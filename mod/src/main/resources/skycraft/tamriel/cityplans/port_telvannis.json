@@ -1,0 +1,162 @@
+{
+  "id": "port_telvannis",
+  "why": [
+    "telvannis.L1.peninsula_cliffs",
+    "telvannis.L5.sea_trade"
+  ],
+  "sil": "giant-cephalopod-harbour",
+  "base": "none",
+  "overlay": "telvannis",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "mushroom_spire",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "port_telvannis_landmark",
+      "overlay": "telvannis"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "telvannis"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_2"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_3"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_4"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_5"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_6"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "port_telvannis_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "telvannis_giant_cap",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "port_telvannis_spore",
+      "count": 3
+    },
+    {
+      "type": "pond",
+      "theme": "harbour_lagoon",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "port_telvannis_landmark": "Grand Archmagister's Spire",
+    "port_telvannis_b_1": "Telvannis Parliament Pod",
+    "port_telvannis_b_2": "The Floating Carapace",
+    "port_telvannis_b_3": "Cephalopod Spice Exchange",
+    "port_telvannis_b_4": "Spore-Master's Alembic",
+    "port_telvannis_b_5": "Archmagister's Grimoire Hall",
+    "port_telvannis_b_6": "Chitin & Enchanted Edge",
+    "port_telvannis_b_7": "Zafirbel Sea-Wharf"
+  },
+  "innKey": "port_telvannis_b_2",
+  "names": {
+    "inn": "port_telvannis_b_2",
+    "store": "port_telvannis_b_3",
+    "smithy": "port_telvannis_b_6"
+  }
+}

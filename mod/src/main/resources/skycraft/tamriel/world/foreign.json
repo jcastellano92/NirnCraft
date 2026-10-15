@@ -1,0 +1,7103 @@
+{
+  "province": "foreign",
+  "truth": "Beyond Tamriel's coast lie five distant lands reached only by chartered expedition ships from the great ports of the Empire and the Dominion: frozen Atmora in the polar north, four-crowned Akavir across the Padomaic Ocean, the shattered desert mesas and drowned shoals of Yokuda in the west, mist-veiled Pyandonea in the southern sea, and the living coral atoll of Thras. None of these lands are ordinary provinces; each is an expeditionary frontier where outsiders cling to a single anchorage or treaty post, trading for relics, star-charts, serpent steel, or forbidden reagents while ancient cataclysms and hostile courts press against the perimeter.",
+  "layers": {
+    "L1": [
+      {
+        "id": "expedition_archipelagos",
+        "text": "five distant continental margins and island chains separated from Tamriel by deep ocean basins",
+        "cites": []
+      },
+      {
+        "id": "cataclysm_scarred_crust",
+        "text": "glacial domes, sunken continental shelves, karst pillars, and calcified coral calderas",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "extreme_oceanic_regimes",
+        "text": "terminal polar freeze in Atmora, monsoon and spring thaw in Akavir, arid trade winds in Yokuda, perpetual sea-fog in Pyandonea, and salt miasma over Thras",
+        "cites": [
+          "foreign.L1.expedition_archipelagos"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "charter_sea_lanes",
+        "text": "long-passage ocean currents, seasonal pack-ice leads, and reef channels navigable only by chartered pilots",
+        "cites": [
+          "foreign.L1.expedition_archipelagos",
+          "foreign.L2.extreme_oceanic_regimes"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "alien_endemics",
+        "text": "frost-petrified forests, cloud bamboo, desert dunerippers, giant kelp serpents, and living coral polyps",
+        "cites": [
+          "foreign.L1.cataclysm_scarred_crust",
+          "foreign.L2.extreme_oceanic_regimes"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "charter_salvage_and_treaty_trade",
+        "text": "high-risk expeditions returning stalhrim, Akaviri folded steel, orichalcum star-charts, black pearls, and alchemical contraband",
+        "cites": [
+          "foreign.L3.charter_sea_lanes",
+          "foreign.L4.alien_endemics"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "beachhead_anchorages",
+        "text": "fortified seasonal camps, pilgrim caravanserais, and quarantined treaty harbours pinned to dry coastal shelves",
+        "cites": [
+          "foreign.L3.charter_sea_lanes",
+          "foreign.L5.charter_salvage_and_treaty_trade"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "captains_factors_and_custodians",
+        "text": "charter captains, guild chroniclers, Ankh-Keepers, and treaty factors living under strict port law",
+        "cites": [
+          "foreign.L6.beachhead_anchorages"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "elder_homeland_myths",
+        "text": "ancestor totems of the Atmoran exodus, the Way of the Sword, the Coiled King, and Akaviri dragon-tiger apotheosis",
+        "cites": [
+          "foreign.L1.cataclysm_scarred_crust",
+          "foreign.L7.captains_factors_and_custodians"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "quarantine_and_awakening",
+        "text": "each anchorage faces an imminent local crisis—waking dragon-priests, Kamal thaws, rogue Ansei seekers, Maormer mutinies, or Sload plague vats",
+        "cites": [
+          "foreign.L6.beachhead_anchorages",
+          "foreign.L8.elder_homeland_myths"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "wonder_sanctums",
+        "text": "ice-entombed meadhalls, Tenth Legion siege-citadels, sunken Pankratosword vaults, serpent-rib grottoes, and drowned coral ziggurats",
+        "cites": [
+          "foreign.L1.cataclysm_scarred_crust",
+          "foreign.L9.quarantine_and_awakening"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "sundered_origins",
+        "text": "the departures, sinkings, schisms, and doomed invasions that severed these five lands from Tamriel",
+        "cites": [
+          "foreign.L1.cataclysm_scarred_crust",
+          "foreign.L8.elder_homeland_myths"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "atmora": {
+      "truth": "Atmora—Altmora, the Elder Wood of myth—is a continent locked in terminal glaciation north of the Sea of Ghosts. No living hearth burns inland; what remains are petrified frost-forests, cyclopean dragon-totem halls half-swallowed by blue glacier tongues, and the frozen dead of the last ships that failed to sail south with Ysgramor. Only seasonal salvage crews and dragon-cult scholars from Windhelm and Solitude camp on its southern basalt shingle, watching the pack-ice leads before winter locks the sea and the unthawed king in Jylkurfyk calls the frost-dead against the anchorage.",
+      "layers": {
+        "L1": [
+          {
+            "id": "continental_ice_dome",
+            "text": "a mile-high glacial shield descending to basalt sea-cliffs",
+            "cites": []
+          },
+          {
+            "id": "petrified_wood_valleys",
+            "text": "sheltered fjords where whole forests froze standing",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "Great_Freeze",
+            "text": "permanent sub-zero whiteout, green-and-violet auroras, catabatic gales off the ice cap",
+            "cites": [
+              "atmora.L1.continental_ice_dome"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "pack_ice_leads",
+            "text": "shifting sea-ice channels that open only in mid-summer",
+            "cites": [
+              "atmora.L1.continental_ice_dome",
+              "atmora.L2.Great_Freeze"
+            ]
+          },
+          {
+            "id": "subglacial_brine",
+            "text": "unfrozen hypersaline rivers beneath the glacier",
+            "cites": [
+              "atmora.L1.continental_ice_dome"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "rime_timber_stand",
+            "text": "frost-petrified pines, ice wraiths, ancient frost trolls",
+            "cites": [
+              "atmora.L1.petrified_wood_valleys",
+              "atmora.L2.Great_Freeze"
+            ]
+          },
+          {
+            "id": "glacier_barrens",
+            "text": "snow whales offshore, frost giants, white sabre cats",
+            "cites": [
+              "atmora.L1.continental_ice_dome",
+              "atmora.L2.Great_Freeze"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "relic_and_stalhrim_expeditions",
+            "text": "no native trade; Windhelm charter camps salvage Atmoran bronze, dragon-masks, and pure stalhrim",
+            "cites": [
+              "atmora.L1.continental_ice_dome",
+              "atmora.L3.pack_ice_leads"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "kjolvik_anchorage",
+            "text": "a fortified seasonal expedition camp on dry basalt above the fjord",
+            "cites": [
+              "atmora.L3.pack_ice_leads",
+              "atmora.L5.relic_and_stalhrim_expeditions"
+            ]
+          },
+          {
+            "id": "jylkurfyk_ruins",
+            "text": "the ruined shipyard-city of the exodus",
+            "cites": [
+              "atmora.L1.petrified_wood_valleys"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "charter_crews_and_scholars",
+            "text": "Nord captains, College chroniclers, and grave-robbers bound by winter-ration law",
+            "cites": [
+              "atmora.L6.kjolvik_anchorage"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "totem_ancestors",
+            "text": "the nine animal totems (Hawk, Wolf, Snake, Moth, Owl, Whale, Bear, Fox, Dragon) in their pre-Imperial form",
+            "cites": [
+              "atmora.L6.jylkurfyk_ruins"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "frozen_king_awakening",
+            "text": "an unthawed dragon-priest in Jylkurfyk calling the frost-dead against the salvage camp",
+            "cites": [
+              "atmora.L6.kjolvik_anchorage",
+              "atmora.L8.totem_ancestors"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "ice_entombed_meadhalls",
+            "text": "giant-scale stone halls under the ice sheet",
+            "cites": [
+              "atmora.L1.continental_ice_dome",
+              "atmora.L8.totem_ancestors",
+              "atmora.L9.frozen_king_awakening"
+            ]
+          },
+          {
+            "id": "subglacial_ice_caverns",
+            "text": "deep brine tunnels beneath the glacier",
+            "cites": [
+              "atmora.L1.continental_ice_dome",
+              "atmora.L3.subglacial_brine"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "the_return_exodus",
+            "text": "Ysgramor's departure, the last fleet of 1E 68, and the continent's final freeze",
+            "cites": [
+              "atmora.L6.jylkurfyk_ruins",
+              "atmora.L8.totem_ancestors"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "atmora.L1.petrified_wood_valleys"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "atmora.L4.rime_timber_stand"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "atmora.L4.rime_timber_stand"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "atmora.L3.pack_ice_leads"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "atmora.L4.rime_timber_stand"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "atmora.L8.totem_ancestors"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "atmora.L6.kjolvik_anchorage"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "atmora.L6.kjolvik_anchorage"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "atmora.L9.frozen_king_awakening"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "atmora.L10.ice_entombed_meadhalls"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "atmora.L6.kjolvik_anchorage"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "atmora.L8.totem_ancestors"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "atmora.L5.relic_and_stalhrim_expeditions"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "atmora.L7.charter_crews_and_scholars"
+          ]
+        },
+        "survivor": {
+          "weight": 2,
+          "why": [
+            "atmora.L9.frozen_king_awakening"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "ruin": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "dwemer": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "falmer": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "bandit": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "fort": [
+          "atmora.L6.kjolvik_anchorage"
+        ],
+        "military": [
+          "atmora.L9.frozen_king_awakening"
+        ],
+        "mage": [
+          "atmora.L7.charter_crews_and_scholars"
+        ],
+        "vampire": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "necromancer": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "hagraven": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "forsworn": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "beast": [
+          "atmora.L4.rime_timber_stand",
+          "atmora.L4.glacier_barrens",
+          "atmora.L10.subglacial_ice_caverns"
+        ],
+        "ice": [
+          "atmora.L10.ice_entombed_meadhalls",
+          "atmora.L10.subglacial_ice_caverns",
+          "atmora.L4.rime_timber_stand"
+        ],
+        "mine": [
+          "atmora.L1.petrified_wood_valleys"
+        ],
+        "grove": [
+          "atmora.L4.rime_timber_stand"
+        ],
+        "smuggler": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "cave": [
+          "atmora.L10.subglacial_ice_caverns",
+          "atmora.L4.rime_timber_stand"
+        ],
+        "giant": [
+          "atmora.L10.ice_entombed_meadhalls",
+          "atmora.L4.glacier_barrens"
+        ],
+        "dragon": [
+          "atmora.L9.frozen_king_awakening"
+        ],
+        "tower": [
+          "atmora.L10.ice_entombed_meadhalls"
+        ],
+        "cabin": [
+          "atmora.L6.kjolvik_anchorage",
+          "atmora.L5.relic_and_stalhrim_expeditions"
+        ],
+        "wreck": [
+          "atmora.L5.relic_and_stalhrim_expeditions"
+        ]
+      }
+    },
+    "akavir": {
+      "truth": "Akavir, the Dragon Land across the Padomaic Ocean, is a mysterious eastern continent of four warring realms where human populations were long ago absorbed or ruled by immortal serpent-folk, thawing snow-demons, hospitable monkey-islanders, and tiger-dragon monks. Outsiders from Tamriel are permitted only in a single open treaty-harbour in Tang Mo and a strictly guarded factor's compound in Tsaesci; beyond those treaty gates lie mist-hung bamboo cloud-mountains, red-scale river fortresses, stepped golden plateaus, and the thawing glacier passes of Kamal where Emperor Uriel V's Tenth Legion lost its eagle standard at Ionith.",
+      "layers": {
+        "L1": [
+          {
+            "id": "bamboo_karst_pillars",
+            "text": "vertical limestone towers and mist valleys in Tang Mo",
+            "cites": []
+          },
+          {
+            "id": "serpent_river_plains",
+            "text": "terraced red-earth basins in Tsaesci",
+            "cites": []
+          },
+          {
+            "id": "kamal_hell_glaciers",
+            "text": "jagged volcanic-and-ice peaks in the north",
+            "cites": []
+          },
+          {
+            "id": "golden_mesa_steppe",
+            "text": "high sun-baked plateaus in Ka Po' Tun",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "monsoon_and_thaw",
+            "text": "warm monsoon mists in Tang Mo, dry heat in Ka Po' Tun, and the annual spring thaw that unleashes Kamal armies",
+            "cites": [
+              "akavir.L1.bamboo_karst_pillars",
+              "akavir.L1.kamal_hell_glaciers"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "lacquer_canals",
+            "text": "stepped irrigation and barge canals",
+            "cites": [
+              "akavir.L1.serpent_river_plains",
+              "akavir.L2.monsoon_and_thaw"
+            ]
+          },
+          {
+            "id": "island_straits",
+            "text": "tidal channels between the monkey-isles",
+            "cites": [
+              "akavir.L1.bamboo_karst_pillars",
+              "akavir.L2.monsoon_and_thaw"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "cloud_bamboo_forest",
+            "text": "giant bamboo, blossoms, Tang Mo rangers",
+            "cites": [
+              "akavir.L1.bamboo_karst_pillars",
+              "akavir.L2.monsoon_and_thaw"
+            ]
+          },
+          {
+            "id": "crimson_reed_plain",
+            "text": "serpent-constructs, scale-hounds",
+            "cites": [
+              "akavir.L1.serpent_river_plains"
+            ]
+          },
+          {
+            "id": "thaw_waste",
+            "text": "frost-demons, ice-beetles",
+            "cites": [
+              "akavir.L1.kamal_hell_glaciers",
+              "akavir.L2.monsoon_and_thaw"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "treaty_silk_and_steel",
+            "text": "Akaviri folded-steel blades, lacquerware, and spice traded under strict port charter",
+            "cites": [
+              "akavir.L3.lacquer_canals",
+              "akavir.L3.island_straits"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "tang_mo_harbor_village",
+            "text": "open treaty port on dry coastal terrace",
+            "cites": [
+              "akavir.L3.island_straits",
+              "akavir.L5.treaty_silk_and_steel"
+            ]
+          },
+          {
+            "id": "tsaesci_treaty_post",
+            "text": "walled factor's enclave",
+            "cites": [
+              "akavir.L3.lacquer_canals",
+              "akavir.L5.treaty_silk_and_steel"
+            ]
+          },
+          {
+            "id": "tiger_plains_village",
+            "text": "high steppe shrine-town",
+            "cites": [
+              "akavir.L1.golden_mesa_steppe"
+            ]
+          },
+          {
+            "id": "kamal_watch_camp",
+            "text": "northern ice-pass watch",
+            "cites": [
+              "akavir.L1.kamal_hell_glaciers"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "four_court_protocol",
+            "text": "outsiders carry bronze tally-seals; breaking quarantine means immediate expulsion",
+            "cites": [
+              "akavir.L6.tsaesci_treaty_post",
+              "akavir.L6.tang_mo_harbor_village"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "dragon_tiger_ascension",
+            "text": "Tosh Raka's apotheosis",
+            "cites": [
+              "akavir.L1.golden_mesa_steppe",
+              "akavir.L6.tiger_plains_village"
+            ]
+          },
+          {
+            "id": "immortal_coil",
+            "text": "blood-and-memory lineage",
+            "cites": [
+              "akavir.L6.tsaesci_treaty_post",
+              "akavir.L7.four_court_protocol"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "spring_thaw_front",
+            "text": "Kamal raiders testing the Tang Mo island passes while Tsaesci envoys play both sides",
+            "cites": [
+              "akavir.L2.monsoon_and_thaw",
+              "akavir.L6.kamal_watch_camp",
+              "akavir.L6.tang_mo_harbor_village"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "serpent_scale_citadels",
+            "text": "subterranean blood-temples and blade-forges",
+            "cites": [
+              "akavir.L1.serpent_river_plains",
+              "akavir.L8.immortal_coil"
+            ]
+          },
+          {
+            "id": "imperial_disaster_tombs",
+            "text": "the lost vaults of Uriel V's Tenth Legion at Ionith",
+            "cites": [
+              "akavir.L1.serpent_river_plains",
+              "akavir.L9.spring_thaw_front"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "reman_invasion",
+            "text": "the 1E 2703 Pale Pass march",
+            "cites": [
+              "akavir.L8.immortal_coil"
+            ]
+          },
+          {
+            "id": "potentate_years",
+            "text": "Tsaesci rule in Cyrodiil from 2E 1 to 430",
+            "cites": [
+              "akavir.L7.four_court_protocol"
+            ]
+          },
+          {
+            "id": "ionith_campaign",
+            "text": "Uriel V's doomed 3E 288 expedition to Septimia and Ionith",
+            "cites": [
+              "akavir.L6.tsaesci_treaty_post",
+              "akavir.L10.imperial_disaster_tombs"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "akavir.L4.cloud_bamboo_forest"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "akavir.L4.cloud_bamboo_forest"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "akavir.L4.cloud_bamboo_forest"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel",
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "akavir.L6.tang_mo_harbor_village",
+            "akavir.L6.tiger_plains_village"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "akavir.L8.dragon_tiger_ascension"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "akavir.L8.dragon_tiger_ascension"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "akavir.L6.kamal_watch_camp"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "akavir.L10.serpent_scale_citadels"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "akavir.L6.tang_mo_harbor_village",
+            "akavir.L6.tiger_plains_village"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "akavir.L6.tiger_plains_village"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "akavir.L6.tiger_plains_village"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "akavir.L7.four_court_protocol"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "akavir.L5.treaty_silk_and_steel"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "akavir.L9.spring_thaw_front"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "akavir.L10.imperial_disaster_tombs"
+        ],
+        "ruin": [
+          "akavir.L10.imperial_disaster_tombs"
+        ],
+        "dwemer": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "falmer": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "bandit": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "fort": [
+          "akavir.L9.spring_thaw_front"
+        ],
+        "military": [
+          "akavir.L9.spring_thaw_front"
+        ],
+        "mage": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "vampire": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "necromancer": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "hagraven": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "forsworn": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "beast": [
+          "akavir.L4.cloud_bamboo_forest"
+        ],
+        "ice": [
+          "akavir.L4.thaw_waste"
+        ],
+        "mine": [
+          "akavir.L5.treaty_silk_and_steel"
+        ],
+        "grove": [
+          "akavir.L4.cloud_bamboo_forest"
+        ],
+        "smuggler": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "cave": [
+          "akavir.L1.bamboo_karst_pillars"
+        ],
+        "giant": [
+          "akavir.L4.cloud_bamboo_forest"
+        ],
+        "dragon": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "tower": [
+          "akavir.L10.serpent_scale_citadels"
+        ],
+        "cabin": [
+          "akavir.L6.kamal_watch_camp"
+        ],
+        "wreck": [
+          "akavir.L5.treaty_silk_and_steel"
+        ]
+      }
+    },
+    "yokuda": {
+      "truth": "Yokuda is the shattered western archipelago of a sunken continent across the sea from Hammerfell: flat-topped red sandstone mesas, drowned white-marble causeways visible beneath clear turquoise shoals, and brass star-observatories left from the high age before the forbidden Pankratosword split the land in 1E 792. Redguard pilgrims, sword-singers, and Sentinel chart-captains sail here to walk the Ancestor Steps at New Tava Anchorage, while sworn Ankh-Keepers guard the half-submerged Na-Totambu tombs against plunderers and a rogue Ansei seeker trying to unseal the fault where the continent broke.",
+      "layers": {
+        "L1": [
+          {
+            "id": "riven_archipelago",
+            "text": "sheared sandstone mesas and basalt faults dropping straight into submerged city shelves",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "trade_wind_arid",
+            "text": "hot dry trade winds and crystalline night skies for star-reading",
+            "cites": [
+              "yokuda.L1.riven_archipelago"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "drowned_causeway_shoals",
+            "text": "shallow turquoise lagoons over sunken streets and oasis cisterns in the mesa rock",
+            "cites": [
+              "yokuda.L1.riven_archipelago"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "mesa_scrub_and_oasis",
+            "text": "date palms, desert lynx, dunerippers, and bone-walkers in the salt flats",
+            "cites": [
+              "yokuda.L1.riven_archipelago",
+              "yokuda.L2.trade_wind_arid"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "pilgrim_and_chart_trade",
+            "text": "memory-stones, orichalcum salvage, and star-charts",
+            "cites": [
+              "yokuda.L3.drowned_causeway_shoals"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "new_tava_anchorage",
+            "text": "Redguard pilgrim port and caravanserai on a high dry mesa shelf",
+            "cites": [
+              "yokuda.L1.riven_archipelago",
+              "yokuda.L5.pilgrim_and_chart_trade"
+            ]
+          },
+          {
+            "id": "riven_shoal_camp",
+            "text": "salvage camp on the outer shoals",
+            "cites": [
+              "yokuda.L3.drowned_causeway_shoals"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "ankh_keepers_and_singers",
+            "text": "order of Redguard custodians who guard the sunken tombs from plunderers",
+            "cites": [
+              "yokuda.L6.new_tava_anchorage"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "way_of_the_sword_and_stars",
+            "text": "the Shehai spirit sword and the constellations of the Warrior, Thief, and Mage",
+            "cites": [
+              "yokuda.L2.trade_wind_arid",
+              "yokuda.L7.ankh_keepers_and_singers"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "forbidden_stroke",
+            "text": "a rogue Ansei seeker trying to unseal the vault where the Pankratosword was struck",
+            "cites": [
+              "yokuda.L7.ankh_keepers_and_singers",
+              "yokuda.L8.way_of_the_sword_and_stars"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "na_totambu_star_tombs",
+            "text": "half-submerged sandstone-and-brass sword-singer vaults",
+            "cites": [
+              "yokuda.L1.riven_archipelago",
+              "yokuda.L9.forbidden_stroke"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "sinking_of_yokuda",
+            "text": "the 1E 792 Hiradirge, the Pankratosword, and the Ra Gada warrior-wave to Hammerfell",
+            "cites": [
+              "yokuda.L1.riven_archipelago",
+              "yokuda.L8.way_of_the_sword_and_stars"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade",
+            "yokuda.L6.new_tava_anchorage"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "yokuda.L8.way_of_the_sword_and_stars"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "yokuda.L6.new_tava_anchorage"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "yokuda.L6.new_tava_anchorage"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "yokuda.L8.way_of_the_sword_and_stars"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "yokuda.L8.way_of_the_sword_and_stars"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "yokuda.L9.forbidden_stroke"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "yokuda.L10.na_totambu_star_tombs"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "yokuda.L6.new_tava_anchorage"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "yokuda.L7.ankh_keepers_and_singers"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "yokuda.L5.pilgrim_and_chart_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "yokuda.L9.forbidden_stroke"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "ruin": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "dwemer": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "falmer": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "bandit": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "fort": [
+          "yokuda.L9.forbidden_stroke"
+        ],
+        "military": [
+          "yokuda.L9.forbidden_stroke"
+        ],
+        "mage": [
+          "yokuda.L8.way_of_the_sword_and_stars"
+        ],
+        "vampire": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "necromancer": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "hagraven": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "forsworn": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "beast": [
+          "yokuda.L4.mesa_scrub_and_oasis"
+        ],
+        "ice": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "mine": [
+          "yokuda.L5.pilgrim_and_chart_trade"
+        ],
+        "grove": [
+          "yokuda.L4.mesa_scrub_and_oasis"
+        ],
+        "smuggler": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "cave": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "giant": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "dragon": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "tower": [
+          "yokuda.L10.na_totambu_star_tombs"
+        ],
+        "cabin": [
+          "yokuda.L6.riven_shoal_camp"
+        ],
+        "wreck": [
+          "yokuda.L5.pilgrim_and_chart_trade"
+        ]
+      }
+    },
+    "pyandonea": {
+      "truth": "Far south of Summerset beyond a wall of perpetual warm sea-fog lies Pyandonea, the veiled tropical jungle-and-reef archipelago of the Maormer Sea Elves and their deathless wizard-monarch King Orgnum. Giant kelp forests, bioluminescent basalt cliffs, and fleet harbours lashed from sea-serpent bone and translucent kelpsail shelter the armadas that raid Auridon every generation. At the outer truce-anchorage, foreign privateers holding temporary ivory tokens trade for black pearls and serpent-scale mail while a mutinous fleet-lord prepares a lightning storm-ritual to break the truce and strike Summerset's open ports.",
+      "layers": {
+        "L1": [
+          {
+            "id": "veil_reef_archipelago",
+            "text": "volcanic jungle peaks ringed by barrier reefs and deep sea-trenches",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "eternal_sea_mist",
+            "text": "warm tropical rain and a permanent mist-curtain along the northern approaches",
+            "cites": [
+              "pyandonea.L1.veil_reef_archipelago"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "serpent_lagoon",
+            "text": "deep sheltered fleet anchorages where sea serpents coil",
+            "cites": [
+              "pyandonea.L1.veil_reef_archipelago",
+              "pyandonea.L2.eternal_sea_mist"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "kelp_and_mist_jungle",
+            "text": "giant canopy ferns, strangler vines, sea serpents, storm-ateliers",
+            "cites": [
+              "pyandonea.L2.eternal_sea_mist",
+              "pyandonea.L3.serpent_lagoon"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "privateer_and_pearl_trade",
+            "text": "black pearls, serpent-scale mail, and neutral privateer safe-conducts",
+            "cites": [
+              "pyandonea.L3.serpent_lagoon",
+              "pyandonea.L4.kelp_and_mist_jungle"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "pyandonean_fleet_anchorage",
+            "text": "outer truce-harbour on a firm coastal terrace with Mistveil Village on the inner ridge",
+            "cites": [
+              "pyandonea.L3.serpent_lagoon",
+              "pyandonea.L5.privateer_and_pearl_trade"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "storm_caste_and_truce_captains",
+            "text": "Maormer storm-callers and foreign privateers holding temporary truce-tokens",
+            "cites": [
+              "pyandonea.L6.pyandonean_fleet_anchorage"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "orgnum_and_the_coiled_king",
+            "text": "worship of the undying serpent-monarch and the lost Aldmeris claim",
+            "cites": [
+              "pyandonea.L3.serpent_lagoon",
+              "pyandonea.L7.storm_caste_and_truce_captains"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "mutiny_of_the_truce_fleet",
+            "text": "a rogue fleet-lord preparing a storm-ritual against Summerset's open ports",
+            "cites": [
+              "pyandonea.L7.storm_caste_and_truce_captains",
+              "pyandonea.L8.orgnum_and_the_coiled_king"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "serpent_rib_grottoes",
+            "text": "tidal sea-caves and lightning-spire sanctums",
+            "cites": [
+              "pyandonea.L1.veil_reef_archipelago",
+              "pyandonea.L3.serpent_lagoon",
+              "pyandonea.L9.mutiny_of_the_truce_fleet"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "aldmeris_schism",
+            "text": "Orgnum's ancient banishment",
+            "cites": [
+              "pyandonea.L8.orgnum_and_the_coiled_king"
+            ]
+          },
+          {
+            "id": "war_of_the_isle",
+            "text": "the 3E 110 storm that broke the Maormer armada",
+            "cites": [
+              "pyandonea.L6.pyandonean_fleet_anchorage",
+              "pyandonea.L9.mutiny_of_the_truce_fleet"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "pyandonea.L3.serpent_lagoon",
+            "pyandonea.L4.kelp_and_mist_jungle"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade",
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L8.orgnum_and_the_coiled_king"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L8.orgnum_and_the_coiled_king"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L9.mutiny_of_the_truce_fleet"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L10.serpent_rib_grottoes"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L6.pyandonean_fleet_anchorage"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L7.storm_caste_and_truce_captains"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L5.privateer_and_pearl_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "pyandonea.L9.mutiny_of_the_truce_fleet"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "ruin": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "dwemer": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "falmer": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "bandit": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "fort": [
+          "pyandonea.L9.mutiny_of_the_truce_fleet"
+        ],
+        "military": [
+          "pyandonea.L9.mutiny_of_the_truce_fleet"
+        ],
+        "mage": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "vampire": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "necromancer": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "hagraven": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "forsworn": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "beast": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "ice": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "mine": [
+          "pyandonea.L5.privateer_and_pearl_trade"
+        ],
+        "grove": [
+          "pyandonea.L4.kelp_and_mist_jungle"
+        ],
+        "smuggler": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "cave": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "giant": [
+          "pyandonea.L4.kelp_and_mist_jungle"
+        ],
+        "dragon": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "tower": [
+          "pyandonea.L10.serpent_rib_grottoes"
+        ],
+        "cabin": [
+          "pyandonea.L6.pyandonean_fleet_anchorage"
+        ],
+        "wreck": [
+          "pyandonea.L5.privateer_and_pearl_trade"
+        ]
+      }
+    },
+    "thras": {
+      "truth": "West of Summerset and south-west of the Iliac Bay rises the Coral Kingdom of Thras: a ring atoll of living, calcified pink-and-bone coral spires, bottomless brine sinkholes, and sacrificial lagoons ruled by the amphibious, calculating Sload. Only licensed alchemy-ships and Bend'r-mahk wreck-hunters dare anchor on its quarantined outer sandbar, where Sload factors deal in literal blood-and-pearl bargains for Sload soap and abyssal pearl-glass while a deep-vent cabal cultivates a second strain of the Thrassian plague in flooded bioluminescent ziggurats beneath Agonir Lagoon.",
+      "layers": {
+        "L1": [
+          {
+            "id": "living_coral_atoll",
+            "text": "calcified coral towers 30 to 70 blocks high growing over a drowned volcanic caldera around Agonir Lagoon",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "brine_miasma",
+            "text": "heavy salt-haze, eerie dead-calm air, phosphorescent night tides",
+            "cites": [
+              "thras.L1.living_coral_atoll"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "abyssal_sinkholes",
+            "text": "bottomless blue holes connecting the central lagoon to Summerset's abyssal vents",
+            "cites": [
+              "thras.L1.living_coral_atoll"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "bleached_and_living_reef",
+            "text": "giant anemones, reef-vipers, zombie thralls, Sload",
+            "cites": [
+              "thras.L1.living_coral_atoll",
+              "thras.L3.abyssal_sinkholes"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "sload_soap_and_alchemical_contraband",
+            "text": "forbidden necromantic reagents and pearl-glass traded at the outer sandbar",
+            "cites": [
+              "thras.L4.bleached_and_living_reef"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "thras_sandbar_camp",
+            "text": "a quarantined trader and expedition anchorage on the outer reef facing Sload coral-spires",
+            "cites": [
+              "thras.L1.living_coral_atoll",
+              "thras.L5.sload_soap_and_alchemical_contraband"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "calculating_contractors",
+            "text": "Sload speak with outsiders purely through slow, literal contracts",
+            "cites": [
+              "thras.L5.sload_soap_and_alchemical_contraband",
+              "thras.L6.thras_sandbar_camp"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "efficiency_and_necromancy",
+            "text": "unsentimental mastery of flesh, memory, and deep-sea currents",
+            "cites": [
+              "thras.L4.bleached_and_living_reef",
+              "thras.L7.calculating_contractors"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "the_second_plague_vats",
+            "text": "a Sload cabal cultivating a new strain of Thrassian miasma in the deep vents",
+            "cites": [
+              "thras.L3.abyssal_sinkholes",
+              "thras.L8.efficiency_and_necromancy"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "drowned_coral_ziggurats",
+            "text": "flooded bio-luminescent chambers beneath the atoll",
+            "cites": [
+              "thras.L1.living_coral_atoll",
+              "thras.L3.abyssal_sinkholes",
+              "thras.L9.the_second_plague_vats"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "thrassian_plague",
+            "text": "the 1E 2200 plague and the All-Flags Navy that sank Thras the first time",
+            "cites": [
+              "thras.L8.efficiency_and_necromancy",
+              "thras.L9.the_second_plague_vats"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband",
+            "thras.L6.thras_sandbar_camp"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband",
+            "thras.L6.thras_sandbar_camp"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "thras.L8.efficiency_and_necromancy"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "thras.L6.thras_sandbar_camp"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "thras.L6.thras_sandbar_camp"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "thras.L8.efficiency_and_necromancy"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "thras.L9.the_second_plague_vats"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "thras.L10.drowned_coral_ziggurats"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "thras.L10.drowned_coral_ziggurats"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "thras.L6.thras_sandbar_camp"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "thras.L7.calculating_contractors"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "thras.L5.sload_soap_and_alchemical_contraband"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "thras.L9.the_second_plague_vats"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "ruin": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "dwemer": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "falmer": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "bandit": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "fort": [
+          "thras.L9.the_second_plague_vats"
+        ],
+        "military": [
+          "thras.L9.the_second_plague_vats"
+        ],
+        "mage": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "vampire": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "necromancer": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "hagraven": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "forsworn": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "beast": [
+          "thras.L4.bleached_and_living_reef"
+        ],
+        "ice": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "mine": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "grove": [
+          "thras.L4.bleached_and_living_reef"
+        ],
+        "smuggler": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "cave": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "giant": [
+          "thras.L4.bleached_and_living_reef"
+        ],
+        "dragon": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "tower": [
+          "thras.L10.drowned_coral_ziggurats"
+        ],
+        "cabin": [
+          "thras.L6.thras_sandbar_camp"
+        ],
+        "wreck": [
+          "thras.L5.sload_soap_and_alchemical_contraband"
+        ]
+      }
+    },
+    "ice_waste": {
+      "truth": "The Ice Waste is the northernmost glacial shield of Atmora: a mile-high dome of blue continental ice descending to black basalt shingle beaches where Windhelm charter vessels moor in brief mid-summer pack-ice leads. Frost giants, snow whales, ice wraiths and white sabre cats roam the crevasses around fortified Kjolvik Anchorage, while Nord salvage crews dig for pure stalhrim and ancient bronze beneath polar auroras, and subglacial brine rivers flow past cyclopean stone meadhalls entombed when the Great Freeze overtook the continent after the last ships sailed south.",
+      "layers": {
+        "L1": [
+          {
+            "id": "glacial_shield",
+            "text": "blue continental ice sheet and basalt sea-cliffs",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "catabatic_whiteout",
+            "text": "permanent sub-zero gales and polar auroras",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "ice_waste.L1.glacial_shield"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "summer_ice_leads",
+            "text": "brief navigable channels in the pack ice",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "ice_waste.L2.catabatic_whiteout"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "glacier_fauna",
+            "text": "frost giants, snow whales, and ice wraiths",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "ice_waste.L2.catabatic_whiteout"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "stalhrim_salvage",
+            "text": "pure burial ice and bronze recovered by charter crews",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "ice_waste.L3.summer_ice_leads"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "kjolvik_camp",
+            "text": "fortified basalt-shingle expedition anchorage",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "ice_waste.L3.summer_ice_leads"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "windhelm_charter_crews",
+            "text": "Nord mariners and winter-ration wardens",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "ice_waste.L6.kjolvik_camp"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "whale_and_bear_totems",
+            "text": "weathered coastal totem pillars of the old faith",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "ice_waste.L6.kjolvik_camp"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "pack_ice_lock",
+            "text": "early freeze threatening to trap the salvage ship",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "ice_waste.L3.summer_ice_leads"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "entombed_great_halls",
+            "text": "giant-scale Atmoran halls beneath the blue ice",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "ice_waste.L1.glacial_shield",
+              "ice_waste.L9.pack_ice_lock"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "last_fleet_shingle",
+            "text": "hulls of the ships that missed the 1E 68 departure",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "ice_waste.L6.kjolvik_camp"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L6.kjolvik_camp"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L6.kjolvik_camp"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L8.whale_and_bear_totems"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L9.pack_ice_lock"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L10.entombed_great_halls"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L6.kjolvik_camp"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "ice_waste.L8.whale_and_bear_totems"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L7.windhelm_charter_crews"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L5.stalhrim_salvage"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "ice_waste.L9.pack_ice_lock"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "ruin": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "dwemer": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "falmer": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "bandit": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "fort": [
+          "ice_waste.L6.kjolvik_camp"
+        ],
+        "military": [
+          "ice_waste.L9.pack_ice_lock"
+        ],
+        "mage": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "vampire": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "necromancer": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "hagraven": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "forsworn": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "beast": [
+          "ice_waste.L4.glacier_fauna"
+        ],
+        "ice": [
+          "ice_waste.L10.entombed_great_halls",
+          "ice_waste.L4.glacier_fauna",
+          "ice_waste.L2.catabatic_whiteout"
+        ],
+        "mine": [
+          "ice_waste.L5.stalhrim_salvage"
+        ],
+        "grove": [
+          "ice_waste.L4.glacier_fauna"
+        ],
+        "smuggler": [
+          "ice_waste.L5.stalhrim_salvage"
+        ],
+        "cave": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "giant": [
+          "ice_waste.L10.entombed_great_halls",
+          "ice_waste.L4.glacier_fauna"
+        ],
+        "dragon": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "tower": [
+          "ice_waste.L10.entombed_great_halls"
+        ],
+        "cabin": [
+          "ice_waste.L6.kjolvik_camp"
+        ],
+        "wreck": [
+          "ice_waste.L5.stalhrim_salvage"
+        ]
+      }
+    },
+    "frozen_forest": {
+      "truth": "In the sheltered southern basalt fjords of Atmora stands the Frozen Forest: whole silent valleys of ancient pines and elder trees flash-frozen in crystalline rime ice around the cyclopean ruined shipyard-city of Jylkurfyk. Here Ysgramor's Five Hundred Companions hewed the keels of the Return before the Great Freeze closed the harbour slips forever. Today Winterhold chroniclers and chartered relic-hunters trace the old totem road through the petrified trunks while an unthawed dragon-priest in Jylkurfyk Great Barrow stirs the frost-dead from their ice-sealed tier-tombs.",
+      "layers": {
+        "L1": [
+          {
+            "id": "fjord_valleys",
+            "text": "sheltered basalt valleys holding standing petrified forests",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "rime_hoarfrost",
+            "text": "still, crystalline freezing air that preserves timber as stone",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "frozen_forest.L1.fjord_valleys"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "frozen_cascades",
+            "text": "waterfalls locked in blue ice columns above subglacial brine",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "frozen_forest.L1.fjord_valleys"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "petrified_rime_woods",
+            "text": "rime-encrusted pines, ancient frost trolls, and wisps",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "frozen_forest.L2.rime_hoarfrost"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "dragon_cult_relic_digs",
+            "text": "inscribed bronze masks and elder-wood cores",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "frozen_forest.L4.petrified_rime_woods"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "jylkurfyk_port_ruins",
+            "text": "cyclopean stone slips of the ancient shipyard-city",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "frozen_forest.L1.fjord_valleys"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "chroniclers_and_delvers",
+            "text": "scholars reading the pre-Return inscriptions",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "frozen_forest.L5.dragon_cult_relic_digs"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "dragon_totem_orthodoxy",
+            "text": "the primal Dragon and Owl totems in cyclopean relief",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "frozen_forest.L6.jylkurfyk_port_ruins"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "barrow_king_stirring",
+            "text": "the Frozen King calling draugr patrols down the fjord",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "frozen_forest.L8.dragon_totem_orthodoxy"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "jylkurfyk_great_barrow",
+            "text": "hearth-brazier vaults sealed by glacial ice",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "frozen_forest.L1.fjord_valleys",
+              "frozen_forest.L9.barrow_king_stirring"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "ysgramor_shipyards",
+            "text": "the slips where the Five Hundred Companions built their fleet",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "frozen_forest.L6.jylkurfyk_port_ruins"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs",
+            "frozen_forest.L1.fjord_valleys"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "lumberjack": {
+          "weight": 3,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs",
+            "frozen_forest.L4.petrified_rime_woods"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "frozen_forest.L4.petrified_rime_woods"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "frozen_forest.L4.petrified_rime_woods"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L8.dragon_totem_orthodoxy"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L6.jylkurfyk_port_ruins"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L6.jylkurfyk_port_ruins"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L9.barrow_king_stirring"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L10.jylkurfyk_great_barrow"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L6.jylkurfyk_port_ruins"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L7.chroniclers_and_delvers"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L5.dragon_cult_relic_digs"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "frozen_forest.L9.barrow_king_stirring"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "ruin": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "dwemer": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "falmer": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "bandit": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "fort": [
+          "frozen_forest.L9.barrow_king_stirring"
+        ],
+        "military": [
+          "frozen_forest.L9.barrow_king_stirring"
+        ],
+        "mage": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "vampire": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "necromancer": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "hagraven": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "forsworn": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "beast": [
+          "frozen_forest.L4.petrified_rime_woods"
+        ],
+        "ice": [
+          "frozen_forest.L10.jylkurfyk_great_barrow",
+          "frozen_forest.L4.petrified_rime_woods"
+        ],
+        "mine": [
+          "frozen_forest.L5.dragon_cult_relic_digs",
+          "frozen_forest.L1.fjord_valleys"
+        ],
+        "grove": [
+          "frozen_forest.L4.petrified_rime_woods"
+        ],
+        "smuggler": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "cave": [
+          "frozen_forest.L4.petrified_rime_woods"
+        ],
+        "giant": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "dragon": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "tower": [
+          "frozen_forest.L10.jylkurfyk_great_barrow"
+        ],
+        "cabin": [
+          "frozen_forest.L6.jylkurfyk_port_ruins"
+        ],
+        "wreck": [
+          "frozen_forest.L5.dragon_cult_relic_digs"
+        ]
+      }
+    },
+    "tsaesci": {
+      "truth": "Tsaesci is the south-western realm of Akavir: a country of terraced red-earth river basins, stepped lacquer irrigation canals, and crimson reed plains ruled by the immortal vampire serpent-courts. Foreigners from Tamriel may not pass beyond the walled coastal factor's compound without a bronze tally-seal, where chartered Ebonheart factors trade for folded-steel blades and red lacquerware. Just inland stand the dual-layer ruins of Ionith, where Emperor Uriel V's Tenth Legion died under arrow-rain in 3E 288 above a subterranean Tsaesci blood-forge and scale-citadel.",
+      "layers": {
+        "L1": [
+          {
+            "id": "red_earth_basin",
+            "text": "terraced red-clay river plains and obsidian outcrops",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "warm_monsoon_haze",
+            "text": "humid summer rains and dry autumn winds",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "tsaesci.L1.red_earth_basin"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "stepped_lacquer_canals",
+            "text": "engineered irrigation and barge waterways",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "tsaesci.L1.red_earth_basin"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "crimson_reeds",
+            "text": "red river-reeds, scale-hounds, and serpent constructs",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "tsaesci.L3.stepped_lacquer_canals"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "folded_steel_and_lacquer",
+            "text": "Akaviri katanas, red lacquerware, and silk",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "tsaesci.L3.stepped_lacquer_canals"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "tsaesci_factor_compound",
+            "text": "walled treaty post beside the ruins of Ionith",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "tsaesci.L3.stepped_lacquer_canals"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "tally_seal_custodians",
+            "text": "serpent-court magistrates and chartered Ebonheart factors",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "tsaesci.L6.tsaesci_factor_compound"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "immortal_blood_lineage",
+            "text": "reverence for the undying scale-lines",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "tsaesci.L7.tally_seal_custodians"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "eagle_standard_intrigue",
+            "text": "rival Tsaesci houses using the lost Imperial standard as leverage",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "tsaesci.L6.tsaesci_factor_compound"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "citadel_of_ionith",
+            "text": "3E 288 Imperial siege-works over a Tsaesci blood-forge",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "tsaesci.L1.red_earth_basin",
+              "tsaesci.L9.eagle_standard_intrigue"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "uriels_doomed_march",
+            "text": "the siege and fall of Ionith in 3E 288",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "tsaesci.L10.citadel_of_ionith"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L8.immortal_blood_lineage"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L8.immortal_blood_lineage"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "tsaesci.L9.eagle_standard_intrigue"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L10.citadel_of_ionith"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L6.tsaesci_factor_compound"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L7.tally_seal_custodians"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L5.folded_steel_and_lacquer"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "tsaesci.L9.eagle_standard_intrigue"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "ruin": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "dwemer": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "falmer": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "bandit": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "fort": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "military": [
+          "tsaesci.L9.eagle_standard_intrigue"
+        ],
+        "mage": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "vampire": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "necromancer": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "hagraven": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "forsworn": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "beast": [
+          "tsaesci.L4.crimson_reeds"
+        ],
+        "ice": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "mine": [
+          "tsaesci.L5.folded_steel_and_lacquer"
+        ],
+        "grove": [
+          "tsaesci.L4.crimson_reeds"
+        ],
+        "smuggler": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "cave": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "giant": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "dragon": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "tower": [
+          "tsaesci.L10.citadel_of_ionith"
+        ],
+        "cabin": [
+          "tsaesci.L6.tsaesci_factor_compound"
+        ],
+        "wreck": [
+          "tsaesci.L5.folded_steel_and_lacquer"
+        ]
+      }
+    },
+    "kamal": {
+      "truth": "Kamal is the northern ice-hell of Akavir: jagged black volcanic crags and hanging glaciers locked in nine months of howling blizzard until the violent annual spring thaw melts the high passes and looses the snow-demon hosts southward toward Tang Mo and Tsaesci. A single fortified stone watch-camp above the thaw line monitors the roaring meltwater torrents and glacier tongues, where armoured ice-beetles, snow predators, and Kamal vanguard warbands gather in rime-tempered iron around volcanic-heated subterranean steam-bastions in memory of Ada'Soom Dir-Kamal's Second Era march.",
+      "layers": {
+        "L1": [
+          {
+            "id": "volcanic_ice_peaks",
+            "text": "black volcanic crags sheathed in hanging glaciers",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "annual_thaw_gale",
+            "text": "nine months of blizzard broken by a violent spring melt",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "kamal.L1.volcanic_ice_peaks"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "meltwater_torrents",
+            "text": "roaring glacial floods that open the mountain passes",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "kamal.L2.annual_thaw_gale"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "ice_beetle_tundra",
+            "text": "armoured ice-beetles and snow-predators",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "kamal.L2.annual_thaw_gale"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "glacial_iron_and_trophies",
+            "text": "dark meteoric iron and rime-tempered armour",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "kamal.L1.volcanic_ice_peaks"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "kamal_pass_watch",
+            "text": "fortified stone watch-camp above the thaw line",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "kamal.L1.volcanic_ice_peaks"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "winter_host_warbands",
+            "text": "garrison scouts watching the northern ice-clans",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "kamal.L6.kamal_pass_watch"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "rite_of_the_spring_march",
+            "text": "martial cult of the thawing war-season",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "kamal.L2.annual_thaw_gale"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "thaw_vanguard_incursion",
+            "text": "Kamal raiders massing at the southern pass",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "kamal.L3.meltwater_torrents"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "steam_ice_bastions",
+            "text": "volcanic-heated ice fortresses beneath the peaks",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "kamal.L1.volcanic_ice_peaks",
+              "kamal.L9.thaw_vanguard_incursion"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "dir_kamal_memory",
+            "text": "Ada'Soom Dir-Kamal's Second Era invasion of Tamriel",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "kamal.L8.rite_of_the_spring_march"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "kamal.L8.rite_of_the_spring_march"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "kamal.L6.kamal_pass_watch"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "kamal.L6.kamal_pass_watch"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "kamal.L8.rite_of_the_spring_march"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "kamal.L6.kamal_pass_watch"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "kamal.L10.steam_ice_bastions"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "kamal.L7.winter_host_warbands"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "kamal.L5.glacial_iron_and_trophies"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "kamal.L9.thaw_vanguard_incursion"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "ruin": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "dwemer": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "falmer": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "bandit": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "fort": [
+          "kamal.L10.steam_ice_bastions",
+          "kamal.L6.kamal_pass_watch"
+        ],
+        "military": [
+          "kamal.L9.thaw_vanguard_incursion"
+        ],
+        "mage": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "vampire": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "necromancer": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "hagraven": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "forsworn": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "beast": [
+          "kamal.L4.ice_beetle_tundra"
+        ],
+        "ice": [
+          "kamal.L10.steam_ice_bastions",
+          "kamal.L4.ice_beetle_tundra"
+        ],
+        "mine": [
+          "kamal.L5.glacial_iron_and_trophies"
+        ],
+        "grove": [
+          "kamal.L4.ice_beetle_tundra"
+        ],
+        "smuggler": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "cave": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "giant": [
+          "kamal.L4.ice_beetle_tundra"
+        ],
+        "dragon": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "tower": [
+          "kamal.L10.steam_ice_bastions"
+        ],
+        "cabin": [
+          "kamal.L6.kamal_pass_watch"
+        ],
+        "wreck": [
+          "kamal.L5.glacial_iron_and_trophies"
+        ]
+      }
+    },
+    "tang_mo": {
+      "truth": "Tang Mo is the Land of the Thousand Monkey Isles: vertical limestone karst pillars wrapped in warm monsoon cloud-mist, giant green bamboo forests, wind-bell pinnacle shrines, and curved tile-and-bamboo pavilions perched high above calm turquoise straits. Its coastal treaty harbour is the one port in all Akavir where Tamrielic charter ships from Ebonheart are welcomed openly, exchanging spice, tea, and silk while brave Tang Mo ranger clans and allied Ka Po' Tun envoys defend the high suspension bridges against Kamal thaw-raiders and Tsaesci privateers.",
+      "layers": {
+        "L1": [
+          {
+            "id": "karst_spire_isles",
+            "text": "vertical limestone pillars rising from coastal straits",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "monsoon_cloud_mist",
+            "text": "warm mist and seasonal rains clinging to the spires",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "tang_mo.L1.karst_spire_isles"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "strait_anchorages",
+            "text": "deep calm channels between the limestone islands",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "tang_mo.L1.karst_spire_isles"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "cloud_bamboo_groves",
+            "text": "towering green bamboo and blossom canopies",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "tang_mo.L2.monsoon_cloud_mist"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "open_charter_spice_trade",
+            "text": "spice, tea, bamboo craft, and silk exchanged with Ebonheart ships",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "tang_mo.L3.strait_anchorages"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "tang_mo_treaty_harbor",
+            "text": "curved bamboo-and-tile port on a dry coastal terrace",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "tang_mo.L3.strait_anchorages"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "island_ranger_clans",
+            "text": "hospitable monkey-folk clans and foreign charter captains",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "tang_mo.L6.tang_mo_treaty_harbor"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "ancestral_spire_shrines",
+            "text": "wind-bell shrines on the highest karst pinnacles",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "tang_mo.L1.karst_spire_isles"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "strait_bridge_defense",
+            "text": "defending the suspension bridges against northern raiders",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "tang_mo.L6.tang_mo_treaty_harbor"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "mist_pillar_sanctums",
+            "text": "hollow limestone spire-caverns and rope-ascents",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "tang_mo.L1.karst_spire_isles",
+              "tang_mo.L9.strait_bridge_defense"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "four_realm_truces",
+            "text": "the alliances that kept the Thousand Isles unconquered",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "tang_mo.L7.island_ranger_clans"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "bard": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L8.ancestral_spire_shrines"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L8.ancestral_spire_shrines"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L6.tang_mo_treaty_harbor"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L6.tang_mo_treaty_harbor"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L8.ancestral_spire_shrines"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L9.strait_bridge_defense"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L10.mist_pillar_sanctums"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L7.island_ranger_clans"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L5.open_charter_spice_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "tang_mo.L9.strait_bridge_defense"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "ruin": [
+          "tang_mo.L8.ancestral_spire_shrines"
+        ],
+        "dwemer": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "falmer": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "bandit": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "fort": [
+          "tang_mo.L9.strait_bridge_defense"
+        ],
+        "military": [
+          "tang_mo.L9.strait_bridge_defense"
+        ],
+        "mage": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "vampire": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "necromancer": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "hagraven": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "forsworn": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "beast": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "ice": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "mine": [
+          "tang_mo.L5.open_charter_spice_trade"
+        ],
+        "grove": [
+          "tang_mo.L4.cloud_bamboo_groves"
+        ],
+        "smuggler": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "cave": [
+          "tang_mo.L10.mist_pillar_sanctums",
+          "tang_mo.L1.karst_spire_isles"
+        ],
+        "giant": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "dragon": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "tower": [
+          "tang_mo.L10.mist_pillar_sanctums"
+        ],
+        "cabin": [
+          "tang_mo.L6.tang_mo_treaty_harbor"
+        ],
+        "wreck": [
+          "tang_mo.L5.open_charter_spice_trade"
+        ]
+      }
+    },
+    "ka_po_tun": {
+      "truth": "Ka Po' Tun is the high sun-baked sandstone plateau of the Tiger-Dragon Empire in central and eastern Akavir: wide golden grass steppes, deep rock-cut stepwells, stepped golden-stone temples, and bronze-gong courts ruled by the divine tiger-dragon Tosh Raka, who transformed himself into the largest dragon in the world. Connected to the Tang Mo treaty harbour by the inland treaty road, Tiger Plains Village hosts allied pilgrims and envoys who witness the strict martial discipline of the tiger-monk retainers and their eternal border vigilance against the Tsaesci serpent-courts.",
+      "layers": {
+        "L1": [
+          {
+            "id": "golden_steppe_mesa",
+            "text": "high sun-baked sandstone plateaus and dry canyons",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "continental_sun_heat",
+            "text": "bright, dry skies and crisp highland winds",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "ka_po_tun.L1.golden_steppe_mesa"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "stepped_cistern_wells",
+            "text": "deep rock-cut stepwells feeding the plateau towns",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "ka_po_tun.L1.golden_steppe_mesa"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "golden_grass_steppe",
+            "text": "tall golden grass and great striped steppe-cats",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "ka_po_tun.L2.continental_sun_heat"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "bronze_and_jade_tribute",
+            "text": "cast bronze bells, sun-jade, and martial manuals",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "ka_po_tun.L3.stepped_cistern_wells"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "tiger_plains_shrine_town",
+            "text": "stepped golden-stone town on the inland treaty road",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "ka_po_tun.L3.stepped_cistern_wells"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "tiger_monk_retainers",
+            "text": "disciplined temple guards and allied Tang Mo envoys",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "ka_po_tun.L6.tiger_plains_shrine_town"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "tosh_raka_apotheosis",
+            "text": "veneration of the ruler who became the largest dragon in the world",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "ka_po_tun.L6.tiger_plains_shrine_town"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "serpent_border_standoff",
+            "text": "armed vigilance along the Tsaesci frontier",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "ka_po_tun.L7.tiger_monk_retainers"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "dragon_step_sanctuary",
+            "text": "subterranean flame-lit trial halls beneath the stepped temple",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "ka_po_tun.L1.golden_steppe_mesa",
+              "ka_po_tun.L9.serpent_border_standoff"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "black_dragon_ascension",
+            "text": "the transformation of Tosh Raka and the renaming of the empire",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "ka_po_tun.L8.tosh_raka_apotheosis"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L8.tosh_raka_apotheosis"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L7.tiger_monk_retainers"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L7.tiger_monk_retainers"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L8.tosh_raka_apotheosis"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L9.serpent_border_standoff"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L10.dragon_step_sanctuary"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L7.tiger_monk_retainers"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L7.tiger_monk_retainers"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L6.tiger_plains_shrine_town"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L7.tiger_monk_retainers"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L10.dragon_step_sanctuary"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "ka_po_tun.L10.dragon_step_sanctuary"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L5.bronze_and_jade_tribute"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "ka_po_tun.L9.serpent_border_standoff"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "ruin": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "dwemer": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "falmer": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "bandit": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "fort": [
+          "ka_po_tun.L9.serpent_border_standoff"
+        ],
+        "military": [
+          "ka_po_tun.L9.serpent_border_standoff"
+        ],
+        "mage": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "vampire": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "necromancer": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "hagraven": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "forsworn": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "beast": [
+          "ka_po_tun.L4.golden_grass_steppe"
+        ],
+        "ice": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "mine": [
+          "ka_po_tun.L5.bronze_and_jade_tribute"
+        ],
+        "grove": [
+          "ka_po_tun.L4.golden_grass_steppe"
+        ],
+        "smuggler": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "cave": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "giant": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "dragon": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "tower": [
+          "ka_po_tun.L10.dragon_step_sanctuary"
+        ],
+        "cabin": [
+          "ka_po_tun.L6.tiger_plains_shrine_town"
+        ],
+        "wreck": [
+          "ka_po_tun.L5.bronze_and_jade_tribute"
+        ]
+      }
+    },
+    "yokudan_desert": {
+      "truth": "The Yokudan Desert is the high, dry mesa remnant of old Yokuda: sheared red sandstone tablelands cut by the 1E 792 cataclysm fault and crowned by fluted Na-Totambu columns, brass star-observatories, and rock-cut date-palm oasis cisterns. At New Tava Anchorage, charter ships from Sentinel and Stros M'Kai land Redguard pilgrims, sword-scholars, and sword-singers to walk the Ancestor Steps under cloudless starry skies, while sworn Ankh-Keepers guard the inland star-mirror fault-vaults against a rogue seeker who would wake the forbidden Pankratosword stroke.",
+      "layers": {
+        "L1": [
+          {
+            "id": "sheared_red_mesas",
+            "text": "flat-topped sandstone mesas cut by the 1E 792 cataclysm fault",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "star_clear_arid",
+            "text": "dry trade winds and cloudless night skies",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "yokudan_desert.L1.sheared_red_mesas"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "mesa_oasis_cisterns",
+            "text": "rock-cut spring reservoirs feeding the pilgrim road",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "yokudan_desert.L1.sheared_red_mesas"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "date_palm_and_lynx_scrub",
+            "text": "oasis palms, desert lynx, and dunerippers",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "yokudan_desert.L2.star_clear_arid"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "orichalcum_and_star_charts",
+            "text": "astronomical tables and ancient metalwork",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "yokudan_desert.L3.mesa_oasis_cisterns"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "new_tava_pilgrim_port",
+            "text": "fluted sandstone caravanserai and harbour on a dry shelf",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "yokudan_desert.L1.sheared_red_mesas"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "ansei_pilgrims_and_keepers",
+            "text": "Ankh-Keepers and Hammerfell sword-scholars",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "yokudan_desert.L6.new_tava_pilgrim_port"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "constellation_liturgy",
+            "text": "rites of the Warrior, Thief, and Mage under Yokudan stars",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "yokudan_desert.L2.star_clear_arid"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "fault_vault_seeker",
+            "text": "a rogue seeker attempting to unseal the Pankratosword chamber",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "vault_of_the_pankratosword",
+            "text": "star-mirror sanctum spanning the riven fault",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "yokudan_desert.L1.sheared_red_mesas",
+              "yokudan_desert.L9.fault_vault_seeker"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "na_totambu_high_age",
+            "text": "the emperors and sword-schools before the sinking",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "yokudan_desert.L6.new_tava_pilgrim_port"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "yokudan_desert.L6.new_tava_pilgrim_port"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "yokudan_desert.L6.new_tava_pilgrim_port"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L8.constellation_liturgy"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L6.new_tava_pilgrim_port"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L6.new_tava_pilgrim_port"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "yokudan_desert.L8.constellation_liturgy"
+          ]
+        },
+        "mage": {
+          "weight": 3,
+          "why": [
+            "yokudan_desert.L8.constellation_liturgy",
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L9.fault_vault_seeker"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L10.vault_of_the_pankratosword"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L6.new_tava_pilgrim_port"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L5.orichalcum_and_star_charts"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "yokudan_desert.L9.fault_vault_seeker"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "ruin": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "dwemer": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "falmer": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "bandit": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "fort": [
+          "yokudan_desert.L9.fault_vault_seeker"
+        ],
+        "military": [
+          "yokudan_desert.L9.fault_vault_seeker"
+        ],
+        "mage": [
+          "yokudan_desert.L8.constellation_liturgy"
+        ],
+        "vampire": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "necromancer": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "hagraven": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "forsworn": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "beast": [
+          "yokudan_desert.L4.date_palm_and_lynx_scrub"
+        ],
+        "ice": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "mine": [
+          "yokudan_desert.L5.orichalcum_and_star_charts"
+        ],
+        "grove": [
+          "yokudan_desert.L4.date_palm_and_lynx_scrub"
+        ],
+        "smuggler": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "cave": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "giant": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "dragon": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "tower": [
+          "yokudan_desert.L10.vault_of_the_pankratosword"
+        ],
+        "cabin": [
+          "yokudan_desert.L6.new_tava_pilgrim_port"
+        ],
+        "wreck": [
+          "yokudan_desert.L5.orichalcum_and_star_charts"
+        ]
+      }
+    },
+    "sunken_isles": {
+      "truth": "Surrounding the high sandstone mesas of Yokuda lie the Sunken Isles: a warm turquoise archipelago of low coral-sand cays, half-submerged white-marble causeways, and drowned city plazas where fluted domes rise out of the clear tide. Sentinel salvage divers and chart-captains camp at Riven Shoal Anchorage on the outer limestone shoals to recover sealed Yokudan memory-stones, orichalcum ingots, and brass astrolabes from the flooded streets, watched closely by sworn Ankh-Keepers and wary of restless Ansei wardens and brass star-automata that still patrol the tide-washed colonnades.",
+      "layers": {
+        "L1": [
+          {
+            "id": "submerged_city_shelves",
+            "text": "drowned marble terraces and low coral-sand cays",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "trade_wind_swell",
+            "text": "warm ocean swells and salt spray over the shoals",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "sunken_isles.L1.submerged_city_shelves"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "turquoise_ruin_lagoons",
+            "text": "clear shallow water over intact stone avenues",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "sunken_isles.L1.submerged_city_shelves"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "shoal_reef_and_salt_scrub",
+            "text": "reef life and bone-walkers in the tidal flats",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "sunken_isles.L3.turquoise_ruin_lagoons"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "memory_stone_salvage",
+            "text": "diving for sealed Yokudan memory-stones and brass",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "sunken_isles.L3.turquoise_ruin_lagoons"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "riven_shoal_anchorage",
+            "text": "diver and chart-captain camp on a dry limestone cay",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "sunken_isles.L3.turquoise_ruin_lagoons"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "salvage_divers_and_wardens",
+            "text": "Sentinel wreck-divers watched by Ankh-Keepers",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "sunken_isles.L5.memory_stone_salvage"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "drowned_ancestor_vigil",
+            "text": "lanterns floated over the sunken streets at night",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "sunken_isles.L3.turquoise_ruin_lagoons"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "plunderers_in_the_shoals",
+            "text": "treasure-hunters breaking into warded drowned tombs",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "sunken_isles.L7.salvage_divers_and_wardens"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "drowned_orichalc_vaults",
+            "text": "tidal star-tombs guarded by brass automata",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "sunken_isles.L1.submerged_city_shelves",
+              "sunken_isles.L9.plunderers_in_the_shoals"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "the_wave_of_1e_792",
+            "text": "the night the western cities slid beneath the sea",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "sunken_isles.L1.submerged_city_shelves"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "sunken_isles.L8.drowned_ancestor_vigil"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L6.riven_shoal_anchorage"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L6.riven_shoal_anchorage"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L8.drowned_ancestor_vigil"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L9.plunderers_in_the_shoals"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L10.drowned_orichalc_vaults"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L6.riven_shoal_anchorage"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "sunken_isles.L8.drowned_ancestor_vigil"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L7.salvage_divers_and_wardens"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L5.memory_stone_salvage"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "sunken_isles.L9.plunderers_in_the_shoals"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "ruin": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "dwemer": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "falmer": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "bandit": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "fort": [
+          "sunken_isles.L9.plunderers_in_the_shoals"
+        ],
+        "military": [
+          "sunken_isles.L9.plunderers_in_the_shoals"
+        ],
+        "mage": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "vampire": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "necromancer": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "hagraven": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "forsworn": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "beast": [
+          "sunken_isles.L4.shoal_reef_and_salt_scrub"
+        ],
+        "ice": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "mine": [
+          "sunken_isles.L5.memory_stone_salvage"
+        ],
+        "grove": [
+          "sunken_isles.L4.shoal_reef_and_salt_scrub"
+        ],
+        "smuggler": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "cave": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "giant": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "dragon": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "tower": [
+          "sunken_isles.L10.drowned_orichalc_vaults"
+        ],
+        "cabin": [
+          "sunken_isles.L6.riven_shoal_anchorage"
+        ],
+        "wreck": [
+          "sunken_isles.L5.memory_stone_salvage"
+        ]
+      }
+    },
+    "maormer_isles": {
+      "truth": "The Maormer Isles of Pyandonea rise out of a perpetual warm sea-fog south of Summerset: steep volcanic jungle peaks, giant kelp lagoons, and fleet harbours built from sea-serpent bone and translucent kelpsail. Foreign ships from Tamriel may moor only at the outer Pyandonean Fleet Anchorage under a privateer truce-token to trade for black pearls and serpent-scale mail; inland past Mistveil Village stands the Sanctum of the Coiled King, where Maormer storm-callers harness lightning spires and breed sea serpents for the next armada against Auridon.",
+      "layers": {
+        "L1": [
+          {
+            "id": "volcanic_reef_isles",
+            "text": "steep jungle peaks ringed by barrier reefs and serpent trenches",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "warm_mist_curtain",
+            "text": "eternal tropical fog and sudden lightning squalls",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "maormer_isles.L1.volcanic_reef_isles"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "serpent_coil_lagoons",
+            "text": "deep sheltered fleet basins",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "maormer_isles.L1.volcanic_reef_isles"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "kelp_and_strangler_jungle",
+            "text": "giant kelp fronds, bioluminescent ferns, and sea serpents",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "maormer_isles.L2.warm_mist_curtain"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "black_pearl_and_scale_trade",
+            "text": "serpent-scale mail, pearls, and truce safe-conducts",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "maormer_isles.L3.serpent_coil_lagoons"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "mistveil_and_fleet_anchorage",
+            "text": "kelpsail docks on the coastal terrace and Mistveil Village on the ridge",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "maormer_isles.L3.serpent_coil_lagoons"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "truce_captains_and_storm_caste",
+            "text": "Maormer storm-mages and foreign privateers",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "maormer_isles.L6.mistveil_and_fleet_anchorage"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "cult_of_immortal_orgnum",
+            "text": "worship of the undying wizard-king and his Coffer",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "maormer_isles.L7.truce_captains_and_storm_caste"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "storm_spire_sabotage",
+            "text": "a mutinous fleet-lord charging a storm-spire to strike Vulkhel Guard",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "maormer_isles.L7.truce_captains_and_storm_caste"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "sanctum_of_the_coiled_king",
+            "text": "rising tidal chambers and lightning-rod sea grottoes",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "maormer_isles.L1.volcanic_reef_isles",
+              "maormer_isles.L9.storm_spire_sabotage"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "armada_of_3e_110",
+            "text": "the War of the Isle and the storm that shattered Orgnum's fleet",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "maormer_isles.L8.cult_of_immortal_orgnum"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "maormer_isles.L4.kelp_and_strangler_jungle"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade",
+            "maormer_isles.L6.mistveil_and_fleet_anchorage"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "maormer_isles.L6.mistveil_and_fleet_anchorage"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L8.cult_of_immortal_orgnum"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L6.mistveil_and_fleet_anchorage"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L6.mistveil_and_fleet_anchorage"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste",
+            "maormer_isles.L8.cult_of_immortal_orgnum"
+          ]
+        },
+        "mage": {
+          "weight": 3,
+          "why": [
+            "maormer_isles.L8.cult_of_immortal_orgnum",
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L9.storm_spire_sabotage"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L10.sanctum_of_the_coiled_king"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "maormer_isles.L6.mistveil_and_fleet_anchorage"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L7.truce_captains_and_storm_caste"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L5.black_pearl_and_scale_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "maormer_isles.L9.storm_spire_sabotage"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "ruin": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "dwemer": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "falmer": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "bandit": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "fort": [
+          "maormer_isles.L9.storm_spire_sabotage"
+        ],
+        "military": [
+          "maormer_isles.L9.storm_spire_sabotage"
+        ],
+        "mage": [
+          "maormer_isles.L8.cult_of_immortal_orgnum",
+          "maormer_isles.L7.truce_captains_and_storm_caste"
+        ],
+        "vampire": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "necromancer": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "hagraven": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "forsworn": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "beast": [
+          "maormer_isles.L4.kelp_and_strangler_jungle"
+        ],
+        "ice": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "mine": [
+          "maormer_isles.L5.black_pearl_and_scale_trade"
+        ],
+        "grove": [
+          "maormer_isles.L4.kelp_and_strangler_jungle"
+        ],
+        "smuggler": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "cave": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "giant": [
+          "maormer_isles.L4.kelp_and_strangler_jungle"
+        ],
+        "dragon": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "tower": [
+          "maormer_isles.L10.sanctum_of_the_coiled_king"
+        ],
+        "cabin": [
+          "maormer_isles.L6.mistveil_and_fleet_anchorage"
+        ],
+        "wreck": [
+          "maormer_isles.L5.black_pearl_and_scale_trade"
+        ]
+      }
+    },
+    "coral_kingdom": {
+      "truth": "The Coral Kingdom of Thras is a ring of living, calcified pink-and-ivory coral spires rising seventy blocks above a drowned volcanic caldera and Agonir Lagoon. Heavy phosphorescent salt-miasma hangs over bottomless blue sinkholes that connect the lagoon to Summerset's abyssal vents. On the quarantined outer sandbar, licensed alchemy-ships from Anvil and Lillandril trade with calculating Sload contractors for Sload soap, abyssal pearl-glass, and forbidden necromantic reagents, while inside the flooded ziggurat of the Pillar of Thras a Sload cabal tends deep-vent plague vats.",
+      "layers": {
+        "L1": [
+          {
+            "id": "agonir_coral_caldera",
+            "text": "living calcified coral towers around a drowned volcanic lagoon",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "phosphorescent_brine_haze",
+            "text": "dead-calm salt miasma and glowing night tides",
+            "cites": [
+              "foreign.L2.extreme_oceanic_regimes",
+              "coral_kingdom.L1.agonir_coral_caldera"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "blue_hole_vents",
+            "text": "abyssal sinkholes linked to deep ocean currents",
+            "cites": [
+              "foreign.L3.charter_sea_lanes",
+              "coral_kingdom.L1.agonir_coral_caldera"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "anemone_and_thrall_reef",
+            "text": "giant anemones, reef-vipers, and amphibious Sload",
+            "cites": [
+              "foreign.L4.alien_endemics",
+              "coral_kingdom.L3.blue_hole_vents"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "alchemical_sandbar_exchange",
+            "text": "Sload soap, necromantic reagents, and pearl-glass",
+            "cites": [
+              "foreign.L5.charter_salvage_and_treaty_trade",
+              "coral_kingdom.L4.anemone_and_thrall_reef"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "quarantined_sandbar_camp",
+            "text": "outer expedition sandbar facing the living coral spires",
+            "cites": [
+              "foreign.L6.beachhead_anchorages",
+              "coral_kingdom.L1.agonir_coral_caldera"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "literal_contract_factors",
+            "text": "Sload contractors and Anvil/Lillandril alchemists",
+            "cites": [
+              "foreign.L7.captains_factors_and_custodians",
+              "coral_kingdom.L5.alchemical_sandbar_exchange"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "unsentimental_mastery",
+            "text": "cold calculus of memory, necromancy, and buoyancy",
+            "cites": [
+              "foreign.L8.elder_homeland_myths",
+              "coral_kingdom.L7.literal_contract_factors"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "plague_vat_cultivation",
+            "text": "a Sload cabal brewing a new miasma strain in the deep vents",
+            "cites": [
+              "foreign.L9.quarantine_and_awakening",
+              "coral_kingdom.L3.blue_hole_vents"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "the_pillar_of_thras",
+            "text": "flooded coral ziggurat with buoyancy shafts and living coral doors",
+            "cites": [
+              "foreign.L10.wonder_sanctums",
+              "coral_kingdom.L1.agonir_coral_caldera",
+              "coral_kingdom.L9.plague_vat_cultivation"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "sinking_by_all_flags",
+            "text": "the 1E 2200 Thrassian Plague and the All-Flags Navy reprisal",
+            "cites": [
+              "foreign.L11.sundered_origins",
+              "coral_kingdom.L9.plague_vat_cultivation"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L8.unsentimental_mastery"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L6.quarantined_sandbar_camp"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L6.quarantined_sandbar_camp"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L8.unsentimental_mastery"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L9.plague_vat_cultivation"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L10.the_pillar_of_thras"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L6.quarantined_sandbar_camp"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "coral_kingdom.L8.unsentimental_mastery"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L7.literal_contract_factors"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L5.alchemical_sandbar_exchange"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "coral_kingdom.L9.plague_vat_cultivation"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "ruin": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "dwemer": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "falmer": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "bandit": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "fort": [
+          "coral_kingdom.L9.plague_vat_cultivation"
+        ],
+        "military": [
+          "coral_kingdom.L9.plague_vat_cultivation"
+        ],
+        "mage": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "vampire": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "necromancer": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "hagraven": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "forsworn": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "beast": [
+          "coral_kingdom.L4.anemone_and_thrall_reef"
+        ],
+        "ice": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "mine": [
+          "coral_kingdom.L5.alchemical_sandbar_exchange"
+        ],
+        "grove": [
+          "coral_kingdom.L4.anemone_and_thrall_reef"
+        ],
+        "smuggler": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "cave": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "giant": [
+          "coral_kingdom.L4.anemone_and_thrall_reef"
+        ],
+        "dragon": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "tower": [
+          "coral_kingdom.L10.the_pillar_of_thras"
+        ],
+        "cabin": [
+          "coral_kingdom.L6.quarantined_sandbar_camp"
+        ],
+        "wreck": [
+          "coral_kingdom.L5.alchemical_sandbar_exchange"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "open_grain_farming",
+      "b": "atmora.L2.Great_Freeze",
+      "reason": "Atmora's permanent sub-zero glaciation forbids any open-field agriculture"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "timber_sawmill",
+      "b": "thras.L1.living_coral_atoll",
+      "reason": "Thras is a calcified coral atoll with brine sinkholes and no terrestrial timber forests"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "imperial_nine_divines_chapel",
+      "b": "pyandonea.L8.orgnum_and_the_coiled_king",
+      "reason": "Pyandonea's Maormer worship Immortal King Orgnum and the Coiled King, not the Imperial Divines"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "ayleid_wraith",
+      "b": "yokuda.L10.na_totambu_star_tombs",
+      "reason": "Yokuda's sunken vaults belong to Na-Totambu Ansei sword-singers and star-automata, not Ayleids"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "smith": {
+      "weight": 2,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "jeweler": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "farmer": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "farmhand": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "lumberjack": {
+      "weight": 2,
+      "why": [
+        "foreign.L4.alien_endemics"
+      ]
+    },
+    "miller": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "mill_hand": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "woodcutter": {
+      "weight": 2,
+      "why": [
+        "foreign.L4.alien_endemics"
+      ]
+    },
+    "fisher": {
+      "weight": 2,
+      "why": [
+        "foreign.L3.charter_sea_lanes"
+      ]
+    },
+    "hunter": {
+      "weight": 2,
+      "why": [
+        "foreign.L4.alien_endemics"
+      ]
+    },
+    "butcher": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "fletcher": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "alchemist": {
+      "weight": 2,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "merchant": {
+      "weight": 3,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "tailor": {
+      "weight": 2,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "bookseller": {
+      "weight": 2,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "innkeeper": {
+      "weight": 2,
+      "why": [
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "cook": {
+      "weight": 2,
+      "why": [
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "server": {
+      "weight": 2,
+      "why": [
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "bard": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "priest": {
+      "weight": 1,
+      "why": [
+        "foreign.L8.elder_homeland_myths"
+      ]
+    },
+    "jarl": {
+      "weight": 1,
+      "why": [
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "steward": {
+      "weight": 1,
+      "why": [
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "housecarl": {
+      "weight": 1,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "court_wizard": {
+      "weight": 1,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "foreign.L8.elder_homeland_myths"
+      ]
+    },
+    "guard": {
+      "weight": 1,
+      "why": [
+        "foreign.L9.quarantine_and_awakening"
+      ]
+    },
+    "fence": {
+      "weight": 1,
+      "why": [
+        "foreign.L10.wonder_sanctums"
+      ]
+    },
+    "prisoner": {
+      "weight": 2,
+      "why": [
+        "foreign.L9.quarantine_and_awakening"
+      ]
+    },
+    "beggar": {
+      "weight": 1,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "citizen": {
+      "weight": 1,
+      "why": [
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    "housekeeper": {
+      "weight": 1,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "child": {
+      "weight": 1,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "elder": {
+      "weight": 2,
+      "why": [
+        "foreign.L8.elder_homeland_myths"
+      ]
+    },
+    "labourer": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "worker": {
+      "weight": 1,
+      "why": [
+        "foreign.L5.charter_salvage_and_treaty_trade"
+      ]
+    },
+    "guild_leader": {
+      "weight": 2,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 2,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 2,
+      "why": [
+        "foreign.L7.captains_factors_and_custodians"
+      ]
+    },
+    "survivor": {
+      "weight": 2,
+      "why": [
+        "foreign.L9.quarantine_and_awakening"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "ruin": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "dwemer": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "falmer": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "bandit": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "fort": [
+      "foreign.L10.wonder_sanctums",
+      "foreign.L6.beachhead_anchorages"
+    ],
+    "military": [
+      "foreign.L9.quarantine_and_awakening"
+    ],
+    "mage": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "vampire": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "necromancer": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "hagraven": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "forsworn": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "beast": [
+      "foreign.L4.alien_endemics"
+    ],
+    "ice": [
+      "foreign.L10.wonder_sanctums",
+      "foreign.L2.extreme_oceanic_regimes"
+    ],
+    "mine": [
+      "foreign.L5.charter_salvage_and_treaty_trade"
+    ],
+    "grove": [
+      "foreign.L4.alien_endemics"
+    ],
+    "smuggler": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "cave": [
+      "foreign.L10.wonder_sanctums",
+      "foreign.L1.cataclysm_scarred_crust"
+    ],
+    "giant": [
+      "foreign.L4.alien_endemics"
+    ],
+    "dragon": [
+      "foreign.L9.quarantine_and_awakening"
+    ],
+    "tower": [
+      "foreign.L10.wonder_sanctums"
+    ],
+    "cabin": [
+      "foreign.L6.beachhead_anchorages"
+    ],
+    "wreck": [
+      "foreign.L5.charter_salvage_and_treaty_trade"
+    ]
+  }
+}

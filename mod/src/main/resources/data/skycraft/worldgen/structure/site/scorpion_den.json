@@ -1,0 +1,18 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "scorpion_den",
+  "kit": "scorpion_den",
+  "flavor": 10,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "scorpion_den"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

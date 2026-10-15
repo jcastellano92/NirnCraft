@@ -1,5 +1,9 @@
 {
  "id": "old_orsinium",
+ "why": [
+  "wrothgar.L11.three_sieges",
+  "wayrest.L10.old_orsinium"
+ ],
  "kit": "orc",
  "entry_depth": 22,
  "palette": {

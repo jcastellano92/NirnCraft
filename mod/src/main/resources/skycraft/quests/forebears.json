@@ -3,36 +3,122 @@
   "category": "faction",
   "faction": "forebears",
   "region": "hammerfell/hews_bane",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "wreck_of_the_salt_gazelle": {"x": -7300, "z": 7950, "r": 30, "name": "Wreck of the Salt Gazelle"},
-    "brinewash_cove": {"x": -10300, "z": 7300, "r": 34, "name": "Brinewash Cove"},
-    "saltwatch_tower": {"x": -6500, "z": 7700, "r": 28, "name": "Saltwatch Tower"}
+    "wreck_of_the_salt_gazelle": {
+      "x": -7300,
+      "z": 7950,
+      "r": 30,
+      "name": "Wreck of the Salt Gazelle"
+    },
+    "brinewash_cove": {
+      "x": -10300,
+      "z": 7300,
+      "r": 34,
+      "name": "Brinewash Cove"
+    },
+    "saltwatch_tower": {
+      "x": -6500,
+      "z": 7700,
+      "r": 28,
+      "name": "Saltwatch Tower"
+    }
   },
   "npcs": [
-    {"id": "ezhar_at_taneth", "name": "Lord Ezhar at-Taneth", "role": "merchant", "place": "taneth", "offset": [4, -5], "hall": "forebears",
-     "greet": "Yokuda is under the sea, friend, and the sea is where the money is. Sit down. Have you ever read a bill of lading?"},
-    {"id": "captain_noraya", "name": "Captain Noraya", "role": "adventurer", "place": "taneth", "offset": [14, 10], "female": true,
-     "greet": "I've run cargo past pirates, storms and Imperial tax-men. The tax-men were the worst."},
-    {"id": "old_huzail", "name": "Old Huzail", "role": "beggar", "place": "taneth", "offset": [-15, -10],
-     "greet": "The harbour talks, if you know how to listen. It talks louder for a coin or two."},
-    {"id": "sabine_larrenne", "name": "Sabine Larrenne", "role": "scholar", "place": "rihad", "offset": [6, 4], "female": true,
-     "greet": "I study the Dwarves. Mostly that means I study the inside of locked crates and the outside of my purse."}
+    {
+      "id": "ezhar_at_taneth",
+      "name": "Lord Ezhar at-Taneth",
+      "role": "merchant",
+      "place": "taneth",
+      "offset": [
+        4,
+        -5
+      ],
+      "hall": "forebears",
+      "greet": "Yokuda is under the sea, friend, and the sea is where the money is. Sit down. Have you ever read a bill of lading?"
+    },
+    {
+      "id": "captain_noraya",
+      "name": "Captain Noraya",
+      "role": "adventurer",
+      "place": "taneth",
+      "offset": [
+        14,
+        10
+      ],
+      "female": true,
+      "greet": "I've run cargo past pirates, storms and Imperial tax-men. The tax-men were the worst."
+    },
+    {
+      "id": "old_huzail",
+      "name": "Old Huzail",
+      "role": "beggar",
+      "place": "taneth",
+      "offset": [
+        -15,
+        -10
+      ],
+      "greet": "The harbour talks, if you know how to listen. It talks louder for a coin or two."
+    },
+    {
+      "id": "sabine_larrenne",
+      "name": "Sabine Larrenne",
+      "role": "scholar",
+      "place": "rihad",
+      "offset": [
+        6,
+        4
+      ],
+      "female": true,
+      "greet": "I study the Dwarves. Mostly that means I study the inside of locked crates and the outside of my purse."
+    }
   ],
   "relics": [
-    {"id": "fb_gazelle_manifest", "name": "Manifest of the Salt Gazelle", "desc": "Water-stained pages listing silk, glass and Imperial-bonded wine, every crate insured under the Emperor's seal.", "icon": 11},
-    {"id": "fb_dwarven_astrolabe", "name": "Dwarven Astrolabe", "desc": "A nest of brass rings that still turn on their own, slowly, as if tracking stars no one else can see. Looted from the ruins of Stros M'Kai.", "icon": 17},
-    {"id": "fb_firebrand_orders", "name": "Orders Under a Crown Seal", "desc": "Instructions to burn the bonded warehouses of Taneth on the night of the new moon. Sealed with a crown above a sword, and no name.", "icon": 11}
+    {
+      "id": "fb_gazelle_manifest",
+      "name": "Manifest of the Salt Gazelle",
+      "desc": "Water-stained pages listing silk, glass and Imperial-bonded wine, every crate insured under the Emperor's seal.",
+      "icon": 11
+    },
+    {
+      "id": "fb_dwarven_astrolabe",
+      "name": "Dwarven Astrolabe",
+      "desc": "A nest of brass rings that still turn on their own, slowly, as if tracking stars no one else can see. Looted from the ruins of Stros M'Kai.",
+      "icon": 17
+    },
+    {
+      "id": "fb_firebrand_orders",
+      "name": "Orders Under a Crown Seal",
+      "desc": "Instructions to burn the bonded warehouses of Taneth on the night of the new moon. Sealed with a crown above a sword, and no name.",
+      "icon": 11
+    }
   ],
   "scenes": {
     "fb_harbor_night": [
-      ["narrator", "Lamps burn low along Taneth's harbour. Somewhere among the warehouses oil has been poured; you can smell it over the salt."],
-      ["captain_noraya", "My crew is on the quay with buckets and boathooks. Find the man with the torch before he finds a spark."]
+      [
+        "narrator",
+        "Lamps burn low along Taneth's harbour. Somewhere among the warehouses oil has been poured; you can smell it over the salt."
+      ],
+      [
+        "captain_noraya",
+        "My crew is on the quay with buckets and boathooks. Find the man with the torch before he finds a spark."
+      ]
     ],
     "fb_council": [
-      ["ezhar_at_taneth", "When our grandfathers came ashore, the Crowns kept the swords and the Forebears kept the harbours. Hammerfell has needed both ever since, whatever the lords in Sentinel say."],
-      ["captain_noraya", "Half the captains in this port owe their ships to you tonight. Sailors remember a debt longer than lords do."],
-      ["ezhar_at_taneth", "So does the council. By its vote you sit with us now, a Lord of the Forebears. Try not to look so surprised. It encourages people to haggle with you."]
+      [
+        "ezhar_at_taneth",
+        "When our grandfathers came ashore, the Crowns kept the swords and the Forebears kept the harbours. Hammerfell has needed both ever since, whatever the lords in Sentinel say."
+      ],
+      [
+        "captain_noraya",
+        "Half the captains in this port owe their ships to you tonight. Sailors remember a debt longer than lords do."
+      ],
+      [
+        "ezhar_at_taneth",
+        "So does the council. By its vote you sit with us now, a Lord of the Forebears. Try not to look so surprised. It encourages people to haggle with you."
+      ]
     ]
   },
   "quests": [
@@ -40,127 +126,417 @@
       "id": "fb_salt_and_paper",
       "title": "Salt and Paper",
       "start": "npc:ezhar_at_taneth",
-      "requires": ["!faction:forebears", "!faction:crowns"],
+      "requires": [
+        "!faction:forebears",
+        "!faction:crowns"
+      ],
       "offer": "I hear the Forebears hire people who can keep their heads.",
       "pitch": "We hire people who can keep their heads and our cargo. The Salt Gazelle ran aground west of the harbour with a hold full of Imperial goods and, more important, her manifest. Scavengers are already at her. Get me that manifest before somebody burns it for warmth.",
       "desc": "Lord Ezhar at-Taneth, a merchant-lord of the Forebears, sent me to recover the manifest of the wrecked Salt Gazelle before scavengers strip her bare.",
       "objectives": [
-        {"type": "talk", "npc": "captain_noraya", "text": "Speak with Captain Noraya on the Taneth quay",
-         "topic": "Lord Ezhar sent me about the Salt Gazelle.",
-         "reply": "She was my ship before she was a wreck. The rocks west of the harbour, past the old light. Mind the dreugh; they like a broken hull as much as the scavengers do."},
-        {"type": "go", "place": "wreck_of_the_salt_gazelle", "text": "Find the wreck of the Salt Gazelle"},
-        {"type": "clear", "place": "wreck_of_the_salt_gazelle", "text": "Drive off the scavengers and the shore beasts",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Wreck Scavenger", "hostile": true, "armor": "#6a5a40"},
-                   {"type": "skycraft:land_dreugh", "name": "Shore Dreugh"},
-                   {"type": "skycraft:mudcrab", "count": 2}],
-         "journal": "The scavengers had already broken open the wine. Most of them were too drunk to run, and the dreugh did not care whom it ate."},
-        {"type": "retrieve", "place": "wreck_of_the_salt_gazelle", "relic": "fb_gazelle_manifest", "radius": 10, "text": "Search the wreck for the ship's manifest"},
-        {"type": "deliver", "npc": "ezhar_at_taneth", "relic": "fb_gazelle_manifest", "text": "Bring the manifest to Lord Ezhar",
-         "topic": "The manifest. A little damp.",
-         "reply": "Damp is fine. Lost is not. Every crate on this list is insured by the Empire, and now I can prove it. You have a head for business, whether you know it or not. The Forebears can use you."}
+        {
+          "type": "talk",
+          "npc": "captain_noraya",
+          "text": "Speak with Captain Noraya on the Taneth quay",
+          "topic": "Lord Ezhar sent me about the Salt Gazelle.",
+          "reply": "She was my ship before she was a wreck. The rocks west of the harbour, past the old light. Mind the dreugh; they like a broken hull as much as the scavengers do."
+        },
+        {
+          "type": "go",
+          "place": "wreck_of_the_salt_gazelle",
+          "text": "Find the wreck of the Salt Gazelle"
+        },
+        {
+          "type": "clear",
+          "place": "wreck_of_the_salt_gazelle",
+          "text": "Drive off the scavengers and the shore beasts",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Wreck Scavenger",
+              "hostile": true,
+              "armor": "#6a5a40"
+            },
+            {
+              "type": "skycraft:land_dreugh",
+              "name": "Shore Dreugh"
+            },
+            {
+              "type": "skycraft:mudcrab",
+              "count": 2
+            }
+          ],
+          "journal": "The scavengers had already broken open the wine. Most of them were too drunk to run, and the dreugh did not care whom it ate."
+        },
+        {
+          "type": "retrieve",
+          "place": "wreck_of_the_salt_gazelle",
+          "relic": "fb_gazelle_manifest",
+          "radius": 10,
+          "text": "Search the wreck for the ship's manifest"
+        },
+        {
+          "type": "deliver",
+          "npc": "ezhar_at_taneth",
+          "relic": "fb_gazelle_manifest",
+          "text": "Bring the manifest to Lord Ezhar",
+          "topic": "The manifest. A little damp.",
+          "reply": "Damp is fine. Lost is not. Every crate on this list is insured by the Empire, and now I can prove it. You have a head for business, whether you know it or not. The Forebears can use you."
+        }
       ],
       "outro": "I recovered the manifest of the Salt Gazelle for Lord Ezhar, and with it the Imperial insurance on her cargo. The Forebears of Taneth have taken me in.",
-      "rewards": {"gold": 250, "join": true, "items": ["skycraft:imperial_light_chestplate", "skycraft:steel_sword"]}
+      "rewards": {
+        "gold": 250,
+        "join": true,
+        "items": [
+          "skycraft:imperial_light_chestplate",
+          "skycraft:steel_sword"
+        ]
+      },
+      "why": [
+        "hews_bane.L9.collaborator_hunt",
+        "hews_bane.L8.forebear_temples"
+      ]
     },
     {
       "id": "fb_the_brinewash_pirates",
       "title": "The Brinewash Pirates",
       "start": "npc:captain_noraya",
-      "requires": ["quest:fb_salt_and_paper|faction:forebears"],
+      "requires": [
+        "quest:fb_salt_and_paper|faction:forebears"
+      ],
       "offer": "Lord Ezhar says you have pirate trouble.",
       "pitch": "Every ship I send west comes home lighter or not at all. The pirates nest at Brinewash Cove on Stros M'Kai, and they've been digging in the old Dwarven ruins on the island as well. Lord Ezhar wants them gone. I want my cargo back. Get us both what we want.",
       "desc": "Pirates operating out of Brinewash Cove on Stros M'Kai have been preying on Forebear shipping. Captain Noraya asked me to break them.",
       "objectives": [
-        {"type": "go", "place": "stros_mkai", "text": "Sail to Stros M'Kai"},
-        {"type": "go", "place": "brinewash_cove", "text": "Find Brinewash Cove"},
-        {"type": "clear", "place": "brinewash_cove", "placement": "structure", "text": "Fight through the pirates in the cove",
-         "spawn": [{"type": "npc:thug", "count": 4, "name": "Brinewash Pirate", "hostile": true, "armor": "#2a4a5a"}]},
-        {"type": "kill", "place": "brinewash_cove", "placement": "structure", "text": "Kill the pirate captain, Ysha the Gull",
-         "spawn": [{"type": "npc:adventurer", "name": "Ysha the Gull", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true, "armor": "#1f3a4a", "weapon": "skycraft:steel_sword"}],
-         "journal": "Ysha the Gull kept her plunder in the cove and her best prize in her own cabin: a Dwarven device wrapped in sailcloth, still ticking."},
-        {"type": "retrieve", "place": "brinewash_cove", "placement": "structure", "relic": "fb_dwarven_astrolabe", "radius": 10, "text": "Take the Dwarven device from the captain's cabin"},
-        {"type": "talk", "npc": "captain_noraya", "text": "Report to Captain Noraya in Taneth",
-         "topic": "The cove is clear. Their captain had this.",
-         "reply": "That isn't mine. That's worth more than anything that was ever mine. Show it to Lord Ezhar; he will know who in Rihad pays for Dwarven brass."}
+        {
+          "type": "go",
+          "place": "stros_mkai",
+          "text": "Sail to Stros M'Kai"
+        },
+        {
+          "type": "go",
+          "place": "brinewash_cove",
+          "text": "Find Brinewash Cove"
+        },
+        {
+          "type": "clear",
+          "place": "brinewash_cove",
+          "placement": "structure",
+          "text": "Fight through the pirates in the cove",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Brinewash Pirate",
+              "hostile": true,
+              "armor": "#2a4a5a"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "brinewash_cove",
+          "placement": "structure",
+          "text": "Kill the pirate captain, Ysha the Gull",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Ysha the Gull",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#1f3a4a",
+              "weapon": "skycraft:steel_sword"
+            }
+          ],
+          "journal": "Ysha the Gull kept her plunder in the cove and her best prize in her own cabin: a Dwarven device wrapped in sailcloth, still ticking."
+        },
+        {
+          "type": "retrieve",
+          "place": "brinewash_cove",
+          "placement": "structure",
+          "relic": "fb_dwarven_astrolabe",
+          "radius": 10,
+          "text": "Take the Dwarven device from the captain's cabin"
+        },
+        {
+          "type": "talk",
+          "npc": "captain_noraya",
+          "text": "Report to Captain Noraya in Taneth",
+          "topic": "The cove is clear. Their captain had this.",
+          "reply": "That isn't mine. That's worth more than anything that was ever mine. Show it to Lord Ezhar; he will know who in Rihad pays for Dwarven brass."
+        }
       ],
       "outro": "I broke the Brinewash pirates on Stros M'Kai and killed their captain. Among her plunder was a working Dwarven astrolabe from the island's ruins.",
-      "rewards": {"gold": 400, "faction_points": 3}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3
+      },
+      "why": [
+        "hews_bane.L9.collaborator_hunt",
+        "hews_bane.L8.forebear_temples"
+      ]
     },
     {
       "id": "fb_brass_for_rihad",
       "title": "Brass for Rihad",
       "start": "auto",
-      "requires": ["quest:fb_the_brinewash_pirates"],
+      "requires": [
+        "quest:fb_the_brinewash_pirates"
+      ],
       "desc": "Lord Ezhar has a buyer for the Dwarven astrolabe: a Breton scholar in Rihad named Sabine Larrenne. Treasure-hunters and Crown loyalists both want the device for themselves.",
       "objectives": [
-        {"type": "talk", "npc": "ezhar_at_taneth", "text": "Speak with Lord Ezhar",
-         "topic": "Noraya says you have a buyer for this.",
-         "reply": "In Rihad, yes. A Breton with an Imperial stipend and very little sense of a bargain. Carry it yourself. The road east is full of men who would rather take than pay."},
-        {"type": "go", "place": "rihad", "text": "Travel to Rihad"},
-        {"type": "clear", "place": "rihad", "offset": [-150, 60], "text": "Deal with the treasure-hunters waiting outside Rihad",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Treasure-Hunter", "hostile": true, "armor": "#7a6040"}],
-         "journal": "Someone in Taneth had talked. Three treasure-hunters were waiting on the Rihad road, and they knew exactly what I carried."},
-        {"type": "talk", "npc": "sabine_larrenne", "text": "Meet Sabine Larrenne in Rihad",
-         "topic": "Lord Ezhar sent me with the astrolabe.",
-         "reply": "Oh. Look at the escapement on it. Before we speak of price, you should know a Crown lord offered me twice as much to smash it rather than let it go to the Empire. I refused, of course. Mostly."},
-        {"type": "talk", "npc": "sabine_larrenne", "text": "Settle the price",
-         "choices": [
-           {"label": "Lord Ezhar's price stands. The Empire pays fairly.", "reply": "It does, eventually, after forms in triplicate. Done. My patrons at the University will be pleased with both of us.", "actions": "flag:fb_fair_sale"},
-           {"label": "If the Crowns want it smashed that badly, the price just went up.", "reply": "You are a Forebear, all right. Half again, then. I will tell my patrons the pirates drove a hard bargain.", "actions": "flag:fb_hard_bargain;give:minecraft:gold_ingot*4"}
-         ]},
-        {"type": "deliver", "npc": "sabine_larrenne", "relic": "fb_dwarven_astrolabe", "text": "Hand over the astrolabe",
-         "topic": "It's yours.",
-         "reply": "Thank you. Tell Lord Ezhar the University will buy whatever else his ships bring out of those ruins. And tell him the Crowns are angrier than I have ever seen them."}
+        {
+          "type": "talk",
+          "npc": "ezhar_at_taneth",
+          "text": "Speak with Lord Ezhar",
+          "topic": "Noraya says you have a buyer for this.",
+          "reply": "In Rihad, yes. A Breton with an Imperial stipend and very little sense of a bargain. Carry it yourself. The road east is full of men who would rather take than pay."
+        },
+        {
+          "type": "go",
+          "place": "rihad",
+          "text": "Travel to Rihad"
+        },
+        {
+          "type": "clear",
+          "place": "rihad",
+          "offset": [
+            -150,
+            60
+          ],
+          "text": "Deal with the treasure-hunters waiting outside Rihad",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Treasure-Hunter",
+              "hostile": true,
+              "armor": "#7a6040"
+            }
+          ],
+          "journal": "Someone in Taneth had talked. Three treasure-hunters were waiting on the Rihad road, and they knew exactly what I carried."
+        },
+        {
+          "type": "talk",
+          "npc": "sabine_larrenne",
+          "text": "Meet Sabine Larrenne in Rihad",
+          "topic": "Lord Ezhar sent me with the astrolabe.",
+          "reply": "Oh. Look at the escapement on it. Before we speak of price, you should know a Crown lord offered me twice as much to smash it rather than let it go to the Empire. I refused, of course. Mostly."
+        },
+        {
+          "type": "talk",
+          "npc": "sabine_larrenne",
+          "text": "Settle the price",
+          "choices": [
+            {
+              "label": "Lord Ezhar's price stands. The Empire pays fairly.",
+              "reply": "It does, eventually, after forms in triplicate. Done. My patrons at the University will be pleased with both of us.",
+              "actions": "flag:fb_fair_sale"
+            },
+            {
+              "label": "If the Crowns want it smashed that badly, the price just went up.",
+              "reply": "You are a Forebear, all right. Half again, then. I will tell my patrons the pirates drove a hard bargain.",
+              "actions": "flag:fb_hard_bargain;give:minecraft:gold_ingot*4"
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "sabine_larrenne",
+          "relic": "fb_dwarven_astrolabe",
+          "text": "Hand over the astrolabe",
+          "topic": "It's yours.",
+          "reply": "Thank you. Tell Lord Ezhar the University will buy whatever else his ships bring out of those ruins. And tell him the Crowns are angrier than I have ever seen them."
+        }
       ],
       "outro": "I sold the Dwarven astrolabe to Sabine Larrenne in Rihad for the Forebears. She warned me that the Crown loyalists are furious that Hammerfell's treasures are going to the Empire.",
-      "rewards": {"gold": 500, "faction_points": 4}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "why": [
+        "hews_bane.L9.collaborator_hunt",
+        "hews_bane.L8.forebear_temples"
+      ]
     },
     {
       "id": "fb_fire_in_the_harbor",
       "title": "Fire in the Harbour",
       "start": "auto",
-      "requires": ["quest:fb_brass_for_rihad"],
+      "requires": [
+        "quest:fb_brass_for_rihad"
+      ],
       "desc": "Back in Taneth, old Huzail has heard talk of Crown zealots who mean to burn the harbour's bonded warehouses and blame the Empire for it.",
       "objectives": [
-        {"type": "talk", "npc": "old_huzail", "text": "Speak with Old Huzail in Taneth",
-         "topic": "Lord Ezhar says you've heard something.",
-         "reply": "I hear everything. Men in desert white, not sailors, asking which warehouses hold Imperial goods. They meet at the old Saltwatch tower on the cliffs. The new moon is close. You can do the arithmetic."},
-        {"type": "go", "place": "saltwatch_tower", "text": "Go to Saltwatch Tower"},
-        {"type": "clear", "place": "saltwatch_tower", "placement": "structure", "text": "Kill the Crown zealots in the tower",
-         "spawn": [{"type": "npc:assassin", "count": 3, "name": "Crown Zealot", "hostile": true, "armor": "#d8c8a0"}],
-         "journal": "The zealots had barrels of lamp oil stacked to the ceiling and a chalk map of the harbour on the floor. They died praying to ancestors who would have been ashamed of them."},
-        {"type": "retrieve", "place": "saltwatch_tower", "placement": "structure", "relic": "fb_firebrand_orders", "radius": 10, "text": "Search the tower for the zealots' orders"},
-        {"type": "deliver", "npc": "ezhar_at_taneth", "relic": "fb_firebrand_orders", "text": "Bring the orders to Lord Ezhar",
-         "topic": "The Crowns meant to burn your harbour. These are their orders.",
-         "reply": "Burn Taneth to save Hammerfell from the Empire. They never could do sums. No name, only the crown and the sword. I know one sword-singer who seals his letters that way: Ansei Qadir. He will want to watch it burn himself."}
+        {
+          "type": "talk",
+          "npc": "old_huzail",
+          "text": "Speak with Old Huzail in Taneth",
+          "topic": "Lord Ezhar says you've heard something.",
+          "reply": "I hear everything. Men in desert white, not sailors, asking which warehouses hold Imperial goods. They meet at the old Saltwatch tower on the cliffs. The new moon is close. You can do the arithmetic."
+        },
+        {
+          "type": "go",
+          "place": "saltwatch_tower",
+          "text": "Go to Saltwatch Tower"
+        },
+        {
+          "type": "clear",
+          "place": "saltwatch_tower",
+          "placement": "structure",
+          "text": "Kill the Crown zealots in the tower",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "count": 3,
+              "name": "Crown Zealot",
+              "hostile": true,
+              "armor": "#d8c8a0"
+            }
+          ],
+          "journal": "The zealots had barrels of lamp oil stacked to the ceiling and a chalk map of the harbour on the floor. They died praying to ancestors who would have been ashamed of them."
+        },
+        {
+          "type": "retrieve",
+          "place": "saltwatch_tower",
+          "placement": "structure",
+          "relic": "fb_firebrand_orders",
+          "radius": 10,
+          "text": "Search the tower for the zealots' orders"
+        },
+        {
+          "type": "deliver",
+          "npc": "ezhar_at_taneth",
+          "relic": "fb_firebrand_orders",
+          "text": "Bring the orders to Lord Ezhar",
+          "topic": "The Crowns meant to burn your harbour. These are their orders.",
+          "reply": "Burn Taneth to save Hammerfell from the Empire. They never could do sums. No name, only the crown and the sword. I know one sword-singer who seals his letters that way: Ansei Qadir. He will want to watch it burn himself."
+        }
       ],
       "outro": "Crown zealots planned to burn Taneth's bonded warehouses. I killed the cell at Saltwatch Tower, but their master, a sword-singer called Ansei Qadir, is still free.",
-      "rewards": {"gold": 500, "faction_points": 4}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "why": [
+        "hews_bane.L9.collaborator_hunt",
+        "hews_bane.L8.forebear_temples"
+      ]
     },
     {
       "id": "fb_lord_of_the_forebears",
       "title": "Lord of the Forebears",
       "start": "auto",
-      "requires": ["quest:fb_fire_in_the_harbor"],
+      "requires": [
+        "quest:fb_fire_in_the_harbor"
+      ],
       "desc": "Ansei Qadir still means to set Taneth's harbour alight. Lord Ezhar has asked me to stop him among the warehouses before the first spark.",
       "objectives": [
-        {"type": "go", "place": "taneth", "offset": [45, 35], "radius": 16, "text": "Go to the bonded warehouses on Taneth's harbour",
-         "actions": "summon:captain_noraya;scene:fb_harbor_night"},
-        {"type": "clear", "place": "taneth", "offset": [45, 35], "text": "Stop the firebrands among the warehouses",
-         "spawn": [{"type": "npc:assassin", "count": 3, "name": "Crown Firebrand", "hostile": true, "armor": "#d8c8a0"},
-                   {"type": "npc:assassin", "count": 1, "name": "Crown Firebrand", "hostile": true, "armor": "#d8c8a0", "if": "flag:fb_hard_bargain"}]},
-        {"type": "kill", "place": "taneth", "offset": [45, 35], "text": "Defeat Ansei Qadir",
-         "spawn": [{"type": "npc:adventurer", "name": "Ansei Qadir", "target": true, "boss": true, "hp": 3.5, "dmg": 1.6, "hostile": true, "armor": "#e0d0a8", "weapon": "skycraft:akaviri_sword"}],
-         "journal": "Qadir fought like the old songs say the Ansei fought, and he called me a traitor to Yokuda with his last breath. The harbour did not burn."},
-        {"type": "talk", "npc": "ezhar_at_taneth", "text": "Return to Lord Ezhar",
-         "topic": "Qadir is dead. The warehouses are standing.",
-         "reply": "Then Taneth stands, and so does the Forebear claim to it. Come. The council is already arguing about you.",
-         "actions": "scene:fb_council;relocate:captain_noraya:taneth:14:10"}
+        {
+          "type": "go",
+          "place": "taneth",
+          "offset": [
+            45,
+            35
+          ],
+          "radius": 16,
+          "text": "Go to the bonded warehouses on Taneth's harbour",
+          "actions": "summon:captain_noraya;scene:fb_harbor_night"
+        },
+        {
+          "type": "clear",
+          "place": "taneth",
+          "offset": [
+            45,
+            35
+          ],
+          "text": "Stop the firebrands among the warehouses",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "count": 3,
+              "name": "Crown Firebrand",
+              "hostile": true,
+              "armor": "#d8c8a0"
+            },
+            {
+              "type": "npc:assassin",
+              "count": 1,
+              "name": "Crown Firebrand",
+              "hostile": true,
+              "armor": "#d8c8a0",
+              "if": "flag:fb_hard_bargain"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "taneth",
+          "offset": [
+            45,
+            35
+          ],
+          "text": "Defeat Ansei Qadir",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Ansei Qadir",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.6,
+              "hostile": true,
+              "armor": "#e0d0a8",
+              "weapon": "skycraft:akaviri_sword"
+            }
+          ],
+          "journal": "Qadir fought like the old songs say the Ansei fought, and he called me a traitor to Yokuda with his last breath. The harbour did not burn."
+        },
+        {
+          "type": "talk",
+          "npc": "ezhar_at_taneth",
+          "text": "Return to Lord Ezhar",
+          "topic": "Qadir is dead. The warehouses are standing.",
+          "reply": "Then Taneth stands, and so does the Forebear claim to it. Come. The council is already arguing about you.",
+          "actions": "scene:fb_council;relocate:captain_noraya:taneth:14:10"
+        }
       ],
       "outro": "I stopped Ansei Qadir before he could burn Taneth's harbour. The Forebear council named me a Lord of the Forebears, with a seat beside Lord Ezhar.",
-      "rewards": {"gold": 1300, "faction_points": 9, "perks": 1, "flags": ["fb_lord_of_the_forebears"],
-                  "items": [{"item": "skycraft:ebony_sword", "name": "Merchant-Prince's Saber", "enchant": {"sharpness": 4, "looting": 2}},
-                            {"item": "skycraft:imperial_light_chestplate", "name": "Harbour-Lord's Coat", "enchant": {"protection": 3, "unbreaking": 2}}]}
+      "rewards": {
+        "gold": 1300,
+        "faction_points": 9,
+        "perks": 1,
+        "flags": [
+          "fb_lord_of_the_forebears"
+        ],
+        "items": [
+          {
+            "item": "skycraft:ebony_sword",
+            "name": "Merchant-Prince's Saber",
+            "enchant": {
+              "sharpness": 4,
+              "looting": 2
+            }
+          },
+          {
+            "item": "skycraft:imperial_light_chestplate",
+            "name": "Harbour-Lord's Coat",
+            "enchant": {
+              "protection": 3,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "hews_bane.L9.collaborator_hunt",
+        "hews_bane.L8.forebear_temples"
+      ]
     }
   ]
 }

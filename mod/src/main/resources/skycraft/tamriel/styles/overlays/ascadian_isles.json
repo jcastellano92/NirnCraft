@@ -1,0 +1,840 @@
+{
+  "id": "ascadian_isles",
+  "why": [
+    "ascadian_isles.L1.fertile_lowland",
+    "ascadian_isles.L4.saltrice_paddy"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:white_terracotta",
+    "low": "minecraft:cut_sandstone",
+    "wood": "jungle",
+    "roof": "smooth_sandstone",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:white_terracotta",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:cut_sandstone",
+    "path": "minecraft:stone_bricks"
+  },
+  "style": {
+    "houseStyle": "hlaalu",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:smooth_sandstone",
+        "minecraft:white_terracotta",
+        "minecraft:cut_sandstone",
+        "minecraft:stone_bricks",
+        "sandstone",
+        "minecraft:smooth_sandstone"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_1_0",
+          "prop_ascadian_isles_1_1",
+          "prop_ascadian_isles_1_2",
+          "prop_ascadian_isles_1_3",
+          "prop_ascadian_isles_1_4",
+          "prop_ascadian_isles_1_5",
+          "prop_ascadian_isles_1_6",
+          "prop_ascadian_isles_1_7",
+          "prop_ascadian_isles_1_8",
+          "prop_ascadian_isles_1_9",
+          "prop_ascadian_isles_1_10",
+          "prop_ascadian_isles_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_2_0",
+          "prop_ascadian_isles_2_1",
+          "prop_ascadian_isles_2_2",
+          "prop_ascadian_isles_2_3",
+          "prop_ascadian_isles_2_4",
+          "prop_ascadian_isles_2_5",
+          "prop_ascadian_isles_2_6",
+          "prop_ascadian_isles_2_7",
+          "prop_ascadian_isles_2_8",
+          "prop_ascadian_isles_2_9",
+          "prop_ascadian_isles_2_10",
+          "prop_ascadian_isles_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_3_0",
+          "prop_ascadian_isles_3_1",
+          "prop_ascadian_isles_3_2",
+          "prop_ascadian_isles_3_3",
+          "prop_ascadian_isles_3_4",
+          "prop_ascadian_isles_3_5",
+          "prop_ascadian_isles_3_6",
+          "prop_ascadian_isles_3_7",
+          "prop_ascadian_isles_3_8",
+          "prop_ascadian_isles_3_9",
+          "prop_ascadian_isles_3_10",
+          "prop_ascadian_isles_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_4_0",
+          "prop_ascadian_isles_4_1",
+          "prop_ascadian_isles_4_2",
+          "prop_ascadian_isles_4_3",
+          "prop_ascadian_isles_4_4",
+          "prop_ascadian_isles_4_5",
+          "prop_ascadian_isles_4_6",
+          "prop_ascadian_isles_4_7",
+          "prop_ascadian_isles_4_8",
+          "prop_ascadian_isles_4_9",
+          "prop_ascadian_isles_4_10",
+          "prop_ascadian_isles_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_5_0",
+          "prop_ascadian_isles_5_1",
+          "prop_ascadian_isles_5_2",
+          "prop_ascadian_isles_5_3",
+          "prop_ascadian_isles_5_4",
+          "prop_ascadian_isles_5_5",
+          "prop_ascadian_isles_5_6",
+          "prop_ascadian_isles_5_7",
+          "prop_ascadian_isles_5_8",
+          "prop_ascadian_isles_5_9",
+          "prop_ascadian_isles_5_10",
+          "prop_ascadian_isles_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_6_0",
+          "prop_ascadian_isles_6_1",
+          "prop_ascadian_isles_6_2",
+          "prop_ascadian_isles_6_3",
+          "prop_ascadian_isles_6_4",
+          "prop_ascadian_isles_6_5",
+          "prop_ascadian_isles_6_6",
+          "prop_ascadian_isles_6_7",
+          "prop_ascadian_isles_6_8",
+          "prop_ascadian_isles_6_9",
+          "prop_ascadian_isles_6_10",
+          "prop_ascadian_isles_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_7_0",
+          "prop_ascadian_isles_7_1",
+          "prop_ascadian_isles_7_2",
+          "prop_ascadian_isles_7_3",
+          "prop_ascadian_isles_7_4",
+          "prop_ascadian_isles_7_5",
+          "prop_ascadian_isles_7_6",
+          "prop_ascadian_isles_7_7",
+          "prop_ascadian_isles_7_8",
+          "prop_ascadian_isles_7_9",
+          "prop_ascadian_isles_7_10",
+          "prop_ascadian_isles_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_8_0",
+          "prop_ascadian_isles_8_1",
+          "prop_ascadian_isles_8_2",
+          "prop_ascadian_isles_8_3",
+          "prop_ascadian_isles_8_4",
+          "prop_ascadian_isles_8_5",
+          "prop_ascadian_isles_8_6",
+          "prop_ascadian_isles_8_7",
+          "prop_ascadian_isles_8_8",
+          "prop_ascadian_isles_8_9",
+          "prop_ascadian_isles_8_10",
+          "prop_ascadian_isles_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_9_0",
+          "prop_ascadian_isles_9_1",
+          "prop_ascadian_isles_9_2",
+          "prop_ascadian_isles_9_3",
+          "prop_ascadian_isles_9_4",
+          "prop_ascadian_isles_9_5",
+          "prop_ascadian_isles_9_6",
+          "prop_ascadian_isles_9_7",
+          "prop_ascadian_isles_9_8",
+          "prop_ascadian_isles_9_9",
+          "prop_ascadian_isles_9_10",
+          "prop_ascadian_isles_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_10_0",
+          "prop_ascadian_isles_10_1",
+          "prop_ascadian_isles_10_2",
+          "prop_ascadian_isles_10_3",
+          "prop_ascadian_isles_10_4",
+          "prop_ascadian_isles_10_5",
+          "prop_ascadian_isles_10_6",
+          "prop_ascadian_isles_10_7",
+          "prop_ascadian_isles_10_8",
+          "prop_ascadian_isles_10_9",
+          "prop_ascadian_isles_10_10",
+          "prop_ascadian_isles_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_11_0",
+          "prop_ascadian_isles_11_1",
+          "prop_ascadian_isles_11_2",
+          "prop_ascadian_isles_11_3",
+          "prop_ascadian_isles_11_4",
+          "prop_ascadian_isles_11_5",
+          "prop_ascadian_isles_11_6",
+          "prop_ascadian_isles_11_7",
+          "prop_ascadian_isles_11_8",
+          "prop_ascadian_isles_11_9",
+          "prop_ascadian_isles_11_10",
+          "prop_ascadian_isles_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_12_0",
+          "prop_ascadian_isles_12_1",
+          "prop_ascadian_isles_12_2",
+          "prop_ascadian_isles_12_3",
+          "prop_ascadian_isles_12_4",
+          "prop_ascadian_isles_12_5",
+          "prop_ascadian_isles_12_6",
+          "prop_ascadian_isles_12_7",
+          "prop_ascadian_isles_12_8",
+          "prop_ascadian_isles_12_9",
+          "prop_ascadian_isles_12_10",
+          "prop_ascadian_isles_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_13_0",
+          "prop_ascadian_isles_13_1",
+          "prop_ascadian_isles_13_2",
+          "prop_ascadian_isles_13_3",
+          "prop_ascadian_isles_13_4",
+          "prop_ascadian_isles_13_5",
+          "prop_ascadian_isles_13_6",
+          "prop_ascadian_isles_13_7",
+          "prop_ascadian_isles_13_8",
+          "prop_ascadian_isles_13_9",
+          "prop_ascadian_isles_13_10",
+          "prop_ascadian_isles_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_14_0",
+          "prop_ascadian_isles_14_1",
+          "prop_ascadian_isles_14_2",
+          "prop_ascadian_isles_14_3",
+          "prop_ascadian_isles_14_4",
+          "prop_ascadian_isles_14_5",
+          "prop_ascadian_isles_14_6",
+          "prop_ascadian_isles_14_7",
+          "prop_ascadian_isles_14_8",
+          "prop_ascadian_isles_14_9",
+          "prop_ascadian_isles_14_10",
+          "prop_ascadian_isles_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_15_0",
+          "prop_ascadian_isles_15_1",
+          "prop_ascadian_isles_15_2",
+          "prop_ascadian_isles_15_3",
+          "prop_ascadian_isles_15_4",
+          "prop_ascadian_isles_15_5",
+          "prop_ascadian_isles_15_6",
+          "prop_ascadian_isles_15_7",
+          "prop_ascadian_isles_15_8",
+          "prop_ascadian_isles_15_9",
+          "prop_ascadian_isles_15_10",
+          "prop_ascadian_isles_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_16_0",
+          "prop_ascadian_isles_16_1",
+          "prop_ascadian_isles_16_2",
+          "prop_ascadian_isles_16_3",
+          "prop_ascadian_isles_16_4",
+          "prop_ascadian_isles_16_5",
+          "prop_ascadian_isles_16_6",
+          "prop_ascadian_isles_16_7",
+          "prop_ascadian_isles_16_8",
+          "prop_ascadian_isles_16_9",
+          "prop_ascadian_isles_16_10",
+          "prop_ascadian_isles_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_17_0",
+          "prop_ascadian_isles_17_1",
+          "prop_ascadian_isles_17_2",
+          "prop_ascadian_isles_17_3",
+          "prop_ascadian_isles_17_4",
+          "prop_ascadian_isles_17_5",
+          "prop_ascadian_isles_17_6",
+          "prop_ascadian_isles_17_7",
+          "prop_ascadian_isles_17_8",
+          "prop_ascadian_isles_17_9",
+          "prop_ascadian_isles_17_10",
+          "prop_ascadian_isles_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_18_0",
+          "prop_ascadian_isles_18_1",
+          "prop_ascadian_isles_18_2",
+          "prop_ascadian_isles_18_3",
+          "prop_ascadian_isles_18_4",
+          "prop_ascadian_isles_18_5",
+          "prop_ascadian_isles_18_6",
+          "prop_ascadian_isles_18_7",
+          "prop_ascadian_isles_18_8",
+          "prop_ascadian_isles_18_9",
+          "prop_ascadian_isles_18_10",
+          "prop_ascadian_isles_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_19_0",
+          "prop_ascadian_isles_19_1",
+          "prop_ascadian_isles_19_2",
+          "prop_ascadian_isles_19_3",
+          "prop_ascadian_isles_19_4",
+          "prop_ascadian_isles_19_5",
+          "prop_ascadian_isles_19_6",
+          "prop_ascadian_isles_19_7",
+          "prop_ascadian_isles_19_8",
+          "prop_ascadian_isles_19_9",
+          "prop_ascadian_isles_19_10",
+          "prop_ascadian_isles_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_20_0",
+          "prop_ascadian_isles_20_1",
+          "prop_ascadian_isles_20_2",
+          "prop_ascadian_isles_20_3",
+          "prop_ascadian_isles_20_4",
+          "prop_ascadian_isles_20_5",
+          "prop_ascadian_isles_20_6",
+          "prop_ascadian_isles_20_7",
+          "prop_ascadian_isles_20_8",
+          "prop_ascadian_isles_20_9",
+          "prop_ascadian_isles_20_10",
+          "prop_ascadian_isles_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:white_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:white_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:stone_bricks"
+        ],
+        "props": [
+          "prop_ascadian_isles_21_0",
+          "prop_ascadian_isles_21_1",
+          "prop_ascadian_isles_21_2",
+          "prop_ascadian_isles_21_3",
+          "prop_ascadian_isles_21_4",
+          "prop_ascadian_isles_21_5",
+          "prop_ascadian_isles_21_6",
+          "prop_ascadian_isles_21_7",
+          "prop_ascadian_isles_21_8",
+          "prop_ascadian_isles_21_9",
+          "prop_ascadian_isles_21_10",
+          "prop_ascadian_isles_21_11"
+        ]
+      }
+    }
+  }
+}

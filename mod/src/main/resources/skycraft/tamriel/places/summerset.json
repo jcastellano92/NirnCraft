@@ -1,2335 +1,5639 @@
 [
- {
-  "id": "skywatch",
-  "name": "place.skycraft.skywatch",
-  "type": "city",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9500,
-  "z": 12000,
-  "radius": 110
- },
- {
-  "id": "dusk",
-  "name": "place.skycraft.dusk",
-  "type": "city",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11809,
-  "z": 14526,
-  "radius": 110
- },
- {
-  "id": "cloudrest",
-  "name": "place.skycraft.cloudrest",
-  "type": "city",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12100,
-  "z": 12450,
-  "radius": 110
- },
- {
-  "id": "lillandril",
-  "name": "place.skycraft.lillandril",
-  "type": "city",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13700,
-  "z": 12550,
-  "radius": 110
- },
- {
-  "id": "greenwater_cove",
-  "name": "place.skycraft.greenwater_cove",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9180,
-  "z": 11200,
-  "radius": 60
- },
- {
-  "id": "mathiisen",
-  "name": "place.skycraft.mathiisen",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9800,
-  "z": 12200,
-  "radius": 60
- },
- {
-  "id": "vulkhel_guard",
-  "name": "place.skycraft.vulkhel_guard",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9812,
-  "z": 13239,
-  "radius": 60
- },
- {
-  "id": "shimmerene",
-  "name": "place.skycraft.shimmerene",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11298,
-  "z": 13846,
-  "radius": 60
- },
- {
-  "id": "sunhold",
-  "name": "place.skycraft.sunhold",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12700,
-  "z": 15300,
-  "radius": 60
- },
- {
-  "id": "rellenthil",
-  "name": "place.skycraft.rellenthil",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12500,
-  "z": 13100,
-  "radius": 60
- },
- {
-  "id": "archen_grangrove",
-  "name": "place.skycraft.archen_grangrove",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13400,
-  "z": 13700,
-  "radius": 60
- },
- {
-  "id": "belport_run",
-  "name": "place.skycraft.belport_run",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12800,
-  "z": 14200,
-  "radius": 60
- },
- {
-  "id": "riverfield",
-  "name": "place.skycraft.riverfield",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12500,
-  "z": 13800,
-  "radius": 60
- },
- {
-  "id": "west_guard",
-  "name": "place.skycraft.west_guard",
-  "type": "town",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14000,
-  "z": 14000,
-  "radius": 60
- },
- {
-  "id": "dawnbreak",
-  "name": "place.skycraft.dawnbreak",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10050,
-  "z": 11250,
-  "radius": 42
- },
- {
-  "id": "shattered_grove",
-  "name": "place.skycraft.shattered_grove",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9900,
-  "z": 11900,
-  "radius": 42
- },
- {
-  "id": "phaer",
-  "name": "place.skycraft.phaer",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9800,
-  "z": 12650,
-  "radius": 42
- },
- {
-  "id": "silsailen",
-  "name": "place.skycraft.silsailen",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9763,
-  "z": 12990,
-  "radius": 28
- },
- {
-  "id": "kings_haven",
-  "name": "place.skycraft.kings_haven",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12900,
-  "z": 12400,
-  "radius": 42
- },
- {
-  "id": "sollicich_on_ker",
-  "name": "place.skycraft.sollicich_on_ker",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13200,
-  "z": 13300,
-  "radius": 42
- },
- {
-  "id": "glenview",
-  "name": "place.skycraft.glenview",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13600,
-  "z": 14400,
-  "radius": 42
- },
- {
-  "id": "graddun_spring",
-  "name": "place.skycraft.graddun_spring",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13100,
-  "z": 14600,
-  "radius": 42
- },
- {
-  "id": "holly_falls",
-  "name": "place.skycraft.holly_falls",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12300,
-  "z": 14600,
-  "radius": 42
- },
- {
-  "id": "karnwasten_moor",
-  "name": "place.skycraft.karnwasten_moor",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12300,
-  "z": 12100,
-  "radius": 42
- },
- {
-  "id": "marbruk_brook",
-  "name": "place.skycraft.marbruk_brook",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12900,
-  "z": 13550,
-  "radius": 42
- },
- {
-  "id": "old_falls",
-  "name": "place.skycraft.old_falls",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12500,
-  "z": 14950,
-  "radius": 42
- },
- {
-  "id": "rosefield",
-  "name": "place.skycraft.rosefield",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13350,
-  "z": 14900,
-  "radius": 42
- },
- {
-  "id": "silver_wood",
-  "name": "place.skycraft.silver_wood",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13900,
-  "z": 13400,
-  "radius": 42
- },
- {
-  "id": "thorheim_guard",
-  "name": "place.skycraft.thorheim_guard",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12062,
-  "z": 14840,
-  "radius": 42
- },
- {
-  "id": "white_guard",
-  "name": "place.skycraft.white_guard",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13000,
-  "z": 15100,
-  "radius": 42
- },
- {
-  "id": "college_of_aldmeri_propriety",
-  "name": "place.skycraft.college_of_aldmeri_propriety",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10000,
-  "z": 10750,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "trebbite_monastery",
-  "name": "place.skycraft.trebbite_monastery",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9550,
-  "z": 11500,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "flowervine_farm",
-  "name": "place.skycraft.flowervine_farm",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9742,
-  "z": 12901,
-  "radius": 28
- },
- {
-  "id": "grand_psijic_villa",
-  "name": "place.skycraft.grand_psijic_villa",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11860,
-  "z": 11288,
-  "radius": 34,
-  "variant": "estate",
-  "isolated": true
- },
- {
-  "id": "oleander_coast_winery",
-  "name": "place.skycraft.oleander_coast_winery",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11250,
-  "z": 12600,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "sil_var_woad",
-  "name": "place.skycraft.sil_var_woad",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11300,
-  "z": 14100,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "russafeld",
-  "name": "place.skycraft.russafeld",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12100,
-  "z": 13450,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "college_of_sapiarchs",
-  "name": "place.skycraft.college_of_sapiarchs",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14050,
-  "z": 12850,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "illumination_academy",
-  "name": "place.skycraft.illumination_academy",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13300,
-  "z": 12550,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "seabloom_villa",
-  "name": "place.skycraft.seabloom_villa",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9650,
-  "z": 11750,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "monastery_of_serene_harmony",
-  "name": "place.skycraft.monastery_of_serene_harmony",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12000,
-  "z": 14000,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "artaeum_craftworks",
-  "name": "place.skycraft.artaeum_craftworks",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11509,
-  "z": 11326,
-  "radius": 26,
-  "variant": "lodge",
-  "isolated": true
- },
- {
-  "id": "castle_rilis",
-  "name": "place.skycraft.castle_rilis",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9450,
-  "z": 10650,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "hightide_keep",
-  "name": "place.skycraft.hightide_keep",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9379,
-  "z": 12211,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "cey_tarn_keep",
-  "name": "place.skycraft.cey_tarn_keep",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11201,
-  "z": 13678,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "keep_of_the_eleven_forces",
-  "name": "place.skycraft.keep_of_the_eleven_forces",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11450,
-  "z": 14200,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "sea_keep",
-  "name": "place.skycraft.sea_keep",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13500,
-  "z": 12850,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "marnor_keep",
-  "name": "place.skycraft.marnor_keep",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13000,
-  "z": 13900,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "the_veiled_keep",
-  "name": "place.skycraft.the_veiled_keep",
-  "type": "fort",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9294,
-  "z": 11633,
-  "radius": 24,
-  "variant": "keep",
-  "class": "major"
- },
- {
-  "id": "nine_prow_landing",
-  "name": "place.skycraft.nine_prow_landing",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9700,
-  "z": 10420,
-  "radius": 12,
-  "variant": "rock"
- },
- {
-  "id": "beacon_falls",
-  "name": "place.skycraft.beacon_falls",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9289,
-  "z": 10670,
-  "radius": 12,
-  "variant": "waterfall"
- },
- {
-  "id": "isle_of_contemplation",
-  "name": "place.skycraft.isle_of_contemplation",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10200,
-  "z": 11100,
-  "radius": 12,
-  "variant": "island"
- },
- {
-  "id": "calluis_lar",
-  "name": "place.skycraft.calluis_lar",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10250,
-  "z": 11650,
-  "radius": 12,
-  "variant": "island"
- },
- {
-  "id": "errinorne_isle",
-  "name": "place.skycraft.errinorne_isle",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9316,
-  "z": 11843,
-  "radius": 12,
-  "variant": "island"
- },
- {
-  "id": "buraniim_isle",
-  "name": "place.skycraft.buraniim_isle",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10230,
-  "z": 12250,
-  "radius": 12,
-  "variant": "island"
- },
- {
-  "id": "soulfire_plateau",
-  "name": "place.skycraft.soulfire_plateau",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9666,
-  "z": 12798,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "monkeys_rest",
-  "name": "place.skycraft.monkeys_rest",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9900,
-  "z": 13000,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "windy_glade",
-  "name": "place.skycraft.windy_glade",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9851,
-  "z": 13118,
-  "radius": 12,
-  "variant": "clearing"
- },
- {
-  "id": "eastshore_islets_camp",
-  "name": "place.skycraft.eastshore_islets_camp",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9699,
-  "z": 13145,
-  "radius": 12,
-  "variant": "campsite"
- },
- {
-  "id": "statue_of_syrabane",
-  "name": "place.skycraft.statue_of_syrabane",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11405,
-  "z": 11106,
-  "radius": 12,
-  "variant": "monument"
- },
- {
-  "id": "colosseum_of_the_old_ways",
-  "name": "place.skycraft.colosseum_of_the_old_ways",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11800,
-  "z": 11000,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "college_of_psijics_ruins",
-  "name": "place.skycraft.college_of_psijics_ruins",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11650,
-  "z": 11350,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "alinor_royal_palace",
-  "name": "place.skycraft.alinor_royal_palace",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11200,
-  "z": 12950,
-  "radius": 8,
-  "variant": "district"
- },
- {
-  "id": "golden_gryphon_garret",
-  "name": "place.skycraft.golden_gryphon_garret",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11180,
-  "z": 13020,
-  "radius": 8,
-  "variant": "district"
- },
- {
-  "id": "alinor_docks",
-  "name": "place.skycraft.alinor_docks",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11180,
-  "z": 13150,
-  "radius": 8,
-  "variant": "district"
- },
- {
-  "id": "shimmerene_dockworks",
-  "name": "place.skycraft.shimmerene_dockworks",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11240,
-  "z": 13830,
-  "radius": 8,
-  "variant": "district"
- },
- {
-  "id": "direnni_acropolis",
-  "name": "place.skycraft.direnni_acropolis",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11550,
-  "z": 13650,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "gryphon_aerie",
-  "name": "place.skycraft.gryphon_aerie",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11850,
-  "z": 13600,
-  "radius": 12,
-  "variant": "eyrie"
- },
- {
-  "id": "garden_of_the_sacred_numbers",
-  "name": "place.skycraft.garden_of_the_sacred_numbers",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11240,
-  "z": 14034,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "coral_forest",
-  "name": "place.skycraft.coral_forest",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11266,
-  "z": 14205,
-  "radius": 12,
-  "variant": "clearing"
- },
- {
-  "id": "eastern_pass_summerset",
-  "name": "place.skycraft.eastern_pass_summerset",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12150,
-  "z": 14150,
-  "radius": 12,
-  "variant": "pass"
- },
- {
-  "id": "indrik_frolic",
-  "name": "place.skycraft.indrik_frolic",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12100,
-  "z": 13750,
-  "radius": 12,
-  "variant": "clearing"
- },
- {
-  "id": "ebon_stadmont",
-  "name": "place.skycraft.ebon_stadmont",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12600,
-  "z": 12700,
-  "radius": 12,
-  "variant": "clearing"
- },
- {
-  "id": "eton_nir",
-  "name": "place.skycraft.eton_nir",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12450,
-  "z": 12300,
-  "radius": 12,
-  "variant": "peak"
- },
- {
-  "id": "kings_haven_pass",
-  "name": "place.skycraft.kings_haven_pass",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12700,
-  "z": 12250,
-  "radius": 12,
-  "variant": "pass"
- },
- {
-  "id": "gryphon_run",
-  "name": "place.skycraft.gryphon_run",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12700,
-  "z": 12000,
-  "radius": 12,
-  "variant": "eyrie"
- },
- {
-  "id": "crystal_tower_summerset",
-  "name": "place.skycraft.crystal_tower_summerset",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13350,
-  "z": 11800,
-  "radius": 12,
-  "variant": "monument"
- },
- {
-  "id": "corgrad_wastes",
-  "name": "place.skycraft.corgrad_wastes",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13600,
-  "z": 12250,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "the_lady",
-  "name": "place.skycraft.the_lady",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9550,
-  "z": 10950,
-  "radius": 12,
-  "variant": "stones"
- },
- {
-  "id": "the_lover",
-  "name": "place.skycraft.the_lover",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9900,
-  "z": 12100,
-  "radius": 12,
-  "variant": "stones"
- },
- {
-  "id": "vafe_dolmen",
-  "name": "place.skycraft.vafe_dolmen",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9600,
-  "z": 11250,
-  "radius": 12,
-  "variant": "stones"
- },
- {
-  "id": "calambar_dolmen",
-  "name": "place.skycraft.calambar_dolmen",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10110,
-  "z": 11974,
-  "radius": 12,
-  "variant": "stones"
- },
- {
-  "id": "iluvamir_dolmen",
-  "name": "place.skycraft.iluvamir_dolmen",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10036,
-  "z": 12954,
-  "radius": 12,
-  "variant": "stones"
- },
- {
-  "id": "shrine_of_lamae_bal",
-  "name": "place.skycraft.shrine_of_lamae_bal",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10000,
-  "z": 11500,
-  "radius": 12,
-  "variant": "altar"
- },
- {
-  "id": "maras_kiss_public_house",
-  "name": "place.skycraft.maras_kiss_public_house",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9790,
-  "z": 13240,
-  "radius": 8,
-  "variant": "district"
- },
- {
-  "id": "corgrad_abyssal_geyser",
-  "name": "place.skycraft.corgrad_abyssal_geyser",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13728,
-  "z": 12262,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "direnni_abyssal_geyser",
-  "name": "place.skycraft.direnni_abyssal_geyser",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11500,
-  "z": 13450,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "rellenthil_abyssal_geyser",
-  "name": "place.skycraft.rellenthil_abyssal_geyser",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12750,
-  "z": 12950,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "sil_var_woad_abyssal_geyser",
-  "name": "place.skycraft.sil_var_woad_abyssal_geyser",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11210,
-  "z": 14167,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "sunhold_abyssal_geyser",
-  "name": "place.skycraft.sunhold_abyssal_geyser",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12514,
-  "z": 15293,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "welenkin_abyssal_geyser",
-  "name": "place.skycraft.welenkin_abyssal_geyser",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11650,
-  "z": 13050,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "augury_basin",
-  "name": "place.skycraft.augury_basin",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13500,
-  "z": 12650,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "diren_valley",
-  "name": "place.skycraft.diren_valley",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12900,
-  "z": 13000,
-  "radius": 12,
-  "variant": "clearing"
- },
- {
-  "id": "oleander_coast",
-  "name": "place.skycraft.oleander_coast",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11047,
-  "z": 12458,
-  "radius": 12,
-  "variant": "clearing"
- },
- {
-  "id": "the_banished_cells",
-  "name": "place.skycraft.the_banished_cells",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9500,
-  "z": 10500,
-  "radius": 26,
-  "variant": "daedric_ruin",
-  "class": "major"
- },
- {
-  "id": "north_beacon",
-  "name": "place.skycraft.north_beacon",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9200,
-  "z": 10750,
-  "radius": 10,
-  "variant": "lighthouse",
-  "class": "minor"
- },
- {
-  "id": "saltspray_cave",
-  "name": "place.skycraft.saltspray_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9950,
-  "z": 10550,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "heritance_proving_ground",
-  "name": "place.skycraft.heritance_proving_ground",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9800,
-  "z": 10500,
-  "radius": 14,
-  "variant": "bandit_camp",
-  "class": "minor"
- },
- {
-  "id": "mehrunes_spite",
-  "name": "place.skycraft.mehrunes_spite",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9750,
-  "z": 10950,
-  "radius": 26,
-  "variant": "daedric_ruin",
-  "class": "major"
- },
- {
-  "id": "torinaan",
-  "name": "place.skycraft.torinaan",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9450,
-  "z": 11250,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "nestmothers_den",
-  "name": "place.skycraft.nestmothers_den",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9346,
-  "z": 11442,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "quendeluun",
-  "name": "place.skycraft.quendeluun",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9750,
-  "z": 11250,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "wansalen",
-  "name": "place.skycraft.wansalen",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9950,
-  "z": 11350,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "bewan",
-  "name": "place.skycraft.bewan",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10142,
-  "z": 11514,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "dragonguard_tomb",
-  "name": "place.skycraft.dragonguard_tomb",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9950,
-  "z": 11650,
-  "radius": 24,
-  "variant": "akaviri_ruin",
-  "class": "major"
- },
- {
-  "id": "ezduiin",
-  "name": "place.skycraft.ezduiin",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9700,
-  "z": 11550,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "heretics_summons",
-  "name": "place.skycraft.heretics_summons",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9412,
-  "z": 11615,
-  "radius": 26,
-  "variant": "daedric_ruin",
-  "class": "marquee"
- },
- {
-  "id": "smugglers_cove",
-  "name": "place.skycraft.smugglers_cove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10200,
-  "z": 11900,
-  "radius": 18,
-  "variant": "smuggler_cave",
-  "class": "short"
- },
- {
-  "id": "wreck_of_the_raptor",
-  "name": "place.skycraft.wreck_of_the_raptor",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10150,
-  "z": 12100,
-  "radius": 14,
-  "variant": "shipwreck",
-  "class": "minor"
- },
- {
-  "id": "entilas_folly",
-  "name": "place.skycraft.entilas_folly",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9600,
-  "z": 12250,
-  "radius": 20,
-  "variant": "mine",
-  "class": "short"
- },
- {
-  "id": "glister_vale",
-  "name": "place.skycraft.glister_vale",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10050,
-  "z": 12350,
-  "radius": 12,
-  "variant": "tower",
-  "class": "minor"
- },
- {
-  "id": "ondil",
-  "name": "place.skycraft.ondil",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9700,
-  "z": 12450,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "phaer_catacombs",
-  "name": "place.skycraft.phaer_catacombs",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9950,
-  "z": 12500,
-  "radius": 20,
-  "variant": "mine",
-  "class": "short"
- },
- {
-  "id": "toothmaul_gully",
-  "name": "place.skycraft.toothmaul_gully",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10050,
-  "z": 12600,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "tanzelwil",
-  "name": "place.skycraft.tanzelwil",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10000,
-  "z": 12800,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "seaside_scarp_camp",
-  "name": "place.skycraft.seaside_scarp_camp",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10070,
-  "z": 12888,
-  "radius": 14,
-  "variant": "bandit_camp",
-  "class": "minor"
- },
- {
-  "id": "dels_claim",
-  "name": "place.skycraft.dels_claim",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9815,
-  "z": 12906,
-  "radius": 20,
-  "variant": "mine",
-  "class": "short"
- },
- {
-  "id": "south_beacon",
-  "name": "place.skycraft.south_beacon",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10000,
-  "z": 13100,
-  "radius": 10,
-  "variant": "lighthouse",
-  "class": "minor"
- },
- {
-  "id": "maormer_invasion_camp",
-  "name": "place.skycraft.maormer_invasion_camp",
-  "type": "dungeon_fixed",
-  "culture": "maormer",
-  "region": "summerset/auridon",
-  "x": -9950,
-  "z": 13204,
-  "radius": 14,
-  "variant": "bandit_camp",
-  "class": "minor"
- },
- {
-  "id": "ceporah_tower",
-  "name": "place.skycraft.ceporah_tower",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11497,
-  "z": 11015,
-  "radius": 10,
-  "variant": "mage_tower",
-  "class": "short"
- },
- {
-  "id": "dreaming_cave",
-  "name": "place.skycraft.dreaming_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11555,
-  "z": 10948,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "traitors_vault",
-  "name": "place.skycraft.traitors_vault",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11700,
-  "z": 11050,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "psijic_relic_vaults",
-  "name": "place.skycraft.psijic_relic_vaults",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -11486,
-  "z": 11243,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "marquee"
- },
- {
-  "id": "welenkin_cove",
-  "name": "place.skycraft.welenkin_cove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11500,
-  "z": 13300,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "karndar_watch",
-  "name": "place.skycraft.karndar_watch",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11700,
-  "z": 13450,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "eldbur_ruins",
-  "name": "place.skycraft.eldbur_ruins",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11850,
-  "z": 13850,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "archons_grove",
-  "name": "place.skycraft.archons_grove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11500,
-  "z": 13950,
-  "radius": 16,
-  "variant": "grove",
-  "class": "minor"
- },
- {
-  "id": "tor_hame_khard",
-  "name": "place.skycraft.tor_hame_khard",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11650,
-  "z": 14100,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "dusk_keep",
-  "name": "place.skycraft.dusk_keep",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11559,
-  "z": 14333,
-  "radius": 12,
-  "variant": "tower",
-  "class": "minor"
- },
- {
-  "id": "red_temple_catacombs",
-  "name": "place.skycraft.red_temple_catacombs",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11950,
-  "z": 13250,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "rellenthil_sinkhole",
-  "name": "place.skycraft.rellenthil_sinkhole",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12450,
-  "z": 13350,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "ald_mora_ruins",
-  "name": "place.skycraft.ald_mora_ruins",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12450,
-  "z": 12850,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "eton_nir_grotto",
-  "name": "place.skycraft.eton_nir_grotto",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12300,
-  "z": 12650,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "karnwasten",
-  "name": "place.skycraft.karnwasten",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12067,
-  "z": 12077,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "cathedral_of_webs",
-  "name": "place.skycraft.cathedral_of_webs",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13350,
-  "z": 12250,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "the_queens_hatchery",
-  "name": "place.skycraft.the_queens_hatchery",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13500,
-  "z": 12400,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "keelsplitters_nest",
-  "name": "place.skycraft.keelsplitters_nest",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13250,
-  "z": 12850,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "saltbreeze_cave",
-  "name": "place.skycraft.saltbreeze_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13600,
-  "z": 13050,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "wasten_coraldale",
-  "name": "place.skycraft.wasten_coraldale",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14302,
-  "z": 13664,
-  "radius": 24,
-  "variant": "coral_pit",
-  "class": "major"
- },
- {
-  "id": "coral_aerie",
-  "name": "place.skycraft.coral_aerie",
-  "type": "dungeon_fixed",
-  "culture": "maormer",
-  "region": "summerset/summerset_isle",
-  "x": -12900,
-  "z": 10900,
-  "radius": 24,
-  "variant": "sea_vault",
-  "class": "major"
- },
- {
-  "id": "gravelds_hideaway",
-  "name": "place.skycraft.gravelds_hideaway",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11400,
-  "z": 13950,
-  "radius": 14,
-  "variant": "bandit_camp",
-  "class": "minor"
- },
- {
-  "id": "alaxonald",
-  "name": "place.skycraft.alaxonald",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12400,
-  "z": 14100,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "marquee"
- },
- {
-  "id": "the_vaults_of_heinarwe",
-  "name": "place.skycraft.the_vaults_of_heinarwe",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13300,
-  "z": 13500,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "colossal_aldmeri_grotto",
-  "name": "place.skycraft.colossal_aldmeri_grotto",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11076,
-  "z": 13297,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "queiisen_vineyard",
-  "name": "place.skycraft.queiisen_vineyard",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12853,
-  "z": 11833,
-  "radius": 28
- },
- {
-  "id": "torancar_vineyard",
-  "name": "place.skycraft.torancar_vineyard",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14351,
-  "z": 14026,
-  "radius": 28
- },
- {
-  "id": "silyon_landing",
-  "name": "place.skycraft.silyon_landing",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13896,
-  "z": 14733,
-  "radius": 40
- },
- {
-  "id": "toreth_undercroft",
-  "name": "place.skycraft.toreth_undercroft",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13142,
-  "z": 12433,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "berancar_cove",
-  "name": "place.skycraft.berancar_cove",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12903,
-  "z": 11146,
-  "radius": 40
- },
- {
-  "id": "wreck_of_the_lonely_hound",
-  "name": "place.skycraft.wreck_of_the_lonely_hound",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -9549,
-  "z": 12594,
-  "radius": 14,
-  "variant": "shipwreck",
-  "class": "minor"
- },
- {
-  "id": "valiel_vineyard",
-  "name": "place.skycraft.valiel_vineyard",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12185,
-  "z": 12943,
-  "radius": 28
- },
- {
-  "id": "ceyeth_hollow",
-  "name": "place.skycraft.ceyeth_hollow",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13460,
-  "z": 12026,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "faaril_spring",
-  "name": "place.skycraft.faaril_spring",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12630,
-  "z": 12503,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "faorne_sea_cave",
-  "name": "place.skycraft.faorne_sea_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12392,
-  "z": 10932,
-  "radius": 24,
-  "variant": "sea_vault",
-  "class": "major"
- },
- {
-  "id": "mirimor_landing",
-  "name": "place.skycraft.mirimor_landing",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12590,
-  "z": 11090,
-  "radius": 40
- },
- {
-  "id": "caliel_hollow",
-  "name": "place.skycraft.caliel_hollow",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13482,
-  "z": 14030,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "koraril_cavern",
-  "name": "place.skycraft.koraril_cavern",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12363,
-  "z": 11786,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "lanitar_monument",
-  "name": "place.skycraft.lanitar_monument",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11846,
-  "z": 12823,
-  "radius": 12,
-  "variant": "monument"
- },
- {
-  "id": "tanethil_undercroft",
-  "name": "place.skycraft.tanethil_undercroft",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12140,
-  "z": 14351,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "calandil_vineyard",
-  "name": "place.skycraft.calandil_vineyard",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13990,
-  "z": 14264,
-  "radius": 28
- },
- {
-  "id": "liriisen_sanctum",
-  "name": "place.skycraft.liriisen_sanctum",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11865,
-  "z": 12267,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "the_golden_netch",
-  "name": "place.skycraft.the_golden_netch",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12730,
-  "z": 14834,
-  "radius": 24,
-  "variant": "inn"
- },
- {
-  "id": "mateth_ruins",
-  "name": "place.skycraft.mateth_ruins",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12043,
-  "z": 14643,
-  "radius": 12,
-  "variant": "ruin"
- },
- {
-  "id": "valdril_docks",
-  "name": "place.skycraft.valdril_docks",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12134,
-  "z": 11886,
-  "radius": 40
- },
- {
-  "id": "ezdril_sanctum",
-  "name": "place.skycraft.ezdril_sanctum",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13850,
-  "z": 14478,
-  "radius": 10,
-  "variant": "mage_tower",
-  "class": "short"
- },
- {
-  "id": "renandil",
-  "name": "place.skycraft.renandil",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13072,
-  "z": 15305,
-  "radius": 28
- },
- {
-  "id": "galiisen_den",
-  "name": "place.skycraft.galiisen_den",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12808,
-  "z": 13845,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "tanilmo_lighthouse",
-  "name": "place.skycraft.tanilmo_lighthouse",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14377,
-  "z": 13835,
-  "radius": 10,
-  "variant": "lighthouse",
-  "class": "minor"
- },
- {
-  "id": "lilondur_grove",
-  "name": "place.skycraft.lilondur_grove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14032,
-  "z": 13146,
-  "radius": 16,
-  "variant": "grove",
-  "class": "minor"
- },
- {
-  "id": "matdril_sea_cave",
-  "name": "place.skycraft.matdril_sea_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13486,
-  "z": 11659,
-  "radius": 24,
-  "variant": "sea_vault",
-  "class": "major"
- },
- {
-  "id": "tandril_grove",
-  "name": "place.skycraft.tandril_grove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12775,
-  "z": 15082,
-  "radius": 16,
-  "variant": "grove",
-  "class": "minor"
- },
- {
-  "id": "feninaan_hollow",
-  "name": "place.skycraft.feninaan_hollow",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12586,
-  "z": 14663,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "galorne_obelisk",
-  "name": "place.skycraft.galorne_obelisk",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12271,
-  "z": 13656,
-  "radius": 12,
-  "variant": "monument"
- },
- {
-  "id": "wreck_of_the_silver_anchor",
-  "name": "place.skycraft.wreck_of_the_silver_anchor",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/artaeum",
-  "x": -12042,
-  "z": 11127,
-  "radius": 14,
-  "variant": "shipwreck",
-  "class": "minor"
- },
- {
-  "id": "alimor_sanctum",
-  "name": "place.skycraft.alimor_sanctum",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13387,
-  "z": 14422,
-  "radius": 10,
-  "variant": "mage_tower",
-  "class": "short"
- },
- {
-  "id": "wreck_of_the_bent_stag",
-  "name": "place.skycraft.wreck_of_the_bent_stag",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13581,
-  "z": 11885,
-  "radius": 14,
-  "variant": "shipwreck",
-  "class": "minor"
- },
- {
-  "id": "torethil_grove",
-  "name": "place.skycraft.torethil_grove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12654,
-  "z": 13544,
-  "radius": 16,
-  "variant": "grove",
-  "class": "minor"
- },
- {
-  "id": "lanethil",
-  "name": "place.skycraft.lanethil",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13815,
-  "z": 12820,
-  "radius": 28
- },
- {
-  "id": "fenancar_cave",
-  "name": "place.skycraft.fenancar_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11635,
-  "z": 12585,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "the_winking_carafe",
-  "name": "place.skycraft.the_winking_carafe",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13199,
-  "z": 13896,
-  "radius": 24,
-  "variant": "inn"
- },
- {
-  "id": "berimor_grotto",
-  "name": "place.skycraft.berimor_grotto",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/auridon",
-  "x": -10297,
-  "z": 12533,
-  "radius": 18,
-  "variant": "smuggler_cave",
-  "class": "short"
- },
- {
-  "id": "helduin_sanctum",
-  "name": "place.skycraft.helduin_sanctum",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12217,
-  "z": 15002,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "ilinaan_grotto",
-  "name": "place.skycraft.ilinaan_grotto",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13134,
-  "z": 14286,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "fenethil_watchtower",
-  "name": "place.skycraft.fenethil_watchtower",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13032,
-  "z": 12041,
-  "radius": 12,
-  "variant": "tower",
-  "class": "minor"
- },
- {
-  "id": "lanwen_villa",
-  "name": "place.skycraft.lanwen_villa",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13582,
-  "z": 13268,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "norlor_spring",
-  "name": "place.skycraft.norlor_spring",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13743,
-  "z": 13945,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "torarion_villa",
-  "name": "place.skycraft.torarion_villa",
-  "type": "farm",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12856,
-  "z": 12761,
-  "radius": 34,
-  "variant": "estate"
- },
- {
-  "id": "alilwe_lighthouse",
-  "name": "place.skycraft.alilwe_lighthouse",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -14065,
-  "z": 13580,
-  "radius": 10,
-  "variant": "lighthouse",
-  "class": "minor"
- },
- {
-  "id": "valilwe_spire",
-  "name": "place.skycraft.valilwe_spire",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12697,
-  "z": 10744,
-  "radius": 10,
-  "variant": "mage_tower",
-  "class": "short"
- },
- {
-  "id": "aeriisen_sanctum",
-  "name": "place.skycraft.aeriisen_sanctum",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12969,
-  "z": 14375,
-  "radius": 10,
-  "variant": "mage_tower",
-  "class": "short"
- },
- {
-  "id": "liliisen_hollow",
-  "name": "place.skycraft.liliisen_hollow",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13398,
-  "z": 13069,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "sarwen_caverns",
-  "name": "place.skycraft.sarwen_caverns",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12294,
-  "z": 13206,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "silandil_lair",
-  "name": "place.skycraft.silandil_lair",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -11862,
-  "z": 14223,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "calinaan_spring",
-  "name": "place.skycraft.calinaan_spring",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12718,
-  "z": 14539,
-  "radius": 12,
-  "variant": "source"
- },
- {
-  "id": "laniel_monument",
-  "name": "place.skycraft.laniel_monument",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13716,
-  "z": 13580,
-  "radius": 12,
-  "variant": "monument"
- },
- {
-  "id": "ezaril_monument",
-  "name": "place.skycraft.ezaril_monument",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13653,
-  "z": 13749,
-  "radius": 12,
-  "variant": "monument"
- },
- {
-  "id": "nororne_lighthouse",
-  "name": "place.skycraft.nororne_lighthouse",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13704,
-  "z": 12076,
-  "radius": 10,
-  "variant": "lighthouse",
-  "class": "minor"
- },
- {
-  "id": "heldril_cove",
-  "name": "place.skycraft.heldril_cove",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13257,
-  "z": 15343,
-  "radius": 18,
-  "variant": "smuggler_cave",
-  "class": "short"
- },
- {
-  "id": "waniel_grotto",
-  "name": "place.skycraft.waniel_grotto",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12366,
-  "z": 14798,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "norimor_lair",
-  "name": "place.skycraft.norimor_lair",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13073,
-  "z": 12954,
-  "radius": 18,
-  "variant": "den",
-  "class": "minor"
- },
- {
-  "id": "berimor_sea_cave",
-  "name": "place.skycraft.berimor_sea_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12214,
-  "z": 15212,
-  "radius": 24,
-  "variant": "sea_vault",
-  "class": "major"
- },
- {
-  "id": "toriisen_archive",
-  "name": "place.skycraft.toriisen_archive",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12813,
-  "z": 13300,
-  "radius": 24,
-  "variant": "crystal_vault",
-  "class": "major"
- },
- {
-  "id": "galilmo_grotto",
-  "name": "place.skycraft.galilmo_grotto",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12486,
-  "z": 14476,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "torondur_cave",
-  "name": "place.skycraft.torondur_cave",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13009,
-  "z": 12600,
-  "radius": 18,
-  "variant": "cave",
-  "class": "major"
- },
- {
-  "id": "galiisen",
-  "name": "place.skycraft.galiisen",
-  "type": "village",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -12524,
-  "z": 12039,
-  "radius": 28
- },
- {
-  "id": "mirimor_spire",
-  "name": "place.skycraft.mirimor_spire",
-  "type": "dungeon_fixed",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13015,
-  "z": 14794,
-  "radius": 10,
-  "variant": "mage_tower",
-  "class": "short"
- },
- {
-  "id": "oraril_monument",
-  "name": "place.skycraft.oraril_monument",
-  "type": "landmark",
-  "culture": "altmer",
-  "region": "summerset/summerset_isle",
-  "x": -13192,
-  "z": 13686,
-  "radius": 12,
-  "variant": "monument"
- }
+  {
+    "id": "skywatch",
+    "name": "place.skycraft.skywatch",
+    "type": "city",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9500,
+    "z": 12000,
+    "radius": 110,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "dusk",
+    "name": "place.skycraft.dusk",
+    "type": "city",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11809,
+    "z": 14526,
+    "radius": 110,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "cloudrest",
+    "name": "place.skycraft.cloudrest",
+    "type": "city",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12100,
+    "z": 12450,
+    "radius": 110,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "lillandril",
+    "name": "place.skycraft.lillandril",
+    "type": "city",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13700,
+    "z": 12550,
+    "radius": 110,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "greenwater_cove",
+    "name": "place.skycraft.greenwater_cove",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9180,
+    "z": 11200,
+    "radius": 60,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "mathiisen",
+    "name": "place.skycraft.mathiisen",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9800,
+    "z": 12200,
+    "radius": 60,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "vulkhel_guard",
+    "name": "place.skycraft.vulkhel_guard",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9812,
+    "z": 13239,
+    "radius": 60,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shimmerene",
+    "name": "place.skycraft.shimmerene",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11298,
+    "z": 13846,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sunhold",
+    "name": "place.skycraft.sunhold",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12700,
+    "z": 15300,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "rellenthil",
+    "name": "place.skycraft.rellenthil",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12500,
+    "z": 13100,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "archen_grangrove",
+    "name": "place.skycraft.archen_grangrove",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13400,
+    "z": 13700,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "belport_run",
+    "name": "place.skycraft.belport_run",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12800,
+    "z": 14200,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "riverfield",
+    "name": "place.skycraft.riverfield",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12500,
+    "z": 13800,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "west_guard",
+    "name": "place.skycraft.west_guard",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14000,
+    "z": 14000,
+    "radius": 60,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "dawnbreak",
+    "name": "place.skycraft.dawnbreak",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10050,
+    "z": 11250,
+    "radius": 42,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shattered_grove",
+    "name": "place.skycraft.shattered_grove",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9900,
+    "z": 11900,
+    "radius": 42,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "phaer",
+    "name": "place.skycraft.phaer",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9800,
+    "z": 12650,
+    "radius": 42,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "silsailen",
+    "name": "place.skycraft.silsailen",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9763,
+    "z": 12990,
+    "radius": 28,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "kings_haven",
+    "name": "place.skycraft.kings_haven",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12900,
+    "z": 12400,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sollicich_on_ker",
+    "name": "place.skycraft.sollicich_on_ker",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13200,
+    "z": 13300,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "glenview",
+    "name": "place.skycraft.glenview",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13600,
+    "z": 14400,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "graddun_spring",
+    "name": "place.skycraft.graddun_spring",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13100,
+    "z": 14600,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "holly_falls",
+    "name": "place.skycraft.holly_falls",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12300,
+    "z": 14600,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "karnwasten_moor",
+    "name": "place.skycraft.karnwasten_moor",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12300,
+    "z": 12100,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "marbruk_brook",
+    "name": "place.skycraft.marbruk_brook",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12900,
+    "z": 13550,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "old_falls",
+    "name": "place.skycraft.old_falls",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12500,
+    "z": 14950,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "rosefield",
+    "name": "place.skycraft.rosefield",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13350,
+    "z": 14900,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "silver_wood",
+    "name": "place.skycraft.silver_wood",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13900,
+    "z": 13400,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "thorheim_guard",
+    "name": "place.skycraft.thorheim_guard",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12062,
+    "z": 14840,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "white_guard",
+    "name": "place.skycraft.white_guard",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13000,
+    "z": 15100,
+    "radius": 42,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "college_of_aldmeri_propriety",
+    "name": "place.skycraft.college_of_aldmeri_propriety",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10000,
+    "z": 10750,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "trebbite_monastery",
+    "name": "place.skycraft.trebbite_monastery",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9550,
+    "z": 11500,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "flowervine_farm",
+    "name": "place.skycraft.flowervine_farm",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9742,
+    "z": 12901,
+    "radius": 28,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "grand_psijic_villa",
+    "name": "place.skycraft.grand_psijic_villa",
+    "type": "town",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11860,
+    "z": 11288,
+    "radius": 34,
+    "variant": "estate",
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "oleander_coast_winery",
+    "name": "place.skycraft.oleander_coast_winery",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11250,
+    "z": 12600,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sil_var_woad",
+    "name": "place.skycraft.sil_var_woad",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11300,
+    "z": 14100,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "russafeld",
+    "name": "place.skycraft.russafeld",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12100,
+    "z": 13450,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "college_of_sapiarchs",
+    "name": "place.skycraft.college_of_sapiarchs",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14050,
+    "z": 12850,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "illumination_academy",
+    "name": "place.skycraft.illumination_academy",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13300,
+    "z": 12550,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "seabloom_villa",
+    "name": "place.skycraft.seabloom_villa",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9650,
+    "z": 11750,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "monastery_of_serene_harmony",
+    "name": "place.skycraft.monastery_of_serene_harmony",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12000,
+    "z": 14000,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "artaeum_craftworks",
+    "name": "place.skycraft.artaeum_craftworks",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11509,
+    "z": 11326,
+    "radius": 26,
+    "variant": "lodge",
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "castle_rilis",
+    "name": "place.skycraft.castle_rilis",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9450,
+    "z": 10650,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "hightide_keep",
+    "name": "place.skycraft.hightide_keep",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9379,
+    "z": 12211,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "cey_tarn_keep",
+    "name": "place.skycraft.cey_tarn_keep",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11201,
+    "z": 13678,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "keep_of_the_eleven_forces",
+    "name": "place.skycraft.keep_of_the_eleven_forces",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11450,
+    "z": 14200,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sea_keep",
+    "name": "place.skycraft.sea_keep",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13500,
+    "z": 12850,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "marnor_keep",
+    "name": "place.skycraft.marnor_keep",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13000,
+    "z": 13900,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_veiled_keep",
+    "name": "place.skycraft.the_veiled_keep",
+    "type": "fort",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9294,
+    "z": 11633,
+    "radius": 24,
+    "variant": "keep",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "nine_prow_landing",
+    "name": "place.skycraft.nine_prow_landing",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9700,
+    "z": 10420,
+    "radius": 12,
+    "variant": "rock",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "beacon_falls",
+    "name": "place.skycraft.beacon_falls",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9289,
+    "z": 10670,
+    "radius": 12,
+    "variant": "waterfall",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "isle_of_contemplation",
+    "name": "place.skycraft.isle_of_contemplation",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10200,
+    "z": 11100,
+    "radius": 12,
+    "variant": "island",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "calluis_lar",
+    "name": "place.skycraft.calluis_lar",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10250,
+    "z": 11650,
+    "radius": 12,
+    "variant": "island",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "errinorne_isle",
+    "name": "place.skycraft.errinorne_isle",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9316,
+    "z": 11843,
+    "radius": 12,
+    "variant": "island",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "buraniim_isle",
+    "name": "place.skycraft.buraniim_isle",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10230,
+    "z": 12250,
+    "radius": 12,
+    "variant": "island",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "soulfire_plateau",
+    "name": "place.skycraft.soulfire_plateau",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9666,
+    "z": 12798,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "monkeys_rest",
+    "name": "place.skycraft.monkeys_rest",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9900,
+    "z": 13000,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "windy_glade",
+    "name": "place.skycraft.windy_glade",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9851,
+    "z": 13118,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "eastshore_islets_camp",
+    "name": "place.skycraft.eastshore_islets_camp",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9699,
+    "z": 13145,
+    "radius": 12,
+    "variant": "campsite",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "statue_of_syrabane",
+    "name": "place.skycraft.statue_of_syrabane",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11405,
+    "z": 11106,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "colosseum_of_the_old_ways",
+    "name": "place.skycraft.colosseum_of_the_old_ways",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11800,
+    "z": 11000,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "college_of_psijics_ruins",
+    "name": "place.skycraft.college_of_psijics_ruins",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11650,
+    "z": 11350,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "alinor_royal_palace",
+    "name": "place.skycraft.alinor_royal_palace",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11200,
+    "z": 12950,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "golden_gryphon_garret",
+    "name": "place.skycraft.golden_gryphon_garret",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11180,
+    "z": 13020,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "alinor_docks",
+    "name": "place.skycraft.alinor_docks",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11180,
+    "z": 13150,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "shimmerene_dockworks",
+    "name": "place.skycraft.shimmerene_dockworks",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11240,
+    "z": 13830,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "direnni_acropolis",
+    "name": "place.skycraft.direnni_acropolis",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11550,
+    "z": 13650,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "gryphon_aerie",
+    "name": "place.skycraft.gryphon_aerie",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11850,
+    "z": 13600,
+    "radius": 12,
+    "variant": "eyrie",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "garden_of_the_sacred_numbers",
+    "name": "place.skycraft.garden_of_the_sacred_numbers",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11240,
+    "z": 14034,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "coral_forest",
+    "name": "place.skycraft.coral_forest",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11266,
+    "z": 14205,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "eastern_pass_summerset",
+    "name": "place.skycraft.eastern_pass_summerset",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12150,
+    "z": 14150,
+    "radius": 12,
+    "variant": "pass",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "indrik_frolic",
+    "name": "place.skycraft.indrik_frolic",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12100,
+    "z": 13750,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "ebon_stadmont",
+    "name": "place.skycraft.ebon_stadmont",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12600,
+    "z": 12700,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "eton_nir",
+    "name": "place.skycraft.eton_nir",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12450,
+    "z": 12300,
+    "radius": 12,
+    "variant": "peak",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "kings_haven_pass",
+    "name": "place.skycraft.kings_haven_pass",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12700,
+    "z": 12250,
+    "radius": 12,
+    "variant": "pass",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "gryphon_run",
+    "name": "place.skycraft.gryphon_run",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12700,
+    "z": 12000,
+    "radius": 12,
+    "variant": "eyrie",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "crystal_tower_summerset",
+    "name": "place.skycraft.crystal_tower_summerset",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13350,
+    "z": 11800,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "corgrad_wastes",
+    "name": "place.skycraft.corgrad_wastes",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13600,
+    "z": 12250,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_lady",
+    "name": "place.skycraft.the_lady",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9550,
+    "z": 10950,
+    "radius": 12,
+    "variant": "stones",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "the_lover",
+    "name": "place.skycraft.the_lover",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9900,
+    "z": 12100,
+    "radius": 12,
+    "variant": "stones",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "vafe_dolmen",
+    "name": "place.skycraft.vafe_dolmen",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9600,
+    "z": 11250,
+    "radius": 12,
+    "variant": "stones",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "calambar_dolmen",
+    "name": "place.skycraft.calambar_dolmen",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10110,
+    "z": 11974,
+    "radius": 12,
+    "variant": "stones",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "iluvamir_dolmen",
+    "name": "place.skycraft.iluvamir_dolmen",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10036,
+    "z": 12954,
+    "radius": 12,
+    "variant": "stones",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "shrine_of_lamae_bal",
+    "name": "place.skycraft.shrine_of_lamae_bal",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10000,
+    "z": 11500,
+    "radius": 12,
+    "variant": "altar",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "maras_kiss_public_house",
+    "name": "place.skycraft.maras_kiss_public_house",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9790,
+    "z": 13240,
+    "radius": 8,
+    "variant": "district",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "corgrad_abyssal_geyser",
+    "name": "place.skycraft.corgrad_abyssal_geyser",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13728,
+    "z": 12262,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "direnni_abyssal_geyser",
+    "name": "place.skycraft.direnni_abyssal_geyser",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11500,
+    "z": 13450,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "rellenthil_abyssal_geyser",
+    "name": "place.skycraft.rellenthil_abyssal_geyser",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12750,
+    "z": 12950,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sil_var_woad_abyssal_geyser",
+    "name": "place.skycraft.sil_var_woad_abyssal_geyser",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11210,
+    "z": 14167,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sunhold_abyssal_geyser",
+    "name": "place.skycraft.sunhold_abyssal_geyser",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12514,
+    "z": 15293,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "welenkin_abyssal_geyser",
+    "name": "place.skycraft.welenkin_abyssal_geyser",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11650,
+    "z": 13050,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "augury_basin",
+    "name": "place.skycraft.augury_basin",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13500,
+    "z": 12650,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "diren_valley",
+    "name": "place.skycraft.diren_valley",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12900,
+    "z": 13000,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "oleander_coast",
+    "name": "place.skycraft.oleander_coast",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11047,
+    "z": 12458,
+    "radius": 12,
+    "variant": "clearing",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_banished_cells",
+    "name": "place.skycraft.the_banished_cells",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9500,
+    "z": 10500,
+    "radius": 26,
+    "variant": "daedric_ruin",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "north_beacon",
+    "name": "place.skycraft.north_beacon",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9200,
+    "z": 10750,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "saltspray_cave",
+    "name": "place.skycraft.saltspray_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9950,
+    "z": 10550,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "heritance_proving_ground",
+    "name": "place.skycraft.heritance_proving_ground",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9800,
+    "z": 10500,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "mehrunes_spite",
+    "name": "place.skycraft.mehrunes_spite",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9750,
+    "z": 10950,
+    "radius": 26,
+    "variant": "daedric_ruin",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "torinaan",
+    "name": "place.skycraft.torinaan",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9450,
+    "z": 11250,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "nestmothers_den",
+    "name": "place.skycraft.nestmothers_den",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9346,
+    "z": 11442,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "quendeluun",
+    "name": "place.skycraft.quendeluun",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9750,
+    "z": 11250,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "wansalen",
+    "name": "place.skycraft.wansalen",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9950,
+    "z": 11350,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "bewan",
+    "name": "place.skycraft.bewan",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10142,
+    "z": 11514,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "dragonguard_tomb",
+    "name": "place.skycraft.dragonguard_tomb",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9950,
+    "z": 11650,
+    "radius": 24,
+    "variant": "akaviri_ruin",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "ezduiin",
+    "name": "place.skycraft.ezduiin",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9700,
+    "z": 11550,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "heretics_summons",
+    "name": "place.skycraft.heretics_summons",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9412,
+    "z": 11615,
+    "radius": 26,
+    "variant": "daedric_ruin",
+    "class": "marquee",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "smugglers_cove",
+    "name": "place.skycraft.smugglers_cove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10200,
+    "z": 11900,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "short",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "wreck_of_the_raptor",
+    "name": "place.skycraft.wreck_of_the_raptor",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10150,
+    "z": 12100,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "entilas_folly",
+    "name": "place.skycraft.entilas_folly",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9600,
+    "z": 12250,
+    "radius": 20,
+    "variant": "mine",
+    "class": "short",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "glister_vale",
+    "name": "place.skycraft.glister_vale",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10050,
+    "z": 12350,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "ondil",
+    "name": "place.skycraft.ondil",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9700,
+    "z": 12450,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "phaer_catacombs",
+    "name": "place.skycraft.phaer_catacombs",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9950,
+    "z": 12500,
+    "radius": 20,
+    "variant": "mine",
+    "class": "short",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "toothmaul_gully",
+    "name": "place.skycraft.toothmaul_gully",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10050,
+    "z": 12600,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "tanzelwil",
+    "name": "place.skycraft.tanzelwil",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10000,
+    "z": 12800,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "seaside_scarp_camp",
+    "name": "place.skycraft.seaside_scarp_camp",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10070,
+    "z": 12888,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "dels_claim",
+    "name": "place.skycraft.dels_claim",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9815,
+    "z": 12906,
+    "radius": 20,
+    "variant": "mine",
+    "class": "short",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "south_beacon",
+    "name": "place.skycraft.south_beacon",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10000,
+    "z": 13100,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "maormer_invasion_camp",
+    "name": "place.skycraft.maormer_invasion_camp",
+    "type": "dungeon_fixed",
+    "culture": "maormer",
+    "region": "summerset/auridon",
+    "x": -9950,
+    "z": 13204,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "ceporah_tower",
+    "name": "place.skycraft.ceporah_tower",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11497,
+    "z": 11015,
+    "radius": 10,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "dreaming_cave",
+    "name": "place.skycraft.dreaming_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11555,
+    "z": 10948,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "traitors_vault",
+    "name": "place.skycraft.traitors_vault",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11700,
+    "z": 11050,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "psijic_relic_vaults",
+    "name": "place.skycraft.psijic_relic_vaults",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11486,
+    "z": 11243,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "marquee",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "welenkin_cove",
+    "name": "place.skycraft.welenkin_cove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11500,
+    "z": 13300,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "karndar_watch",
+    "name": "place.skycraft.karndar_watch",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11700,
+    "z": 13450,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "eldbur_ruins",
+    "name": "place.skycraft.eldbur_ruins",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11850,
+    "z": 13850,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "archons_grove",
+    "name": "place.skycraft.archons_grove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11500,
+    "z": 13950,
+    "radius": 16,
+    "variant": "grove",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "tor_hame_khard",
+    "name": "place.skycraft.tor_hame_khard",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11650,
+    "z": 14100,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "dusk_keep",
+    "name": "place.skycraft.dusk_keep",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11559,
+    "z": 14333,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "red_temple_catacombs",
+    "name": "place.skycraft.red_temple_catacombs",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11950,
+    "z": 13250,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "rellenthil_sinkhole",
+    "name": "place.skycraft.rellenthil_sinkhole",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12450,
+    "z": 13350,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "ald_mora_ruins",
+    "name": "place.skycraft.ald_mora_ruins",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12450,
+    "z": 12850,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "eton_nir_grotto",
+    "name": "place.skycraft.eton_nir_grotto",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12300,
+    "z": 12650,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "karnwasten",
+    "name": "place.skycraft.karnwasten",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12067,
+    "z": 12077,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "cathedral_of_webs",
+    "name": "place.skycraft.cathedral_of_webs",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13350,
+    "z": 12250,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_queens_hatchery",
+    "name": "place.skycraft.the_queens_hatchery",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13500,
+    "z": 12400,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "keelsplitters_nest",
+    "name": "place.skycraft.keelsplitters_nest",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13250,
+    "z": 12850,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "saltbreeze_cave",
+    "name": "place.skycraft.saltbreeze_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13600,
+    "z": 13050,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "wasten_coraldale",
+    "name": "place.skycraft.wasten_coraldale",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14302,
+    "z": 13664,
+    "radius": 24,
+    "variant": "coral_pit",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "coral_aerie",
+    "name": "place.skycraft.coral_aerie",
+    "type": "dungeon_fixed",
+    "culture": "maormer",
+    "region": "summerset/summerset_isle",
+    "x": -12900,
+    "z": 10900,
+    "radius": 24,
+    "variant": "sea_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "gravelds_hideaway",
+    "name": "place.skycraft.gravelds_hideaway",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11400,
+    "z": 13950,
+    "radius": 14,
+    "variant": "bandit_camp",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "alaxonald",
+    "name": "place.skycraft.alaxonald",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12400,
+    "z": 14100,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "marquee",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_vaults_of_heinarwe",
+    "name": "place.skycraft.the_vaults_of_heinarwe",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13300,
+    "z": 13500,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "colossal_aldmeri_grotto",
+    "name": "place.skycraft.colossal_aldmeri_grotto",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11076,
+    "z": 13297,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "queiisen_vineyard",
+    "name": "place.skycraft.queiisen_vineyard",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12853,
+    "z": 11833,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "torancar_vineyard",
+    "name": "place.skycraft.torancar_vineyard",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14351,
+    "z": 14026,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "silyon_landing",
+    "name": "place.skycraft.silyon_landing",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13896,
+    "z": 14733,
+    "radius": 40,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "toreth_undercroft",
+    "name": "place.skycraft.toreth_undercroft",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13142,
+    "z": 12433,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "berancar_cove",
+    "name": "place.skycraft.berancar_cove",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12903,
+    "z": 11146,
+    "radius": 40,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "wreck_of_the_lonely_hound",
+    "name": "place.skycraft.wreck_of_the_lonely_hound",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9549,
+    "z": 12594,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "valiel_vineyard",
+    "name": "place.skycraft.valiel_vineyard",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12185,
+    "z": 12943,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "ceyeth_hollow",
+    "name": "place.skycraft.ceyeth_hollow",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13460,
+    "z": 12026,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "faaril_spring",
+    "name": "place.skycraft.faaril_spring",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12630,
+    "z": 12503,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "faorne_sea_cave",
+    "name": "place.skycraft.faorne_sea_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12392,
+    "z": 10932,
+    "radius": 24,
+    "variant": "sea_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "mirimor_landing",
+    "name": "place.skycraft.mirimor_landing",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12590,
+    "z": 11090,
+    "radius": 40,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "caliel_hollow",
+    "name": "place.skycraft.caliel_hollow",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13482,
+    "z": 14030,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "koraril_cavern",
+    "name": "place.skycraft.koraril_cavern",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12363,
+    "z": 11786,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "lanitar_monument",
+    "name": "place.skycraft.lanitar_monument",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11846,
+    "z": 12823,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "tanethil_undercroft",
+    "name": "place.skycraft.tanethil_undercroft",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12140,
+    "z": 14351,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "calandil_vineyard",
+    "name": "place.skycraft.calandil_vineyard",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13990,
+    "z": 14264,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "liriisen_sanctum",
+    "name": "place.skycraft.liriisen_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11865,
+    "z": 12267,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_golden_netch",
+    "name": "place.skycraft.the_golden_netch",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12730,
+    "z": 14834,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "mateth_ruins",
+    "name": "place.skycraft.mateth_ruins",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12043,
+    "z": 14643,
+    "radius": 12,
+    "variant": "ruin",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "valdril_docks",
+    "name": "place.skycraft.valdril_docks",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12134,
+    "z": 11886,
+    "radius": 40,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "ezdril_sanctum",
+    "name": "place.skycraft.ezdril_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13850,
+    "z": 14478,
+    "radius": 10,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "renandil",
+    "name": "place.skycraft.renandil",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13072,
+    "z": 15305,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "galiisen_den",
+    "name": "place.skycraft.galiisen_den",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12808,
+    "z": 13845,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "tanilmo_lighthouse",
+    "name": "place.skycraft.tanilmo_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14377,
+    "z": 13835,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "lilondur_grove",
+    "name": "place.skycraft.lilondur_grove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14032,
+    "z": 13146,
+    "radius": 16,
+    "variant": "grove",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "matdril_sea_cave",
+    "name": "place.skycraft.matdril_sea_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13486,
+    "z": 11659,
+    "radius": 24,
+    "variant": "sea_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "tandril_grove",
+    "name": "place.skycraft.tandril_grove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12775,
+    "z": 15082,
+    "radius": 16,
+    "variant": "grove",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "feninaan_hollow",
+    "name": "place.skycraft.feninaan_hollow",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12586,
+    "z": 14663,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "galorne_obelisk",
+    "name": "place.skycraft.galorne_obelisk",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12271,
+    "z": 13656,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "wreck_of_the_silver_anchor",
+    "name": "place.skycraft.wreck_of_the_silver_anchor",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12042,
+    "z": 11127,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ]
+  },
+  {
+    "id": "alimor_sanctum",
+    "name": "place.skycraft.alimor_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13387,
+    "z": 14422,
+    "radius": 10,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "wreck_of_the_bent_stag",
+    "name": "place.skycraft.wreck_of_the_bent_stag",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13581,
+    "z": 11885,
+    "radius": 14,
+    "variant": "shipwreck",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "torethil_grove",
+    "name": "place.skycraft.torethil_grove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12654,
+    "z": 13544,
+    "radius": 16,
+    "variant": "grove",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "lanethil",
+    "name": "place.skycraft.lanethil",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13815,
+    "z": 12820,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "fenancar_cave",
+    "name": "place.skycraft.fenancar_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11635,
+    "z": 12585,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "the_winking_carafe",
+    "name": "place.skycraft.the_winking_carafe",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13199,
+    "z": 13896,
+    "radius": 24,
+    "variant": "inn",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "berimor_grotto",
+    "name": "place.skycraft.berimor_grotto",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10297,
+    "z": 12533,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "short",
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ]
+  },
+  {
+    "id": "helduin_sanctum",
+    "name": "place.skycraft.helduin_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12217,
+    "z": 15002,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "ilinaan_grotto",
+    "name": "place.skycraft.ilinaan_grotto",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13134,
+    "z": 14286,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "fenethil_watchtower",
+    "name": "place.skycraft.fenethil_watchtower",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13032,
+    "z": 12041,
+    "radius": 12,
+    "variant": "tower",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "lanwen_villa",
+    "name": "place.skycraft.lanwen_villa",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13582,
+    "z": 13268,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "norlor_spring",
+    "name": "place.skycraft.norlor_spring",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13743,
+    "z": 13945,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "torarion_villa",
+    "name": "place.skycraft.torarion_villa",
+    "type": "farm",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12856,
+    "z": 12761,
+    "radius": 34,
+    "variant": "estate",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "alilwe_lighthouse",
+    "name": "place.skycraft.alilwe_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -14065,
+    "z": 13580,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "valilwe_spire",
+    "name": "place.skycraft.valilwe_spire",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12697,
+    "z": 10744,
+    "radius": 10,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "aeriisen_sanctum",
+    "name": "place.skycraft.aeriisen_sanctum",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12969,
+    "z": 14375,
+    "radius": 10,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "liliisen_hollow",
+    "name": "place.skycraft.liliisen_hollow",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13398,
+    "z": 13069,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "sarwen_caverns",
+    "name": "place.skycraft.sarwen_caverns",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12294,
+    "z": 13206,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "silandil_lair",
+    "name": "place.skycraft.silandil_lair",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11862,
+    "z": 14223,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "calinaan_spring",
+    "name": "place.skycraft.calinaan_spring",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12718,
+    "z": 14539,
+    "radius": 12,
+    "variant": "source",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "laniel_monument",
+    "name": "place.skycraft.laniel_monument",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13716,
+    "z": 13580,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "ezaril_monument",
+    "name": "place.skycraft.ezaril_monument",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13653,
+    "z": 13749,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "nororne_lighthouse",
+    "name": "place.skycraft.nororne_lighthouse",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13704,
+    "z": 12076,
+    "radius": 10,
+    "variant": "lighthouse",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "heldril_cove",
+    "name": "place.skycraft.heldril_cove",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13257,
+    "z": 15343,
+    "radius": 18,
+    "variant": "smuggler_cave",
+    "class": "short",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "waniel_grotto",
+    "name": "place.skycraft.waniel_grotto",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12366,
+    "z": 14798,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "norimor_lair",
+    "name": "place.skycraft.norimor_lair",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13073,
+    "z": 12954,
+    "radius": 18,
+    "variant": "den",
+    "class": "minor",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "berimor_sea_cave",
+    "name": "place.skycraft.berimor_sea_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12214,
+    "z": 15212,
+    "radius": 24,
+    "variant": "sea_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "toriisen_archive",
+    "name": "place.skycraft.toriisen_archive",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12813,
+    "z": 13300,
+    "radius": 24,
+    "variant": "crystal_vault",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "galilmo_grotto",
+    "name": "place.skycraft.galilmo_grotto",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12486,
+    "z": 14476,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "torondur_cave",
+    "name": "place.skycraft.torondur_cave",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13009,
+    "z": 12600,
+    "radius": 18,
+    "variant": "cave",
+    "class": "major",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "galiisen",
+    "name": "place.skycraft.galiisen",
+    "type": "village",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12524,
+    "z": 12039,
+    "radius": 28,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "mirimor_spire",
+    "name": "place.skycraft.mirimor_spire",
+    "type": "dungeon_fixed",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13015,
+    "z": 14794,
+    "radius": 10,
+    "variant": "mage_tower",
+    "class": "short",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "oraril_monument",
+    "name": "place.skycraft.oraril_monument",
+    "type": "landmark",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13192,
+    "z": 13686,
+    "radius": 12,
+    "variant": "monument",
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ]
+  },
+  {
+    "id": "summerset_isle_croft_1_plantation",
+    "name": "place.skycraft.summerset_isle_croft_1_plantation",
+    "type": "farm",
+    "variant": "plantation",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12752,
+    "z": 10544,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_croft_2_windmill",
+    "name": "place.skycraft.summerset_isle_croft_2_windmill",
+    "type": "farm",
+    "variant": "windmill",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13008,
+    "z": 10640,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_croft_3_orchard",
+    "name": "place.skycraft.summerset_isle_croft_3_orchard",
+    "type": "farm",
+    "variant": "orchard",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12752,
+    "z": 10672,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_croft_4_fishery",
+    "name": "place.skycraft.summerset_isle_croft_4_fishery",
+    "type": "farm",
+    "variant": "fishery",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12592,
+    "z": 10704,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_croft_5_herb_garden",
+    "name": "place.skycraft.summerset_isle_croft_5_herb_garden",
+    "type": "farm",
+    "variant": "herb_garden",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12496,
+    "z": 10736,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_croft_6_stables",
+    "name": "place.skycraft.summerset_isle_croft_6_stables",
+    "type": "farm",
+    "variant": "stables",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12432,
+    "z": 10768,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_croft_7_homestead",
+    "name": "place.skycraft.summerset_isle_croft_7_homestead",
+    "type": "farm",
+    "variant": "homestead",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12400,
+    "z": 10800,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_1_barrow",
+    "name": "place.skycraft.summerset_isle_site_1_barrow",
+    "type": "dungeon_fixed",
+    "variant": "barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12432,
+    "z": 10864,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_2_dwemer_ruin",
+    "name": "place.skycraft.summerset_isle_site_2_dwemer_ruin",
+    "type": "dungeon_fixed",
+    "variant": "dwemer_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12464,
+    "z": 10896,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_3_fort",
+    "name": "place.skycraft.summerset_isle_site_3_fort",
+    "type": "fort",
+    "variant": "fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12464,
+    "z": 10960,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_4_fort_mage",
+    "name": "place.skycraft.summerset_isle_site_4_fort_mage",
+    "type": "fort",
+    "variant": "fort_mage",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13104,
+    "z": 11024,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_5_akaviri_fort",
+    "name": "place.skycraft.summerset_isle_site_5_akaviri_fort",
+    "type": "fort",
+    "variant": "akaviri_fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13008,
+    "z": 11056,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_6_daedric_ruin",
+    "name": "place.skycraft.summerset_isle_site_6_daedric_ruin",
+    "type": "dungeon_fixed",
+    "variant": "daedric_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12880,
+    "z": 11088,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_7_breton_keep_ruin",
+    "name": "place.skycraft.summerset_isle_site_7_breton_keep_ruin",
+    "type": "dungeon_fixed",
+    "variant": "breton_keep_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12720,
+    "z": 11120,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_8_bandit_cave",
+    "name": "place.skycraft.summerset_isle_site_8_bandit_cave",
+    "type": "dungeon_fixed",
+    "variant": "bandit_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12528,
+    "z": 11152,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_9_spider_cave",
+    "name": "place.skycraft.summerset_isle_site_9_spider_cave",
+    "type": "dungeon_fixed",
+    "variant": "spider_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13360,
+    "z": 11504,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_10_troll_cave",
+    "name": "place.skycraft.summerset_isle_site_10_troll_cave",
+    "type": "dungeon_fixed",
+    "variant": "troll_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13168,
+    "z": 11600,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_11_ice_cave",
+    "name": "place.skycraft.summerset_isle_site_11_ice_cave",
+    "type": "dungeon_fixed",
+    "variant": "ice_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13200,
+    "z": 11664,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_12_sixth_house_base",
+    "name": "place.skycraft.summerset_isle_site_12_sixth_house_base",
+    "type": "dungeon_fixed",
+    "variant": "sixth_house_base",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13520,
+    "z": 11696,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_13_scorpion_den",
+    "name": "place.skycraft.summerset_isle_site_13_scorpion_den",
+    "type": "dungeon_fixed",
+    "variant": "scorpion_den",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12720,
+    "z": 11696,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_14_mine",
+    "name": "place.skycraft.summerset_isle_site_14_mine",
+    "type": "dungeon_fixed",
+    "variant": "mine",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13200,
+    "z": 11728,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_15_vampire_lair",
+    "name": "place.skycraft.summerset_isle_site_15_vampire_lair",
+    "type": "dungeon_fixed",
+    "variant": "vampire_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12400,
+    "z": 11728,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_16_necromancer_lair",
+    "name": "place.skycraft.summerset_isle_site_16_necromancer_lair",
+    "type": "dungeon_fixed",
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12944,
+    "z": 11760,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_17_hagraven_lair",
+    "name": "place.skycraft.summerset_isle_site_17_hagraven_lair",
+    "type": "dungeon_fixed",
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13584,
+    "z": 11792,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_18_giant_camp",
+    "name": "place.skycraft.summerset_isle_site_18_giant_camp",
+    "type": "dungeon_fixed",
+    "variant": "giant_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12784,
+    "z": 11792,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_19_dragon_lair",
+    "name": "place.skycraft.summerset_isle_site_19_dragon_lair",
+    "type": "dungeon_fixed",
+    "variant": "dragon_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13488,
+    "z": 11824,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_20_watchtower",
+    "name": "place.skycraft.summerset_isle_site_20_watchtower",
+    "type": "dungeon_fixed",
+    "variant": "watchtower",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12688,
+    "z": 11824,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_21_cabin",
+    "name": "place.skycraft.summerset_isle_site_21_cabin",
+    "type": "dungeon_fixed",
+    "variant": "cabin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12752,
+    "z": 11888,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_22_imperial_camp",
+    "name": "place.skycraft.summerset_isle_site_22_imperial_camp",
+    "type": "dungeon_fixed",
+    "variant": "imperial_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13616,
+    "z": 11920,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_23_nordic_ruin",
+    "name": "place.skycraft.summerset_isle_site_23_nordic_ruin",
+    "type": "dungeon_fixed",
+    "variant": "nordic_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12816,
+    "z": 11920,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_24_great_lift",
+    "name": "place.skycraft.summerset_isle_site_24_great_lift",
+    "type": "dungeon_fixed",
+    "variant": "great_lift",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11920,
+    "z": 11920,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_25_kolskeggr_mine",
+    "name": "place.skycraft.summerset_isle_site_25_kolskeggr_mine",
+    "type": "dungeon_fixed",
+    "variant": "kolskeggr_mine",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12976,
+    "z": 11952,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_site_26_bleak_falls_barrow",
+    "name": "place.skycraft.summerset_isle_site_26_bleak_falls_barrow",
+    "type": "dungeon_fixed",
+    "variant": "bleak_falls_barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12176,
+    "z": 11952,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_27",
+    "name": "place.skycraft.summerset_isle_delve_27",
+    "type": "dungeon_fixed",
+    "variant": "mine",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13136,
+    "z": 11984,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_28",
+    "name": "place.skycraft.summerset_isle_delve_28",
+    "type": "fort",
+    "variant": "fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12336,
+    "z": 11984,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_29",
+    "name": "place.skycraft.summerset_isle_delve_29",
+    "type": "dungeon_fixed",
+    "variant": "bandit_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13424,
+    "z": 12016,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_30",
+    "name": "place.skycraft.summerset_isle_delve_30",
+    "type": "dungeon_fixed",
+    "variant": "crystal_vault",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12624,
+    "z": 12016,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_31",
+    "name": "place.skycraft.summerset_isle_delve_31",
+    "type": "dungeon_fixed",
+    "variant": "dragon_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13680,
+    "z": 12048,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_32",
+    "name": "place.skycraft.summerset_isle_delve_32",
+    "type": "dungeon_fixed",
+    "variant": "barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12880,
+    "z": 12048,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_33",
+    "name": "place.skycraft.summerset_isle_delve_33",
+    "type": "dungeon_fixed",
+    "variant": "dwemer_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13264,
+    "z": 12080,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_34",
+    "name": "place.skycraft.summerset_isle_delve_34",
+    "type": "dungeon_fixed",
+    "variant": "vampire_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12464,
+    "z": 12080,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_delve_35",
+    "name": "place.skycraft.summerset_isle_delve_35",
+    "type": "dungeon_fixed",
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11664,
+    "z": 12080,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_1_standing_stone",
+    "name": "place.skycraft.summerset_isle_marker_1_standing_stone",
+    "type": "standing_stone",
+    "variant": "standing_stone",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13040,
+    "z": 12112,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_2_word_wall",
+    "name": "place.skycraft.summerset_isle_marker_2_word_wall",
+    "type": "word_wall",
+    "variant": "word_wall",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12240,
+    "z": 12112,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_3_dragon_mound",
+    "name": "place.skycraft.summerset_isle_marker_3_dragon_mound",
+    "type": "dragon_mound",
+    "variant": "dragon_mound",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13680,
+    "z": 12144,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_4_azura",
+    "name": "place.skycraft.summerset_isle_marker_4_azura",
+    "type": "daedric_shrine",
+    "variant": "azura",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12880,
+    "z": 12144,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_5_boethiah",
+    "name": "place.skycraft.summerset_isle_marker_5_boethiah",
+    "type": "daedric_shrine",
+    "variant": "boethiah",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12080,
+    "z": 12144,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_6_mephala",
+    "name": "place.skycraft.summerset_isle_marker_6_mephala",
+    "type": "daedric_shrine",
+    "variant": "mephala",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13584,
+    "z": 12176,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_7_altar",
+    "name": "place.skycraft.summerset_isle_marker_7_altar",
+    "type": "landmark",
+    "variant": "altar",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12784,
+    "z": 12176,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_8_monument",
+    "name": "place.skycraft.summerset_isle_marker_8_monument",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11984,
+    "z": 12176,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_9_ruin",
+    "name": "place.skycraft.summerset_isle_marker_9_ruin",
+    "type": "landmark",
+    "variant": "ruin",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13520,
+    "z": 12208,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_10_stones",
+    "name": "place.skycraft.summerset_isle_marker_10_stones",
+    "type": "landmark",
+    "variant": "stones",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12720,
+    "z": 12208,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_11_waterfall",
+    "name": "place.skycraft.summerset_isle_marker_11_waterfall",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -11920,
+    "z": 12208,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_12_campsite",
+    "name": "place.skycraft.summerset_isle_marker_12_campsite",
+    "type": "landmark",
+    "variant": "campsite",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -13648,
+    "z": 12272,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "summerset_isle_marker_13_rock",
+    "name": "place.skycraft.summerset_isle_marker_13_rock",
+    "type": "landmark",
+    "variant": "rock",
+    "culture": "altmer",
+    "region": "summerset/summerset_isle",
+    "x": -12848,
+    "z": 12272,
+    "why": [
+      "summerset_isle.L1.corgrad_tableland",
+      "summerset_isle.L1.south_shelf"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_1_plantation",
+    "name": "place.skycraft.auridon_croft_1_plantation",
+    "type": "farm",
+    "variant": "plantation",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9904,
+    "z": 10288,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_2_windmill",
+    "name": "place.skycraft.auridon_croft_2_windmill",
+    "type": "farm",
+    "variant": "windmill",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9904,
+    "z": 10352,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_3_orchard",
+    "name": "place.skycraft.auridon_croft_3_orchard",
+    "type": "farm",
+    "variant": "orchard",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9584,
+    "z": 10352,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_4_fishery",
+    "name": "place.skycraft.auridon_croft_4_fishery",
+    "type": "farm",
+    "variant": "fishery",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9968,
+    "z": 10384,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_5_herb_garden",
+    "name": "place.skycraft.auridon_croft_5_herb_garden",
+    "type": "farm",
+    "variant": "herb_garden",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9776,
+    "z": 10384,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_6_stables",
+    "name": "place.skycraft.auridon_croft_6_stables",
+    "type": "farm",
+    "variant": "stables",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9392,
+    "z": 10384,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_croft_7_homestead",
+    "name": "place.skycraft.auridon_croft_7_homestead",
+    "type": "farm",
+    "variant": "homestead",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9872,
+    "z": 10416,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_1_barrow",
+    "name": "place.skycraft.auridon_site_1_barrow",
+    "type": "dungeon_fixed",
+    "variant": "barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9488,
+    "z": 10416,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_2_dwemer_ruin",
+    "name": "place.skycraft.auridon_site_2_dwemer_ruin",
+    "type": "dungeon_fixed",
+    "variant": "dwemer_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10032,
+    "z": 10448,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_3_fort",
+    "name": "place.skycraft.auridon_site_3_fort",
+    "type": "fort",
+    "variant": "fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9840,
+    "z": 10448,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_4_fort_mage",
+    "name": "place.skycraft.auridon_site_4_fort_mage",
+    "type": "fort",
+    "variant": "fort_mage",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9648,
+    "z": 10448,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_5_akaviri_fort",
+    "name": "place.skycraft.auridon_site_5_akaviri_fort",
+    "type": "fort",
+    "variant": "akaviri_fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9456,
+    "z": 10448,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_6_breton_keep_ruin",
+    "name": "place.skycraft.auridon_site_6_breton_keep_ruin",
+    "type": "dungeon_fixed",
+    "variant": "breton_keep_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10064,
+    "z": 10480,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_7_bandit_cave",
+    "name": "place.skycraft.auridon_site_7_bandit_cave",
+    "type": "dungeon_fixed",
+    "variant": "bandit_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9872,
+    "z": 10480,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_8_spider_cave",
+    "name": "place.skycraft.auridon_site_8_spider_cave",
+    "type": "dungeon_fixed",
+    "variant": "spider_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9680,
+    "z": 10480,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_9_troll_cave",
+    "name": "place.skycraft.auridon_site_9_troll_cave",
+    "type": "dungeon_fixed",
+    "variant": "troll_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9296,
+    "z": 10480,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_10_ice_cave",
+    "name": "place.skycraft.auridon_site_10_ice_cave",
+    "type": "dungeon_fixed",
+    "variant": "ice_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9936,
+    "z": 10512,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_11_sixth_house_base",
+    "name": "place.skycraft.auridon_site_11_sixth_house_base",
+    "type": "dungeon_fixed",
+    "variant": "sixth_house_base",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9744,
+    "z": 10512,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_12_scorpion_den",
+    "name": "place.skycraft.auridon_site_12_scorpion_den",
+    "type": "dungeon_fixed",
+    "variant": "scorpion_den",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9552,
+    "z": 10512,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_13_vampire_lair",
+    "name": "place.skycraft.auridon_site_13_vampire_lair",
+    "type": "dungeon_fixed",
+    "variant": "vampire_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9360,
+    "z": 10512,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_14_necromancer_lair",
+    "name": "place.skycraft.auridon_site_14_necromancer_lair",
+    "type": "dungeon_fixed",
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10096,
+    "z": 10544,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_15_hagraven_lair",
+    "name": "place.skycraft.auridon_site_15_hagraven_lair",
+    "type": "dungeon_fixed",
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9904,
+    "z": 10544,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_16_giant_camp",
+    "name": "place.skycraft.auridon_site_16_giant_camp",
+    "type": "dungeon_fixed",
+    "variant": "giant_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9712,
+    "z": 10544,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_17_dragon_lair",
+    "name": "place.skycraft.auridon_site_17_dragon_lair",
+    "type": "dungeon_fixed",
+    "variant": "dragon_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9520,
+    "z": 10544,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_18_watchtower",
+    "name": "place.skycraft.auridon_site_18_watchtower",
+    "type": "dungeon_fixed",
+    "variant": "watchtower",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9328,
+    "z": 10544,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_19_cabin",
+    "name": "place.skycraft.auridon_site_19_cabin",
+    "type": "dungeon_fixed",
+    "variant": "cabin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10128,
+    "z": 10576,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_20_grove",
+    "name": "place.skycraft.auridon_site_20_grove",
+    "type": "dungeon_fixed",
+    "variant": "grove",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9744,
+    "z": 10576,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_21_mage_tower",
+    "name": "place.skycraft.auridon_site_21_mage_tower",
+    "type": "dungeon_fixed",
+    "variant": "mage_tower",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9552,
+    "z": 10576,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_22_imperial_camp",
+    "name": "place.skycraft.auridon_site_22_imperial_camp",
+    "type": "dungeon_fixed",
+    "variant": "imperial_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9360,
+    "z": 10576,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_23_nordic_ruin",
+    "name": "place.skycraft.auridon_site_23_nordic_ruin",
+    "type": "dungeon_fixed",
+    "variant": "nordic_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9168,
+    "z": 10576,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_24_great_lift",
+    "name": "place.skycraft.auridon_site_24_great_lift",
+    "type": "dungeon_fixed",
+    "variant": "great_lift",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10000,
+    "z": 10608,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_25_kolskeggr_mine",
+    "name": "place.skycraft.auridon_site_25_kolskeggr_mine",
+    "type": "dungeon_fixed",
+    "variant": "kolskeggr_mine",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9808,
+    "z": 10608,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_site_26_bleak_falls_barrow",
+    "name": "place.skycraft.auridon_site_26_bleak_falls_barrow",
+    "type": "dungeon_fixed",
+    "variant": "bleak_falls_barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9616,
+    "z": 10608,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_1_standing_stone",
+    "name": "place.skycraft.auridon_marker_1_standing_stone",
+    "type": "standing_stone",
+    "variant": "standing_stone",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9424,
+    "z": 10608,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_2_word_wall",
+    "name": "place.skycraft.auridon_marker_2_word_wall",
+    "type": "word_wall",
+    "variant": "word_wall",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9232,
+    "z": 10608,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_3_dragon_mound",
+    "name": "place.skycraft.auridon_marker_3_dragon_mound",
+    "type": "dragon_mound",
+    "variant": "dragon_mound",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10096,
+    "z": 10640,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_4_azura",
+    "name": "place.skycraft.auridon_marker_4_azura",
+    "type": "daedric_shrine",
+    "variant": "azura",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9904,
+    "z": 10640,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_5_boethiah",
+    "name": "place.skycraft.auridon_marker_5_boethiah",
+    "type": "daedric_shrine",
+    "variant": "boethiah",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9712,
+    "z": 10640,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_6_mephala",
+    "name": "place.skycraft.auridon_marker_6_mephala",
+    "type": "daedric_shrine",
+    "variant": "mephala",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9520,
+    "z": 10640,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_7_monument",
+    "name": "place.skycraft.auridon_marker_7_monument",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9328,
+    "z": 10640,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_8_peak",
+    "name": "place.skycraft.auridon_marker_8_peak",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10224,
+    "z": 10672,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_9_pass",
+    "name": "place.skycraft.auridon_marker_9_pass",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -10032,
+    "z": 10672,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_10_source",
+    "name": "place.skycraft.auridon_marker_10_source",
+    "type": "landmark",
+    "variant": "source",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9840,
+    "z": 10672,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "auridon_marker_11_eyrie",
+    "name": "place.skycraft.auridon_marker_11_eyrie",
+    "type": "landmark",
+    "variant": "eyrie",
+    "culture": "altmer",
+    "region": "summerset/auridon",
+    "x": -9648,
+    "z": 10672,
+    "why": [
+      "auridon.L1.ridge",
+      "auridon.L1.tide_rock"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_1_plantation",
+    "name": "place.skycraft.artaeum_croft_1_plantation",
+    "type": "farm",
+    "variant": "plantation",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12496,
+    "z": 10672,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_2_estate",
+    "name": "place.skycraft.artaeum_croft_2_estate",
+    "type": "farm",
+    "variant": "estate",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12464,
+    "z": 10704,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_3_windmill",
+    "name": "place.skycraft.artaeum_croft_3_windmill",
+    "type": "farm",
+    "variant": "windmill",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12400,
+    "z": 10736,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_4_orchard",
+    "name": "place.skycraft.artaeum_croft_4_orchard",
+    "type": "farm",
+    "variant": "orchard",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12368,
+    "z": 10768,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_5_fishery",
+    "name": "place.skycraft.artaeum_croft_5_fishery",
+    "type": "farm",
+    "variant": "fishery",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12336,
+    "z": 10800,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_6_herb_garden",
+    "name": "place.skycraft.artaeum_croft_6_herb_garden",
+    "type": "farm",
+    "variant": "herb_garden",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12304,
+    "z": 10832,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_7_stables",
+    "name": "place.skycraft.artaeum_croft_7_stables",
+    "type": "farm",
+    "variant": "stables",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11760,
+    "z": 10832,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_croft_8_homestead",
+    "name": "place.skycraft.artaeum_croft_8_homestead",
+    "type": "farm",
+    "variant": "homestead",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11696,
+    "z": 10832,
+    "radius": 24,
+    "isolated": true,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_1_barrow",
+    "name": "place.skycraft.artaeum_site_1_barrow",
+    "type": "dungeon_fixed",
+    "variant": "barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11632,
+    "z": 10832,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_2_dwemer_ruin",
+    "name": "place.skycraft.artaeum_site_2_dwemer_ruin",
+    "type": "dungeon_fixed",
+    "variant": "dwemer_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11568,
+    "z": 10832,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_3_fort",
+    "name": "place.skycraft.artaeum_site_3_fort",
+    "type": "fort",
+    "variant": "fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11824,
+    "z": 10864,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_4_keep",
+    "name": "place.skycraft.artaeum_site_4_keep",
+    "type": "fort",
+    "variant": "keep",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11728,
+    "z": 10864,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_5_fort_mage",
+    "name": "place.skycraft.artaeum_site_5_fort_mage",
+    "type": "fort",
+    "variant": "fort_mage",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11664,
+    "z": 10864,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_6_akaviri_fort",
+    "name": "place.skycraft.artaeum_site_6_akaviri_fort",
+    "type": "fort",
+    "variant": "akaviri_fort",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11600,
+    "z": 10864,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_7_daedric_ruin",
+    "name": "place.skycraft.artaeum_site_7_daedric_ruin",
+    "type": "dungeon_fixed",
+    "variant": "daedric_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11536,
+    "z": 10864,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_8_breton_keep_ruin",
+    "name": "place.skycraft.artaeum_site_8_breton_keep_ruin",
+    "type": "dungeon_fixed",
+    "variant": "breton_keep_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12336,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_9_bandit_cave",
+    "name": "place.skycraft.artaeum_site_9_bandit_cave",
+    "type": "dungeon_fixed",
+    "variant": "bandit_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11952,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_10_den",
+    "name": "place.skycraft.artaeum_site_10_den",
+    "type": "dungeon_fixed",
+    "variant": "den",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11888,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_11_spider_cave",
+    "name": "place.skycraft.artaeum_site_11_spider_cave",
+    "type": "dungeon_fixed",
+    "variant": "spider_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11792,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_12_troll_cave",
+    "name": "place.skycraft.artaeum_site_12_troll_cave",
+    "type": "dungeon_fixed",
+    "variant": "troll_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11696,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_13_ice_cave",
+    "name": "place.skycraft.artaeum_site_13_ice_cave",
+    "type": "dungeon_fixed",
+    "variant": "ice_cave",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11632,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_14_sixth_house_base",
+    "name": "place.skycraft.artaeum_site_14_sixth_house_base",
+    "type": "dungeon_fixed",
+    "variant": "sixth_house_base",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11568,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_15_scorpion_den",
+    "name": "place.skycraft.artaeum_site_15_scorpion_den",
+    "type": "dungeon_fixed",
+    "variant": "scorpion_den",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11504,
+    "z": 10896,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_16_mine",
+    "name": "place.skycraft.artaeum_site_16_mine",
+    "type": "dungeon_fixed",
+    "variant": "mine",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11984,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_17_vampire_lair",
+    "name": "place.skycraft.artaeum_site_17_vampire_lair",
+    "type": "dungeon_fixed",
+    "variant": "vampire_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11920,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_18_necromancer_lair",
+    "name": "place.skycraft.artaeum_site_18_necromancer_lair",
+    "type": "dungeon_fixed",
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11856,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_19_hagraven_lair",
+    "name": "place.skycraft.artaeum_site_19_hagraven_lair",
+    "type": "dungeon_fixed",
+    "variant": "hagraven_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11760,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_20_bandit_camp",
+    "name": "place.skycraft.artaeum_site_20_bandit_camp",
+    "type": "dungeon_fixed",
+    "variant": "bandit_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11664,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_21_giant_camp",
+    "name": "place.skycraft.artaeum_site_21_giant_camp",
+    "type": "dungeon_fixed",
+    "variant": "giant_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11600,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_22_dragon_lair",
+    "name": "place.skycraft.artaeum_site_22_dragon_lair",
+    "type": "dungeon_fixed",
+    "variant": "dragon_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11472,
+    "z": 10928,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_23_watchtower",
+    "name": "place.skycraft.artaeum_site_23_watchtower",
+    "type": "dungeon_fixed",
+    "variant": "watchtower",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12048,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_24_cabin",
+    "name": "place.skycraft.artaeum_site_24_cabin",
+    "type": "dungeon_fixed",
+    "variant": "cabin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11952,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_25_grove",
+    "name": "place.skycraft.artaeum_site_25_grove",
+    "type": "dungeon_fixed",
+    "variant": "grove",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11888,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_26_imperial_camp",
+    "name": "place.skycraft.artaeum_site_26_imperial_camp",
+    "type": "dungeon_fixed",
+    "variant": "imperial_camp",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11824,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_27_nordic_ruin",
+    "name": "place.skycraft.artaeum_site_27_nordic_ruin",
+    "type": "dungeon_fixed",
+    "variant": "nordic_ruin",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11728,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_28_great_lift",
+    "name": "place.skycraft.artaeum_site_28_great_lift",
+    "type": "dungeon_fixed",
+    "variant": "great_lift",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11632,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_29_kolskeggr_mine",
+    "name": "place.skycraft.artaeum_site_29_kolskeggr_mine",
+    "type": "dungeon_fixed",
+    "variant": "kolskeggr_mine",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11504,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_site_30_bleak_falls_barrow",
+    "name": "place.skycraft.artaeum_site_30_bleak_falls_barrow",
+    "type": "dungeon_fixed",
+    "variant": "bleak_falls_barrow",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11440,
+    "z": 10960,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_delve_31",
+    "name": "place.skycraft.artaeum_delve_31",
+    "type": "dungeon_fixed",
+    "variant": "necromancer_lair",
+    "class": "minor",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12016,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_1_standing_stone",
+    "name": "place.skycraft.artaeum_marker_1_standing_stone",
+    "type": "standing_stone",
+    "variant": "standing_stone",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11920,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_2_word_wall",
+    "name": "place.skycraft.artaeum_marker_2_word_wall",
+    "type": "word_wall",
+    "variant": "word_wall",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11856,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_3_dragon_mound",
+    "name": "place.skycraft.artaeum_marker_3_dragon_mound",
+    "type": "dragon_mound",
+    "variant": "dragon_mound",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11760,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_4_azura",
+    "name": "place.skycraft.artaeum_marker_4_azura",
+    "type": "daedric_shrine",
+    "variant": "azura",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11696,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_5_boethiah",
+    "name": "place.skycraft.artaeum_marker_5_boethiah",
+    "type": "daedric_shrine",
+    "variant": "boethiah",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11600,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_6_mephala",
+    "name": "place.skycraft.artaeum_marker_6_mephala",
+    "type": "daedric_shrine",
+    "variant": "mephala",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11536,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_7_altar",
+    "name": "place.skycraft.artaeum_marker_7_altar",
+    "type": "landmark",
+    "variant": "altar",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11408,
+    "z": 10992,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_8_monument",
+    "name": "place.skycraft.artaeum_marker_8_monument",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12048,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_9_ruin",
+    "name": "place.skycraft.artaeum_marker_9_ruin",
+    "type": "landmark",
+    "variant": "ruin",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11984,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_10_stones",
+    "name": "place.skycraft.artaeum_marker_10_stones",
+    "type": "landmark",
+    "variant": "stones",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11888,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_11_peak",
+    "name": "place.skycraft.artaeum_marker_11_peak",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11728,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_12_waterfall",
+    "name": "place.skycraft.artaeum_marker_12_waterfall",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11664,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_13_clearing",
+    "name": "place.skycraft.artaeum_marker_13_clearing",
+    "type": "landmark",
+    "variant": "clearing",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11568,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_14_campsite",
+    "name": "place.skycraft.artaeum_marker_14_campsite",
+    "type": "landmark",
+    "variant": "campsite",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11440,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_15_pass",
+    "name": "place.skycraft.artaeum_marker_15_pass",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11376,
+    "z": 11024,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_16_rock",
+    "name": "place.skycraft.artaeum_marker_16_rock",
+    "type": "landmark",
+    "variant": "rock",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12080,
+    "z": 11056,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_17_source",
+    "name": "place.skycraft.artaeum_marker_17_source",
+    "type": "landmark",
+    "variant": "source",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -12016,
+    "z": 11056,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "artaeum_marker_18_eyrie",
+    "name": "place.skycraft.artaeum_marker_18_eyrie",
+    "type": "landmark",
+    "variant": "eyrie",
+    "culture": "altmer",
+    "region": "summerset/artaeum",
+    "x": -11952,
+    "z": 11056,
+    "why": [
+      "artaeum.L1.isle_rock",
+      "artaeum.L10.psijic_time_vaults"
+    ],
+    "_r7_r12_v4": true
+  }
 ]

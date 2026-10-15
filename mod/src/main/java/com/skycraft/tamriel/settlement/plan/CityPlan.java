@@ -157,9 +157,16 @@ public final class CityPlan {
         for (JsonObject w : objs(o, "walls")) {
             double[] gs = new double[0];
             if (w.has("gates")) {
-                JsonArray a = w.getAsJsonArray("gates");
-                gs = new double[a.size()];
-                for (int i = 0; i < gs.length; i++) gs[i] = a.get(i).getAsDouble();
+                com.google.gson.JsonElement ge = w.get("gates");
+                if (ge.isJsonArray()) {
+                    JsonArray a = ge.getAsJsonArray();
+                    gs = new double[a.size()];
+                    for (int i = 0; i < gs.length; i++) gs[i] = a.get(i).getAsDouble();
+                } else if (ge.isJsonPrimitive() && ge.getAsJsonPrimitive().isNumber()) {
+                    int n = Math.max(0, ge.getAsInt());
+                    gs = new double[n];
+                    for (int i = 0; i < n; i++) gs[i] = (2.0 * Math.PI * i) / n;
+                }
             }
             walls.add(new Wall(num(w, "r", 60), Math.max(4, num(w, "sides", 16)), num(w, "h", 9), gs, flags(w),
                     bool(w, "towers", true), num(w, "raise", 0)));

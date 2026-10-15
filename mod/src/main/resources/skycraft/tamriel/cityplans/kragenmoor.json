@@ -1,0 +1,162 @@
+{
+  "id": "kragenmoor",
+  "why": [
+    "stonefalls.L1.lava_shields",
+    "stonefalls.L4.basalt_field"
+  ],
+  "sil": "hlaalu-obsidian-gate-city",
+  "base": "none",
+  "overlay": "stonefalls",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "kragenmoor_landmark",
+      "overlay": "stonefalls"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "stonefalls"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_2"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_3"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_4"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_5"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_6"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "kragenmoor_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "kragenmoor_hlaalu",
+      "count": 2
+    },
+    {
+      "type": "fountain",
+      "theme": "obsidian_basin",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "kragenmoor_lantern",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "kragenmoor_landmark": "Grandmaster Omalen's House",
+    "kragenmoor_b_1": "Kragenmoor Temple",
+    "kragenmoor_b_2": "The Obsidian Jug",
+    "kragenmoor_b_3": "West-Pass Ironworks",
+    "kragenmoor_b_4": "Cheydinhal-Road Exchange",
+    "kragenmoor_b_5": "Lava-Tube Distillers",
+    "kragenmoor_b_6": "Dren Border Manor",
+    "kragenmoor_b_7": "Kragenmoor Gate Garrison"
+  },
+  "innKey": "kragenmoor_b_2",
+  "names": {
+    "inn": "kragenmoor_b_2",
+    "store": "kragenmoor_b_4",
+    "smithy": "kragenmoor_b_3"
+  }
+}

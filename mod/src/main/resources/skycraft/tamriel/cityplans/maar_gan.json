@@ -1,0 +1,112 @@
+{
+  "id": "maar_gan",
+  "why": [
+    "vvardenfell_ashlands.L1.ash_plain",
+    "vvardenfell_ashlands.L2.ash_storm_track"
+  ],
+  "sil": "boulder-shrine-outpost",
+  "base": "none",
+  "overlay": "vvardenfell_ashlands",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "vvardenfell_ashlands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "maar_gan_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        10,
+        30
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "maar_gan_b_2"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "maar_gan_b_3"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -26,
+        -19
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "maar_gan_b_4"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "maar_gan_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "maar_gan_boulder",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "theme": "maar_gan_redoran",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "maar_gan_b_1": "Maar Gan Shrine (The Taunt Rock)",
+    "maar_gan_b_2": "Andus Tradehouse",
+    "maar_gan_b_3": "Anruin's Outfitter",
+    "maar_gan_b_4": "Redoran Watch Tower",
+    "maar_gan_b_5": "Huleen's Hut"
+  },
+  "innKey": "maar_gan_b_2",
+  "names": {
+    "inn": "maar_gan_b_2"
+  }
+}

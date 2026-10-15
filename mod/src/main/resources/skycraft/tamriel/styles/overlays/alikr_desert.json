@@ -1,0 +1,19 @@
+{
+  "id": "alikr_desert",
+  "tint": {
+    "wall": "minecraft:sandstone",
+    "wall2": "minecraft:smooth_sandstone",
+    "low": "minecraft:cut_sandstone",
+    "roof": "mud_brick",
+    "trim": "jungle",
+    "wood": "jungle",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:cut_sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:sandstone",
+    "path": "minecraft:sand"
+  }
+}

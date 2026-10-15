@@ -1,0 +1,445 @@
+{
+  "id": "camlorn",
+  "sil": "spire-hill-gothic",
+  "base": "none",
+  "overlay": "camlorn",
+  "radius": 118,
+  "reach": 126,
+  "fill_gap": 2,
+  "inn_key": "camlorn_silver_hound",
+  "names": {
+    "inn": "camlorn_silver_hound",
+    "store": "camlorn_gable_provisions",
+    "smithy": "camlorn_silver_steel_forge"
+  },
+  "titles": {
+    "camlorn_landmark": "Cathedral of Mara's Spires",
+    "camlorn_ducal_castle": "Castle Camlorn Black-Slate Keep",
+    "camlorn_silver_hound": "The Silver Hound Inn",
+    "camlorn_belfry_lantern": "The Belfry Lantern Tavern",
+    "camlorn_gable_provisions": "Seven-Gables General Store",
+    "camlorn_silver_steel_forge": "Silver-Inlay Forge & Bladeworks",
+    "camlorn_wolfsbane_still": "The Wolfsbane & Moonwort Still",
+    "camlorn_verse_press": "Camlorn Ballad & Folio Press",
+    "camlorn_filigree_hall": "Lune-Silver Filigree Workshop",
+    "camlorn_sable_mantle": "Sable & Slate Courtier Tailors",
+    "camlorn_mages_scholarium": "Camlorn Mages Scholarium",
+    "camlorn_fighters_chapter": "Glenumbra Blades Chapterhouse",
+    "camlorn_cathedral_of_mara": "Cathedral of Mara",
+    "camlorn_whispering_ossuary": "The Whispering Ossuary",
+    "camlorn_hvarine_manor": "Lady Hvarine's Spire Manor",
+    "camlorn_bell_tower_watch": "Bell-Ringers' Watchtower",
+    "camlorn_moor_gate_stables": "Moor-Gate Post Stables",
+    "camlorn_market_plaza": "Cathedral Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -114
+    ],
+    [
+      114,
+      0
+    ],
+    [
+      0,
+      114
+    ],
+    [
+      -114,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 114,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -49
+      ],
+      "face": "south",
+      "name": "camlorn_landmark",
+      "overlay": "camlorn"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        31,
+        -43
+      ],
+      "face": "south",
+      "name": "camlorn_ducal_castle"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        67,
+        -48
+      ],
+      "face": "west",
+      "name": "camlorn_silver_hound"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        51,
+        -15
+      ],
+      "face": "west",
+      "name": "camlorn_belfry_lantern"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        82,
+        2
+      ],
+      "face": "west",
+      "name": "camlorn_gable_provisions"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        50,
+        18
+      ],
+      "face": "west",
+      "name": "camlorn_silver_steel_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        64,
+        51
+      ],
+      "face": "west",
+      "name": "camlorn_wolfsbane_still"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        29,
+        45
+      ],
+      "face": "north",
+      "name": "camlorn_verse_press"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        20,
+        80
+      ],
+      "face": "north",
+      "name": "camlorn_filigree_hall"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -4,
+        53
+      ],
+      "face": "north",
+      "name": "camlorn_sable_mantle"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -32,
+        75
+      ],
+      "face": "north",
+      "name": "camlorn_mages_scholarium"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -35,
+        40
+      ],
+      "face": "north",
+      "name": "camlorn_fighters_chapter"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -71,
+        41
+      ],
+      "face": "east",
+      "name": "camlorn_cathedral_of_mara"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -52,
+        10
+      ],
+      "face": "east",
+      "name": "camlorn_whispering_ossuary"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -81,
+        -10
+      ],
+      "face": "east",
+      "name": "camlorn_hvarine_manor"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -48,
+        -23
+      ],
+      "face": "east",
+      "name": "camlorn_bell_tower_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -59,
+        -57
+      ],
+      "face": "east",
+      "name": "camlorn_moor_gate_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -100
+      ],
+      "to": [
+        0,
+        100
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -100,
+        0
+      ],
+      "to": [
+        100,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -61,
+        -61
+      ],
+      "to": [
+        61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        -61
+      ],
+      "to": [
+        61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        61
+      ],
+      "to": [
+        -61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -61,
+        61
+      ],
+      "to": [
+        -61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "camlorn_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        59
+      ],
+      "overlay": "camlorn"
+    },
+    {
+      "ring": [
+        59,
+        118
+      ],
+      "overlay": "camlorn"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:arkay",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:akatosh",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "willow",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    }
+  ]
+}

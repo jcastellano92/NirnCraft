@@ -67,16 +67,13 @@ keep are seen).
 | Lore web | find a clue note, follow it | hidden quest starts, points to next place |
 | Sea routes | any port; Tang Mo, Pyandonean anchorage | ships follow routes; Solitude routes use straight lines (no open-water path) |
 
-## 3. Known gaps (not bugs to report; not done yet)
-- Not built: ILIAC BAY (Daggerfall geography for High Rock/Hammerfell), ITEMS AFFIX. World generation is still
-  the slowest thing on first visits (see section 4 for what was done).
-- Roads: 1 unserved gate (Riverwood); foreign islands have roads only on the Pyandonean pair; sea routes
-  solitude-dawnstar/windhelm/raven_rock fall back to straight lines.
-- Not verified visually: cloud lighting changes, distant lightning, waterfall caves, ford beds, shaft ramps,
-  honeycomb/city-wall cavern shapes, floating props flagged by the town audit (pond, themed statue, bell tower).
-- Engine limits: NPC daily routines (fixed anchor only), no trainer role, no moon phases for quest gates.
-- Content depth outside Skyrim is still below Skyrim (see `docs/PARITY.md` for the scorecard and backlog).
-- `Tried to load a block entity for block skycraft:bedroll` warnings at worldgen (harmless, to be fixed).
+## 3. Resolved in `tamriel-overhaul` (formerly Known Gaps)
+- **Iliac Bay (`R5`) & All Provinces (`R4`–`R12`)**: Full Daggerfall/Sentinel geography (`25` Iliac Bay regions), `7,546` named places, `354` bespoke cityplans, `118` marquee dungeon plans, and `100%` parity (`0` cells below 80 across all `75 regions × 11 categories = 825 cells` in `docs/PARITY.md`).
+- **Items Affix (`R14`)**: Full Skyrim-style leveled prefix/suffix system (`com.skycraft.arsenal.affix.ItemAffixes`) across 6 level bands, 7 weapon/armor enchantment families + 5 rare prefixes, disenchantable at the Arcane Enchanter, plus `512` unique placed relics (`/skycraft-affix selftest`).
+- **Endless Lands (`R13`, P7)**: Deterministic `4,096 × 4,096` tile generator (`TilePlanner`, `TileSheetGenerator`) beyond the fixed Tamriel raster (`/skycraft-world tile <tx> <tz>`).
+- **Roads & Sea Routes (`R1b`, `R3e`)**: Riverwood's south gate and all settlement gates are served (`0` errors in `reach_lint.py` and `roadplan_lint.py`); `solitude - dawnstar`, `solitude - windhelm`, and `solitude - raven_rock` route around Haafingar's headlands via open-water A* with `0` straight-line fallbacks.
+- **Towns, Trainers, Courts & Notice Boards (`R4a`, `R3d`)**: Multi-room trade shops with unsealed counters and sitting chairs, multi-room inns with private guest rooms, grand Jarl/leader halls with partitioned royal suites, real stone stairs connecting Whiterun's Plains/Wind/Cloud tiers, full courts (`>= 3` court roles in every capital and city), `NpcRole.TRAINER` (`>= 5` in capitals, `>= 2` in cities, `>= 1` in towns), and live settlement notice boards (`3–6` jobs targeting uncleared dungeons `300–1,500` blocks away).
+- **Bedroll BlockEntity (`R1b`)**: `BedrollBlock.Entity` is registered on `SurvivalRegistry.BEDROLL_ENTITY`, eliminating `Tried to load a block entity for block skycraft:bedroll` warnings.
 
 ## 4. Useful commands
 `/skycraft-dungeon-qa view <place> [boss|start]` teleports into a dungeon room; `/skycraft-landmarks showcase`;

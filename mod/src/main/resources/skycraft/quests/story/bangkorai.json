@@ -1,0 +1,398 @@
+{
+  "region": "hammerfell/bangkorai",
+  "title": "The Scarab-Gate of Bangkorai",
+  "summary": "Hold the timber-valleys and pass-fortresses of Bangkorai when covens of the Fallen Grotto and highland raiders conspire to breach the Bangkorai Garrison and seize the Dwemer foundries of Klathzgar.",
+  "why": [
+    "bangkorai.L7.timber_lords",
+    "bangkorai.L7.mixed_towns",
+    "bangkorai.L8.z_en_patron",
+    "bangkorai.L9.river_pirates",
+    "bangkorai.L10.scarab_temple"
+  ],
+  "hook": {
+    "place": "lainlyn",
+    "places": [
+      "lainlyn",
+      "qaana",
+      "skyreach_catacombs",
+      "torogs_spite",
+      "viridian_watch"
+    ],
+    "npc": "story_bg_reeve_hassan",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_bg_reeve_hassan",
+      "name": "Timber-Reeve Hassan",
+      "role": "steward",
+      "place": "lainlyn",
+      "greet": "Look to your harness, traveller! The log-booms on the Lainlyn inlet were cut last night, and cove-pirates raided the sawmill stores.",
+      "talk": [
+        "Lainlyn and Ayasofya sit where Breton timber-wrights and Redguard garrison families share the same wall—and someone is trying to crack that wall from within.",
+        "Corsairs from Fallen Grotto stole three wagons of blasting-salts meant for the quarries and hauled them toward Bangkorai Garrison. Speak with Commander Renaud at Viridian Watch."
+      ]
+    },
+    {
+      "id": "story_bg_commander_renaud_vw",
+      "name": "Commander Renaud of Viridian",
+      "role": "knight",
+      "place": "viridian_watch",
+      "greet": "We hold the western timber-line at Viridian Watch, but our scouts just rode in with grim news from the bay.",
+      "talk": [
+        "Tide-Caller Morgana and her cove-pirates have turned Fallen Grotto into a staging-ground, trading stolen blasting-salts to Iron-Chieftain Gharzol in the hills.",
+        "Drive Morgana out of Fallen Grotto first, then warn Castellan Suhail at Bangkorai Garrison!"
+      ]
+    },
+    {
+      "id": "story_bg_castellan_suhail",
+      "name": "Castellan Suhail",
+      "role": "guard",
+      "place": "bangkorai_garrison",
+      "greet": "By Z'en's honest scale, you arrived in the nick of time! A sapper-tunnel was found beneath the eastern bastion an hour ago.",
+      "talk": [
+        "Iron-Chieftain Gharzol used the blasting-salts from Fallen Grotto to breach the Dwemer steam-conduits of Klathzgar, which run directly under Bangkorai Garrison!",
+        "Check the supply town of Ayasofya, then enter Klathzgar and stop Gharzol before he collapses the pass wall."
+      ]
+    },
+    {
+      "id": "story_bg_warden_farida",
+      "name": "Warden Farida of the Scarab",
+      "role": "knight",
+      "place": "ayasofya",
+      "greet": "The Knights of the Scarab have sworn to keep the pass between high crag and hot sand unbroken.",
+      "talk": [
+        "Gharzol's sappers are piling oil-barrels and Dwemer fire-cores against the foundation piers inside Klathzgar.",
+        "Go into Klathzgar and scatter his warband before the fuse is lit!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_bg_tide_caller_morgana": {
+      "name": "Tide-Caller Morgana",
+      "rank": "boss",
+      "place": "fallen_grotto",
+      "weapon": "steel_sword",
+      "helmet": "leather_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_bg_chieftain_gharzol": {
+      "name": "Iron-Chieftain Gharzol",
+      "rank": "boss",
+      "place": "klathzgar",
+      "weapon": "orcish_warhammer",
+      "helmet": "orcish_helmet",
+      "chest": "orcish_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_bg_viridian_council": [
+      "Commander Renaud of Viridian: Look at this powder-keg recovered from the inlet—marked with the Lainlyn timber-seal, but lashed onto a hill-pony pack-frame.",
+      "Timber-Reeve Hassan: Sea-pirates in Fallen Grotto and hill-raiders above the pass have never worked together without a shared paymaster.",
+      "Commander Renaud of Viridian: Storm Fallen Grotto now and find out what target they are mining!"
+    ],
+    "story_bg_fallen_grotto_parley": [
+      "Tide-Caller Morgana: You're too late, garrison dog! The blasting-salts are already packed beneath the great wall of Bangkorai!",
+      "Commander Renaud of Viridian: Take her head and ride for the Garrison!"
+    ],
+    "story_bg_klathzgar_pier": [
+      "Iron-Chieftain Gharzol: For three ages this stone gate barred our clans from the timber-valleys! One spark in Klathzgar's boiler, and the wall falls!",
+      "Warden Farida of the Scarab: The Garrison stands as long as one blade remains to guard its piers! Strike!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_bangkorai_01_stolen_salts",
+      "region": "hammerfell/bangkorai",
+      "category": "main",
+      "title": "Raiders on the Lainlyn Inlet",
+      "giver": "story_bg_reeve_hassan",
+      "start": "npc:story_bg_reeve_hassan",
+      "requires": [],
+      "why": [
+        "bangkorai.L7.timber_lords",
+        "bangkorai.L7.mixed_towns",
+        "bangkorai.L9.river_pirates"
+      ],
+      "summary": "Report the stolen quarry blasting-salts from Lainlyn to Commander Renaud at Viridian Watch.",
+      "intro": [
+        "Cove-pirates cut the Lainlyn timber-booms and stole three wagons of quarry blasting-salts.",
+        "Travel from Lainlyn to Viridian Watch and examine the recovered powder-keg with Commander Renaud."
+      ],
+      "complete": [
+        "Commander Renaud traced the stolen blasting-salts to Tide-Caller Morgana in Fallen Grotto."
+      ],
+      "journal": {
+        "start": "Timber-Reeve Hassan in Lainlyn sent me to Viridian Watch to track the stolen blasting-salts.",
+        "done": "Commander Renaud pinpointed the pirate staging-ground inside Fallen Grotto."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "lainlyn",
+          "text": "Inspect the cut timber-booms at Lainlyn"
+        },
+        {
+          "type": "scene",
+          "place": "viridian_watch",
+          "target": "scene:story_bg_viridian_council",
+          "text": "Examine the recovered powder-keg at Viridian Watch"
+        },
+        {
+          "type": "talk",
+          "place": "viridian_watch",
+          "npc": "story_bg_commander_renaud_vw",
+          "text": "Take orders from Commander Renaud at Viridian Watch"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "lainlyn",
+        "viridian_watch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "lainlyn",
+          "objective": "Inspect the cut timber-booms at Lainlyn"
+        },
+        {
+          "id": 20,
+          "place": "viridian_watch",
+          "objective": "Examine the recovered powder-keg at Viridian Watch"
+        },
+        {
+          "id": 30,
+          "place": "viridian_watch",
+          "objective": "Take orders from Commander Renaud at Viridian Watch"
+        }
+      ],
+      "consequence": "guard_banner:bangkorai_stage_1"
+    },
+    {
+      "id": "ms1_bangkorai_02_fallen_grotto",
+      "region": "hammerfell/bangkorai",
+      "category": "main",
+      "title": "The Cove of the Tide-Caller",
+      "giver": "story_bg_commander_renaud_vw",
+      "start": "auto",
+      "requires": [
+        "ms1_bangkorai_01_stolen_salts"
+      ],
+      "why": [
+        "bangkorai.L9.forebear_ports",
+        "bangkorai.L10.tide_witches"
+      ],
+      "summary": "Storm Fallen Grotto and defeat Tide-Caller Morgana.",
+      "intro": [
+        "Tide-Caller Morgana and her river-pirates use Fallen Grotto to transfer contraband from the bay to the highland passes.",
+        "Enter Fallen Grotto and defeat Tide-Caller Morgana."
+      ],
+      "complete": [
+        "Before falling, Morgana boasted that the blasting-salts are already packed in the tunnels beneath Bangkorai Garrison."
+      ],
+      "journal": {
+        "start": "I must enter Fallen Grotto and defeat Tide-Caller Morgana.",
+        "done": "I defeated Tide-Caller Morgana and learned that sappers are mining beneath Bangkorai Garrison."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "fallen_grotto",
+          "text": "Enter Fallen Grotto"
+        },
+        {
+          "type": "scene",
+          "place": "fallen_grotto",
+          "target": "scene:story_bg_fallen_grotto_parley",
+          "text": "Confront Tide-Caller Morgana in the sea-cavern"
+        },
+        {
+          "type": "boss",
+          "place": "fallen_grotto",
+          "target": "story_bg_tide_caller_morgana",
+          "text": "Defeat Tide-Caller Morgana"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "fallen_grotto"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "fallen_grotto",
+          "objective": "Enter Fallen Grotto"
+        },
+        {
+          "id": 20,
+          "place": "fallen_grotto",
+          "objective": "Confront Tide-Caller Morgana in the sea-cavern"
+        },
+        {
+          "id": 30,
+          "place": "fallen_grotto",
+          "objective": "Defeat Tide-Caller Morgana"
+        }
+      ],
+      "consequence": "npc_schedule:bangkorai_stage_2"
+    },
+    {
+      "id": "ms1_bangkorai_03_garrison_warned",
+      "region": "hammerfell/bangkorai",
+      "category": "main",
+      "title": "Sappers Beneath the Gate",
+      "giver": "story_bg_commander_renaud_vw",
+      "start": "auto",
+      "requires": [
+        "ms1_bangkorai_02_fallen_grotto"
+      ],
+      "why": [
+        "bangkorai.L8.z_en_patron",
+        "bangkorai.L10.scarab_temple"
+      ],
+      "summary": "Warn Castellan Suhail at Bangkorai Garrison and rally Warden Farida in Ayasofya.",
+      "intro": [
+        "Ride swiftly to Bangkorai Garrison to warn Castellan Suhail of the sapper plot, then meet Warden Farida of the Scarab in Ayasofya.",
+        "Speak with Castellan Suhail at Bangkorai Garrison and Warden Farida in Ayasofya."
+      ],
+      "complete": [
+        "Warden Farida identified the Dwemer steam-gallery of Klathzgar as the chamber directly beneath the Garrison's eastern pier."
+      ],
+      "journal": {
+        "start": "I must warn Castellan Suhail at Bangkorai Garrison and speak with Warden Farida in Ayasofya.",
+        "done": "We traced the sapper tunnel into the Dwemer ruins of Klathzgar."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "bangkorai_garrison",
+          "npc": "story_bg_castellan_suhail",
+          "text": "Warn Castellan Suhail at Bangkorai Garrison"
+        },
+        {
+          "type": "talk",
+          "place": "ayasofya",
+          "npc": "story_bg_warden_farida",
+          "text": "Rally Warden Farida of the Scarab in Ayasofya"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "bangkorai_garrison",
+        "ayasofya"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bangkorai_garrison",
+          "objective": "Warn Castellan Suhail at Bangkorai Garrison"
+        },
+        {
+          "id": 20,
+          "place": "ayasofya",
+          "objective": "Rally Warden Farida of the Scarab in Ayasofya"
+        }
+      ],
+      "consequence": "shrine_state:bangkorai_stage_3"
+    },
+    {
+      "id": "ms1_bangkorai_04_klathzgar_boiler",
+      "region": "hammerfell/bangkorai",
+      "category": "main",
+      "title": "The Foundation Piers of Klathzgar",
+      "giver": "story_bg_warden_farida",
+      "start": "auto",
+      "requires": [
+        "ms1_bangkorai_03_garrison_warned"
+      ],
+      "finale": true,
+      "why": [
+        "bangkorai.L8.na_totambu_reverence",
+        "bangkorai.L10.orc_hill_bands",
+        "bangkorai.L10.scarab_temple"
+      ],
+      "summary": "Enter the Dwemer halls of Klathzgar, defeat Iron-Chieftain Gharzol before he detonates the boiler, and report to Timber-Reeve Hassan in Lainlyn.",
+      "intro": [
+        "Inside Klathzgar, Iron-Chieftain Gharzol has packed blasting-salts around the main Dwemer steam-boiler beneath Bangkorai Garrison.",
+        "Enter Klathzgar, slay Gharzol, and bring word of the saved Garrison back to Timber-Reeve Hassan in Lainlyn."
+      ],
+      "complete": [
+        "Iron-Chieftain Gharzol fell before the fuse could reach the boiler, and the great stone wall of Bangkorai Garrison stands unshaken."
+      ],
+      "journal": {
+        "start": "I must enter Klathzgar, defeat Iron-Chieftain Gharzol, and return to Timber-Reeve Hassan in Lainlyn.",
+        "done": "I defeated Iron-Chieftain Gharzol in Klathzgar and saved Bangkorai Garrison."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "klathzgar",
+          "text": "Enter the Dwemer galleries of Klathzgar"
+        },
+        {
+          "type": "scene",
+          "place": "klathzgar",
+          "target": "scene:story_bg_klathzgar_pier",
+          "text": "Stop Iron-Chieftain Gharzol at the foundation boiler"
+        },
+        {
+          "type": "boss",
+          "place": "klathzgar",
+          "target": "story_bg_chieftain_gharzol",
+          "text": "Defeat Iron-Chieftain Gharzol"
+        },
+        {
+          "type": "talk",
+          "place": "lainlyn",
+          "npc": "story_bg_reeve_hassan",
+          "text": "Report the victory to Timber-Reeve Hassan in Lainlyn"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "klathzgar",
+        "lainlyn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "klathzgar",
+          "objective": "Enter the Dwemer galleries of Klathzgar"
+        },
+        {
+          "id": 20,
+          "place": "klathzgar",
+          "objective": "Stop Iron-Chieftain Gharzol at the foundation boiler"
+        },
+        {
+          "id": 30,
+          "place": "klathzgar",
+          "objective": "Defeat Iron-Chieftain Gharzol"
+        },
+        {
+          "id": 40,
+          "place": "lainlyn",
+          "objective": "Report the victory to Timber-Reeve Hassan in Lainlyn"
+        }
+      ],
+      "consequence": "settlement_prosperity:bangkorai_stage_4"
+    }
+  ]
+}

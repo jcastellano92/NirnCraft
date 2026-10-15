@@ -120,6 +120,7 @@ public final class NaturalRooms {
             case VAMPIRE_LAIR -> Mobs.vampire();
             case NECROMANCER_LAIR -> "minecraft:skeleton";
             case HAGRAVEN_LAIR -> Mobs.forsworn();
+            case SCORPION_DEN -> Mobs.giantScorpion();
             case MINE -> room.piece.flavor % 2 == 1 ? Mobs.bandit() : Mobs.skeever();
             default -> switch (CaveRoster.of(room.piece.flavor)) {
                 case CaveRoster.BANDIT, CaveRoster.SMUGGLER -> Mobs.bandit();
@@ -129,6 +130,7 @@ public final class NaturalRooms {
                 case CaveRoster.SPRIGGAN -> Mobs.spriggan();
                 case CaveRoster.ICE -> Mobs.iceWraith();
                 case CaveRoster.SKEEVER -> Mobs.skeever();
+                case CaveRoster.SCORPION -> Mobs.giantScorpion();
                 default -> Mobs.denBeast(room.cx + room.cz);
             };
         };
@@ -179,8 +181,13 @@ public final class NaturalRooms {
             case VAMPIRE_LAIR -> vampire(p, room);
             case NECROMANCER_LAIR -> necromancer(p, room);
             case HAGRAVEN_LAIR -> hagraven(p, room);
+            case SCORPION_DEN -> CaveRooms.scorpions(p, room);
             case MINE -> mine(p, room, flavor);
             default -> {
+                if (p.kit == Kit.SCORPION_DEN) {
+                    CaveRooms.scorpions(p, room);
+                    break;
+                }
                 switch (CaveRoster.of(flavor)) {
                     case CaveRoster.BANDIT, CaveRoster.SMUGGLER -> bandits(p, room);
                     case CaveRoster.SPIDER -> CaveRooms.spiders(p, room);
@@ -190,6 +197,7 @@ public final class NaturalRooms {
                     case CaveRoster.SPRIGGAN -> CaveRooms.spriggans(p, room);
                     case CaveRoster.ICE -> CaveRooms.ice(p, room);
                     case CaveRoster.SKEEVER -> CaveRooms.skeevers(p, room);
+                    case CaveRoster.SCORPION -> CaveRooms.scorpions(p, room);
                     default -> den(p, room);
                 }
             }

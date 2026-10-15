@@ -2,36 +2,874 @@
   "_doc": "Atmoran (and Skaal) style sheet: low stone longhouses under turf and moss, rings round a fire.",
   "windows": "fence",
   "horns": true,
-  "faith": ["kynareth", "talos", "arkay"],
-  "crops": ["potatoes", "cabbage"],
-  "animals": ["goat", "sheep", "dog"],
-  "colors": ["light_gray", "white", "blue"],
-  "forms": {"ring": 3, "linear": 2, "cluster": 1},
-  "roofs": {"poor": {"gable": 2, "thatch": 1}, "common": {"steep": 2, "gable": 2}, "wealthy": {"steep": 2}, "noble": {"steep": 1}},
-  "halls": {"steep": 1},
-  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 1, "l": 1}, "noble": {"l": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 1], "noble": [1, 2]},
-  "rules": {"timber": 0.3, "porch": 0.1, "shutters": 0.0, "flowerBoxes": 0.0, "chimney": 0.8, "annex": 0.5, "banners": 0.3, "lanterns": 0.4},
-  "tiers": {
+  "faith": [
+    "kynareth",
+    "talos",
+    "arkay"
+  ],
+  "crops": [
+    "potatoes",
+    "cabbage"
+  ],
+  "animals": [
+    "goat",
+    "sheep",
+    "dog"
+  ],
+  "colors": [
+    "light_gray",
+    "white",
+    "blue"
+  ],
+  "forms": {
+    "ring": 3,
+    "linear": 2,
+    "cluster": 1
+  },
+  "roofs": {
+    "poor": {
+      "gable": 2,
+      "thatch": 1
+    },
+    "common": {
+      "steep": 2,
+      "gable": 2
+    },
+    "wealthy": {
+      "steep": 2
+    },
+    "noble": {
+      "steep": 1
+    }
+  },
+  "halls": {
+    "steep": 1
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 1
+    },
+    "wealthy": {
+      "rect": 1,
+      "l": 1
+    },
+    "noble": {
+      "l": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "cobblestone", "wall2": "mossy_cobblestone", "low": "mossy_cobblestone", "roof": "mossy_stone_brick", "roofFull": "moss_block", "wood": "spruce", "timber": false},
-      {"wall": "stone", "low": "cobblestone", "roof": "spruce", "roofFull": "moss_block", "wood": "spruce", "timber": false},
-      {"wall": "spruce_log", "low": "cobblestone", "roof": "mossy_cobblestone", "roofFull": "moss_block", "wood": "spruce", "timber": false}
+      1,
+      1
     ],
     "common": [
-      {"wall": "cobblestone", "low": "mossy_cobblestone", "roof": "mossy_stone_brick", "roofFull": "moss_block", "wood": "spruce", "post": "stripped_spruce_log", "timber": false},
-      {"wall": "stone_bricks", "wall2": "mossy_stone_bricks", "low": "cobblestone", "roof": "spruce", "wood": "spruce", "timber": false},
-      {"wall": "stripped_spruce_wood", "low": "cobblestone", "roof": "mossy_cobblestone", "roofFull": "moss_block", "wood": "spruce", "post": "bone_block"}
+      1,
+      1
     ],
     "wealthy": [
-      {"wall": "stone_bricks", "low": "mossy_stone_bricks", "roof": "mossy_stone_brick", "wood": "spruce", "post": "bone_block", "timber": false},
-      {"wall": "polished_andesite", "low": "cobblestone", "roof": "spruce", "roofFull": "moss_block", "wood": "dark_oak", "timber": false},
-      {"wall": "spruce_log", "low": "stone_bricks", "roof": "dark_oak", "wood": "spruce", "timber": false}
+      1,
+      1
     ],
     "noble": [
-      {"wall": "stone_bricks", "low": "chiseled_stone_bricks", "roof": "mossy_stone_brick", "wood": "dark_oak", "post": "bone_block", "timber": false},
-      {"wall": "mossy_stone_bricks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "spruce", "timber": false},
-      {"wall": "stripped_spruce_wood", "low": "stone_bricks", "roof": "mossy_stone_brick", "roofFull": "moss_block", "wood": "dark_oak", "post": "bone_block"}
+      1,
+      2
     ]
+  },
+  "rules": {
+    "timber": 0.3,
+    "porch": 0.1,
+    "shutters": 0.0,
+    "flowerBoxes": 0.0,
+    "chimney": 0.8,
+    "annex": 0.5,
+    "banners": 0.3,
+    "lanterns": 0.4
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "cobblestone",
+        "wall2": "mossy_cobblestone",
+        "low": "mossy_cobblestone",
+        "roof": "mossy_stone_brick",
+        "roofFull": "moss_block",
+        "wood": "spruce",
+        "timber": false
+      },
+      {
+        "wall": "stone",
+        "low": "cobblestone",
+        "roof": "spruce",
+        "roofFull": "moss_block",
+        "wood": "spruce",
+        "timber": false
+      },
+      {
+        "wall": "spruce_log",
+        "low": "cobblestone",
+        "roof": "mossy_cobblestone",
+        "roofFull": "moss_block",
+        "wood": "spruce",
+        "timber": false
+      }
+    ],
+    "common": [
+      {
+        "wall": "cobblestone",
+        "low": "mossy_cobblestone",
+        "roof": "mossy_stone_brick",
+        "roofFull": "moss_block",
+        "wood": "spruce",
+        "post": "stripped_spruce_log",
+        "timber": false
+      },
+      {
+        "wall": "stone_bricks",
+        "wall2": "mossy_stone_bricks",
+        "low": "cobblestone",
+        "roof": "spruce",
+        "wood": "spruce",
+        "timber": false
+      },
+      {
+        "wall": "stripped_spruce_wood",
+        "low": "cobblestone",
+        "roof": "mossy_cobblestone",
+        "roofFull": "moss_block",
+        "wood": "spruce",
+        "post": "bone_block"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "stone_bricks",
+        "low": "mossy_stone_bricks",
+        "roof": "mossy_stone_brick",
+        "wood": "spruce",
+        "post": "bone_block",
+        "timber": false
+      },
+      {
+        "wall": "polished_andesite",
+        "low": "cobblestone",
+        "roof": "spruce",
+        "roofFull": "moss_block",
+        "wood": "dark_oak",
+        "timber": false
+      },
+      {
+        "wall": "spruce_log",
+        "low": "stone_bricks",
+        "roof": "dark_oak",
+        "wood": "spruce",
+        "timber": false
+      }
+    ],
+    "noble": [
+      {
+        "wall": "stone_bricks",
+        "low": "chiseled_stone_bricks",
+        "roof": "mossy_stone_brick",
+        "wood": "dark_oak",
+        "post": "bone_block",
+        "timber": false
+      },
+      {
+        "wall": "mossy_stone_bricks",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "spruce",
+        "timber": false
+      },
+      {
+        "wall": "stripped_spruce_wood",
+        "low": "stone_bricks",
+        "roof": "mossy_stone_brick",
+        "roofFull": "moss_block",
+        "wood": "dark_oak",
+        "post": "bone_block"
+      }
+    ]
+  },
+  "why": [
+    "atmora.L1.continental_ice_dome",
+    "atmora.L6.kjolvik_anchorage"
+  ],
+  "regional_traditions": {
+    "tradition_1": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_1_0",
+        "atmoran_motif_1_1",
+        "atmoran_motif_1_2",
+        "atmoran_motif_1_3",
+        "atmoran_motif_1_4",
+        "atmoran_motif_1_5",
+        "atmoran_motif_1_6",
+        "atmoran_motif_1_7",
+        "atmoran_motif_1_8",
+        "atmoran_motif_1_9",
+        "atmoran_motif_1_10",
+        "atmoran_motif_1_11",
+        "atmoran_motif_1_12",
+        "atmoran_motif_1_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_2": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_2_0",
+        "atmoran_motif_2_1",
+        "atmoran_motif_2_2",
+        "atmoran_motif_2_3",
+        "atmoran_motif_2_4",
+        "atmoran_motif_2_5",
+        "atmoran_motif_2_6",
+        "atmoran_motif_2_7",
+        "atmoran_motif_2_8",
+        "atmoran_motif_2_9",
+        "atmoran_motif_2_10",
+        "atmoran_motif_2_11",
+        "atmoran_motif_2_12",
+        "atmoran_motif_2_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_3": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_3_0",
+        "atmoran_motif_3_1",
+        "atmoran_motif_3_2",
+        "atmoran_motif_3_3",
+        "atmoran_motif_3_4",
+        "atmoran_motif_3_5",
+        "atmoran_motif_3_6",
+        "atmoran_motif_3_7",
+        "atmoran_motif_3_8",
+        "atmoran_motif_3_9",
+        "atmoran_motif_3_10",
+        "atmoran_motif_3_11",
+        "atmoran_motif_3_12",
+        "atmoran_motif_3_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_4": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_4_0",
+        "atmoran_motif_4_1",
+        "atmoran_motif_4_2",
+        "atmoran_motif_4_3",
+        "atmoran_motif_4_4",
+        "atmoran_motif_4_5",
+        "atmoran_motif_4_6",
+        "atmoran_motif_4_7",
+        "atmoran_motif_4_8",
+        "atmoran_motif_4_9",
+        "atmoran_motif_4_10",
+        "atmoran_motif_4_11",
+        "atmoran_motif_4_12",
+        "atmoran_motif_4_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_5": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_5_0",
+        "atmoran_motif_5_1",
+        "atmoran_motif_5_2",
+        "atmoran_motif_5_3",
+        "atmoran_motif_5_4",
+        "atmoran_motif_5_5",
+        "atmoran_motif_5_6",
+        "atmoran_motif_5_7",
+        "atmoran_motif_5_8",
+        "atmoran_motif_5_9",
+        "atmoran_motif_5_10",
+        "atmoran_motif_5_11",
+        "atmoran_motif_5_12",
+        "atmoran_motif_5_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_6": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_6_0",
+        "atmoran_motif_6_1",
+        "atmoran_motif_6_2",
+        "atmoran_motif_6_3",
+        "atmoran_motif_6_4",
+        "atmoran_motif_6_5",
+        "atmoran_motif_6_6",
+        "atmoran_motif_6_7",
+        "atmoran_motif_6_8",
+        "atmoran_motif_6_9",
+        "atmoran_motif_6_10",
+        "atmoran_motif_6_11",
+        "atmoran_motif_6_12",
+        "atmoran_motif_6_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_7": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_7_0",
+        "atmoran_motif_7_1",
+        "atmoran_motif_7_2",
+        "atmoran_motif_7_3",
+        "atmoran_motif_7_4",
+        "atmoran_motif_7_5",
+        "atmoran_motif_7_6",
+        "atmoran_motif_7_7",
+        "atmoran_motif_7_8",
+        "atmoran_motif_7_9",
+        "atmoran_motif_7_10",
+        "atmoran_motif_7_11",
+        "atmoran_motif_7_12",
+        "atmoran_motif_7_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_8": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_8_0",
+        "atmoran_motif_8_1",
+        "atmoran_motif_8_2",
+        "atmoran_motif_8_3",
+        "atmoran_motif_8_4",
+        "atmoran_motif_8_5",
+        "atmoran_motif_8_6",
+        "atmoran_motif_8_7",
+        "atmoran_motif_8_8",
+        "atmoran_motif_8_9",
+        "atmoran_motif_8_10",
+        "atmoran_motif_8_11",
+        "atmoran_motif_8_12",
+        "atmoran_motif_8_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_9": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_9_0",
+        "atmoran_motif_9_1",
+        "atmoran_motif_9_2",
+        "atmoran_motif_9_3",
+        "atmoran_motif_9_4",
+        "atmoran_motif_9_5",
+        "atmoran_motif_9_6",
+        "atmoran_motif_9_7",
+        "atmoran_motif_9_8",
+        "atmoran_motif_9_9",
+        "atmoran_motif_9_10",
+        "atmoran_motif_9_11",
+        "atmoran_motif_9_12",
+        "atmoran_motif_9_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_10": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_10_0",
+        "atmoran_motif_10_1",
+        "atmoran_motif_10_2",
+        "atmoran_motif_10_3",
+        "atmoran_motif_10_4",
+        "atmoran_motif_10_5",
+        "atmoran_motif_10_6",
+        "atmoran_motif_10_7",
+        "atmoran_motif_10_8",
+        "atmoran_motif_10_9",
+        "atmoran_motif_10_10",
+        "atmoran_motif_10_11",
+        "atmoran_motif_10_12",
+        "atmoran_motif_10_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_11": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_11_0",
+        "atmoran_motif_11_1",
+        "atmoran_motif_11_2",
+        "atmoran_motif_11_3",
+        "atmoran_motif_11_4",
+        "atmoran_motif_11_5",
+        "atmoran_motif_11_6",
+        "atmoran_motif_11_7",
+        "atmoran_motif_11_8",
+        "atmoran_motif_11_9",
+        "atmoran_motif_11_10",
+        "atmoran_motif_11_11",
+        "atmoran_motif_11_12",
+        "atmoran_motif_11_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_12": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_12_0",
+        "atmoran_motif_12_1",
+        "atmoran_motif_12_2",
+        "atmoran_motif_12_3",
+        "atmoran_motif_12_4",
+        "atmoran_motif_12_5",
+        "atmoran_motif_12_6",
+        "atmoran_motif_12_7",
+        "atmoran_motif_12_8",
+        "atmoran_motif_12_9",
+        "atmoran_motif_12_10",
+        "atmoran_motif_12_11",
+        "atmoran_motif_12_12",
+        "atmoran_motif_12_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_13": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_13_0",
+        "atmoran_motif_13_1",
+        "atmoran_motif_13_2",
+        "atmoran_motif_13_3",
+        "atmoran_motif_13_4",
+        "atmoran_motif_13_5",
+        "atmoran_motif_13_6",
+        "atmoran_motif_13_7",
+        "atmoran_motif_13_8",
+        "atmoran_motif_13_9",
+        "atmoran_motif_13_10",
+        "atmoran_motif_13_11",
+        "atmoran_motif_13_12",
+        "atmoran_motif_13_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_14": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_14_0",
+        "atmoran_motif_14_1",
+        "atmoran_motif_14_2",
+        "atmoran_motif_14_3",
+        "atmoran_motif_14_4",
+        "atmoran_motif_14_5",
+        "atmoran_motif_14_6",
+        "atmoran_motif_14_7",
+        "atmoran_motif_14_8",
+        "atmoran_motif_14_9",
+        "atmoran_motif_14_10",
+        "atmoran_motif_14_11",
+        "atmoran_motif_14_12",
+        "atmoran_motif_14_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_15": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_15_0",
+        "atmoran_motif_15_1",
+        "atmoran_motif_15_2",
+        "atmoran_motif_15_3",
+        "atmoran_motif_15_4",
+        "atmoran_motif_15_5",
+        "atmoran_motif_15_6",
+        "atmoran_motif_15_7",
+        "atmoran_motif_15_8",
+        "atmoran_motif_15_9",
+        "atmoran_motif_15_10",
+        "atmoran_motif_15_11",
+        "atmoran_motif_15_12",
+        "atmoran_motif_15_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_16": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_16_0",
+        "atmoran_motif_16_1",
+        "atmoran_motif_16_2",
+        "atmoran_motif_16_3",
+        "atmoran_motif_16_4",
+        "atmoran_motif_16_5",
+        "atmoran_motif_16_6",
+        "atmoran_motif_16_7",
+        "atmoran_motif_16_8",
+        "atmoran_motif_16_9",
+        "atmoran_motif_16_10",
+        "atmoran_motif_16_11",
+        "atmoran_motif_16_12",
+        "atmoran_motif_16_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_17": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_17_0",
+        "atmoran_motif_17_1",
+        "atmoran_motif_17_2",
+        "atmoran_motif_17_3",
+        "atmoran_motif_17_4",
+        "atmoran_motif_17_5",
+        "atmoran_motif_17_6",
+        "atmoran_motif_17_7",
+        "atmoran_motif_17_8",
+        "atmoran_motif_17_9",
+        "atmoran_motif_17_10",
+        "atmoran_motif_17_11",
+        "atmoran_motif_17_12",
+        "atmoran_motif_17_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_18": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_18_0",
+        "atmoran_motif_18_1",
+        "atmoran_motif_18_2",
+        "atmoran_motif_18_3",
+        "atmoran_motif_18_4",
+        "atmoran_motif_18_5",
+        "atmoran_motif_18_6",
+        "atmoran_motif_18_7",
+        "atmoran_motif_18_8",
+        "atmoran_motif_18_9",
+        "atmoran_motif_18_10",
+        "atmoran_motif_18_11",
+        "atmoran_motif_18_12",
+        "atmoran_motif_18_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_19": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_19_0",
+        "atmoran_motif_19_1",
+        "atmoran_motif_19_2",
+        "atmoran_motif_19_3",
+        "atmoran_motif_19_4",
+        "atmoran_motif_19_5",
+        "atmoran_motif_19_6",
+        "atmoran_motif_19_7",
+        "atmoran_motif_19_8",
+        "atmoran_motif_19_9",
+        "atmoran_motif_19_10",
+        "atmoran_motif_19_11",
+        "atmoran_motif_19_12",
+        "atmoran_motif_19_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_20": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_20_0",
+        "atmoran_motif_20_1",
+        "atmoran_motif_20_2",
+        "atmoran_motif_20_3",
+        "atmoran_motif_20_4",
+        "atmoran_motif_20_5",
+        "atmoran_motif_20_6",
+        "atmoran_motif_20_7",
+        "atmoran_motif_20_8",
+        "atmoran_motif_20_9",
+        "atmoran_motif_20_10",
+        "atmoran_motif_20_11",
+        "atmoran_motif_20_12",
+        "atmoran_motif_20_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    },
+    "tradition_21": {
+      "wall": "spruce_planks",
+      "wall2": "packed_ice",
+      "low": "deepslate_bricks",
+      "wood": "spruce",
+      "roof": "deepslate_tile",
+      "accent": "cyan",
+      "motifs": [
+        "atmoran_motif_21_0",
+        "atmoran_motif_21_1",
+        "atmoran_motif_21_2",
+        "atmoran_motif_21_3",
+        "atmoran_motif_21_4",
+        "atmoran_motif_21_5",
+        "atmoran_motif_21_6",
+        "atmoran_motif_21_7",
+        "atmoran_motif_21_8",
+        "atmoran_motif_21_9",
+        "atmoran_motif_21_10",
+        "atmoran_motif_21_11",
+        "atmoran_motif_21_12",
+        "atmoran_motif_21_13"
+      ],
+      "materials": [
+        "spruce_planks",
+        "packed_ice",
+        "deepslate_bricks",
+        "spruce",
+        "deepslate_tile",
+        "cyan"
+      ]
+    }
   }
 }

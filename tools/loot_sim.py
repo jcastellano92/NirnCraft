@@ -25,6 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "mod" / "src" / "main" / "resources" / "data"
+AFFIX_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "loot" / "affixes"
 LOOT = DATA / "skycraft" / "loot_tables"
 SK = "skycraft:"
 LEVELS = [1, 3, 6, 9, 12, 15, 18, 22, 27, 32, 36, 40, 46, 50, 55, 60]
@@ -40,6 +41,24 @@ for f in (DATA / "skycraft" / "skycraft_values").glob("*.json"):
 TABLES = {}
 for f in LOOT.rglob("*.json"):
     TABLES[SK + f.relative_to(LOOT).as_posix()[:-5]] = json.loads(f.read_text(encoding="utf-8"))
+
+QUALITIES_DATA = json.loads((AFFIX_DIR / "qualities.json").read_text(encoding="utf-8"))["qualities"]
+MAKERS_DATA = json.loads((AFFIX_DIR / "makers.json").read_text(encoding="utf-8"))
+STORIED_DATA = json.loads((AFFIX_DIR / "storied.json").read_text(encoding="utf-8"))
+
+
+def roll_affix_mult(source_kind, rnd):
+    """Mirrors com.skycraft.loot.affix.ItemAffixes value multiplier for a gear drop."""
+    pairs = [(q, max(0, q.get("weights", {}).get(source_kind, 0))) for q in QUALITIES_DATA]
+    q = weighted(rnd, [p for p in pairs if p[1] > 0]) if any(w > 0 for _, w in pairs) else QUALITIES_DATA[3]
+    mult = float(q.get("value_mult", 1.0))
+    if q.get("tier", 0) >= 0 and rnd.random() < MAKERS_DATA.get("source_chances", {}).get(source_kind, 0.15):
+        m = rnd.choice(MAKERS_DATA["makers"])
+        mult *= float(m.get("value_mult", 1.0))
+    if source_kind == "boss" and rnd.random() < float(STORIED_DATA.get("boss_chance", 0.05)):
+        st = rnd.choice(STORIED_DATA["entries"])
+        mult *= float(st.get("value_mult", 1.0))
+    return mult, q["id"]
 
 
 def value_of(item):
@@ -190,14 +209,18 @@ def apply(d, fns, ctx, rnd):
                 d.item, d.value = "arrows", 1 + L // 8
                 continue
             d.item, d.tier = roll_gear(kind, L, rnd)
-            d.value, d.gear = value_of(d.item), True
+            q_chance = f.get("quality_chance", 0)
+            tid = ctx.get("table", "")
+            src_kind = "corpse" if "/corpse/" in tid else ("boss" if q_chance >= 0.32 or "/boss" in tid else ("merchant" if "/shop/" in tid else "container"))
+            affix_mult, _ = roll_affix_mult(src_kind, rnd)
+            d.value, d.gear = max(1, round(value_of(d.item) * affix_mult)), True
             if rnd.random() < enchant_chance(f.get("enchant_chance", 0), L):
                 n = 2 if L >= 36 and rnd.random() < .15 else 1
                 for _ in range(n):
                     lv = max(1, min(4, 1 + L // 15 + (rnd.random() < .25) - (rnd.random() < .25)))
                     d.enchant = max(d.enchant, lv)
                     d.value += 50 * lv * 1.4
-            if rnd.random() < f.get("quality_chance", 0):
+            if rnd.random() < q_chance:
                 q = 1 + rnd.randrange(max(1, min(5, 1 + L // 12)))
                 d.value *= 1 + .15 * q
         elif fn == SK + "skyrim_potion":
@@ -224,7 +247,7 @@ def apply(d, fns, ctx, rnd):
 
 def roll(tid, level, rnd, danger=1.0):
     out = []
-    roll_table(tid, {"level": level, "danger": danger}, rnd, out)
+    roll_table(tid, {"level": level, "danger": danger, "table": tid}, rnd, out)
     return out
 
 

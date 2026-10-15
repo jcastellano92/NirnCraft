@@ -235,4 +235,44 @@ public final class CaveRooms {
             loot(p, room, 751, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
         }
     }
+
+    // ------------------------------------------------------------------ scorpion den
+
+    static void scorpions(Painter p, Room room) {
+        p.feature("room:scorpion_clutch");
+        // sand-choked floor drifts and half-buried Yokudan sandstone columns
+        for (int x = room.minX + 1; x < room.maxX; x++) {
+            for (int z = room.minZ + 1; z < room.maxZ; z++) {
+                if (!inside(p, room, x, z, 0.92) || !p.ok(x, room.floor - 1, z)) continue;
+                int roll = p.roll(x, 0, z, 760, 10);
+                if (roll < 4) p.set(x, room.floor - 1, z, Blocks.SAND.defaultBlockState());
+                else if (roll < 7) p.set(x, room.floor - 1, z, Blocks.RED_SAND.defaultBlockState());
+                else p.set(x, room.floor - 1, z, Blocks.CUT_SANDSTONE.defaultBlockState());
+            }
+        }
+        // half-buried Yokudan columns
+        int[] col = edgeSpot(p, room, 761);
+        if (col != null) {
+            p.set(col[0], room.floor, col[1], Blocks.CHISELED_RED_SANDSTONE.defaultBlockState());
+            p.set(col[0], room.floor + 1, col[1], Blocks.CUT_RED_SANDSTONE.defaultBlockState());
+        }
+        // sun-bleached bones and scorpion egg clutches
+        scatter(p, room, 762, 6, r -> switch (r % 4) {
+            case 0 -> Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.X);
+            case 1 -> Deco.skull(Blocks.SKELETON_SKULL, r % 16);
+            case 2 -> Blocks.SANDSTONE_SLAB.defaultBlockState();
+            default -> Blocks.OCHRE_FROGLIGHT.defaultBlockState();
+        });
+        if (room.boss()) {
+            boss(p, room, 770, Mobs.giantScorpion(), "Broodmother Scorpion");
+            mob(p, room, 771, Mobs.giantScorpion(), null);
+            mob(p, room, 772, Mobs.giantScorpion(), null);
+            loot(p, room, 773, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
+            loot(p, room, 774, Deco.barrel(Direction.UP), Deco.LOOT_COMMON);
+            return;
+        }
+        int n = 1 + p.roll(room.cx, 0, room.cz, 775, 3);
+        for (int i = 0; i < n; i++) mob(p, room, 776 + i, Mobs.giantScorpion(), null);
+        if (room.piece.has(DungeonPiece.FLAG_DEAD_END)) loot(p, room, 780, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
+    }
 }

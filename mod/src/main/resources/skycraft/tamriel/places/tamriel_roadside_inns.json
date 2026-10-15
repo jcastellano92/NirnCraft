@@ -1,288 +1,392 @@
 [
- {
-  "id": "roadside_wayfarers_rest",
-  "name": "place.skycraft.roadside_wayfarers_rest",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/colovian_highlands",
-  "x": -1132,
-  "z": 3494,
-  "radius": 26
- },
- {
-  "id": "roadside_ninth_milestone",
-  "name": "place.skycraft.roadside_ninth_milestone",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/colovian_highlands",
-  "x": -3196,
-  "z": 4062,
-  "radius": 26
- },
- {
-  "id": "roadside_gilded_carafe",
-  "name": "place.skycraft.roadside_gilded_carafe",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/west_weald",
-  "x": -2420,
-  "z": 6176,
-  "radius": 26
- },
- {
-  "id": "roadside_laughing_septim",
-  "name": "place.skycraft.roadside_laughing_septim",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/colovian_highlands",
-  "x": -3082,
-  "z": 5465,
-  "radius": 26
- },
- {
-  "id": "roadside_ashen_lantern",
-  "name": "place.skycraft.roadside_ashen_lantern",
-  "type": "village",
-  "variant": "inn",
-  "culture": "dunmer",
-  "region": "morrowind/stonefalls",
-  "x": 4603,
-  "z": 3523,
-  "radius": 26
- },
- {
-  "id": "roadside_rose_and_thistle",
-  "name": "place.skycraft.roadside_rose_and_thistle",
-  "type": "village",
-  "variant": "inn",
-  "culture": "breton",
-  "region": "high_rock/stormhaven",
-  "x": -6299,
-  "z": 2485,
-  "radius": 26
- },
- {
-  "id": "roadside_crooked_crown",
-  "name": "place.skycraft.roadside_crooked_crown",
-  "type": "village",
-  "variant": "inn",
-  "culture": "breton",
-  "region": "high_rock/bjoulsae",
-  "x": -6541,
-  "z": 1481,
-  "radius": 26
- },
- {
-  "id": "roadside_ox_and_plough",
-  "name": "place.skycraft.roadside_ox_and_plough",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/nibenay_basin",
-  "x": 4462,
-  "z": 5917,
-  "radius": 26
- },
- {
-  "id": "roadside_gilded_griffon",
-  "name": "place.skycraft.roadside_gilded_griffon",
-  "type": "village",
-  "variant": "inn",
-  "culture": "breton",
-  "region": "high_rock/glenumbra",
-  "x": -8359,
-  "z": 2175,
-  "radius": 26
- },
- {
-  "id": "roadside_ladys_lantern",
-  "name": "place.skycraft.roadside_ladys_lantern",
-  "type": "village",
-  "variant": "inn",
-  "culture": "breton",
-  "region": "high_rock/stormhaven",
-  "x": -7463,
-  "z": 1280,
-  "radius": 26
- },
- {
-  "id": "roadside_guars_rest",
-  "name": "place.skycraft.roadside_guars_rest",
-  "type": "village",
-  "variant": "inn",
-  "culture": "dunmer",
-  "region": "morrowind/deshaan",
-  "x": 7563,
-  "z": 3771,
-  "radius": 26
- },
- {
-  "id": "roadside_sand_rose",
-  "name": "place.skycraft.roadside_sand_rose",
-  "type": "village",
-  "variant": "inn",
-  "culture": "redguard",
-  "region": "hammerfell/alikr_desert",
-  "x": -7397,
-  "z": 5632,
-  "radius": 26
- },
- {
-  "id": "roadside_silver_tankard",
-  "name": "place.skycraft.roadside_silver_tankard",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/gold_coast",
-  "x": -1584,
-  "z": 8528,
-  "radius": 26
- },
- {
-  "id": "roadside_wheel_and_lantern",
-  "name": "place.skycraft.roadside_wheel_and_lantern",
-  "type": "village",
-  "variant": "inn",
-  "culture": "imperial",
-  "region": "cyrodiil/nibenay_valley",
-  "x": -556,
-  "z": 8964,
-  "radius": 26
- },
- {
-  "id": "roadside_twin_moons",
-  "name": "place.skycraft.roadside_twin_moons",
-  "type": "village",
-  "variant": "inn",
-  "culture": "khajiit",
-  "region": "elsweyr/rimmen",
-  "x": 1228,
-  "z": 9679,
-  "radius": 26
- },
- {
-  "id": "roadside_desert_wind",
-  "name": "place.skycraft.roadside_desert_wind",
-  "type": "village",
-  "variant": "inn",
-  "culture": "redguard",
-  "region": "hammerfell/hews_bane",
-  "x": -5883,
-  "z": 7759,
-  "radius": 26
- },
- {
-  "id": "roadside_oasis_gate",
-  "name": "place.skycraft.roadside_oasis_gate",
-  "type": "village",
-  "variant": "inn",
-  "culture": "redguard",
-  "region": "hammerfell/alikr_desert",
-  "x": -6999,
-  "z": 6801,
-  "radius": 26
- },
- {
-  "id": "roadside_bright_scimitar",
-  "name": "place.skycraft.roadside_bright_scimitar",
-  "type": "village",
-  "variant": "inn",
-  "culture": "redguard",
-  "region": "hammerfell/hews_bane",
-  "x": -4910,
-  "z": 8494,
-  "radius": 26
- },
- {
-  "id": "roadside_hearth_and_harp",
-  "name": "place.skycraft.roadside_hearth_and_harp",
-  "type": "village",
-  "variant": "inn",
-  "culture": "breton",
-  "region": "high_rock/glenumbra",
-  "x": -8972,
-  "z": 1348,
-  "radius": 26
- },
- {
-  "id": "roadside_green_bough",
-  "name": "place.skycraft.roadside_green_bough",
-  "type": "village",
-  "variant": "inn",
-  "culture": "bosmer",
-  "region": "valenwood/malabal_tor",
-  "x": -4819,
-  "z": 9539,
-  "radius": 26
- },
- {
-  "id": "roadside_hollow_oak",
-  "name": "place.skycraft.roadside_hollow_oak",
-  "type": "village",
-  "variant": "inn",
-  "culture": "bosmer",
-  "region": "valenwood/reapers_march",
-  "x": -4011,
-  "z": 10270,
-  "radius": 26
- },
- {
-  "id": "roadside_sleeping_sand_cat",
-  "name": "place.skycraft.roadside_sleeping_sand_cat",
-  "type": "village",
-  "variant": "inn",
-  "culture": "khajiit",
-  "region": "elsweyr/torval",
-  "x": 1169,
-  "z": 11785,
-  "radius": 26
- },
- {
-  "id": "roadside_huntsmans_rest",
-  "name": "place.skycraft.roadside_huntsmans_rest",
-  "type": "village",
-  "variant": "inn",
-  "culture": "bosmer",
-  "region": "valenwood/grahtwood",
-  "x": -4842,
-  "z": 11033,
-  "radius": 26
- },
- {
-  "id": "roadside_dusk_caravan",
-  "name": "place.skycraft.roadside_dusk_caravan",
-  "type": "village",
-  "variant": "inn",
-  "culture": "khajiit",
-  "region": "elsweyr/pellitine",
-  "x": 252,
-  "z": 11937,
-  "radius": 26
- },
- {
-  "id": "roadside_saffron_tent",
-  "name": "place.skycraft.roadside_saffron_tent",
-  "type": "village",
-  "variant": "inn",
-  "culture": "khajiit",
-  "region": "elsweyr/senchal",
-  "x": 1892,
-  "z": 13524,
-  "radius": 26
- },
- {
-  "id": "roadside_wandering_root",
-  "name": "place.skycraft.roadside_wandering_root",
-  "type": "village",
-  "variant": "inn",
-  "culture": "bosmer",
-  "region": "valenwood/greenshade",
-  "x": -6461,
-  "z": 11472,
-  "radius": 26
- }
+  {
+    "id": "roadside_wayfarers_rest",
+    "name": "place.skycraft.roadside_wayfarers_rest",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/colovian_highlands",
+    "x": -1132,
+    "z": 3494,
+    "radius": 26,
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L1.limestone_caves"
+    ]
+  },
+  {
+    "id": "roadside_ninth_milestone",
+    "name": "place.skycraft.roadside_ninth_milestone",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/colovian_highlands",
+    "x": -3196,
+    "z": 4062,
+    "radius": 26,
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L1.limestone_caves"
+    ]
+  },
+  {
+    "id": "roadside_gilded_carafe",
+    "name": "place.skycraft.roadside_gilded_carafe",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/west_weald",
+    "x": -2420,
+    "z": 6176,
+    "radius": 26,
+    "why": [
+      "west_weald.L1.warm_limestone_slopes",
+      "west_weald.L1.deep_ayleid_vault"
+    ]
+  },
+  {
+    "id": "roadside_laughing_septim",
+    "name": "place.skycraft.roadside_laughing_septim",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/colovian_highlands",
+    "x": -3082,
+    "z": 5465,
+    "radius": 26,
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L1.limestone_caves"
+    ]
+  },
+  {
+    "id": "roadside_ashen_lantern",
+    "name": "place.skycraft.roadside_ashen_lantern",
+    "type": "village",
+    "variant": "inn",
+    "culture": "dunmer",
+    "region": "morrowind/stonefalls",
+    "x": 4603,
+    "z": 3523,
+    "radius": 26,
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L1.twin_peaks"
+    ]
+  },
+  {
+    "id": "roadside_rose_and_thistle",
+    "name": "place.skycraft.roadside_rose_and_thistle",
+    "type": "village",
+    "variant": "inn",
+    "culture": "breton",
+    "region": "high_rock/stormhaven",
+    "x": -6760,
+    "z": 1496,
+    "radius": 26,
+    "why": [
+      "stormhaven.L1.rolling_uplands",
+      "stormhaven.L1.weeping_crag"
+    ]
+  },
+  {
+    "id": "roadside_crooked_crown",
+    "name": "place.skycraft.roadside_crooked_crown",
+    "type": "village",
+    "variant": "inn",
+    "culture": "breton",
+    "region": "high_rock/bjoulsae",
+    "x": -6541,
+    "z": 1481,
+    "radius": 26,
+    "why": [
+      "bjoulsae.L1.bjoulsae_trench",
+      "bjoulsae.L1.evermor_lake_basin"
+    ]
+  },
+  {
+    "id": "roadside_ox_and_plough",
+    "name": "place.skycraft.roadside_ox_and_plough",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_basin",
+    "x": 4462,
+    "z": 5917,
+    "radius": 26,
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L1.basin_silt"
+    ]
+  },
+  {
+    "id": "roadside_gilded_griffon",
+    "name": "place.skycraft.roadside_gilded_griffon",
+    "type": "village",
+    "variant": "inn",
+    "culture": "breton",
+    "region": "high_rock/anticlere",
+    "x": -8359,
+    "z": 2175,
+    "radius": 26,
+    "why": [
+      "anticlere.L1.anticlere_scarp",
+      "anticlere.L1.river_meadows"
+    ]
+  },
+  {
+    "id": "roadside_ladys_lantern",
+    "name": "place.skycraft.roadside_ladys_lantern",
+    "type": "village",
+    "variant": "inn",
+    "culture": "breton",
+    "region": "high_rock/stormhaven",
+    "x": -7463,
+    "z": 1280,
+    "radius": 26,
+    "why": [
+      "stormhaven.L1.rolling_uplands",
+      "stormhaven.L1.weeping_crag"
+    ]
+  },
+  {
+    "id": "roadside_guars_rest",
+    "name": "place.skycraft.roadside_guars_rest",
+    "type": "village",
+    "variant": "inn",
+    "culture": "dunmer",
+    "region": "morrowind/deshaan",
+    "x": 7563,
+    "z": 3771,
+    "radius": 26,
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L1.obsidian_gorge"
+    ]
+  },
+  {
+    "id": "roadside_sand_rose",
+    "name": "place.skycraft.roadside_sand_rose",
+    "type": "village",
+    "variant": "inn",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -7397,
+    "z": 5632,
+    "radius": 26,
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "roadside_silver_tankard",
+    "name": "place.skycraft.roadside_silver_tankard",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/gold_coast",
+    "x": -1584,
+    "z": 8528,
+    "radius": 26,
+    "why": [
+      "gold_coast.L1.low_sea_cliffs",
+      "gold_coast.L1.sea_caves"
+    ]
+  },
+  {
+    "id": "roadside_wheel_and_lantern",
+    "name": "place.skycraft.roadside_wheel_and_lantern",
+    "type": "village",
+    "variant": "inn",
+    "culture": "imperial",
+    "region": "cyrodiil/nibenay_valley",
+    "x": -556,
+    "z": 8964,
+    "radius": 26,
+    "why": [
+      "nibenay_valley.L1.river_flats",
+      "nibenay_valley.L1.riverbank_caves"
+    ]
+  },
+  {
+    "id": "roadside_twin_moons",
+    "name": "place.skycraft.roadside_twin_moons",
+    "type": "village",
+    "variant": "inn",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 1228,
+    "z": 9679,
+    "radius": 26,
+    "why": [
+      "rimmen.L1.rimmen_cliff",
+      "rimmen.L1.alabaster_beds"
+    ]
+  },
+  {
+    "id": "roadside_desert_wind",
+    "name": "place.skycraft.roadside_desert_wind",
+    "type": "village",
+    "variant": "inn",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -5883,
+    "z": 7759,
+    "radius": 26,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "roadside_oasis_gate",
+    "name": "place.skycraft.roadside_oasis_gate",
+    "type": "village",
+    "variant": "inn",
+    "culture": "redguard",
+    "region": "hammerfell/alikr_desert",
+    "x": -6999,
+    "z": 6801,
+    "radius": 26,
+    "why": [
+      "alikr_desert.L1.erg",
+      "alikr_desert.L1.mesas"
+    ]
+  },
+  {
+    "id": "roadside_bright_scimitar",
+    "name": "place.skycraft.roadside_bright_scimitar",
+    "type": "village",
+    "variant": "inn",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -4910,
+    "z": 8494,
+    "radius": 26,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L1.taneth_cliff_shelf"
+    ]
+  },
+  {
+    "id": "roadside_hearth_and_harp",
+    "name": "place.skycraft.roadside_hearth_and_harp",
+    "type": "village",
+    "variant": "inn",
+    "culture": "breton",
+    "region": "high_rock/daggerfall",
+    "x": -8972,
+    "z": 1348,
+    "radius": 26,
+    "why": [
+      "daggerfall.L1.dagger_bluffs",
+      "daggerfall.L1.glenpoint_headland"
+    ]
+  },
+  {
+    "id": "roadside_green_bough",
+    "name": "place.skycraft.roadside_green_bough",
+    "type": "village",
+    "variant": "inn",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4819,
+    "z": 9539,
+    "radius": 26,
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L1.jungle_floor"
+    ]
+  },
+  {
+    "id": "roadside_hollow_oak",
+    "name": "place.skycraft.roadside_hollow_oak",
+    "type": "village",
+    "variant": "inn",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -4011,
+    "z": 10270,
+    "radius": 26,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ]
+  },
+  {
+    "id": "roadside_sleeping_sand_cat",
+    "name": "place.skycraft.roadside_sleeping_sand_cat",
+    "type": "village",
+    "variant": "inn",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1169,
+    "z": 11785,
+    "radius": 26,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ]
+  },
+  {
+    "id": "roadside_huntsmans_rest",
+    "name": "place.skycraft.roadside_huntsmans_rest",
+    "type": "village",
+    "variant": "inn",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4842,
+    "z": 11033,
+    "radius": 26,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "roadside_dusk_caravan",
+    "name": "place.skycraft.roadside_dusk_caravan",
+    "type": "village",
+    "variant": "inn",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 252,
+    "z": 11937,
+    "radius": 26,
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L1.tenmar_sinkholes"
+    ]
+  },
+  {
+    "id": "roadside_saffron_tent",
+    "name": "place.skycraft.roadside_saffron_tent",
+    "type": "village",
+    "variant": "inn",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 1892,
+    "z": 13524,
+    "radius": 26,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ]
+  },
+  {
+    "id": "roadside_wandering_root",
+    "name": "place.skycraft.roadside_wandering_root",
+    "type": "village",
+    "variant": "inn",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6461,
+    "z": 11472,
+    "radius": 26,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ]
+  }
 ]

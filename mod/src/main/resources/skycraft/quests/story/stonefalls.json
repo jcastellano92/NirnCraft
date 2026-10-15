@@ -1,0 +1,825 @@
+{
+  "region": "morrowind/stonefalls",
+  "province": "morrowind",
+  "line": "story_stonefalls",
+  "category": "main",
+  "title": "The Charter of Ash and Salt",
+  "why": [
+    "morrowind/stonefalls.L7.imperial_district_vs_dunmer_quarter",
+    "morrowind/stonefalls.L9.grand_council",
+    "morrowind/stonefalls.L9.border_watch",
+    "morrowind/stonefalls.L10.inner_sea_armature",
+    "morrowind/stonefalls.L10.pact_era_forts"
+  ],
+  "hook": {
+    "place": "ebonheart",
+    "rumour": "At Ebonheart's East Empire quays, two sets of customs manifests bear the Grand Council's stamp while cargo vanishes between Davon's Watch and Kragenmoor.",
+    "notice": "BY WARRANT OF THE GRAND COUNCIL AT EBONHEART — Investigators sought to audit the duplicate Inner Sea customs seals between Ebonheart, Davon's Watch, and Kragenmoor.",
+    "context": "Ebonheart is the uneasy hinge between the Imperial administration and the mainland Great Houses: whoever controls the Inner Sea customs seals controls ebony and glass tariffs across Stonefalls.",
+    "places": [
+      "ebonheart",
+      "dhalmora",
+      "davons_watch",
+      "lukiul_uxith",
+      "nukhaiarnit_landing",
+      "emberflint_mine",
+      "vivecs_antlers",
+      "inner_sea_armature",
+      "shubuakku_camp",
+      "etudiunar",
+      "ileamdun",
+      "sheogoraths_tongue",
+      "umasheakku",
+      "fort_virak"
+    ],
+    "npc": "story_stonefalls_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_stonefalls_01_double_manifest",
+      "order": 1,
+      "title": "Two Seals on the Inner Sea",
+      "region": "morrowind/stonefalls",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/stonefalls.L7.imperial_district_vs_dunmer_quarter",
+        "morrowind/stonefalls.L9.grand_council"
+      ],
+      "places": [
+        "ebonheart",
+        "dhalmora",
+        "davons_watch",
+        "lukiul_uxith",
+        "nukhaiarnit_landing",
+        "emberflint_mine",
+        "vivecs_antlers",
+        "inner_sea_armature",
+        "shubuakku_camp",
+        "etudiunar",
+        "ileamdun",
+        "sheogoraths_tongue",
+        "umasheakku",
+        "fort_virak"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "ebonheart",
+          "objective": "Compare the duplicate customs registers at the East Empire Company Hall and Grand Council Chambers in Ebonheart"
+        },
+        {
+          "id": 20,
+          "place": "davons_watch",
+          "objective": "Inspect the unlogged night-lighters moored below the sea-wall at Davon's Watch"
+        },
+        {
+          "id": 30,
+          "place": "kragenmoor",
+          "objective": "Question the Hlaalu toll-factors in Kragenmoor about the Ash-Mountain wax matrix"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ebonheart",
+          "text": "Compare the duplicate customs registers at the East Empire Company Hall and Grand Council Chambers in Ebonheart"
+        },
+        {
+          "type": "go",
+          "place": "davons_watch",
+          "text": "Inspect the unlogged night-lighters moored below the sea-wall at Davon's Watch"
+        },
+        {
+          "type": "go",
+          "place": "kragenmoor",
+          "text": "Question the Hlaalu toll-factors in Kragenmoor about the Ash-Mountain wax matrix"
+        }
+      ],
+      "consequence": "world_state:stonefalls_double_manifest_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "stonefalls_double_manifest_traced",
+        "flag": "story_sf_manifest_traced",
+        "summary": "The duplicate customs seals in Ebonheart and Davon's Watch are traced to a renegade syndicate operating between Kragenmoor and Fort Arand."
+      }
+    },
+    {
+      "id": "story_stonefalls_02_smoke_over_arand",
+      "order": 2,
+      "title": "Smoke Over Fort Arand",
+      "region": "morrowind/stonefalls",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_stonefalls_01_double_manifest",
+      "requires": [
+        "story_stonefalls_01_double_manifest"
+      ],
+      "why": [
+        "morrowind/stonefalls.L7.nord_settlers",
+        "morrowind/stonefalls.L9.border_watch"
+      ],
+      "places": [
+        "kragenmoor",
+        "fort_arand",
+        "silgrad_tower"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "kragenmoor",
+          "objective": "Track the smuggler mule-train north from Kragenmoor toward the lava-ridge at Fort Arand"
+        },
+        {
+          "id": 20,
+          "place": "fort_arand",
+          "objective": "Clear the renegade tariff-wardens holding Fort Arand and recover the Brass Stamp-Die"
+        },
+        {
+          "id": 30,
+          "place": "silgrad_tower",
+          "objective": "Carry the Brass Stamp-Die to the Redoran border-magistrates at Silgrad Tower"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "kragenmoor",
+          "text": "Track the smuggler mule-train north from Kragenmoor toward the lava-ridge at Fort Arand"
+        },
+        {
+          "type": "clear",
+          "place": "fort_arand",
+          "text": "Clear the renegade tariff-wardens holding Fort Arand and recover the Brass Stamp-Die"
+        },
+        {
+          "type": "go",
+          "place": "silgrad_tower",
+          "text": "Carry the Brass Stamp-Die to the Redoran border-magistrates at Silgrad Tower"
+        }
+      ],
+      "consequence": "world_state:fort_arand_stamp_recovered",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "fort_arand_stamp_recovered",
+        "flag": "story_sf_arand_cleared",
+        "summary": "The Brass Stamp-Die is recovered from Fort Arand and verified at Silgrad Tower, revealing a Dwemer steam-vault cache under Ash Mountain."
+      }
+    },
+    {
+      "id": "story_stonefalls_03_armature_of_ash_mountain",
+      "order": 3,
+      "title": "The Armature Under Ash Mountain",
+      "region": "morrowind/stonefalls",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_stonefalls_02_smoke_over_arand",
+      "requires": [
+        "story_stonefalls_02_smoke_over_arand"
+      ],
+      "why": [
+        "morrowind/stonefalls.L10.inner_sea_armature",
+        "morrowind/stonefalls.L10.pact_era_forts"
+      ],
+      "places": [
+        "blacklight",
+        "heimlyn_keep",
+        "ash_mountain"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "blacklight",
+          "objective": "Consult the Redoran archivists in Blacklight on the old Pact-era keys to Ash Mountain"
+        },
+        {
+          "id": 20,
+          "place": "heimlyn_keep",
+          "objective": "Retrieve the Dwemer pressure-key from the reliquary vaults beneath Heimlyn Keep"
+        },
+        {
+          "id": 30,
+          "place": "ash_mountain",
+          "objective": "Defeat the smuggling cabal inside the Ash Mountain steam-armature and seal the contraband sluice"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "blacklight",
+          "text": "Consult the Redoran archivists in Blacklight on the old Pact-era keys to Ash Mountain"
+        },
+        {
+          "type": "go",
+          "place": "heimlyn_keep",
+          "text": "Retrieve the Dwemer pressure-key from the reliquary vaults beneath Heimlyn Keep"
+        },
+        {
+          "type": "clear",
+          "place": "ash_mountain",
+          "text": "Defeat the smuggling cabal inside the Ash Mountain steam-armature and seal the contraband sluice"
+        }
+      ],
+      "consequence": "world_state:ash_mountain_sluice_sealed",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "ash_mountain_sluice_sealed",
+        "flag": "story_sf_armature_sealed",
+        "summary": "The Dwemer contraband sluice under Ash Mountain is sealed and the conspirators' ledger naming their Ebonheart patron is seized."
+      }
+    },
+    {
+      "id": "story_stonefalls_04_concord_of_ebonheart",
+      "order": 4,
+      "title": "Concord of the Inner Sea",
+      "region": "morrowind/stonefalls",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_stonefalls_03_armature_of_ash_mountain",
+      "requires": [
+        "story_stonefalls_03_armature_of_ash_mountain"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/stonefalls.L8.imperial_chapels",
+        "morrowind/stonefalls.L9.grand_council"
+      ],
+      "places": [
+        "brothers_of_strife",
+        "ebonheart"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "brothers_of_strife",
+          "objective": "Intercept the corrupt legate's mercenary rearguard beneath the stone colossi at Brothers of Strife"
+        },
+        {
+          "id": 20,
+          "place": "ebonheart",
+          "objective": "Present the Ash Mountain ledger to the Grand Council Chambers in Ebonheart"
+        },
+        {
+          "id": 30,
+          "place": "ebonheart",
+          "objective": "Witness the Imperial and Great House delegates ratify the renewed Inner Sea Customs Concord"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "brothers_of_strife",
+          "text": "Intercept the corrupt legate's mercenary rearguard beneath the stone colossi at Brothers of Strife"
+        },
+        {
+          "type": "go",
+          "place": "ebonheart",
+          "text": "Present the Ash Mountain ledger to the Grand Council Chambers in Ebonheart"
+        },
+        {
+          "type": "go",
+          "place": "ebonheart",
+          "text": "Witness the Imperial and Great House delegates ratify the renewed Inner Sea Customs Concord"
+        }
+      ],
+      "consequence": "world_state:ebonheart_inner_sea_concord_ratified",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Legate-Arbiter of Stonefalls",
+        "unique_item": "skycraft:ebony_sword"
+      },
+      "consequence_detail": {
+        "world_state": "ebonheart_inner_sea_concord_ratified",
+        "flag": "story_sf_finale_complete",
+        "summary": "The corrupt tariff ring is broken, lawful shipping resumes between Ebonheart and Vvardenfell, and the Grand Council honors your service."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_stonefalls_hook_npc",
+      "name": "Warden of Ebonheart",
+      "role": "guard",
+      "place": "ebonheart",
+      "greet": "At Ebonheart's East Empire quays, two sets of customs manifests bear the Grand Council's stamp while cargo vanishes between Davon's Watch and Kragenmoor."
+    }
+  ],
+  "scenes": {
+    "story_stonefalls_scene_01": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ebonheart (1).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ebonheart at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ebonheart and report back to the seat."
+    ],
+    "story_stonefalls_scene_02": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Dhalmora (2).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Dhalmora at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Dhalmora and report back to the seat."
+    ],
+    "story_stonefalls_scene_03": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Davons Watch (3).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Davons Watch at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Davons Watch and report back to the seat."
+    ],
+    "story_stonefalls_scene_04": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Lukiul Uxith (4).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Lukiul Uxith at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Lukiul Uxith and report back to the seat."
+    ],
+    "story_stonefalls_scene_05": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Nukhaiarnit Landing (5).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Nukhaiarnit Landing at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Nukhaiarnit Landing and report back to the seat."
+    ],
+    "story_stonefalls_scene_06": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Emberflint Mine (6).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Emberflint Mine at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Emberflint Mine and report back to the seat."
+    ],
+    "story_stonefalls_scene_07": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Vivecs Antlers (7).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Vivecs Antlers at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Vivecs Antlers and report back to the seat."
+    ],
+    "story_stonefalls_scene_08": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Inner Sea Armature (8).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Inner Sea Armature at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Inner Sea Armature and report back to the seat."
+    ],
+    "story_stonefalls_scene_09": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Shubuakku Camp (9).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Shubuakku Camp at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Shubuakku Camp and report back to the seat."
+    ],
+    "story_stonefalls_scene_10": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Etudiunar (10).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Etudiunar at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Etudiunar and report back to the seat."
+    ],
+    "story_stonefalls_scene_11": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ileamdun (11).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ileamdun at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ileamdun and report back to the seat."
+    ],
+    "story_stonefalls_scene_12": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Sheogoraths Tongue (12).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Sheogoraths Tongue at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Sheogoraths Tongue and report back to the seat."
+    ],
+    "story_stonefalls_scene_13": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Umasheakku (13).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Umasheakku at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Umasheakku and report back to the seat."
+    ],
+    "story_stonefalls_scene_14": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Fort Virak (14).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Fort Virak at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Fort Virak and report back to the seat."
+    ],
+    "story_stonefalls_scene_15": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ebonheart (15).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ebonheart at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ebonheart and report back to the seat."
+    ],
+    "story_stonefalls_scene_16": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Dhalmora (16).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Dhalmora at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Dhalmora and report back to the seat."
+    ],
+    "story_stonefalls_scene_17": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Davons Watch (17).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Davons Watch at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Davons Watch and report back to the seat."
+    ],
+    "story_stonefalls_scene_18": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Lukiul Uxith (18).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Lukiul Uxith at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Lukiul Uxith and report back to the seat."
+    ],
+    "story_stonefalls_scene_19": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Nukhaiarnit Landing (19).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Nukhaiarnit Landing at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Nukhaiarnit Landing and report back to the seat."
+    ],
+    "story_stonefalls_scene_20": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Emberflint Mine (20).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Emberflint Mine at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Emberflint Mine and report back to the seat."
+    ],
+    "story_stonefalls_scene_21": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Vivecs Antlers (21).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Vivecs Antlers at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Vivecs Antlers and report back to the seat."
+    ],
+    "story_stonefalls_scene_22": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Inner Sea Armature (22).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Inner Sea Armature at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Inner Sea Armature and report back to the seat."
+    ],
+    "story_stonefalls_scene_23": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Shubuakku Camp (23).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Shubuakku Camp at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Shubuakku Camp and report back to the seat."
+    ],
+    "story_stonefalls_scene_24": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Etudiunar (24).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Etudiunar at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Etudiunar and report back to the seat."
+    ],
+    "story_stonefalls_scene_25": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ileamdun (25).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ileamdun at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ileamdun and report back to the seat."
+    ],
+    "story_stonefalls_scene_26": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Sheogoraths Tongue (26).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Sheogoraths Tongue at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Sheogoraths Tongue and report back to the seat."
+    ],
+    "story_stonefalls_scene_27": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Umasheakku (27).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Umasheakku at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Umasheakku and report back to the seat."
+    ],
+    "story_stonefalls_scene_28": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Fort Virak (28).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Fort Virak at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Fort Virak and report back to the seat."
+    ],
+    "story_stonefalls_scene_29": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ebonheart (29).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ebonheart at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ebonheart and report back to the seat."
+    ],
+    "story_stonefalls_scene_30": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Dhalmora (30).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Dhalmora at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Dhalmora and report back to the seat."
+    ],
+    "story_stonefalls_scene_31": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Davons Watch (31).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Davons Watch at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Davons Watch and report back to the seat."
+    ],
+    "story_stonefalls_scene_32": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Lukiul Uxith (32).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Lukiul Uxith at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Lukiul Uxith and report back to the seat."
+    ],
+    "story_stonefalls_scene_33": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Nukhaiarnit Landing (33).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Nukhaiarnit Landing at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Nukhaiarnit Landing and report back to the seat."
+    ],
+    "story_stonefalls_scene_34": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Emberflint Mine (34).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Emberflint Mine at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Emberflint Mine and report back to the seat."
+    ],
+    "story_stonefalls_scene_35": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Vivecs Antlers (35).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Vivecs Antlers at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Vivecs Antlers and report back to the seat."
+    ],
+    "story_stonefalls_scene_36": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Inner Sea Armature (36).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Inner Sea Armature at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Inner Sea Armature and report back to the seat."
+    ],
+    "story_stonefalls_scene_37": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Shubuakku Camp (37).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Shubuakku Camp at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Shubuakku Camp and report back to the seat."
+    ],
+    "story_stonefalls_scene_38": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Etudiunar (38).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Etudiunar at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Etudiunar and report back to the seat."
+    ],
+    "story_stonefalls_scene_39": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ileamdun (39).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ileamdun at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ileamdun and report back to the seat."
+    ],
+    "story_stonefalls_scene_40": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Sheogoraths Tongue (40).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Sheogoraths Tongue at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Sheogoraths Tongue and report back to the seat."
+    ],
+    "story_stonefalls_scene_41": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Umasheakku (41).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Umasheakku at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Umasheakku and report back to the seat."
+    ],
+    "story_stonefalls_scene_42": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Fort Virak (42).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Fort Virak at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Fort Virak and report back to the seat."
+    ],
+    "story_stonefalls_scene_43": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ebonheart (43).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ebonheart at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ebonheart and report back to the seat."
+    ],
+    "story_stonefalls_scene_44": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Dhalmora (44).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Dhalmora at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Dhalmora and report back to the seat."
+    ],
+    "story_stonefalls_scene_45": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Davons Watch (45).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Davons Watch at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Davons Watch and report back to the seat."
+    ],
+    "story_stonefalls_scene_46": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Lukiul Uxith (46).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Lukiul Uxith at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Lukiul Uxith and report back to the seat."
+    ],
+    "story_stonefalls_scene_47": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Nukhaiarnit Landing (47).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Nukhaiarnit Landing at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Nukhaiarnit Landing and report back to the seat."
+    ],
+    "story_stonefalls_scene_48": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Emberflint Mine (48).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Emberflint Mine at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Emberflint Mine and report back to the seat."
+    ],
+    "story_stonefalls_scene_49": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Vivecs Antlers (49).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Vivecs Antlers at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Vivecs Antlers and report back to the seat."
+    ],
+    "story_stonefalls_scene_50": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Inner Sea Armature (50).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Inner Sea Armature at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Inner Sea Armature and report back to the seat."
+    ],
+    "story_stonefalls_scene_51": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Shubuakku Camp (51).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Shubuakku Camp at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Shubuakku Camp and report back to the seat."
+    ],
+    "story_stonefalls_scene_52": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Etudiunar (52).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Etudiunar at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Etudiunar and report back to the seat."
+    ],
+    "story_stonefalls_scene_53": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ileamdun (53).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ileamdun at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ileamdun and report back to the seat."
+    ],
+    "story_stonefalls_scene_54": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Sheogoraths Tongue (54).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Sheogoraths Tongue at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Sheogoraths Tongue and report back to the seat."
+    ],
+    "story_stonefalls_scene_55": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Umasheakku (55).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Umasheakku at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Umasheakku and report back to the seat."
+    ],
+    "story_stonefalls_scene_56": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Fort Virak (56).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Fort Virak at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Fort Virak and report back to the seat."
+    ],
+    "story_stonefalls_scene_57": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ebonheart (57).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ebonheart at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ebonheart and report back to the seat."
+    ],
+    "story_stonefalls_scene_58": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Dhalmora (58).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Dhalmora at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Dhalmora and report back to the seat."
+    ],
+    "story_stonefalls_scene_59": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Davons Watch (59).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Davons Watch at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Davons Watch and report back to the seat."
+    ],
+    "story_stonefalls_scene_60": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Lukiul Uxith (60).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Lukiul Uxith at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Lukiul Uxith and report back to the seat."
+    ],
+    "story_stonefalls_scene_61": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Nukhaiarnit Landing (61).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Nukhaiarnit Landing at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Nukhaiarnit Landing and report back to the seat."
+    ],
+    "story_stonefalls_scene_62": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Emberflint Mine (62).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Emberflint Mine at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Emberflint Mine and report back to the seat."
+    ],
+    "story_stonefalls_scene_63": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Vivecs Antlers (63).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Vivecs Antlers at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Vivecs Antlers and report back to the seat."
+    ],
+    "story_stonefalls_scene_64": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Inner Sea Armature (64).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Inner Sea Armature at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Inner Sea Armature and report back to the seat."
+    ],
+    "story_stonefalls_scene_65": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Shubuakku Camp (65).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Shubuakku Camp at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Shubuakku Camp and report back to the seat."
+    ],
+    "story_stonefalls_scene_66": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Etudiunar (66).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Etudiunar at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Etudiunar and report back to the seat."
+    ],
+    "story_stonefalls_scene_67": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ileamdun (67).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ileamdun at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ileamdun and report back to the seat."
+    ],
+    "story_stonefalls_scene_68": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Sheogoraths Tongue (68).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Sheogoraths Tongue at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Sheogoraths Tongue and report back to the seat."
+    ],
+    "story_stonefalls_scene_69": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Umasheakku (69).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Umasheakku at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Umasheakku and report back to the seat."
+    ],
+    "story_stonefalls_scene_70": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Fort Virak (70).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Fort Virak at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Fort Virak and report back to the seat."
+    ],
+    "story_stonefalls_scene_71": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ebonheart (71).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ebonheart at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ebonheart and report back to the seat."
+    ],
+    "story_stonefalls_scene_72": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Dhalmora (72).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Dhalmora at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Dhalmora and report back to the seat."
+    ],
+    "story_stonefalls_scene_73": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Davons Watch (73).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Davons Watch at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Davons Watch and report back to the seat."
+    ],
+    "story_stonefalls_scene_74": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Lukiul Uxith (74).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Lukiul Uxith at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Lukiul Uxith and report back to the seat."
+    ],
+    "story_stonefalls_scene_75": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Nukhaiarnit Landing (75).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Nukhaiarnit Landing at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Nukhaiarnit Landing and report back to the seat."
+    ],
+    "story_stonefalls_scene_76": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Emberflint Mine (76).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Emberflint Mine at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Emberflint Mine and report back to the seat."
+    ],
+    "story_stonefalls_scene_77": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Vivecs Antlers (77).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Vivecs Antlers at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Vivecs Antlers and report back to the seat."
+    ],
+    "story_stonefalls_scene_78": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Inner Sea Armature (78).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Inner Sea Armature at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Inner Sea Armature and report back to the seat."
+    ],
+    "story_stonefalls_scene_79": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Shubuakku Camp (79).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Shubuakku Camp at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Shubuakku Camp and report back to the seat."
+    ],
+    "story_stonefalls_scene_80": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Etudiunar (80).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Etudiunar at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Etudiunar and report back to the seat."
+    ],
+    "story_stonefalls_scene_81": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Ileamdun (81).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Ileamdun at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Ileamdun and report back to the seat."
+    ],
+    "story_stonefalls_scene_82": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Sheogoraths Tongue (82).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Sheogoraths Tongue at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Sheogoraths Tongue and report back to the seat."
+    ],
+    "story_stonefalls_scene_83": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Umasheakku (83).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Umasheakku at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Umasheakku and report back to the seat."
+    ],
+    "story_stonefalls_scene_84": [
+      "Warden of Ebonheart: Examine the ash-wax seals recovered near Fort Virak (84).",
+      "Watch-Captain of Stonefalls: The ledger entries match the dispatches troubling Stonefalls.",
+      "Watch-Captain of Stonefalls: Our scouts tracked the courier column past Fort Virak at dusk.",
+      "Watch-Captain of Stonefalls: Secure the approaches around Fort Virak and report back to the seat."
+    ]
+  }
+}

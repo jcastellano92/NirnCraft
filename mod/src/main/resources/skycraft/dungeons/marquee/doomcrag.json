@@ -1,0 +1,313 @@
+{
+ "id": "doomcrag",
+ "why": [
+  "rivenspire.L10.doomcrag",
+  "rivenspire.L11.doomcrag_fall"
+ ],
+ "kit": "ayleid",
+ "entry_depth": 24,
+ "palette": {
+  "wall": [
+   "minecraft:calcite*5",
+   "minecraft:quartz_bricks*4",
+   "minecraft:polished_blackstone_bricks*4",
+   "minecraft:crying_obsidian*2",
+   "minecraft:deepslate_tiles*3"
+  ],
+  "floor": [
+   "minecraft:polished_diorite*4",
+   "minecraft:deepslate_tiles*4",
+   "minecraft:calcite*3"
+  ],
+  "ceiling": [
+   "minecraft:smooth_quartz*4",
+   "minecraft:polished_blackstone_bricks*3"
+  ],
+  "rock": "minecraft:deepslate",
+  "trim": "minecraft:chiseled_quartz_block",
+  "pillar": "minecraft:quartz_pillar",
+  "cap": "minecraft:chiseled_quartz_block",
+  "light": "minecraft:sea_lantern",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:diorite_wall",
+  "stair": "minecraft:quartz_stairs"
+ },
+ "boss": {
+  "id": "skycraft:vampire_lord|skycraft:vampire|minecraft:wither_skeleton",
+  "name": "Earl Reezal-Jul of House Montclair"
+ },
+ "books": {
+  "remnant": {
+   "title": "On the Lightless Remnant",
+   "author": "Verandis Ravenwatch",
+   "pages": [
+    "Erokii was built to cradle life, yet when the relic cracked at its heart the black crags drank its inversion.\n\nMontclair thinks to drink from the Lightless Remnant and rule Rivenspire. He does not understand that the stone is already drinking him."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "erokii_narthex",
+   "name": "The Split Narthex of Erokii",
+   "at": [0, 0],
+   "y": -8,
+   "half": [5, 6],
+   "h": 12,
+   "role": "start",
+   "doors": {"s": 8},
+   "ops": [
+    {"op": "landing", "y": 8, "depth": 3, "stairs": 3},
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "scatter", "block": "minecraft:cobweb", "on": "ceiling", "chance": 14},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Montclair Blood-Sworn", "mode": "sleep", "n": 2, "where": "wall"},
+     {"id": "skycraft:gargoyle|minecraft:iron_golem", "name": "Crag Gargoyle", "mode": "awake", "n": 1}
+    ]}
+   ]
+  },
+  {
+   "id": "welkynd_west",
+   "name": "Shattered Welkynd Vault",
+   "at": [-1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:stray", "name": "Erokii Wraith", "mode": "sleep", "at": [[-3, -3], [-3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "skycraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "welkynd_east",
+   "name": "Blood-Stained Choir",
+   "at": [1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Montclair Scion", "mode": "ambush", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, -3], "table": "skycraft:chests/dungeon_minor", "face": "e"}
+   ]
+  },
+  {
+   "id": "spire_fissure",
+   "name": "The Riven Spire Concourse",
+   "at": [0, -1],
+   "y": -10,
+   "half": [5, 5],
+   "h": 10,
+   "ops": [
+    {"op": "bowl", "tiers": 2, "width": 2, "step": 1},
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:stray", "name": "Ayleid Shade", "mode": "awake", "n": 2, "where": "ledge"},
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Montclair Huscarl", "mode": "ambush", "n": 2, "where": "ledge"}
+    ]},
+    {"op": "feature", "id": "setpiece:riven_concourse"}
+   ]
+  },
+  {
+   "id": "thrall_cells",
+   "name": "The Blood-Drained Cells",
+   "at": [-1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [-3, -3, 0], "to": [-2, -3, 0], "block": "minecraft:crying_obsidian"},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:death_hound|minecraft:wolf", "name": "Montclair Hound", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "skycraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "star_gallery",
+   "name": "Gallery of Darkened Stars",
+   "at": [1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "scatter", "block": "minecraft:cobweb", "on": "floor", "chance": 16, "salt": 450},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Ayleid Guardian", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, 3], "table": "skycraft:chests/dungeon_common", "face": "e"}
+   ]
+  },
+  {
+   "id": "crimson_Crucible",
+   "name": "The Crimson Crucible",
+   "at": [0, -2],
+   "y": -13,
+   "half": [5, 5],
+   "h": 12,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "fill", "from": [-1, -1, 0], "to": [1, 1, 1], "block": "minecraft:redstone_block"},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:gargoyle|minecraft:iron_golem", "name": "Doomcrag Behemoth", "mode": "elite", "at": [[0, -3]]},
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Blood-Weaver", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "feature", "id": "setpiece:crimson_crucible"}
+   ]
+  },
+  {
+   "id": "nave_west",
+   "name": "West Ayleid Transept",
+   "at": [-1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:stray", "name": "Erokii Sentinel", "mode": "sleep", "at": [[-3, -3], [-3, 0], [-3, 3], [3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, -3], "table": "skycraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "nave_east",
+   "name": "East Ayleid Transept",
+   "at": [1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 9,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "scatter", "block": "minecraft:skeleton_skull", "on": "floor", "chance": 14, "salt": 451},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Montclair Knight", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 4], "table": "skycraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "abyss_bridge",
+   "name": "The Lightless Span",
+   "at": [-1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:stray", "name": "Lightless Wraith", "mode": "awake", "n": 2, "where": "any"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "skycraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "remnant_crown",
+   "name": "Sanctuary of the Lightless Remnant",
+   "at": [0, -3],
+   "y": -22,
+   "half": [6, 6],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "walllights", "every": 4, "y": 10},
+    {"op": "boss", "at": [0, -2], "dais": 2},
+    {"op": "fill", "from": [-6, -6, 1], "to": [6, -6, 9], "block": "minecraft:crying_obsidian"},
+    {"op": "chest", "at": [0, -5], "table": "skycraft:chests/dungeon_boss", "face": "s", "capstone": true},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Montclair Honor-Guard", "mode": "sleep", "at": [[-4, 3], [4, 3], [-4, 0], [4, 0]]}
+    ]}
+   ]
+  },
+  {
+   "id": "verandis_alcove",
+   "name": "Ravenwatch Study",
+   "at": [1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [3, -3, 0], "to": [3, -3, 0], "block": "trim"},
+    {"op": "lectern", "at": [3, -3, 1], "book": "remnant", "candle": true, "face": "w"},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Relic Watcher", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "blood_well",
+   "name": "The Sunken Ayleid Well",
+   "at": [-2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "flood", "sink": 3, "margin": 1, "causeway": 3, "rails": false},
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:stray", "name": "Well Wraith", "mode": "awake", "n": 1, "where": "lane"}
+    ]}
+   ]
+  },
+  {
+   "id": "coffer_vault",
+   "name": "Montclair Coffer Vault",
+   "at": [2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "chest", "at": [0, -3], "table": "skycraft:chests/dungeon_cache", "face": "s"},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:vampire|minecraft:vindicator", "name": "Coffer Guard", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "spire_gallery_walk",
+   "name": "Outer Spire Walk",
+   "at": [-2, -2],
+   "y": -18,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:stray", "name": "Spire Watcher", "mode": "sleep", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [0, 3], "table": "skycraft:chests/dungeon_minor", "face": "n"}
+   ]
+  }
+ ],
+ "links": [
+  {"a": "erokii_narthex", "b": "welkynd_west"},
+  {"a": "erokii_narthex", "b": "welkynd_east"},
+  {"a": "erokii_narthex", "b": "spire_fissure"},
+  {"a": "spire_fissure", "b": "thrall_cells"},
+  {"a": "spire_fissure", "b": "star_gallery"},
+  {"a": "thrall_cells", "b": "blood_well"},
+  {"a": "star_gallery", "b": "coffer_vault"},
+  {"a": "spire_fissure", "b": "crimson_Crucible", "gate": "spire_fissure"},
+  {"a": "crimson_Crucible", "b": "nave_west"},
+  {"a": "crimson_Crucible", "b": "nave_east"},
+  {"a": "nave_west", "b": "abyss_bridge"},
+  {"a": "nave_east", "b": "verandis_alcove"},
+  {"a": "verandis_alcove", "b": "remnant_crown", "gate": "verandis_alcove", "trap": true},
+  {"a": "nave_west", "b": "spire_gallery_walk"},
+  {"a": "blood_well", "b": "spire_gallery_walk"}
+ ]
+}

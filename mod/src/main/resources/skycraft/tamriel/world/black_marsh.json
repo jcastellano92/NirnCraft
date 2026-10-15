@@ -1,0 +1,3452 @@
+{
+  "province": "black_marsh",
+  "truth": "Black Marsh—Argonia to its people—is a vast subtropical basin of slow rivers, tidal deltas, peat domes, and flooded root-tangles fed by the Niben's spill and the warm rains of the Padomaic Ocean. Only its north-western rim rises into firm basalt and limestone; everywhere else dry ground consists of natural levees, shell middens, ancient stone xanmeer platforms, and clay mounds raised around sentient Hist trees. Before the Duskfall, Saxhleel priest-kings built calendar pyramids and stone canals; after the Duskfall they abandoned stone for reed, mud, and living root, listening to the Hist sap while empires and Dunmer slavers broke their teeth on the outer border and never reached Helstrom at the centre.",
+  "layers": {
+    "L1": [
+      {
+        "id": "alluvial_basin",
+        "text": "a 38 km2 low-gradient basin of silt, peat, and drowned limestone karst",
+        "cites": []
+      },
+      {
+        "id": "nw_border_uplands",
+        "text": "basalt and sandstone ridges (30-80 blocks) along the Cyrodiil and Morrowind frontier",
+        "cites": []
+      },
+      {
+        "id": "hist_clay_rises",
+        "text": "natural and artificial mounds (8-20 blocks) that stay above flood stage",
+        "cites": []
+      },
+      {
+        "id": "xanmeer_foundations",
+        "text": "pre-Duskfall stepped stone platforms half-sunk in peat",
+        "cites": []
+      },
+      {
+        "id": "east_barrier_spits",
+        "text": "sandy barrier islands, coral shoals, and tidal coves on the Padomaic coast",
+        "cites": []
+      },
+      {
+        "id": "lilmoth_delta",
+        "text": "a multi-mouth silt fan emptying into Topal Bay",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "monsoon_humidity",
+        "text": "warm, wet, mist-heavy air year-round with afternoon downpours",
+        "cites": [
+          "black_marsh.L1.alluvial_basin"
+        ]
+      },
+      {
+        "id": "spore_and_marsh_haze",
+        "text": "luminous night fog and heavy pollen over stagnant backwaters",
+        "cites": [
+          "black_marsh.L1.alluvial_basin",
+          "black_marsh.L2.monsoon_humidity"
+        ]
+      },
+      {
+        "id": "padomaic_squalls",
+        "text": "coastal gales that push salt water up the eastern estuaries",
+        "cites": [
+          "black_marsh.L1.east_barrier_spits"
+        ]
+      },
+      {
+        "id": "upland_breeze",
+        "text": "drier air on the Stormhold and Gideon border hills",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "braided_channels",
+        "text": "slow, interconnected river arms, oxbows, and root-tunnels navigable by flatboat",
+        "cites": [
+          "black_marsh.L1.alluvial_basin",
+          "black_marsh.L2.monsoon_humidity"
+        ]
+      },
+      {
+        "id": "root_water_network",
+        "text": "submerged hollow root-tubes through which native swimmers move between pools",
+        "cites": [
+          "black_marsh.L1.hist_clay_rises",
+          "black_marsh.L3.braided_channels"
+        ]
+      },
+      {
+        "id": "hist_sap_springs",
+        "text": "amber sap-fed pools around the roots of elder Hist trees",
+        "cites": [
+          "black_marsh.L1.hist_clay_rises"
+        ]
+      },
+      {
+        "id": "brackish_estuaries",
+        "text": "salt-and-fresh mixing zones along the south and east coasts",
+        "cites": [
+          "black_marsh.L1.lilmoth_delta",
+          "black_marsh.L2.padomaic_squalls"
+        ]
+      },
+      {
+        "id": "blackwood_spill",
+        "text": "Niben overflow entering the western reed beds",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "hist_grove",
+        "text": "giant buttressed Hist trees, bioluminescent fungi, sacred silence",
+        "cites": [
+          "black_marsh.L1.hist_clay_rises",
+          "black_marsh.L3.hist_sap_springs"
+        ]
+      },
+      {
+        "id": "mangrove_tangle",
+        "text": "stilt-rooted mangroves, mudskippers, haj mota, swamp jellyfish",
+        "cites": [
+          "black_marsh.L3.brackish_estuaries"
+        ]
+      },
+      {
+        "id": "cypress_mire",
+        "text": "knees of bald cypress, hanging moss, wamasu, hackwings, fleshflies",
+        "cites": [
+          "black_marsh.L3.braided_channels",
+          "black_marsh.L2.spore_and_marsh_haze"
+        ]
+      },
+      {
+        "id": "reed_savanna",
+        "text": "tall sawgrass, lily mats, kagouti, bog dogs",
+        "cites": [
+          "black_marsh.L3.blackwood_spill"
+        ]
+      },
+      {
+        "id": "sinkhole_fen",
+        "text": "acid peat pools, carnivorous pitcher flora, Voriplasm oozes",
+        "cites": [
+          "black_marsh.L1.alluvial_basin"
+        ]
+      },
+      {
+        "id": "upland_fern_wood",
+        "text": "drier fern-and-stone wood on the northern rim",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands",
+          "black_marsh.L2.upland_breeze"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "reed_and_mud_craft",
+        "text": "woven reed, shell-lime, bone, and cured hide replacing iron that rusts in a season",
+        "cites": [
+          "black_marsh.L4.reed_savanna",
+          "black_marsh.L4.cypress_mire"
+        ]
+      },
+      {
+        "id": "alchemical_reagents",
+        "text": "rare marsh toxins, luminous spores, hackwing plumes, wamasu scales",
+        "cites": [
+          "black_marsh.L4.sinkhole_fen",
+          "black_marsh.L4.hist_grove"
+        ]
+      },
+      {
+        "id": "river_barge_and_punt",
+        "text": "flatboat transport, reed rafts, and guide fees",
+        "cites": [
+          "black_marsh.L3.braided_channels"
+        ]
+      },
+      {
+        "id": "border_timber_and_rice",
+        "text": "bog-iron, wetland grain, and timber traded at Gideon and Stormhold",
+        "cites": [
+          "black_marsh.L4.upland_fern_wood",
+          "black_marsh.L3.blackwood_spill"
+        ]
+      },
+      {
+        "id": "coastal_smuggling",
+        "text": "spice, contraband, and salvaged Imperial cargo at Lilmoth and Archon",
+        "cites": [
+          "black_marsh.L1.east_barrier_spits",
+          "black_marsh.L1.lilmoth_delta"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "outer_ring_ports",
+        "text": "stone-and-timber hybrid towns (Stormhold, Gideon, Lilmoth, Thorn, Archon, Soulrest) sit on the outer border and coast where foreigners can reach them",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands",
+          "black_marsh.L1.lilmoth_delta",
+          "black_marsh.L5.coastal_smuggling"
+        ]
+      },
+      {
+        "id": "inner_hist_villages",
+        "text": "inside the mire, every village is a ring of mud-and-reed huts and stilt walkways around a central Hist tree",
+        "cites": [
+          "black_marsh.L1.hist_clay_rises",
+          "black_marsh.L4.hist_grove"
+        ]
+      },
+      {
+        "id": "helstrom_sanctuary",
+        "text": "the sacred interior capital reachable only by water and causeway",
+        "cites": [
+          "black_marsh.L3.braided_channels",
+          "black_marsh.L4.cypress_mire"
+        ]
+      },
+      {
+        "id": "raised_causeways",
+        "text": "ancient stone causeways and log corduroy bridges linking the outer seats",
+        "cites": [
+          "black_marsh.L1.xanmeer_foundations",
+          "black_marsh.L3.braided_channels"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "hist_communion",
+        "text": "every tribe takes its speech, craft, and role from its Hist tree; the Tree-Minder interprets the sap",
+        "cites": [
+          "black_marsh.L4.hist_grove",
+          "black_marsh.L6.inner_hist_villages"
+        ]
+      },
+      {
+        "id": "outer_vs_inner_tribes",
+        "text": "assimilated Lukiul Argonians in the border towns vs traditional Saxhleel tribes (Bright-Throat, Dead-Water, Kota-Vimleel, Naga) in the interior",
+        "cites": [
+          "black_marsh.L6.outer_ring_ports",
+          "black_marsh.L6.inner_hist_villages"
+        ]
+      },
+      {
+        "id": "shadowscale_order",
+        "text": "those hatched under the Shadow sign, trained in silence and bound to both Sithis and the Dark Brotherhood",
+        "cites": [
+          "black_marsh.L4.hist_grove",
+          "black_marsh.L7.hist_communion"
+        ]
+      },
+      {
+        "id": "freed_and_scarred",
+        "text": "former captives of House Dres holding the northern marches",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands",
+          "black_marsh.L6.outer_ring_ports"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "the_hist_and_sithis",
+        "text": "the Hist is the living memory of the tribe; Sithis is change, honoured by letting stone ruins sink back into the mud rather than rebuilding them after Duskfall",
+        "cites": [
+          "black_marsh.L7.hist_communion",
+          "black_marsh.L1.xanmeer_foundations"
+        ]
+      },
+      {
+        "id": "hist_communion",
+        "text": "sap-communion rites binding each clutch to its tree",
+        "cites": [
+          "black_marsh.L3.hist_sap_springs",
+          "black_marsh.L7.hist_communion"
+        ]
+      },
+      {
+        "id": "sap_rites_and_naming",
+        "text": "naming day at the tree, sap-licking festivals, and reincarnation through the roots",
+        "cites": [
+          "black_marsh.L3.hist_sap_springs"
+        ]
+      },
+      {
+        "id": "xanmeer_taboo",
+        "text": "old stone pyramids are respected as reminders of hubris, entered only when the Tree-Minder bids",
+        "cites": [
+          "black_marsh.L1.xanmeer_foundations",
+          "black_marsh.L8.the_hist_and_sithis"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "an_xileel_and_imperial_border",
+        "text": "traditionalist An-Xileel wardens vs Imperial charter-factors and Lukiul merchants in Gideon and Lilmoth",
+        "cites": [
+          "black_marsh.L6.outer_ring_ports",
+          "black_marsh.L7.outer_vs_inner_tribes"
+        ]
+      },
+      {
+        "id": "dres_slaver_remnants",
+        "text": "rogue slaver rings, smuggling stockades, and border raids in Shadowfen and Thornmarsh",
+        "cites": [
+          "black_marsh.L7.freed_and_scarred",
+          "black_marsh.L6.outer_ring_ports"
+        ]
+      },
+      {
+        "id": "sickening_hist",
+        "text": "a rogue mining/alchemical syndicate tapping a deep Hist root-vein for black sap",
+        "cites": [
+          "black_marsh.L3.hist_sap_springs"
+        ]
+      },
+      {
+        "id": "tribal_water_feuds",
+        "text": "Dead-Water warriors and Bright-Throat singers contesting a sunken calendar stone",
+        "cites": [
+          "black_marsh.L7.outer_vs_inner_tribes"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "sunken_xanmeer",
+        "text": "flooded multi-tier step-pyramids with water-gate puzzles, stone vipers, and pre-Duskfall relics",
+        "cites": [
+          "black_marsh.L1.xanmeer_foundations",
+          "black_marsh.L8.xanmeer_taboo"
+        ]
+      },
+      {
+        "id": "root_caverns",
+        "text": "amber-lit caverns beneath elder Hist trees guarded by sap-bound constructs and wamasu",
+        "cites": [
+          "black_marsh.L3.root_water_network",
+          "black_marsh.L4.hist_grove"
+        ]
+      },
+      {
+        "id": "ayleid_barsaebic_ruins",
+        "text": "Barsaebic Ayleid vaults under Stormhold and Gideon",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands"
+        ]
+      },
+      {
+        "id": "slaver_stockades_and_pens",
+        "text": "hidden subterranean and mangrove-camouflaged holding pens",
+        "cites": [
+          "black_marsh.L9.dres_slaver_remnants"
+        ]
+      },
+      {
+        "id": "kothringi_ghost_ships",
+        "text": "silver-skinned undead and plague-era hulks in the southern estuaries",
+        "cites": [
+          "black_marsh.L1.lilmoth_delta",
+          "black_marsh.L3.brackish_estuaries"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "pre_duskfall_empire",
+        "text": "the era of stone xanmeer, astronomy, and blood-oracles before the Hist called the Saxhleel back to simplicity",
+        "cites": [
+          "black_marsh.L1.xanmeer_foundations",
+          "black_marsh.L10.sunken_xanmeer"
+        ]
+      },
+      {
+        "id": "barsaebic_exile",
+        "text": "Ayleids who fled Cyrodiil into northern Black Marsh and built Stormhold's under-works",
+        "cites": [
+          "black_marsh.L1.nw_border_uplands",
+          "black_marsh.L10.ayleid_barsaebic_ruins"
+        ]
+      },
+      {
+        "id": "imperial_blackwater_war",
+        "text": "Reman and Septim legions burning roads into the outer swamp and building border forts that sank a foot a decade",
+        "cites": [
+          "black_marsh.L6.raised_causeways",
+          "black_marsh.L9.an_xileel_and_imperial_border"
+        ]
+      },
+      {
+        "id": "knahaten_flu",
+        "text": "the 2E 560 plague that wiped out the silver-skinned Kothringi and closed the ports to outsiders",
+        "cites": [
+          "black_marsh.L1.lilmoth_delta",
+          "black_marsh.L10.kothringi_ghost_ships"
+        ]
+      },
+      {
+        "id": "dres_slave_raids",
+        "text": "centuries of border raiding across Shadowfen and Thornmarsh",
+        "cites": [
+          "black_marsh.L7.freed_and_scarred",
+          "black_marsh.L9.dres_slaver_remnants"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "shadowfen": {
+      "truth": "Shadowfen is the north-western border mire where Morrowind's ash-runoff meets Argonia's deep peat: a scarred frontier of broken slaver chains, mud-stilt villages, sunken step-pyramids, and vigilant border-tribes watching every road down from Deshaan. Here former Dres captives and Tree-Minders guard the Percolating Mire and Alten Corimont against smuggling rings that still try to spirit hatchlings north across the hills. Beneath the pitcher bogs and cypress knees lie Barsaebic Ayleid ruins and the twin-peaked xanmeer of Ten-Maur-Wolk, where water-locks still answer the old calendar.",
+      "layers": {
+        "L1": [
+          {
+            "id": "border_karst",
+            "text": "limestone sinkholes and low basalt spurs along the Morrowind march",
+            "cites": []
+          },
+          {
+            "id": "mire_peat_domes",
+            "text": "raised acid peat beds between the channels",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "ash_tinged_mist",
+            "text": "warm marsh fog carrying fine grey ash from the northern hills",
+            "cites": [
+              "black_marsh.L2.spore_and_marsh_haze",
+              "shadowfen.L1.border_karst"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "ash_stained_fen",
+            "text": "slow dark channels draining the northern border",
+            "cites": [
+              "black_marsh.L3.braided_channels",
+              "shadowfen.L1.border_karst"
+            ]
+          },
+          {
+            "id": "percolating_springs",
+            "text": "warm bubbling mire pools",
+            "cites": [
+              "black_marsh.L3.hist_sap_springs",
+              "shadowfen.L1.mire_peat_domes"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "pitcher_bog",
+            "text": "carnivorous flora, fleshflies, and bog dogs",
+            "cites": [
+              "black_marsh.L4.sinkhole_fen",
+              "shadowfen.L1.mire_peat_domes"
+            ]
+          },
+          {
+            "id": "border_cypress",
+            "text": "moss-hung cypress and wamasu lairs",
+            "cites": [
+              "black_marsh.L4.cypress_mire",
+              "shadowfen.L3.ash_stained_fen"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "toxin_and_reed_harvest",
+            "text": "marsh reagents, reed basketry, and bog-iron spears",
+            "cites": [
+              "black_marsh.L5.alchemical_reagents",
+              "shadowfen.L4.pitcher_bog"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "percolating_mire_posts",
+            "text": "mud-and-stilt villages around border Hist trees, led by Alten Corimont and Forsaken Hamlet",
+            "cites": [
+              "black_marsh.L6.inner_hist_villages",
+              "shadowfen.L3.percolating_springs"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "chain_breaker_clans",
+            "text": "freed slave families and vigilant marsh scouts",
+            "cites": [
+              "black_marsh.L7.freed_and_scarred",
+              "shadowfen.L6.percolating_mire_posts"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "shackle_cairns",
+            "text": "rusted slaver irons hung on boundary trees as a warning and memorial",
+            "cites": [
+              "black_marsh.L8.the_hist_and_sithis",
+              "shadowfen.L7.chain_breaker_clans"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "broken_chain_watch",
+            "text": "border wardens hunting rogue slaver factors and informants",
+            "cites": [
+              "black_marsh.L9.dres_slaver_remnants",
+              "shadowfen.L7.chain_breaker_clans"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "ten_maur_wolk_xanmeer",
+            "text": "sunken step-pyramids and the Loriasel Ayleid-Hist vault",
+            "cites": [
+              "black_marsh.L10.sunken_xanmeer",
+              "shadowfen.L1.border_karst"
+            ]
+          },
+          {
+            "id": "slaver_hideouts",
+            "text": "concealed caves in the northern karst",
+            "cites": [
+              "black_marsh.L10.slaver_stockades_and_pens",
+              "shadowfen.L9.broken_chain_watch"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "liberation_marches",
+            "text": "the border uprisings that burned the northern slave pens",
+            "cites": [
+              "black_marsh.L11.dres_slave_raids",
+              "shadowfen.L8.shackle_cairns"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "alchemist": {
+          "weight": 3,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest",
+            "shadowfen.L4.border_cypress"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L6.percolating_mire_posts"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L8.shackle_cairns"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L6.percolating_mire_posts"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L6.percolating_mire_posts"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L8.shackle_cairns"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "shadowfen.L9.broken_chain_watch",
+            "shadowfen.L6.percolating_mire_posts"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L10.ten_maur_wolk_xanmeer"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "shadowfen.L6.percolating_mire_posts",
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L7.chain_breaker_clans"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L5.toxin_and_reed_harvest"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "shadowfen.L9.broken_chain_watch"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "ruin": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "dwemer": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "falmer": [
+          "shadowfen.L4.pitcher_bog"
+        ],
+        "bandit": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "fort": [
+          "shadowfen.L9.broken_chain_watch",
+          "shadowfen.L6.percolating_mire_posts"
+        ],
+        "military": [
+          "shadowfen.L9.broken_chain_watch"
+        ],
+        "mage": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "vampire": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "necromancer": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "hagraven": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "forsworn": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "beast": [
+          "shadowfen.L10.slaver_hideouts"
+        ],
+        "ice": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "mine": [
+          "shadowfen.L5.toxin_and_reed_harvest"
+        ],
+        "grove": [
+          "shadowfen.L4.pitcher_bog"
+        ],
+        "smuggler": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "cave": [
+          "shadowfen.L10.slaver_hideouts",
+          "shadowfen.L1.border_karst"
+        ],
+        "giant": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "dragon": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "tower": [
+          "shadowfen.L10.ten_maur_wolk_xanmeer"
+        ],
+        "cabin": [
+          "shadowfen.L6.percolating_mire_posts"
+        ],
+        "wreck": [
+          "shadowfen.L5.toxin_and_reed_harvest"
+        ]
+      }
+    },
+    "stormhold": {
+      "truth": "Built atop the only high basalt and limestone shelf on the northern frontier, Stormhold wraps Argonian mud-and-timber compounds around the half-sunken white-stone spires of a Barsaebic Ayleid citadel. It is the northern gateway of Black Marsh, where raised stone causeways meet the Morrowind and Cyrodiil roads and where caravans trade northern iron and wetland grain for marsh reagents, bog-timber and cured hides. Tree-Minders share the market ring with Dunmer and Imperial factors, while beneath the city's guildhalls and plazas, flooded Ayleid crystal vaults and Shadowscale training sanctums run deep into the living rock.",
+      "layers": {
+        "L1": [
+          {
+            "id": "stormhold_shelf",
+            "text": "a firm basalt and limestone ridge rising above the northern fens",
+            "cites": []
+          },
+          {
+            "id": "sunken_plinths",
+            "text": "Ayleid white-stone foundations subsiding into the clay",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "northern_scarp_breeze",
+            "text": "clearer upland air above the marsh haze",
+            "cites": [
+              "black_marsh.L2.upland_breeze",
+              "stormhold.L1.stormhold_shelf"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "upper_causeway_falls",
+            "text": "stepped cascades where upland streams drop into the mire",
+            "cites": [
+              "black_marsh.L3.braided_channels",
+              "stormhold.L1.stormhold_shelf"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "basalt_fern_wood",
+            "text": "tree-ferns, kagouti, and durzogs along the northern rocks",
+            "cites": [
+              "black_marsh.L4.upland_fern_wood",
+              "stormhold.L2.northern_scarp_breeze"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "border_caravan_exchange",
+            "text": "iron imports traded for marsh herbs, hides, and bog-timber",
+            "cites": [
+              "black_marsh.L5.border_timber_and_rice",
+              "stormhold.L3.upper_causeway_falls"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "stormhold_ring_over_ruin",
+            "text": "Argonian timber-and-mud compounds crowning Ayleid stone walls",
+            "cites": [
+              "black_marsh.L6.outer_ring_ports",
+              "stormhold.L1.sunken_plinths"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "tree_minders_and_factors",
+            "text": "Saxhleel elders sharing the market ring with Dunmer and Imperial factors",
+            "cites": [
+              "black_marsh.L7.outer_vs_inner_tribes",
+              "stormhold.L5.border_caravan_exchange"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "shadow_sign_vigil",
+            "text": "shrines to Sithis and the Hist in the under-plaza",
+            "cites": [
+              "black_marsh.L8.the_hist_and_sithis",
+              "black_marsh.L7.shadowscale_order"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "caravan_toll_dispute",
+            "text": "tension over foreign charter privileges and relic smuggling",
+            "cites": [
+              "black_marsh.L9.an_xileel_and_imperial_border",
+              "stormhold.L5.border_caravan_exchange"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "barsaebic_undercity",
+            "text": "the Sunken Stormhold Vaults and crystal-lit Ayleid labyrinths",
+            "cites": [
+              "black_marsh.L10.ayleid_barsaebic_ruins",
+              "stormhold.L1.sunken_plinths"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "ayleid_foundation",
+            "text": "the Barsaebic Ayleid flight from Cyrodiil and the old Imperial prison-keep",
+            "cites": [
+              "black_marsh.L11.barsaebic_exile",
+              "stormhold.L10.barsaebic_undercity"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "lumberjack": {
+          "weight": 3,
+          "why": [
+            "stormhold.L5.border_caravan_exchange",
+            "stormhold.L4.basalt_fern_wood"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "stormhold.L5.border_caravan_exchange",
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "stormhold.L8.shadow_sign_vigil"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "stormhold.L6.stormhold_ring_over_ruin"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "stormhold.L6.stormhold_ring_over_ruin"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "stormhold.L8.shadow_sign_vigil"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "stormhold.L9.caravan_toll_dispute"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "stormhold.L10.barsaebic_undercity"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "stormhold.L6.stormhold_ring_over_ruin"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "stormhold.L11.ayleid_foundation"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "stormhold.L5.border_caravan_exchange"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "stormhold.L7.tree_minders_and_factors"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "stormhold.L9.caravan_toll_dispute"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "ruin": [
+          "stormhold.L8.shadow_sign_vigil"
+        ],
+        "dwemer": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "falmer": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "bandit": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "fort": [
+          "stormhold.L9.caravan_toll_dispute"
+        ],
+        "military": [
+          "stormhold.L9.caravan_toll_dispute"
+        ],
+        "mage": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "vampire": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "necromancer": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "hagraven": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "forsworn": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "beast": [
+          "stormhold.L4.basalt_fern_wood"
+        ],
+        "ice": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "mine": [
+          "stormhold.L5.border_caravan_exchange"
+        ],
+        "grove": [
+          "stormhold.L4.basalt_fern_wood"
+        ],
+        "smuggler": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "cave": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "giant": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "dragon": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "tower": [
+          "stormhold.L10.barsaebic_undercity"
+        ],
+        "cabin": [
+          "stormhold.L6.stormhold_ring_over_ruin"
+        ],
+        "wreck": [
+          "stormhold.L5.border_caravan_exchange"
+        ]
+      }
+    },
+    "gideon": {
+      "truth": "Gideon is the western reed-plain bordering Cyrodiil's Blackwood: a country of wide sawgrass prairies, Niben overflow marshes, half-drowned Imperial causeways, and fortified stone manors left from the Colovian and Septim occupations. Its walled seat of Gideon and the ruined penal fortress of Blackrose stand on the last firm silt levees before the deep interior swamp begins. Here assimilated Lukiul townsfolk, Imperial charter-traders, and An-Xileel traditionalists contest every bridge, punt-ferry and warehouse, while weathered chapels stand beside living Hist pools and blood-root cults and bog hounds haunt the sunken estates.",
+      "layers": {
+        "L1": [
+          {
+            "id": "western_levee_plain",
+            "text": "broad silt levees and low clay islands along the Blackwood frontier",
+            "cites": []
+          },
+          {
+            "id": "blackrose_basin",
+            "text": "a subsided marsh depression in the south-west",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "niben_valley_warmth",
+            "text": "warm river-valley rains and summer thunderheads",
+            "cites": [
+              "black_marsh.L2.monsoon_humidity",
+              "gideon.L1.western_levee_plain"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "niben_overflow_marshes",
+            "text": "seasonal flood sheets and reed-choked bayous",
+            "cites": [
+              "black_marsh.L3.blackwood_spill",
+              "gideon.L1.western_levee_plain"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "sawgrass_prairie",
+            "text": "tall sawgrass, bog dogs, and marsh nix",
+            "cites": [
+              "black_marsh.L4.reed_savanna",
+              "gideon.L3.niben_overflow_marshes"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "levee_rice_and_punt_trade",
+            "text": "wetland rice, reed rafts, and Blackwood border trade",
+            "cites": [
+              "black_marsh.L5.border_timber_and_rice",
+              "black_marsh.L5.river_barge_and_punt",
+              "gideon.L3.niben_overflow_marshes"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "gideon_walled_seat",
+            "text": "Imperial stone lower walls topped with Argonian stilt-galleries",
+            "cites": [
+              "black_marsh.L6.outer_ring_ports",
+              "black_marsh.L6.raised_causeways",
+              "gideon.L1.western_levee_plain"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "lukiul_townsfolk",
+            "text": "Imperialised Argonians, Colovian factor descendants, and marsh guides",
+            "cites": [
+              "black_marsh.L7.outer_vs_inner_tribes",
+              "gideon.L6.gideon_walled_seat"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "chapel_and_root_shrine",
+            "text": "weathered Imperial chapels standing beside living Hist sap-pools",
+            "cites": [
+              "black_marsh.L8.sap_rites_and_naming",
+              "gideon.L7.lukiul_townsfolk"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "lukiul_and_an_xileel",
+            "text": "An-Xileel wardens pushing to close the western charter houses",
+            "cites": [
+              "black_marsh.L9.an_xileel_and_imperial_border",
+              "gideon.L7.lukiul_townsfolk"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "old_governor_vaults",
+            "text": "Blackrose Prison's flooded dungeons and drowned Colovian estates",
+            "cites": [
+              "black_marsh.L10.ayleid_barsaebic_ruins",
+              "gideon.L1.blackrose_basin",
+              "gideon.L9.lukiul_and_an_xileel"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "blackwater_forts",
+            "text": "the Second and Third Era legion campaigns that built the western causeway",
+            "cites": [
+              "black_marsh.L11.imperial_blackwater_war",
+              "gideon.L6.gideon_walled_seat"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "gideon.L3.niben_overflow_marshes"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "gideon.L4.sawgrass_prairie"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "gideon.L8.chapel_and_root_shrine"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "gideon.L7.lukiul_townsfolk"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "gideon.L8.chapel_and_root_shrine"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "gideon.L10.old_governor_vaults"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "gideon.L10.old_governor_vaults"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "gideon.L7.lukiul_townsfolk"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "gideon.L6.gideon_walled_seat",
+            "gideon.L7.lukiul_townsfolk"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "gideon.L7.lukiul_townsfolk",
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "gideon.L7.lukiul_townsfolk",
+            "gideon.L6.gideon_walled_seat"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "gideon.L7.lukiul_townsfolk"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "gideon.L7.lukiul_townsfolk"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "gideon.L7.lukiul_townsfolk"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "gideon.L5.levee_rice_and_punt_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "gideon.L9.lukiul_and_an_xileel"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "ruin": [
+          "gideon.L8.chapel_and_root_shrine"
+        ],
+        "dwemer": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "falmer": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "bandit": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "fort": [
+          "gideon.L9.lukiul_and_an_xileel"
+        ],
+        "military": [
+          "gideon.L9.lukiul_and_an_xileel"
+        ],
+        "mage": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "vampire": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "necromancer": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "hagraven": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "forsworn": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "beast": [
+          "gideon.L4.sawgrass_prairie"
+        ],
+        "ice": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "mine": [
+          "gideon.L5.levee_rice_and_punt_trade"
+        ],
+        "grove": [
+          "gideon.L4.sawgrass_prairie"
+        ],
+        "smuggler": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "cave": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "giant": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "dragon": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "tower": [
+          "gideon.L10.old_governor_vaults"
+        ],
+        "cabin": [
+          "gideon.L6.gideon_walled_seat"
+        ],
+        "wreck": [
+          "gideon.L5.levee_rice_and_punt_trade"
+        ]
+      }
+    },
+    "helstrom": {
+      "truth": "Two worlds share this central and eastern region: along the Padomaic barrier spits stand Thorn and Archon, hybrid ports of call for coastal traders and former slaver houses; inland lies the impenetrable root-labyrinth surrounding Helstrom, the sacred capital no outsider army has ever taken. In Helstrom, giant interlocking Hist roots form living bridges over dark water, and the eldest Tree-Minders commune with the root-heart of Argonia. When a rogue syndicate taps a deep root-vein in the east, the central trees stir and summon the interior tribes.",
+      "layers": {
+        "L1": [
+          {
+            "id": "helstrom_root_dome",
+            "text": "the raised clay-and-root core of the interior basin",
+            "cites": []
+          },
+          {
+            "id": "thorn_coastal_spits",
+            "text": "eastern barrier beaches and limestone bluffs",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "interior_twilight_haze",
+            "text": "perpetual golden spore-mist under the high canopy",
+            "cites": [
+              "black_marsh.L2.spore_and_marsh_haze",
+              "helstrom.L1.helstrom_root_dome"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "labyrinth_channels",
+            "text": "shifting root-tunnels and dark rivers that turn back unguided boats",
+            "cites": [
+              "black_marsh.L3.root_water_network",
+              "helstrom.L1.helstrom_root_dome"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "elder_hist_canopy",
+            "text": "65-block Elder Hist domes, Naga patrols, and wamasu",
+            "cites": [
+              "black_marsh.L4.hist_grove",
+              "black_marsh.L4.cypress_mire",
+              "helstrom.L2.interior_twilight_haze"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "sacred_sap_and_east_port_trade",
+            "text": "coastal shipping at Thorn and Archon; pure reed-and-bone craft inland",
+            "cites": [
+              "black_marsh.L5.alchemical_reagents",
+              "black_marsh.L5.coastal_smuggling",
+              "helstrom.L1.thorn_coastal_spits"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "helstrom_ring_and_thorn_port",
+            "text": "Helstrom's concentric mud-dome rings and the eastern harbour towns",
+            "cites": [
+              "black_marsh.L6.helstrom_sanctuary",
+              "black_marsh.L6.outer_ring_ports",
+              "helstrom.L3.labyrinth_channels"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "root_heart_tribes",
+            "text": "elder Tree-Minders, Naga-Kur guardians, and Kota-Vimleel speakers",
+            "cites": [
+              "black_marsh.L7.hist_communion",
+              "helstrom.L6.helstrom_ring_and_thorn_port"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "sap_naming_rite",
+            "text": "the grand communion around the Elder Hist of Helstrom",
+            "cites": [
+              "black_marsh.L8.sap_rites_and_naming",
+              "helstrom.L4.elder_hist_canopy"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "elder_tree_council",
+            "text": "the interior council mobilising against black-sap poachers and eastern slaver remnants",
+            "cites": [
+              "black_marsh.L9.sickening_hist",
+              "helstrom.L7.root_heart_tribes"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "elder_root_sanctum",
+            "text": "Hissmir's sunken calendar pyramid and the living root-caverns beneath Helstrom",
+            "cites": [
+              "black_marsh.L10.root_caverns",
+              "black_marsh.L10.sunken_xanmeer",
+              "helstrom.L1.helstrom_root_dome"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "unconquered_core",
+            "text": "every foreign legion lost in the root-ways since the First Era",
+            "cites": [
+              "black_marsh.L11.pre_duskfall_empire",
+              "black_marsh.L11.imperial_blackwater_war",
+              "helstrom.L3.labyrinth_channels"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "helstrom.L1.helstrom_root_dome"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade",
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "helstrom.L8.sap_naming_rite"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "helstrom.L8.sap_naming_rite"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "helstrom.L9.elder_tree_council"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "helstrom.L10.elder_root_sanctum"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "helstrom.L6.helstrom_ring_and_thorn_port"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "helstrom.L7.root_heart_tribes"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "helstrom.L5.sacred_sap_and_east_port_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 2,
+          "why": [
+            "helstrom.L9.elder_tree_council"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "ruin": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "dwemer": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "falmer": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "bandit": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "fort": [
+          "helstrom.L9.elder_tree_council"
+        ],
+        "military": [
+          "helstrom.L9.elder_tree_council"
+        ],
+        "mage": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "vampire": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "necromancer": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "hagraven": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "forsworn": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "beast": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "ice": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "mine": [
+          "helstrom.L1.helstrom_root_dome"
+        ],
+        "grove": [
+          "helstrom.L4.elder_hist_canopy"
+        ],
+        "smuggler": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "cave": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "giant": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "dragon": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "tower": [
+          "helstrom.L10.elder_root_sanctum"
+        ],
+        "cabin": [
+          "helstrom.L6.helstrom_ring_and_thorn_port"
+        ],
+        "wreck": [
+          "helstrom.L5.sacred_sap_and_east_port_trade"
+        ]
+      }
+    },
+    "lilmoth": {
+      "truth": "Where the southern river channels fan out into Topal Bay stands Lilmoth: a bustling, half-sunken delta port of rotting Imperial stone warehouses, cypress stilt-quays, smuggling wharves, and a customhouse that taxes everything that floats. In the surrounding tidal mangrove bayous, silver-hulled Kothringi plague-ships from the Second Era Knahaten Flu still drift through the warm salt fog, and pre-Duskfall xanmeer steps lie just beneath the brackish tide. Saxhleel punt-men, Khajiit smugglers, Padomaic spice factors, and An-Xileel dock-wardens share the lantern-lit boardwalks at night.",
+      "layers": {
+        "L1": [
+          {
+            "id": "topal_silt_delta",
+            "text": "shifting mudbanks, shell islands, and drowned stone quays at the bay mouth",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "topal_sea_fog",
+            "text": "warm salt fog and summer squalls off Topal Bay",
+            "cites": [
+              "black_marsh.L2.padomaic_squalls",
+              "lilmoth.L1.topal_silt_delta"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "tidal_bayous",
+            "text": "twice-daily tides reversing the flow of the lower channels",
+            "cites": [
+              "black_marsh.L3.brackish_estuaries",
+              "lilmoth.L1.topal_silt_delta"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "delta_mangroves",
+            "text": "stilt-root mangroves, haj mota, and swamp jellyfish",
+            "cites": [
+              "black_marsh.L4.mangrove_tangle",
+              "lilmoth.L3.tidal_bayous"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "smuggler_and_spice_quays",
+            "text": "Padomaic spice, pearls, shell-lime, and untaxed cargo",
+            "cites": [
+              "black_marsh.L5.coastal_smuggling",
+              "black_marsh.L5.river_barge_and_punt",
+              "lilmoth.L3.tidal_bayous"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "lilmoth_harbour",
+            "text": "twin harbour-cranes, boardwalk markets, and half-sunken stone warehouses",
+            "cites": [
+              "black_marsh.L6.outer_ring_ports",
+              "lilmoth.L5.smuggler_and_spice_quays"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "dock_syndicates_and_boatmen",
+            "text": "Saxhleel punt-men, Khajiit and Imperial captains, and harbour factors",
+            "cites": [
+              "black_marsh.L7.outer_vs_inner_tribes",
+              "lilmoth.L6.lilmoth_harbour"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "kothringi_quarantine_shrines",
+            "text": "mirror-posts set on the shoals to turn back plague spirits",
+            "cites": [
+              "black_marsh.L8.the_hist_and_sithis",
+              "lilmoth.L2.topal_sea_fog"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "customhouse_struggle",
+            "text": "An-Xileel dock-wardens seizing contraband from foreign charter ships",
+            "cites": [
+              "black_marsh.L9.an_xileel_and_imperial_border",
+              "lilmoth.L5.smuggler_and_spice_quays"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "drowned_customs_and_hulks",
+            "text": "Crimson Cove's Kothringi silver-ship and flooded wharf vaults",
+            "cites": [
+              "black_marsh.L10.kothringi_ghost_ships",
+              "black_marsh.L10.sunken_xanmeer",
+              "lilmoth.L1.topal_silt_delta"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "flu_quarantine_wharves",
+            "text": "the burning of the old port during the Knahaten Flu of 2E 560",
+            "cites": [
+              "black_marsh.L11.knahaten_flu",
+              "lilmoth.L10.drowned_customs_and_hulks"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L4.delta_mangroves"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L4.delta_mangroves"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L6.lilmoth_harbour"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L6.lilmoth_harbour"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L6.lilmoth_harbour"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L8.kothringi_quarantine_shrines"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L6.lilmoth_harbour"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L6.lilmoth_harbour"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L8.kothringi_quarantine_shrines"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L9.customhouse_struggle"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L6.lilmoth_harbour"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L11.flu_quarantine_wharves"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L7.dock_syndicates_and_boatmen"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L5.smuggler_and_spice_quays"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "lilmoth.L9.customhouse_struggle"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "ruin": [
+          "lilmoth.L8.kothringi_quarantine_shrines"
+        ],
+        "dwemer": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "falmer": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "bandit": [
+          "lilmoth.L5.smuggler_and_spice_quays"
+        ],
+        "fort": [
+          "lilmoth.L9.customhouse_struggle"
+        ],
+        "military": [
+          "lilmoth.L9.customhouse_struggle"
+        ],
+        "mage": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "vampire": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "necromancer": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "hagraven": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "forsworn": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "beast": [
+          "lilmoth.L4.delta_mangroves"
+        ],
+        "ice": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "mine": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "grove": [
+          "lilmoth.L4.delta_mangroves"
+        ],
+        "smuggler": [
+          "lilmoth.L10.drowned_customs_and_hulks",
+          "lilmoth.L5.smuggler_and_spice_quays"
+        ],
+        "cave": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "giant": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "dragon": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "tower": [
+          "lilmoth.L10.drowned_customs_and_hulks"
+        ],
+        "cabin": [
+          "lilmoth.L6.lilmoth_harbour"
+        ],
+        "wreck": [
+          "lilmoth.L5.smuggler_and_spice_quays"
+        ]
+      }
+    },
+    "murkmire": {
+      "truth": "Murkmire is the deep south-eastern coastal shelf stretching from Soulrest's sheltered sound to the outer mangrove archipelagos: a vertical jungle of stilt-roots, bright-painted tribal villages, acid sinkhole fens, and the grandest pre-Duskfall xanmeer pyramids rising out of the warm equatorial mist. Here the welcoming Bright-Throat artisan clans and the fierce Dead-Water hunter-warriors keep the old Saxhleel ways untouched by Imperial law, carving root-canoes, mixing rare marsh venoms, and reading the stone calendars of Xul-Thuxis and the Teeth of Sithis while Shadowscale initiates undergo their silent trials in the flooded depths.",
+      "layers": {
+        "L1": [
+          {
+            "id": "mangrove_shelf",
+            "text": "drowned limestone karst and stepped xanmeer foundations along the southern shelf",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "equatorial_downpour",
+            "text": "heavy warm rains and luminous night spore-mist",
+            "cites": [
+              "black_marsh.L2.monsoon_humidity",
+              "murkmire.L1.mangrove_shelf"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "soulrest_sound",
+            "text": "calm lagoon channels and submerged root-ways",
+            "cites": [
+              "black_marsh.L3.brackish_estuaries",
+              "black_marsh.L3.root_water_network",
+              "murkmire.L1.mangrove_shelf"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "coastal_mangrove_dome",
+            "text": "towering mangrove arches, hackwings, and Voriplasm fens",
+            "cites": [
+              "black_marsh.L4.mangrove_tangle",
+              "black_marsh.L4.hist_grove",
+              "murkmire.L3.soulrest_sound"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "reed_canoe_and_reagent_craft",
+            "text": "shell-lime pottery, Bright-Throat carvings, and rare venoms",
+            "cites": [
+              "black_marsh.L5.reed_and_mud_craft",
+              "black_marsh.L5.alchemical_reagents",
+              "murkmire.L4.coastal_mangrove_dome"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "soulrest_and_stilt_villages",
+            "text": "Soulrest's stilt-harbour and painted tribal rings around Hist mounds",
+            "cites": [
+              "black_marsh.L6.inner_hist_villages",
+              "black_marsh.L6.outer_ring_ports",
+              "murkmire.L3.soulrest_sound"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "bright_throat_and_dead_water",
+            "text": "rival hunter and singer tribes plus Shadowscale mentors",
+            "cites": [
+              "black_marsh.L7.hist_communion",
+              "black_marsh.L7.shadowscale_order",
+              "murkmire.L6.soulrest_and_stilt_villages"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "sithis_calendar_stones",
+            "text": "honoring Duskfall and the seasonal turning of change",
+            "cites": [
+              "black_marsh.L8.the_hist_and_sithis",
+              "black_marsh.L8.xanmeer_taboo",
+              "murkmire.L1.mangrove_shelf"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "calendar_stone_feud",
+            "text": "tribal contest over a waking pre-Duskfall blood-oracle",
+            "cites": [
+              "black_marsh.L9.tribal_water_feuds",
+              "murkmire.L7.bright_throat_and_dead_water"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "grand_calendar_xanmeer",
+            "text": "the Teeth of Sithis and Xul-Thuxis stepped pyramids descending into subterranean seas",
+            "cites": [
+              "black_marsh.L10.sunken_xanmeer",
+              "murkmire.L1.mangrove_shelf",
+              "murkmire.L9.calendar_stone_feud"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "duskfall_abandonment",
+            "text": "the day the priest-kings laid down their obsidian knives and walked into the mud",
+            "cites": [
+              "black_marsh.L11.pre_duskfall_empire",
+              "murkmire.L8.sithis_calendar_stones"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "murkmire.L4.coastal_mangrove_dome"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "murkmire.L6.soulrest_and_stilt_villages"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "murkmire.L6.soulrest_and_stilt_villages"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "murkmire.L8.sithis_calendar_stones"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "murkmire.L6.soulrest_and_stilt_villages"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "murkmire.L6.soulrest_and_stilt_villages"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "murkmire.L8.sithis_calendar_stones"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "murkmire.L9.calendar_stone_feud"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "murkmire.L10.grand_calendar_xanmeer"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "murkmire.L6.soulrest_and_stilt_villages"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "murkmire.L7.bright_throat_and_dead_water"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "murkmire.L5.reed_canoe_and_reagent_craft"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "murkmire.L9.calendar_stone_feud"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "ruin": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "dwemer": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "falmer": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "bandit": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "fort": [
+          "murkmire.L9.calendar_stone_feud"
+        ],
+        "military": [
+          "murkmire.L9.calendar_stone_feud"
+        ],
+        "mage": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "vampire": [
+          "murkmire.L9.calendar_stone_feud"
+        ],
+        "necromancer": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "hagraven": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "forsworn": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "beast": [
+          "murkmire.L4.coastal_mangrove_dome"
+        ],
+        "ice": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "mine": [
+          "murkmire.L5.reed_canoe_and_reagent_craft"
+        ],
+        "grove": [
+          "murkmire.L4.coastal_mangrove_dome"
+        ],
+        "smuggler": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "cave": [
+          "murkmire.L1.mangrove_shelf"
+        ],
+        "giant": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "dragon": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "tower": [
+          "murkmire.L10.grand_calendar_xanmeer"
+        ],
+        "cabin": [
+          "murkmire.L6.soulrest_and_stilt_villages"
+        ],
+        "wreck": [
+          "murkmire.L5.reed_canoe_and_reagent_craft"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "dry_wheat_farmland",
+      "b": "helstrom.L4.elder_hist_canopy",
+      "reason": "The submerged toxic interior mire around Helstrom cannot support dry ploughed wheat farms"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "hist_lumber_mill",
+      "b": "black_marsh.L8.hist_communion",
+      "reason": "The Hist are sacred sentient elders; Saxhleel never fell or mill living Hist trees"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "eight_divines_chapel",
+      "b": "helstrom.L8.sap_naming_rite",
+      "reason": "The impenetrable Helstrom core answers only to the Hist and Sithis, with no Imperial chapels"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "dwemer_automaton",
+      "b": "black_marsh.L10.sunken_xanmeer",
+      "reason": "Black Marsh's ancient stone layer is pre-Duskfall Saxhleel xanmeer and Barsaebic Ayleid, never Dwemer"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft",
+        "black_marsh.L5.alchemical_reagents",
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "smith": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft",
+        "black_marsh.L5.alchemical_reagents",
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "jeweler": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft"
+      ]
+    },
+    "farmer": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "farmhand": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "lumberjack": {
+      "weight": 3,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice",
+        "black_marsh.L4.upland_fern_wood"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "mill_hand": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "woodcutter": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "fisher": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft",
+        "black_marsh.L5.coastal_smuggling",
+        "black_marsh.L3.brackish_estuaries"
+      ]
+    },
+    "hunter": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft"
+      ]
+    },
+    "butcher": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L4.mangrove_tangle"
+      ]
+    },
+    "fletcher": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "alchemist": {
+      "weight": 3,
+      "why": [
+        "black_marsh.L5.alchemical_reagents",
+        "black_marsh.L4.cypress_mire"
+      ]
+    },
+    "merchant": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "tailor": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "bookseller": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.border_timber_and_rice"
+      ]
+    },
+    "innkeeper": {
+      "weight": 3,
+      "why": [
+        "black_marsh.L6.inner_hist_villages",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "cook": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L6.inner_hist_villages"
+      ]
+    },
+    "server": {
+      "weight": 3,
+      "why": [
+        "black_marsh.L6.inner_hist_villages",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "bard": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L8.the_hist_and_sithis"
+      ]
+    },
+    "priest": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L8.hist_communion",
+        "black_marsh.L8.sap_rites_and_naming",
+        "black_marsh.L8.xanmeer_taboo"
+      ]
+    },
+    "jarl": {
+      "weight": 3,
+      "why": [
+        "black_marsh.L6.helstrom_sanctuary",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "steward": {
+      "weight": 3,
+      "why": [
+        "black_marsh.L6.helstrom_sanctuary",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "housecarl": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L9.tribal_water_feuds"
+      ]
+    },
+    "court_wizard": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L8.the_hist_and_sithis"
+      ]
+    },
+    "guard": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L9.an_xileel_and_imperial_border",
+        "black_marsh.L9.dres_slaver_remnants",
+        "black_marsh.L6.outer_ring_ports"
+      ]
+    },
+    "fence": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L5.coastal_smuggling"
+      ]
+    },
+    "prisoner": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L7.hist_communion"
+      ]
+    },
+    "beggar": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L7.hist_communion"
+      ]
+    },
+    "citizen": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L6.outer_ring_ports",
+        "black_marsh.L6.inner_hist_villages",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "housekeeper": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L7.outer_vs_inner_tribes",
+        "black_marsh.L6.outer_ring_ports",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "child": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L7.outer_vs_inner_tribes",
+        "black_marsh.L6.outer_ring_ports",
+        "black_marsh.L6.raised_causeways"
+      ]
+    },
+    "elder": {
+      "weight": 4,
+      "why": [
+        "black_marsh.L7.freed_and_scarred",
+        "black_marsh.L8.xanmeer_taboo",
+        "black_marsh.L11.barsaebic_exile"
+      ]
+    },
+    "labourer": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft"
+      ]
+    },
+    "worker": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft"
+      ]
+    },
+    "guild_leader": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L6.helstrom_sanctuary"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L6.helstrom_sanctuary"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 1,
+      "why": [
+        "black_marsh.L5.reed_and_mud_craft"
+      ]
+    },
+    "survivor": {
+      "weight": 2,
+      "why": [
+        "black_marsh.L9.dres_slaver_remnants"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "ruin": [
+      "black_marsh.L10.ayleid_barsaebic_ruins",
+      "black_marsh.L8.the_hist_and_sithis"
+    ],
+    "dwemer": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "falmer": [
+      "black_marsh.L4.sinkhole_fen"
+    ],
+    "bandit": [
+      "black_marsh.L5.coastal_smuggling"
+    ],
+    "fort": [
+      "black_marsh.L9.an_xileel_and_imperial_border",
+      "black_marsh.L9.dres_slaver_remnants",
+      "black_marsh.L6.outer_ring_ports"
+    ],
+    "military": [
+      "black_marsh.L9.an_xileel_and_imperial_border",
+      "black_marsh.L9.dres_slaver_remnants"
+    ],
+    "mage": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "vampire": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "necromancer": [
+      "black_marsh.L10.kothringi_ghost_ships"
+    ],
+    "hagraven": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "forsworn": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "beast": [
+      "black_marsh.L10.root_caverns",
+      "black_marsh.L10.slaver_stockades_and_pens"
+    ],
+    "ice": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "mine": [
+      "black_marsh.L5.reed_and_mud_craft",
+      "black_marsh.L5.alchemical_reagents",
+      "black_marsh.L5.border_timber_and_rice"
+    ],
+    "grove": [
+      "black_marsh.L4.hist_grove",
+      "black_marsh.L4.mangrove_tangle"
+    ],
+    "smuggler": [
+      "black_marsh.L5.coastal_smuggling"
+    ],
+    "cave": [
+      "black_marsh.L10.root_caverns",
+      "black_marsh.L1.alluvial_basin"
+    ],
+    "giant": [
+      "black_marsh.L4.hist_grove"
+    ],
+    "dragon": [
+      "black_marsh.L9.tribal_water_feuds"
+    ],
+    "tower": [
+      "black_marsh.L10.sunken_xanmeer"
+    ],
+    "cabin": [
+      "black_marsh.L6.outer_ring_ports"
+    ],
+    "wreck": [
+      "black_marsh.L5.coastal_smuggling"
+    ]
+  }
+}

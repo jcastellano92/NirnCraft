@@ -1,0 +1,429 @@
+{
+  "id": "stros_mkai",
+  "sil": "island-lighthouse-citadel",
+  "base": "none",
+  "overlay": "stros_mkai",
+  "radius": 80,
+  "reach": 88,
+  "fill_gap": 2,
+  "inn_key": "stros_mkai_pirates_rest",
+  "names": {
+    "inn": "stros_mkai_pirates_rest",
+    "store": "stros_mkai_port_hundings_store",
+    "smithy": "stros_mkai_brass_gear_forge"
+  },
+  "titles": {
+    "stros_mkai_landmark": "Stros M'Kai Dwemer Observatory & Beacon",
+    "stros_mkai_governors_palace": "Palace of the Island Headman",
+    "stros_mkai_pirates_rest": "The Pirate's Rest Tavern",
+    "stros_mkai_screaming_mermaid": "The Screaming Mermaid Inn",
+    "stros_mkai_port_hundings_store": "Port Hunding Ship-Chandlery",
+    "stros_mkai_brass_gear_forge": "Dwemer-Scrap & Cutlass Forge",
+    "stros_mkai_cane_rum_still": "Cane-Spirit & Sea-Lime Apothecary",
+    "stros_mkai_sun_glass_cutters": "Polished Brass & Pearl Workshop",
+    "stros_mkai_cartographers_house": "Abecean Currents Chart-House",
+    "stros_mkai_freebooters_hall": "Restless League Mariners' Hall",
+    "stros_mkai_hundings_shrine": "Harbour Pavilion of Frandar Hunding",
+    "stros_mkai_pillar_palace_tomb": "Cliff-Side Tomb of the Sailors",
+    "stros_mkai_harbourmaster_house": "Harbourmaster Zahra's Customs House",
+    "stros_mkai_careening_dock": "Careening Beach & Sail-Loft",
+    "stros_mkai_fort_at_the_mouth": "Sea-Mouth Chain Fort",
+    "stros_mkai_mule_caravan_pens": "Island Pack-Mule Pens",
+    "stros_mkai_market_plaza": "Stros Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -76
+    ],
+    [
+      76,
+      0
+    ],
+    [
+      0,
+      76
+    ],
+    [
+      -76,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 76,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "orrery",
+      "at": [
+        0,
+        -33
+      ],
+      "face": "south",
+      "name": "stros_mkai_landmark",
+      "overlay": "stros_mkai"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        -29
+      ],
+      "face": "south",
+      "name": "stros_mkai_governors_palace"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        46,
+        -31
+      ],
+      "face": "west",
+      "name": "stros_mkai_pirates_rest"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        35,
+        -9
+      ],
+      "face": "west",
+      "name": "stros_mkai_screaming_mermaid"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        56,
+        5
+      ],
+      "face": "west",
+      "name": "stros_mkai_port_hundings_store"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        33,
+        15
+      ],
+      "face": "west",
+      "name": "stros_mkai_brass_gear_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        40,
+        40
+      ],
+      "face": "north",
+      "name": "stros_mkai_cane_rum_still"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        15,
+        33
+      ],
+      "face": "north",
+      "name": "stros_mkai_sun_glass_cutters"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        5,
+        56
+      ],
+      "face": "north",
+      "name": "stros_mkai_cartographers_house"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -9,
+        35
+      ],
+      "face": "north",
+      "name": "stros_mkai_freebooters_hall"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -31,
+        46
+      ],
+      "face": "north",
+      "name": "stros_mkai_hundings_shrine"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -29,
+        21
+      ],
+      "face": "east",
+      "name": "stros_mkai_pillar_palace_tomb"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -54,
+        16
+      ],
+      "face": "east",
+      "name": "stros_mkai_harbourmaster_house"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -36,
+        -2
+      ],
+      "face": "east",
+      "name": "stros_mkai_careening_dock"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -51,
+        -22
+      ],
+      "face": "east",
+      "name": "stros_mkai_fort_at_the_mouth"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -26,
+        -25
+      ],
+      "face": "east",
+      "name": "stros_mkai_mule_caravan_pens"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -66
+      ],
+      "to": [
+        0,
+        66
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -66,
+        0
+      ],
+      "to": [
+        66,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -41,
+        -41
+      ],
+      "to": [
+        41,
+        -41
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        41,
+        -41
+      ],
+      "to": [
+        41,
+        41
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        41,
+        41
+      ],
+      "to": [
+        -41,
+        41
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -41,
+        41
+      ],
+      "to": [
+        -41,
+        -41
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        51
+      ],
+      "to": [
+        8,
+        51
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "stros_mkai_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 5,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 4,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "stros_mkai"
+    },
+    {
+      "ring": [
+        40,
+        80
+      ],
+      "overlay": "stros_mkai"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:kynareth",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "acacia",
+      "count": 1
+    },
+    {
+      "type": "pond",
+      "count": 1
+    }
+  ]
+}

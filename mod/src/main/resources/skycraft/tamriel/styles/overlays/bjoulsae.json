@@ -1,0 +1,19 @@
+{
+  "id": "bjoulsae",
+  "tint": {
+    "wall": "minecraft:mud_bricks",
+    "wall2": "minecraft:packed_mud",
+    "low": "minecraft:cobblestone",
+    "roof": "spruce",
+    "trim": "spruce",
+    "wood": "spruce",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mud_bricks",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:cobblestone",
+    "path": "minecraft:coarse_dirt"
+  }
+}

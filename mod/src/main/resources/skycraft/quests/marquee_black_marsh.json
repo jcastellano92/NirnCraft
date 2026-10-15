@@ -1,6 +1,6 @@
 {
   "line": "marquee_black_marsh",
-  "category": "side",
+  "category": "faction",
   "speakers": {},
   "npcs": [
     {
@@ -548,7 +548,8 @@
           "text": "Accept the boat from Boatwife Mudtoe",
           "topic": "The Keeper says you will give me a boat.",
           "reply": "A boat and a rule: keep to the left of every bend. The fourth canal has an old one living in it, and he is a bad-tempered fellow, but he is not hungry yet. If you startle him, he is. Take this contract; the shrine-keeper will want to see it.",
-          "actions": "relic:mq_bm_lm_contract;relic:mq_bm_lm_sapling"
+          "actions": "relic:mq_bm_lm_contract;relic:mq_bm_lm_sapling",
+          "place": "lilmoth"
         },
         {
           "type": "go",
@@ -609,13 +610,23 @@
               "reply": "Then the city is fed and the Pool is a little lonelier. I shall not forget you either. I shall not say how.",
               "actions": "flag:mq_bm_lm_sold;start:mq_bm_lm_glass"
             }
-          ]
+          ],
+          "place": "lilmoth"
         }
       ],
       "outro": "The tide turned. The boat was returned. The canals did not say what they thought.",
       "rewards": {
         "gold": 800,
         "loot": "standard"
+      },
+      "why": [
+        "lilmoth.L7.dock_syndicates_and_boatmen",
+        "lilmoth.L8.kothringi_quarantine_shrines"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_lm_boat_resolved",
+        "flag": "conseq_mq_bm_lm_boat",
+        "summary": "The tide turned. The boat was returned. The canals did not say what they thought."
       }
     },
     {
@@ -630,14 +641,16 @@
           "npc": "mq_bm_moons",
           "text": "Ask the Keeper what the Hist wants",
           "topic": "The sapling is in the Pool. What does it ask?",
-          "reply": "It asks for a story. Not a prayer. A story, told by someone who has never heard the Hist before. Go to the Dripping Reed and ask Wet-Whiskers for the oldest tale the inn knows. Bring it back."
+          "reply": "It asks for a story. Not a prayer. A story, told by someone who has never heard the Hist before. Go to the Dripping Reed and ask Wet-Whiskers for the oldest tale the inn knows. Bring it back.",
+          "place": "lilmoth"
         },
         {
           "type": "talk",
           "npc": "mq_bm_wetwhisk",
           "text": "Ask Wet-Whiskers for the oldest tale",
           "topic": "The Hist wants the oldest tale in your inn.",
-          "reply": "That is the tale of the first boat. Nobody knows who built it. It floats on every canal on the same night once a year. Tell the Keeper the boat never sinks. Tell her it never lands. That is the whole tale."
+          "reply": "That is the tale of the first boat. Nobody knows who built it. It floats on every canal on the same night once a year. Tell the Keeper the boat never sinks. Tell her it never lands. That is the whole tale.",
+          "place": "lilmoth"
         }
       ],
       "outro": "The Pool took the tale and was quiet. In the morning, a new leaf had opened.",
@@ -652,6 +665,15 @@
             }
           }
         ]
+      },
+      "why": [
+        "lilmoth.L8.kothringi_quarantine_shrines",
+        "lilmoth.L9.customhouse_struggle"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_lm_sing_resolved",
+        "flag": "conseq_mq_bm_lm_sing",
+        "summary": "The Pool took the tale and was quiet. In the morning, a new leaf had opened."
       }
     },
     {
@@ -666,7 +688,8 @@
           "npc": "mq_bm_varro",
           "text": "Meet the botanist at the Legion customs house",
           "topic": "The botanist has the sapling. Is it well?",
-          "reply": "It sits in a glass box on my desk. It does not hum. It faces the window. I have, quite unreasonably, begun to talk to it. I need you to take it back before I lose my professional distance."
+          "reply": "It sits in a glass box on my desk. It does not hum. It faces the window. I have, quite unreasonably, begun to talk to it. I need you to take it back before I lose my professional distance.",
+          "place": "lilmoth"
         },
         {
           "type": "escort",
@@ -691,6 +714,15 @@
             }
           }
         ]
+      },
+      "why": [
+        "lilmoth.L9.customhouse_struggle",
+        "lilmoth.L10.drowned_customs_and_hulks"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_lm_glass_resolved",
+        "flag": "conseq_mq_bm_lm_glass",
+        "summary": "The sapling went back to the Pool, humming faintly. The money was not returned."
       }
     },
     {
@@ -710,7 +742,8 @@
           "npc": "mq_bm_ruu",
           "text": "Ask Sap-Fence Ruu who sold wine on the canals",
           "topic": "Nine crates of red. Who bought?",
-          "reply": "A man with a Cyrodiilic accent and a Legion belt, in a boat with a hidden floor. He sells by the bottle at the Fourth Canal Steps at dusk. I did not tell you that. I did not tell you anything, and the price of not telling is six drakes."
+          "reply": "A man with a Cyrodiilic accent and a Legion belt, in a boat with a hidden floor. He sells by the bottle at the Fourth Canal Steps at dusk. I did not tell you that. I did not tell you anything, and the price of not telling is six drakes.",
+          "place": "lilmoth"
         },
         {
           "type": "kill",
@@ -757,13 +790,23 @@
               "reply": "He will stand at the wharf with a sign. It is humiliating. It is also effective. I did not have the nerve myself.",
               "actions": "flag:mq_bm_lm_example;points:imperial_legion:1"
             }
-          ]
+          ],
+          "place": "lilmoth"
         }
       ],
       "outro": "Ocheeva counted forty crates, and sold nine of them at a discount to the man who found them.",
       "rewards": {
         "gold": 360,
         "loot": "minor"
+      },
+      "why": [
+        "lilmoth.L10.drowned_customs_and_hulks",
+        "lilmoth.L7.dock_syndicates_and_boatmen"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_lm_wine_resolved",
+        "flag": "conseq_mq_bm_lm_wine",
+        "summary": "Ocheeva counted forty crates, and sold nine of them at a discount to the man who found them."
       }
     },
     {
@@ -794,7 +837,8 @@
           "npc": "mq_bm_wetwhisk",
           "text": "Ask Wet-Whiskers about the merchant",
           "topic": "A merchant with debt-boats. Who is he?",
-          "reply": "A Cyrodiilic factor with friends. He keeps a second ledger in the rafters of the counting-house, under a sack of rice. The first one lies. The second one remembers. If someone happened to burn the first and read the second aloud in the market... well. I cannot say what would happen."
+          "reply": "A Cyrodiilic factor with friends. He keeps a second ledger in the rafters of the counting-house, under a sack of rice. The first one lies. The second one remembers. If someone happened to burn the first and read the second aloud in the market... well. I cannot say what would happen.",
+          "place": "lilmoth"
         },
         {
           "type": "retrieve",
@@ -825,13 +869,23 @@
               "reply": "Seven boatwomen, free and surprised. It is a quieter victory. I shall have to learn to enjoy it.",
               "actions": "flag:mq_bm_lm_traded;give:skycraft:argonian_chestplate"
             }
-          ]
+          ],
+          "place": "lilmoth"
         }
       ],
       "outro": "Jelu poled her own boat out of the counting-house canal that evening, and did not look back.",
       "rewards": {
         "gold": 400,
         "loot": "minor"
+      },
+      "why": [
+        "lilmoth.L7.dock_syndicates_and_boatmen",
+        "lilmoth.L8.kothringi_quarantine_shrines"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_lm_debt_resolved",
+        "flag": "conseq_mq_bm_lm_debt",
+        "summary": "Jelu poled her own boat out of the counting-house canal that evening, and did not look back."
       }
     },
     {
@@ -869,13 +923,23 @@
           "npc": "mq_bm_wetwhisk",
           "text": "Tell Wet-Whiskers where he wanted to go",
           "topic": "He was lost. He wanted to go home to Alten Meerhleel. His wife is still waiting.",
-          "reply": "Then we shall send word. A lantern in the window of the reed-bank, lit every night. He will see it. He will go home. Thank you. I think I shall sleep."
+          "reply": "Then we shall send word. A lantern in the window of the reed-bank, lit every night. He will see it. He will go home. Thank you. I think I shall sleep.",
+          "place": "lilmoth"
         }
       ],
       "outro": "The reeds no longer whisper. A lantern burns in the bank each night.",
       "rewards": {
         "gold": 300,
         "loot": "minor"
+      },
+      "why": [
+        "lilmoth.L8.kothringi_quarantine_shrines",
+        "lilmoth.L9.customhouse_struggle"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_lm_reed_resolved",
+        "flag": "conseq_mq_bm_lm_reed",
+        "summary": "The reeds no longer whisper. A lantern burns in the bank each night."
       }
     },
     {
@@ -907,7 +971,8 @@
           "text": "Ask Stone-Carver Nook about the idol",
           "topic": "The idol is gone. Who knew its weight?",
           "reply": "Four hundred and twelve ounces, a hair under. A thief would need a sling, not a pocket. Gorge-Eel uses a sling. He is a river man gone wrong. He sleeps in the gorge-caves under the south hill. Here: this is his cord. He tied it at the last job.",
-          "actions": "relic:mq_bm_sh_cord"
+          "actions": "relic:mq_bm_sh_cord",
+          "place": "stormhold"
         },
         {
           "type": "go",
@@ -958,13 +1023,23 @@
               "reply": "A bold thing. The bridge will have a god in the middle. Both hills will argue over whose it is. That is an improvement.",
               "actions": "flag:mq_bm_sh_bridge;give:skycraft:hist_sap*3"
             }
-          ]
+          ],
+          "place": "stormhold"
         }
       ],
       "outro": "The bridge held. The idol slept. One of its eyes was open, and nobody mentioned it.",
       "rewards": {
         "gold": 760,
         "loot": "standard"
+      },
+      "why": [
+        "stormhold.L9.caravan_toll_dispute",
+        "stormhold.L10.barsaebic_undercity"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_sh_bridge_resolved",
+        "flag": "conseq_mq_bm_sh_bridge",
+        "summary": "The bridge held. The idol slept. One of its eyes was open, and nobody mentioned it."
       }
     },
     {
@@ -984,7 +1059,8 @@
           "npc": "mq_bm_pebble",
           "text": "Ask Pebble-Pocket who sold the block",
           "topic": "A block of north-hill stone ended up on the south hill. Who sold it?",
-          "reply": "A third party. A Hlaalu merchant with a rope-rig and a bill of lading nobody read. He sold it to both hills at the same price, on the same day, and left on the evening boat. I did not tell you."
+          "reply": "A third party. A Hlaalu merchant with a rope-rig and a bill of lading nobody read. He sold it to both hills at the same price, on the same day, and left on the evening boat. I did not tell you.",
+          "place": "stormhold"
         },
         {
           "type": "go",
@@ -1002,13 +1078,23 @@
           "npc": "mq_bm_nook",
           "text": "Tell Nook the block has two buyers",
           "topic": "Both hills paid for it. The merchant is gone.",
-          "reply": "Both hills paid. Neither is owed. Then it is neither's stone. I shall carve it in half, and set each half on a hill, with a single seam that matches. Let them argue over the seam."
+          "reply": "Both hills paid. Neither is owed. Then it is neither's stone. I shall carve it in half, and set each half on a hill, with a single seam that matches. Let them argue over the seam.",
+          "place": "stormhold"
         }
       ],
       "outro": "The seam is visible from both ziggurats, and neither hill will admit to looking at it.",
       "rewards": {
         "gold": 300,
         "loot": "minor"
+      },
+      "why": [
+        "stormhold.L10.barsaebic_undercity",
+        "stormhold.L7.tree_minders_and_factors"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_sh_stone_resolved",
+        "flag": "conseq_mq_bm_sh_stone",
+        "summary": "The seam is visible from both ziggurats, and neither hill will admit to looking at it."
       }
     },
     {
@@ -1035,20 +1121,31 @@
           "npc": "mq_bm_scales",
           "text": "Ask Warden Scales who the twelfth is",
           "topic": "Who is the twelfth in the White Rose?",
-          "reply": "An elder who was convicted of a crime he did not commit, twelve years ago, and has been waiting for someone to ask. He does not wish to leave. He wishes to be asked. Go and ask him. Gently."
+          "reply": "An elder who was convicted of a crime he did not commit, twelve years ago, and has been waiting for someone to ask. He does not wish to leave. He wishes to be asked. Go and ask him. Gently.",
+          "place": "stormhold"
         },
         {
           "type": "talk",
           "npc": "mq_bm_fasteyes",
           "text": "Tell Fast-Eyes what the twelfth wants",
           "topic": "The twelfth wants to be asked.",
-          "reply": "Then I have seen it and never asked. A tenth of what I see, and the rest I carry. Thank you. I shall take him a pipe, and a witness."
+          "reply": "Then I have seen it and never asked. A tenth of what I see, and the rest I carry. Thank you. I shall take him a pipe, and a witness.",
+          "place": "stormhold"
         }
       ],
       "outro": "The old elder left the prison on the arm of a scout who had never before said more than a tenth.",
       "rewards": {
         "gold": 340,
         "loot": "minor"
+      },
+      "why": [
+        "stormhold.L7.tree_minders_and_factors",
+        "stormhold.L8.shadow_sign_vigil"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_sh_eyes_resolved",
+        "flag": "conseq_mq_bm_sh_eyes",
+        "summary": "The old elder left the prison on the arm of a scout who had never before said more than a tenth."
       }
     },
     {
@@ -1144,13 +1241,23 @@
               "reply": "Then we are all a little thirsty, equally. I find that a better arrangement than I expected.",
               "actions": "flag:mq_bm_gd_split;give:skycraft:histcarp*4"
             }
-          ]
+          ],
+          "place": "gideon"
         }
       ],
       "outro": "The well rose three fingers the next dawn. Nobody believed it. Everybody counted.",
       "rewards": {
         "gold": 700,
         "loot": "standard"
+      },
+      "why": [
+        "gideon.L8.chapel_and_root_shrine",
+        "gideon.L9.lukiul_and_an_xileel"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_gd_dry_resolved",
+        "flag": "conseq_mq_bm_gd_dry",
+        "summary": "The well rose three fingers the next dawn. Nobody believed it. Everybody counted."
       }
     },
     {
@@ -1185,13 +1292,23 @@
           "relic": "mq_bm_gd_grant",
           "text": "Bring the original grant to Magistrate Verrus",
           "topic": "The true record. The Cut belongs to the road.",
-          "reply": "The road. Then neither farmer owns it and both may use it, which is, I suspect, what they have been doing for fifty years while arguing. I shall write it in the register. A very short ruling. I am delighted."
+          "reply": "The road. Then neither farmer owns it and both may use it, which is, I suspect, what they have been doing for fifty years while arguing. I shall write it in the register. A very short ruling. I am delighted.",
+          "place": "gideon_courthouse"
         }
       ],
       "outro": "The Eastern Cut is the road's, and both farmers share the last drop.",
       "rewards": {
         "gold": 300,
         "loot": "minor"
+      },
+      "why": [
+        "gideon.L9.lukiul_and_an_xileel",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_gd_verdict_resolved",
+        "flag": "conseq_mq_bm_gd_verdict",
+        "summary": "The Eastern Cut is the road's, and both farmers share the last drop."
       }
     },
     {
@@ -1224,13 +1341,23 @@
           "npc": "mq_bm_kulasha",
           "text": "Tell Ku-Lasha the guar is home",
           "topic": "Your guar is in the yard. It is being fed dates.",
-          "reply": "Dates. Of course. Of course it found dates. That animal could find a bribe in a desert. Thank you. I shall add a charge to the merchant's bill: 'for the stress.'"
+          "reply": "Dates. Of course. Of course it found dates. That animal could find a bribe in a desert. Thank you. I shall add a charge to the merchant's bill: 'for the stress.'",
+          "place": "the_stable_steed"
         }
       ],
       "outro": "The guar was returned. The merchant left, and nobody mentioned the dates.",
       "rewards": {
         "gold": 240,
         "loot": "minor"
+      },
+      "why": [
+        "gideon.L10.old_governor_vaults",
+        "gideon.L7.lukiul_townsfolk"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_gd_steed_resolved",
+        "flag": "conseq_mq_bm_gd_steed",
+        "summary": "The guar was returned. The merchant left, and nobody mentioned the dates."
       }
     },
     {
@@ -1250,7 +1377,8 @@
           "npc": "mq_bm_teeba",
           "text": "Ask Elder Teeba about the ninth stair",
           "topic": "Pa-Dar says you remember where the ninth stair led.",
-          "reply": "To a gate. A real gate, with a door and a keeper. It was sealed when the ring broke, because what lay beyond it was not meant for the sun. The key is in the mason's old yard, in a jar marked with a spiral. Do not open the gate if you are afraid. Close it again if you are not."
+          "reply": "To a gate. A real gate, with a door and a keeper. It was sealed when the ring broke, because what lay beyond it was not meant for the sun. The key is in the mason's old yard, in a jar marked with a spiral. Do not open the gate if you are afraid. Close it again if you are not.",
+          "place": "helstrom"
         },
         {
           "type": "retrieve",
@@ -1316,13 +1444,23 @@
               "reply": "Then it is shut, and the ring stays a ruin on that side. A stair that leads nowhere is, after all, a kind of peace.",
               "actions": "flag:mq_bm_hs_closed;give:skycraft:hist_sap*2"
             }
-          ]
+          ],
+          "place": "helstrom"
         }
       ],
       "outro": "The ninth stair is still a stair. What lies at the top is only partly a secret.",
       "rewards": {
         "gold": 750,
         "loot": "standard"
+      },
+      "why": [
+        "helstrom.L7.root_heart_tribes",
+        "helstrom.L8.sap_naming_rite"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_hs_stairs_resolved",
+        "flag": "conseq_mq_bm_hs_stairs",
+        "summary": "The ninth stair is still a stair. What lies at the top is only partly a secret."
       }
     },
     {
@@ -1349,20 +1487,31 @@
           "npc": "mq_bm_teeba",
           "text": "Ask Elder Teeba whose hand it is",
           "topic": "The hand in the quarry. Do you know it?",
-          "reply": "A mason's. He fell into the pit on the day the ring broke and was never found. He wants to finish the wall he was building. Set the mortar where he fell, and lay one stone. Just one."
+          "reply": "A mason's. He fell into the pit on the day the ring broke and was never found. He wants to finish the wall he was building. Set the mortar where he fell, and lay one stone. Just one.",
+          "place": "helstrom"
         },
         {
           "type": "talk",
           "npc": "mq_bm_noo",
           "text": "Tell Mason Noo to lay the one stone",
           "topic": "Lay a single stone at the quarry. The hand will be at rest.",
-          "reply": "One stone. I can do that. I have laid ten thousand. I never thought I would lay one for a ghost. Come, hold the line, and do not breathe near the mortar. It is touchy."
+          "reply": "One stone. I can do that. I have laid ten thousand. I never thought I would lay one for a ghost. Come, hold the line, and do not breathe near the mortar. It is touchy.",
+          "place": "helstrom"
         }
       ],
       "outro": "The quarry now has one stone laid straight, and no more mortar hands.",
       "rewards": {
         "gold": 320,
         "loot": "minor"
+      },
+      "why": [
+        "helstrom.L8.sap_naming_rite",
+        "helstrom.L9.elder_tree_council"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_hs_mortar_resolved",
+        "flag": "conseq_mq_bm_hs_mortar",
+        "summary": "The quarry now has one stone laid straight, and no more mortar hands."
       }
     },
     {
@@ -1393,13 +1542,23 @@
           "npc": "mq_bm_kessa",
           "text": "Collect your share from Kessa",
           "topic": "I crossed. No rail.",
-          "reply": "Without touching the rail! I had five drakes on you falling. I lost four hundred. Here is your share, and my sincere admiration, and a request that you never do that again within my sight."
+          "reply": "Without touching the rail! I had five drakes on you falling. I lost four hundred. Here is your share, and my sincere admiration, and a request that you never do that again within my sight.",
+          "place": "helstrom"
         }
       ],
       "outro": "The rope-walk now has a plaque with your name on it. Nobody knows who put it up.",
       "rewards": {
         "gold": 260,
         "loot": "minor"
+      },
+      "why": [
+        "helstrom.L9.elder_tree_council",
+        "helstrom.L10.elder_root_sanctum"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_hs_rope_resolved",
+        "flag": "conseq_mq_bm_hs_rope",
+        "summary": "The rope-walk now has a plaque with your name on it. Nobody knows who put it up."
       }
     },
     {
@@ -1420,7 +1579,8 @@
           "text": "Accept the Keeper's blade",
           "topic": "I will take the rite.",
           "reply": "Then take the blade. Do not hold it by the edge. Do not speak while the tree listens. Walk to the third root and make the cut where the bark is soft as a cheek. If the tree sighs, stop, and wait.",
-          "actions": "relic:mq_bm_th_blade"
+          "actions": "relic:mq_bm_th_blade",
+          "place": "thorn"
         },
         {
           "type": "go",
@@ -1467,13 +1627,23 @@
               "reply": "Then it is yours. Go gently, hatchling of nowhere.",
               "actions": "flag:mq_bm_th_drank;give:skycraft:hist_sap*3"
             }
-          ]
+          ],
+          "place": "thorn"
         }
       ],
       "outro": "The vision did not fade. It simply learned to wait.",
       "rewards": {
         "gold": 500,
         "loot": "standard"
+      },
+      "why": [
+        "shadowfen.L7.chain_breaker_clans",
+        "shadowfen.L8.shackle_cairns"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_th_rite_resolved",
+        "flag": "conseq_mq_bm_th_rite",
+        "summary": "The vision did not fade. It simply learned to wait."
       }
     },
     {
@@ -1494,7 +1664,8 @@
           "text": "Borrow a rope from Sap-Cutter Horu",
           "topic": "Yill says you have rope.",
           "reply": "Forty fathoms, soaked in pitch and good for a drop. Tie it round your waist, not your neck. Trust me. I have tried both.",
-          "actions": "give:skycraft:iron_fittings"
+          "actions": "give:skycraft:iron_fittings",
+          "place": "thorn"
         },
         {
           "type": "go",
@@ -1522,6 +1693,15 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
+      },
+      "why": [
+        "shadowfen.L8.shackle_cairns",
+        "shadowfen.L9.broken_chain_watch"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_th_roots_resolved",
+        "flag": "conseq_mq_bm_th_roots",
+        "summary": "The three hatchlings were returned. The Hist, they said, had not wanted them. It had only been listening."
       }
     },
     {
@@ -1542,7 +1722,8 @@
           "text": "Take the urn and the lantern",
           "topic": "I will steer the barge.",
           "reply": "The lantern keeps the way. Do not let it go out. If it goes out, the passenger will wake, and ask where he is, and you must answer honestly. Take the urn.",
-          "actions": "relic:mq_bm_sr_urn;relic:mq_bm_sr_lantern"
+          "actions": "relic:mq_bm_sr_urn;relic:mq_bm_sr_lantern",
+          "place": "soulrest"
         },
         {
           "type": "go",
@@ -1596,13 +1777,23 @@
               "reply": "Also a good thing. Some prefer quiet. The lantern will burn a year.",
               "actions": "flag:mq_bm_sr_quiet;give:skycraft:soul_gem_lesser*2"
             }
-          ]
+          ],
+          "place": "soulrest"
         }
       ],
       "outro": "The barge went home in the dark. The lilies on the far bed bloomed white that morning.",
       "rewards": {
         "gold": 520,
         "loot": "standard"
+      },
+      "why": [
+        "gideon.L8.chapel_and_root_shrine",
+        "gideon.L9.lukiul_and_an_xileel"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_sr_barge_resolved",
+        "flag": "conseq_mq_bm_sr_barge",
+        "summary": "The barge went home in the dark. The lilies on the far bed bloomed white that morning."
       }
     },
     {
@@ -1622,7 +1813,8 @@
           "npc": "mq_bm_gaar",
           "text": "Ask Gaar the Lantern-Seller about the family",
           "topic": "A lily bed that will not bloom. Whose?",
-          "reply": "The Teeb family. Their daughter went into the marsh to find a cure and never came back. They have kept her lantern lit for three years in the window. They will not bury what they have not lost. The lilies are waiting with them."
+          "reply": "The Teeb family. Their daughter went into the marsh to find a cure and never came back. They have kept her lantern lit for three years in the window. They will not bury what they have not lost. The lilies are waiting with them.",
+          "place": "soulrest"
         },
         {
           "type": "go",
@@ -1636,13 +1828,23 @@
           "npc": "mq_bm_pi",
           "text": "Take the journal to the Teeb family",
           "topic": "I found her. She was not afraid.",
-          "reply": "Then they will bury her, and the bed will bloom. White, I think. White for the quiet. I shall plant the first bulb myself."
+          "reply": "Then they will bury her, and the bed will bloom. White, I think. White for the quiet. I shall plant the first bulb myself.",
+          "place": "soulrest"
         }
       ],
       "outro": "The Teeb bed bloomed white that spring, for the first time in three years.",
       "rewards": {
         "gold": 300,
         "loot": "minor"
+      },
+      "why": [
+        "gideon.L9.lukiul_and_an_xileel",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_sr_lily_resolved",
+        "flag": "conseq_mq_bm_sr_lily",
+        "summary": "The Teeb bed bloomed white that spring, for the first time in three years."
       }
     },
     {
@@ -1680,7 +1882,8 @@
               "reply": "Then you have answered. Take the coal. Walk it out, and do not drop it.",
               "actions": "flag:mq_bm_mm_answered;relic:mq_bm_mm_coal"
             }
-          ]
+          ],
+          "place": "murkmire"
         },
         {
           "type": "go",
@@ -1709,6 +1912,15 @@
       "rewards": {
         "gold": 420,
         "loot": "standard"
+      },
+      "why": [
+        "murkmire.L10.grand_calendar_xanmeer",
+        "murkmire.L7.bright_throat_and_dead_water"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_mm_spiral_resolved",
+        "flag": "conseq_mq_bm_mm_spiral",
+        "summary": "The mire kept your fire. You may find it again, if you stop looking."
       }
     },
     {
@@ -1761,13 +1973,23 @@
           "npc": "mq_bm_mussa",
           "text": "Tell Mussa the paddy is clear",
           "topic": "The croak was a bullfrog in a noble's collar. It is gone.",
-          "reply": "A noble's collar. How very Cyrodiilic. I shall hang it on the scarecrow, as a warning. Thank you. Eat. You are still too thin."
+          "reply": "A noble's collar. How very Cyrodiilic. I shall hang it on the scarecrow, as a warning. Thank you. Eat. You are still too thin.",
+          "place": "murkmire"
         }
       ],
       "outro": "The north paddy greened by the next moon, and the scarecrow wore a collar.",
       "rewards": {
         "gold": 260,
         "loot": "minor"
+      },
+      "why": [
+        "murkmire.L7.bright_throat_and_dead_water",
+        "murkmire.L8.sithis_calendar_stones"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_mm_croak_resolved",
+        "flag": "conseq_mq_bm_mm_croak",
+        "summary": "The north paddy greened by the next moon, and the scarecrow wore a collar."
       }
     },
     {
@@ -1816,13 +2038,23 @@
           "npc": "mq_bm_eeka",
           "text": "Tell Hist-Keeper Eeka the tree is clear",
           "topic": "The root-chewers are dead.",
-          "reply": "Then the tree sleeps easy, and the sap runs clear. It has asked me to thank you. It does not say so in words. It hums a different note. You will hear it, if you stay."
+          "reply": "Then the tree sleeps easy, and the sap runs clear. It has asked me to thank you. It does not say so in words. It hums a different note. You will hear it, if you stay.",
+          "place": "thorn"
         }
       ],
       "outro": "The sap ran clear that night. The root-walks stopped shivering.",
       "rewards": {
         "gold": 320,
         "loot": "minor"
+      },
+      "why": [
+        "shadowfen.L8.shackle_cairns",
+        "shadowfen.L9.broken_chain_watch"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_th_tooth_resolved",
+        "flag": "conseq_mq_bm_th_tooth",
+        "summary": "The sap ran clear that night. The root-walks stopped shivering."
       }
     },
     {
@@ -1842,7 +2074,8 @@
           "npc": "mq_bm_eesh",
           "text": "Ask Priest Eesh whether there is a way",
           "topic": "A living mourner wants to see her brother's stone. The rule forbids it.",
-          "reply": "The rule forbids the crossing. It does not forbid the seeing. There is a lamp-post at the lagoon's edge, and from it the isle's third stone is visible on a clear night. It is his. Walk her there at dusk."
+          "reply": "The rule forbids the crossing. It does not forbid the seeing. There is a lamp-post at the lagoon's edge, and from it the isle's third stone is visible on a clear night. It is his. Walk her there at dusk.",
+          "place": "soulrest"
         },
         {
           "type": "escort",
@@ -1866,13 +2099,23 @@
               "reply": "Then he knows. That is enough. I will sleep tonight.",
               "actions": "flag:mq_bm_sr_seen;give:skycraft:histcarp"
             }
-          ]
+          ],
+          "place": "soulrest"
         }
       ],
       "outro": "Kess-Ta left Soulrest at dawn, lighter than she came.",
       "rewards": {
         "gold": 280,
         "loot": "minor"
+      },
+      "why": [
+        "gideon.L9.lukiul_and_an_xileel",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_sr_mourner_resolved",
+        "flag": "conseq_mq_bm_sr_mourner",
+        "summary": "Kess-Ta left Soulrest at dawn, lighter than she came."
       }
     },
     {
@@ -1914,13 +2157,23 @@
           "npc": "mq_bm_mussa",
           "text": "Tell Rice-Mother Mussa the hatchlings are fed",
           "topic": "The hatchlings were hungry. The bully is gone.",
-          "reply": "Then they will eat from the paddy, and no one shall begrudge them. I shall set out a bowl at dusk. The hatchlings will take it. You will not tell the elder. She will tell me she knew."
+          "reply": "Then they will eat from the paddy, and no one shall begrudge them. I shall set out a bowl at dusk. The hatchlings will take it. You will not tell the elder. She will tell me she knew.",
+          "place": "murkmire"
         }
       ],
       "outro": "A bowl is set out at the village edge each dusk. It is always empty by dawn.",
       "rewards": {
         "gold": 260,
         "loot": "minor"
+      },
+      "why": [
+        "murkmire.L10.grand_calendar_xanmeer",
+        "murkmire.L7.bright_throat_and_dead_water"
+      ],
+      "consequence": {
+        "world_state": "mq_bm_mm_eggs_resolved",
+        "flag": "conseq_mq_bm_mm_eggs",
+        "summary": "A bowl is set out at the village edge each dusk. It is always empty by dawn."
       }
     }
   ]

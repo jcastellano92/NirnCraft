@@ -1,0 +1,416 @@
+{
+  "region": "high_rock/wrothgar",
+  "title": "The Anvil-Right of Orsinium",
+  "summary": "Prevent a blood-feud between the iron-clans of Orsinium and the old-faith strongholds when clanless raiders steal the Paragon's Hammer-Roll from Merchant's Gate.",
+  "why": [
+    "wrothgar.L7.chief_and_wives",
+    "wrothgar.L8.malacath",
+    "wrothgar.L8.trinimac_memory",
+    "wrothgar.L9.ore_rights",
+    "wrothgar.L10.clanless_raiders"
+  ],
+  "hook": {
+    "place": "orsinium",
+    "places": [
+      "aldwych_cavern",
+      "balthorpe",
+      "bormok_quarry",
+      "burash_lookout",
+      "draul_camp",
+      "goldford_stones",
+      "goldwych_hag_fen",
+      "graystone_quarry",
+      "greygate_lair",
+      "gulul_grotto",
+      "kragosh_burrow",
+      "marcliff",
+      "margate_wyrd_grove",
+      "mzanzak",
+      "narmok_glacier_cave",
+      "orsinium",
+      "penwick_hollow",
+      "shrine_mehrunes_dagon_high_rock",
+      "shrine_peryite_high_rock",
+      "thibault_farm",
+      "wyngate"
+    ],
+    "npc": "story_wg_forge_wife_ghorakha",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_wg_forge_wife_ghorakha",
+      "name": "Forge-Wife Ghorakha",
+      "role": "blacksmith",
+      "place": "orsinium",
+      "greet": "Hold your step by the slag-trough, outlander! If you bring ore-writs from the lowlands, the High Forge is barred until the Blood-Price is settled.",
+      "talk": [
+        "Last night clanless raiders struck Merchant's Gate and stole the bronze Hammer-Roll that partitions the orichalcum seams between Orsinium and Morkul Stronghold.",
+        "Chief Bazrag's hotheads blame Morkul's Malacath-sworn smiths, while Morkul blames the Trinimac priests in Orsinium. Meet Hearth-Wife Ulga at Morkul Stronghold before axes are drawn."
+      ]
+    },
+    {
+      "id": "story_wg_hearth_wife_ulga",
+      "name": "Hearth-Wife Ulga",
+      "role": "steward",
+      "place": "morkul_stronghold_high_rock",
+      "greet": "Let the city-Orcs polish their white stone! Morkul's anvils were ringing before Orsinium was rebuilt—and we do not steal in the dark.",
+      "talk": [
+        "The raiders left broken Trinimac emblems at Merchant's Gate to frame Orsinium, and Malacath ash-fetishes on Morkul's road to frame us.",
+        "That is the work of Skargol the Clanless and the Daughters of Wroth in Frostbreak Fortress and Watcher's Hold."
+      ]
+    },
+    {
+      "id": "story_wg_outrider_agharz",
+      "name": "Outrider Agharz",
+      "role": "guard",
+      "place": "fharun_stronghold",
+      "greet": "You ride fast for a lowlander! My scouts tracked the clanless pack-mules across Morkul Plain toward Watcher's Hold.",
+      "talk": [
+        "Hag-Matron Kraugha of the Daughters of Wroth holds half the stolen Hammer-Roll in Watcher's Hold, while Skargol took the other half to Frostbreak Fortress.",
+        "Slay Kraugha first, or her ice-storms will close the pass to Frostbreak."
+      ]
+    },
+    {
+      "id": "story_wg_shield_thane_broguk",
+      "name": "Shield-Thane Broguk",
+      "role": "warrior",
+      "place": "frostbreak_fortress",
+      "greet": "By Mauloch's tusk, you broke through Kraugha's wind-ward! Skargol's warband is inside the inner keep of Frostbreak Fortress.",
+      "talk": [
+        "Skargol plans to melt the bronze Hammer-Roll in the siege-furnace so every stronghold in Wrothgar goes to war over the mines.",
+        "Come—let us crack his shield-wall together!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_wg_matron_kraugha": {
+      "name": "Hag-Matron Kraugha of Wroth",
+      "rank": "boss",
+      "place": "watchers_hold",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.5,
+      "dmg_mult": 1.6
+    },
+    "story_wg_warlord_skargol": {
+      "name": "Skargol the Clanless",
+      "rank": "boss",
+      "place": "frostbreak_fortress",
+      "weapon": "orcish_warhammer",
+      "helmet": "orcish_helmet",
+      "chest": "orcish_chestplate",
+      "hp_mult": 3.4,
+      "dmg_mult": 1.9
+    }
+  },
+  "scenes": {
+    "story_wg_merchants_gate": [
+      "Forge-Wife Ghorakha: Look at the stone lintel of Merchant's Gate—chiseled out where the bronze Hammer-Roll hung for sixty winters.",
+      "Outrider Agharz: And see the boot-prints in the slag? Unshod mountain-ponies, driven north toward Morkul Plain.",
+      "Forge-Wife Ghorakha: Go to Morkul Stronghold and show Hearth-Wife Ulga this broken rivet before her sons march on the gate."
+    ],
+    "story_wg_watchers_hold": [
+      "Hag-Matron Kraugha: Let the fat smiths of Orsinium and the proud chiefs of Morkul split each other's skulls over the ore-veins!",
+      "Outrider Agharz: The Daughters of Wroth will choke on their own frost, witch!",
+      "Hag-Matron Kraugha: Hear the peaks howl, iron-bound sheep!"
+    ],
+    "story_wg_frostbreak_furnace": [
+      "Skargol the Clanless: When the Hammer-Roll runs as molten brass in this trough, no chief will own the mountain's ribs!",
+      "Shield-Thane Broguk: The Code is carved in blood and memory, Skargol, not just bronze!",
+      "Skargol the Clanless: Then come and write your name in my axe!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_wrothgar_01_stolen_anvil_roll",
+      "region": "high_rock/wrothgar",
+      "category": "main",
+      "title": "The Empty Lintel at Merchant's Gate",
+      "giver": "story_wg_forge_wife_ghorakha",
+      "start": "npc:story_wg_forge_wife_ghorakha",
+      "requires": [],
+      "why": [
+        "wrothgar.L7.chief_and_wives",
+        "wrothgar.L9.ore_rights"
+      ],
+      "summary": "Inspect the theft at Merchant's Gate with Forge-Wife Ghorakha and carry proof of the ambush to Hearth-Wife Ulga at Morkul Stronghold.",
+      "intro": [
+        "The bronze Hammer-Roll that governs ore-rights across Wrothgar has been pried from Merchant's Gate, bringing Orsinium and the strongholds to the brink of war.",
+        "Examine the gate at Merchant's Gate and travel to Morkul Stronghold to parley with Hearth-Wife Ulga."
+      ],
+      "complete": [
+        "Hearth-Wife Ulga recognized the false tokens left by Skargol the Clanless and the Daughters of Wroth."
+      ],
+      "journal": {
+        "start": "Forge-Wife Ghorakha in Orsinium asked me to inspect Merchant's Gate and speak with Hearth-Wife Ulga at Morkul Stronghold.",
+        "done": "Hearth-Wife Ulga agreed to stay Morkul's blades while I hunt Skargol the Clanless."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "merchants_gate",
+          "text": "Inspect the pried lintel at Merchant's Gate"
+        },
+        {
+          "type": "scene",
+          "place": "merchants_gate",
+          "target": "scene:story_wg_merchants_gate",
+          "text": "Examine the raiders' tracks with Forge-Wife Ghorakha"
+        },
+        {
+          "type": "talk",
+          "place": "morkul_stronghold_high_rock",
+          "npc": "story_wg_hearth_wife_ulga",
+          "text": "Parley with Hearth-Wife Ulga at Morkul Stronghold"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "merchants_gate",
+        "morkul_stronghold_high_rock"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "merchants_gate",
+          "objective": "Inspect the pried lintel at Merchant's Gate"
+        },
+        {
+          "id": 20,
+          "place": "merchants_gate",
+          "objective": "Examine the raiders' tracks with Forge-Wife Ghorakha"
+        },
+        {
+          "id": 30,
+          "place": "morkul_stronghold_high_rock",
+          "objective": "Parley with Hearth-Wife Ulga at Morkul Stronghold"
+        }
+      ],
+      "consequence": "guard_banner:wrothgar_stage_1"
+    },
+    {
+      "id": "ms1_wrothgar_02_paragons_trail",
+      "region": "high_rock/wrothgar",
+      "category": "main",
+      "title": "Hoofprints on Morkul Plain",
+      "giver": "story_wg_hearth_wife_ulga",
+      "start": "auto",
+      "requires": [
+        "ms1_wrothgar_01_stolen_anvil_roll"
+      ],
+      "why": [
+        "wrothgar.L8.malacath",
+        "wrothgar.L8.trinimac_memory"
+      ],
+      "summary": "Track the clanless raiders past Paragon's Remembrance and meet Outrider Agharz at Fharun Stronghold.",
+      "intro": [
+        "The clanless pack-train crossed Morkul Plain past Paragon's Remembrance toward the northern crags.",
+        "Search Paragon's Remembrance for the raiders' trail and confer with Outrider Agharz at Fharun Stronghold."
+      ],
+      "complete": [
+        "Outrider Agharz located Hag-Matron Kraugha's coven inside Watcher's Hold."
+      ],
+      "journal": {
+        "start": "I must follow the raiders' trail past Paragon's Remembrance to Outrider Agharz at Fharun Stronghold.",
+        "done": "Outrider Agharz confirmed that the Hammer-Roll was split between Watcher's Hold and Frostbreak Fortress."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "paragons_remembrance",
+          "text": "Check the mountain trail at Paragon's Remembrance"
+        },
+        {
+          "type": "talk",
+          "place": "fharun_stronghold",
+          "npc": "story_wg_outrider_agharz",
+          "text": "Speak with Outrider Agharz at Fharun Stronghold"
+        }
+      ],
+      "reward": {
+        "gold": 300,
+        "xp": 450
+      },
+      "places": [
+        "paragons_remembrance",
+        "fharun_stronghold"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "paragons_remembrance",
+          "objective": "Check the mountain trail at Paragon's Remembrance"
+        },
+        {
+          "id": 20,
+          "place": "fharun_stronghold",
+          "objective": "Speak with Outrider Agharz at Fharun Stronghold"
+        }
+      ],
+      "consequence": "npc_schedule:wrothgar_stage_2"
+    },
+    {
+      "id": "ms1_wrothgar_03_daughters_of_wroth",
+      "region": "high_rock/wrothgar",
+      "category": "main",
+      "title": "The Witch-Wind of Watcher's Hold",
+      "giver": "story_wg_outrider_agharz",
+      "start": "auto",
+      "requires": [
+        "ms1_wrothgar_02_paragons_trail"
+      ],
+      "why": [
+        "wrothgar.L10.daughters_of_wroth",
+        "wrothgar.L10.clanless_raiders"
+      ],
+      "summary": "Storm Watcher's Hold, slay Hag-Matron Kraugha, and recover the first half of the bronze Hammer-Roll.",
+      "intro": [
+        "Hag-Matron Kraugha of the Daughters of Wroth holds the upper towers of Watcher's Hold, calling down blizzards to shield Skargol's retreat.",
+        "Fight through Watcher's Hold and defeat Hag-Matron Kraugha."
+      ],
+      "complete": [
+        "With Kraugha slain, the blizzard over the northern ridge cleared, opening the road to Frostbreak Fortress."
+      ],
+      "journal": {
+        "start": "I must assault Watcher's Hold and defeat Hag-Matron Kraugha.",
+        "done": "I slew Hag-Matron Kraugha in Watcher's Hold and recovered the first half of the Hammer-Roll."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "watchers_hold",
+          "text": "Ascend to Watcher's Hold"
+        },
+        {
+          "type": "scene",
+          "place": "watchers_hold",
+          "target": "scene:story_wg_watchers_hold",
+          "text": "Confront Hag-Matron Kraugha in the ice-court"
+        },
+        {
+          "type": "boss",
+          "place": "watchers_hold",
+          "target": "story_wg_matron_kraugha",
+          "text": "Defeat Hag-Matron Kraugha of Wroth"
+        }
+      ],
+      "reward": {
+        "gold": 400,
+        "xp": 600
+      },
+      "places": [
+        "watchers_hold"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "watchers_hold",
+          "objective": "Ascend to Watcher's Hold"
+        },
+        {
+          "id": 20,
+          "place": "watchers_hold",
+          "objective": "Confront Hag-Matron Kraugha in the ice-court"
+        },
+        {
+          "id": 30,
+          "place": "watchers_hold",
+          "objective": "Defeat Hag-Matron Kraugha of Wroth"
+        }
+      ],
+      "consequence": "shrine_state:wrothgar_stage_3"
+    },
+    {
+      "id": "ms1_wrothgar_04_frostbreak_anvil",
+      "region": "high_rock/wrothgar",
+      "category": "main",
+      "title": "Iron and Recognition",
+      "giver": "story_wg_shield_thane_broguk",
+      "start": "auto",
+      "requires": [
+        "ms1_wrothgar_03_daughters_of_wroth"
+      ],
+      "finale": true,
+      "why": [
+        "wrothgar.L8.names_matter",
+        "wrothgar.L9.orsinium_succession",
+        "wrothgar.L9.recognition"
+      ],
+      "summary": "Join Shield-Thane Broguk at Frostbreak Fortress, defeat Skargol the Clanless, and restore the Hammer-Roll to Orsinium.",
+      "intro": [
+        "Skargol the Clanless has lit the great siege-furnace in Frostbreak Fortress to melt the remaining bronze tablets of the Hammer-Roll.",
+        "Speak with Shield-Thane Broguk, defeat Skargol, and carry the restored Hammer-Roll back to Forge-Wife Ghorakha in Orsinium."
+      ],
+      "complete": [
+        "Skargol the Clanless fell before the furnace, and the reforged Hammer-Roll now hangs once more above the High Forge of Orsinium."
+      ],
+      "journal": {
+        "start": "I must join Shield-Thane Broguk at Frostbreak Fortress, defeat Skargol the Clanless, and return the Hammer-Roll to Orsinium.",
+        "done": "I defeated Skargol the Clanless and restored the Hammer-Roll to Forge-Wife Ghorakha in Orsinium, earning Gortwog's Hammer."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "frostbreak_fortress",
+          "npc": "story_wg_shield_thane_broguk",
+          "text": "Meet Shield-Thane Broguk at Frostbreak Fortress"
+        },
+        {
+          "type": "scene",
+          "place": "frostbreak_fortress",
+          "target": "scene:story_wg_frostbreak_furnace",
+          "text": "Stop Skargol at the siege-furnace"
+        },
+        {
+          "type": "boss",
+          "place": "frostbreak_fortress",
+          "target": "story_wg_warlord_skargol",
+          "text": "Defeat Skargol the Clanless"
+        },
+        {
+          "type": "talk",
+          "place": "orsinium",
+          "npc": "story_wg_forge_wife_ghorakha",
+          "text": "Return the Hammer-Roll to Forge-Wife Ghorakha in Orsinium"
+        }
+      ],
+      "reward": {
+        "gold": 800,
+        "xp": 1200,
+        "unique": "gortwogs_hammer"
+      },
+      "places": [
+        "frostbreak_fortress",
+        "orsinium"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "frostbreak_fortress",
+          "objective": "Meet Shield-Thane Broguk at Frostbreak Fortress"
+        },
+        {
+          "id": 20,
+          "place": "frostbreak_fortress",
+          "objective": "Stop Skargol at the siege-furnace"
+        },
+        {
+          "id": 30,
+          "place": "frostbreak_fortress",
+          "objective": "Defeat Skargol the Clanless"
+        },
+        {
+          "id": 40,
+          "place": "orsinium",
+          "objective": "Return the Hammer-Roll to Forge-Wife Ghorakha in Orsinium"
+        }
+      ],
+      "consequence": "settlement_prosperity:wrothgar_stage_4"
+    }
+  ]
+}

@@ -1,16 +1,23 @@
 {
   "id": "imperial_garden",
+  "why": [
+    "heartlands.L1.lakeshore_clay",
+    "heartlands.L4.urban_garden",
+    "heartlands.L6.imperial_city"
+  ],
   "tint": {
     "wall": "minecraft:calcite",
-    "wall2": "minecraft:polished_diorite",
-    "wood": "birch",
-    "roof": "oxidized_cut_copper",
+    "wall2": "minecraft:mossy_stone_bricks",
+    "low": "minecraft:mossy_stone_bricks",
+    "wood": "oak",
+    "roof": "brick",
     "accent": "green"
   },
   "palette": {
-    "cityWall": "polished_diorite",
-    "cityWall2": "minecraft:calcite",
-    "plaza": "minecraft:polished_diorite",
-    "plaza2": "minecraft:moss_block"
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:mossy_stone_bricks",
+    "plaza2": "minecraft:calcite",
+    "path": "minecraft:gravel"
   }
 }

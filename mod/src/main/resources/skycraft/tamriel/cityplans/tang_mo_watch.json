@@ -1,0 +1,199 @@
+{
+  "id": "tang_mo_watch",
+  "why": [
+    "tang_mo.L1.karst_spire_isles",
+    "tang_mo.L5.open_charter_spice_trade",
+    "tang_mo.L6.tang_mo_treaty_harbor"
+  ],
+  "sil": "akavir-tang-mo-watch-plan",
+  "base": "none",
+  "overlay": "tang_mo",
+  "radius": 10,
+  "reach": 22,
+  "gates": [
+    [
+      0,
+      8
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        4
+      ],
+      "overlay": "tang_mo",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        4,
+        10
+      ],
+      "overlay": "tang_mo",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "tang_mo_watch_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -2
+      ],
+      "name": "tang_mo_watch_landmark",
+      "overlay": "tang_mo"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 2,
+      "r1": 12,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        4,
+        0
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        5,
+        5
+      ],
+      "face": "north",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        4
+      ],
+      "face": "north",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -5,
+        5
+      ],
+      "face": "north",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        0
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        -5
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -4
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        5,
+        -5
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "tang_mo_watch_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "tang_mo_watch_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "tang_mo_watch_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "tang_mo_watch_b_5",
+    "smithy": "tang_mo_watch_b_7"
+  },
+  "titles": {
+    "tang_mo_watch_b_1": "place.skycraft.tang_mo_watch Council & Seat Hall",
+    "tang_mo_watch_b_2": "place.skycraft.tang_mo_watch High Sanctuary",
+    "tang_mo_watch_b_3": "place.skycraft.tang_mo_watch Fighters & Wayfarers Hall",
+    "tang_mo_watch_b_4": "place.skycraft.tang_mo_watch Mages & Chroniclers Spire",
+    "tang_mo_watch_b_5": "place.skycraft.tang_mo_watch The Lantern & Hearth Inn",
+    "tang_mo_watch_b_6": "place.skycraft.tang_mo_watch The Traveler's Rest Tavern",
+    "tang_mo_watch_b_7": "place.skycraft.tang_mo_watch Master Forge & Armorer",
+    "tang_mo_watch_b_8": "place.skycraft.tang_mo_watch Botanicals & Remedies",
+    "tang_mo_watch_landmark": "High Seat of place.skycraft.tang_mo_watch",
+    "tang_mo_watch_plaza": "place.skycraft.tang_mo_watch Central Plaza"
+  },
+  "innKey": "tang_mo_watch_b_5"
+}

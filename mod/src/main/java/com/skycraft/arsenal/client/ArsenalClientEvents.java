@@ -28,4 +28,9 @@ public final class ArsenalClientEvents {
         if (player.getAttackStrengthScale(0.5f) < 0.95f) return;
         SkyNetwork.sendToServer(new ArsenalPackets.BladeSwing());
     }
+
+    @SubscribeEvent
+    public static void onTooltip(net.minecraftforge.event.entity.player.ItemTooltipEvent event) {
+        com.skycraft.loot.affix.ItemAffixes.appendTooltip(event.getItemStack(), event.getToolTip());
+    }
 }

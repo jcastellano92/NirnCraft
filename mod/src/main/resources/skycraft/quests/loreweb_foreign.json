@@ -1,343 +1,415 @@
 {
- "line": "loreweb_foreign",
- "category": "side",
- "bosses": {
-  "lw_for_1_boss": {
-   "name": "Hjalti the Ice-Sworn",
-   "type": "skycraft:draugr_deathlord",
-   "hp": 3.6,
-   "dmg": 1.6,
-   "level": 30,
-   "drop": "loot:major",
-   "glow": false
-  },
-  "lw_for_2_boss": {
-   "name": "Kamal's Frost-Warden",
-   "type": "skycraft:ice_wraith",
-   "hp": 4,
-   "dmg": 1.6,
-   "level": 32,
-   "drop": "loot:major",
-   "glow": false
-  },
-  "lw_for_3_boss": {
-   "name": "Orgnum's Reef-Warden",
-   "type": "skycraft:flame_atronach",
-   "hp": 3.4,
-   "dmg": 1.5,
-   "level": 28,
-   "drop": "loot:standard",
-   "glow": false
-  },
-  "lw_for_4_boss": {
-   "name": "The Barge-Master",
-   "type": "skycraft:draugr_deathlord",
-   "hp": 3.4,
-   "dmg": 1.5,
-   "level": 28,
-   "drop": "loot:standard",
-   "glow": false
-  }
- },
- "quests": [
-  {
-   "id": "lw_for_1_a",
-   "title": "The Last Voyage Home",
-   "region": "atmora/frozen_forest",
-   "start": "find",
-   "find": {
-    "place": "saarvik_landing",
-    "offset": [
-     6,
-     5
-    ],
-    "radius": 4,
-    "clue": "skeleton",
-    "text": "A broken ship's ribs, and in the sand a dead sailor with a rune-tablet clutched in both hands: 'Ice cracks under the long halls. The captain's ship sleeps in the howe. Wake her before the thaw.'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A sailor's skeleton at a landing of broken ships holds a rune-tablet: the ice will crack and a ship sleeps in a howe.",
-   "pitch": "The old hold at Kjolvik keeps hearing the ice speak at night.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "skjaldborg",
-     "text": "Take the captain's last page to the hold at Kjolvik."
+  "line": "loreweb_foreign",
+  "category": "faction",
+  "bosses": {
+    "lw_for_1_boss": {
+      "name": "Hjalti the Ice-Sworn",
+      "type": "skycraft:draugr_deathlord",
+      "hp": 3.6,
+      "dmg": 1.6,
+      "level": 30,
+      "drop": "loot:major",
+      "glow": false
     },
-    {
-     "type": "go",
-     "place": "kjolvik",
-     "text": "Persuade the elders of Kjolvik and take the hold-token to the dragon mound."
+    "lw_for_2_boss": {
+      "name": "Kamal's Frost-Warden",
+      "type": "skycraft:ice_wraith",
+      "hp": 4,
+      "dmg": 1.6,
+      "level": 32,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "lw_for_3_boss": {
+      "name": "Orgnum's Reef-Warden",
+      "type": "skycraft:flame_atronach",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 28,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_for_4_boss": {
+      "name": "The Barge-Master",
+      "type": "skycraft:draugr_deathlord",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 28,
+      "drop": "loot:standard",
+      "glow": false
     }
-   ],
-   "rewards": {
-    "gold": 280,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The tablet's trail passes a shield-fort and the last long halls to a frozen dragon and a buried ship."
   },
-  {
-   "id": "lw_for_1_b",
-   "title": "The Last Voyage Home (II)",
-   "region": "atmora/frozen_forest",
-   "start": "auto",
-   "requires": [
-    "quest:lw_for_1_a"
-   ],
-   "desc": "The tablet's trail passes a shield-fort and the last long halls to a frozen dragon and a buried ship.",
-   "pitch": "The old hold at Kjolvik keeps hearing the ice speak at night.",
-   "objectives": [
+  "quests": [
     {
-     "type": "go",
-     "place": "the_frozen_dragon_mound",
-     "text": "Bind the dragon's thaw with the cold shard and go on to the howe."
-    },
-    {
-     "type": "kill",
-     "place": "wolf_jarls_howe",
-     "text": "Speak the forgotten word before the wolf-jarl's ship and set her free.",
-     "spawn": [
-      {
-       "boss_id": "lw_for_1_boss"
+      "id": "lw_for_1_a",
+      "title": "The Last Voyage Home",
+      "region": "atmora/frozen_forest",
+      "start": "find",
+      "find": {
+        "place": "saarvik_landing",
+        "offset": [
+          6,
+          5
+        ],
+        "radius": 4,
+        "clue": "skeleton",
+        "text": "A broken ship's ribs, and in the sand a dead sailor with a rune-tablet clutched in both hands: 'Ice cracks under the long halls. The captain's ship sleeps in the howe. Wake her before the thaw.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A sailor's skeleton at a landing of broken ships holds a rune-tablet: the ice will crack and a ship sleeps in a howe.",
+      "pitch": "The old hold at Kjolvik keeps hearing the ice speak at night.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "skjaldborg",
+          "text": "Take the captain's last page to the hold at Kjolvik."
+        },
+        {
+          "type": "go",
+          "place": "kjolvik",
+          "text": "Persuade the elders of Kjolvik and take the hold-token to the dragon mound."
+        }
+      ],
+      "rewards": {
+        "gold": 280,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The tablet's trail passes a shield-fort and the last long halls to a frozen dragon and a buried ship.",
+      "why": [
+        "frozen_forest.L7.chroniclers_and_delvers",
+        "frozen_forest.L8.dragon_totem_orthodoxy"
+      ],
+      "consequence": {
+        "world_state": "lw_for_1_a_resolved",
+        "flag": "conseq_lw_for_1_a",
+        "summary": "One thread of the trail ends here and the next begins. The tablet's trail passes a shield-fort and the last long halls to a frozen dragon and a buried ship."
       }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 700,
-    "loot": "legendary",
-    "flags": [
-     "lw_for_1_done"
-    ],
-    "unique": "atmoran_frostaxe"
-   },
-   "outro": "The great ship shook the barrow's snow from her ribs and rose. Her ropes were rotten, her mast a frozen pole, but the hold's people climbed aboard, one by one, with their ancestors' shields."
-  },
-  {
-   "id": "lw_for_2_a",
-   "title": "The Four-Court Seal",
-   "region": "akavir/tang_mo",
-   "start": "find",
-   "find": {
-    "place": "tang_mo_watch",
-    "offset": [
-     8,
-     7
-    ],
-    "radius": 4,
-    "clue": "stone",
-    "text": "A watch-tower's border stone carries a fourfold seal, three quarters worn smooth. On the fourth, a handful of Akaviri characters: 'Three bow. One waits in the ice.'"
-   },
-   "requires": [
-    "level:20"
-   ],
-   "desc": "A watch-tower's border stone carries a fourfold seal, three quarters worn smooth.",
-   "pitch": "The watchmen at Tang Mo say the border stone has been rubbed away by pilgrims who pay no coin.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "tang_mo_harbor_village",
-     "text": "Take the harbour's quarter from the dragon-prow and cross to the mountain village."
     },
     {
-     "type": "go",
-     "place": "tiger_plains_village",
-     "text": "Take the lantern's quarter and climb to the serpent temple."
-    }
-   ],
-   "rewards": {
-    "gold": 300,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The seal's quarters are held across a harbour village, a mountain village and a serpent temple, ending at a valley of ribs and an ice throne."
-  },
-  {
-   "id": "lw_for_2_b",
-   "title": "The Four-Court Seal (II)",
-   "region": "akavir/tang_mo",
-   "start": "auto",
-   "requires": [
-    "quest:lw_for_2_a"
-   ],
-   "desc": "The seal's quarters are held across a harbour village, a mountain village and a serpent temple, ending at a valley of ribs and an ice throne.",
-   "pitch": "The watchmen at Tang Mo say the border stone has been rubbed away by pilgrims who pay no coin.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "temple_of_the_serpent_emperor",
-     "text": "Barter or take the third quarter from the serpent temple."
-    },
-    {
-     "type": "go",
-     "place": "dragon_graveyard_of_akavir",
-     "text": "Cross the valley of ribs with the three quarters and find the ice throne."
-    },
-    {
-     "type": "kill",
-     "place": "frost_throne_of_kamal",
-     "text": "Join the four quarters on the throne and decide whether the valley stays shut.",
-     "spawn": [
-      {
-       "boss_id": "lw_for_2_boss"
+      "id": "lw_for_1_b",
+      "title": "The Last Voyage Home (II)",
+      "region": "atmora/frozen_forest",
+      "start": "auto",
+      "requires": [
+        "quest:lw_for_1_a"
+      ],
+      "desc": "The tablet's trail passes a shield-fort and the last long halls to a frozen dragon and a buried ship.",
+      "pitch": "The old hold at Kjolvik keeps hearing the ice speak at night.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_frozen_dragon_mound",
+          "text": "Bind the dragon's thaw with the cold shard and go on to the howe."
+        },
+        {
+          "type": "kill",
+          "place": "wolf_jarls_howe",
+          "text": "Speak the forgotten word before the wolf-jarl's ship and set her free.",
+          "spawn": [
+            {
+              "boss_id": "lw_for_1_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 700,
+        "loot": "legendary",
+        "flags": [
+          "lw_for_1_done"
+        ],
+        "unique": "atmoran_frostaxe"
+      },
+      "outro": "The great ship shook the barrow's snow from her ribs and rose. Her ropes were rotten, her mast a frozen pole, but the hold's people climbed aboard, one by one, with their ancestors' shields.",
+      "why": [
+        "frozen_forest.L8.dragon_totem_orthodoxy",
+        "frozen_forest.L9.barrow_king_stirring"
+      ],
+      "consequence": {
+        "world_state": "lw_for_1_b_resolved",
+        "flag": "conseq_lw_for_1_b",
+        "summary": "The great ship shook the barrow's snow from her ribs and rose. Her ropes were rotten, her mast a frozen pole, but the hold's people climbed aboard, one by one, with their ancestors' shields."
       }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 760,
-    "loot": "legendary",
-    "flags": [
-     "lw_for_2_done"
-    ],
-    "unique": "shehai_blade"
-   },
-   "outro": "I laid the fourth quarter against the other three and the valley of ribs, which had been groaning for a thousand years, fell quiet. The serpent-court will come, but not through that door."
-  },
-  {
-   "id": "lw_for_3_a",
-   "title": "The Walking Reef",
-   "region": "pyandonea/maormer_isles",
-   "start": "find",
-   "find": {
-    "place": "serpent_pens",
-    "offset": [
-     4,
-     8
-    ],
-    "radius": 4,
-    "clue": "totem",
-    "text": "A pen-keeper's totem is hung with pink coral-shards that have started to take root in the wood. A scratch on its post: 'The pens are eating it. The pens are growing. Who feeds the pens?'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A pen-keeper's totem sprouting pink coral, with a note that the pens are growing strangely.",
-   "pitch": "The pen-keepers say the serpents have been eating something pink, and it has not agreed with them.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "pyandonean_fleet_anchorage",
-     "text": "Take the admiral's chart from the flagship and sail for the plague-coral sea."
-    }
-   ],
-   "rewards": {
-    "gold": 240,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The reef's walk leads past the shell-raft fleet and the coral tower of Thras to the sea-serpent citadel's window on the deep."
-  },
-  {
-   "id": "lw_for_3_b",
-   "title": "The Walking Reef (II)",
-   "region": "pyandonea/maormer_isles",
-   "start": "auto",
-   "requires": [
-    "quest:lw_for_3_a"
-   ],
-   "desc": "The reef's walk leads past the shell-raft fleet and the coral tower of Thras to the sea-serpent citadel's window on the deep.",
-   "pitch": "The pen-keepers say the serpents have been eating something pink, and it has not agreed with them.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "coral_tower_of_thras",
-     "text": "Reach the heart-chamber of the coral tower and take the seed."
     },
     {
-     "type": "kill",
-     "place": "orgnums_citadel",
-     "text": "Close the sea-gate against the reef and counsel the sleepless king.",
-     "spawn": [
-      {
-       "boss_id": "lw_for_3_boss"
+      "id": "lw_for_2_a",
+      "title": "The Four-Court Seal",
+      "region": "akavir/tang_mo",
+      "start": "find",
+      "find": {
+        "place": "tang_mo_watch",
+        "offset": [
+          8,
+          7
+        ],
+        "radius": 4,
+        "clue": "stone",
+        "text": "A watch-tower's border stone carries a fourfold seal, three quarters worn smooth. On the fourth, a handful of Akaviri characters: 'Three bow. One waits in the ice.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A watch-tower's border stone carries a fourfold seal, three quarters worn smooth.",
+      "pitch": "The watchmen at Tang Mo say the border stone has been rubbed away by pilgrims who pay no coin.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tang_mo_harbor_village",
+          "text": "Take the harbour's quarter from the dragon-prow and cross to the mountain village."
+        },
+        {
+          "type": "go",
+          "place": "tiger_plains_village",
+          "text": "Take the lantern's quarter and climb to the serpent temple."
+        }
+      ],
+      "rewards": {
+        "gold": 300,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The seal's quarters are held across a harbour village, a mountain village and a serpent temple, ending at a valley of ribs and an ice throne.",
+      "why": [
+        "tang_mo.L9.strait_bridge_defense",
+        "tang_mo.L10.mist_pillar_sanctums"
+      ],
+      "consequence": {
+        "world_state": "lw_for_2_a_resolved",
+        "flag": "conseq_lw_for_2_a",
+        "summary": "One thread of the trail ends here and the next begins. The seal's quarters are held across a harbour village, a mountain village and a serpent temple, ending at a valley of ribs and an ice throne."
       }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 600,
-    "loot": "major",
-    "flags": [
-     "lw_for_3_done"
-    ],
-    "unique": "hist_fang"
-   },
-   "outro": "At the citadel's window, the reef's great pink head lay pressed to the glass. I closed the sea-gate against it. For a week the fleet slept. Then, far below, the head turned, patient, to wait for the next tide."
-  },
-  {
-   "id": "lw_for_4_a",
-   "title": "The Last Lesson",
-   "region": "yokuda/yokudan_desert",
-   "start": "find",
-   "find": {
-    "place": "ra_gada_encampment",
-    "offset": [
-     5,
-     -3
-    ],
-    "radius": 4,
-    "clue": "lectern",
-    "text": "A training-post is carved with four forms. Three have a student's name. The fourth reads only: 'The Last Lesson, taught on the water.' A master's sandal sits on the step."
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A training-post carved with four forms, the fourth to be taught on the water.",
-   "pitch": "A veteran at the Ra Gada camp says the fourth form has not been taught in living memory.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "hundings_dojo",
-     "text": "Earn the second form's stone at the sunken dojo and go on to the serpent temple."
-    }
-   ],
-   "rewards": {
-    "gold": 250,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The lesson's next forms are in a sunken dojo and a serpent temple, and the last in a sunken temple of kings."
-  },
-  {
-   "id": "lw_for_4_b",
-   "title": "The Last Lesson (II)",
-   "region": "yokuda/yokudan_desert",
-   "start": "auto",
-   "requires": [
-    "quest:lw_for_4_a"
-   ],
-   "desc": "The lesson's next forms are in a sunken dojo and a serpent temple, and the last in a sunken temple of kings.",
-   "pitch": "A veteran at the Ra Gada camp says the fourth form has not been taught in living memory.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "temple_of_satakal",
-     "text": "Dance the third form on the scales and bring the token to the sunken temple."
     },
     {
-     "type": "kill",
-     "place": "sunken_temple_of_the_yokudan_kings",
-     "text": "Row the funeral barge out through the sea-gate and finish the Last Lesson.",
-     "spawn": [
-      {
-       "boss_id": "lw_for_4_boss"
+      "id": "lw_for_2_b",
+      "title": "The Four-Court Seal (II)",
+      "region": "akavir/tang_mo",
+      "start": "auto",
+      "requires": [
+        "quest:lw_for_2_a"
+      ],
+      "desc": "The seal's quarters are held across a harbour village, a mountain village and a serpent temple, ending at a valley of ribs and an ice throne.",
+      "pitch": "The watchmen at Tang Mo say the border stone has been rubbed away by pilgrims who pay no coin.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "temple_of_the_serpent_emperor",
+          "text": "Barter or take the third quarter from the serpent temple."
+        },
+        {
+          "type": "go",
+          "place": "dragon_graveyard_of_akavir",
+          "text": "Cross the valley of ribs with the three quarters and find the ice throne."
+        },
+        {
+          "type": "kill",
+          "place": "frost_throne_of_kamal",
+          "text": "Join the four quarters on the throne and decide whether the valley stays shut.",
+          "spawn": [
+            {
+              "boss_id": "lw_for_2_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 760,
+        "loot": "legendary",
+        "flags": [
+          "lw_for_2_done"
+        ],
+        "unique": "shehai_blade"
+      },
+      "outro": "I laid the fourth quarter against the other three and the valley of ribs, which had been groaning for a thousand years, fell quiet. The serpent-court will come, but not through that door.",
+      "why": [
+        "tang_mo.L10.mist_pillar_sanctums",
+        "tang_mo.L7.island_ranger_clans"
+      ],
+      "consequence": {
+        "world_state": "lw_for_2_b_resolved",
+        "flag": "conseq_lw_for_2_b",
+        "summary": "I laid the fourth quarter against the other three and the valley of ribs, which had been groaning for a thousand years, fell quiet. The serpent-court will come, but not through that door."
       }
-     ],
-     "placement": "structure"
+    },
+    {
+      "id": "lw_for_3_a",
+      "title": "The Walking Reef",
+      "region": "pyandonea/maormer_isles",
+      "start": "find",
+      "find": {
+        "place": "serpent_pens",
+        "offset": [
+          4,
+          8
+        ],
+        "radius": 4,
+        "clue": "totem",
+        "text": "A pen-keeper's totem is hung with pink coral-shards that have started to take root in the wood. A scratch on its post: 'The pens are eating it. The pens are growing. Who feeds the pens?'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A pen-keeper's totem sprouting pink coral, with a note that the pens are growing strangely.",
+      "pitch": "The pen-keepers say the serpents have been eating something pink, and it has not agreed with them.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "pyandonean_fleet_anchorage",
+          "text": "Take the admiral's chart from the flagship and sail for the plague-coral sea."
+        }
+      ],
+      "rewards": {
+        "gold": 240,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The reef's walk leads past the shell-raft fleet and the coral tower of Thras to the sea-serpent citadel's window on the deep.",
+      "why": [
+        "maormer_isles.L7.truce_captains_and_storm_caste",
+        "maormer_isles.L8.cult_of_immortal_orgnum"
+      ],
+      "consequence": {
+        "world_state": "lw_for_3_a_resolved",
+        "flag": "conseq_lw_for_3_a",
+        "summary": "One thread of the trail ends here and the next begins. The reef's walk leads past the shell-raft fleet and the coral tower of Thras to the sea-serpent citadel's window on the deep."
+      }
+    },
+    {
+      "id": "lw_for_3_b",
+      "title": "The Walking Reef (II)",
+      "region": "pyandonea/maormer_isles",
+      "start": "auto",
+      "requires": [
+        "quest:lw_for_3_a"
+      ],
+      "desc": "The reef's walk leads past the shell-raft fleet and the coral tower of Thras to the sea-serpent citadel's window on the deep.",
+      "pitch": "The pen-keepers say the serpents have been eating something pink, and it has not agreed with them.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "coral_tower_of_thras",
+          "text": "Reach the heart-chamber of the coral tower and take the seed."
+        },
+        {
+          "type": "kill",
+          "place": "orgnums_citadel",
+          "text": "Close the sea-gate against the reef and counsel the sleepless king.",
+          "spawn": [
+            {
+              "boss_id": "lw_for_3_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 600,
+        "loot": "major",
+        "flags": [
+          "lw_for_3_done"
+        ],
+        "unique": "hist_fang"
+      },
+      "outro": "At the citadel's window, the reef's great pink head lay pressed to the glass. I closed the sea-gate against it. For a week the fleet slept. Then, far below, the head turned, patient, to wait for the next tide.",
+      "why": [
+        "maormer_isles.L8.cult_of_immortal_orgnum",
+        "maormer_isles.L9.storm_spire_sabotage"
+      ],
+      "consequence": {
+        "world_state": "lw_for_3_b_resolved",
+        "flag": "conseq_lw_for_3_b",
+        "summary": "At the citadel's window, the reef's great pink head lay pressed to the glass. I closed the sea-gate against it. For a week the fleet slept. Then, far below, the head turned, patient, to wait for the next tide."
+      }
+    },
+    {
+      "id": "lw_for_4_a",
+      "title": "The Last Lesson",
+      "region": "yokuda/yokudan_desert",
+      "start": "find",
+      "find": {
+        "place": "ra_gada_encampment",
+        "offset": [
+          5,
+          -3
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "A training-post is carved with four forms. Three have a student's name. The fourth reads only: 'The Last Lesson, taught on the water.' A master's sandal sits on the step."
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A training-post carved with four forms, the fourth to be taught on the water.",
+      "pitch": "A veteran at the Ra Gada camp says the fourth form has not been taught in living memory.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hundings_dojo",
+          "text": "Earn the second form's stone at the sunken dojo and go on to the serpent temple."
+        }
+      ],
+      "rewards": {
+        "gold": 250,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The lesson's next forms are in a sunken dojo and a serpent temple, and the last in a sunken temple of kings.",
+      "why": [
+        "yokudan_desert.L9.fault_vault_seeker",
+        "yokudan_desert.L10.vault_of_the_pankratosword"
+      ],
+      "consequence": {
+        "world_state": "lw_for_4_a_resolved",
+        "flag": "conseq_lw_for_4_a",
+        "summary": "One thread of the trail ends here and the next begins. The lesson's next forms are in a sunken dojo and a serpent temple, and the last in a sunken temple of kings."
+      }
+    },
+    {
+      "id": "lw_for_4_b",
+      "title": "The Last Lesson (II)",
+      "region": "yokuda/yokudan_desert",
+      "start": "auto",
+      "requires": [
+        "quest:lw_for_4_a"
+      ],
+      "desc": "The lesson's next forms are in a sunken dojo and a serpent temple, and the last in a sunken temple of kings.",
+      "pitch": "A veteran at the Ra Gada camp says the fourth form has not been taught in living memory.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "temple_of_satakal",
+          "text": "Dance the third form on the scales and bring the token to the sunken temple."
+        },
+        {
+          "type": "kill",
+          "place": "sunken_temple_of_the_yokudan_kings",
+          "text": "Row the funeral barge out through the sea-gate and finish the Last Lesson.",
+          "spawn": [
+            {
+              "boss_id": "lw_for_4_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 620,
+        "loot": "major",
+        "flags": [
+          "lw_for_4_done"
+        ],
+        "unique": "claw_of_alkosh"
+      },
+      "outro": "I rowed the funeral barge out of the sunken temple's flooded hall and through a gate of light. The kings did not speak. I think they were satisfied that someone, finally, had finished the lesson.",
+      "why": [
+        "yokudan_desert.L10.vault_of_the_pankratosword",
+        "yokudan_desert.L7.ansei_pilgrims_and_keepers"
+      ],
+      "consequence": {
+        "world_state": "lw_for_4_b_resolved",
+        "flag": "conseq_lw_for_4_b",
+        "summary": "I rowed the funeral barge out of the sunken temple's flooded hall and through a gate of light. The kings did not speak. I think they were satisfied that someone, finally, had finished the lesson."
+      }
     }
-   ],
-   "rewards": {
-    "gold": 620,
-    "loot": "major",
-    "flags": [
-     "lw_for_4_done"
-    ],
-    "unique": "claw_of_alkosh"
-   },
-   "outro": "I rowed the funeral barge out of the sunken temple's flooded hall and through a gate of light. The kings did not speak. I think they were satisfied that someone, finally, had finished the lesson."
-  }
- ]
+  ]
 }

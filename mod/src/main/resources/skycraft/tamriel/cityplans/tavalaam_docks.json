@@ -1,0 +1,231 @@
+{
+  "id": "tavalaam_docks",
+  "sil": "southern-shore-dhow-wharf",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "tavalaam_docks_lateen_spar",
+  "names": {
+    "inn": "tavalaam_docks_lateen_spar",
+    "store": "tavalaam_docks_salt_bale_store",
+    "smithy": "tavalaam_docks_copper_nail_forge"
+  },
+  "titles": {
+    "tavalaam_docks_landmark": "Tavalaam Wharf Shade-Awnings",
+    "tavalaam_docks_lateen_spar": "The Lateen Spar Inn",
+    "tavalaam_docks_salt_bale_store": "Salt-Bale & Amphora Wharf-Store",
+    "tavalaam_docks_dhow_jetty": "Coaster-Dhow & Lighter Jetty",
+    "tavalaam_docks_copper_nail_forge": "Copper-Sheathing & Nail Forge",
+    "tavalaam_docks_customs_shed": "Coast-Road Bonded Dates Shed",
+    "tavalaam_docks_harbour_shrine": "Breakwater Lantern-Shrine of Tava",
+    "tavalaam_docks_market_plaza": "Tavalaam Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "awning_row",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "tavalaam_docks_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "tavalaam_docks_lateen_spar"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "tavalaam_docks_salt_bale_store"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "tavalaam_docks_dhow_jetty"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "tavalaam_docks_copper_nail_forge"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "tavalaam_docks_customs_shed"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "tavalaam_docks_harbour_shrine"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        18
+      ],
+      "to": [
+        8,
+        18
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "tavalaam_docks_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:dibella",
+      "count": 1
+    },
+    {
+      "type": "memorial",
+      "count": 1
+    }
+  ]
+}

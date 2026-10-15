@@ -35,18 +35,45 @@ IDENT = os.path.join(SKY, "dungeons", "identity", "skyrim.json")
 # variant -> family (the story kind). Families decide boss names, set-piece motifs and the loot table.
 FAMILY = {
     "barrow": "barrow", "bleak_falls_barrow": "barrow", "forelhost": "barrow", "ysgramors_tomb": "barrow",
-    "ustengrav": "barrow", "saarthal": "barrow", "labyrinthian": "barrow",
-    "nordic_ruin": "ruin", "dwemer_ruin": "dwemer", "great_lift": "dwemer", "mzark": "dwemer",
-    "bandit_cave": "bandit", "bandit_camp": "bandit", "fort": "fort", "keep": "fort", "akaviri_fort": "fort",
-    "fort_mage": "mage", "fort_vampire": "vampire", "fort_forsworn": "forsworn",
-    "vampire_lair": "vampire", "necromancer_lair": "necromancer", "hagraven_lair": "hagraven",
-    "falmer_cave": "falmer", "den": "beast", "skeever_cave": "beast", "spider_cave": "beast", "troll_cave": "beast",
+    "ustengrav": "barrow", "saarthal": "barrow", "labyrinthian": "barrow", "atmoran_tomb": "barrow",
+    "nordic_ruin": "ruin", "breton_crypt": "ruin", "yokudan_tomb": "ruin", "orc_ruin": "ruin",
+    "daedric_ruin": "ruin", "ayleid_ruin": "ruin", "crystal_vault": "ruin", "imperial_crypt": "ruin",
+    "velothi_tomb": "ruin", "xanmeer": "ruin", "moon_temple": "ruin", "tree_tomb": "ruin",
+    "sea_vault": "ruin", "akaviri_ruin": "ruin",
+    "dwemer_ruin": "dwemer", "great_lift": "dwemer", "mzark": "dwemer",
+    "bandit_cave": "bandit", "bandit_camp": "bandit",
+    "fort": "fort", "keep": "fort", "akaviri_fort": "fort", "breton_keep_ruin": "fort", "orc_stronghold": "fort",
+    "fort_mage": "mage", "fort_vampire": "vampire", "fort_forsworn": "forsworn", "fort_necromancer": "necromancer",
+    "vampire_lair": "vampire", "necromancer_lair": "necromancer", "sixth_house_base": "necromancer",
+    "hagraven_lair": "hagraven",
+    "falmer_cave": "falmer", "den": "beast", "skeever_cave": "beast", "spider_cave": "beast",
+    "troll_cave": "beast", "scorpion_den": "beast",
     "ice_cave": "ice", "mine": "mine", "kolskeggr_mine": "mine", "egg_mine": "mine",
     "forsworn_camp": "forsworn", "forsworn_cave": "forsworn", "forsworn_tower": "forsworn",
-    "spriggan_cave": "grove", "grove": "grove", "smuggler_cave": "smuggler", "cave": "cave",
+    "spriggan_cave": "grove", "grove": "grove", "smuggler_cave": "smuggler", "cave": "cave", "coral_pit": "cave",
     "giant_camp": "giant", "dragon_lair": "dragon", "watchtower": "tower", "nordic_tower": "tower", "tower": "tower",
     "lighthouse": "tower", "mage_tower": "mage", "imperial_camp": "military", "stormcloak_camp": "military",
     "cabin": "cabin", "shipwreck": "wreck",
+}
+
+KW = {
+    "forsworn": r"forsworn|hagraven|briarheart",
+    "vampire": r"vampire|thrall|volkihar",
+    "necromancer": r"necromanc|reanimat|ritualist",
+    "bandit": r"bandit|outlaw|thieves|brigand|smuggler",
+    "falmer": r"falmer|chaurus",
+    "dwemer": r"dwemer|dwarven|centurion|animuncul",
+    "draugr": r"draugr|barrow|sarcoph|entomb|crypt|tomb",
+    "giant": r"\bgiants?\b|mammoth",
+    "spriggan": r"spriggan",
+}
+FAMKW = {
+    "barrow": "draugr", "bandit": "bandit", "vampire": "vampire", "necromancer": "necromancer",
+    "hagraven": "forsworn", "forsworn": "forsworn", "falmer": "falmer", "grove": "spriggan", "giant": "giant",
+}
+KW_TO_FAM = {
+    "forsworn": "forsworn", "vampire": "vampire", "necromancer": "necromancer", "bandit": "bandit",
+    "falmer": "falmer", "dwemer": "dwemer", "draugr": "barrow", "giant": "giant", "spriggan": "grove",
 }
 
 # family -> (loot key, motifs). The motif is picked by a name token first, then by the place id's hash.
@@ -99,43 +126,57 @@ POOLS = {
         "title": ["", "", "Jarl ", "Thane ", "Warchief "],
     },
     "ruin": {
-        "first": ["Valdrek", "Orsolf", "Aethel", "Haldris", "Morthgar", "Ysolt", "Brandrek", "Tormund", "Edrith", "Gallowyn"],
-        "by": ["the Watcher", "Ward-Sworn", "of the Broken Wall", "the Shrine-Warden", "Rune-Keeper", "the Fallen Priest"],
-        "title": ["", "Warden "],
+        "first": ["Valdrek", "Orsolf", "Aethel", "Haldris", "Morthgar", "Ysolt", "Brandrek", "Tormund", "Edrith", "Gallowyn",
+                  "Caelan", "Morgant", "Bertrand", "Evrard", "Gaston", "Roderic", "Aelric", "Corwyn", "Varnak", "Dura",
+                  "Rashid", "Tarik", "Sulaiman", "Karim", "Zahir", "Harun", "Malik", "Farid", "Azad", "Qasim", "Nadia", "Soraya"],
+        "by": ["the Watcher", "Ward-Sworn", "of the Broken Wall", "the Shrine-Warden", "Rune-Keeper", "the Fallen Priest",
+               "of the Sealed Vault", "the Sword-Singer", "of the First Ansei", "the Tomb-Warden", "the Sunken Lord",
+               "of the Lion Guard", "the Oath-Bound", "of the Direnni Sigil", "the Iron Castellan", "of the Sand-Shrine"],
+        "title": ["", "Warden ", "Ansei ", "Castellan ", "Prelate ", "Keeper "],
     },
     "bandit": {
         "first": ["Garrick", "Maren", "Torvik", "Sella", "Bram", "Hesk", "Orla", "Dunstan", "Vexa", "Kolgrim", "Ysmar", "Tilda",
-                  "Rurik", "Nessa", "Gorm", "Elsbet", "Drake", "Halvar", "Isra", "Ketil", "Wulfric", "Brenna", "Jarek", "Mavis"],
+                  "Rurik", "Nessa", "Gorm", "Elsbet", "Drake", "Halvar", "Isra", "Ketil", "Wulfric", "Brenna", "Jarek", "Mavis",
+                  "Reynard", "Thibault", "Giselle", "Corinne", "Bastien", "Luc", "Kemal", "Jafar", "Razia", "Tariq", "Farah", "Zayd"],
         "by": ["Two-Knives", "Red-Sash", "the Tithe-Taker", "Coin-Hand", "Split-Lip", "the Gaoler", "Black-Boots", "Toll-Master",
-               "Cutpurse", "One-Ear", "Salt-Eye", "the Lamplighter", "Crow-Bait", "Broken-Nose", "the Quartermaster", "Hook-Thumb"],
-        "title": ["", "", "Captain ", "Boss "],
+               "Cutpurse", "One-Ear", "Salt-Eye", "the Lamplighter", "Crow-Bait", "Broken-Nose", "the Quartermaster", "Hook-Thumb",
+               "the Dune-Raider", "Sand-Cloak", "of the Red Sails", "the Highwayman", "the Cutthroat", "the Freebooter"],
+        "title": ["", "", "Captain ", "Boss ", "Corsair ", "Reaver "],
     },
     "vampire": {
         "first": ["Ysmaine", "Valdrec", "Seraphene", "Corvane", "Morgathe", "Isolwen", "Dravik", "Maelis", "Narcissa", "Lucius",
-                  "Verenna", "Aurelio", "Selwyn", "Ravenna"],
-        "by": ["of the Pale Table", "the Patient", "Night-Born", "the Courteous", "of the Red Cup", "the Long-Lived"],
-        "title": ["Lady ", "Lord ", "Count ", "Mistress ", "Master "],
+                  "Verenna", "Aurelio", "Selwyn", "Ravenna", "Genevieve", "Montclair", "Vivienne", "Cyprien", "Sabbah", "Khalid"],
+        "by": ["of the Pale Table", "the Patient", "Night-Born", "the Courteous", "of the Red Cup", "the Long-Lived",
+               "of the Crimson Chalice", "the Thirsting", "of the Crypt", "the Blood-Lord"],
+        "title": ["Lady ", "Lord ", "Count ", "Mistress ", "Master ", "Baron "],
     },
     "necromancer": {
         "first": ["Orsin", "Velka", "Thaddeus", "Iselde", "Morwen", "Caldus", "Drusilla", "Hadrik", "Nerissa", "Umbrel", "Skarn",
-                  "Lucan"],
-        "by": ["the Careful", "Grave-Taker", "the Hollow Hand", "Bone-Reader", "of the Ninth Candle", "the Lector"],
-        "title": ["Magister ", "Adept ", "Ritualist ", "Brother ", "Sister "],
+                  "Lucan", "Malcor", "Severin", "Delphine", "Mordecai", "Nazeer", "Qadir", "Yasmin", "Hakim"],
+        "by": ["the Careful", "Grave-Taker", "the Hollow Hand", "Bone-Reader", "of the Ninth Candle", "the Lector",
+               "of the Worm Cult", "the Corpse-Speaker", "the Shroud-Weaver", "of the Black Sepulcher"],
+        "title": ["Magister ", "Adept ", "Ritualist ", "Brother ", "Sister ", "Arch-Lector "],
     },
     "mage": {
-        "first": ["Aldwyn", "Perrin", "Caraline", "Xerxes", "Melisande", "Orrin", "Thessaly", "Ambrose"],
-        "by": ["the Exiled", "of the Sealed Door", "Star-Reader", "the Apostate"],
-        "title": ["Magister ", "Warlock ", "Conjurer "],
+        "first": ["Aldwyn", "Perrin", "Caraline", "Xerxes", "Melisande", "Orrin", "Thessaly", "Ambrose",
+                  "Aurelien", "Celeste", "Evangeline", "Balthazar", "Marwan", "Soraya", "Idris", "Zuleika"],
+        "by": ["the Exiled", "of the Sealed Door", "Star-Reader", "the Apostate", "the Glass-Maker", "of the High Spire",
+               "the Spell-Weaver", "of the Astral Seal"],
+        "title": ["Magister ", "Warlock ", "Conjurer ", "Savant "],
     },
     "hagraven": {
-        "first": ["Skeldra", "Orgwen", "Mugrash", "Hesthra", "Dunmira", "Vorga", "Thistle-Anne", "Grimsel", "Wrenna", "Oldwyth"],
-        "by": ["of the Briar", "Feather-Mother", "the Heart-Taker", "Old-Bones", "the Hungry"],
-        "title": ["Gristle-Mother ", "Crone ", "Briar-Mother ", "Mother "],
+        "first": ["Skeldra", "Orgwen", "Mugrash", "Hesthra", "Dunmira", "Vorga", "Thistle-Anne", "Grimsel", "Wrenna", "Oldwyth",
+                  "Morgra", "Beldama", "Drusba", "Kragna", "Ulvra", "Ygraine", "fenn-Mother", "mire-Sister"],
+        "by": ["of the Briar", "Feather-Mother", "the Heart-Taker", "Old-Bones", "the Hungry", "of the Wyrd",
+               "of the Fen", "the Crow-Speaker", "of the Salt-Marsh"],
+        "title": ["Gristle-Mother ", "Crone ", "Briar-Mother ", "Mother ", "Sister "],
     },
     "forsworn": {
-        "first": ["Madra", "Ketha", "Orgul", "Sanna", "Thrull", "Varka", "Edda", "Kyrn", "Bresa", "Haskel"],
-        "by": ["Antler-Crown", "Spear-Mother", "the Briar-Sworn", "Red-Feather", "Bone-Chanter", "Ash-Walker", "Hollow-Drum"],
-        "title": ["", "Briarheart ", "Hunt-Mother "],
+        "first": ["Madra", "Ketha", "Orgul", "Sanna", "Thrull", "Varka", "Edda", "Kyrn", "Bresa", "Haskel",
+                  "Cael", "Donnan", "Faelan", "Morcant", "Riordan", "Taran", "Branwen", "Niamh"],
+        "by": ["Antler-Crown", "Spear-Mother", "the Briar-Sworn", "Red-Feather", "Bone-Chanter", "Ash-Walker", "Hollow-Drum",
+               "of the Crags", "the Thorn-Chanter", "Stone-Claw"],
+        "title": ["", "Briarheart ", "Hunt-Mother ", "Chieftain "],
     },
     "falmer": {
         "first": ["Mhuur", "Ysk", "Oozk", "Grath", "Hesh", "Vyl", "Nuum", "Skree", "Thok", "Ilmuk"],
@@ -144,69 +185,82 @@ POOLS = {
     },
     "beast": {
         "first": ["Gnarltooth", "Hollowfang", "Bonecrusher", "Mossback", "Wretchhide", "Cragmaw", "Splitclaw", "Dreadpaw",
-                  "Hushfur", "Ironhide", "Brindlemaw", "Scarflank", "Grimsnout", "Bleakhowl", "Ashmane", "Thornback"],
-        "by": [""],
-        "title": ["Old ", "Mother ", "Great ", "Black "],
+                  "Hushfur", "Ironhide", "Brindlemaw", "Scarflank", "Grimsnout", "Bleakhowl", "Ashmane", "Thornback",
+                  "Sandstinger", "Duneclaw", "Venomtail", "Chitinback", "Sunscorcher", "Saltfang", "Canyonstalker", "Redpincer"],
+        "by": ["", "of the Wastes", "of the Deep Den", "of the Hollow", "the Ravenous", "the Burrower"],
+        "title": ["Old ", "Mother ", "Great ", "Black ", "Brood-Queen ", "Dread "],
     },
     "dwemer": {
-        "first": ["Kt-7", "Vh-12", "Rn-3", "Dz-9", "Mk-21", "Ph-4", "Sg-16", "Ol-8", "Bt-30", "Nx-5", "Tr-14", "Gl-2"],
-        "by": [""],
-        "title": ["Warden-Engine ", "Overseer Unit ", "Foundry-Guard ", "Gate-Engine "],
+        "first": ["Kt-7", "Vh-12", "Rn-3", "Dz-9", "Mk-21", "Ph-4", "Sg-16", "Ol-8", "Bt-30", "Nx-5", "Tr-14", "Gl-2",
+                  "Rk-11", "Bz-6", "Mz-19", " Vol-3", "Kla-8", "Zel-15", "Tha-22", "Nch-1"],
+        "by": ["", "of the Brass Hall", "of the Dynamo", "of the Steam-Vault", "of the Deep Forge"],
+        "title": ["Warden-Engine ", "Overseer Unit ", "Foundry-Guard ", "Gate-Engine ", "Centurion "],
     },
     "ice": {
         "first": ["Rimeheart", "Glasswing", "Frostmaw", "Shardbrow", "Coldwhisper", "Hoarvein", "Icegrip", "Blueclaw"],
-        "by": [""],
+        "by": ["", "of the Glacier", "the Rime-Stalker"],
         "title": ["the ", "Old ", "The Frozen "],
     },
     "mine": {
-        "first": ["Pickback", "Deepdelver", "Slagheart", "Cinderjaw", "Rubblefist", "Lodestone", "Gritmaw", "Seamripper"],
-        "by": [""],
-        "title": ["the ", "Old ", "Foreman "],
+        "first": ["Pickback", "Deepdelver", "Slagheart", "Cinderjaw", "Rubblefist", "Lodestone", "Gritmaw", "Seamripper",
+                  "Ironvein", "Copperjaw", "Shaftwarden", "Orebreaker", "Pitboss", "Dustlung", "Quarrymaster", "Deeppick"],
+        "by": ["", "of the Deep Adit", "of the Lower Drift", "the Pit-Boss", "the Vein-Claimer"],
+        "title": ["the ", "Old ", "Foreman ", "Overseer "],
     },
     "grove": {
-        "first": ["Moss-Crown", "Thornmother", "Oldwood", "Rootwarden", "Fernhollow", "Barkhide", "Wispweaver"],
-        "by": [""],
-        "title": ["the ", "Mother ", "Elder "],
+        "first": ["Moss-Crown", "Thornmother", "Oldwood", "Rootwarden", "Fernhollow", "Barkhide", "Wispweaver",
+                  "Wyrd-Bough", "Briar-Heart", "Glen-Singer", "Oasis-Keeper", "Leaf-Warden"],
+        "by": ["", "of the Sacred Grove", "of the Old Root", "of the Spring"],
+        "title": ["the ", "Mother ", "Elder ", "Matron "],
     },
     "smuggler": {
-        "first": ["Saltlip", "Tidehand", "Brinejack", "Knotwork", "Crab-Ear", "Lanternjaw", "Driftwood"],
-        "by": [""],
-        "title": ["Captain ", "Boss ", "Quartermaster "],
+        "first": ["Saltlip", "Tidehand", "Brinejack", "Knotwork", "Crab-Ear", "Lanternjaw", "Driftwood",
+                  "Bilge-Rat", "Reef-Runner", "Gaff-Hook", "Cove-Master", "Fog-Sail", "Tar-Hand", "Rum-Cask"],
+        "by": ["", "of the Hidden Cove", "of the Night Tide", "the Contrabandist", "of the Sea-Caves"],
+        "title": ["Captain ", "Boss ", "Quartermaster ", "First Mate ", "Skipper "],
     },
     "cave": {
-        "first": ["Hollowback", "Gloomfang", "Stonebrow", "Nightcrawler", "Duskmaw", "Cavepaw"],
-        "by": [""],
-        "title": ["Old ", "the ", "Great "],
+        "first": ["Hollowback", "Gloomfang", "Stonebrow", "Nightcrawler", "Duskmaw", "Cavepaw",
+                  "Echo-Stalker", "Dripstone", "Limestone-Lurker", "Sinkhole-Maw", "blind-Claw", "Karst-Runner"],
+        "by": ["", "of the Sinkhole", "of the Dark Grotto", "of the Under-Stream", "the Lurker", "of the Caverns"],
+        "title": ["Old ", "the ", "Great ", "Deep ", "Blind "],
     },
     "giant": {
-        "first": ["Gruvuk", "Maghor", "Thundrak", "Bolgrum", "Haggarn", "Skulgar", "Yurrg", "Orgnok"],
-        "by": ["Stone-Elbow", "Mammoth-Walker", "Cairn-Kicker", "Big-Drum", "Tree-Splitter"],
-        "title": ["Old ", ""],
+        "first": ["Gruvuk", "Maghor", "Thundrak", "Bolgrum", "Haggarn", "Skulgar", "Yurrg", "Orgnok",
+                  "Brogul", "Durgash", "Ghorbash", "Kharzug", "Murzol", "Sharn"],
+        "by": ["Stone-Elbow", "Mammoth-Walker", "Cairn-Kicker", "Big-Drum", "Tree-Splitter", "Ridge-Strider", "Boulder-Hand"],
+        "title": ["Old ", "", "Chieftain "],
     },
     "dragon": {
-        "first": ["Vulthrax", "Nirkul", "Sahrotor", "Krindoth", "Alduhn", "Faasnuk", "Thodrak"],
-        "by": ["the Skyborn", "Storm-Wing", "the Ashen", "of the High Perch"],
-        "title": [""],
+        "first": ["Vulthrax", "Nirkul", "Sahrotor", "Krindoth", "Alduhn", "Faasnuk", "Thodrak",
+                  "Nahagliiv", "Viinturuth", "Odahviing", "Krosulhah", "Sahrotaar", "Relonikiv", "Kruziikrel"],
+        "by": ["the Skyborn", "Storm-Wing", "the Ashen", "of the High Perch", "the Sun-Scorcher", "of the Crags"],
+        "title": ["", "Elder "],
     },
     "military": {
-        "first": ["Aurelian", "Brynjolf", "Cassian", "Dagny", "Eirik", "Fabius", "Gunnar", "Halla", "Iovan", "Jorun"],
-        "by": ["the Steadfast", "Iron-Line", "the Quartermaster", "Hard-March", "the Veteran"],
-        "title": ["Captain ", "Sergeant ", "Commander "],
+        "first": ["Aurelian", "Brynjolf", "Cassian", "Dagny", "Eirik", "Fabius", "Gunnar", "Halla", "Iovan", "Jorun",
+                  "Gervais", "Amaury", "rashid", "Qasim", "brennan", "Lucian"],
+        "by": ["the Steadfast", "Iron-Line", "the Quartermaster", "Hard-March", "the Veteran", "of the Border Watch"],
+        "title": ["Captain ", "Sergeant ", "Commander ", "Marshal "],
     },
     "tower": {
-        "first": ["Edrun", "Galdis", "Haldane", "Ismara", "Joric", "Kelwin", "Lysa", "Merrick"],
-        "by": ["the Watcher", "Beacon-Keeper", "the Last Lamp", "of the High Stair"],
-        "title": ["Warden ", "Keeper ", ""],
+        "first": ["Edrun", "Galdis", "Haldane", "Ismara", "Joric", "Kelwin", "Lysa", "Merrick",
+                  "Tristan", "Alaric", "Damien", "Genevieve", "Tariq", "Nadir", "Samira", "Khlid"],
+        "by": ["the Watcher", "Beacon-Keeper", "the Last Lamp", "of the High Stair", "of the Coast Watch",
+               "of the Signal Tower", "the Lookout", "of the Rampart"],
+        "title": ["Warden ", "Keeper ", "", "Watch-Captain ", "Sentinel "],
     },
     "cabin": {
-        "first": ["Otho", "Brenna", "Hargrim", "Pelle", "Roskva", "Ivar", "Dagmar", "Folke", "Sunniva", "Alrek"],
-        "by": ["the Hermit", "Tall-Tale", "the Trapper"],
-        "title": [""],
+        "first": ["Otho", "Brenna", "Hargrim", "Pelle", "Roskva", "Ivar", "Dagmar", "Folke", "Sunniva", "Alrek",
+                  "Henri", "Margot", "Gaston", "Bilal", "Amina"],
+        "by": ["the Hermit", "Tall-Tale", "the Trapper", "the Outcast", "the Lone Hunter"],
+        "title": ["", "Old "],
     },
     "wreck": {
-        "first": ["Nautilus", "Barnacle", "Saltgrave", "Wavebreaker", "Driftmaw", "Kelpbeard", "Gullcry", "Tidewarden"],
-        "by": [""],
-        "title": ["the ", "Old "],
+        "first": ["Nautilus", "Barnacle", "Saltgrave", "Wavebreaker", "Driftmaw", "Kelpbeard", "Gullcry", "Tidewarden",
+                  "Reef-Ghost", "Bilge-Wraith", "Drowned-Captain", "Hull-Breaker", "Anchor-Shade"],
+        "by": ["", "of the Sunken Hull", "of the Shoals", "of the Wreck"],
+        "title": ["the ", "Old ", "Captain "],
     },
 }
 
@@ -413,21 +467,148 @@ def short(name, width=14):
     return name[:width]
 
 
-def boss_name(pid, family, used):
-    pool = POOLS.get(family) or POOLS["bandit"]
+SKYRIM_POOLS = {
+    "barrow": {
+        "first": ["Hrolfgar", "Vestri", "Ulfmund", "Thorgeir", "Grimvald", "Aldrun", "Skeggi", "Haldor", "Orlaug", "Brynjolf",
+                  "Eirmund", "Svartkel", "Gunnhild", "Ragnhei", "Yrsa", "Valgrim", "Hakon", "Sigtrygg", "Ingrun", "Bergthor",
+                  "Alfhild", "Torvald", "Runolf", "Kettil", "Asmund", "Hjalmar", "Solveig", "Ottrik", "Vigfus", "Arnkel"],
+        "by": ["the Unburied", "Rime-Crowned", "Grave-Warden", "the Oathbreaker", "the Long Dead", "Cold-Hand", "the Hollow Jarl",
+               "Frost-Beard", "the Sleepless", "Stone-Sworn", "Black-Mantle", "Wolf-Slayer", "of the Seven Urns", "the Barrow-Lord",
+               "Ash-Shield", "the Bitter", "Iron-Brow", "the Last Thane", "Ember-Eyed", "the Pale Marshal", "Bone-Reaver",
+               "the Silent King", "Night-Sworn", "Hall-Keeper"],
+        "title": ["", "", "Jarl ", "Thane ", "Warchief "],
+    },
+    "ruin": {
+        "first": ["Valdrek", "Orsolf", "Aethel", "Haldris", "Morthgar", "Ysolt", "Brandrek", "Tormund", "Edrith", "Gallowyn"],
+        "by": ["the Watcher", "Ward-Sworn", "of the Broken Wall", "the Shrine-Warden", "Rune-Keeper", "the Fallen Priest"],
+        "title": ["", "Warden "],
+    },
+    "bandit": {
+        "first": ["Garrick", "Maren", "Torvik", "Sella", "Bram", "Hesk", "Orla", "Dunstan", "Vexa", "Kolgrim", "Ysmar", "Tilda",
+                  "Rurik", "Nessa", "Gorm", "Elsbet", "Drake", "Halvar", "Isra", "Ketil", "Wulfric", "Brenna", "Jarek", "Mavis"],
+        "by": ["Two-Knives", "Red-Sash", "the Tithe-Taker", "Coin-Hand", "Split-Lip", "the Gaoler", "Black-Boots", "Toll-Master",
+               "Cutpurse", "One-Ear", "Salt-Eye", "the Lamplighter", "Crow-Bait", "Broken-Nose", "the Quartermaster", "Hook-Thumb"],
+        "title": ["", "", "Captain ", "Boss "],
+    },
+    "vampire": {
+        "first": ["Ysmaine", "Valdrec", "Seraphene", "Corvane", "Morgathe", "Isolwen", "Dravik", "Maelis", "Narcissa", "Lucius",
+                  "Verenna", "Aurelio", "Selwyn", "Ravenna"],
+        "by": ["of the Pale Table", "the Patient", "Night-Born", "the Courteous", "of the Red Cup", "the Long-Lived"],
+        "title": ["Lady ", "Lord ", "Count ", "Mistress ", "Master "],
+    },
+    "necromancer": {
+        "first": ["Orsin", "Velka", "Thaddeus", "Iselde", "Morwen", "Caldus", "Drusilla", "Hadrik", "Nerissa", "Umbrel", "Skarn",
+                  "Lucan"],
+        "by": ["the Careful", "Grave-Taker", "the Hollow Hand", "Bone-Reader", "of the Ninth Candle", "the Lector"],
+        "title": ["Magister ", "Adept ", "Ritualist ", "Brother ", "Sister "],
+    },
+    "mage": {
+        "first": ["Aldwyn", "Perrin", "Caraline", "Xerxes", "Melisande", "Orrin", "Thessaly", "Ambrose"],
+        "by": ["the Exiled", "of the Sealed Door", "Star-Reader", "the Apostate"],
+        "title": ["Magister ", "Warlock ", "Conjurer "],
+    },
+    "hagraven": {
+        "first": ["Skeldra", "Orgwen", "Mugrash", "Hesthra", "Dunmira", "Vorga", "Thistle-Anne", "Grimsel", "Wrenna", "Oldwyth"],
+        "by": ["of the Briar", "Feather-Mother", "the Heart-Taker", "Old-Bones", "the Hungry"],
+        "title": ["Gristle-Mother ", "Crone ", "Briar-Mother ", "Mother "],
+    },
+    "forsworn": {
+        "first": ["Madra", "Ketha", "Orgul", "Sanna", "Thrull", "Varka", "Edda", "Kyrn", "Bresa", "Haskel"],
+        "by": ["Antler-Crown", "Spear-Mother", "the Briar-Sworn", "Red-Feather", "Bone-Chanter", "Ash-Walker", "Hollow-Drum"],
+        "title": ["", "Briarheart ", "Hunt-Mother "],
+    },
+    "falmer": {
+        "first": ["Mhuur", "Ysk", "Oozk", "Grath", "Hesh", "Vyl", "Nuum", "Skree", "Thok", "Ilmuk"],
+        "by": ["the Blind Elder", "Spore-Warden", "of the Deep Hive", "the Pale Chanter", "Gloom-Keeper"],
+        "title": ["Elder ", "Hive-Warden ", "Gloomwarden "],
+    },
+    "beast": {
+        "first": ["Gnarltooth", "Hollowfang", "Bonecrusher", "Mossback", "Wretchhide", "Cragmaw", "Splitclaw", "Dreadpaw",
+                  "Hushfur", "Ironhide", "Brindlemaw", "Scarflank", "Grimsnout", "Bleakhowl", "Ashmane", "Thornback"],
+        "by": [""],
+        "title": ["Old ", "Mother ", "Great ", "Black "],
+    },
+    "dwemer": {
+        "first": ["Kt-7", "Vh-12", "Rn-3", "Dz-9", "Mk-21", "Ph-4", "Sg-16", "Ol-8", "Bt-30", "Nx-5", "Tr-14", "Gl-2"],
+        "by": [""],
+        "title": ["Warden-Engine ", "Overseer Unit ", "Foundry-Guard ", "Gate-Engine "],
+    },
+    "ice": {
+        "first": ["Rimeheart", "Glasswing", "Frostmaw", "Shardbrow", "Coldwhisper", "Hoarvein", "Icegrip", "Blueclaw"],
+        "by": [""],
+        "title": ["the ", "Old ", "The Frozen "],
+    },
+    "mine": {
+        "first": ["Pickback", "Deepdelver", "Slagheart", "Cinderjaw", "Rubblefist", "Lodestone", "Gritmaw", "Seamripper"],
+        "by": [""],
+        "title": ["the ", "Old ", "Foreman "],
+    },
+    "grove": {
+        "first": ["Moss-Crown", "Thornmother", "Oldwood", "Rootwarden", "Fernhollow", "Barkhide", "Wispweaver"],
+        "by": [""],
+        "title": ["the ", "Mother ", "Elder "],
+    },
+    "smuggler": {
+        "first": ["Saltlip", "Tidehand", "Brinejack", "Knotwork", "Crab-Ear", "Lanternjaw", "Driftwood"],
+        "by": [""],
+        "title": ["Captain ", "Boss ", "Quartermaster "],
+    },
+    "cave": {
+        "first": ["Hollowback", "Gloomfang", "Stonebrow", "Nightcrawler", "Duskmaw", "Cavepaw"],
+        "by": [""],
+        "title": ["Old ", "the ", "Great "],
+    },
+    "giant": {
+        "first": ["Gruvuk", "Maghor", "Thundrak", "Bolgrum", "Haggarn", "Skulgar", "Yurrg", "Orgnok"],
+        "by": ["Stone-Elbow", "Mammoth-Walker", "Cairn-Kicker", "Big-Drum", "Tree-Splitter"],
+        "title": ["Old ", ""],
+    },
+    "dragon": {
+        "first": ["Vulthrax", "Nirkul", "Sahrotor", "Krindoth", "Alduhn", "Faasnuk", "Thodrak"],
+        "by": ["the Skyborn", "Storm-Wing", "the Ashen", "of the High Perch"],
+        "title": [""],
+    },
+    "military": {
+        "first": ["Aurelian", "Brynjolf", "Cassian", "Dagny", "Eirik", "Fabius", "Gunnar", "Halla", "Iovan", "Jorun"],
+        "by": ["the Steadfast", "Iron-Line", "the Quartermaster", "Hard-March", "the Veteran"],
+        "title": ["Captain ", "Sergeant ", "Commander "],
+    },
+    "tower": {
+        "first": ["Edrun", "Galdis", "Haldane", "Ismara", "Joric", "Kelwin", "Lysa", "Merrick"],
+        "by": ["the Watcher", "Beacon-Keeper", "the Last Lamp", "of the High Stair"],
+        "title": ["Warden ", "Keeper ", ""],
+    },
+    "cabin": {
+        "first": ["Otho", "Brenna", "Hargrim", "Pelle", "Roskva", "Ivar", "Dagmar", "Folke", "Sunniva", "Alrek"],
+        "by": ["the Hermit", "Tall-Tale", "the Trapper"],
+        "title": [""],
+    },
+    "wreck": {
+        "first": ["Nautilus", "Barnacle", "Saltgrave", "Wavebreaker", "Driftmaw", "Kelpbeard", "Gullcry", "Tidewarden"],
+        "by": [""],
+        "title": ["the ", "Old "],
+    },
+}
+
+
+def boss_name(pid, family, used, pools=POOLS):
+    pool = pools.get(family) or pools["bandit"]
     seed = h(pid)
-    for i in range(400):
+    for i in range(600):
         s = seed + i * 2654435761
         first = pool["first"][s % len(pool["first"])]
         by = pool["by"][(s >> 8) % len(pool["by"])]
         title = pool["title"][(s >> 16) % len(pool["title"])]
         name = (title + first + (" " + by if by else "")).strip()
-        # "the Gnarltooth" style titles read fine; keep the first letter upper where a title is lower-case
         name = name[0].upper() + name[1:]
         if name not in used:
             used.add(name)
             return name
-    raise SystemExit("name pool exhausted for " + family)
+    # Fallback with place suffix if pool exhausted
+    name = f"{pool['title'][0]}{pool['first'][seed % len(pool['first'])]} of {pid.replace('_', ' ').title()}"
+    name = name[0].upper() + name[1:]
+    used.add(name)
+    return name
 
 
 def pick_motif(pid, name, family):
@@ -458,27 +639,36 @@ def pick_notes(notes):
     return (entrance["id"] if entrance else "", bossn["id"] if bossn else "", story["id"] if story else "")
 
 
-def build():
-    places = load_json(os.path.join(SKY, "tamriel", "places", "skyrim_landmarks.json"))
-    sheet_path = os.path.join(SKY, "tamriel", "world", "skyrim.json")
+def build_province(prov_key, places_file, names, lore, used=None):
+    places = load_json(os.path.join(SKY, "tamriel", "places", places_file))
+    sheet_path = os.path.join(SKY, "tamriel", "world", f"{prov_key}.json")
     sheet = load_json(sheet_path) if os.path.exists(sheet_path) else {}
     sheet_regions = sheet.get("regions", {}) if isinstance(sheet, dict) else {}
     prov_themes = sheet.get("dungeon_themes", {}) if isinstance(sheet, dict) else {}
-    names = lang_names()
-    lore = lore_places()
-    used = set()
+    if used is None:
+        used = set()
+    pools = SKYRIM_POOLS if prov_key == "skyrim" else POOLS
     out = {}
     skipped = []
     for p in places:
         if p["type"] not in ("dungeon_fixed", "fort"):
             continue
-        pid, variant = p["id"], p.get("variant", "")
+        pid, variant = p["id"], p.get("variant") or ("keep" if p["type"] == "fort" else "cave")
         fam = "forsworn" if variant == "barrow" and p.get("culture") == "forsworn" else FAMILY.get(variant)
         if fam is None:
             skipped.append(pid)
             continue
+        lore_p = lore.get(pid) or {}
+        if prov_key != "skyrim":
+            hook = (lore_p.get("hook", "") + " " + lore_p.get("rumour", "")).lower()
+            exp = FAMKW.get(fam)
+            if exp and hook.strip():
+                hits = {k: len(re.findall(v, hook)) for k, v in KW.items()}
+                top = max(hits, key=hits.get)
+                if hits[top] > 0 and top != exp and hits[top] > hits[exp]:
+                    fam = KW_TO_FAM[top]
         name = names.get(pid, pid.replace("_", " ").title())
-        notes = lore.get(pid, {}).get("notes", [])
+        notes = lore_p.get("notes", [])
         ent_id, boss_id, story_id = pick_notes(notes)
         by_id = {n["id"]: n for n in notes}
         person = clean_person(by_id[ent_id].get("author")) if ent_id else None
@@ -487,7 +677,7 @@ def build():
             boss = chief
             used.add(chief)
         else:
-            boss = boss_name(pid, fam, used)
+            boss = boss_name(pid, fam, used, pools=pools)
         motif = pick_motif(pid, name, fam)
         # sign: two lines of name, then who
         lines = wrap(name, 14, 2)
@@ -512,6 +702,13 @@ def build():
             why = list(sheet_regions[rkey]["dungeon_themes"][fam])
         elif fam in prov_themes:
             why = list(prov_themes[fam])
+        elif p.get("why"):
+            why = list(p["why"])
+        elif rkey in sheet_regions:
+            layers = sheet_regions[rkey].get("layers", {})
+            l10 = layers.get("L10", []) or layers.get("L11", []) or layers.get("L8", [])
+            if l10:
+                why = [f"{rkey}.L10.{l10[0]['id']}"]
         if why:
             entry["why"] = why
         out[pid] = entry
@@ -548,11 +745,35 @@ def dumps(o):
 
 def main():
     check = "--check" in sys.argv
-    out, skipped = build()
-    files = {IDENT: dumps({"note": "Generated by tools/qa/dungeon_identity_gen.py from the places and the place lore. Do not edit.",
-                           "places": out})}
-    files[os.path.join(os.path.dirname(IDENT), "index.json")] = dumps(["skyrim.json"])
-    used_motifs = {e["motif"] for e in out.values()}
+    names = lang_names()
+    lore = lore_places()
+    ident_dir = os.path.dirname(IDENT)
+
+    prov_specs = [
+        ("skyrim", "skyrim_landmarks.json", "skyrim.json"),
+        ("high_rock", "high_rock.json", "high_rock.json"),
+        ("hammerfell", "hammerfell.json", "hammerfell.json"),
+        ("cyrodiil", "cyrodiil.json", "cyrodiil.json"),
+    ]
+    all_out = {}
+    all_skipped = []
+    files = {}
+    used_global = set()
+    for prov_key, pl_file, out_fn in prov_specs:
+        # Skyrim uses its own isolated `used` set so skyrim.json remains byte-for-byte deterministic
+        u_set = set() if prov_key == "skyrim" else used_global
+        out, skipped = build_province(prov_key, pl_file, names, lore, used=u_set)
+        if prov_key == "skyrim":
+            used_global |= u_set
+        all_out.update(out)
+        all_skipped.extend(skipped)
+        files[os.path.join(ident_dir, out_fn)] = dumps({
+            "note": "Generated by tools/qa/dungeon_identity_gen.py from the places and the place lore. Do not edit.",
+            "places": out,
+        })
+
+    files[os.path.join(ident_dir, "index.json")] = dumps([s[2] for s in prov_specs])
+    used_motifs = {e["motif"] for e in all_out.values()}
     unknown = sorted(m for m in used_motifs if m not in BP_DEFS)
     if unknown:
         raise SystemExit("motifs without a blueprint: %s" % unknown)
@@ -577,13 +798,13 @@ def main():
                 with open(path, "w", encoding="utf8", newline="\n") as f:
                     f.write(text)
     fam = {}
-    for e in out.values():
+    for e in all_out.values():
         fam[e["family"]] = fam.get(e["family"], 0) + 1
     print("%d places, %d blueprints, %d loot tables; %d files %s" % (
-        len(out), len(BP_DEFS), len(LOOT_RECIPES), changed, "differ" if check else "written"))
+        len(all_out), len(BP_DEFS), len(LOOT_RECIPES), changed, "differ" if check else "written"))
     print("families:", ", ".join("%s %d" % kv for kv in sorted(fam.items(), key=lambda kv: -kv[1])))
-    if skipped:
-        print("skipped (no family for variant):", ", ".join(skipped))
+    if all_skipped:
+        print("skipped (no family for variant):", ", ".join(all_skipped))
     return 1 if check and changed else 0
 
 

@@ -190,8 +190,8 @@ random-block dungeon mazes, and hours of empty walking between near-identical do
 
 ### 4.1 Nine realms (Skycraft regions inside the window)
 
-Grouped by geography, kingdom and race. Six keep an existing id (`TAMRIEL.md` section 9: ids are never renamed;
-polygons may change), and three are new ids. Areas are Skycraft km² of land.
+Grouped by geography, kingdom and race. Five keep an existing id (`TAMRIEL.md` section 9: ids are never renamed;
+polygons may change), and four are new ids. Areas are Skycraft km² of land.
 
 | Realm (region id) | Fiefs (Daggerfall regions) | km² | Seat | Climate mix | Palette proposal |
 | --- | --- | --- | --- | --- | --- |

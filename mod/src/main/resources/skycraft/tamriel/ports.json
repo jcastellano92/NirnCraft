@@ -1,81 +1,1446 @@
 {
   "ports": [
-    {"id": "solitude", "place": "solitude", "style": "imperial", "ferry": "cog", "x": -1365, "z": -1685},
-    {"id": "dawnstar", "place": "dawnstar", "style": "nord", "ferry": "longship", "x": 155, "z": -1835},
-    {"id": "winterhold", "place": "winterhold", "style": "nord", "ferry": "longship", "x": 1417, "z": -1749},
-    {"id": "windhelm", "place": "windhelm", "style": "nord", "ferry": "cog", "x": 1906, "z": -662},
-    {"id": "raven_rock", "place": "raven_rock", "style": "dunmer", "ferry": "cog", "x": 4300, "z": -2900},
-    {"id": "vivec", "place": "vivec", "style": "dunmer", "ferry": "cog", "x": 7400, "z": 1300},
-    {"id": "ebonheart", "place": "ebonheart", "style": "imperial", "ferry": "cog", "x": 4700, "z": 2400},
-    {"id": "sadrith_mora", "place": "sadrith_mora", "style": "dunmer", "ferry": "cog", "x": 8900, "z": 100},
-    {"id": "necrom", "place": "necrom", "style": "dunmer", "ferry": "cog", "x": 8900, "z": 3600},
-    {"id": "anvil", "place": "anvil", "style": "imperial", "ferry": "cog", "x": -3900, "z": 8700},
-    {"id": "leyawiin", "place": "leyawiin", "style": "imperial", "ferry": "cog", "x": 3600, "z": 9900},
-    {"id": "senchal", "place": "senchal", "style": "khajiit", "ferry": "cog", "x": 2800, "z": 13700},
-    {"id": "lilmoth", "place": "lilmoth", "style": "argonian", "ferry": "cog", "x": 7700, "z": 10000},
-    {"id": "sentinel", "place": "sentinel", "style": "redguard", "ferry": "cog", "x": -8200, "z": 4900},
-    {"id": "taneth", "place": "taneth", "style": "redguard", "ferry": "cog", "x": -6800, "z": 8000},
-    {"id": "stros_mkai", "place": "stros_mkai", "style": "redguard", "ferry": "cog", "x": -10200, "z": 7200},
-    {"id": "daggerfall", "place": "daggerfall", "style": "breton", "ferry": "cog", "x": -9300, "z": 2600},
-    {"id": "wayrest", "place": "wayrest", "style": "breton", "ferry": "cog", "x": -5300, "z": 3300},
-    {"id": "woodhearth", "place": "woodhearth", "style": "bosmer", "ferry": "cog", "x": -6700, "z": 12600},
-    {"id": "alinor", "place": "alinor", "style": "altmer", "ferry": "cog", "x": -11200, "z": 13000},
-    {"id": "firsthold", "place": "firsthold", "style": "altmer", "ferry": "cog", "x": -9300, "z": 11000},
-
-    {"id": "tang_mo_harbor_village", "place": "tang_mo_harbor_village", "style": "akaviri", "ferry": "cog", "x": 22600, "z": 6000},
-    {"id": "pyandonean_fleet_anchorage", "place": "pyandonean_fleet_anchorage", "style": "maormer", "ferry": "cog", "x": -18200, "z": 20812},
-    {"id": "mistveil_village", "place": "mistveil_village", "style": "maormer", "ferry": "cog", "x": -20171, "z": 18649},
-
-    {"id": "atmora", "kind": "landing", "land": "atmora", "approach": "dawnstar", "style": "atmoran", "ferry": "longship", "x": 0, "z": -11500},
-    {"id": "akavir", "kind": "landing", "land": "akavir", "approach": "vivec", "style": "akaviri", "ferry": "cog", "x": 17600, "z": 2800},
-    {"id": "yokuda", "kind": "landing", "land": "yokuda", "approach": "sentinel", "style": "yokudan", "ferry": "cog", "x": -19800, "z": 6300},
-    {"id": "pyandonea", "kind": "landing", "land": "pyandonea", "approach": "woodhearth", "style": "maormer", "ferry": "cog", "x": -19300, "z": 20600},
-    {"id": "thras", "kind": "landing", "land": "thras", "approach": "alinor", "style": "coral", "ferry": "cog", "x": -15200, "z": 17000}
+    {
+      "id": "solitude",
+      "place": "solitude",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": -1365,
+      "z": -1685
+    },
+    {
+      "id": "dawnstar",
+      "place": "dawnstar",
+      "style": "nord",
+      "ferry": "longship",
+      "x": 155,
+      "z": -1835
+    },
+    {
+      "id": "winterhold",
+      "place": "winterhold",
+      "style": "nord",
+      "ferry": "longship",
+      "x": 1417,
+      "z": -1749
+    },
+    {
+      "id": "windhelm",
+      "place": "windhelm",
+      "style": "nord",
+      "ferry": "cog",
+      "x": 1906,
+      "z": -662
+    },
+    {
+      "id": "raven_rock",
+      "place": "raven_rock",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 4300,
+      "z": -2900
+    },
+    {
+      "id": "vivec",
+      "place": "vivec",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 7400,
+      "z": 1300
+    },
+    {
+      "id": "ebonheart",
+      "place": "ebonheart",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": 4700,
+      "z": 2400
+    },
+    {
+      "id": "sadrith_mora",
+      "place": "sadrith_mora",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 8900,
+      "z": 100
+    },
+    {
+      "id": "necrom",
+      "place": "necrom",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 8900,
+      "z": 3600
+    },
+    {
+      "id": "anvil",
+      "place": "anvil",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": -3900,
+      "z": 8700
+    },
+    {
+      "id": "leyawiin",
+      "place": "leyawiin",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": 3600,
+      "z": 9900
+    },
+    {
+      "id": "senchal",
+      "place": "senchal",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": 2800,
+      "z": 13700
+    },
+    {
+      "id": "lilmoth",
+      "place": "lilmoth",
+      "style": "argonian",
+      "ferry": "cog",
+      "x": 7700,
+      "z": 10000
+    },
+    {
+      "id": "sentinel",
+      "place": "sentinel",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -8200,
+      "z": 4900
+    },
+    {
+      "id": "taneth",
+      "place": "taneth",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -6800,
+      "z": 8000
+    },
+    {
+      "id": "stros_mkai",
+      "place": "stros_mkai",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -10200,
+      "z": 7200
+    },
+    {
+      "id": "lainlyn",
+      "place": "lainlyn",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -5850,
+      "z": 3960
+    },
+    {
+      "id": "gilane",
+      "place": "gilane",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -9860,
+      "z": 6090
+    },
+    {
+      "id": "hegathe",
+      "place": "hegathe",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -8210,
+      "z": 7010
+    },
+    {
+      "id": "abahs_landing",
+      "place": "abahs_landing",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -5350,
+      "z": 8520
+    },
+    {
+      "id": "rihad",
+      "place": "rihad",
+      "style": "redguard",
+      "ferry": "cog",
+      "x": -4840,
+      "z": 7260
+    },
+    {
+      "id": "daggerfall",
+      "place": "daggerfall",
+      "style": "breton",
+      "ferry": "cog",
+      "x": -9300,
+      "z": 2600
+    },
+    {
+      "id": "wayrest",
+      "place": "wayrest",
+      "style": "breton",
+      "ferry": "cog",
+      "x": -5300,
+      "z": 3300
+    },
+    {
+      "id": "northpoint",
+      "place": "northpoint",
+      "style": "breton",
+      "ferry": "cog",
+      "x": -7540,
+      "z": -2680
+    },
+    {
+      "id": "betony",
+      "place": "betony",
+      "style": "breton",
+      "ferry": "cog",
+      "x": -8310,
+      "z": 2880
+    },
+    {
+      "id": "balfiera",
+      "place": "isle_of_balfiera",
+      "style": "breton",
+      "ferry": "cog",
+      "x": -7600,
+      "z": 3510
+    },
+    {
+      "id": "woodhearth",
+      "place": "woodhearth",
+      "style": "bosmer",
+      "ferry": "cog",
+      "x": -6700,
+      "z": 12600
+    },
+    {
+      "id": "alinor",
+      "place": "alinor",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -11200,
+      "z": 13000
+    },
+    {
+      "id": "firsthold",
+      "place": "firsthold",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -9300,
+      "z": 11000
+    },
+    {
+      "id": "tang_mo_harbor_village",
+      "place": "tang_mo_harbor_village",
+      "style": "akaviri",
+      "ferry": "cog",
+      "x": 22600,
+      "z": 6000
+    },
+    {
+      "id": "pyandonean_fleet_anchorage",
+      "place": "pyandonean_fleet_anchorage",
+      "style": "maormer",
+      "ferry": "cog",
+      "x": -18200,
+      "z": 20812
+    },
+    {
+      "id": "mistveil_village",
+      "place": "mistveil_village",
+      "style": "maormer",
+      "ferry": "cog",
+      "x": -20171,
+      "z": 18649
+    },
+    {
+      "id": "atmora",
+      "kind": "landing",
+      "land": "atmora",
+      "approach": "dawnstar",
+      "style": "atmoran",
+      "ferry": "longship",
+      "x": 0,
+      "z": -11500
+    },
+    {
+      "id": "akavir",
+      "kind": "landing",
+      "land": "akavir",
+      "approach": "vivec",
+      "style": "akaviri",
+      "ferry": "cog",
+      "x": 17600,
+      "z": 2800
+    },
+    {
+      "id": "yokuda",
+      "kind": "landing",
+      "land": "yokuda",
+      "approach": "sentinel",
+      "style": "yokudan",
+      "ferry": "cog",
+      "x": -19800,
+      "z": 6300
+    },
+    {
+      "id": "pyandonea",
+      "kind": "landing",
+      "land": "pyandonea",
+      "approach": "woodhearth",
+      "style": "maormer",
+      "ferry": "cog",
+      "x": -19300,
+      "z": 20600
+    },
+    {
+      "id": "thras",
+      "kind": "landing",
+      "land": "thras",
+      "approach": "alinor",
+      "style": "coral",
+      "ferry": "cog",
+      "x": -15200,
+      "z": 17000
+    },
+    {
+      "id": "imperial_city",
+      "place": "imperial_city",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": 1150,
+      "z": 5650
+    },
+    {
+      "id": "bravil",
+      "place": "bravil",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": 2350,
+      "z": 7900
+    },
+    {
+      "id": "blacklight",
+      "place": "blacklight",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 3600,
+      "z": -300
+    },
+    {
+      "id": "firewatch",
+      "place": "firewatch",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": 10300,
+      "z": -1400
+    },
+    {
+      "id": "port_telvannis",
+      "place": "port_telvannis",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 11450,
+      "z": -400
+    },
+    {
+      "id": "gorne",
+      "place": "gorne",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 10850,
+      "z": 2450
+    },
+    {
+      "id": "davons_watch",
+      "place": "davons_watch",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 5000,
+      "z": 2150
+    },
+    {
+      "id": "tear",
+      "place": "tear",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 7300,
+      "z": 3850
+    },
+    {
+      "id": "seyda_neen",
+      "place": "seyda_neen",
+      "style": "imperial",
+      "ferry": "cog",
+      "x": 6638,
+      "z": 1111
+    },
+    {
+      "id": "molag_mar",
+      "place": "molag_mar",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 8100,
+      "z": 600
+    },
+    {
+      "id": "dagon_fel",
+      "place": "dagon_fel",
+      "style": "nord",
+      "ferry": "longship",
+      "x": 7600,
+      "z": -2580
+    },
+    {
+      "id": "khuul",
+      "place": "khuul",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 5850,
+      "z": -1900
+    },
+    {
+      "id": "ald_velothi",
+      "place": "ald_velothi",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 5450,
+      "z": -1550
+    },
+    {
+      "id": "gnaar_mok",
+      "place": "gnaar_mok",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 5329,
+      "z": -231
+    },
+    {
+      "id": "hla_oad",
+      "place": "hla_oad",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 5933,
+      "z": 729
+    },
+    {
+      "id": "tel_branora",
+      "place": "tel_branora",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 8089,
+      "z": 948
+    },
+    {
+      "id": "tel_mora",
+      "place": "tel_mora",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 8288,
+      "z": -754
+    },
+    {
+      "id": "tel_aruhn",
+      "place": "tel_aruhn",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 8507,
+      "z": -1
+    },
+    {
+      "id": "tel_mithryn",
+      "place": "tel_mithryn",
+      "style": "dunmer",
+      "ferry": "cog",
+      "x": 5007,
+      "z": -2722
+    },
+    {
+      "id": "thorn",
+      "place": "thorn",
+      "style": "argonian",
+      "ferry": "cog",
+      "x": 9174,
+      "z": 4778
+    },
+    {
+      "id": "archon",
+      "place": "archon",
+      "style": "argonian",
+      "ferry": "cog",
+      "x": 10145,
+      "z": 7684
+    },
+    {
+      "id": "soulrest",
+      "place": "soulrest",
+      "style": "argonian",
+      "ferry": "cog",
+      "x": 4955,
+      "z": 9568
+    },
+    {
+      "id": "blackrose",
+      "place": "blackrose",
+      "style": "argonian",
+      "ferry": "cog",
+      "x": 8701,
+      "z": 8198
+    },
+    {
+      "id": "seaspring",
+      "place": "seaspring",
+      "style": "argonian",
+      "ferry": "cog",
+      "x": 9300,
+      "z": 7450
+    },
+    {
+      "id": "alabaster",
+      "place": "alabaster",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": 2600,
+      "z": 10250
+    },
+    {
+      "id": "portneu_view",
+      "place": "portneu_view",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": -1474,
+      "z": 13641
+    },
+    {
+      "id": "darvulk_haven",
+      "place": "darvulk_haven",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": 1593,
+      "z": 14465
+    },
+    {
+      "id": "mari_docks",
+      "place": "mari_docks",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": -360,
+      "z": 14640
+    },
+    {
+      "id": "rinsmar_docks",
+      "place": "rinsmar_docks",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": -18,
+      "z": 14220
+    },
+    {
+      "id": "nezahset_landing",
+      "place": "nezahset_landing",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": 622,
+      "z": 14351
+    },
+    {
+      "id": "thaae_cove",
+      "place": "thaae_cove",
+      "style": "khajiit",
+      "ferry": "cog",
+      "x": 3086,
+      "z": 12807
+    },
+    {
+      "id": "velyn_harbor",
+      "place": "velyn_harbor",
+      "style": "bosmer",
+      "ferry": "cog",
+      "x": -6900,
+      "z": 10300
+    },
+    {
+      "id": "haven",
+      "place": "haven",
+      "style": "bosmer",
+      "ferry": "cog",
+      "x": -2300,
+      "z": 13950
+    },
+    {
+      "id": "southpoint",
+      "place": "southpoint",
+      "style": "bosmer",
+      "ferry": "cog",
+      "x": -4600,
+      "z": 13950
+    },
+    {
+      "id": "greenheart",
+      "place": "greenheart",
+      "style": "bosmer",
+      "ferry": "cog",
+      "x": -5750,
+      "z": 13150
+    },
+    {
+      "id": "skywatch",
+      "place": "skywatch",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -9500,
+      "z": 12000
+    },
+    {
+      "id": "vulkhel_guard",
+      "place": "vulkhel_guard",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -9812,
+      "z": 13239
+    },
+    {
+      "id": "lillandril",
+      "place": "lillandril",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -13700,
+      "z": 12550
+    },
+    {
+      "id": "shimmerene",
+      "place": "shimmerene",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -11298,
+      "z": 13846
+    },
+    {
+      "id": "sunhold",
+      "place": "sunhold",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -12700,
+      "z": 15300
+    },
+    {
+      "id": "dusk",
+      "place": "dusk",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -11809,
+      "z": 14526
+    },
+    {
+      "id": "west_guard",
+      "place": "west_guard",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -14000,
+      "z": 14000
+    },
+    {
+      "id": "greenwater_cove",
+      "place": "greenwater_cove",
+      "style": "altmer",
+      "ferry": "cog",
+      "x": -9180,
+      "z": 11200
+    },
+    {
+      "id": "kjolvik",
+      "place": "kjolvik",
+      "style": "atmoran",
+      "ferry": "longship",
+      "x": 2400,
+      "z": -10800
+    },
+    {
+      "id": "saarvik_landing",
+      "place": "saarvik_landing",
+      "style": "atmoran",
+      "ferry": "longship",
+      "x": -800,
+      "z": -10000
+    },
+    {
+      "id": "adasooms_gate",
+      "place": "adasooms_gate",
+      "style": "akaviri",
+      "ferry": "cog",
+      "x": 16800,
+      "z": -800
+    },
+    {
+      "id": "isle_of_the_drowned_ansei",
+      "place": "isle_of_the_drowned_ansei",
+      "style": "yokudan",
+      "ferry": "cog",
+      "x": -18000,
+      "z": 10900
+    },
+    {
+      "id": "sload_spawning_pools",
+      "place": "sload_spawning_pools",
+      "style": "coral",
+      "ferry": "cog",
+      "x": -16045,
+      "z": 16258
+    }
   ],
   "routes": [
-    {"a": "windhelm", "b": "raven_rock", "ship": "northern_maiden", "fare": 250},
-    {"a": "solitude", "b": "dawnstar", "ship": "frostwake"},
-    {"a": "dawnstar", "b": "winterhold", "ship": "frostwake"},
-    {"a": "winterhold", "b": "windhelm", "ship": "frostwake"},
-    {"a": "dawnstar", "b": "windhelm", "ship": "frostwake"},
-    {"a": "solitude", "b": "windhelm", "ship": "frostwake"},
-    {"a": "solitude", "b": "raven_rock", "ship": "grey_gannet"},
-    {"a": "windhelm", "b": "vivec", "ship": "silt_heron"},
-    {"a": "windhelm", "b": "ebonheart", "ship": "silt_heron"},
-    {"a": "raven_rock", "b": "sadrith_mora", "ship": "telvanni_pearl"},
-    {"a": "vivec", "b": "ebonheart", "ship": "hlaalu_trader"},
-    {"a": "vivec", "b": "sadrith_mora", "ship": "hlaalu_trader"},
-    {"a": "sadrith_mora", "b": "necrom", "ship": "hlaalu_trader"},
-    {"a": "necrom", "b": "lilmoth", "ship": "marsh_heron"},
-    {"a": "leyawiin", "b": "lilmoth", "ship": "marsh_heron"},
-    {"a": "leyawiin", "b": "senchal", "ship": "topal_corsair"},
-    {"a": "senchal", "b": "lilmoth", "ship": "topal_corsair"},
-    {"a": "senchal", "b": "woodhearth", "ship": "pellitine_star"},
-    {"a": "anvil", "b": "sentinel", "ship": "abecean_queen"},
-    {"a": "anvil", "b": "taneth", "ship": "abecean_queen"},
-    {"a": "anvil", "b": "woodhearth", "ship": "abecean_queen"},
-    {"a": "taneth", "b": "sentinel", "ship": "crown_of_stros"},
-    {"a": "sentinel", "b": "stros_mkai", "ship": "crown_of_stros"},
-    {"a": "sentinel", "b": "daggerfall", "ship": "iliac_swift"},
-    {"a": "sentinel", "b": "wayrest", "ship": "iliac_swift"},
-    {"a": "daggerfall", "b": "wayrest", "ship": "iliac_swift"},
-    {"a": "alinor", "b": "firsthold", "ship": "eagle_of_alinor"},
-    {"a": "firsthold", "b": "anvil", "ship": "eagle_of_alinor"},
-    {"a": "alinor", "b": "woodhearth", "ship": "green_pact"},
-    {"a": "firsthold", "b": "woodhearth", "ship": "green_pact"},
-
-    {"a": "tang_mo_harbor_village", "b": "necrom", "ship": "tang_mo_lantern"},
-    {"a": "tang_mo_harbor_village", "b": "lilmoth", "ship": "tang_mo_lantern"},
-    {"a": "pyandonean_fleet_anchorage", "b": "alinor", "ship": "tide_serpent"},
-    {"a": "pyandonean_fleet_anchorage", "b": "woodhearth", "ship": "tide_serpent"},
-    {"a": "mistveil_village", "b": "pyandonean_fleet_anchorage", "ship": "mist_runner"},
-
-    {"a": "dawnstar", "b": "atmora", "ship": "ysgramors_wake", "expedition": true},
-    {"a": "winterhold", "b": "atmora", "ship": "ysgramors_wake", "expedition": true},
-    {"a": "vivec", "b": "akavir", "ship": "dragons_tooth", "expedition": true},
-    {"a": "lilmoth", "b": "akavir", "ship": "dragons_tooth", "expedition": true},
-    {"a": "sentinel", "b": "yokuda", "ship": "ra_gada", "expedition": true},
-    {"a": "woodhearth", "b": "pyandonea", "ship": "serpents_bane", "expedition": true},
-    {"a": "alinor", "b": "thras", "ship": "coral_dawn", "expedition": true}
+    {
+      "a": "windhelm",
+      "b": "raven_rock",
+      "ship": "northern_maiden",
+      "fare": 250
+    },
+    {
+      "a": "solitude",
+      "b": "dawnstar",
+      "ship": "frostwake"
+    },
+    {
+      "a": "dawnstar",
+      "b": "winterhold",
+      "ship": "frostwake"
+    },
+    {
+      "a": "winterhold",
+      "b": "windhelm",
+      "ship": "frostwake"
+    },
+    {
+      "a": "dawnstar",
+      "b": "windhelm",
+      "ship": "frostwake"
+    },
+    {
+      "a": "solitude",
+      "b": "windhelm",
+      "ship": "frostwake"
+    },
+    {
+      "a": "solitude",
+      "b": "raven_rock",
+      "ship": "grey_gannet"
+    },
+    {
+      "a": "windhelm",
+      "b": "vivec",
+      "ship": "silt_heron"
+    },
+    {
+      "a": "windhelm",
+      "b": "ebonheart",
+      "ship": "silt_heron"
+    },
+    {
+      "a": "raven_rock",
+      "b": "sadrith_mora",
+      "ship": "telvanni_pearl"
+    },
+    {
+      "a": "vivec",
+      "b": "ebonheart",
+      "ship": "hlaalu_trader"
+    },
+    {
+      "a": "vivec",
+      "b": "sadrith_mora",
+      "ship": "hlaalu_trader"
+    },
+    {
+      "a": "sadrith_mora",
+      "b": "necrom",
+      "ship": "hlaalu_trader"
+    },
+    {
+      "a": "necrom",
+      "b": "lilmoth",
+      "ship": "marsh_heron"
+    },
+    {
+      "a": "leyawiin",
+      "b": "lilmoth",
+      "ship": "marsh_heron"
+    },
+    {
+      "a": "leyawiin",
+      "b": "senchal",
+      "ship": "topal_corsair"
+    },
+    {
+      "a": "senchal",
+      "b": "lilmoth",
+      "ship": "topal_corsair"
+    },
+    {
+      "a": "senchal",
+      "b": "woodhearth",
+      "ship": "pellitine_star"
+    },
+    {
+      "a": "anvil",
+      "b": "sentinel",
+      "ship": "abecean_queen"
+    },
+    {
+      "a": "anvil",
+      "b": "taneth",
+      "ship": "abecean_queen"
+    },
+    {
+      "a": "anvil",
+      "b": "rihad",
+      "ship": "abecean_queen",
+      "fare": 40
+    },
+    {
+      "a": "anvil",
+      "b": "woodhearth",
+      "ship": "abecean_queen"
+    },
+    {
+      "a": "taneth",
+      "b": "sentinel",
+      "ship": "crown_of_stros"
+    },
+    {
+      "a": "taneth",
+      "b": "rihad",
+      "ship": "crown_of_stros",
+      "fare": 45
+    },
+    {
+      "a": "abahs_landing",
+      "b": "taneth",
+      "ship": "crown_of_stros",
+      "fare": 30
+    },
+    {
+      "a": "abahs_landing",
+      "b": "rihad",
+      "ship": "crown_of_stros",
+      "fare": 35
+    },
+    {
+      "a": "hegathe",
+      "b": "gilane",
+      "ship": "crown_of_stros",
+      "fare": 35
+    },
+    {
+      "a": "hegathe",
+      "b": "taneth",
+      "ship": "crown_of_stros",
+      "fare": 40
+    },
+    {
+      "a": "hegathe",
+      "b": "stros_mkai",
+      "ship": "crown_of_stros",
+      "fare": 40
+    },
+    {
+      "a": "sentinel",
+      "b": "gilane",
+      "ship": "crown_of_stros",
+      "fare": 40
+    },
+    {
+      "a": "sentinel",
+      "b": "stros_mkai",
+      "ship": "crown_of_stros",
+      "fare": 45
+    },
+    {
+      "a": "stros_mkai",
+      "b": "taneth",
+      "ship": "crown_of_stros",
+      "fare": 55
+    },
+    {
+      "a": "sentinel",
+      "b": "daggerfall",
+      "ship": "iliac_swift",
+      "fare": 45
+    },
+    {
+      "a": "sentinel",
+      "b": "wayrest",
+      "ship": "iliac_swift",
+      "fare": 55
+    },
+    {
+      "a": "sentinel",
+      "b": "betony",
+      "ship": "iliac_swift",
+      "fare": 30
+    },
+    {
+      "a": "daggerfall",
+      "b": "wayrest",
+      "ship": "iliac_swift",
+      "fare": 60
+    },
+    {
+      "a": "daggerfall",
+      "b": "betony",
+      "ship": "iliac_swift",
+      "fare": 25
+    },
+    {
+      "a": "daggerfall",
+      "b": "balfiera",
+      "ship": "iliac_swift",
+      "fare": 40
+    },
+    {
+      "a": "wayrest",
+      "b": "lainlyn",
+      "ship": "iliac_swift",
+      "fare": 40
+    },
+    {
+      "a": "wayrest",
+      "b": "balfiera",
+      "ship": "iliac_swift",
+      "fare": 30
+    },
+    {
+      "a": "northpoint",
+      "b": "wayrest",
+      "ship": "iliac_swift",
+      "fare": 75
+    },
+    {
+      "a": "northpoint",
+      "b": "daggerfall",
+      "ship": "iliac_swift",
+      "fare": 65
+    },
+    {
+      "a": "northpoint",
+      "b": "solitude",
+      "ship": "frostwake",
+      "fare": 85
+    },
+    {
+      "a": "alinor",
+      "b": "firsthold",
+      "ship": "eagle_of_alinor"
+    },
+    {
+      "a": "firsthold",
+      "b": "anvil",
+      "ship": "eagle_of_alinor"
+    },
+    {
+      "a": "alinor",
+      "b": "woodhearth",
+      "ship": "green_pact"
+    },
+    {
+      "a": "firsthold",
+      "b": "woodhearth",
+      "ship": "green_pact"
+    },
+    {
+      "a": "tang_mo_harbor_village",
+      "b": "necrom",
+      "ship": "tang_mo_lantern"
+    },
+    {
+      "a": "tang_mo_harbor_village",
+      "b": "lilmoth",
+      "ship": "tang_mo_lantern"
+    },
+    {
+      "a": "pyandonean_fleet_anchorage",
+      "b": "alinor",
+      "ship": "tide_serpent"
+    },
+    {
+      "a": "pyandonean_fleet_anchorage",
+      "b": "woodhearth",
+      "ship": "tide_serpent"
+    },
+    {
+      "a": "mistveil_village",
+      "b": "pyandonean_fleet_anchorage",
+      "ship": "mist_runner"
+    },
+    {
+      "a": "dawnstar",
+      "b": "atmora",
+      "ship": "ysgramors_wake",
+      "expedition": true
+    },
+    {
+      "a": "winterhold",
+      "b": "atmora",
+      "ship": "ysgramors_wake",
+      "expedition": true
+    },
+    {
+      "a": "vivec",
+      "b": "akavir",
+      "ship": "dragons_tooth",
+      "expedition": true
+    },
+    {
+      "a": "lilmoth",
+      "b": "akavir",
+      "ship": "dragons_tooth",
+      "expedition": true
+    },
+    {
+      "a": "sentinel",
+      "b": "yokuda",
+      "ship": "ra_gada",
+      "expedition": true
+    },
+    {
+      "a": "woodhearth",
+      "b": "pyandonea",
+      "ship": "serpents_bane",
+      "expedition": true
+    },
+    {
+      "a": "alinor",
+      "b": "thras",
+      "ship": "coral_dawn",
+      "expedition": true
+    },
+    {
+      "a": "imperial_city",
+      "b": "bravil",
+      "ship": "niben_barge",
+      "fare": 25
+    },
+    {
+      "a": "bravil",
+      "b": "leyawiin",
+      "ship": "niben_barge",
+      "fare": 30
+    },
+    {
+      "a": "imperial_city",
+      "b": "leyawiin",
+      "ship": "niben_barge",
+      "fare": 45
+    },
+    {
+      "a": "anvil",
+      "b": "leyawiin",
+      "ship": "topal_corsair",
+      "fare": 55
+    },
+    {
+      "a": "windhelm",
+      "b": "blacklight",
+      "ship": "silt_heron",
+      "fare": 55
+    },
+    {
+      "a": "blacklight",
+      "b": "raven_rock",
+      "ship": "telvanni_pearl",
+      "fare": 40
+    },
+    {
+      "a": "blacklight",
+      "b": "khuul",
+      "ship": "hlaalu_trader",
+      "fare": 35
+    },
+    {
+      "a": "raven_rock",
+      "b": "tel_mithryn",
+      "ship": "telvanni_pearl",
+      "fare": 25
+    },
+    {
+      "a": "raven_rock",
+      "b": "khuul",
+      "ship": "telvanni_pearl",
+      "fare": 40
+    },
+    {
+      "a": "khuul",
+      "b": "ald_velothi",
+      "ship": "hlaalu_trader",
+      "fare": 20
+    },
+    {
+      "a": "ald_velothi",
+      "b": "gnaar_mok",
+      "ship": "hlaalu_trader",
+      "fare": 25
+    },
+    {
+      "a": "gnaar_mok",
+      "b": "hla_oad",
+      "ship": "hlaalu_trader",
+      "fare": 20
+    },
+    {
+      "a": "hla_oad",
+      "b": "seyda_neen",
+      "ship": "hlaalu_trader",
+      "fare": 20
+    },
+    {
+      "a": "seyda_neen",
+      "b": "vivec",
+      "ship": "hlaalu_trader",
+      "fare": 20
+    },
+    {
+      "a": "seyda_neen",
+      "b": "ebonheart",
+      "ship": "hlaalu_trader",
+      "fare": 20
+    },
+    {
+      "a": "ebonheart",
+      "b": "davons_watch",
+      "ship": "hlaalu_trader",
+      "fare": 25
+    },
+    {
+      "a": "vivec",
+      "b": "molag_mar",
+      "ship": "hlaalu_trader",
+      "fare": 30
+    },
+    {
+      "a": "molag_mar",
+      "b": "tel_branora",
+      "ship": "telvanni_pearl",
+      "fare": 20
+    },
+    {
+      "a": "tel_branora",
+      "b": "sadrith_mora",
+      "ship": "telvanni_pearl",
+      "fare": 30
+    },
+    {
+      "a": "sadrith_mora",
+      "b": "tel_aruhn",
+      "ship": "telvanni_pearl",
+      "fare": 15
+    },
+    {
+      "a": "tel_aruhn",
+      "b": "tel_mora",
+      "ship": "telvanni_pearl",
+      "fare": 30
+    },
+    {
+      "a": "tel_mora",
+      "b": "dagon_fel",
+      "ship": "telvanni_pearl",
+      "fare": 25
+    },
+    {
+      "a": "dagon_fel",
+      "b": "khuul",
+      "ship": "telvanni_pearl",
+      "fare": 30
+    },
+    {
+      "a": "sadrith_mora",
+      "b": "firewatch",
+      "ship": "telvanni_pearl",
+      "fare": 35
+    },
+    {
+      "a": "firewatch",
+      "b": "port_telvannis",
+      "ship": "telvanni_pearl",
+      "fare": 30
+    },
+    {
+      "a": "port_telvannis",
+      "b": "necrom",
+      "ship": "telvanni_pearl",
+      "fare": 45
+    },
+    {
+      "a": "necrom",
+      "b": "gorne",
+      "ship": "telvanni_pearl",
+      "fare": 25
+    },
+    {
+      "a": "gorne",
+      "b": "tear",
+      "ship": "hlaalu_trader",
+      "fare": 35
+    },
+    {
+      "a": "tear",
+      "b": "thorn",
+      "ship": "marsh_heron",
+      "fare": 35
+    },
+    {
+      "a": "thorn",
+      "b": "archon",
+      "ship": "marsh_heron",
+      "fare": 45
+    },
+    {
+      "a": "archon",
+      "b": "seaspring",
+      "ship": "marsh_heron",
+      "fare": 25
+    },
+    {
+      "a": "archon",
+      "b": "lilmoth",
+      "ship": "marsh_heron",
+      "fare": 40
+    },
+    {
+      "a": "lilmoth",
+      "b": "blackrose",
+      "ship": "marsh_heron",
+      "fare": 25
+    },
+    {
+      "a": "lilmoth",
+      "b": "soulrest",
+      "ship": "marsh_heron",
+      "fare": 35
+    },
+    {
+      "a": "soulrest",
+      "b": "leyawiin",
+      "ship": "topal_corsair",
+      "fare": 30
+    },
+    {
+      "a": "leyawiin",
+      "b": "alabaster",
+      "ship": "topal_corsair",
+      "fare": 25
+    },
+    {
+      "a": "alabaster",
+      "b": "senchal",
+      "ship": "topal_corsair",
+      "fare": 40
+    },
+    {
+      "a": "senchal",
+      "b": "thaae_cove",
+      "ship": "topal_corsair",
+      "fare": 20
+    },
+    {
+      "a": "senchal",
+      "b": "darvulk_haven",
+      "ship": "pellitine_star",
+      "fare": 25
+    },
+    {
+      "a": "darvulk_haven",
+      "b": "nezahset_landing",
+      "ship": "pellitine_star",
+      "fare": 20
+    },
+    {
+      "a": "nezahset_landing",
+      "b": "rinsmar_docks",
+      "ship": "pellitine_star",
+      "fare": 20
+    },
+    {
+      "a": "rinsmar_docks",
+      "b": "mari_docks",
+      "ship": "pellitine_star",
+      "fare": 20
+    },
+    {
+      "a": "mari_docks",
+      "b": "portneu_view",
+      "ship": "pellitine_star",
+      "fare": 30
+    },
+    {
+      "a": "portneu_view",
+      "b": "haven",
+      "ship": "pellitine_star",
+      "fare": 30
+    },
+    {
+      "a": "haven",
+      "b": "southpoint",
+      "ship": "green_pact",
+      "fare": 30
+    },
+    {
+      "a": "southpoint",
+      "b": "greenheart",
+      "ship": "green_pact",
+      "fare": 25
+    },
+    {
+      "a": "greenheart",
+      "b": "woodhearth",
+      "ship": "green_pact",
+      "fare": 25
+    },
+    {
+      "a": "woodhearth",
+      "b": "velyn_harbor",
+      "ship": "green_pact",
+      "fare": 30
+    },
+    {
+      "a": "velyn_harbor",
+      "b": "anvil",
+      "ship": "abecean_queen",
+      "fare": 40
+    },
+    {
+      "a": "woodhearth",
+      "b": "vulkhel_guard",
+      "ship": "eagle_of_alinor",
+      "fare": 40
+    },
+    {
+      "a": "vulkhel_guard",
+      "b": "skywatch",
+      "ship": "eagle_of_alinor",
+      "fare": 30
+    },
+    {
+      "a": "skywatch",
+      "b": "firsthold",
+      "ship": "eagle_of_alinor",
+      "fare": 25
+    },
+    {
+      "a": "firsthold",
+      "b": "greenwater_cove",
+      "ship": "eagle_of_alinor",
+      "fare": 15
+    },
+    {
+      "a": "vulkhel_guard",
+      "b": "shimmerene",
+      "ship": "eagle_of_alinor",
+      "fare": 30
+    },
+    {
+      "a": "shimmerene",
+      "b": "alinor",
+      "ship": "eagle_of_alinor",
+      "fare": 25
+    },
+    {
+      "a": "shimmerene",
+      "b": "dusk",
+      "ship": "eagle_of_alinor",
+      "fare": 25
+    },
+    {
+      "a": "dusk",
+      "b": "sunhold",
+      "ship": "eagle_of_alinor",
+      "fare": 25
+    },
+    {
+      "a": "sunhold",
+      "b": "west_guard",
+      "ship": "eagle_of_alinor",
+      "fare": 35
+    },
+    {
+      "a": "west_guard",
+      "b": "lillandril",
+      "ship": "eagle_of_alinor",
+      "fare": 30
+    },
+    {
+      "a": "lillandril",
+      "b": "alinor",
+      "ship": "eagle_of_alinor",
+      "fare": 35
+    },
+    {
+      "a": "lillandril",
+      "b": "stros_mkai",
+      "ship": "abecean_queen",
+      "fare": 65
+    },
+    {
+      "a": "atmora",
+      "b": "saarvik_landing",
+      "ship": "ysgramors_wake",
+      "fare": 40
+    },
+    {
+      "a": "saarvik_landing",
+      "b": "kjolvik",
+      "ship": "ysgramors_wake",
+      "fare": 30
+    },
+    {
+      "a": "akavir",
+      "b": "adasooms_gate",
+      "ship": "dragons_tooth",
+      "fare": 50
+    },
+    {
+      "a": "akavir",
+      "b": "tang_mo_harbor_village",
+      "ship": "tang_mo_lantern",
+      "fare": 45
+    },
+    {
+      "a": "port_telvannis",
+      "b": "tang_mo_harbor_village",
+      "ship": "tang_mo_lantern",
+      "fare": 95
+    },
+    {
+      "a": "yokuda",
+      "b": "isle_of_the_drowned_ansei",
+      "ship": "ra_gada",
+      "fare": 45
+    },
+    {
+      "a": "stros_mkai",
+      "b": "yokuda",
+      "ship": "ra_gada",
+      "fare": 90
+    },
+    {
+      "a": "pyandonea",
+      "b": "pyandonean_fleet_anchorage",
+      "ship": "serpents_bane",
+      "fare": 30
+    },
+    {
+      "a": "thras",
+      "b": "sload_spawning_pools",
+      "ship": "coral_dawn",
+      "fare": 30
+    },
+    {
+      "a": "lillandril",
+      "b": "thras",
+      "ship": "coral_dawn",
+      "fare": 80
+    }
   ]
 }

@@ -1,0 +1,335 @@
+{
+  "id": "rawlkha",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "rope-caravan-camp",
+  "base": "none",
+  "overlay": "rawlkha",
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "rawlkha",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "rawlkha_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "rawlkha_landmark",
+      "overlay": "rawlkha"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 92,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        26,
+        23
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -29,
+        -18
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -42,
+        -55
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -9,
+        -33
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        6,
+        -69
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        15,
+        -31
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        51,
+        -47
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        32,
+        -12
+      ],
+      "face": "south",
+      "overlay": "rawlkha",
+      "name": "rawlkha_b_17"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "rawlkha_great_tree",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "rawlkha_garden",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "rawlkha_lamps",
+      "count": 4
+    },
+    {
+      "type": "shrine",
+      "theme": "rawlkha_shrine",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "rawlkha_b_5",
+    "store": "rawlkha_b_10",
+    "smithy": "rawlkha_b_7"
+  },
+  "titles": {
+    "rawlkha_b_1": "place.skycraft.rawlkha Council & Seat Hall",
+    "rawlkha_b_2": "place.skycraft.rawlkha High Sanctuary",
+    "rawlkha_b_3": "place.skycraft.rawlkha Fighters & Wayfarers Hall",
+    "rawlkha_b_4": "place.skycraft.rawlkha Mages & Chroniclers Spire",
+    "rawlkha_b_5": "place.skycraft.rawlkha The Lantern & Hearth Inn",
+    "rawlkha_b_6": "place.skycraft.rawlkha The Traveler's Rest Tavern",
+    "rawlkha_b_7": "place.skycraft.rawlkha Master Forge & Armorer",
+    "rawlkha_b_8": "place.skycraft.rawlkha Botanicals & Remedies",
+    "rawlkha_b_9": "place.skycraft.rawlkha Scriptorium & Charts",
+    "rawlkha_b_10": "place.skycraft.rawlkha Grand Provisioner & Sundries",
+    "rawlkha_b_11": "place.skycraft.rawlkha Silk & Hide Clothier",
+    "rawlkha_b_12": "place.skycraft.rawlkha Lapidary & Signets",
+    "rawlkha_b_13": "place.skycraft.rawlkha Wayfarer Stables & Post",
+    "rawlkha_b_14": "place.skycraft.rawlkha Bonded Factor Warehouse",
+    "rawlkha_b_15": "place.skycraft.rawlkha Watch Garrison Barracks",
+    "rawlkha_b_16": "place.skycraft.rawlkha High Steward's Manor",
+    "rawlkha_b_17": "place.skycraft.rawlkha Merchant-Factor's Villa",
+    "rawlkha_landmark": "High Seat of place.skycraft.rawlkha",
+    "rawlkha_plaza": "place.skycraft.rawlkha Central Plaza"
+  },
+  "innKey": "rawlkha_b_5"
+}

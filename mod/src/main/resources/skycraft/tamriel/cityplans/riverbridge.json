@@ -1,0 +1,186 @@
+{
+  "id": "riverbridge",
+  "why": [
+    "helstrom.L1.helstrom_root_dome",
+    "helstrom.L4.elder_hist_canopy",
+    "helstrom.L6.helstrom_ring_and_thorn_port"
+  ],
+  "sil": "black-marsh-riverbridge-plan",
+  "base": "none",
+  "overlay": "helstrom",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "helstrom",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "helstrom",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "riverbridge_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "riverbridge_landmark",
+      "overlay": "helstrom"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "riverbridge_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "riverbridge_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "riverbridge_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "riverbridge_b_5",
+    "smithy": "riverbridge_b_7"
+  },
+  "titles": {
+    "riverbridge_b_1": "place.skycraft.riverbridge Council & Seat Hall",
+    "riverbridge_b_2": "place.skycraft.riverbridge High Sanctuary",
+    "riverbridge_b_3": "place.skycraft.riverbridge Fighters & Wayfarers Hall",
+    "riverbridge_b_4": "place.skycraft.riverbridge Mages & Chroniclers Spire",
+    "riverbridge_b_5": "place.skycraft.riverbridge The Lantern & Hearth Inn",
+    "riverbridge_b_6": "place.skycraft.riverbridge The Traveler's Rest Tavern",
+    "riverbridge_b_7": "place.skycraft.riverbridge Master Forge & Armorer",
+    "riverbridge_landmark": "High Seat of place.skycraft.riverbridge",
+    "riverbridge_plaza": "place.skycraft.riverbridge Central Plaza"
+  },
+  "innKey": "riverbridge_b_5"
+}

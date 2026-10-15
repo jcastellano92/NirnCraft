@@ -1,0 +1,19 @@
+{
+  "id": "dwynnen",
+  "tint": {
+    "wall": "minecraft:andesite",
+    "wall2": "minecraft:cobblestone",
+    "low": "minecraft:mossy_cobblestone",
+    "roof": "stone_brick",
+    "trim": "oak",
+    "wood": "oak",
+    "accent": "cyan"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:stone_bricks",
+    "plaza": "minecraft:polished_andesite",
+    "plaza2": "minecraft:cobblestone",
+    "path": "minecraft:gravel"
+  }
+}

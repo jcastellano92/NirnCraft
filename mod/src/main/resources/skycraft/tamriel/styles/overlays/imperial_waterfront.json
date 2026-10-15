@@ -1,18 +1,24 @@
 {
   "id": "imperial_waterfront",
+  "why": [
+    "heartlands.L1.lakeshore_clay",
+    "heartlands.L3.rumare_shore",
+    "heartlands.L7.beggar_eyes"
+  ],
   "tint": {
-    "wall": "minecraft:stone_bricks",
-    "wall2": "minecraft:mossy_stone_bricks",
-    "low": "minecraft:cobblestone",
-    "wood": "dark_oak",
-    "roof": "prismarine_brick",
-    "accent": "blue"
+    "wall": "minecraft:oak_planks",
+    "wall2": "minecraft:cobblestone",
+    "low": "minecraft:mossy_cobblestone",
+    "wood": "spruce",
+    "roof": "spruce",
+    "thatch": "true",
+    "accent": "brown"
   },
   "palette": {
-    "cityWall": "stone_bricks",
-    "cityWall2": "minecraft:mossy_stone_bricks",
-    "plaza": "minecraft:stone_bricks",
-    "plaza2": "minecraft:prismarine_bricks",
-    "path": "minecraft:gravel"
+    "cityWall": "cobblestone",
+    "cityWall2": "minecraft:mossy_cobblestone",
+    "plaza": "minecraft:cobblestone",
+    "plaza2": "minecraft:oak_planks",
+    "path": "minecraft:coarse_dirt"
   }
 }

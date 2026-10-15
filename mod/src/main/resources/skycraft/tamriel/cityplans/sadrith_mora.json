@@ -1,78 +1,303 @@
 {
   "id": "sadrith_mora",
-  "base": "none",
-  "sil": "mushroom-spore-cluster",
-  "reach": 120,
-  "radius": 120,
-  "kit": "telvanni",
-  "overlay": "sadrith_mora",
-  "names": {"inn": "sadrith_mora_gateway_inn", "store": "sadrith_mora_spore_traders", "smithy": ""},
-  "innKey": "sadrith_mora_gateway_inn",
-  "gates": [[0, 112]],
-  "landmarks": [
-    {"id": "mushroom_spire", "at": [0, -8], "size": [17, 17], "h": 56, "name": "purple"},
-    {"id": "mushroom_spire", "at": [-50, -40], "size": [15, 15], "h": 42, "name": "cyan"},
-    {"id": "mushroom_spire", "at": [52, -34], "size": [15, 15], "h": 38, "name": "magenta"},
-    {"id": "mushroom_spire", "at": [58, 34], "size": [15, 15], "h": 36, "name": "blue"},
-    {"id": "mushroom_spire", "at": [-56, 30], "size": [15, 15], "h": 40, "name": "pink"},
-    {"id": "mushroom_spire", "at": [0, -70], "size": [15, 15], "h": 46, "name": "lime"}
+  "why": [
+    "zafirbel_bay.L1.bay_islands",
+    "zafirbel_bay.L4.telvanni_mushroom_forest",
+    "zafirbel_bay.L5.enchanting_and_spells"
   ],
-  "lines": [
-    {"kind": "bridge", "from": [-13, -20], "to": [-43, -33], "width": 3, "lift": 21},
-    {"kind": "bridge", "from": [13, -20], "to": [45, -29], "width": 3, "lift": 21},
-    {"kind": "bridge", "from": [10, 2], "to": [52, 30], "width": 3, "lift": 21},
-    {"kind": "bridge", "from": [-10, 4], "to": [-49, 27], "width": 3, "lift": 21},
-    {"kind": "bridge", "from": [0, -17], "to": [0, -63], "width": 3, "lift": 21}
+  "sil": "mushroom-spore-cluster",
+  "base": "none",
+  "overlay": "sadrith_mora",
+  "radius": 96,
+  "reach": 114,
+  "innKey": "sm_gateway_inn",
+  "names": {
+    "inn": "sm_gateway_inn",
+    "store": "sm_anis_seloth_shop",
+    "smithy": "sm_llaalam_smithy"
+  },
+  "gates": [
+    [
+      0,
+      90
+    ],
+    [
+      -90,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "mushroom_spire",
+      "at": [
+        0,
+        -18
+      ],
+      "face": "south",
+      "name": "sadrith_mora_tel_naga",
+      "overlay": "sadrith_mora"
+    },
+    {
+      "id": "castle",
+      "at": [
+        36,
+        36
+      ],
+      "face": "south",
+      "name": "sadrith_mora_wolverine_hall",
+      "overlay": "sadrith_mora"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "sadrith_mora"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "telvannis"
+    }
   ],
   "buildings": [
-    {"kind": "inn", "at": [26, 62], "size": [13, 17], "face": "W", "flags": ["upper"], "name": "sadrith_mora_gateway_inn"},
-    {"kind": "garden", "at": [-34, 66], "size": [19, 15], "face": "S"},
-    {"kind": "tower", "at": [-26, 90], "size": [7, 7], "h": 22, "margin": 1},
-    {"kind": "tower", "at": [26, 94], "size": [7, 7], "h": 22, "margin": 1}
-  ],
-  "nets": [
-    {"type": "path", "via": [[0, 112], [-10, 94], [8, 76], [-6, 56], [4, 38], [0, 20]], "width": 4, "major": true, "tag": "spore"},
-    {"type": "radial", "at": [0, -8], "spokes": 6, "r0": 14, "r1": 34, "wobble": 5, "offset": 0.5, "width": 3, "tag": "court"},
-    {"type": "loop", "at": [0, -8], "rx": 36, "rz": 30, "wobble": 7, "lobes": 3, "phase": 0.2, "width": 3, "rank": 1, "tag": "court"},
-    {"type": "path", "via": [[-50, -22], [-40, -4], [-48, 14], [-56, 14]], "width": 3, "tag": "court"},
-    {"type": "path", "via": [[52, -18], [44, 2], [52, 18], [58, 18]], "width": 3, "tag": "court"},
-    {"type": "path", "via": [[-30, -48], [-12, -52], [0, -54]], "width": 3, "tag": "court"},
-    {"type": "path", "via": [[-84, 54], [-62, 60], [-40, 50], [-18, 56], [4, 44]], "width": 3, "tag": "spore"},
-    {"type": "path", "via": [[86, 52], [64, 62], [42, 52], [20, 58], [4, 44]], "width": 3, "tag": "spore"},
-    {"type": "path", "via": [[-84, 24], [-70, 36], [-56, 44]], "width": 2, "tag": "court"},
-    {"type": "path", "via": [[84, 18], [72, 32], [58, 48]], "width": 2, "tag": "court"},
-    {"type": "path", "via": [[-92, 84], [-64, 88], [-40, 100], [-10, 100]], "width": 3, "tag": "spore"},
-    {"type": "path", "via": [[92, 84], [64, 90], [44, 100], [10, 100]], "width": 3, "tag": "spore"}
-  ],
-  "plazas": [
-    {"at": [0, 36], "size": 15, "variant": 2, "name": "sadrith_mora_council_court"}
-  ],
-  "zones": [
-    {"at": [0, -50], "r": 30, "zone": "noble"},
-    {"at": [0, 36], "r": 24, "zone": "centre"},
-    {"at": [-60, 70], "r": 28, "zone": "poor"},
-    {"at": [62, 66], "r": 26, "zone": "craft"}
-  ],
-  "fabric": {"radius": 108, "target": 0.5},
-  "queue": [
-    {"kind": "store", "count": 2, "name": "sadrith_mora_spore_traders", "on": "spore"},
-    {"kind": "alchemist", "count": 2, "on": "spore"}
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_telvanni_council_house"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        63,
+        26
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_gateway_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_faras_hole"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        63
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_dirty_muriels"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_mages_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -26,
+        63
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_fighters_guild"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_imperial_shrine"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -63,
+        26
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_pierlette_apothecary"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_threvul_healer"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -63,
+        -26
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_urtiso_sorcerer"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_llaalam_smithy"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -63
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_anis_seloth_shop"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_therana_pod"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -63
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_nevrasa_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_meluria_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        63,
+        -26
+      ],
+      "face": "south",
+      "overlay": "sadrith_mora",
+      "name": "sm_trendrus_house"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "daedric:azura", "where": "square"},
-    {"type": "shrine", "theme": "daedric:azura", "where": "street", "tag": "spore"},
-    {"type": "pond", "count": 2, "where": "free"},
-    {"type": "garden", "count": 2, "where": "free"},
-    {"type": "great_tree", "theme": "dark_oak", "where": "free"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "court"},
-    {"type": "banners", "where": "gate"},
-    {"type": "memorial", "where": "free"},
-    {"type": "market", "where": "free"}
+    {
+      "type": "great_tree",
+      "theme": "emperor_parasol",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "biolume_spore_pod",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "house_telvanni_mycelium",
+      "count": 3
+    },
+    {
+      "type": "pond",
+      "theme": "zafirbel_tide_pool",
+      "count": 2
+    }
   ],
   "titles": {
-    "sadrith_mora_gateway_inn": "The Rope-Bridge Tavern",
-    "sadrith_mora_spore_traders": "Spore Traders",
-    "sadrith_mora_council_court": "Council Court"
+    "sadrith_mora_tel_naga": "Tel Naga Great Tower",
+    "sadrith_mora_wolverine_hall": "Wolverine Hall Imperial Fort",
+    "sm_telvanni_council_house": "Telvanni Council House",
+    "sm_gateway_inn": "Gateway Inn",
+    "sm_faras_hole": "Fara's Hole in the Wall",
+    "sm_dirty_muriels": "Dirty Muriel's Cornerclub",
+    "sm_mages_guild": "Wolverine Hall Mages Guild",
+    "sm_fighters_guild": "Wolverine Hall Fighters Guild",
+    "sm_imperial_shrine": "Wolverine Hall Imperial Shrine",
+    "sm_pierlette_apothecary": "Pierlette Rostorard's Apothecary",
+    "sm_threvul_healer": "Threvul Serethi's Healer Pod",
+    "sm_urtiso_sorcerer": "Urtiso Faryon's Sorcerer Shop",
+    "sm_llaalam_smithy": "Llaalam Madalas's Mage-Smithy",
+    "sm_anis_seloth_shop": "Anis Seloth's Alchemist & Goods",
+    "sm_therana_pod": "Therana's Envoy Pod",
+    "sm_nevrasa_house": "Nevrasa Dralor's Pod House",
+    "sm_meluria_house": "Meluria Seleth's Root House",
+    "sm_trendrus_house": "Trendrus Dral's Spore House"
   }
 }

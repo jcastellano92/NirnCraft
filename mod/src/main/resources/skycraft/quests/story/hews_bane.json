@@ -1,0 +1,415 @@
+{
+  "region": "hammerfell/hews_bane",
+  "title": "The Unforgiven Ledger of Taneth",
+  "summary": "Hunt down a Great War traitor-magnate who sold Taneth's gates to the Thalmor and now uses Iron Wheel mercenaries and slavers in Thrall Cove and Bahraha's Gloom to silence the survivors.",
+  "why": [
+    "hews_bane.L7.forebear_merchant_syndicates",
+    "hews_bane.L7.hunted_traitors",
+    "hews_bane.L8.no_forgiveness_oath",
+    "hews_bane.L9.collaborator_hunt",
+    "hews_bane.L10.thrall_cove"
+  ],
+  "hook": {
+    "place": "taneth",
+    "places": [
+      "abahs_landing",
+      "ashana_tombs",
+      "qaezir",
+      "shaabah_homestead",
+      "shaam_camp",
+      "sulan_watch",
+      "suloon_grotto",
+      "taneth",
+      "wreck_of_the_winking_netch",
+      "zehts_displeasure"
+    ],
+    "npc": "story_hb_oath_keeper_samira",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_hb_oath_keeper_samira",
+      "name": "Oath-Keeper Samira of Taneth",
+      "role": "steward",
+      "place": "taneth",
+      "greet": "Read the names chiseled into the sea-wall of Taneth, stranger. Every stone remembers the night our gate was sold to the Dominion.",
+      "talk": [
+        "In Taneth and Abah's Landing, we swear the Oath of No Forgiveness against the collaborators who took Thalmor gold during the Great War.",
+        "Last night someone murdered the old harbour-archivist and stole the Iron Casket containing the true signatures of the Traitor-Syndicate. Speak with Fence-Master Zayd in Abah's Landing."
+      ]
+    },
+    {
+      "id": "story_hb_fence_master_zayd",
+      "name": "Fence-Master Zayd",
+      "role": "merchant",
+      "place": "abahs_landing",
+      "greet": "Look, we pick pockets and lighten merchant barges in Abah's Landing—we don't traffic with Dominion collaborators or Thrall Cove slavers!",
+      "talk": [
+        "Merchant-Magnate Hazaq—who sits on the syndicate board under a bought name—hired slaver-corsairs in Thrall Cove to smuggle the Iron Casket out to sea.",
+        "Catch Slaver-Captain Murad at Thrall Cove before his galley weighs anchor!"
+      ]
+    },
+    {
+      "id": "story_hb_thief_captain_leila",
+      "name": "Captain Leila of the Quays",
+      "role": "citizen",
+      "place": "thieves_den",
+      "greet": "Toss a coin into Nocturnal's fountain for luck, blade-for-hire. You'll need it where Hazaq has gone.",
+      "talk": [
+        "When you burned Murad's skiffs at Thrall Cove, Magnate Hazaq fled with the Iron Casket into the sealed family tomb of Bahraha's Gloom.",
+        "He has hired necromancers and disgraced mercenaries to hold the catacombs until a Thalmor cutter arrives at No Shira Citadel."
+      ]
+    },
+    {
+      "id": "story_hb_warden_qasim",
+      "name": "Warden Qasim of the Iron-Watch",
+      "role": "guard",
+      "place": "no_shira_citadel",
+      "greet": "Our coastal batteries at No Shira Citadel just drove off an unmarked elven schooner!",
+      "talk": [
+        "Magnate Hazaq has nowhere left to run. He is trapped inside Bahraha's Gloom with the traitor-ledger.",
+        "Go in, execute the Oath of No Forgiveness, and bring the Iron Casket back to Taneth!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_hb_slaver_captain_murad": {
+      "name": "Slaver-Captain Murad",
+      "rank": "boss",
+      "place": "thrall_cove",
+      "weapon": "steel_sword",
+      "helmet": "leather_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_hb_magnate_hazaq": {
+      "name": "Magnate Hazaq the Gate-Seller",
+      "rank": "boss",
+      "place": "bahrahas_gloom",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_hb_abahs_landing_bridge": [
+      "Fence-Master Zayd: Look at this gold eagle dropped by the archivist's killers—stamped with an Aldmeri eagle on one side and a Thrall Cove slave-tally on the other.",
+      "Oath-Keeper Samira of Taneth: Then one of the syndicate lords in Abah's Landing is the surviving traitor of the East Gate!",
+      "Fence-Master Zayd: Hit Thrall Cove now before Captain Murad loads the Iron Casket onto his galley!"
+    ],
+    "story_hb_thrall_cove_jetty": [
+      "Slaver-Captain Murad: Magnate Hazaq paid double freight to sink that Iron Casket in the Abecean trench! You won't take this jetty alive!",
+      "Captain Leila of the Quays: Cut the gangplank ropes and take Murad's head!"
+    ],
+    "story_hb_bahraha_vault": [
+      "Magnate Hazaq: Half of Taneth's merchant houses ate bread bought with my Dominion gold when the siege-lines starved!",
+      "Oath-Keeper Samira of Taneth: And four thousand died when you unbarred the postern gate, Hazaq! The Oath of Taneth knows no statute of years!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_hews_bane_01_iron_casket",
+      "region": "hammerfell/hews_bane",
+      "category": "main",
+      "title": "The Stolen Roll of the East Gate",
+      "giver": "story_hb_oath_keeper_samira",
+      "start": "npc:story_hb_oath_keeper_samira",
+      "requires": [],
+      "why": [
+        "hews_bane.L7.forebear_merchant_syndicates",
+        "hews_bane.L8.no_forgiveness_oath",
+        "hews_bane.L9.collaborator_hunt"
+      ],
+      "summary": "Trace the stolen Iron Casket of Taneth to Fence-Master Zayd in Abah's Landing.",
+      "intro": [
+        "The Iron Casket containing the original Great War collaborator signatures has been stolen from Taneth's harbour archives.",
+        "Speak with Oath-Keeper Samira in Taneth and travel to Abah's Landing to question Fence-Master Zayd."
+      ],
+      "complete": [
+        "In Abah's Landing, Zayd identified a Thrall Cove tally-coin linking the theft to Magnate Hazaq and Slaver-Captain Murad."
+      ],
+      "journal": {
+        "start": "Oath-Keeper Samira in Taneth sent me to Abah's Landing to trace the stolen Iron Casket.",
+        "done": "Fence-Master Zayd traced the stolen casket to Slaver-Captain Murad at Thrall Cove."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "taneth",
+          "text": "Inspect the harbour archive in Taneth"
+        },
+        {
+          "type": "scene",
+          "place": "abahs_landing",
+          "target": "scene:story_hb_abahs_landing_bridge",
+          "text": "Examine the traitor's coin with Fence-Master Zayd in Abah's Landing"
+        },
+        {
+          "type": "talk",
+          "place": "abahs_landing",
+          "npc": "story_hb_fence_master_zayd",
+          "text": "Speak with Fence-Master Zayd in Abah's Landing"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "taneth",
+        "abahs_landing"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "taneth",
+          "objective": "Inspect the harbour archive in Taneth"
+        },
+        {
+          "id": 20,
+          "place": "abahs_landing",
+          "objective": "Examine the traitor's coin with Fence-Master Zayd in Abah's Landing"
+        },
+        {
+          "id": 30,
+          "place": "abahs_landing",
+          "objective": "Speak with Fence-Master Zayd in Abah's Landing"
+        }
+      ],
+      "consequence": "guard_banner:hews_bane_stage_1"
+    },
+    {
+      "id": "ms1_hews_bane_02_thrall_cove",
+      "region": "hammerfell/hews_bane",
+      "category": "main",
+      "title": "Blood on the Slave-Jetty",
+      "giver": "story_hb_fence_master_zayd",
+      "start": "auto",
+      "requires": [
+        "ms1_hews_bane_01_iron_casket"
+      ],
+      "why": [
+        "hews_bane.L7.dock_thieves_and_cutpurses",
+        "hews_bane.L10.thrall_cove"
+      ],
+      "summary": "Storm Thrall Cove, defeat Slaver-Captain Murad, and meet Captain Leila in the Thieves Den.",
+      "intro": [
+        "Slaver-Captain Murad is preparing to sail from Thrall Cove to dump the Iron Casket in deep water for Magnate Hazaq.",
+        "Raid Thrall Cove, defeat Captain Murad, and consult Captain Leila at the Thieves Den."
+      ],
+      "complete": [
+        "Slaver-Captain Murad fell on the jetty, and Captain Leila revealed that Magnate Hazaq fled with the casket into Bahraha's Gloom."
+      ],
+      "journal": {
+        "start": "I must raid Thrall Cove, defeat Slaver-Captain Murad, and speak with Captain Leila in the Thieves Den.",
+        "done": "I defeated Slaver-Captain Murad and learned Magnate Hazaq is hiding in Bahraha's Gloom."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "thrall_cove",
+          "text": "Storm the anchorage at Thrall Cove"
+        },
+        {
+          "type": "scene",
+          "place": "thrall_cove",
+          "target": "scene:story_hb_thrall_cove_jetty",
+          "text": "Confront Slaver-Captain Murad on the jetty"
+        },
+        {
+          "type": "boss",
+          "place": "thrall_cove",
+          "target": "story_hb_slaver_captain_murad",
+          "text": "Defeat Slaver-Captain Murad"
+        },
+        {
+          "type": "talk",
+          "place": "thieves_den",
+          "npc": "story_hb_thief_captain_leila",
+          "text": "Consult Captain Leila at the Thieves Den"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "thrall_cove",
+        "thieves_den"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "thrall_cove",
+          "objective": "Storm the anchorage at Thrall Cove"
+        },
+        {
+          "id": 20,
+          "place": "thrall_cove",
+          "objective": "Confront Slaver-Captain Murad on the jetty"
+        },
+        {
+          "id": 30,
+          "place": "thrall_cove",
+          "objective": "Defeat Slaver-Captain Murad"
+        },
+        {
+          "id": 40,
+          "place": "thieves_den",
+          "objective": "Consult Captain Leila at the Thieves Den"
+        }
+      ],
+      "consequence": "npc_schedule:hews_bane_stage_2"
+    },
+    {
+      "id": "ms1_hews_bane_03_no_shira_watch",
+      "region": "hammerfell/hews_bane",
+      "category": "main",
+      "title": "Guns of No Shira Citadel",
+      "giver": "story_hb_thief_captain_leila",
+      "start": "auto",
+      "requires": [
+        "ms1_hews_bane_02_thrall_cove"
+      ],
+      "why": [
+        "hews_bane.L8.nocturnal_coin_custom",
+        "hews_bane.L9.syndicate_vs_thieves"
+      ],
+      "summary": "Alert Warden Qasim at No Shira Citadel to block Magnate Hazaq's sea escape.",
+      "intro": [
+        "Magnate Hazaq signaled an unmarked schooner off the peninsula to pick him up near No Shira Citadel.",
+        "Check the signal-promontory at Zeht's Displeasure and alert Warden Qasim at No Shira Citadel."
+      ],
+      "complete": [
+        "Warden Qasim's coastal batteries drove off the schooner, trapping Magnate Hazaq inside Bahraha's Gloom."
+      ],
+      "journal": {
+        "start": "I must check Zeht's Displeasure and alert Warden Qasim at No Shira Citadel.",
+        "done": "Warden Qasim drove off Hazaq's escape ship from No Shira Citadel."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "zehts_displeasure",
+          "text": "Extinguish the signal-lanterns at Zeht's Displeasure"
+        },
+        {
+          "type": "talk",
+          "place": "no_shira_citadel",
+          "npc": "story_hb_warden_qasim",
+          "text": "Alert Warden Qasim at No Shira Citadel"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "zehts_displeasure",
+        "no_shira_citadel"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "zehts_displeasure",
+          "objective": "Extinguish the signal-lanterns at Zeht's Displeasure"
+        },
+        {
+          "id": 20,
+          "place": "no_shira_citadel",
+          "objective": "Alert Warden Qasim at No Shira Citadel"
+        }
+      ],
+      "consequence": "shrine_state:hews_bane_stage_3"
+    },
+    {
+      "id": "ms1_hews_bane_04_bahrahas_gloom",
+      "region": "hammerfell/hews_bane",
+      "category": "main",
+      "title": "The Oath of No Forgiveness",
+      "giver": "story_hb_warden_qasim",
+      "start": "auto",
+      "requires": [
+        "ms1_hews_bane_03_no_shira_watch"
+      ],
+      "finale": true,
+      "why": [
+        "hews_bane.L7.hunted_traitors",
+        "hews_bane.L8.no_forgiveness_oath",
+        "hews_bane.L9.collaborator_hunt"
+      ],
+      "summary": "Descend into Bahraha's Gloom, defeat Magnate Hazaq the Gate-Seller, and return the Iron Casket to Oath-Keeper Samira in Taneth.",
+      "intro": [
+        "Trapped inside the catacombs of Bahraha's Gloom, Magnate Hazaq is guarded by his last mercenaries and tomb-thralls.",
+        "Enter Bahraha's Gloom, defeat Hazaq, and bring the Iron Casket back to Oath-Keeper Samira in Taneth."
+      ],
+      "complete": [
+        "Magnate Hazaq has answered for the betrayal of the East Gate, the Iron Casket rests once more in Taneth, and you have been awarded the Hew's Bane Scimitar."
+      ],
+      "journal": {
+        "start": "I must enter Bahraha's Gloom, defeat Magnate Hazaq, and return the Iron Casket to Oath-Keeper Samira in Taneth.",
+        "done": "I defeated Magnate Hazaq in Bahraha's Gloom and received the Hew's Bane Scimitar in Taneth."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "bahrahas_gloom",
+          "text": "Enter the catacombs of Bahraha's Gloom"
+        },
+        {
+          "type": "scene",
+          "place": "bahrahas_gloom",
+          "target": "scene:story_hb_bahraha_vault",
+          "text": "Confront Magnate Hazaq in the inner vault"
+        },
+        {
+          "type": "boss",
+          "place": "bahrahas_gloom",
+          "target": "story_hb_magnate_hazaq",
+          "text": "Defeat Magnate Hazaq the Gate-Seller"
+        },
+        {
+          "type": "talk",
+          "place": "taneth",
+          "npc": "story_hb_oath_keeper_samira",
+          "text": "Return the Iron Casket to Oath-Keeper Samira in Taneth"
+        }
+      ],
+      "reward": {
+        "gold": 800,
+        "xp": 1200,
+        "unique": "hews_bane_scimitar"
+      },
+      "places": [
+        "bahrahas_gloom",
+        "taneth"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bahrahas_gloom",
+          "objective": "Enter the catacombs of Bahraha's Gloom"
+        },
+        {
+          "id": 20,
+          "place": "bahrahas_gloom",
+          "objective": "Confront Magnate Hazaq in the inner vault"
+        },
+        {
+          "id": 30,
+          "place": "bahrahas_gloom",
+          "objective": "Defeat Magnate Hazaq the Gate-Seller"
+        },
+        {
+          "id": 40,
+          "place": "taneth",
+          "objective": "Return the Iron Casket to Oath-Keeper Samira in Taneth"
+        }
+      ],
+      "consequence": "settlement_prosperity:hews_bane_stage_4"
+    }
+  ]
+}

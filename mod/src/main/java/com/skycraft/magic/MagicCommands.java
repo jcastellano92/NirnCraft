@@ -154,6 +154,7 @@ public final class MagicCommands {
         // eating ingredients (bite choice, four-line effect text, the Use/right-click/eat paths) and the HUD corner layout
         problems.addAll(com.skycraft.crafting.arcane.alchemy.AlchemySelfTest.run());
         problems.addAll(com.skycraft.core.HudStack.selfTest());
+        problems.addAll(com.skycraft.loot.affix.ItemAffixes.selftest());
         // one hand system: bound weapon vs spell vs item, tome learning, favorites, nothing bound in a save
         problems.addAll(HandsSelfTest.run(player, report));
         int perkCount = 0;

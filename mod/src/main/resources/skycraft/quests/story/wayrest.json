@@ -1,0 +1,396 @@
+{
+  "region": "high_rock/wayrest",
+  "title": "The Direnni Seal of the Bjoulsae Mouth",
+  "summary": "Navigate the cutthroat rivalry between Castle Wayrest's chancery and the merchant guild-lords when a sunken Direnni treaty-coffer is dredged up from the bay.",
+  "why": [
+    "wayrest.L7.guild_lords",
+    "wayrest.L7.chancery_clerks",
+    "wayrest.L8.direnni_awe",
+    "wayrest.L9.crown_vs_guild",
+    "wayrest.L10.tamarilyn_coven"
+  ],
+  "hook": {
+    "place": "wayrest",
+    "places": [
+      "aldhaven_harbor",
+      "glenmere_cove",
+      "goldwych_hag_fen",
+      "hawkmarsh_lighthouse",
+      "highmarsh_hagspit",
+      "kambria",
+      "marcliff",
+      "penwick_hollow",
+      "shrine_mehrunes_dagon_high_rock",
+      "tessier_family_crypt",
+      "valois_farm",
+      "wayrest",
+      "wayrest_outlaws_refuge",
+      "wayrest_sewers"
+    ],
+    "npc": "story_wr_chancellor_perrault",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_wr_chancellor_perrault",
+      "name": "Chancellor Perrault",
+      "role": "steward",
+      "place": "wayrest",
+      "greet": "If you have business at the counting-houses, traveller, best keep your hand on your hilt. The harbour syndicates and the Crown are an inch from open war.",
+      "talk": [
+        "Dredgers at the Bjoulsae mouth hauled up an adamant-bound Direnni coffer containing the original Balfiera toll-exemptions.",
+        "Before the Knights of the Rose could escort it to Castle Wayrest, someone opened the flood-gates into the Wayrest Sewers and vanished with the coffer."
+      ]
+    },
+    {
+      "id": "story_wr_dame_vivienne",
+      "name": "Dame Vivienne of the Rose",
+      "role": "knight",
+      "place": "castle_wayrest",
+      "greet": "The guild-lords blame the Crown, and the Crown blames the dockers. Meanwhile the real thieves move through the tide-drains beneath our feet.",
+      "talk": [
+        "Factor Moreau of the Merchant Council paid smugglers in the Wayrest Sewers to spirit the Direnni coffer out to Hawkfield Caverns.",
+        "Search the sluices in the Wayrest Sewers and meet Wharf-Master Luc at the outfall."
+      ]
+    },
+    {
+      "id": "story_wr_wharfmaster_luc",
+      "name": "Wharf-Master Luc",
+      "role": "citizen",
+      "place": "wayrest_sewers",
+      "greet": "Hold your torch high! The tide is rising in the brick culverts, and Moreau's hired blades left caltrops on the catwalks.",
+      "talk": [
+        "Factor Moreau didn't just hire cutthroats—he made a pact with the Tamarilyn sea-witches in Hawkfield Caverns to crack the Direnni ward-lock.",
+        "Clear the smugglers from Oakhurst Cave and Hawkfield Caverns before they open the coffer!"
+      ]
+    },
+    {
+      "id": "story_wr_archivist_celine",
+      "name": "Archivist Celine",
+      "role": "scholar",
+      "place": "castle_wayrest",
+      "greet": "You found the Direnni coffer intact? By Akatosh's hourglass, half the counting-houses in Wayrest would have burned for what lies inside.",
+      "talk": [
+        "The charter binds both Crown and Guild to share the Balfiera light-dues—no wonder Factor Moreau wanted the wax melted."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_wr_siren_merisande": {
+      "name": "Hag-Sister Merisande of Tamarilyn",
+      "rank": "boss",
+      "place": "oakhurst_cave",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_wr_factor_moreau": {
+      "name": "High Factor Moreau",
+      "rank": "boss",
+      "place": "hawkfield_caverns",
+      "weapon": "ebony_sword",
+      "helmet": "chainmail_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 3.2,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_wr_sewer_sluice": [
+      "Wharf-Master Luc: Look at the bronze grating—pried open with a counting-house winch, and the mortar still wet with salt-slime.",
+      "Dame Vivienne of the Rose: And here is a ledger-tag from Factor Moreau's own lighter-barge.",
+      "Wharf-Master Luc: They rowed the Direnni coffer west along the marsh shore toward Oakhurst Cave and Hawkfield Caverns!"
+    ],
+    "story_wr_oakhurst_ritual": [
+      "Hag-Sister Merisande: Elven adamant does not yield to iron chisels, merchant! It drinks salt and drowned men's breath!",
+      "Dame Vivienne of the Rose: Break her circle before the Direnni ward shatters!"
+    ],
+    "story_wr_hawkfield_finale": [
+      "High Factor Moreau: With the Direnni charter in my strongroom, the King of Wayrest will beg the Guilds for every ship that crosses the bar!",
+      "Dame Vivienne of the Rose: You would drown the harbour in blood for a three-percent toll-rebate, Moreau!",
+      "High Factor Moreau: Three percent of the Iliac Bay is an empire, knight! Guards—kill them!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_wayrest_01_dredged_coffer",
+      "region": "high_rock/wayrest",
+      "category": "main",
+      "title": "The Dredged Charter of Balfiera",
+      "giver": "story_wr_chancellor_perrault",
+      "start": "npc:story_wr_chancellor_perrault",
+      "requires": [],
+      "why": [
+        "wayrest.L7.guild_lords",
+        "wayrest.L7.chancery_clerks",
+        "wayrest.L9.crown_vs_guild"
+      ],
+      "summary": "Speak with Dame Vivienne at Castle Wayrest and trace the stolen Direnni coffer into the Wayrest Sewers.",
+      "intro": [
+        "An ancient Direnni treaty-coffer dredged from the Bjoulsae mouth was stolen from the customs quay before the Knights of the Rose could secure it.",
+        "Confer with Dame Vivienne at Castle Wayrest and descend into the Wayrest Sewers to inspect the flood-sluice."
+      ],
+      "complete": [
+        "In the Wayrest Sewers, Wharf-Master Luc and Dame Vivienne proved that High Factor Moreau smuggled the coffer out by barge."
+      ],
+      "journal": {
+        "start": "Chancellor Perrault sent me to Castle Wayrest and the Wayrest Sewers to trace the stolen Direnni coffer.",
+        "done": "We discovered High Factor Moreau's barge-marks at the sewer sluice."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "castle_wayrest",
+          "npc": "story_wr_dame_vivienne",
+          "text": "Consult Dame Vivienne of the Rose at Castle Wayrest"
+        },
+        {
+          "type": "scene",
+          "place": "wayrest_sewers",
+          "target": "scene:story_wr_sewer_sluice",
+          "text": "Inspect the pried flood-grating in the Wayrest Sewers"
+        },
+        {
+          "type": "talk",
+          "place": "wayrest_sewers",
+          "npc": "story_wr_wharfmaster_luc",
+          "text": "Question Wharf-Master Luc in the Wayrest Sewers"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "castle_wayrest",
+        "wayrest_sewers"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "castle_wayrest",
+          "objective": "Consult Dame Vivienne of the Rose at Castle Wayrest"
+        },
+        {
+          "id": 20,
+          "place": "wayrest_sewers",
+          "objective": "Inspect the pried flood-grating in the Wayrest Sewers"
+        },
+        {
+          "id": 30,
+          "place": "wayrest_sewers",
+          "objective": "Question Wharf-Master Luc in the Wayrest Sewers"
+        }
+      ],
+      "consequence": "guard_banner:wayrest_stage_1"
+    },
+    {
+      "id": "ms1_wayrest_02_marsh_lighter",
+      "region": "high_rock/wayrest",
+      "category": "main",
+      "title": "Tide-Witches of the Reed-Fen",
+      "giver": "story_wr_wharfmaster_luc",
+      "start": "auto",
+      "requires": [
+        "ms1_wayrest_01_dredged_coffer"
+      ],
+      "why": [
+        "wayrest.L8.direnni_awe",
+        "wayrest.L10.tamarilyn_coven"
+      ],
+      "summary": "Pursue the smugglers to Oakhurst Cave and defeat Hag-Sister Merisande of the Tamarilyn Coven.",
+      "intro": [
+        "High Factor Moreau hired the Tamarilyn sea-coven in Oakhurst Cave to dissolve the Direnni ward-seals on the coffer.",
+        "Enter Oakhurst Cave and stop Hag-Sister Merisande before the ward is broken."
+      ],
+      "complete": [
+        "Hag-Sister Merisande was defeated, and her half-forged key revealed that Moreau took the coffer to Hawkfield Caverns."
+      ],
+      "journal": {
+        "start": "I must enter Oakhurst Cave and stop Hag-Sister Merisande from breaking the Direnni seal.",
+        "done": "I defeated Hag-Sister Merisande in Oakhurst Cave and traced the coffer to Hawkfield Caverns."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "oakhurst_cave",
+          "text": "Track the lighter-barge to Oakhurst Cave"
+        },
+        {
+          "type": "scene",
+          "place": "oakhurst_cave",
+          "target": "scene:story_wr_oakhurst_ritual",
+          "text": "Interrupt the Tamarilyn ward-breaking rite"
+        },
+        {
+          "type": "boss",
+          "place": "oakhurst_cave",
+          "target": "story_wr_siren_merisande",
+          "text": "Defeat Hag-Sister Merisande of Tamarilyn"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "oakhurst_cave"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "oakhurst_cave",
+          "objective": "Track the lighter-barge to Oakhurst Cave"
+        },
+        {
+          "id": 20,
+          "place": "oakhurst_cave",
+          "objective": "Interrupt the Tamarilyn ward-breaking rite"
+        },
+        {
+          "id": 30,
+          "place": "oakhurst_cave",
+          "objective": "Defeat Hag-Sister Merisande of Tamarilyn"
+        }
+      ],
+      "consequence": "npc_schedule:wayrest_stage_2"
+    },
+    {
+      "id": "ms1_wayrest_03_hawkfield_vault",
+      "region": "high_rock/wayrest",
+      "category": "main",
+      "title": "The Factor's Contraband",
+      "giver": "story_wr_dame_vivienne",
+      "start": "auto",
+      "requires": [
+        "ms1_wayrest_02_marsh_lighter"
+      ],
+      "why": [
+        "wayrest.L7.dockers",
+        "wayrest.L9.crown_vs_guild"
+      ],
+      "summary": "Infiltrate Hawkfield Caverns, confront High Factor Moreau, and reclaim the Direnni treaty-coffer.",
+      "intro": [
+        "High Factor Moreau has gathered his mercenary company inside Hawkfield Caverns to pry open the Direnni coffer.",
+        "Storm Hawkfield Caverns and defeat High Factor Moreau."
+      ],
+      "complete": [
+        "High Factor Moreau fell in Hawkfield Caverns, and the adamant Direnni coffer was recovered unbroken."
+      ],
+      "journal": {
+        "start": "I must enter Hawkfield Caverns and defeat High Factor Moreau to recover the Direnni coffer.",
+        "done": "I defeated High Factor Moreau and secured the Direnni coffer."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "hawkfield_caverns",
+          "text": "Enter Hawkfield Caverns"
+        },
+        {
+          "type": "scene",
+          "place": "hawkfield_caverns",
+          "target": "scene:story_wr_hawkfield_finale",
+          "text": "Confront High Factor Moreau in the cavern vault"
+        },
+        {
+          "type": "boss",
+          "place": "hawkfield_caverns",
+          "target": "story_wr_factor_moreau",
+          "text": "Defeat High Factor Moreau"
+        }
+      ],
+      "reward": {
+        "gold": 450,
+        "xp": 650
+      },
+      "places": [
+        "hawkfield_caverns"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hawkfield_caverns",
+          "objective": "Enter Hawkfield Caverns"
+        },
+        {
+          "id": 20,
+          "place": "hawkfield_caverns",
+          "objective": "Confront High Factor Moreau in the cavern vault"
+        },
+        {
+          "id": 30,
+          "place": "hawkfield_caverns",
+          "objective": "Defeat High Factor Moreau"
+        }
+      ],
+      "consequence": "shrine_state:wayrest_stage_3"
+    },
+    {
+      "id": "ms1_wayrest_04_balfiera_concord",
+      "region": "high_rock/wayrest",
+      "category": "main",
+      "title": "The Concord of Castle Wayrest",
+      "giver": "story_wr_dame_vivienne",
+      "start": "auto",
+      "requires": [
+        "ms1_wayrest_03_hawkfield_vault"
+      ],
+      "finale": true,
+      "why": [
+        "wayrest.L8.akatosh_chantry",
+        "wayrest.L9.crown_vs_guild",
+        "wayrest.L10.direnni_tower"
+      ],
+      "summary": "Deliver the Direnni coffer to Archivist Celine at Castle Wayrest and report the concord to Chancellor Perrault.",
+      "intro": [
+        "With the Direnni coffer in hand, return to Castle Wayrest so Archivist Celine can unseal the Balfiera charter before both Crown and Guild.",
+        "Present the coffer at Castle Wayrest and inform Chancellor Perrault in the city."
+      ],
+      "complete": [
+        "The Direnni charter confirmed shared customs rights across the Bjoulsae mouth, averting civil war on the Wayrest quays."
+      ],
+      "journal": {
+        "start": "I must bring the Direnni coffer to Archivist Celine at Castle Wayrest and report to Chancellor Perrault.",
+        "done": "The Direnni charter was unsealed at Castle Wayrest, restoring peace between the Crown and the Merchant Guilds."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "castle_wayrest",
+          "npc": "story_wr_archivist_celine",
+          "text": "Deliver the Direnni coffer to Archivist Celine at Castle Wayrest"
+        },
+        {
+          "type": "talk",
+          "place": "wayrest",
+          "npc": "story_wr_chancellor_perrault",
+          "text": "Report the settlement to Chancellor Perrault in Wayrest"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "castle_wayrest",
+        "wayrest"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "castle_wayrest",
+          "objective": "Deliver the Direnni coffer to Archivist Celine at Castle Wayrest"
+        },
+        {
+          "id": 20,
+          "place": "wayrest",
+          "objective": "Report the settlement to Chancellor Perrault in Wayrest"
+        }
+      ],
+      "consequence": "settlement_prosperity:wayrest_stage_4"
+    }
+  ]
+}

@@ -3,35 +3,116 @@
   "category": "faction",
   "faction": "knights_of_the_rose",
   "region": "high_rock/wayrest",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "saltreef_hold": {"x": -5650, "z": 3150, "r": 34, "name": "Saltreef Hold"}
+    "saltreef_hold": {
+      "x": -5650,
+      "z": 3150,
+      "r": 34,
+      "name": "Saltreef Hold"
+    }
   },
   "npcs": [
-    {"id": "aubrec_valmont", "name": "Lord Aubrec Valmont", "role": "adventurer", "place": "wayrest", "offset": [5, -2], "hall": "knights_of_the_rose",
-     "greet": "A knight of the Rose is courteous to the poor, honest with the powerful and terrible to the wicked. Most days I manage two of the three."},
-    {"id": "dame_orielle_fontaine", "name": "Dame Orielle Fontaine", "role": "adventurer", "place": "wayrest", "offset": [8, 3], "female": true, "hall": "knights_of_the_rose",
-     "greet": "Manners first, then the sword. You'd be amazed how many fights end at the manners."},
-    {"id": "ivo_brennault", "name": "Chancellor Ivo Brennault", "role": "steward", "place": "wayrest", "offset": [-12, 8],
-     "greet": "The King is very busy. I am very busy on his behalf. Speak quickly, and beautifully if you can manage it."},
-    {"id": "garrick_vane", "name": "Sir Garrick Vane", "role": "adventurer", "place": "wayrest", "offset": [-16, 4],
-     "greet": "I serve the Chancellor. That is all you need to know about me, and more than most people learn."},
-    {"id": "elsabet_mornay", "name": "Elsabet Mornay", "role": "citizen", "place": "wayrest", "offset": [14, 14], "female": true,
-     "greet": "Father sits on the King's council. Everyone is very polite to me, and nobody tells me anything."}
+    {
+      "id": "aubrec_valmont",
+      "name": "Lord Aubrec Valmont",
+      "role": "adventurer",
+      "place": "wayrest",
+      "offset": [
+        5,
+        -2
+      ],
+      "hall": "knights_of_the_rose",
+      "greet": "A knight of the Rose is courteous to the poor, honest with the powerful and terrible to the wicked. Most days I manage two of the three."
+    },
+    {
+      "id": "dame_orielle_fontaine",
+      "name": "Dame Orielle Fontaine",
+      "role": "adventurer",
+      "place": "wayrest",
+      "offset": [
+        8,
+        3
+      ],
+      "female": true,
+      "hall": "knights_of_the_rose",
+      "greet": "Manners first, then the sword. You'd be amazed how many fights end at the manners."
+    },
+    {
+      "id": "ivo_brennault",
+      "name": "Chancellor Ivo Brennault",
+      "role": "steward",
+      "place": "wayrest",
+      "offset": [
+        -12,
+        8
+      ],
+      "greet": "The King is very busy. I am very busy on his behalf. Speak quickly, and beautifully if you can manage it."
+    },
+    {
+      "id": "garrick_vane",
+      "name": "Sir Garrick Vane",
+      "role": "adventurer",
+      "place": "wayrest",
+      "offset": [
+        -16,
+        4
+      ],
+      "greet": "I serve the Chancellor. That is all you need to know about me, and more than most people learn."
+    },
+    {
+      "id": "elsabet_mornay",
+      "name": "Elsabet Mornay",
+      "role": "citizen",
+      "place": "wayrest",
+      "offset": [
+        14,
+        14
+      ],
+      "female": true,
+      "greet": "Father sits on the King's council. Everyone is very polite to me, and nobody tells me anything."
+    }
   ],
   "relics": [
-    {"id": "kr_ransom_letter", "name": "Ransom Letter", "desc": "A demand for five thousand crowns for the safe return of Elsabet Mornay. Written in a careful hand, on very good paper. Pirates rarely own very good paper.", "icon": 11},
-    {"id": "kr_chancellors_purse", "name": "Purse of New Crowns", "desc": "Freshly minted Wayrest coin, still in the wrapping of the banker who serves the Chancellor's household.", "icon": 23}
+    {
+      "id": "kr_ransom_letter",
+      "name": "Ransom Letter",
+      "desc": "A demand for five thousand crowns for the safe return of Elsabet Mornay. Written in a careful hand, on very good paper. Pirates rarely own very good paper.",
+      "icon": 11
+    },
+    {
+      "id": "kr_chancellors_purse",
+      "name": "Purse of New Crowns",
+      "desc": "Freshly minted Wayrest coin, still in the wrapping of the banker who serves the Chancellor's household.",
+      "icon": 23
+    }
   ],
   "scenes": {
     "kr_the_yield": [
-      ["narrator", "Sir Garrick lies in the sand of the duelling ground with his helm knocked askew. The crowd is silent. In the gallery, the Chancellor's chair is empty."],
-      ["aubrec_valmont", "The trial is decided. Before Stendarr and the court of Wayrest, the Chancellor's cause has failed. Guards, find him."]
+      [
+        "narrator",
+        "Sir Garrick lies in the sand of the duelling ground with his helm knocked askew. The crowd is silent. In the gallery, the Chancellor's chair is empty."
+      ],
+      [
+        "aubrec_valmont",
+        "The trial is decided. Before Stendarr and the court of Wayrest, the Chancellor's cause has failed. Guards, find him."
+      ]
     ],
     "kr_roses_oath": [
-      ["narrator", "In the chapel of the Rose, every knight in Wayrest stands with a white rose pinned over the heart. The candles have burned low."],
-      ["aubrec_valmont", "We swear to keep faith with the weak, to speak truth to the mighty and to suffer no cruelty in our sight. You have kept that oath before you ever spoke it."],
-      ["dame_orielle_fontaine", "Say the words, and take the rose. The order is yours to lead in the field, as Lord of the Rose."]
+      [
+        "narrator",
+        "In the chapel of the Rose, every knight in Wayrest stands with a white rose pinned over the heart. The candles have burned low."
+      ],
+      [
+        "aubrec_valmont",
+        "We swear to keep faith with the weak, to speak truth to the mighty and to suffer no cruelty in our sight. You have kept that oath before you ever spoke it."
+      ],
+      [
+        "dame_orielle_fontaine",
+        "Say the words, and take the rose. The order is yours to lead in the field, as Lord of the Rose."
+      ]
     ]
   },
   "quests": [
@@ -39,128 +120,405 @@
       "id": "kr_a_courteous_blade",
       "title": "A Courteous Blade",
       "start": "npc:aubrec_valmont",
-      "requires": ["!faction:knights_of_the_rose"],
+      "requires": [
+        "!faction:knights_of_the_rose"
+      ],
       "offer": "I'd like to earn a place among the Knights of the Rose.",
       "pitch": "Then begin where we all begin, with the people nobody else bothers about. A gang has been squeezing coin out of the fishwives on the Wayrest docks. Dame Orielle will tell you more. Settle it, and settle it like a knight, not a brawler.",
       "desc": "Lord Aubrec Valmont of the Knights of the Rose set me a first task: end the extortion of the fishwives on the Wayrest docks.",
       "objectives": [
-        {"type": "talk", "npc": "dame_orielle_fontaine", "text": "Speak with Dame Orielle Fontaine",
-         "topic": "Lord Valmont sent me about the docks.",
-         "reply": "The Gullhook boys. They sell 'protection' to women who gut fish for a living, and break their tables when they can't pay. Give them the chance to leave. If they refuse it, don't give them a second."},
-        {"type": "clear", "place": "wayrest", "offset": [-45, 40], "text": "Break the Gullhook gang on the docks",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Gullhook Bully", "hostile": true, "armor": "#5a5a4a"}],
-         "journal": "I told them to leave the docks. Their leader laughed and drew a gutting knife. The fishwives cheered at the end, which I did not expect."},
-        {"type": "talk", "npc": "dame_orielle_fontaine", "text": "Report to Dame Orielle",
-         "topic": "The Gullhook gang won't trouble anyone again.",
-         "reply": "I watched from the harbour wall. You offered them the door first. Good. That's what separates us from the men we fight. Go and tell Lord Valmont."},
-        {"type": "talk", "npc": "aubrec_valmont", "text": "Report to Lord Valmont",
-         "topic": "The docks are quiet.",
-         "reply": "Dame Orielle has already sung your praises, which she does about once a decade. Take the Rose, Aspirant. Wear it where people can see it, and behave accordingly."}
+        {
+          "type": "talk",
+          "npc": "dame_orielle_fontaine",
+          "text": "Speak with Dame Orielle Fontaine",
+          "topic": "Lord Valmont sent me about the docks.",
+          "reply": "The Gullhook boys. They sell 'protection' to women who gut fish for a living, and break their tables when they can't pay. Give them the chance to leave. If they refuse it, don't give them a second."
+        },
+        {
+          "type": "clear",
+          "place": "wayrest",
+          "offset": [
+            -45,
+            40
+          ],
+          "text": "Break the Gullhook gang on the docks",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Gullhook Bully",
+              "hostile": true,
+              "armor": "#5a5a4a"
+            }
+          ],
+          "journal": "I told them to leave the docks. Their leader laughed and drew a gutting knife. The fishwives cheered at the end, which I did not expect."
+        },
+        {
+          "type": "talk",
+          "npc": "dame_orielle_fontaine",
+          "text": "Report to Dame Orielle",
+          "topic": "The Gullhook gang won't trouble anyone again.",
+          "reply": "I watched from the harbour wall. You offered them the door first. Good. That's what separates us from the men we fight. Go and tell Lord Valmont."
+        },
+        {
+          "type": "talk",
+          "npc": "aubrec_valmont",
+          "text": "Report to Lord Valmont",
+          "topic": "The docks are quiet.",
+          "reply": "Dame Orielle has already sung your praises, which she does about once a decade. Take the Rose, Aspirant. Wear it where people can see it, and behave accordingly."
+        }
       ],
       "outro": "I broke the Gullhook gang that preyed on the fishwives of the Wayrest docks. Lord Aubrec Valmont accepted me as an aspirant of the Knights of the Rose.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:steel_sword", "skycraft:breton_chestplate"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:steel_sword",
+          "skycraft:breton_chestplate"
+        ]
+      },
+      "why": [
+        "wayrest.L9.crown_vs_guild",
+        "wayrest.L8.akatosh_chantry"
+      ]
     },
     {
       "id": "kr_very_good_paper",
       "title": "Very Good Paper",
       "start": "npc:aubrec_valmont",
-      "requires": ["quest:kr_a_courteous_blade|faction:knights_of_the_rose"],
+      "requires": [
+        "quest:kr_a_courteous_blade|faction:knights_of_the_rose"
+      ],
       "offer": "You look troubled, my lord.",
       "pitch": "I am. Iliac Bay pirates have taken Elsabet Mornay, whose father sits on the King's council. Chancellor Brennault wants the ransom paid quietly and quickly. Something about it smells wrong. Go and see the Chancellor, and look at that letter with a knight's eyes.",
       "desc": "Pirates have kidnapped Elsabet Mornay, daughter of a royal councillor. Chancellor Ivo Brennault wants the ransom paid at once, and Lord Valmont suspects something is wrong.",
       "objectives": [
-        {"type": "talk", "npc": "ivo_brennault", "text": "Speak with Chancellor Brennault",
-         "topic": "Lord Valmont asked me to look at the ransom letter.",
-         "reply": "Valmont asked, did he? Very well. Read it, by all means. The girl's life is on a clock, and the Rose should be helping me pay, not reading over my shoulder. The money goes to the docks tonight.",
-         "actions": "relic:kr_ransom_letter"},
-        {"type": "cond", "cond": "night", "text": "Wait for nightfall"},
-        {"type": "kill", "place": "wayrest", "offset": [-60, 55], "text": "Catch the go-between collecting the ransom on the docks",
-         "spawn": [{"type": "npc:thief", "name": "Ransom Go-Between", "target": true, "hostile": true, "hp": 1.5}],
-         "journal": "The go-between was no pirate. He wore a clerk's ink stains under his sailor's coat, and he fought like a man who had never expected to."},
-        {"type": "retrieve", "place": "wayrest", "offset": [-60, 55], "relic": "kr_chancellors_purse", "radius": 8, "text": "Take the purse the go-between carried"},
-        {"type": "deliver", "npc": "aubrec_valmont", "relic": "kr_chancellors_purse", "text": "Bring the purse and the letter to Lord Valmont",
-         "topic": "The go-between was carrying this. It's the Chancellor's own coin.",
-         "reply": "Paid to the pirates by the Chancellor's banker, before the ransom was ever announced. Brennault arranged this himself. The question is why. We need the girl back before anyone thinks to silence her."}
+        {
+          "type": "talk",
+          "npc": "ivo_brennault",
+          "text": "Speak with Chancellor Brennault",
+          "topic": "Lord Valmont asked me to look at the ransom letter.",
+          "reply": "Valmont asked, did he? Very well. Read it, by all means. The girl's life is on a clock, and the Rose should be helping me pay, not reading over my shoulder. The money goes to the docks tonight.",
+          "actions": "relic:kr_ransom_letter"
+        },
+        {
+          "type": "cond",
+          "cond": "night",
+          "text": "Wait for nightfall"
+        },
+        {
+          "type": "kill",
+          "place": "wayrest",
+          "offset": [
+            -60,
+            55
+          ],
+          "text": "Catch the go-between collecting the ransom on the docks",
+          "spawn": [
+            {
+              "type": "npc:thief",
+              "name": "Ransom Go-Between",
+              "target": true,
+              "hostile": true,
+              "hp": 1.5
+            }
+          ],
+          "journal": "The go-between was no pirate. He wore a clerk's ink stains under his sailor's coat, and he fought like a man who had never expected to."
+        },
+        {
+          "type": "retrieve",
+          "place": "wayrest",
+          "offset": [
+            -60,
+            55
+          ],
+          "relic": "kr_chancellors_purse",
+          "radius": 8,
+          "text": "Take the purse the go-between carried"
+        },
+        {
+          "type": "deliver",
+          "npc": "aubrec_valmont",
+          "relic": "kr_chancellors_purse",
+          "text": "Bring the purse and the letter to Lord Valmont",
+          "topic": "The go-between was carrying this. It's the Chancellor's own coin.",
+          "reply": "Paid to the pirates by the Chancellor's banker, before the ransom was ever announced. Brennault arranged this himself. The question is why. We need the girl back before anyone thinks to silence her."
+        }
       ],
       "outro": "The ransom for Elsabet Mornay was being paid out of Chancellor Brennault's own purse before the kidnapping was announced. The Chancellor arranged it. Lord Valmont wants her rescued before she can be silenced.",
-      "rewards": {"gold": 300, "faction_points": 3}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 3
+      },
+      "why": [
+        "wayrest.L9.crown_vs_guild",
+        "wayrest.L8.akatosh_chantry"
+      ]
     },
     {
       "id": "kr_the_saltreef_hostage",
       "title": "The Saltreef Hostage",
       "start": "auto",
-      "requires": ["quest:kr_very_good_paper"],
+      "requires": [
+        "quest:kr_very_good_paper"
+      ],
       "desc": "Elsabet Mornay is held by pirates at Saltreef Hold on the coast west of Wayrest. Lord Valmont wants her brought home alive before the Chancellor's allies decide she knows too much.",
       "on_start": "relocate:elsabet_mornay:saltreef_hold",
       "objectives": [
-        {"type": "go", "place": "saltreef_hold", "text": "Travel to Saltreef Hold"},
-        {"type": "clear", "place": "saltreef_hold", "placement": "structure", "text": "Fight through the pirates of Saltreef Hold",
-         "spawn": [{"type": "npc:thug", "count": 4, "name": "Iliac Pirate", "hostile": true, "armor": "#2a4a5a"}]},
-        {"type": "kill", "place": "saltreef_hold", "placement": "structure", "text": "Kill the pirate captain, Red Brannoc",
-         "spawn": [{"type": "npc:adventurer", "name": "Red Brannoc", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true, "armor": "#7a2a2a", "weapon": "skycraft:steel_war_axe"}],
-         "journal": "Red Brannoc told me, with his last breath, that he had been paid to take the girl and paid again to keep her. He didn't say by whom. He didn't need to."},
-        {"type": "talk", "npc": "elsabet_mornay", "text": "Free Elsabet Mornay",
-         "topic": "Lord Valmont sent me. You're safe now.",
-         "reply": "I heard them talking about the Chancellor. My father was going to vote against his new tariff. They were going to hold me until the council met. Please, take me home."},
-        {"type": "escort", "npc": "elsabet_mornay", "place": "wayrest", "text": "Escort Elsabet home to Wayrest"},
-        {"type": "talk", "npc": "aubrec_valmont", "text": "Report to Lord Valmont",
-         "topic": "Elsabet is home. She heard the pirates name the Chancellor.",
-         "reply": "A councillor's daughter stolen to buy a vote. The King must hear it, from her own mouth, before the whole court.",
-         "actions": "relocate:elsabet_mornay:wayrest:14:14"}
+        {
+          "type": "go",
+          "place": "saltreef_hold",
+          "text": "Travel to Saltreef Hold"
+        },
+        {
+          "type": "clear",
+          "place": "saltreef_hold",
+          "placement": "structure",
+          "text": "Fight through the pirates of Saltreef Hold",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Iliac Pirate",
+              "hostile": true,
+              "armor": "#2a4a5a"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "saltreef_hold",
+          "placement": "structure",
+          "text": "Kill the pirate captain, Red Brannoc",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Red Brannoc",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#7a2a2a",
+              "weapon": "skycraft:steel_war_axe"
+            }
+          ],
+          "journal": "Red Brannoc told me, with his last breath, that he had been paid to take the girl and paid again to keep her. He didn't say by whom. He didn't need to."
+        },
+        {
+          "type": "talk",
+          "npc": "elsabet_mornay",
+          "text": "Free Elsabet Mornay",
+          "topic": "Lord Valmont sent me. You're safe now.",
+          "reply": "I heard them talking about the Chancellor. My father was going to vote against his new tariff. They were going to hold me until the council met. Please, take me home."
+        },
+        {
+          "type": "escort",
+          "npc": "elsabet_mornay",
+          "place": "wayrest",
+          "text": "Escort Elsabet home to Wayrest"
+        },
+        {
+          "type": "talk",
+          "npc": "aubrec_valmont",
+          "text": "Report to Lord Valmont",
+          "topic": "Elsabet is home. She heard the pirates name the Chancellor.",
+          "reply": "A councillor's daughter stolen to buy a vote. The King must hear it, from her own mouth, before the whole court.",
+          "actions": "relocate:elsabet_mornay:wayrest:14:14"
+        }
       ],
       "outro": "I rescued Elsabet Mornay from the pirates of Saltreef Hold. She heard them name Chancellor Brennault, who had her taken to force her father's vote on the King's council.",
-      "rewards": {"gold": 500, "faction_points": 4, "items": ["skycraft:breton_leggings"]}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4,
+        "items": [
+          "skycraft:breton_leggings"
+        ]
+      },
+      "why": [
+        "wayrest.L9.crown_vs_guild",
+        "wayrest.L8.akatosh_chantry"
+      ]
     },
     {
       "id": "kr_trial_by_combat",
       "title": "Trial by Combat",
       "start": "auto",
-      "requires": ["quest:kr_the_saltreef_hostage"],
+      "requires": [
+        "quest:kr_the_saltreef_hostage"
+      ],
       "desc": "Accused before the court, Chancellor Brennault claimed the old Breton right of trial by combat, and named Sir Garrick Vane his champion. Lord Valmont has named me champion of the Rose.",
       "objectives": [
-        {"type": "talk", "npc": "aubrec_valmont", "text": "Speak with Lord Valmont",
-         "topic": "The Chancellor wants a trial by combat?",
-         "reply": "An old law, and he knows Garrick Vane has never lost a duel. If his champion wins, Stendarr has judged him innocent, and nobody may speak of it again. I am too old to be sure of beating Vane. You are not."},
-        {"type": "talk", "npc": "aubrec_valmont", "text": "Tell Lord Valmont how you will fight",
-         "choices": [
-           {"label": "I'll fight to make him yield. The truth needs a winner, not a corpse.", "reply": "That is the Rose's way, and the harder one. Vane will not offer you the same courtesy.", "actions": "flag:kr_merciful_champion"},
-           {"label": "Whatever it takes. Vane chose his master.", "reply": "Then go with Stendarr, and don't let anger make you careless.", "actions": "flag:kr_hard_champion"}
-         ]},
-        {"type": "kill", "place": "wayrest", "offset": [25, -30], "radius": 20, "flee_at": 0.25, "text": "Defeat Sir Garrick Vane on the duelling ground",
-         "spawn": [{"type": "npc:adventurer", "name": "Sir Garrick Vane", "target": true, "boss": true, "hp": 3.5, "dmg": 1.5, "hostile": true, "armor": "#3a3a3a", "weapon": "skycraft:steel_greatsword"}],
-         "actions": "scene:kr_the_yield",
-         "journal": "Garrick Vane was the best swordsman I have ever faced. When he went down he did not ask for mercy. He simply looked up at the gallery, and saw his master's chair empty."},
-        {"type": "talk", "npc": "aubrec_valmont", "text": "Speak with Lord Valmont",
-         "topic": "The Chancellor fled before the duel ended.",
-         "reply": "Through a servants' door with half the treasury's seals in his pockets, and a pirate ship waiting at Saltreef, no doubt. He has run to the only friends he has left."}
+        {
+          "type": "talk",
+          "npc": "aubrec_valmont",
+          "text": "Speak with Lord Valmont",
+          "topic": "The Chancellor wants a trial by combat?",
+          "reply": "An old law, and he knows Garrick Vane has never lost a duel. If his champion wins, Stendarr has judged him innocent, and nobody may speak of it again. I am too old to be sure of beating Vane. You are not."
+        },
+        {
+          "type": "talk",
+          "npc": "aubrec_valmont",
+          "text": "Tell Lord Valmont how you will fight",
+          "choices": [
+            {
+              "label": "I'll fight to make him yield. The truth needs a winner, not a corpse.",
+              "reply": "That is the Rose's way, and the harder one. Vane will not offer you the same courtesy.",
+              "actions": "flag:kr_merciful_champion"
+            },
+            {
+              "label": "Whatever it takes. Vane chose his master.",
+              "reply": "Then go with Stendarr, and don't let anger make you careless.",
+              "actions": "flag:kr_hard_champion"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "wayrest",
+          "offset": [
+            25,
+            -30
+          ],
+          "radius": 20,
+          "flee_at": 0.25,
+          "text": "Defeat Sir Garrick Vane on the duelling ground",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Sir Garrick Vane",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#3a3a3a",
+              "weapon": "skycraft:steel_greatsword"
+            }
+          ],
+          "actions": "scene:kr_the_yield",
+          "journal": "Garrick Vane was the best swordsman I have ever faced. When he went down he did not ask for mercy. He simply looked up at the gallery, and saw his master's chair empty."
+        },
+        {
+          "type": "talk",
+          "npc": "aubrec_valmont",
+          "text": "Speak with Lord Valmont",
+          "topic": "The Chancellor fled before the duel ended.",
+          "reply": "Through a servants' door with half the treasury's seals in his pockets, and a pirate ship waiting at Saltreef, no doubt. He has run to the only friends he has left."
+        }
       ],
       "outro": "I defeated Sir Garrick Vane in a trial by combat, and the court of Wayrest judged the Chancellor guilty. Brennault fled before the verdict, toward his pirate allies at Saltreef.",
-      "rewards": {"gold": 600, "faction_points": 4}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 4
+      },
+      "why": [
+        "wayrest.L9.crown_vs_guild",
+        "wayrest.L8.akatosh_chantry"
+      ]
     },
     {
       "id": "kr_the_roses_oath",
       "title": "The Rose's Oath",
       "start": "auto",
-      "requires": ["quest:kr_trial_by_combat"],
+      "requires": [
+        "quest:kr_trial_by_combat"
+      ],
       "desc": "Chancellor Ivo Brennault has fled to Saltreef Hold to sail out of the King's reach. Lord Valmont has given me the honour of bringing him to justice.",
       "on_start": "retire:ivo_brennault",
       "objectives": [
-        {"type": "go", "place": "saltreef_hold", "text": "Ride to Saltreef Hold", "actions": "summon:dame_orielle_fontaine"},
-        {"type": "clear", "place": "saltreef_hold", "offset": [30, 20], "text": "Cut down the Chancellor's hired swords on the shore",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Brennault's Sellsword", "hostile": true, "armor": "#4a3a5a"},
-                   {"type": "npc:thug", "count": 2, "name": "Iliac Pirate", "hostile": true, "armor": "#2a4a5a"}]},
-        {"type": "kill", "place": "saltreef_hold", "offset": [30, 20], "text": "Stop Ivo Brennault before he reaches the ship",
-         "spawn": [{"type": "npc:mage", "name": "Ivo Brennault", "target": true, "boss": true, "hp": 3.0, "dmg": 1.6, "hostile": true}],
-         "journal": "The Chancellor was a battlemage in his youth, it turns out, and had kept his hand in. It did not save him. The pirate ship sailed without him."},
-        {"type": "talk", "npc": "aubrec_valmont", "text": "Return to Lord Valmont in Wayrest",
-         "topic": "The Chancellor won't trouble the court again.",
-         "reply": "Then Wayrest owes you its honour twice over. Come to the chapel tonight. The order has a question to ask you, and an oath to hear.",
-         "actions": "scene:kr_roses_oath;relocate:dame_orielle_fontaine:wayrest:8:3"}
+        {
+          "type": "go",
+          "place": "saltreef_hold",
+          "text": "Ride to Saltreef Hold",
+          "actions": "summon:dame_orielle_fontaine"
+        },
+        {
+          "type": "clear",
+          "place": "saltreef_hold",
+          "offset": [
+            30,
+            20
+          ],
+          "text": "Cut down the Chancellor's hired swords on the shore",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Brennault's Sellsword",
+              "hostile": true,
+              "armor": "#4a3a5a"
+            },
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Iliac Pirate",
+              "hostile": true,
+              "armor": "#2a4a5a"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "saltreef_hold",
+          "offset": [
+            30,
+            20
+          ],
+          "text": "Stop Ivo Brennault before he reaches the ship",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "name": "Ivo Brennault",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.6,
+              "hostile": true
+            }
+          ],
+          "journal": "The Chancellor was a battlemage in his youth, it turns out, and had kept his hand in. It did not save him. The pirate ship sailed without him."
+        },
+        {
+          "type": "talk",
+          "npc": "aubrec_valmont",
+          "text": "Return to Lord Valmont in Wayrest",
+          "topic": "The Chancellor won't trouble the court again.",
+          "reply": "Then Wayrest owes you its honour twice over. Come to the chapel tonight. The order has a question to ask you, and an oath to hear.",
+          "actions": "scene:kr_roses_oath;relocate:dame_orielle_fontaine:wayrest:8:3"
+        }
       ],
       "outro": "I stopped Chancellor Brennault at Saltreef before he could escape across the bay. In the chapel of the Rose I swore the order's oath, and Lord Valmont named me Lord of the Rose.",
-      "rewards": {"gold": 1200, "faction_points": 9, "perks": 1, "flags": ["kr_lord_of_the_rose"],
-                  "items": [{"item": "skycraft:glass_sword", "name": "Thornless Rose", "enchant": {"sharpness": 4, "smite": 2, "unbreaking": 3}},
-                            {"item": "skycraft:breton_helmet", "name": "Helm of the White Rose", "enchant": {"protection": 3}}]}
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 9,
+        "perks": 1,
+        "flags": [
+          "kr_lord_of_the_rose"
+        ],
+        "items": [
+          {
+            "item": "skycraft:glass_sword",
+            "name": "Thornless Rose",
+            "enchant": {
+              "sharpness": 4,
+              "smite": 2,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:breton_helmet",
+            "name": "Helm of the White Rose",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "wayrest.L9.crown_vs_guild",
+        "wayrest.L8.akatosh_chantry"
+      ]
     }
   ]
 }

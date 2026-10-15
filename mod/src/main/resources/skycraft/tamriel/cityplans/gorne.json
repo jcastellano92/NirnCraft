@@ -1,0 +1,161 @@
+{
+  "id": "gorne",
+  "why": [
+    "telvannis.L1.fungal_forest_soils",
+    "telvannis.L5.sea_trade"
+  ],
+  "sil": "emerald-islet-manor-ring",
+  "base": "none",
+  "overlay": "telvannis",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "gorne_landmark",
+      "overlay": "telvannis"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "telvannis"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_2"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_3"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_4"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_5"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_6"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "telvannis",
+      "name": "gorne_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "gorne_terraces",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "gorne_lantern",
+      "count": 2
+    },
+    {
+      "type": "fountain",
+      "theme": "emerald_basin",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "gorne_landmark": "Indoril-Gorne Island Manor",
+    "gorne_b_1": "Chapel of the Emerald Bay",
+    "gorne_b_2": "The Quiet Cove Inn",
+    "gorne_b_3": "Gorne Spice & Silk Hall",
+    "gorne_b_4": "Island Herbary",
+    "gorne_b_5": "Lady Llaren's Summer Estate",
+    "gorne_b_6": "Ferryman's Stone Cottage",
+    "gorne_b_7": "Bay Pier Store"
+  },
+  "innKey": "gorne_b_2",
+  "names": {
+    "inn": "gorne_b_2",
+    "store": "gorne_b_3"
+  }
+}

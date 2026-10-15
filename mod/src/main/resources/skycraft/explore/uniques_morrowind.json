@@ -1,0 +1,2793 @@
+[
+  {
+    "id": "morrowind_telvannis_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.aburuabi",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "aburuabi",
+    "x": 11561,
+    "z": -205,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.aburuabi in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.adasiamus",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "adasiamus",
+    "x": 10287,
+    "z": 792,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.adasiamus in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.akhaisaanabi",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "akhaisaanabi",
+    "x": 9969,
+    "z": -1232,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.akhaisaanabi in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.ald_izlaassu",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ald_izlaassu",
+    "x": 10261,
+    "z": 183,
+    "kind": "corpse",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.ald_izlaassu in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.ald_uraianabi",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ald_uraianabi",
+    "x": 9833,
+    "z": 553,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.ald_uraianabi in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.arkzak",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "arkzak",
+    "x": 10284,
+    "z": 1077,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.arkzak in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.azlaiarnit_encampment",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "azlaiarnit_encampment",
+    "x": 10962,
+    "z": -1325,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.azlaiarnit_encampment in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.beranvanyon",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "beranvanyon",
+    "x": 9849,
+    "z": -491,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.beranvanyon in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.bthungdahrk",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "bthungdahrk",
+    "x": 10857,
+    "z": 1914,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.bthungdahrk in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.ekhizuurus",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ekhizuurus",
+    "x": 10297,
+    "z": -1904,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.ekhizuurus in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_11",
+    "name": "Dres Canal-Glaive of place.skycraft.ekhuamus",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ekhuamus",
+    "x": 9709,
+    "z": -850,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ekhuamus in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_12",
+    "name": "Dwemer Tonal Scepter of place.skycraft.epaiamdun",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "epaiamdun",
+    "x": 11211,
+    "z": 559,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.epaiamdun in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_13",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.etearnit",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "etearnit",
+    "x": 11799,
+    "z": -469,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.etearnit in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_14",
+    "name": "Dissident Priest's Crozier of place.skycraft.ezushuamdun",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ezushuamdun",
+    "x": 11084,
+    "z": 2225,
+    "kind": "corpse",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.ezushuamdun in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_15",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.hlaren_ancestral_tomb",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "hlaren_ancestral_tomb",
+    "x": 10505,
+    "z": 1902,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.hlaren_ancestral_tomb in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_16",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.ikhuraarnit_egg_mine",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ikhuraarnit_egg_mine",
+    "x": 10281,
+    "z": 537,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ikhuraarnit_egg_mine in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_17",
+    "name": "Redoran Council Bulwark of place.skycraft.ipaanu",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "ipaanu",
+    "x": 9653,
+    "z": 1350,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ipaanu in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_18",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.nerevan_ancestral_tomb",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "nerevan_ancestral_tomb",
+    "x": 10488,
+    "z": -180,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.nerevan_ancestral_tomb in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_19",
+    "name": "Dres Canal-Glaive of place.skycraft.nuamat",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "nuamat",
+    "x": 10963,
+    "z": 746,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.nuamat in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_20",
+    "name": "Dwemer Tonal Scepter of place.skycraft.tatasipal_spire",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "tatasipal_spire",
+    "x": 11016,
+    "z": -436,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.tatasipal_spire in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_21",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.tel_dreloth",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "tel_dreloth",
+    "x": 10300,
+    "z": 1500,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.tel_dreloth in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_telvannis_unique_22",
+    "name": "Dissident Priest's Crozier of place.skycraft.uhaiabi",
+    "region": "telvannis",
+    "why": [
+      "telvannis.L1.peninsula_cliffs",
+      "telvannis.L4.coastal_mushroom_forest"
+    ],
+    "place": "uhaiabi",
+    "x": 11183,
+    "z": 904,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.uhaiabi in Telvannis, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abakaiarnit",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "abakaiarnit",
+    "x": 5809,
+    "z": 2166,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.abakaiarnit in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.abukhuarnit",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "abukhuarnit",
+    "x": 7527,
+    "z": 3641,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.abukhuarnit in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.akhairra",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "akhairra",
+    "x": 6476,
+    "z": 2230,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.akhairra in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.arasaurus",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "arasaurus",
+    "x": 7309,
+    "z": 2730,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.arasaurus in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.ashazlaamat",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "ashazlaamat",
+    "x": 6376,
+    "z": 4055,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ashazlaamat in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.belas_ancestral_tomb",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "belas_ancestral_tomb",
+    "x": 5465,
+    "z": 4087,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.belas_ancestral_tomb in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.buruabi_egg_mine",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "buruabi_egg_mine",
+    "x": 5330,
+    "z": 2262,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.buruabi_egg_mine in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.darkshade_caverns",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "darkshade_caverns",
+    "x": 6200,
+    "z": 2700,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.darkshade_caverns in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.ekaammu_mine",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "ekaammu_mine",
+    "x": 5399,
+    "z": 3335,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ekaammu_mine in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.forgotten_crypts",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "forgotten_crypts",
+    "x": 5500,
+    "z": 3900,
+    "kind": "corpse",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.forgotten_crypts in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_11",
+    "name": "Dres Canal-Glaive of place.skycraft.ibuluamus",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "ibuluamus",
+    "x": 5254,
+    "z": 3789,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.ibuluamus in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_12",
+    "name": "Dwemer Tonal Scepter of place.skycraft.ishiabi",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "ishiabi",
+    "x": 6549,
+    "z": 2956,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ishiabi in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_13",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.knife_ear_grotto",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "knife_ear_grotto",
+    "x": 7550,
+    "z": 2650,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.knife_ear_grotto in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_14",
+    "name": "Dissident Priest's Crozier of place.skycraft.lady_llarels_shelter",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "lady_llarels_shelter",
+    "x": 5250,
+    "z": 2550,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.lady_llarels_shelter in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_15",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.lower_bthanual",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "lower_bthanual",
+    "x": 7100,
+    "z": 3900,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.lower_bthanual in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_deshaan_unique_16",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.mzithumz",
+    "region": "deshaan",
+    "why": [
+      "deshaan.L1.fungal_plains",
+      "deshaan.L5.temple_economy"
+    ],
+    "place": "mzithumz",
+    "x": 5950,
+    "z": 2500,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.mzithumz in Deshaan, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.ahiarnit",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "ahiarnit",
+    "x": 3728,
+    "z": 150,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.ahiarnit in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.dalen_ancestral_tomb",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "dalen_ancestral_tomb",
+    "x": 4280,
+    "z": 182,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.dalen_ancestral_tomb in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.ehasipal_mine",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "ehasipal_mine",
+    "x": 3689,
+    "z": 966,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ehasipal_mine in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.ehukhaakku",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "ehukhaakku",
+    "x": 3282,
+    "z": -337,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ehukhaakku in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.emberflint_mine",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "emberflint_mine",
+    "x": 3750,
+    "z": 1500,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.emberflint_mine in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.etudiunar",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "etudiunar",
+    "x": 4038,
+    "z": 2258,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.etudiunar in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.fort_arand",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "fort_arand",
+    "x": 4200,
+    "z": 2750,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.fort_arand in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.fort_virak",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "fort_virak",
+    "x": 3350,
+    "z": 1850,
+    "kind": "corpse",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.fort_virak in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.fungal_grotto",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "fungal_grotto",
+    "x": 4950,
+    "z": 2450,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.fungal_grotto in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.heimlyn_keep",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "heimlyn_keep",
+    "x": 3750,
+    "z": 1150,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.heimlyn_keep in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_11",
+    "name": "Dres Canal-Glaive of place.skycraft.hightide_hollow",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "hightide_hollow",
+    "x": 4100,
+    "z": 850,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.hightide_hollow in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_12",
+    "name": "Dwemer Tonal Scepter of place.skycraft.inner_sea_armature",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "inner_sea_armature",
+    "x": 4250,
+    "z": 2150,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.inner_sea_armature in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_13",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.ipashearnit_sanctum",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "ipashearnit_sanctum",
+    "x": 3274,
+    "z": 550,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ipashearnit_sanctum in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_14",
+    "name": "Dissident Priest's Crozier of place.skycraft.kazeappi",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "kazeappi",
+    "x": 3225,
+    "z": 1673,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.kazeappi in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_15",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.lukiul_uxith",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "lukiul_uxith",
+    "x": 4950,
+    "z": 2700,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.lukiul_uxith in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_stonefalls_unique_16",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.mephalas_nest",
+    "region": "stonefalls",
+    "why": [
+      "stonefalls.L1.lava_shields",
+      "stonefalls.L3.inner_sea_shore"
+    ],
+    "place": "mephalas_nest",
+    "x": 4400,
+    "z": 2500,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.mephalas_nest in Stonefalls, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.adaanabi_eggmine",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "adaanabi_eggmine",
+    "x": 7993,
+    "z": 2953,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.adaanabi_eggmine in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.aduunar_stronghold",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "aduunar_stronghold",
+    "x": 8169,
+    "z": 3630,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.aduunar_stronghold in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.ahushuamdun",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "ahushuamdun",
+    "x": 8692,
+    "z": 2838,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ahushuamdun in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.ald_nasaibi",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "ald_nasaibi",
+    "x": 10318,
+    "z": 2279,
+    "kind": "corpse",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.ald_nasaibi in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.amudiamus_spire",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "amudiamus_spire",
+    "x": 7983,
+    "z": 4208,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.amudiamus_spire in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.apiirra",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "apiirra",
+    "x": 10000,
+    "z": 2552,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.apiirra in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.areibi",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "areibi",
+    "x": 10035,
+    "z": 2995,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.areibi in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.bal_sunnar",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "bal_sunnar",
+    "x": 10100,
+    "z": 2200,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.bal_sunnar in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.bthanduabthar",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "bthanduabthar",
+    "x": 10359,
+    "z": 2867,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.bthanduabthar in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.bthar_zel",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "bthar_zel",
+    "x": 9600,
+    "z": 2700,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.bthar_zel in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_11",
+    "name": "Dres Canal-Glaive of place.skycraft.camonnaruhn",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "camonnaruhn",
+    "x": 8350,
+    "z": 3250,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.camonnaruhn in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_12",
+    "name": "Dwemer Tonal Scepter of place.skycraft.dren_ancestral_tomb",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "dren_ancestral_tomb",
+    "x": 10391,
+    "z": 2522,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.dren_ancestral_tomb in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_13",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.edariammu",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "edariammu",
+    "x": 9175,
+    "z": 3411,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.edariammu in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_molag_amur_unique_14",
+    "name": "Dissident Priest's Crozier of place.skycraft.ehakhaamat_egg_mine",
+    "region": "molag_amur",
+    "why": [
+      "molag_amur.L1.lava_field",
+      "necrom.L5.funeral_trade"
+    ],
+    "place": "ehakhaamat_egg_mine",
+    "x": 8783,
+    "z": 3015,
+    "kind": "corpse",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.ehakhaamat_egg_mine in Molag Amur, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abernanit",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "abernanit",
+    "x": 6613,
+    "z": -1594,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.abernanit in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.ahallaraddon_egg_mine",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "ahallaraddon_egg_mine",
+    "x": 6000,
+    "z": -714,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.ahallaraddon_egg_mine in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.akimaes_ilanipu_egg_mine",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "akimaes_ilanipu_egg_mine",
+    "x": 6068,
+    "z": -1320,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.akimaes_ilanipu_egg_mine in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.alen_ancestral_tomb",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "alen_ancestral_tomb",
+    "x": 5289,
+    "z": -1382,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.alen_ancestral_tomb in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.aleri_ancestral_tomb",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "aleri_ancestral_tomb",
+    "x": 5737,
+    "z": -412,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.aleri_ancestral_tomb in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.andalor_ancestral_tomb",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "andalor_ancestral_tomb",
+    "x": 5748,
+    "z": -885,
+    "kind": "corpse",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.andalor_ancestral_tomb in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.andasreth",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "andasreth",
+    "x": 5662,
+    "z": -260,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.andasreth in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.aran_ancestral_tomb",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "aran_ancestral_tomb",
+    "x": 5534,
+    "z": -952,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.aran_ancestral_tomb in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.arenim_ancestral_tomb",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "arenim_ancestral_tomb",
+    "x": 5942,
+    "z": -289,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.arenim_ancestral_tomb in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.arethan_ancestral_tomb",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "arethan_ancestral_tomb",
+    "x": 5653,
+    "z": -1481,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.arethan_ancestral_tomb in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_11",
+    "name": "Dres Canal-Glaive of place.skycraft.arkngthunch_sturdumz",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "arkngthunch_sturdumz",
+    "x": 5840,
+    "z": -1505,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.arkngthunch_sturdumz in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_vvardenfell_ashlands_unique_12",
+    "name": "Dwemer Tonal Scepter of place.skycraft.arvs_drelen",
+    "region": "vvardenfell_ashlands",
+    "why": [
+      "vvardenfell_ashlands.L1.ash_plain",
+      "vvardenfell_ashlands.L1.crab_shell_rock"
+    ],
+    "place": "arvs_drelen",
+    "x": 5730,
+    "z": -1254,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.arvs_drelen in Vvardenfell Ashlands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.ahanibi_malmus_egg_mine",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "ahanibi_malmus_egg_mine",
+    "x": 7536,
+    "z": -1322,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ahanibi_malmus_egg_mine in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.ainab",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "ainab",
+    "x": 6836,
+    "z": -1616,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ainab in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.akimaes_grotto",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "akimaes_grotto",
+    "x": 7757,
+    "z": -1446,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.akimaes_grotto in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.alas_ancestral_tomb",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "alas_ancestral_tomb",
+    "x": 7657,
+    "z": -1067,
+    "kind": "corpse",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.alas_ancestral_tomb in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.ald_daedroth",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "ald_daedroth",
+    "x": 7942,
+    "z": -1332,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.ald_daedroth in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.asha_ahhe_egg_mine",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "asha_ahhe_egg_mine",
+    "x": 7786,
+    "z": -1147,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.asha_ahhe_egg_mine in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.baram_ancestral_tomb",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "baram_ancestral_tomb",
+    "x": 7387,
+    "z": -1305,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.baram_ancestral_tomb in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.bthuand",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "bthuand",
+    "x": 7943,
+    "z": -2008,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.bthuand in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.desolate_shipwreck",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "desolate_shipwreck",
+    "x": 8473,
+    "z": -1207,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.desolate_shipwreck in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_grazelands_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.dreloth_ancestral_tomb",
+    "region": "grazelands",
+    "why": [
+      "grazelands.L1.grass_slopes",
+      "grazelands.L4.wickwheat_steppe"
+    ],
+    "place": "dreloth_ancestral_tomb",
+    "x": 8270,
+    "z": -1102,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.dreloth_ancestral_tomb in Grazelands, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abaesen_pulu_egg_mine",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "abaesen_pulu_egg_mine",
+    "x": 6909,
+    "z": 1154,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.abaesen_pulu_egg_mine in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.abebaal_egg_mine",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "abebaal_egg_mine",
+    "x": 7730,
+    "z": 265,
+    "kind": "corpse",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.abebaal_egg_mine in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.addamasartus",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "addamasartus",
+    "x": 6722,
+    "z": 1079,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.addamasartus in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.ald_sotha",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "ald_sotha",
+    "x": 7709,
+    "z": 1078,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ald_sotha in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.andalen_ancestral_tomb",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "andalen_ancestral_tomb",
+    "x": 6777,
+    "z": 1188,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.andalen_ancestral_tomb in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.andavel_ancestral_tomb",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "andavel_ancestral_tomb",
+    "x": 7828,
+    "z": 653,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.andavel_ancestral_tomb in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.andrano_ancestral_tomb",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "andrano_ancestral_tomb",
+    "x": 6882,
+    "z": 1076,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.andrano_ancestral_tomb in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.andules_ancestral_tomb",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "andules_ancestral_tomb",
+    "x": 7722,
+    "z": 610,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.andules_ancestral_tomb in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.assernerairan",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "assernerairan",
+    "x": 7477,
+    "z": 993,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.assernerairan in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_ascadian_isles_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.assumanu",
+    "region": "ascadian_isles",
+    "why": [
+      "ascadian_isles.L1.fertile_lowland",
+      "ascadian_isles.L4.saltrice_paddy"
+    ],
+    "place": "assumanu",
+    "x": 7185,
+    "z": 680,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.assumanu in Ascadian Isles, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.aryon_ancestral_tomb",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "aryon_ancestral_tomb",
+    "x": 7091,
+    "z": 147,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.aryon_ancestral_tomb in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.assalkushalit",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "assalkushalit",
+    "x": 6860,
+    "z": -674,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.assalkushalit in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.assemanu",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "assemanu",
+    "x": 7490,
+    "z": 70,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.assemanu in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.cavern_of_the_incarnate",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "cavern_of_the_incarnate",
+    "x": 7428,
+    "z": -732,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.cavern_of_the_incarnate in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.dagoth_ur",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "dagoth_ur",
+    "x": 6859,
+    "z": -438,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.dagoth_ur in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.dun_ahhe",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "dun_ahhe",
+    "x": 7469,
+    "z": -828,
+    "kind": "corpse",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.dun_ahhe in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.endusal",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "endusal",
+    "x": 6715,
+    "z": -382,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.endusal in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.falensarano",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "falensarano",
+    "x": 7767,
+    "z": -436,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.falensarano in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.forgotten_wastes",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "forgotten_wastes",
+    "x": 7331,
+    "z": -261,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.forgotten_wastes in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_red_mountain_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.ghostgate",
+    "region": "red_mountain",
+    "why": [
+      "red_mountain.L1.caldera",
+      "red_mountain.L2.blight_storms"
+    ],
+    "place": "ghostgate",
+    "x": 6883,
+    "z": -102,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.ghostgate in Red Mountain, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abaelun_mine",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "abaelun_mine",
+    "x": 8256,
+    "z": 121,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.abaelun_mine in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.abanabi",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "abanabi",
+    "x": 7901,
+    "z": 79,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.abanabi in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.adanumuran",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "adanumuran",
+    "x": 7776,
+    "z": 65,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.adanumuran in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.ahinipalit",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "ahinipalit",
+    "x": 8307,
+    "z": 240,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ahinipalit in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.almurbalarammi",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "almurbalarammi",
+    "x": 7865,
+    "z": 165,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.almurbalarammi in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.ancient_shipwreck",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "ancient_shipwreck",
+    "x": 8584,
+    "z": 664,
+    "kind": "corpse",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ancient_shipwreck in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.aralen_ancestral_tomb",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "aralen_ancestral_tomb",
+    "x": 7955,
+    "z": -246,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.aralen_ancestral_tomb in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.arano_ancestral_tomb",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "arano_ancestral_tomb",
+    "x": 8156,
+    "z": 861,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.arano_ancestral_tomb in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.bal_fell",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "bal_fell",
+    "x": 8120,
+    "z": 219,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.bal_fell in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_azuras_coast_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.dareleth_ancestral_tomb",
+    "region": "azuras_coast",
+    "why": [
+      "azuras_coast.L1.islet_maze",
+      "azuras_coast.L2.dawn_light"
+    ],
+    "place": "dareleth_ancestral_tomb",
+    "x": 7832,
+    "z": -209,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.dareleth_ancestral_tomb in Azuras Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abinabi",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "abinabi",
+    "x": 6309,
+    "z": 926,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.abinabi in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.andas_ancestral_tomb",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "andas_ancestral_tomb",
+    "x": 6819,
+    "z": 618,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.andas_ancestral_tomb in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.andrethi_ancestral_tomb",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "andrethi_ancestral_tomb",
+    "x": 6008,
+    "z": 428,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.andrethi_ancestral_tomb in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.arkngthand",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "arkngthand",
+    "x": 6695,
+    "z": 560,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.arkngthand in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.ashanammu",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "ashanammu",
+    "x": 6084,
+    "z": 22,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.ashanammu in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.assarnatamat",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "assarnatamat",
+    "x": 6688,
+    "z": 281,
+    "kind": "corpse",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.assarnatamat in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.band_egg_mine",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "band_egg_mine",
+    "x": 5845,
+    "z": -37,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.band_egg_mine in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.bthanchend",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "bthanchend",
+    "x": 5732,
+    "z": -103,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.bthanchend in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_9",
+    "name": "Redoran Council Bulwark of place.skycraft.caldera_mine",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "caldera_mine",
+    "x": 6243,
+    "z": 120,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.caldera_mine in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_west_gash_unique_10",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.favel_ancestral_tomb",
+    "region": "west_gash",
+    "why": [
+      "west_gash.L1.odai_gorge",
+      "west_gash.L1.ebony_seam"
+    ],
+    "place": "favel_ancestral_tomb",
+    "x": 5656,
+    "z": 261,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.favel_ancestral_tomb in West Gash, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abandoned_lodge",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "abandoned_lodge",
+    "x": 4377,
+    "z": -3170,
+    "kind": "pedestal",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.abandoned_lodge in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.ashfallow_citadel",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "ashfallow_citadel",
+    "x": 4867,
+    "z": -3005,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ashfallow_citadel in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.benkongerike",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "benkongerike",
+    "x": 4584,
+    "z": -3617,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.benkongerike in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.bloodskal_barrow",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "bloodskal_barrow",
+    "x": 4225,
+    "z": -3089,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.bloodskal_barrow in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.bristleback_cave",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "bristleback_cave",
+    "x": 4103,
+    "z": -3664,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.bristleback_cave in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.brodir_grove",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "brodir_grove",
+    "x": 4504,
+    "z": -3042,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.brodir_grove in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_7",
+    "name": "Ghostfence Pylon Ward-Blade of place.skycraft.broken_tusk_mine",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "broken_tusk_mine",
+    "x": 4169,
+    "z": -3613,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.broken_tusk_mine in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_solstheim_unique_8",
+    "name": "Bloodskal Runed Cleaver of place.skycraft.bujolds_retreat",
+    "region": "solstheim",
+    "why": [
+      "red_mountain.L1.caldera",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "bujolds_retreat",
+    "x": 5040,
+    "z": -3280,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.bujolds_retreat in Solstheim, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.addadshashanammu",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.wave_cut_islets",
+      "sheogorad.L2.cold_sea_storms"
+    ],
+    "place": "addadshashanammu",
+    "x": 7003,
+    "z": -2325,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.addadshashanammu in Sheogorad, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.ald_redaynia",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.wave_cut_islets",
+      "sheogorad.L2.cold_sea_storms"
+    ],
+    "place": "ald_redaynia",
+    "x": 6498,
+    "z": -2208,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ald_redaynia in Sheogorad, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.emaimaamdun",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.wave_cut_islets",
+      "sheogorad.L2.cold_sea_storms"
+    ],
+    "place": "emaimaamdun",
+    "x": 6831,
+    "z": -2809,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.emaimaamdun in Sheogorad, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.forgotten_shipwreck",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.wave_cut_islets",
+      "sheogorad.L2.cold_sea_storms"
+    ],
+    "place": "forgotten_shipwreck",
+    "x": 7738,
+    "z": -2612,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Recovered beside place.skycraft.forgotten_shipwreck in Sheogorad, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.lonely_shipwreck",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.wave_cut_islets",
+      "sheogorad.L2.cold_sea_storms"
+    ],
+    "place": "lonely_shipwreck",
+    "x": 6180,
+    "z": -2240,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.lonely_shipwreck in Sheogorad, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.savel_ancestral_tomb",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.wave_cut_islets",
+      "sheogorad.L2.cold_sea_storms"
+    ],
+    "place": "savel_ancestral_tomb",
+    "x": 6867,
+    "z": -2088,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Recovered beside place.skycraft.savel_ancestral_tomb in Sheogorad, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_bitter_coast_unique_1",
+    "name": "Redoran Council Bulwark of place.skycraft.abandoned_shipwreck",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L4.bitter_swamp"
+    ],
+    "place": "abandoned_shipwreck",
+    "x": 6027,
+    "z": 1051,
+    "kind": "pedestal",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Recovered beside place.skycraft.abandoned_shipwreck in Bitter Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_bitter_coast_unique_2",
+    "name": "Hlaalu Charter Signet-Dagger of place.skycraft.aharunartus",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L4.bitter_swamp"
+    ],
+    "place": "aharunartus",
+    "x": 6198,
+    "z": 1066,
+    "kind": "corpse",
+    "item": "skycraft:chitin_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered beside place.skycraft.aharunartus in Bitter Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_bitter_coast_unique_3",
+    "name": "Dres Canal-Glaive of place.skycraft.aleft",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L4.bitter_swamp"
+    ],
+    "place": "aleft",
+    "x": 5492,
+    "z": -10,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.aleft in Bitter Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_bitter_coast_unique_4",
+    "name": "Dwemer Tonal Scepter of place.skycraft.anudnabia",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L4.bitter_swamp"
+    ],
+    "place": "anudnabia",
+    "x": 5705,
+    "z": 620,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.anudnabia in Bitter Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_bitter_coast_unique_5",
+    "name": "Ashkhan's Chitin Spear of place.skycraft.ashalmimilkala",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L4.bitter_swamp"
+    ],
+    "place": "ashalmimilkala",
+    "x": 5481,
+    "z": 302,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered beside place.skycraft.ashalmimilkala in Bitter Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_bitter_coast_unique_6",
+    "name": "Dissident Priest's Crozier of place.skycraft.ashurnibibi",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L4.bitter_swamp"
+    ],
+    "place": "ashurnibibi",
+    "x": 5777,
+    "z": 555,
+    "kind": "corpse",
+    "item": "skycraft:ebony_mace",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered beside place.skycraft.ashurnibibi in Bitter Coast, bearing the seal of the old Houses."
+  },
+  {
+    "id": "morrowind_sheogorad_v4_unique_7",
+    "name": "Relic of Forgotten Shipwreck (7)",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.reefs",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "forgotten_shipwreck",
+    "x": 7738,
+    "z": -2612,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Forgotten Shipwreck in Sheogorad from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "morrowind_sheogorad_v4_unique_8",
+    "name": "Relic of Strange Shipwreck (8)",
+    "region": "sheogorad",
+    "why": [
+      "sheogorad.L1.reefs",
+      "sheogorad.L1.wave_cut_islets"
+    ],
+    "place": "strange_shipwreck",
+    "x": 6631,
+    "z": -2365,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Strange Shipwreck in Sheogorad from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "morrowind_bitter_coast_v4_unique_7",
+    "name": "Relic of Anudnabia (7)",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L1.sea_caves"
+    ],
+    "place": "anudnabia",
+    "x": 5705,
+    "z": 620,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Anudnabia in Bitter Coast from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "morrowind_bitter_coast_v4_unique_8",
+    "name": "Relic of Aharunartus (8)",
+    "region": "bitter_coast",
+    "why": [
+      "bitter_coast.L1.mud_coast",
+      "bitter_coast.L1.sea_caves"
+    ],
+    "place": "aharunartus",
+    "x": 6198,
+    "z": 1066,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Aharunartus in Bitter Coast from the elder council.",
+    "_r7_r12_v4": true
+  }
+]

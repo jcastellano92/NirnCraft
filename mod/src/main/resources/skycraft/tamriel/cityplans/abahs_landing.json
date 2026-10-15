@@ -1,0 +1,458 @@
+{
+  "id": "abahs_landing",
+  "sil": "stilt-pier-harbour",
+  "base": "none",
+  "overlay": "hews_bane",
+  "radius": 96,
+  "reach": 104,
+  "fill_gap": 2,
+  "inn_key": "abahs_landing_golden_caravel",
+  "names": {
+    "inn": "abahs_landing_golden_caravel",
+    "store": "abahs_landing_pier_market",
+    "smithy": "abahs_landing_cutlass_and_hook"
+  },
+  "titles": {
+    "abahs_landing_landmark": "The Landing Light & Harbour Arch",
+    "abahs_landing_merchant_palace": "Grand Counting-Palace of the Syndics",
+    "abahs_landing_golden_caravel": "The Golden Caravel Inn",
+    "abahs_landing_bilge_and_barrel": "The Bilge and Barrel",
+    "abahs_landing_pier_market": "Stilt-Pier Free-Port Bazaar",
+    "abahs_landing_cutlass_and_hook": "Cutlass and Boarding-Hook Smithy",
+    "abahs_landing_lotus_smoke_shop": "Black-Lotus & Coral-Tonic Apothecary",
+    "abahs_landing_no_questions_pawn": "The Unstamped Bullion & Gem House",
+    "abahs_landing_silks_of_abecea": "Smuggled-Silk & Sash Clothiers",
+    "abahs_landing_false_manifest": "Harbour Manifest & Letter-of-Marque Scribe",
+    "abahs_landing_net_loft_guild": "The Net-Loft Ledger Hall",
+    "abahs_landing_cistern_undercroft": " Cistern-Stair Brokers' Den",
+    "abahs_landing_zeht_tava_chapel": "Harbour-Side Sanctuary of Tava",
+    "abahs_landing_sunken_ossuary": "Tide-Cut Limestone Ossuary",
+    "abahs_landing_iron_wheel_hq": "Iron Wheel Provost's Villa",
+    "abahs_landing_free_port_vaults": "Hew's Bane Bonded Prize-Vaults",
+    "abahs_landing_mole_lighthouse": "The Landing Light Watchhouse",
+    "abahs_landing_market_plaza": "The Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 92,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -40
+      ],
+      "face": "south",
+      "name": "abahs_landing_landmark",
+      "overlay": "hews_bane"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        -35
+      ],
+      "face": "south",
+      "name": "abahs_landing_merchant_palace"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        55,
+        -39
+      ],
+      "face": "west",
+      "name": "abahs_landing_golden_caravel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        41,
+        -12
+      ],
+      "face": "west",
+      "name": "abahs_landing_bilge_and_barrel"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        67,
+        2
+      ],
+      "face": "west",
+      "name": "abahs_landing_pier_market"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        40,
+        15
+      ],
+      "face": "west",
+      "name": "abahs_landing_cutlass_and_hook"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        52,
+        42
+      ],
+      "face": "west",
+      "name": "abahs_landing_lotus_smoke_shop"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        23,
+        36
+      ],
+      "face": "north",
+      "name": "abahs_landing_no_questions_pawn"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        16,
+        65
+      ],
+      "face": "north",
+      "name": "abahs_landing_silks_of_abecea"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        43
+      ],
+      "face": "north",
+      "name": "abahs_landing_false_manifest"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -26,
+        62
+      ],
+      "face": "north",
+      "name": "abahs_landing_net_loft_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "fence_den",
+      "wealth": "wealthy",
+      "at": [
+        -29,
+        32
+      ],
+      "face": "north",
+      "name": "abahs_landing_cistern_undercroft"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -58,
+        33
+      ],
+      "face": "east",
+      "name": "abahs_landing_zeht_tava_chapel"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -42,
+        8
+      ],
+      "face": "east",
+      "name": "abahs_landing_sunken_ossuary"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -66,
+        -9
+      ],
+      "face": "east",
+      "name": "abahs_landing_iron_wheel_hq"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -39,
+        -19
+      ],
+      "face": "east",
+      "name": "abahs_landing_free_port_vaults"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -48,
+        -47
+      ],
+      "face": "east",
+      "name": "abahs_landing_mole_lighthouse"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -80
+      ],
+      "to": [
+        0,
+        80
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -80,
+        0
+      ],
+      "to": [
+        80,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -49,
+        -49
+      ],
+      "to": [
+        49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        -49
+      ],
+      "to": [
+        49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        49
+      ],
+      "to": [
+        -49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -49,
+        49
+      ],
+      "to": [
+        -49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        63
+      ],
+      "to": [
+        8,
+        63
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "abahs_landing_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        48
+      ],
+      "overlay": "hews_bane"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "hews_bane"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:dibella",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:julianos",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "jungle",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    }
+  ]
+}

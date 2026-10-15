@@ -5827,7 +5827,7 @@
         ],
         "time": "any",
         "place": "cave",
-        "entity": "skycraft:draugr_deathlord",
+        "entity": "skycraft:draugr",
         "count": [
           1,
           1
@@ -5878,7 +5878,7 @@
         ],
         "time": "any",
         "place": "cave",
-        "entity": "skycraft:chaurus_hunter",
+        "entity": "skycraft:chaurus",
         "count": [
           1,
           2
@@ -6070,7 +6070,7 @@
         ],
         "time": "any",
         "place": "cave",
-        "entity": "skycraft:dwarven_ballista",
+        "entity": "skycraft:dwarven_sphere",
         "count": [
           1,
           1

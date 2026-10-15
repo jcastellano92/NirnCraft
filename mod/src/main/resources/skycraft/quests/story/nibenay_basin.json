@@ -1,0 +1,309 @@
+{
+  "region": "cyrodiil/nibenay_basin",
+  "province": "cyrodiil",
+  "line": "story_nibenay_basin",
+  "category": "main",
+  "title": "Two Banks",
+  "why": [
+    "cyrodiil/nibenay_basin.L9.market_quarrel",
+    "cyrodiil/nibenay_basin.L9.dunmer_count",
+    "cyrodiil/nibenay_basin.L7.dunmer_quarter",
+    "cyrodiil/nibenay_basin.L7.nibenese_gentry"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "cheydinhal",
+    "places": [
+      "cheydinhal",
+      "steed_stone",
+      "frosthollow_grotto",
+      "cracked_wood_cave",
+      "crestbridge_camp",
+      "the_lucky_netch",
+      "wrenglen_diggings",
+      "ayleid_well_10",
+      "otter_fen_ruins",
+      "oblivion_gate_97",
+      "mage_stone",
+      "priscus_farm",
+      "willow_run_cavern",
+      "shadowtooth_pit",
+      "the_beasts_maw",
+      "larkmarsh"
+    ],
+    "max_road_blocks": 600,
+    "rumour": "Someone scuttled a silk-barge right across Cheydinhal's Corbolo canal lock, and now the Dunmer banking-house and the old Nibenese silk-gentry are hiring blades against each other.",
+    "notice": "CHEYDINHAL CANAL CHANCERY: Neutral investigators sought to examine the scuttled silk-barge in the Corbolo Lock before the Charter Assize convenes.",
+    "npc": "story_nibenay_basin_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_nibenay_basin_01_the_corbolo_lock",
+      "order": 1,
+      "title": "The Scuttled Silk-Barge",
+      "region": "cyrodiil/nibenay_basin",
+      "category": "main",
+      "start": "board:cheydinhal",
+      "prereq": null,
+      "why": [
+        "cyrodiil/nibenay_basin.L9.market_quarrel",
+        "cyrodiil/nibenay_basin.L7.dunmer_quarter"
+      ],
+      "places": [
+        "cheydinhal",
+        "knights_of_the_thorn_lodge"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "cheydinhal",
+          "objective": "Inspect the augered hull timbers of the sunken barge in Cheydinhal's Corbolo canal"
+        },
+        {
+          "id": 20,
+          "place": "knights_of_the_thorn_lodge",
+          "objective": "Question the young noblemen at the Knights of the Thorn Lodge who witnessed the night watch"
+        },
+        {
+          "id": 30,
+          "place": "cheydinhal",
+          "objective": "Report the foreign auger-marks to both banking factors in Cheydinhal"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Inspect the augered hull timbers of the sunken barge in Cheydinhal's Corbolo canal"
+        },
+        {
+          "type": "go",
+          "place": "knights_of_the_thorn_lodge",
+          "text": "Question the young noblemen at the Knights of the Thorn Lodge who witnessed the night watch"
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Report the foreign auger-marks to both banking factors in Cheydinhal"
+        }
+      ],
+      "consequence": "world_state:corbolo_barge_auger_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "requires": [],
+      "consequence_detail": {
+        "world_state": "corbolo_barge_auger_traced",
+        "flag": "story_nb_auger_traced",
+        "summary": "The barge was sunk with a sapper's brace stamped in the Imperial City, not by either Cheydinhal faction."
+      }
+    },
+    {
+      "id": "story_nibenay_basin_02_silk_and_cinder",
+      "order": 2,
+      "title": "Silk and Cinder",
+      "region": "cyrodiil/nibenay_basin",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_nibenay_basin_01_the_corbolo_lock",
+      "requires": [
+        "story_nibenay_basin_01_the_corbolo_lock"
+      ],
+      "why": [
+        "cyrodiil/nibenay_basin.L7.nibenese_gentry",
+        "cyrodiil/nibenay_basin.L10.valus_keeps"
+      ],
+      "places": [
+        "cheydinhal",
+        "harluns_watch",
+        "shurgak_clan_estate"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "cheydinhal",
+          "objective": "Trace the discounted promissory notes from Cheydinhal's counting-houses south toward Harlun's Watch"
+        },
+        {
+          "id": 20,
+          "place": "harluns_watch",
+          "objective": "Recover the burned silk-warehouse tally from the factor's clerk at Harlun's Watch"
+        },
+        {
+          "id": 30,
+          "place": "shurgak_clan_estate",
+          "objective": "Verify the Valus caravan bullion receipts with the smiths at Shurgak Clan Estate"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Trace the discounted promissory notes from Cheydinhal's counting-houses south toward Harlun's Watch"
+        },
+        {
+          "type": "go",
+          "place": "harluns_watch",
+          "text": "Recover the burned silk-warehouse tally from the factor's clerk at Harlun's Watch"
+        },
+        {
+          "type": "go",
+          "place": "shurgak_clan_estate",
+          "text": "Verify the Valus caravan bullion receipts with the smiths at Shurgak Clan Estate"
+        }
+      ],
+      "consequence": "world_state:nibenay_basin_notes_traced",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "nibenay_basin_notes_traced",
+        "flag": "story_nb_notes_traced",
+        "summary": "A shell brokerage run by Arbiter Flavius Olo has been buying up defaulted notes from both Dunmer and Nibenese merchants."
+      }
+    },
+    {
+      "id": "story_nibenay_basin_03_the_third_ledger",
+      "order": 3,
+      "title": "The Third Bank's Courier",
+      "region": "cyrodiil/nibenay_basin",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_nibenay_basin_02_silk_and_cinder",
+      "requires": [
+        "story_nibenay_basin_02_silk_and_cinder"
+      ],
+      "why": [
+        "cyrodiil/nibenay_basin.L9.dunmer_count",
+        "cyrodiil/nibenay_basin.L10.arrius_cult_cells"
+      ],
+      "places": [
+        "shurgak_clan_estate",
+        "cropsford",
+        "cheydinhal"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shurgak_clan_estate",
+          "objective": "Follow the debt-collectors south from Shurgak Clan Estate along the basin road"
+        },
+        {
+          "id": 20,
+          "place": "cropsford",
+          "objective": "Intercept the Council of Ash courier at Cropsford and seize the sealed Charter instructions"
+        },
+        {
+          "id": 30,
+          "place": "cheydinhal",
+          "objective": "Carry the intercepted instructions back to Castle Cheydinhal"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "shurgak_clan_estate",
+          "text": "Follow the debt-collectors south from Shurgak Clan Estate along the basin road"
+        },
+        {
+          "type": "clear",
+          "place": "cropsford",
+          "text": "Intercept the Council of Ash courier at Cropsford and seize the sealed Charter instructions"
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Carry the intercepted instructions back to Castle Cheydinhal"
+        }
+      ],
+      "consequence": "world_state:cropsford_courier_intercepted",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "cropsford_courier_intercepted",
+        "flag": "story_nb_courier_intercepted",
+        "summary": "The intercepted dispatch proves Arbiter Olo was ordered by the Council of Ash to bankrupt both Cheydinhal banks and seize the Corbolo toll."
+      }
+    },
+    {
+      "id": "story_nibenay_basin_04_charter_of_the_willows",
+      "order": 4,
+      "title": "Charter of the Painted Bridges",
+      "region": "cyrodiil/nibenay_basin",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_nibenay_basin_03_the_third_ledger",
+      "requires": [
+        "story_nibenay_basin_03_the_third_ledger"
+      ],
+      "finale": true,
+      "why": [
+        "cyrodiil/nibenay_basin.L9.market_quarrel",
+        "cyrodiil/nibenay_basin.L9.dunmer_count"
+      ],
+      "places": [
+        "cropsford",
+        "cheydinhal"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "cropsford",
+          "objective": "Escort the Cropsford silk-witnesses north to the Charter Assize in Cheydinhal"
+        },
+        {
+          "id": 20,
+          "place": "cheydinhal",
+          "objective": "Defeat Arbiter Flavius Olo's hired enforcers at the Corbolo canal warehouse"
+        },
+        {
+          "id": 30,
+          "place": "cheydinhal",
+          "objective": "Witness Count Andel Indarys seal the Joint Corbolo Canal Charter between Dunmer and Nibenese houses"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "cropsford",
+          "text": "Escort the Cropsford silk-witnesses north to the Charter Assize in Cheydinhal"
+        },
+        {
+          "type": "clear",
+          "place": "cheydinhal",
+          "text": "Defeat Arbiter Flavius Olo's hired enforcers at the Corbolo canal warehouse"
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "text": "Witness Count Andel Indarys seal the Joint Corbolo Canal Charter between Dunmer and Nibenese houses"
+        }
+      ],
+      "consequence": "world_state:cheydinhal_joint_charter_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Syndic of the Painted Bridges",
+        "unique_item": "skycraft:chitin_sword"
+      },
+      "consequence_detail": {
+        "world_state": "cheydinhal_joint_charter_sealed",
+        "flag": "story_nb_finale_complete",
+        "summary": "Dunmer and Nibenese merchant houses form a joint clearing-house under Count Indarys, expelling the Council of Ash's brokers."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_nibenay_basin_hook_npc",
+      "name": "Warden of Cheydinhal",
+      "role": "guard",
+      "place": "cheydinhal",
+      "greet": "Someone scuttled a silk-barge right across Cheydinhal's Corbolo canal lock, and now the Dunmer banking-house and the old Nibenese silk-gentry are hiring blades against each other."
+    }
+  ]
+}

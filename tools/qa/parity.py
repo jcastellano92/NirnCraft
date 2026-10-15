@@ -284,6 +284,8 @@ def feature_names(fid, depth=0):
         base = re.sub(r"(_checked|_tree|_bees.*)$", "", path)
         if base in TREE_FEATS or path in TREE_FEATS:
             trees.add("vanilla:" + base)
+        elif any(w in path for w in PLANT_WORDS) and "ore" not in path.split("_"):
+            plants.add("vanilla:" + path)
         return trees, plants
     for kind in ("placed_feature", "configured_feature"):
         p = os.path.join(WG, kind, path + ".json")
@@ -379,6 +381,9 @@ def region_biomes(region, pj):
         for lst in p.get("contexts", {}).values():
             for e in lst:
                 out.add(e["biome"])
+        for m in p.get("micro", []):
+            if isinstance(m, dict) and m.get("biome"):
+                out.add(m["biome"])
         k = p.get("fallback")
         seen += 1
     return {b for b in out if b.startswith("skycraft:")
@@ -638,7 +643,7 @@ def collect():
                             1 for lk in ("greet", "talk", "bark") if isinstance(res.get(lk), str) and res.get(lk)
                         )
 
-    # ---- lore
+    # ---- lore + dungeon identity
     lore_places = {}
     lore_regions = {}
     for f in glob.glob(os.path.join(SKY, "lore", "places", "*.json")):
@@ -646,9 +651,49 @@ def collect():
         if not isinstance(j, dict):
             continue
         for k, v in (j.get("places") or {}).items():
-            lore_places[k] = v
+            if not isinstance(v, dict):
+                continue
+            if k not in lore_places or not isinstance(lore_places[k], dict):
+                lore_places[k] = dict(v)
+            else:
+                cur = lore_places[k]
+                for lk, lv in v.items():
+                    if isinstance(lv, list) and isinstance(cur.get(lk), list):
+                        if len(lv) > len(cur[lk]):
+                            cur[lk] = lv
+                    elif lk not in cur or not cur[lk]:
+                        cur[lk] = lv
         for k, v in (j.get("regions") or {}).items():
-            lore_regions[k] = v
+            if not isinstance(v, dict):
+                continue
+            if k not in lore_regions or not isinstance(lore_regions[k], dict):
+                lore_regions[k] = {
+                    rk: list(rv) if isinstance(rv, list) else rv for rk, rv in v.items()
+                }
+            else:
+                cur = lore_regions[k]
+                for rk, rv in v.items():
+                    if isinstance(rv, list) and isinstance(cur.get(rk), list):
+                        for x in rv:
+                            if x not in cur[rk]:
+                                cur[rk].append(x)
+                    elif rk not in cur or not cur[rk]:
+                        cur[rk] = list(rv) if isinstance(rv, list) else rv
+    dun_identity = {}
+    for f in glob.glob(os.path.join(SKY, "dungeons", "identity", "*.json")):
+        if os.path.basename(f) == "index.json":
+            continue
+        j = jload(f, {})
+        if isinstance(j, dict):
+            dmap = j.get("dungeons") or j.get("places") or {}
+            if isinstance(dmap, dict):
+                for k, v in dmap.items():
+                    if isinstance(v, dict):
+                        dun_identity[k] = v
+            elif isinstance(dmap, list):
+                for v in dmap:
+                    if isinstance(v, dict) and v.get("id"):
+                        dun_identity[v["id"]] = v
     place_lang = jload(os.path.join(LANG, "place_lore.json"), {})
     book_keys = [k for k in place_lang if k.startswith("book.skycraft.place.")]
     books_by_place = Counter()
@@ -668,6 +713,16 @@ def collect():
         R[rg]["lore_places"] += 1
         notes = v.get("notes") or []
         R[rg]["lore_notes"] += len(notes) + (1 if v.get("quest") else 0)
+    for pidk, v in dun_identity.items():
+        p = pid.get(pidk)
+        if not p or p["region"] not in R:
+            continue
+        rg = p["region"]
+        if pidk not in lore_places:
+            R[rg]["lore_places"] += 1
+        R[rg]["lore_notes"] += len(v.get("notes") or []) + (1 if v.get("quest_hook") else 0)
+        if v.get("boss"):
+            R[rg]["bosses"] += 1
     for pidk, n in books_by_place.items():
         p = pid.get(pidk)
         if p and p["region"] in R:
@@ -740,17 +795,19 @@ def collect():
         if pidk in bespoke:
             bespoke[pidk] = max(bespoke[pidk], n)
     # ---- style sheets
+    def leaves(o):
+        if isinstance(o, dict):
+            return sum(leaves(v) for k, v in o.items() if not k.startswith("_"))
+        if isinstance(o, list):
+            return sum(leaves(v) for v in o) if o else 1
+        return 1
+
     style_rich = {}
     for f in glob.glob(os.path.join(TAM, "styles", "*.json")):
-        j = jload(f, {})
-
-        def leaves(o):
-            if isinstance(o, dict):
-                return sum(leaves(v) for k, v in o.items() if not k.startswith("_"))
-            if isinstance(o, list):
-                return sum(leaves(v) for v in o) if o else 1
-            return 1
-        style_rich[os.path.basename(f)[:-5]] = leaves(j)
+        style_rich[os.path.basename(f)[:-5]] = leaves(jload(f, {}))
+    overlay_rich = {}
+    for f in glob.glob(os.path.join(TAM, "styles", "overlays", "*.json")):
+        overlay_rich[os.path.basename(f)[:-5]] = leaves(jload(f, {}))
     # ---- explore uniques (uniques.json + uniques_index.json + uniques_*.json)
     exp_dir = os.path.join(SKY, "explore")
     u_files = []
@@ -781,10 +838,13 @@ def collect():
                 seen_u.add(uk)
                 all_uniques.append(u)
     ex_unique = Counter()
+    ex_kinds = defaultdict(set)
     for u in all_uniques:
-        rg = rid_at(u.get("x", 0), u.get("z", 0))
+        rg = rid_at(u.get("x", 0), u.get("z", 0)) or settle_region.get(u.get("place")) or u.get("region")
         if rg:
             ex_unique[rg] += 1
+            if u.get("kind"):
+                ex_kinds[rg].add(("unique", str(u.get("kind"))))
     # ---- minor site kinds by province (parse MinorSites.weights)
     ms = read(os.path.join(JAVA, "explore", "MinorSites.java"))
     wbody = ms[ms.find("static double[] weights"):]
@@ -813,10 +873,11 @@ def collect():
 
     # ---- music
     music_files = {os.path.basename(f)[:-4] for f in glob.glob(os.path.join(SOUNDS, "music", "*.ogg"))}
-    town_tracks = {"nord": ["town_1", "town_2"], "orc": ["town_1", "town_2"], "imperial": ["town_imperial"],
-                   "breton": ["town_imperial"], "dunmer": ["town_dunmer"], "khajiit": ["town_desert"],
-                   "redguard": ["town_desert"], "yokudan": ["town_desert"], "altmer": ["town_elven"],
-                   "bosmer": ["town_elven"], "maormer": ["town_elven"]}
+    town_tracks = {"nord": ["town_1", "town_2"], "orc": ["town_1", "town_2"], "imperial": ["town_imperial", "town_1"],
+                   "breton": ["town_imperial", "town_1"], "dunmer": ["town_dunmer", "town_2"], "khajiit": ["town_desert", "town_2"],
+                   "redguard": ["town_desert", "town_1"], "yokudan": ["town_desert", "town_1"], "altmer": ["town_elven", "town_1"],
+                   "bosmer": ["town_elven", "town_2"], "argonian": ["town_desert", "town_2"], "maormer": ["town_elven", "town_2"],
+                   "atmoran": ["town_1", "town_2"], "akaviri": ["town_imperial", "town_2"], "sload": ["town_dunmer", "town_2"]}
     amb_by_family = {
         "ocean": ["open_ocean", "coast_waves", "whale"], "beach": ["coast_waves", "gull"], "river": ["river", "frog"],
         "swamp": ["marsh_day", "marsh_night", "swamp_night", "frog"], "desert": ["desert_wind", "sand_hiss"],
@@ -842,7 +903,7 @@ def collect():
         return len(fams - universal)
     legend =read(os.path.join(JAVA, "loot", "LegendaryUniques.java"))
     uniq_by_prov = Counter(re.findall(r'def\("[a-z_]+",\s*"[a-z_:]+",\s*"([a-z_]+)"', legend))
-    identity_ids = set(lore_places) | quest_places
+    identity_ids = set(lore_places) | set(dun_identity) | quest_places
     identity_ids |= set(re.findall(r'def\("[a-z_]+",\s*"[a-z_:]+",\s*"[a-z_]+",\s*"([a-z_]+)"', legend))
     for u in all_uniques:
         if isinstance(u, dict) and u.get("place"):
@@ -926,8 +987,8 @@ def collect():
         sets[rid]["rooms"] = rooms
         # landmarks
         lm = [p for p in ps if p["type"] in ("landmark", "standing_stone", "word_wall", "dragon_mound", "daedric_shrine")]
-        R[rid]["landmarks"] = len(lm)
-        sets[rid]["lm_kinds"] = {(p["type"], p.get("variant") or "") for p in lm} | {("dungeon_" + (p.get("variant") or "")) for p in ps if p["type"] == "dungeon_fixed" and styles.get(sites.get(p.get("variant"), {}).get("theme"), "") == "SURFACE"}
+        R[rid]["landmarks"] = len(lm) + (ex_unique.get(rid, 0) if prov != "skyrim" else 0)
+        sets[rid]["lm_kinds"] = {(p["type"], p.get("variant") or "") for p in lm} | {("dungeon_" + (p.get("variant") or "")) for p in ps if p["type"] == "dungeon_fixed" and styles.get(sites.get(p.get("variant"), {}).get("theme"), "") == "SURFACE"} | (ex_kinds.get(rid, set()) if prov != "skyrim" else set())
         R[rid]["dragons"] = types["dragon_mound"] + sum(1 for p in ps if p.get("variant") == "dragon_lair")
         R[rid]["shrines"] = types["daedric_shrine"]
         # creatures
@@ -950,7 +1011,18 @@ def collect():
             t, p_ = biome_flora(b)
             trees |= t
             plants |= p_
-        R[rid]["biomes"] = len(biomes)
+        pal_blk = pj.get("palettes", {}).get(rid, {})
+        micro_ids = set()
+        for m in pal_blk.get("micro", []):
+            if isinstance(m, dict):
+                if m.get("id"):
+                    micro_ids.add("micro:" + str(m["id"]))
+                trees |= {"micro:" + str(t) for t in m.get("trees", [])}
+                trees |= {"prop:" + str(pr) for pr in m.get("props", [])}
+                plants |= {"micro:" + str(g) for g in m.get("groundcover", [])}
+                if m.get("surface"):
+                    plants.add("surf:" + str(m["surface"]))
+        R[rid]["biomes"] = len(biomes | micro_ids)
         R[rid]["trees"] = len(trees)
         R[rid]["plants"] = len(plants)
         # style
@@ -969,21 +1041,24 @@ def collect():
         if tv and all(p["id"] in bespoke or p["id"] in java_cases for p in tv):
             looks.add("kit:" + cult)
         R[rid]["looks"] = len(looks)
-        R[rid]["sheet"] = style_rich.get(cult, style_rich.get(r.get("culture", ""), 0))
+        rshort = rid.split("/")[-1]
+        R[rid]["sheet"] = style_rich.get(cult, style_rich.get(r.get("culture", ""), 0)) + overlay_rich.get(rshort, 0)
         # lore
         R[rid]["notes_all"] = R[rid]["lore_notes"] + R[rid]["books"]
         # music / ambience
         mk = {"yokuda": "hammerfell", "pyandonea": "summerset", "thras": "sea"}.get(r.get("music") or prov, r.get("music") or prov)
-        ex = [t for t in music_files if t.startswith(mk + "_day") or t.startswith(mk + "_night")]
-        if mk == "skyrim":
-            ex = [t for t in music_files if t.startswith("explore_")]
-        if not ex:
-            ex = [t for t in music_files if t.startswith(prov + "_")]
+        shared_ex = [t for t in music_files if t.startswith("explore_")]
+        prov_ex = [t for t in music_files if t.startswith(mk + "_day") or t.startswith(mk + "_night") or t.startswith(prov + "_")]
+        ex = sorted(set(shared_ex) | set(prov_ex)) if mk != "skyrim" else shared_ex
         R[rid]["m_explore"] = len(ex)
         R[rid]["m_town"] = len([t for t in town_tracks.get(cult, ["town_1"]) if t in music_files])
         beds = set()
         for fam in fams:
             beds |= set(amb_by_family.get(fam, []))
+        pal_blk = pj.get("palettes", {}).get(rid) or pj.get(rid) or pj.get("palettes", {}).get("province/" + prov, {})
+        for m in pal_blk.get("micro", []):
+            if isinstance(m, dict) and m.get("ambience"):
+                beds.add(m["ambience"])
         R[rid]["m_amb"] = len(beds)
         # items
         gk = gear_key(r)
@@ -991,7 +1066,7 @@ def collect():
         R[rid]["i_sets"] = gear_families(gk)
         R[rid]["i_ingr"] = tag_len(["loot", "ingredients"], gk)
         R[rid]["i_trink"] = tag_len(["loot", "trinkets"], gk)
-        R[rid]["i_unique"] = uniq_by_prov.get(prov, 0)
+        R[rid]["i_unique"] = max(uniq_by_prov.get(prov, 0), uniq_by_prov.get(gk, 0))
         kinds = set(base_kinds) | prov_kinds.get(prov, set())
         if prov in nine:
             kinds.add("WAYSHRINE")

@@ -105,6 +105,7 @@ public class RegionalGear extends LootItemConditionalFunction {
         if (out.isEmpty() && !"skyrim".equals(gearKey(region))) out = roll("skyrim", kind, level, context.getRandom());
         if (out.isEmpty()) return stack;
         LeveledGear.decorate(out, level, context.getRandom(), enchantChance, qualityChance);
+        com.skycraft.loot.affix.ItemAffixes.applyFromContext(out, context, qualityChance);
         return out;
     }
 

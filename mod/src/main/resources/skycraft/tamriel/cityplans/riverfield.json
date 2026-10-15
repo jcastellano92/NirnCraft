@@ -1,0 +1,291 @@
+{
+  "id": "riverfield",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
+  "sil": "summerset-riverfield-plan",
+  "base": "none",
+  "overlay": "summerset_isle",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "riverfield_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "riverfield_landmark",
+      "overlay": "summerset_isle"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "riverfield_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "riverfield_fountain",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "riverfield_statue",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "riverfield_garden",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "riverfield_b_5",
+    "store": "riverfield_b_10",
+    "smithy": "riverfield_b_7"
+  },
+  "titles": {
+    "riverfield_b_1": "place.skycraft.riverfield Council & Seat Hall",
+    "riverfield_b_2": "place.skycraft.riverfield High Sanctuary",
+    "riverfield_b_3": "place.skycraft.riverfield Fighters & Wayfarers Hall",
+    "riverfield_b_4": "place.skycraft.riverfield Mages & Chroniclers Spire",
+    "riverfield_b_5": "place.skycraft.riverfield The Lantern & Hearth Inn",
+    "riverfield_b_6": "place.skycraft.riverfield The Traveler's Rest Tavern",
+    "riverfield_b_7": "place.skycraft.riverfield Master Forge & Armorer",
+    "riverfield_b_8": "place.skycraft.riverfield Botanicals & Remedies",
+    "riverfield_b_9": "place.skycraft.riverfield Scriptorium & Charts",
+    "riverfield_b_10": "place.skycraft.riverfield Grand Provisioner & Sundries",
+    "riverfield_b_11": "place.skycraft.riverfield Silk & Hide Clothier",
+    "riverfield_b_12": "place.skycraft.riverfield Lapidary & Signets",
+    "riverfield_b_13": "place.skycraft.riverfield Wayfarer Stables & Post",
+    "riverfield_b_14": "place.skycraft.riverfield Bonded Factor Warehouse",
+    "riverfield_landmark": "High Seat of place.skycraft.riverfield",
+    "riverfield_plaza": "place.skycraft.riverfield Central Plaza"
+  },
+  "innKey": "riverfield_b_5"
+}

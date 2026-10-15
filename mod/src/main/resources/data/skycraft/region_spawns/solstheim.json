@@ -166,6 +166,11 @@
           2
         ]
       }
+    ],
+    "why": [
+      "solstheim.L4.ash_waste",
+      "solstheim.L4.riekling_country",
+      "solstheim.L10.ash_spawn"
     ]
   },
   {
@@ -233,6 +238,11 @@
           2
         ]
       }
+    ],
+    "why": [
+      "solstheim.L10.riekling_dens",
+      "solstheim.L10.thane_dead",
+      "solstheim.L10.ash_spawn"
     ]
   }
 ]

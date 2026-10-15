@@ -657,6 +657,30 @@ def audit_micro(province=None):
     ridge_grid = feat[:, :, 1] / 255.0
 
     _, world_idx = worldsheet_lint.validate_sheets(province, [])
+    provs_to_check = [province] if province else sorted({r.split("/")[0] for r in target_holds})
+    for prov_id in provs_to_check:
+        if not any(v.get("province") == prov_id for v in world_idx.values()):
+            md_path = os.path.join(ROOT, "docs", "world", "provinces", f"{prov_id}.md")
+            if os.path.exists(md_path):
+                cur_scope = None
+                for line in open(md_path, encoding="utf-8"):
+                    s = line.strip()
+                    if s.startswith("### 1.0 "):
+                        cur_scope = prov_id
+                    elif s.startswith("### 1."):
+                        m_sc = re.search(r"`([a-z_]+/[a-z_]+)`", s)
+                        cur_scope = worldsheet_lint.canon_scope(m_sc.group(1)) if m_sc else None
+                    elif s.startswith("## 2."):
+                        break
+                    elif cur_scope and s.startswith("| L"):
+                        parts = [p.strip() for p in s.strip("|").split("|")]
+                        if len(parts) >= 2:
+                            m_lyr = re.match(r"^(L\d+)\b", parts[0])
+                            if m_lyr:
+                                lyr = m_lyr.group(1)
+                                for fid in re.findall(r"`([a-z0-9_]+)`", parts[1]):
+                                    gid = f"{cur_scope}.{lyr}.{fid}"
+                                    world_idx.setdefault(gid, {"scope": cur_scope, "layer": lyr, "id": fid, "province": prov_id})
     errors = []
     sub_offsets = [-12.0, -4.0, 4.0, 12.0]
     cell_km2 = (CELL / 1000.0) ** 2

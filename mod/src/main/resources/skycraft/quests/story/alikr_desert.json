@@ -1,0 +1,414 @@
+{
+  "region": "hammerfell/alikr_desert",
+  "title": "The Well-Oath of Volenfell",
+  "summary": "Quell a deadly water-feud across the Alik'r oases when Kykos dust-witches and Withered Hand defilers poison the cistern-channels between Skaven, Bergama, and Volenfell.",
+  "why": [
+    "alikr_desert.L7.crown_oasis_lords",
+    "alikr_desert.L7.nomad_tribes",
+    "alikr_desert.L8.well_oaths",
+    "alikr_desert.L9.well_feud",
+    "alikr_desert.L10.volenfell"
+  ],
+  "hook": {
+    "place": "skaven",
+    "places": [
+      "ashana_tombs",
+      "aswala_stables",
+      "daira_pillar",
+      "faakir_lair",
+      "hundings_palatial_hall",
+      "kiset_wharf",
+      "maud_den",
+      "qaezir",
+      "rkhunzak",
+      "rkulftzel",
+      "saalaam_homestead",
+      "shaam_camp",
+      "shrine_mephala_hammerfell",
+      "skaven",
+      "taahim_keep",
+      "the_lucky_kettle",
+      "tomb_of_jaama",
+      "wreck_of_the_winking_netch"
+    ],
+    "npc": "story_ak_water_judge_tarik",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_ak_water_judge_tarik",
+      "name": "Water-Judge Tarik",
+      "role": "steward",
+      "place": "skaven",
+      "greet": "Drink your cup dry and spill not a drop, traveller! In the Alik'r, a broken well-stone is a death sentence for three tribes.",
+      "talk": [
+        "Someone shattered the bronze water-meter at Goat's Head Oasis and fouled the underground qanat feeding Bergama with graveyard salt.",
+        "Now the Crown oasis-lords of Skaven and the nomad clans of Satakalaam have drawn scimitars over the remaining wells. Ride to Goat's Head Oasis and Bergama to speak with Nomad-Matron Zulaikha."
+      ]
+    },
+    {
+      "id": "story_ak_matron_zulaikha",
+      "name": "Nomad-Matron Zulaikha",
+      "role": "citizen",
+      "place": "bergama",
+      "greet": "The oasis-lords accuse my herdsmen of salting the qanat? My camels drink from the same stone troughs!",
+      "talk": [
+        "My scouts tracked sandals stitched with burial-linen from Goat's Head Oasis toward Motalion Necropolis.",
+        "The Kykos Coven and corpse-binders in Motalion Necropolis are diverting the pure aquifer into the ruins of Volenfell! Speak with Sword-Brother Rami at Leki's Blade."
+      ]
+    },
+    {
+      "id": "story_ak_brother_rami",
+      "name": "Sword-Brother Rami",
+      "role": "warrior",
+      "place": "lekis_blade",
+      "greet": "May Leki's edge test your resolve! We have watched dust-storms gather unnaturally over Motalion Necropolis and Volenfell for three nights.",
+      "talk": [
+        "First we must slay Dust-Matron Samira in Motalion Necropolis to stop the corpse-salt from entering the aquifer.",
+        "Then we march into the Dwemer depths of Volenfell, where Conduit-Lord Kazar has locked the great subterranean cistern."
+      ]
+    },
+    {
+      "id": "story_ak_ashabah_zahra",
+      "name": "Ash'abah Tracker Zahra",
+      "role": "scholar",
+      "place": "volenfell",
+      "greet": "Do not fear the stained hands of the Ash'abah, stranger. Where the dead defile the living water, we walk without hesitation.",
+      "talk": [
+        "Conduit-Lord Kazar is inside the central brass reservoir of Volenfell, using the stolen water-pressure to unseal a buried necropolis vault.",
+        "Strike him down and turn the Dwemer main-valve back toward Skaven and Bergama!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_ak_dust_matron_samira": {
+      "name": "Dust-Matron Samira of Kykos",
+      "rank": "boss",
+      "place": "motalion_necropolis",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.5,
+      "dmg_mult": 1.6
+    },
+    "story_ak_conduit_lord_kazar": {
+      "name": "Conduit-Lord Kazar",
+      "rank": "boss",
+      "place": "volenfell",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.4,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_ak_goats_head_well": [
+      "Nomad-Matron Zulaikha: Look at the bronze weir-gate of Goat's Head Oasis—corroded with natron-salts taken from an embalming jar!",
+      "Water-Judge Tarik: Neither Crown townsman nor desert nomad touches embalming natron. This is necromancer's work.",
+      "Nomad-Matron Zulaikha: Ride to Leki's Blade and Motalion Necropolis before every well in the hollow turns bitter!"
+    ],
+    "story_ak_motalion_wellhead": [
+      "Dust-Matron Samira: When the oases dry to cracked clay, the tribes will crawl to our altars for a mouthful of muddy brine!",
+      "Sword-Brother Rami: The Well-Oath of the Alik'r is sealed in steel, witch!"
+    ],
+    "story_ak_volenfell_cistern": [
+      "Conduit-Lord Kazar: The Dwemer built Volenfell over the deepest river in the desert—and tonight its waters belong to the dead!",
+      "Ash'abah Tracker Zahra: The water belongs to the living who walk the sands! Cut him down and open the sluice!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_alikr_01_salted_qanat",
+      "region": "hammerfell/alikr_desert",
+      "category": "main",
+      "title": "The Broken Weir at Goat's Head",
+      "giver": "story_ak_water_judge_tarik",
+      "start": "npc:story_ak_water_judge_tarik",
+      "requires": [],
+      "why": [
+        "alikr_desert.L7.crown_oasis_lords",
+        "alikr_desert.L8.well_oaths",
+        "alikr_desert.L9.well_feud"
+      ],
+      "summary": "Inspect the poisoned water-channel at Goat's Head Oasis and parley with Nomad-Matron Zulaikha in Bergama.",
+      "intro": [
+        "The underground qanat supplying the central Alik'r oases has been fouled with salt, bringing oasis-lords and nomad tribes to the brink of war.",
+        "Inspect the weir at Goat's Head Oasis and speak with Nomad-Matron Zulaikha in Bergama."
+      ],
+      "complete": [
+        "Embalming natron on the weir-gate proved that necromancers and the Kykos Coven poisoned the water."
+      ],
+      "journal": {
+        "start": "Water-Judge Tarik in Skaven asked me to inspect Goat's Head Oasis and speak with Nomad-Matron Zulaikha in Bergama.",
+        "done": "We proved that embalming salts from Motalion Necropolis were used to foul the oasis."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "goats_head_oasis",
+          "text": "Inspect the fouled water-channel at Goat's Head Oasis"
+        },
+        {
+          "type": "scene",
+          "place": "goats_head_oasis",
+          "target": "scene:story_ak_goats_head_well",
+          "text": "Examine the natron-corroded weir with Nomad-Matron Zulaikha"
+        },
+        {
+          "type": "talk",
+          "place": "bergama",
+          "npc": "story_ak_matron_zulaikha",
+          "text": "Confer with Nomad-Matron Zulaikha in Bergama"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "goats_head_oasis",
+        "bergama"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "goats_head_oasis",
+          "objective": "Inspect the fouled water-channel at Goat's Head Oasis"
+        },
+        {
+          "id": 20,
+          "place": "goats_head_oasis",
+          "objective": "Examine the natron-corroded weir with Nomad-Matron Zulaikha"
+        },
+        {
+          "id": 30,
+          "place": "bergama",
+          "objective": "Confer with Nomad-Matron Zulaikha in Bergama"
+        }
+      ],
+      "consequence": "guard_banner:alikr_desert_stage_1"
+    },
+    {
+      "id": "ms1_alikr_02_motalion_natron",
+      "region": "hammerfell/alikr_desert",
+      "category": "main",
+      "title": "Salt of Motalion Necropolis",
+      "giver": "story_ak_matron_zulaikha",
+      "start": "auto",
+      "requires": [
+        "ms1_alikr_01_salted_qanat"
+      ],
+      "why": [
+        "alikr_desert.L8.yokudan_gods",
+        "alikr_desert.L10.kykos_coven",
+        "alikr_desert.L10.defiled_temples"
+      ],
+      "summary": "Meet Sword-Brother Rami at Leki's Blade and slay Dust-Matron Samira in Motalion Necropolis.",
+      "intro": [
+        "Sword-Brother Rami at Leki's Blade has tracked the Kykos dust-witches to Motalion Necropolis, where they dump embalming salt into the qanat shafts.",
+        "Speak with Sword-Brother Rami at Leki's Blade, then enter Motalion Necropolis and defeat Dust-Matron Samira."
+      ],
+      "complete": [
+        "Dust-Matron Samira was slain in Motalion Necropolis, revealing that Conduit-Lord Kazar has dammed the main aquifer inside Volenfell."
+      ],
+      "journal": {
+        "start": "I must meet Sword-Brother Rami at Leki's Blade and defeat Dust-Matron Samira in Motalion Necropolis.",
+        "done": "I slew Dust-Matron Samira and learned the main desert aquifer is dammed inside Volenfell."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "lekis_blade",
+          "npc": "story_ak_brother_rami",
+          "text": "Consult Sword-Brother Rami at Leki's Blade"
+        },
+        {
+          "type": "scene",
+          "place": "motalion_necropolis",
+          "target": "scene:story_ak_motalion_wellhead",
+          "text": "Confront Dust-Matron Samira at the qanat shaft"
+        },
+        {
+          "type": "boss",
+          "place": "motalion_necropolis",
+          "target": "story_ak_dust_matron_samira",
+          "text": "Defeat Dust-Matron Samira of Kykos"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "lekis_blade",
+        "motalion_necropolis"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "lekis_blade",
+          "objective": "Consult Sword-Brother Rami at Leki's Blade"
+        },
+        {
+          "id": 20,
+          "place": "motalion_necropolis",
+          "objective": "Confront Dust-Matron Samira at the qanat shaft"
+        },
+        {
+          "id": 30,
+          "place": "motalion_necropolis",
+          "objective": "Defeat Dust-Matron Samira of Kykos"
+        }
+      ],
+      "consequence": "npc_schedule:alikr_desert_stage_2"
+    },
+    {
+      "id": "ms1_alikr_03_seps_spine_march",
+      "region": "hammerfell/alikr_desert",
+      "category": "main",
+      "title": "Across Sep's Spine",
+      "giver": "story_ak_brother_rami",
+      "start": "auto",
+      "requires": [
+        "ms1_alikr_02_motalion_natron"
+      ],
+      "why": [
+        "alikr_desert.L7.caravan_men",
+        "alikr_desert.L9.ra_gada_war_camps"
+      ],
+      "summary": "Check the ancient aqueduct markers at Sep's Spine and meet Ash'abah Tracker Zahra at Volenfell.",
+      "intro": [
+        "To locate the master valve inside Volenfell, read the Dwemer pressure-markers along Sep's Spine and join Ash'abah Tracker Zahra at the entrance to Volenfell.",
+        "Visit Sep's Spine and speak with Ash'abah Tracker Zahra at Volenfell."
+      ],
+      "complete": [
+        "Ash'abah Tracker Zahra deciphered the Dwemer conduit markings leading to Kazar's reservoir chamber."
+      ],
+      "journal": {
+        "start": "I must inspect the conduit markers at Sep's Spine and meet Ash'abah Tracker Zahra at Volenfell.",
+        "done": "Zahra located the master reservoir chamber inside Volenfell."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "seps_spine",
+          "text": "Read the Dwemer conduit stones at Sep's Spine"
+        },
+        {
+          "type": "talk",
+          "place": "volenfell",
+          "npc": "story_ak_ashabah_zahra",
+          "text": "Meet Ash'abah Tracker Zahra outside Volenfell"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "seps_spine",
+        "volenfell"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "seps_spine",
+          "objective": "Read the Dwemer conduit stones at Sep's Spine"
+        },
+        {
+          "id": 20,
+          "place": "volenfell",
+          "objective": "Meet Ash'abah Tracker Zahra outside Volenfell"
+        }
+      ],
+      "consequence": "shrine_state:alikr_desert_stage_3"
+    },
+    {
+      "id": "ms1_alikr_04_volenfell_reservoir",
+      "region": "hammerfell/alikr_desert",
+      "category": "main",
+      "title": "Living Water of Volenfell",
+      "giver": "story_ak_ashabah_zahra",
+      "start": "auto",
+      "requires": [
+        "ms1_alikr_03_seps_spine_march"
+      ],
+      "finale": true,
+      "why": [
+        "alikr_desert.L7.nomad_tribes",
+        "alikr_desert.L8.well_oaths",
+        "alikr_desert.L10.volenfell"
+      ],
+      "summary": "Storm the Dwemer reservoir of Volenfell, defeat Conduit-Lord Kazar, and report the restored waters to Water-Judge Tarik in Skaven.",
+      "intro": [
+        "Deep within Volenfell, Conduit-Lord Kazar has sealed the great brass cistern that feeds the Alik'r oases.",
+        "Defeat Kazar in Volenfell, release the aquifer, and bring word to Water-Judge Tarik in Skaven."
+      ],
+      "complete": [
+        "Cold, sweet water now rushes through the qanats of Skaven and Bergama, and the Crown lords and nomad matrons have renewed the Well-Oath with the Sword of the Ansei."
+      ],
+      "journal": {
+        "start": "I must defeat Conduit-Lord Kazar in Volenfell and report to Water-Judge Tarik in Skaven.",
+        "done": "I defeated Conduit-Lord Kazar, reopened the Volenfell aquifer, and received the Sword of the Ansei."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "volenfell",
+          "text": "Descend into the brass reservoir of Volenfell"
+        },
+        {
+          "type": "scene",
+          "place": "volenfell",
+          "target": "scene:story_ak_volenfell_cistern",
+          "text": "Confront Conduit-Lord Kazar at the master sluice"
+        },
+        {
+          "type": "boss",
+          "place": "volenfell",
+          "target": "story_ak_conduit_lord_kazar",
+          "text": "Defeat Conduit-Lord Kazar"
+        },
+        {
+          "type": "talk",
+          "place": "skaven",
+          "npc": "story_ak_water_judge_tarik",
+          "text": "Report the restored aquifer to Water-Judge Tarik in Skaven"
+        }
+      ],
+      "reward": {
+        "gold": 800,
+        "xp": 1200,
+        "unique": "sword_of_the_ansei"
+      },
+      "places": [
+        "volenfell",
+        "skaven"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "volenfell",
+          "objective": "Descend into the brass reservoir of Volenfell"
+        },
+        {
+          "id": 20,
+          "place": "volenfell",
+          "objective": "Confront Conduit-Lord Kazar at the master sluice"
+        },
+        {
+          "id": 30,
+          "place": "volenfell",
+          "objective": "Defeat Conduit-Lord Kazar"
+        },
+        {
+          "id": 40,
+          "place": "skaven",
+          "objective": "Report the restored aquifer to Water-Judge Tarik in Skaven"
+        }
+      ],
+      "consequence": "settlement_prosperity:alikr_desert_stage_4"
+    }
+  ]
+}

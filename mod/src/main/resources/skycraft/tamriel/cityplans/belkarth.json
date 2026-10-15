@@ -1,0 +1,356 @@
+{
+  "id": "belkarth",
+  "sil": "river-canyon-stargazer-hub",
+  "base": "none",
+  "overlay": "craglorn",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "belkarth_crossroads_tavern",
+  "names": {
+    "inn": "belkarth_crossroads_tavern",
+    "store": "belkarth_delvers_outfitter",
+    "smithy": "belkarth_crux_steel_forge"
+  },
+  "titles": {
+    "belkarth_landmark": "Belkarth Star-Gazer Observatory",
+    "belkarth_council_hall": "Belkarth Canyon-Keep & Council Hall",
+    "belkarth_crossroads_tavern": "The Crossroads Tavern",
+    "belkarth_delvers_outfitter": "Craglorn Delvers' Outfitter",
+    "belkarth_crux_steel_forge": "Nirncrux-Tempered Anvil & Forge",
+    "belkarth_canyon_herb_still": "Serpent-Scale & Sage Apothecary",
+    "belkarth_star_gazers_lodge": "Observatory Cartographer's Lodge",
+    "belkarth_undaunted_enclave": "Canyon Adventurers' Muster Hall",
+    "belkarth_arkay_tuwhacca_chapel": "Chapel of the Passing Stars",
+    "belkarth_bridge_watch": "Canyon-Span Watchhouse",
+    "belkarth_caravan_stables": "Elinhir-Road Caravan Stables",
+    "belkarth_market_plaza": "Belkarth Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "orrery",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "belkarth_landmark",
+      "overlay": "craglorn"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "belkarth_council_hall"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "belkarth_crossroads_tavern"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "belkarth_delvers_outfitter"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "belkarth_crux_steel_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "belkarth_canyon_herb_still"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "belkarth_star_gazers_lodge"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "belkarth_undaunted_enclave"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "belkarth_arkay_tuwhacca_chapel"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "belkarth_bridge_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "belkarth_caravan_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "belkarth_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 5,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 4,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "craglorn"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "craglorn"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:dibella",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "jungle",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

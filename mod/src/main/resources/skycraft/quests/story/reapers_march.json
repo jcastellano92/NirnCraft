@@ -1,0 +1,701 @@
+{
+  "region": "valenwood/reapers_march",
+  "province": "valenwood",
+  "line": "story_reapers_march",
+  "category": "main",
+  "title": "The Bone-Truce of Arenthia",
+  "summary": "Along the northern savannah border between Arenthia and Greenheart, Bosmer truce-elders and Khajiit lunar priests must recover the stolen Bone-Truce Mammoth Tusk before raiders ignite a war.",
+  "why": [
+    "reapers_march.L7.mixed_town_rank",
+    "reapers_march.L7.truce_elders",
+    "reapers_march.L8.bone_truce_rite"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "arenthia",
+    "places": [
+      "arenthia",
+      "maw_of_lorkhaj",
+      "gilelle_vault",
+      "meadow_run",
+      "sren_ja",
+      "helaril_ossuary",
+      "paalat",
+      "havion_glade",
+      "deathsong_cleft",
+      "ildar_lair",
+      "dawnshadow",
+      "jodes_light",
+      "two_moons_path",
+      "willowgrove_cavern",
+      "vaorin_grove",
+      "falathil_falls",
+      "jodewood",
+      "maenwe_lookout",
+      "ithion",
+      "laearata_lair",
+      "broken_arch",
+      "the_vile_manse",
+      "rawlkha",
+      "eagle_vale",
+      "emperors_run",
+      "longvale",
+      "wasten_brukbrook",
+      "vinedusk_village",
+      "greenhill",
+      "willowgrove",
+      "lynpar_march",
+      "gerathil",
+      "faldell",
+      "roadside_hollow_oak"
+    ],
+    "npc": "story_reapers_march_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "The carved Mammoth Tusk that seals the grazing compact between Arenthia's Bosmer hunters and the Moonmont Khajiit vanished from the border cairn last night.",
+    "notice": "ARENTHIA TRUCE-ELDERS & MOONMONT PRIESTS: Envoys sought to track the missing Bone-Truce Tusk across Reaper's March before border skirmishes break out."
+  },
+  "npcs": [
+    {
+      "id": "story_reapers_march_hook_npc",
+      "name": "Warden of Arenthia",
+      "role": "guard",
+      "place": "arenthia",
+      "greet": "The carved Mammoth Tusk that seals the grazing compact between Arenthia's Bosmer hunters and the Moonmont Khajiit vanished from the border cairn last night.",
+      "talk": [
+        "The trouble across Reaper's March began when sealed dispatches started bypassing Arenthia.",
+        "If you mean to help the Border-Truce Court of Arenthia, start by checking the trail between Arenthia and Little Ozurs Camp."
+      ]
+    },
+    {
+      "id": "story_reapers_march_envoy_npc",
+      "name": "Chronicler of Arenthia",
+      "role": "scholar",
+      "place": "little_ozurs_camp",
+      "greet": "Keep your voice low—everyone at Little Ozurs Camp is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Little Ozurs Camp toward Arara Grove before they vanished into the brush.",
+        "Bring any ciphered tallies back to Arenthia so Truce-ElderBregor can see the proof."
+      ]
+    },
+    {
+      "id": "story_reapers_march_scout_npc",
+      "name": "Outrider of Arara Grove",
+      "role": "scout",
+      "place": "arara_grove",
+      "greet": "You made good time from Little Ozurs Camp. The saboteurs have fortified the approaches near Belwasten Root Tomb.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Belwasten Root Tomb with a picked guard.",
+        "Once Belwasten Root Tomb is cleared, return to Arenthia to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_reapers_march_steward_npc",
+      "name": "Speaker of Arenthia",
+      "role": "steward",
+      "place": "arenthia",
+      "greet": "Truce-ElderBregor awaits word on whether the crisis in Reaper's March has been contained.",
+      "talk": [
+        "The elders of Arenthia have prepared the concord table for your return.",
+        "All of Reaper's March owes you a debt for standing between Arenthia and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_reapers_march_boss_01": {
+      "name": "Usurper-Captain of Arenthia (1)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "arenthia",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_02": {
+      "name": "Usurper-Captain of Little Ozurs Camp (2)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "little_ozurs_camp",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_03": {
+      "name": "Usurper-Captain of Arara Grove (3)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "arara_grove",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_04": {
+      "name": "Usurper-Captain of Belwasten Root Tomb (4)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "belwasten_root_tomb",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_05": {
+      "name": "Usurper-Captain of Gerathil (5)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "gerathil",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_06": {
+      "name": "Usurper-Captain of Ninarata Hollow (6)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "ninarata_hollow",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_07": {
+      "name": "Usurper-Captain of Big Ozurs Valley (7)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "big_ozurs_valley",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_reapers_march_boss_08": {
+      "name": "Usurper-Captain of Dawnmead Dolmen (8)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "dawnmead_dolmen",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_reapers_march_scene_01": [
+      "Warden of Arenthia: Examine these marks recovered near Arenthia—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Arenthia and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Arenthia, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_02": [
+      "Warden of Arenthia: Examine these marks recovered near Little Ozurs Camp—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Little Ozurs Camp and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Little Ozurs Camp, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_03": [
+      "Warden of Arenthia: Examine these marks recovered near Arara Grove—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Arara Grove and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Arara Grove, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_04": [
+      "Warden of Arenthia: Examine these marks recovered near Belwasten Root Tomb—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Belwasten Root Tomb and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Belwasten Root Tomb, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_05": [
+      "Warden of Arenthia: Examine these marks recovered near Gerathil—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Gerathil and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Gerathil, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_06": [
+      "Warden of Arenthia: Examine these marks recovered near Ninarata Hollow—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Ninarata Hollow and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Ninarata Hollow, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_07": [
+      "Warden of Arenthia: Examine these marks recovered near Big Ozurs Valley—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Big Ozurs Valley and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Big Ozurs Valley, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_08": [
+      "Warden of Arenthia: Examine these marks recovered near Dawnmead Dolmen—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Dawnmead Dolmen and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Dawnmead Dolmen, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_09": [
+      "Warden of Arenthia: Examine these marks recovered near Paalat—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Paalat and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Paalat, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_10": [
+      "Warden of Arenthia: Examine these marks recovered near Ushmals Rest—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Ushmals Rest and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Ushmals Rest, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_11": [
+      "Warden of Arenthia: Examine these marks recovered near Wilinor Spring—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Wilinor Spring and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Wilinor Spring, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_12": [
+      "Warden of Arenthia: Examine these marks recovered near Greenhill—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Greenhill and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Greenhill, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_13": [
+      "Warden of Arenthia: Examine these marks recovered near Northern Woods—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Northern Woods and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Northern Woods, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_14": [
+      "Warden of Arenthia: Examine these marks recovered near Shrine Vaermina Valenwood—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Shrine Vaermina Valenwood and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Shrine Vaermina Valenwood, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_15": [
+      "Warden of Arenthia: Examine these marks recovered near Northern Woods Dolmen—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Northern Woods Dolmen and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Northern Woods Dolmen, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_16": [
+      "Warden of Arenthia: Examine these marks recovered near Kunas Delve—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Kunas Delve and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Kunas Delve, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_17": [
+      "Warden of Arenthia: Examine these marks recovered near Werewolf Ritual Site—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Werewolf Ritual Site and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Werewolf Ritual Site, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_18": [
+      "Warden of Arenthia: Examine these marks recovered near Fort Sphinxmoth—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Fort Sphinxmoth and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Fort Sphinxmoth, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_19": [
+      "Warden of Arenthia: Examine these marks recovered near Senalana—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Senalana and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Senalana, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_20": [
+      "Warden of Arenthia: Examine these marks recovered near Shrine Hermaeus Mora Valenwood—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Shrine Hermaeus Mora Valenwood and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Shrine Hermaeus Mora Valenwood, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_21": [
+      "Warden of Arenthia: Examine these marks recovered near Researchers Camp—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Researchers Camp and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Researchers Camp, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_22": [
+      "Warden of Arenthia: Examine these marks recovered near Dawnshadow—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Dawnshadow and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Dawnshadow, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_23": [
+      "Warden of Arenthia: Examine these marks recovered near Shrine Nocturnal Valenwood—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Shrine Nocturnal Valenwood and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Shrine Nocturnal Valenwood, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_24": [
+      "Warden of Arenthia: Examine these marks recovered near Dawnmead Brigand Camp—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Dawnmead Brigand Camp and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Dawnmead Brigand Camp, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_25": [
+      "Warden of Arenthia: Examine these marks recovered near Maw of Lorkhaj—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Maw of Lorkhaj and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Maw of Lorkhaj, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_26": [
+      "Warden of Arenthia: Examine these marks recovered near Nearata Camp—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Nearata Camp and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Nearata Camp, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_27": [
+      "Warden of Arenthia: Examine these marks recovered near Wasten Brukbrook—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Wasten Brukbrook and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Wasten Brukbrook, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_28": [
+      "Warden of Arenthia: Examine these marks recovered near Xyamath Cavern—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Xyamath Cavern and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Xyamath Cavern, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_29": [
+      "Warden of Arenthia: Examine these marks recovered near Shrine Mephala Valenwood—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Shrine Mephala Valenwood and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Shrine Mephala Valenwood, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_30": [
+      "Warden of Arenthia: Examine these marks recovered near Arorin Ruins—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Arorin Ruins and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Arorin Ruins, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_31": [
+      "Warden of Arenthia: Examine these marks recovered near Thizzrini Arena—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Thizzrini Arena and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Thizzrini Arena, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_32": [
+      "Warden of Arenthia: Examine these marks recovered near Reapers Henge—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Reapers Henge and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Reapers Henge, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_33": [
+      "Warden of Arenthia: Examine these marks recovered near Dawnmead—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Dawnmead and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Dawnmead, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_34": [
+      "Warden of Arenthia: Examine these marks recovered near Fardirs Folly—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Fardirs Folly and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Fardirs Folly, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_35": [
+      "Warden of Arenthia: Examine these marks recovered near Jodes Light—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Jodes Light and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Jodes Light, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_36": [
+      "Warden of Arenthia: Examine these marks recovered near Goloria Hollow—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Goloria Hollow and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Goloria Hollow, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_37": [
+      "Warden of Arenthia: Examine these marks recovered near Helaril Ossuary—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Helaril Ossuary and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Helaril Ossuary, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_38": [
+      "Warden of Arenthia: Examine these marks recovered near Old Town Cavern—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Old Town Cavern and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Old Town Cavern, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_39": [
+      "Warden of Arenthia: Examine these marks recovered near Meadow Run—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Meadow Run and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Meadow Run, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_40": [
+      "Warden of Arenthia: Examine these marks recovered near Sleek Creek House—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Sleek Creek House and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Sleek Creek House, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_41": [
+      "Warden of Arenthia: Examine these marks recovered near Lynpar March—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Lynpar March and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Lynpar March, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_42": [
+      "Warden of Arenthia: Examine these marks recovered near Claws Strike—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Claws Strike and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Claws Strike, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_43": [
+      "Warden of Arenthia: Examine these marks recovered near Vauin Burial Tree—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Vauin Burial Tree and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Vauin Burial Tree, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_44": [
+      "Warden of Arenthia: Examine these marks recovered near Telamath Grove—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Telamath Grove and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Telamath Grove, then bring the recovered charter back to Arenthia."
+    ],
+    "story_reapers_march_scene_45": [
+      "Warden of Arenthia: Examine these marks recovered near Dawnmead Ruin Camp—they match the cabal troubling Reaper's March.",
+      "Chronicler of Arenthia: The seal impressions cite the old charters of the Border-Truce Court of Arenthia word for word.",
+      "Outrider of Arara Grove: Our scouts spotted lantern-signals flashing between Dawnmead Ruin Camp and Belwasten Root Tomb at dusk.",
+      "Speaker of Arenthia: Strike swiftly at Dawnmead Ruin Camp, then bring the recovered charter back to Arenthia."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_reapers_march_01_opening",
+      "order": 1,
+      "title": "The Empty Border-Cairn",
+      "region": "valenwood/reapers_march",
+      "category": "main",
+      "giver": "story_reapers_march_hook_npc",
+      "start": "npc:story_reapers_march_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "reapers_march.L7.mixed_town_rank",
+        "reapers_march.L7.truce_elders"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Arenthia and Little Ozurs Camp in Reaper's March.",
+      "places": [
+        "arenthia",
+        "little_ozurs_camp"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "arenthia",
+          "objective": "Speak with the Warden at Arenthia and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "little_ozurs_camp",
+          "objective": "Examine the disturbed boundary markers at Little Ozurs Camp"
+        },
+        {
+          "id": 30,
+          "place": "arenthia",
+          "objective": "Return the recovered seal-impression to the Chronicler at Arenthia"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "arenthia",
+          "text": "Speak with the Warden at Arenthia and inspect the contested tallies",
+          "scene": "story_reapers_march_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "little_ozurs_camp",
+          "text": "Examine the disturbed boundary markers at Little Ozurs Camp"
+        },
+        {
+          "type": "go",
+          "place": "arenthia",
+          "text": "Return the recovered seal-impression to the Chronicler at Arenthia"
+        }
+      ],
+      "consequence": "world_state:reapers_march_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_reapers_march_02_trail",
+      "order": 2,
+      "title": "Ashes at Moonmont",
+      "region": "valenwood/reapers_march",
+      "category": "main",
+      "giver": "story_reapers_march_envoy_npc",
+      "start": "auto",
+      "prereq": "story_reapers_march_01_opening",
+      "requires": [
+        "story_reapers_march_01_opening"
+      ],
+      "why": [
+        "reapers_march.L7.truce_elders",
+        "reapers_march.L8.bone_truce_rite"
+      ],
+      "summary": "Follow the conspirators' supply route from Little Ozurs Camp to Arara Grove and seize their cipher-ledger.",
+      "places": [
+        "little_ozurs_camp",
+        "arara_grove"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "little_ozurs_camp",
+          "objective": "Track the night-couriers departing Little Ozurs Camp"
+        },
+        {
+          "id": 20,
+          "place": "arara_grove",
+          "objective": "Drive off the cabal outriders at Arara Grove and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "little_ozurs_camp",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Little Ozurs Camp"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "little_ozurs_camp",
+          "text": "Track the night-couriers departing Little Ozurs Camp",
+          "scene": "story_reapers_march_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "arara_grove",
+          "text": "Drive off the cabal outriders at Arara Grove and seize their cipher-box",
+          "boss": "story_reapers_march_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "little_ozurs_camp",
+          "text": "Deliver the cipher-box to the expedition chronicler at Little Ozurs Camp"
+        }
+      ],
+      "consequence": "world_state:reapers_march_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_reapers_march_03_sanctum",
+      "order": 3,
+      "title": "The Savannah Raider's Den",
+      "region": "valenwood/reapers_march",
+      "category": "main",
+      "giver": "story_reapers_march_scout_npc",
+      "start": "auto",
+      "prereq": "story_reapers_march_02_trail",
+      "requires": [
+        "story_reapers_march_02_trail"
+      ],
+      "why": [
+        "reapers_march.L8.bone_truce_rite",
+        "reapers_march.L8.moonmont"
+      ],
+      "summary": "Secure the outer wards between Arara Grove and Belwasten Root Tomb to lay bare the cabal's stronghold.",
+      "places": [
+        "arara_grove",
+        "belwasten_root_tomb"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "arara_grove",
+          "objective": "Meet the outrider scout at Arara Grove to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "belwasten_root_tomb",
+          "objective": "Scout the fortified threshold at Belwasten Root Tomb and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "arenthia",
+          "objective": "Carry the ward-key back to the council table at Arenthia"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "arara_grove",
+          "text": "Meet the outrider scout at Arara Grove to decode the sanctum approach",
+          "scene": "story_reapers_march_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "belwasten_root_tomb",
+          "text": "Scout the fortified threshold at Belwasten Root Tomb and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "arenthia",
+          "text": "Carry the ward-key back to the council table at Arenthia"
+        }
+      ],
+      "consequence": "world_state:reapers_march_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_reapers_march_04_finale",
+      "order": 4,
+      "title": "Renewal of the Bone-Truce",
+      "region": "valenwood/reapers_march",
+      "category": "main",
+      "giver": "story_reapers_march_steward_npc",
+      "start": "auto",
+      "prereq": "story_reapers_march_03_sanctum",
+      "requires": [
+        "story_reapers_march_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "reapers_march.L7.mixed_town_rank",
+        "reapers_march.L8.moonmont"
+      ],
+      "summary": "Storm the cabal stronghold at Belwasten Root Tomb and witness Truce-ElderBregor seal the regional concord at Arenthia.",
+      "places": [
+        "belwasten_root_tomb",
+        "arenthia"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "belwasten_root_tomb",
+          "objective": "Storm the inner chamber at Belwasten Root Tomb and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "belwasten_root_tomb",
+          "objective": "Recover the stolen charter-seal of Reaper's March from Belwasten Root Tomb"
+        },
+        {
+          "id": 30,
+          "place": "arenthia",
+          "objective": "Present the charter-seal at Arenthia to restore peace across Reaper's March"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "belwasten_root_tomb",
+          "text": "Storm the inner chamber at Belwasten Root Tomb and defeat the cabal ringleader",
+          "boss": "story_reapers_march_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "belwasten_root_tomb",
+          "text": "Recover the stolen charter-seal of Reaper's March from Belwasten Root Tomb"
+        },
+        {
+          "type": "go",
+          "place": "arenthia",
+          "text": "Present the charter-seal at Arenthia to restore peace across Reaper's March",
+          "scene": "story_reapers_march_scene_04"
+        }
+      ],
+      "consequence": "world_state:reapers_march_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Arenthia"
+      }
+    }
+  ]
+}

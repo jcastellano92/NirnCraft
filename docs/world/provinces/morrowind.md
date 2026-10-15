@@ -28,31 +28,7 @@ travel by giant flea-insect and boat; the underground belongs to the Dwemer, the
 
 ## 1. World model sheet
 
-### 1.0 Province sheet (`tamriel/world/morrowind.json`, block `province`)
-
-**World truth.** Morrowind is the Dunmer homeland: the island of Vvardenfell, with the volcano Red Mountain at its
-heart, and the mainland beyond the Inner Sea, walled from Skyrim and Cyrodiil by the Velothi and Valus ranges. Its
-people worship the Tribunal, three living gods who rule from Vivec, Mournhold and a hidden city, and honour their own
-ancestors whose bones guard every family. Five Great Houses split the land: the Hlaalu traders, the Redoran warriors
-and the Telvanni wizards on Vvardenfell; the Indoril priest-nobles and the Dres slave-planters on the mainland. The
-Empire keeps forts and a trading charter it calls an alliance. Now ash storms carry a plague out of the mountain, men
-dream of a sleeping god, and the Tribunal's walls of ghost-light are the only thing holding the mountain in.
-
-| Layer | Fields `id`: text [causes] |
-| --- | --- |
-| L1 Geology | `red_mountain`: an active volcano at Vvardenfell's centre, with lava channels (foyada) radiating from its crater. `ash_mantle`: wind-blown ash over the north and east. `velothi_wall`: the mainland's western range, the border with Skyrim. `valus_ridge`: the south-western range, the border with Cyrodiil. `inner_sea`: the shallow sea between the island and the mainland. `volcanic_shields`: lava plains and old cones on the mainland's west (Stonefalls). `fungal_soils`: ash-and-loam soils that grow giant mushrooms. `ebony_and_glass`: ebony and raw glass in volcanic rock. `kwama_hills`: egg-mine colonies dug into hills everywhere. `dwemer_deeps`: the vanished Dwemer's cities cut into rock |
-| L2 Climate | `ash_storms`: the mountain's ash rides north and east winds over the Ashlands, Molag Amur and the mainland coast [L1.red_mountain]. `blight_storms`: red storms that carry the Blight [L10.sixth_house]. `wet_south`: the Ascadian Isles and Bitter Coast are mild and rainy [L1.inner_sea]. `cold_north`: Sheogorad and the Velothi foot are cool and stormy. `fumarole_heat`: hot ground round vents and lava [L1.red_mountain] |
-| L3 Water | `odai_and_rivers`: few rivers; the Odai through Balmora is the largest [L1]. `ascadian_lakes`: lakes of the fertile south. `inner_sea_coasts`: most settlements are coastal [L1.inner_sea]. `cisterns_and_wells`: ash country lives on cisterns and deep wells. `who_holds_water`: Great House lords hold the wells in their towns; plantations hold the irrigation; Ashlanders know the hidden springs |
-| L4 Ecology | `mushroom_forest`: emperor-parasol and Telvanni giant fungi [L1.fungal_soils]. `ash_waste`: scrub, scathecraw and trama root [L1.ash_mantle]. `grazeland_steppe`: wickwheat and hackle-lo grass [L2.wet_south]. `bitter_swamp` with marshmerrow [L3.inner_sea_coasts]. `lava_field` with fire fern [L2.fumarole_heat]. Fauna: guar (herded), netch (floating), silt striders (tamed for travel), kagouti, alit, nix-hounds, cliff racers (everywhere), kwama and scribs, mudcrabs, slaughterfish, dreugh; blighted beasts and ash creatures inside the Ghostfence [L10.sixth_house]; lesser Daedra at the old shrines [L8.daedra_veneration] |
-| L5 Economy | `kwama_eggs`: the staple, from egg mines [L1.kwama_hills]. `saltrice_plantations`: slave-worked fields in the south and round Tear [L3.ascadian_lakes, L7.slavery]. `ebony_mining`: the Empire's chartered mines [L1.ebony_and_glass]. `guar_and_netch`: leather and meat [L4]. `east_empire_charter`: an Imperial trading company with its hall at Ebonheart [L9.imperial_presence]. `house_trade`: Hlaalu merchant networks, Telvanni enchanting, Redoran arms [L7.house_order]. `slave_trade`: Tear's markets and slaver raids into Black Marsh [L7.slavery] |
-| L6 Settlement | `coastal_and_river_towns` [L3.inner_sea_coasts]. `house_seats`: Balmora (Hlaalu), Ald'ruhn (Redoran), Sadrith Mora (Telvanni), Mournhold (Indoril, capital), Tear (Dres) [L7.house_order]. `temple_cities`: Vivec, Mournhold, Necrom [L8.tribunal]. `imperial_forts_and_ports`: Ebonheart, Pelagiad, the Legion forts, Seyda Neen's customs house [L9.imperial_presence]. `egg_mine_villages` [L5.kwama_eggs]. `ashlander_camps`: nomad yurts away from the towns [L7.ashlanders]. `busy_centres`: Vivec (pilgrims and every house), Balmora (trade, guilds), Mournhold (the capital), Ebonheart (Council and Empire), Sadrith Mora (wizards' trade) [L5.house_trade] |
-| L7 Society | `house_order`: everyone belongs to a house, the Temple, the Empire or nothing. `caste_ladder`: house nobles and Temple canons > house retainers, merchants and craftsmen > commoners > outlanders (tolerated) > Ashlanders (outside) > slaves (property). `slavery`: Argonians and Khajiit owned by law [L9.house_politics]. `ashlanders`: nomad tribes who reject the Temple and the towns. `outlander_scorn`: foreigners are second-class. `legal_murder`: a licensed guild of assassins settles disputes by writ (the Morag Tong) [L9.house_politics]. `criminal_syndicate`: a native crime family that hates outlanders (the Camonna Tong) [L7.outlander_scorn] |
-| L8 Belief | `tribunal`: Almalexia, Sotha Sil and Vivec, living gods, with the Ordinators as their armed priesthood [L11.tribunal_apotheosis]. `ancestor_worship`: family tombs, household shrines and guardian ghosts; bonemeal and ash are sacred [L11.chimer_era]. `daedra_veneration`: the "good" Daedra (Azura, Boethiah, Mephala) honoured as old teachers; the others feared [L11.chimer_era]. `ashlander_old_ways`: the Ashlanders keep the old Daedric faith and a prophecy of a returning hero [L7.ashlanders]. `imperial_cult` in the forts [L9.imperial_presence]. `pilgrimage`: shrines of the Seven Graces and Temple pilgrim routes [L8.tribunal] |
-| L9 Politics | `tribunal_failing`: the gods' power ebbs; the Temple hides it [L10.sixth_house]. `house_politics`: Hlaalu court the Empire, Redoran hold to honour, Telvanni to power, Indoril to the Temple, Dres to slavery. `imperial_presence`: Legion forts, a governor and a trade charter [L11.armistice]. `ghostfence_holds`: the Temple's wall round the mountain [L10.sixth_house]. `slavery_question`: an abolitionist underground (the Twin Lamps) against the Dres and Telvanni [L7.slavery]. `argonian_grudge`: raids into Black Marsh breed hatred that will one day come back [X: black_marsh.P.L9.slaver_raids] |
-| L10 Hidden | `sixth_house`: a house of sleepers serving a god under the mountain, spreading through dreams and corprus [L1.red_mountain, L11.red_mountain_battle]. `dwemer_citadels`: empty halls with working machines [L1.dwemer_deeps]. `daedric_ruins`: Chimer-era shrines held by cultists [L8.daedra_veneration]. `ancestral_tombs`: 87 family tombs with their guardians [L8.ancestor_worship]. `smugglers`: coast caves for ebony, skooma and moon sugar [L5.ebony_mining]. `blighted_mines`: egg mines where the queen sickens [L2.blight_storms] |
-| L11 History | `chimer_era`: the Chimer's exodus from Summerset under Veloth; Velothi towers and Daedric shrines. `dwemer_war`: Chimer and Dwemer united against the Nords, then fought at Red Mountain, where the Dwemer vanished. `red_mountain_battle`: Nerevar's death there. `tribunal_apotheosis`: his counsellors became gods. `velothi_strongholds`: the propylon-linked fortresses of the old wars. `armistice`: Morrowind joined the Empire by treaty, not conquest. `pact_era`: in the Second Era Dunmer, Nords and Argonians fought side by side and Argonian slaves in Bal Foyen were briefly freed |
-
-### 1.1 Region list and the two map fixes it needs
+#### Region list and the two map fixes it needs
 
 Today's regions mix the island and the mainland in two places (section 3): `molag_amur` is painted on the **mainland
 round Necrom**, while Vvardenfell's real Molag Amur is split between `azuras_coast`, `ascadian_isles` and
@@ -77,303 +53,348 @@ written for the fixed map: ids marked "proposed" need the owner decision M2.
 | Necrom Coast (proposed `necrom`, today's mainland `molag_amur`) | 4.8 | mainland | Necrom | medium |
 | Solstheim (`solstheim`) | 1.0 | island | Raven Rock | held to the Skyrim plan (SCALE 5.1); here only for L9 links (the Empire's ebony colony) |
 
-### 1.2 Region sub-sheets
+### 1.1 Province sheet (`tamriel/world/morrowind.json`, block `morrowind`)
 
-#### Ashlands (`vvardenfell_ashlands`, seat Ald'ruhn)
+**World truth.** Morrowind is the Dunmer homeland: the island of Vvardenfell, with the volcano Red Mountain at its
+heart, and the mainland beyond the Inner Sea, walled from Skyrim and Cyrodiil by the Velothi and Valus ranges. Its
+people worship the Tribunal, three living gods who rule from Vivec, Mournhold and a hidden city, and honour their own
+ancestors whose bones guard every family. Five Great Houses split the land: the Hlaalu traders, the Redoran warriors
+and the Telvanni wizards on Vvardenfell; the Indoril priest-nobles and the Dres slave-planters on the mainland. The
+Empire keeps forts and a trading charter it calls an alliance, while ash storms carry a plague out of the mountain.
 
-**World truth.** Grey ash country north and west of the mountain, swept by storms that bury roads in hours. Ald'ruhn,
-the Redoran seat, is built inside and around the shell of a giant dead crab, and its warrior-nobles hold the north
-by duty and stubbornness. Maar Gan's pilgrims, Gnisis' egg mine, Khuul and Ald Velothi's harbours, the Urshilaku
-nomads and a Legion fort all live off the ash. The Sixth House's sleepers have taken old strongholds here (Kogoruhn),
-and the Blight comes out of the storms.
+| Layer | Fields `id` (causes): text |
+| --- | --- |
+| L1 Geology | `red_mountain`: an active volcano at Vvardenfell's centre, with lava channels (foyada) radiating from its crater. `ash_mantle`: wind-blown ash over the north and east. `velothi_wall`: the mainland's western range, the border with Skyrim. `valus_ridge`: the south-western range, the border with Cyrodiil. `inner_sea`: the shallow sea between the island and the mainland. `volcanic_shields`: lava plains and old cones on the mainland's west (Stonefalls). `fungal_soils`: ash-and-loam soils that grow giant mushrooms. `ebony_and_glass`: ebony and raw glass in volcanic rock. `kwama_hills`: egg-mine colonies dug into hills everywhere. `dwemer_deeps`: the vanished Dwemer's cities cut into rock |
+| L2 Climate | `ash_storms` (L1.red_mountain, L1.ash_mantle): the mountain's ash rides north and east winds over the Ashlands, Molag Amur and the mainland coast. `blight_storms` (L1.red_mountain, L2.ash_storms): red storms that carry the Blight out of the crater. `wet_south` (L1.inner_sea): the Ascadian Isles and Bitter Coast are mild and rainy. `cold_north` (L1.velothi_wall, L1.inner_sea): Sheogorad and the Velothi foot are cool and stormy. `fumarole_heat` (L1.red_mountain, L1.volcanic_shields): hot ground round vents and lava |
+| L3 Water | `odai_and_rivers` (L1.ash_mantle, L2.wet_south): few rivers; the Odai through Balmora is the largest. `ascadian_lakes` (L1.fungal_soils, L2.wet_south): lakes of the fertile south. `inner_sea_coasts` (L1.inner_sea): most settlements are coastal. `cisterns_and_wells` (L1.ash_mantle, L2.ash_storms): ash country lives on cisterns and deep wells. `who_holds_water` (L2.ash_storms, L3.cisterns_and_wells, L3.ascadian_lakes): Great House lords hold the wells in their towns; plantations hold the irrigation; Ashlanders know the hidden springs |
+| L4 Ecology | `mushroom_forest` (L1.fungal_soils, L2.wet_south): emperor-parasol and Telvanni giant fungi. `ash_waste` (L1.ash_mantle, L2.ash_storms): scrub, scathecraw and trama root. `grazeland_steppe` (L1.fungal_soils, L2.wet_south): wickwheat and hackle-lo grass. `bitter_swamp` (L2.wet_south, L3.inner_sea_coasts): coastal mire with marshmerrow. `lava_field` (L1.red_mountain, L2.fumarole_heat): black basalt with fire fern. `native_fauna` (L1.fungal_soils, L4.mushroom_forest, L4.ash_waste): guar (herded), netch (floating), silt striders (tamed for travel), kagouti, alit, nix-hounds, cliff racers, kwama, scribs, mudcrabs, slaughterfish and dreugh |
+| L5 Economy | `kwama_eggs` (L1.kwama_hills): the staple food harvested from underground egg mines. `saltrice_plantations` (L3.ascadian_lakes, L4.mushroom_forest): slave-worked fields in the south and round Tear. `ebony_mining` (L1.ebony_and_glass): the Empire's chartered ebony and glass mines. `guar_and_netch` (L4.native_fauna): leather, meat and silt-strider caravan haulage. `east_empire_charter` (L3.inner_sea_coasts, L5.ebony_mining): an Imperial trading company with its hall at Ebonheart. `house_trade` (L4.native_fauna, L5.kwama_eggs, L5.guar_and_netch): Hlaalu merchant networks, Telvanni enchanting, Redoran arms. `slave_trade` (L3.ascadian_lakes, L5.saltrice_plantations): Tear's markets and slaver raids into Black Marsh |
+| L6 Settlement | `coastal_and_river_towns` (L3.inner_sea_coasts, L3.odai_and_rivers): ports and river towns built in House styles. `house_seats` (L5.house_trade): Balmora (Hlaalu), Ald'ruhn (Redoran), Sadrith Mora (Telvanni), Mournhold (Indoril, capital), Tear (Dres). `temple_cities` (L3.inner_sea_coasts, L5.house_trade): Vivec, Mournhold and Necrom. `imperial_forts_and_ports` (L5.east_empire_charter): Ebonheart, Pelagiad, the Legion forts and Seyda Neen's customs house. `egg_mine_villages` (L5.kwama_eggs): miner hamlets clustered at kwama hills. `ashlander_camps` (L3.who_holds_water, L4.ash_waste): nomad yurts away from the towns. `busy_centres` (L5.house_trade, L6.house_seats): Vivec, Balmora, Mournhold, Ebonheart and Sadrith Mora |
+| L7 Society | `house_order` (L5.house_trade, L6.house_seats): everyone belongs to a Great House, the Temple, the Empire or nothing. `caste_ladder` (L6.house_seats, L7.house_order): house nobles and Temple canons above retainers, merchants, commoners, outlanders, Ashlanders and slaves. `slavery` (L5.slave_trade, L7.caste_ladder): Argonians and Khajiit owned by law. `ashlanders` (L6.ashlander_camps): nomad tribes who reject the Temple and the towns. `outlander_scorn` (L6.imperial_forts_and_ports, L7.house_order): foreigners are treated as second-class. `legal_murder` (L6.house_seats, L7.house_order): a licensed guild of assassins (the Morag Tong) settles House disputes by writ. `criminal_syndicate` (L5.house_trade, L7.outlander_scorn): a native crime family (the Camonna Tong) that hates outlanders |
+| L8 Belief | `tribunal` (L6.temple_cities, L7.house_order): Almalexia, Sotha Sil and Vivec, living gods, with the Ordinators as their armed priesthood. `ancestor_worship` (L7.house_order, L8.tribunal): family tombs, household shrines and guardian ghosts; bonemeal and ash are sacred. `daedra_veneration` (L7.ashlanders, L8.tribunal): the "good" Daedra (Azura, Boethiah, Mephala) honoured as old teachers while the Four Corners of the House of Troubles are feared. `ashlander_old_ways` (L7.ashlanders): the Ashlanders keep the old Daedric faith and a prophecy of the Nerevarine. `imperial_cult` (L6.imperial_forts_and_ports): Nine Divines chapels in the forts. `pilgrimage` (L6.temple_cities, L8.tribunal): shrines of the Seven Graces and Temple pilgrim routes |
+| L9 Politics | `tribunal_failing` (L2.blight_storms, L8.tribunal): the living gods' power ebbs while the Temple hides it. `house_politics` (L7.house_order, L7.legal_murder): Hlaalu court the Empire, Redoran hold to honour, Telvanni to power, Indoril to the Temple, Dres to slavery. `imperial_presence` (L5.east_empire_charter, L6.imperial_forts_and_ports): Legion forts, a figurehead king and a trade charter. `ghostfence_holds` (L1.red_mountain, L8.ancestor_worship, L9.tribunal_failing): the Temple's wall of ancestor-powered ghost-light round the mountain. `slavery_question` (L7.slavery, L9.house_politics): an abolitionist underground (the Twin Lamps) against the Dres and Telvanni. `argonian_grudge` (L5.slave_trade, L7.slavery): slaver raids into Black Marsh breed hatred that will one day return |
+| L10 Hidden | `sixth_house` (L1.red_mountain, L2.blight_storms, L9.tribunal_failing): a house of sleepers serving Dagoth Ur under the mountain, spreading through dreams and corprus. `dwemer_citadels` (L1.dwemer_deeps): empty subterranean halls with working steam centurions. `daedric_ruins` (L1.volcanic_shields, L8.daedra_veneration): Chimer-era basalt shrines held by cultists and lesser Daedra. `ancestral_tombs` (L1.ash_mantle, L8.ancestor_worship): eighty-seven family tombs guarded by bonewalkers and ancestor ghosts. `smugglers` (L3.inner_sea_coasts, L5.ebony_mining, L9.imperial_presence): coast caves for contraband ebony, skooma and Dwemer artifacts. `blighted_mines` (L1.kwama_hills, L2.blight_storms, L9.ghostfence_holds): egg mines where the kwama queen sickens |
+| L11 History | `chimer_era` (L1.velothi_wall, L8.daedra_veneration): the Chimer's exodus from Summerset under the prophet Veloth. `dwemer_war` (L1.dwemer_deeps, L10.dwemer_citadels): Chimer and Dwemer united against the Nords, then fought at Red Mountain, where the Dwemer vanished. `red_mountain_battle` (L1.red_mountain, L11.dwemer_war): Indoril Nerevar's death at the mountain. `tribunal_apotheosis` (L8.tribunal, L11.red_mountain_battle): Nerevar's counsellors became living gods. `velothi_strongholds` (L1.ash_mantle, L11.chimer_era): the propylon-linked Dunmer fortresses of the old wars. `armistice` (L9.imperial_presence, L11.tribunal_apotheosis): Morrowind joined the Empire by treaty, keeping its gods, Houses and slave laws. `pact_era` (L9.argonian_grudge, L11.chimer_era): in the Second Era Dunmer, Nords and Argonians briefly fought side by side in the Ebonheart Pact |
+
+### 1.2 Ashlands (`vvardenfell_ashlands`)
+
+**World truth.** The Ashlands are grey volcanic country north and west of Red Mountain, swept by choking storms that
+bury roads and cairns in hours. Ald'ruhn, the Vvardenfell seat of House Redoran, is built inside and around Skar, the
+hollowed shell of a giant ancient emperor crab, and its warrior-nobles hold the northern frontier by duty and austere
+pride. Maar Gan's pilgrim shrine, Gnisis' rich egg mine, Khuul and Ald Velothi's fishing harbours, the Urshilaku
+Ashlander nomads and Fort Buckmoth all scrape a living from the ash while Sixth House sleepers gather in ruined
+Kogoruhn.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `ash_plain`, `scoria_ridges` [P.L1.ash_mantle]. `crab_shell_rock`: the Skar [P.L1]. `velothi_strongholds` (Falasmaryon, Valenvaryon, Andasreth, Berandas) [P.L11.velothi_strongholds] |
-| L2 | `ash_storm_track` [P.L2.ash_storms]. `blight_season` [P.L2.blight_storms] |
-| L3 | `deep_wells`, `ald_ruhn_cisterns` under the shell [P.L3.cisterns_and_wells] |
-| L4 | `ash_dune`, `scoria_scrub` (scathecraw, trama), `fumarole_flat` (fire fern), `kwama_hill`, `storm_hollow`. Cliff racers, kagouti, alit |
-| L5 | `egg_mines` (Gnisis) [P.L5.kwama_eggs]. `redoran_arms` [P.L5.house_trade]. `shell_crafts` (chitin) |
-| L6 | `aldruhn_under_the_skar` [L1.crab_shell_rock]. `pilgrim_and_harbour_villages` (Maar Gan, Khuul, Ald Velothi) [P.L6.coastal_and_river_towns]. `urshilaku_camp` [P.L6.ashlander_camps]. `buckmoth_fort` [P.L6.imperial_forts_and_ports] |
-| L7 | `redoran_duty`: honour, duels, service [P.L7.house_order]. `ashlander_traders_at_the_gate` |
-| L8 | `redoran_temple_piety` [P.L8.tribunal]. `urshilaku_prophecy` [P.L8.ashlander_old_ways] |
-| L9 | `council_of_ald_ruhn`: councillors split over the Empire [P.L9.house_politics]. `sleepers_in_the_north` [P.L10.sixth_house] |
-| L10 | `kogoruhn`: a Sixth House citadel in an old stronghold. `missamsi`: a blighted sanctum. `daedric_ruins` (Ashalmawia, Ebernanit and others) [P.L10.daedric_ruins] |
-| L11 | `shell_founding`, `stronghold_wars` [P.L11.velothi_strongholds] |
+| L1 | `ash_plain`: grey volcanic ash flats north and west of the crater. `scoria_ridges`: jagged basalt and cinder ridges. `crab_shell_rock`: the colossal fossilized emperor-crab carapace (Skar) at Ald'ruhn. `velothi_strongholds`: ancient stepped stone fortresses (Falasmaryon, Valenvaryon, Andasreth, Berandas) |
+| L2 | `ash_storm_track` (mw.L2.ash_storms, L1.ash_plain): howling ash winds scouring the northern tracks. `blight_season` (mw.L2.blight_storms, L1.scoria_ridges): red Blight gusts spilling over the Ghostfence |
+| L3 | `deep_wells` (mw.L3.cisterns_and_wells, L1.ash_plain): covered wells sunk through dry ash. `ald_ruhn_cisterns` (mw.L3.cisterns_and_wells, L1.crab_shell_rock): stone water cisterns sheltered beneath the Skar shell |
+| L4 | `ash_dune` (mw.L4.ash_waste, L2.ash_storm_track): drifting grey dunes. `scoria_scrub` (L1.scoria_ridges, L2.ash_storm_track): scathecraw, trama root and ash yams. `fumarole_flat` (mw.L2.fumarole_heat, L1.scoria_ridges): hot vents with fire fern. `kwama_hill` (mw.L1.kwama_hills, L1.ash_plain): warm clay hills housing kwama colonies, cliff racers, kagouti and alit |
+| L5 | `egg_mines` (mw.L5.kwama_eggs, L4.kwama_hill): the great egg mine at Gnisis and smaller burrows. `redoran_arms` (mw.L5.house_trade, L4.kwama_hill): bonemold and chitin armour smithing. `shell_crafts` (L4.kwama_hill): chitin tools and ash-glass goggles |
+| L6 | `aldruhn_under_the_skar` (L1.crab_shell_rock, L3.ald_ruhn_cisterns, L5.redoran_arms): Redoran manor halls inside the giant crab shell and mudbrick houses around it. `pilgrim_and_harbour_villages` (mw.L6.coastal_and_river_towns, L5.egg_mines): Maar Gan, Gnisis, Khuul and Ald Velothi. `urshilaku_camp` (mw.L6.ashlander_camps, L4.ash_dune): yurt camp of the Urshilaku tribe. `buckmoth_fort` (mw.L6.imperial_forts_and_ports, L1.ash_plain): Legion garrison south of Ald'ruhn |
+| L7 | `redoran_duty` (mw.L7.house_order, L6.aldruhn_under_the_skar): martial honour, duels and Temple service. `ashlander_traders_at_the_gate` (mw.L7.ashlanders, L6.urshilaku_camp): guarded trade between Redoran patrols and Urshilaku scouts |
+| L8 | `redoran_temple_piety` (mw.L8.tribunal, L7.redoran_duty): strict devotion to the Tribunal and the Maar Gan rock shrine. `urshilaku_prophecy` (mw.L8.ashlander_old_ways, L6.urshilaku_camp): Wise Woman visions of the Nerevarine and the burial caverns |
+| L9 | `council_of_ald_ruhn` (mw.L9.house_politics, L6.aldruhn_under_the_skar, L7.redoran_duty): Redoran councillors divided between honourable tradition and corrupt nobles. `sleepers_in_the_north` (mw.L9.ghostfence_holds, L2.blight_season): Sixth House cultists infiltrating towns and mines |
+| L10 | `kogoruhn` (mw.L10.sixth_house, L1.velothi_strongholds, L9.sleepers_in_the_north): the fallen House Dagoth stronghold bridging the Ashlands and Red Mountain. `missamsi` (mw.L10.sixth_house, L1.scoria_ridges, L9.sleepers_in_the_north): a blighted Sixth House cavern sanctum. `daedric_ruins` (mw.L10.daedric_ruins, L1.scoria_ridges, L9.council_of_ald_ruhn): Ashalmawia, Ebernanit and Yasammidan |
+| L11 | `shell_founding` (L1.crab_shell_rock, L6.aldruhn_under_the_skar): House Redoran's raising of the ancient emperor-crab shell. `stronghold_wars` (mw.L11.velothi_strongholds, L1.velothi_strongholds): First Era wars documented in the Velothi keeps |
 
-#### West Gash (`west_gash`, seat Balmora)
+### 1.3 West Gash (`west_gash`)
 
-**World truth.** Rocky ridges and green valleys on the west of the island, where the Odai runs through Balmora, the
-Hlaalu city of yellow plaster, guild halls and trade. Upriver the Empire's charter town of Caldera digs ebony. The
-Hlaalu do business with the Empire and anyone else; the native crime family runs the docks and hates the outlanders
-who now own the mines. Dwemer ruins (Arkngthand) sit in the hills, and a lava channel scars the ridges.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `gash_ridges`, `odai_gorge`. `ebony_seam` at Caldera [P.L1.ebony_and_glass]. `foyada_mamaea` [P.L1.red_mountain] |
-| L2 | `sheltered_west`: less ash, more rain than the Ashlands [P.L2.wet_south] |
-| L3 | `odai_river` [P.L3.odai_and_rivers]. `balmora_banks`: the river splits the city's classes |
-| L4 | `ridge_heath` (stoneflower, bittergreen), `odai_terrace`, `gorge_fern`, `mine_spoil` [L5.ebony]. Kagouti, cliff racers, nix-hounds |
-| L5 | `hlaalu_trade` [P.L5.house_trade]. `ebony` (Caldera, Imperial charter) [L1.ebony_seam]. `guild_services` |
-| L6 | `balmora_on_the_odai` [L3.odai_river]. `caldera_company_town` [L5.ebony]. `moonmoth_fort` |
-| L7 | `merchant_city`: guild row and council manor [L5.hlaalu_trade]. `dockside_syndicate` [P.L7.criminal_syndicate]. `outlander_miners` |
-| L8 | `pragmatic_piety`: Temple attended, Imperial cult tolerated [P.L8] |
-| L9 | `hlaalu_collaboration`: the house sells the island to the Empire, say its rivals [P.L9.house_politics]. `mine_ownership_fight` [L5.ebony] |
-| L10 | `arkngthand` (Dwemer) [P.L10.dwemer_citadels]. `smuggled_ebony` [P.L10.smugglers]. Sixth House shrines in the hills (Sanit, Abinabi) |
-| L11 | `odai_settlement`, `charter_granted` [P.L11.armistice] |
-
-#### Bitter Coast (`bitter_coast`)
-
-**World truth.** A warm, rotting swamp coast on the south-west, all twisted trees, mud and fog. Seyda Neen's customs
-house and lighthouse greet ships from the Empire; Hla Oad and Gnaar Mok are fishing villages that do better from
-smuggling than from fish. Caves along the shore hold contraband and those who guard it, and Daedric ruins rot in the
-mangrove. The first impression of Morrowind for most outlanders, and a misleading one.
+**World truth.** The West Gash is a belt of rocky limestone ridges and green river valleys along Vvardenfell's western
+flank, where the Odai River runs through Balmora, the bustling Hlaalu seat of yellow plaster terraces, guild halls and
+merchant manors. Upriver, the Empire's chartered company town of Caldera digs rich ebony in stone towers built in
+Cyrodilic style. House Hlaalu does business with the Empire and anyone else, while the Camonna Tong crime syndicate runs
+the docks and hates the outlanders who own the mines. Above the valley, Dwemer Arkngthand and Foyada Mamaea scar the
+hills.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `mud_coast`, `sea_caves` [P.L1.inner_sea] |
-| L2 | `fog_and_heat` [P.L2.wet_south] |
-| L3 | `brackish_inlets` [P.L3.inner_sea_coasts] |
-| L4 | `bitter_swamp` (marshmerrow, twisted trees), `mudflat`, `smuggler_cove`, `kelp_shallows`. Mudcrabs, slaughterfish, dreugh |
-| L5 | `fishing`, `contraband` [P.L10.smugglers] |
-| L6 | `customs_port` (Seyda Neen) [P.L6.imperial_forts_and_ports]. `fishing_villages` (Hla Oad, Gnaar Mok) |
-| L7 | `smugglers_and_tax_men` [L5.contraband] |
-| L8 | `bitter_superstitions`: drowned men's lights in the fog |
-| L9 | `customs_corruption` [L6.customs_port] |
-| L10 | `smuggler_caves` (most of the region's 21 sites) [L1.sea_caves]. `daedric_mire_ruins` (Ashurnibibi and others) [P.L10.daedric_ruins] |
-| L11 | `prisoner_landings`: the Empire ships its pardoned prisoners here |
+| L1 | `gash_ridges`: weathered grey-brown rock ridges dividing the Ashlands from the coast. `odai_gorge`: the fertile canyon cut by the Odai River. `ebony_seam` (mw.L1.ebony_and_glass): rich volcanic ebony veins at Caldera. `foyada_mamaea` (mw.L1.red_mountain): a deep lava ravine running down from Red Mountain |
+| L2 | `sheltered_west` (mw.L2.wet_south, L1.gash_ridges): ridge shelter blocks most ash storms and brings mild coastal rain |
+| L3 | `odai_river` (mw.L3.odai_and_rivers, L1.odai_gorge, L2.sheltered_west): Vvardenfell's largest river flowing south to the sea. `balmora_banks` (L1.odai_gorge, L3.odai_river): stone-walled river embankments dividing Balmora's noble hill from its working district |
+| L4 | `ridge_heath` (L1.gash_ridges, L2.sheltered_west): stoneflower, bittergreen and heather scrub. `odai_terrace` (L3.odai_river): grassy river benches with guar and nix-hounds. `mine_spoil` (L1.ebony_seam): dark slag heaps around the Caldera pits |
+| L5 | `hlaalu_trade` (mw.L5.house_trade, L3.odai_river): silt-strider caravans, guild contracts and Hlaalu commerce. `ebony` (mw.L5.ebony_mining, L1.ebony_seam): Imperial-chartered ebony mining at Caldera. `guild_services` (L3.odai_river, L5.hlaalu_trade): Fighters, Mages and Thieves Guild chapters in Balmora |
+| L6 | `balmora_on_the_odai` (mw.L6.house_seats, L3.balmora_banks, L5.hlaalu_trade): flat-roofed Hlaalu stone houses, bridges and council manor along the Odai. `caldera_company_town` (mw.L6.imperial_forts_and_ports, L5.ebony): timber-framed Imperial town and castle keep at the mines. `moonmoth_fort` (mw.L6.imperial_forts_and_ports, L1.foyada_mamaea): Legion fort guarding the road junction |
+| L7 | `merchant_city` (mw.L7.house_order, L5.hlaalu_trade, L6.balmora_on_the_odai): Hlaalu factors, guild retainers and cosmopolitan traders. `dockside_syndicate` (mw.L7.criminal_syndicate, L6.balmora_on_the_odai): the Camonna Tong running the Council Club and smuggling rings. `outlander_miners` (mw.L7.slavery, L6.caldera_company_town): hired miners and slaves working Caldera's shafts |
+| L8 | `pragmatic_piety` (mw.L8.tribunal, mw.L8.imperial_cult, L6.balmora_on_the_odai): Balmora's hilltop Temple and Moonmoth's Imperial shrine coexist for business |
+| L9 | `hlaalu_collaboration` (mw.L9.house_politics, L6.balmora_on_the_odai, L7.merchant_city): House Hlaalu enriches itself through Imperial charters while rivals call them traitors. `mine_ownership_fight` (L5.ebony, L7.dockside_syndicate, L9.hlaalu_collaboration): corrupt Hlaalu councillors and the Camonna Tong scheming to sabotage Caldera |
+| L10 | `arkngthand` (mw.L10.dwemer_citadels, L1.foyada_mamaea, L9.hlaalu_collaboration): the Dwemer citadel overlooking Foyada Mamaea. `smuggled_ebony` (mw.L10.smugglers, L1.ebony_seam, L9.mine_ownership_fight): illicit raw ebony caches in ridge caves. `sixth_house_hill_shrines` (mw.L10.sixth_house, L1.gash_ridges, L9.hlaalu_collaboration): hidden Dreamer caves at Sanit and Abinabi |
+| L11 | `odai_settlement` (L3.odai_river, L6.balmora_on_the_odai): House Hlaalu's growth along the Odai valley. `charter_granted` (mw.L11.armistice, L6.caldera_company_town): the Imperial mining charter granted after the Armistice |
 
-#### Ascadian Isles (`ascadian_isles`, seat Vivec)
+### 1.4 Bitter Coast (`bitter_coast`)
 
-**World truth.** The green, fertile south: lakes, rice paddies and the great water city of Vivec, a ring of stepped
-cantons standing in the sea, home of the living god and his Temple. Around it lie slave plantations of saltrice,
-Pelagiad's Imperial garrison, Suran's pleasure houses and the pilgrim shrines of the Seven Graces. The wealth here is
-old and the cruelty is quiet. A Daedric ruin of the old faith (Ald Sotha) and Dwemer halls lie within a day's walk of
-the god's palace.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `fertile_lowland`, `lake_basins` [P.L1.fungal_soils] |
-| L2 | `mild_rain` [P.L2.wet_south] |
-| L3 | `ascadian_lakes`, `paddy_irrigation`: plantation owners hold the water [P.L3.who_holds_water] |
-| L4 | `saltrice_paddy`, `heather_lake_shore`, `parasol_grove` (emperor parasol), `lagoon_reed`, `plantation_ring`. Netch, mudcrabs, scribs |
-| L5 | `saltrice_plantations` [P.L5.saltrice_plantations]. `pilgrim_economy` [P.L8.pilgrimage] |
-| L6 | `vivec_cantons` [P.L6.temple_cities]. `pelagiad_garrison`, `suran_on_the_road` [P.L6.imperial_forts_and_ports] |
-| L7 | `plantation_slaves` [P.L7.slavery]. `canton_ranks`: Temple and noble cantons above the Foreign Quarter and the waterfront |
-| L8 | `vivec_the_living_god` [P.L8.tribunal]. `seven_graces` |
-| L9 | `twin_lamps_underground` [P.L9.slavery_question]. `temple_secrets` [P.L9.tribunal_failing] |
-| L10 | `under_vivec`: flooded canton foundations and sewers. `ald_sotha` [P.L10.daedric_ruins]. `escaped_slave_caves` [L7.plantation_slaves] |
-| L11 | `vivec_founding`, `fields_of_kummu` |
-
-#### Azura's Coast (`azuras_coast`)
-
-**World truth.** The broken eastern coast: hundreds of rocky islets, kelp coves and Telvanni towers. Tel Branora on
-the southern tip, Tel Aruhn and the towers of lesser wizards rise from the islands; the old Telvanni master at Tel Fyr
-keeps a hospital for the incurable; the Dreamers' monastery (Holamayan) hides in a cove. Daedric shrines to Azura and
-others stand on the headlands, and Dwemer ruins break the sea cliffs.
+**World truth.** The Bitter Coast is a warm, rotting swamp shore along Vvardenfell's south-west, a maze of twisted bog
+trees, brackish mudflats, glowing mushroom caps and thick sea fog. At its southern gate, Seyda Neen's Imperial Census
+and Excise warehouse and wooden lighthouse greet prisoners and merchants arriving from Cyrodiil, while the stilted
+shacks of Hla Oad and Gnaar Mok make more coin from smuggling than from netch or fish. Sea caves along the inlets hide
+skooma, moon sugar and escaped slaves, and sunken Daedric ruins rot in the mangrove mire.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `islet_maze`, `sea_cliffs` [P.L1.inner_sea] |
-| L2 | `sea_storms`, `dawn_light` (Azura's coast faces the sunrise) |
-| L3 | `kelp_coves`, `rain_cisterns` |
-| L4 | `rocky_islet`, `kelp_cove`, `comberry_heath`, `cliff_racer_rookery`, `telvanni_spore_garden` |
-| L5 | `telvanni_enchanting` [P.L5.house_trade]. `fishing`. `slave_market_at_tel_aruhn` [P.L5.slave_trade] |
-| L6 | `wizard_towers` (Tel Branora, Tel Aruhn, Tel Fyr) [P.L6.house_seats] |
-| L7 | `wizard_and_servant` [P.L7.caste_ladder] |
-| L8 | `azura_shrine` [P.L8.daedra_veneration]. `dreamer_monastery` |
-| L9 | `telvanni_rivalries` [P.L9.house_politics]. `corprus_hospital` [P.L10.sixth_house] |
-| L10 | `daedric_headland_ruins` (Bal Fell, Kushtashpi) [P.L10.daedric_ruins]. `sea_cliff_dwemer` |
-| L11 | `azura_dawn_legends` |
+| L1 | `mud_coast`: low-lying coastal silt, peat and mudflats. `sea_caves` (mw.L1.inner_sea): tidal limestone and basalt caves hollowed by the Inner Sea |
+| L2 | `fog_and_heat` (mw.L2.wet_south, L1.mud_coast): warm, humid rains and dense coastal sea fog |
+| L3 | `brackish_inlets` (mw.L3.inner_sea_coasts, L1.mud_coast, L2.fog_and_heat): stagnant swamp sloughs and tidal creeks |
+| L4 | `bitter_swamp` (mw.L4.bitter_swamp, L2.fog_and_heat, L3.brackish_inlets): twisted swamp trees, luminous russula, violet coprinus and marshmerrow. `kelp_shallows` (L3.brackish_inlets): shallow bays teeming with mudcrabs, slaughterfish and dreugh |
+| L5 | `fishing` (L4.kelp_shallows): small-boat fishing and netch herding. `contraband` (mw.L5.ebony_mining, L1.sea_caves): moon-sugar, skooma and unchartered ebony smuggling |
+| L6 | `customs_port` (mw.L6.imperial_forts_and_ports, L3.brackish_inlets): Seyda Neen's Imperial Census office, dock and lighthouse. `fishing_villages` (mw.L6.coastal_and_river_towns, L5.fishing): plank-walk shacks on stilts at Hla Oad and Gnaar Mok |
+| L7 | `smugglers_and_tax_men` (mw.L7.criminal_syndicate, L5.contraband, L6.customs_port): Camonna Tong smugglers bribing or dodging Imperial excise clerks |
+| L8 | `bitter_superstitions` (mw.L8.ancestor_worship, L2.fog_and_heat): fishermen's tales of drowned ghosts and swamp lights |
+| L9 | `customs_corruption` (mw.L9.imperial_presence, L6.customs_port, L7.smugglers_and_tax_men): bribed excise guards looking the other way along the coast |
+| L10 | `smuggler_caves` (mw.L10.smugglers, L1.sea_caves, L9.customs_corruption): Addamasartus and twenty other coastal contraband grottoes. `daedric_mire_ruins` (mw.L10.daedric_ruins, L4.bitter_swamp, L9.customs_corruption): half-sunken Daedric shrines at Ashurnibibi and Assarnatamat |
+| L11 | `prisoner_landings` (mw.L11.armistice, L6.customs_port): Seyda Neen's history as the port of entry for Imperial ships and prisoners |
 
-#### Molag Amur, Vvardenfell (proposed `molag_amur`, carved from `azuras_coast`, `ascadian_isles`, `red_mountain`)
+### 1.5 Ascadian Isles (`ascadian_isles`)
 
-**World truth.** Black lava fields and cinder cones south-east of the mountain, the harshest country on the island.
-Molag Mar, a Temple and Redoran pilgrim town cut into a cliff, is the only town; Erabenimsun nomads, the most warlike
-of the Ashlanders, roam the rest. Pilgrims cross it to the holy mountains of Assarnibibi and Kand. Fire ferns grow at
-the vents, and Daedra haunt the old shrines in the lava.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `lava_field`, `cinder_cones`, `obsidian_flats` [P.L1.red_mountain] |
-| L2 | `ash_and_heat` [P.L2.ash_storms, P.L2.fumarole_heat] |
-| L3 | `no_rivers`; `pilgrim_cisterns` along the route |
-| L4 | `lava_field`, `fumarole_fern`, `obsidian_flat`, `scoria_cone`, `sulphur_pool`. Kagouti, scamps, cliff racers |
-| L5 | `pilgrim_trade` [P.L8.pilgrimage]. `obsidian_and_fire_fern` |
-| L6 | `molag_mar_cliff_town` [L5.pilgrim_trade]. `erabenimsun_camp` |
-| L7 | `warlike_nomads` [P.L7.ashlanders] |
-| L8 | `holy_mountains` (Assarnibibi, Kand) [P.L8.pilgrimage] |
-| L9 | `erabenimsun_raids` on pilgrims [L7.warlike_nomads] |
-| L10 | `lava_daedra_shrines` [P.L10.daedric_ruins] |
-| L11 | `burned_land` [P.L11.red_mountain_battle] |
-
-#### Grazelands (`grazelands`, seat Vos)
-
-**World truth.** Rolling grass steppe in the north-east, the only open herding land on the island. Ashlander herds
-graze it, and the Telvanni have pushed their farming village of Vos and the tower of their one reasonable councillor
-into it. Wickwheat and hackle-lo grow wild, guar herds move with the seasons, and the nomads and the wizards argue
-over who owns grass nobody planted. Egg mines here are going quiet as the Blight reaches them.
+**World truth.** The Ascadian Isles are Vvardenfell's green, fertile southern garden: placid lakes, emperor-parasol
+groves, bridged channels and the great water city of Vivec, where nine stepped cantons stand in the bay below the
+floating Ministry of Truth and the palace of the living god. Around Lake Amaya and Lake Masobi lie walled Hlaalu and
+Dres saltrice plantations worked by Argonian and Khajiit slaves, alongside Pelagiad's Imperial fort, Suran's hillside
+pleasure houses and the pilgrim shrines of the Seven Graces. The wealth here is old, the cruelty is polite, and
+Twin Lamps abolitionists move in secret.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `grass_slopes`, `kwama_hills` [P.L1.kwama_hills] |
-| L2 | `lee_of_the_storms`: less ash [P.L2.ash_storms] |
-| L3 | `seasonal_springs` known to the nomads [P.L3.who_holds_water] |
-| L4 | `wickwheat_steppe`, `hackle_lo_meadow`, `guar_commons`, `ash_fringe`, `vos_mushroom_farm` |
-| L5 | `herding` [P.L5.guar_and_netch]. `vos_farms`. `egg_mines` (10, many blighted) |
-| L6 | `vos_and_tel_vos` [P.L6.house_seats]. `zainab_and_ahemmusa_camps` [P.L6.ashlander_camps] |
-| L7 | `nomads_vs_farmers` [P.L7.ashlanders] |
-| L8 | `ashlander_herd_rites` |
-| L9 | `grass_rights`: Telvanni charters against nomad custom [L7.nomads_vs_farmers] |
-| L10 | `blighted_egg_mines` [P.L10.blighted_mines]. `dwemer_ruins` (Nchuleft and others), Sixth House bases (Ainab, Sharapli) |
-| L11 | `old_herd_paths` |
+| L1 | `fertile_lowland` (mw.L1.fungal_soils): rich volcanic-loam valleys and islands. `lake_basins`: sheltered freshwater basins and coastal lagoons |
+| L2 | `mild_rain` (mw.L2.wet_south, L1.lake_basins): warm, gentle rains shielded from the worst ash storms |
+| L3 | `ascadian_lakes` (mw.L3.ascadian_lakes, L1.lake_basins, L2.mild_rain): Lake Amaya, Lake Hairan and Lake Masobi. `paddy_irrigation` (L1.fertile_lowland, mw.L3.who_holds_water, L3.ascadian_lakes): ditched saltrice terraces controlled by the great manors |
+| L4 | `saltrice_paddy` (L3.paddy_irrigation): cultivated saltrice, marshmerrow and heather. `parasol_grove` (mw.L4.mushroom_forest, L1.fertile_lowland): towering emperor-parasol mushrooms, netch, guar and scribs |
+| L5 | `saltrice_plantations` (mw.L5.saltrice_plantations, L3.paddy_irrigation, L4.saltrice_paddy): the Dren, Arvel and Sterdecan slave estates. `pilgrim_economy` (mw.L5.house_trade, L3.ascadian_lakes): gondola ferries, offerings and hostelries serving Vivec's pilgrims |
+| L6 | `vivec_cantons` (mw.L6.temple_cities, L1.lake_basins, L5.pilgrim_economy): the stepped pyramid cantons of Vivec City standing in the bay under the floating moonlet Baar Dau. `pelagiad_garrison` (mw.L6.imperial_forts_and_ports, L1.fertile_lowland): the stone Imperial fort and village of Pelagiad. `suran_on_the_road` (mw.L6.coastal_and_river_towns, L5.saltrice_plantations): Hlaalu trade town on the eastern shore |
+| L7 | `plantation_slaves` (mw.L7.slavery, L5.saltrice_plantations): shackled Khajiit and Argonian field hands watched by Hlaalu and Camonna Tong overseers. `canton_ranks` (mw.L7.caste_ladder, L6.vivec_cantons): Ordinators and priests in the High Fane above the Foreign Quarter and sewer underworks |
+| L8 | `vivec_the_living_god` (mw.L8.tribunal, L6.vivec_cantons): Warrior-Poet Vivec keeping vigil in his palace while Ordinators patrol the plazas. `seven_graces` (mw.L8.pilgrimage, L3.ascadian_lakes): the Stop the Moon shrine and the Fields of Kummu |
+| L9 | `twin_lamps_underground` (mw.L9.slavery_question, L7.plantation_slaves): abolitionists smuggling freed slaves from the plantations to Ebonheart. `temple_secrets` (mw.L9.tribunal_failing, L6.vivec_cantons, L8.vivec_the_living_god): the Ordinators' Ministry of Truth prison silencing dissidents |
+| L10 | `under_vivec` (L1.lake_basins, L6.vivec_cantons, L9.temple_secrets): flooded canton underworks housing cult shrines, rats and Morag Tong headquarters. `ald_sotha` (mw.L10.daedric_ruins, L1.fertile_lowland, L9.temple_secrets): the ruined Chimer seat of House Sotha dedicated to Mehrunes Dagon. `escaped_slave_caves` (L1.fertile_lowland, L7.plantation_slaves, L9.twin_lamps_underground): hidden caverns sheltering runaways |
+| L11 | `vivec_founding` (mw.L11.tribunal_apotheosis, L6.vivec_cantons): the building of the cantons and the halting of the meteor Baar Dau. `fields_of_kummu` (L8.seven_graces, L11.vivec_founding): the lakeside shrine where Lord Vivec once worked as a humble field hand |
 
-#### Sheogorad (`sheogorad`, seat Dagon Fel)
+### 1.6 Azura's Coast (`azuras_coast`)
 
-**World truth.** A cold scatter of islands off the north coast, wrecks on every reef. Dagon Fel, a harbour run by
-Nord settlers, trades with Skyrim and with whoever survives the reefs. Daedric shrine-fortresses (Ald Daedroth among
-them) and Velothi towers stand on the islets, and the Temple keeps a pilgrim shrine at the northern edge of the world.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `wave_cut_islets`, `reefs` |
-| L2 | `cold_sea_storms` [P.L2.cold_north] |
-| L3 | `rain_barrels_and_springs` |
-| L4 | `islet_heath`, `wreck_reef`, `kelp_bed`, `gull_cliff`, `driftwood_strand`. Dreugh, slaughterfish |
-| L5 | `salvage` [L1.reefs]. `nord_trade` with Skyrim |
-| L6 | `dagon_fel_harbour` [L5.nord_trade] |
-| L7 | `nord_dunmer_mix` |
-| L8 | `sanctus_shrine` [P.L8.pilgrimage]. `mad_god_shrine` (Ald Daedroth) [P.L8.daedra_veneration] |
-| L9 | `wreckers_suspected` [L5.salvage] |
-| L10 | `shipwrecks`, `velothi_towers`, `daedric_island_fortress` |
-| L11 | `nord_landings` |
-
-#### Red Mountain (`red_mountain`, seat Ghostgate)
-
-**World truth.** The volcano itself, walled by the Tribunal's Ghostfence, a ring of shimmering wards anchored by
-pylons of the dead. Inside, Dwemer citadels taken by the Sixth House, blighted beasts, ash creatures and red storms.
-Ghostgate, the Temple's fortress on the one pass through the fence, is the only settlement; Buoyant Armigers and
-Ordinators hold it. The mountain's plume is the island's weenie, visible from everywhere.
+**World truth.** Azura's Coast is Vvardenfell's jagged eastern archipelago: hundreds of steep basalt islets, kelp-choked
+channels and giant fungal towers facing the sunrise over the Padomaic sea. Tel Branora at the southern point, Tel Aruhn
+with its underground slave market, and Tel Fyr—where the four-thousand-year-old wizard Divayth Fyr keeps his Corprusarium
+for the incurably blighted—rise from the islands. Hidden behind a magical rock door on a southern island, the Dissident
+Priests of Holamayan preserve the history the Tribunal suppresses, while Azura's great twilight statue watches from the
+headland cliffs.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `caldera`, `cinder_slopes`, `foyadas` (Esannudan, Ashur-Dan, Ilibaal) [P.L1.red_mountain] |
-| L2 | `blight_storms`, `plume_shadow` [P.L2.blight_storms] |
-| L3 | `none_inside`: no water inside the fence; Ghostgate's cisterns |
-| L4 | `caldera_rim`, `cinder_waste`, `blight_scar`, `foyada_lava`, `ghostfence_zone`. Ash creatures, corprus beasts, blighted cliff racers |
-| L5 | `no_economy`: Ghostgate is supplied from outside |
-| L6 | `ghostgate` [P.L9.ghostfence_holds] |
-| L7 | `garrison_life`: Temple soldiers on rotation |
-| L8 | `fence_of_the_dead`: the wall's power comes from ancestors' bones [P.L8.ancestor_worship] |
-| L9 | `fence_weakening` [P.L9.tribunal_failing] |
-| L10 | `sixth_house_citadels` in Dwemer halls (Vemynal, Odrosal, Tureynulal, Endusal) [P.L10.sixth_house, P.L10.dwemer_citadels] |
-| L11 | `red_mountain_battle`, `ghostfence_raised` |
+| L1 | `islet_maze` (mw.L1.inner_sea): hundreds of jagged basalt islands and sea stacks. `sea_cliffs`: sheer volcanic headlands facing the eastern sea |
+| L2 | `sea_storms` (mw.L2.wet_south, L1.sea_cliffs): squalls and salt spray off the eastern water. `dawn_light` (L1.sea_cliffs): clear sunrise and twilight skies along the eastern headlands |
+| L3 | `kelp_coves` (mw.L3.inner_sea_coasts, L1.islet_maze): deep tidal channels between the islets. `rain_cisterns` (mw.L3.cisterns_and_wells, L2.sea_storms): rainwater catchments in the island towers |
+| L4 | `rocky_islet` (L1.islet_maze, L2.sea_storms): bare basalt stacks and comberry scrub. `kelp_cove` (L3.kelp_coves): giant kelp, mudcrabs and dreugh. `cliff_racer_rookery` (L1.sea_cliffs): nesting crags of cliff racers. `telvanni_spore_garden` (mw.L4.mushroom_forest, L3.rain_cisterns): magically grown fungal stalks |
+| L5 | `telvanni_enchanting` (mw.L5.house_trade, L4.telvanni_spore_garden): spellmaking, alchemy and enchanting in the wizard towers. `fishing` (L4.kelp_cove): small skiffs working the coves. `slave_market_at_tel_aruhn` (mw.L5.slave_trade, L3.kelp_coves): Vvardenfell's largest open slave market beneath Tel Aruhn |
+| L6 | `wizard_towers` (mw.L6.house_seats, L4.telvanni_spore_garden, L5.telvanni_enchanting): grown fungal towers at Tel Branora, Tel Aruhn and Tel Fyr |
+| L7 | `wizard_and_servant` (mw.L7.caste_ladder, L5.slave_market_at_tel_aruhn, L6.wizard_towers): aloof Telvanni magister-lords served by retainers, mercenaries and slaves |
+| L8 | `azura_shrine` (mw.L8.daedra_veneration, L1.sea_cliffs, L2.dawn_light): the monumental headland shrine of Azura of the Crimson Gate. `dreamer_monastery` (mw.L8.tribunal, L1.islet_maze): the secret Dissident Priests' monastery at Holamayan |
+| L9 | `telvanni_rivalries` (mw.L9.house_politics, L6.wizard_towers, L7.wizard_and_servant): wizard-lords settling disputes by spell and assassination. `corprus_hospital` (mw.L9.tribunal_failing, L6.wizard_towers): Divayth Fyr's Corprusarium sheltering victims of the divine disease including the last living Dwarf |
+| L10 | `daedric_headland_ruins` (mw.L10.daedric_ruins, L1.sea_cliffs, L9.telvanni_rivalries): Bal Fell, Kushtashpi and Onimushili among the islets. `sea_cliff_dwemer` (mw.L10.dwemer_citadels, L1.islet_maze, L9.corprus_hospital): Nchardahrk and Mudan Grotto beneath the waves |
+| L11 | `azura_dawn_legends` (mw.L11.chimer_era, L8.azura_shrine): ancient Chimer myths of Azura's guidance and her prophecy after Red Mountain |
 
-#### Zafirbel Bay (proposed `zafirbel_bay`, Vvardenfell half of `telvannis`, seat Sadrith Mora)
+### 1.7 Molag Amur, Vvardenfell (`molag_amur`)
 
-**World truth.** The eastern bay and its islands, the Telvanni wizards' Vvardenfell heartland. Sadrith Mora is a
-cluster of giant fungal towers with no streets, only stems and footbridges, where the house council meets. Outside it
-the Empire's Wolverine Hall holds the guilds and a fort, and the Gateway Inn is where outlanders must sleep. Towers of
-ambitious wizards (Tel Naga) and Dwemer pipes on the reefs complete a bay where might is the only law.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `bay_islands`, `dwemer_reef_vents` [P.L1.dwemer_deeps] |
-| L2 | `mild_bay` |
-| L3 | `rain_and_spores`: towers drink from fungal catchments |
-| L4 | `telvanni_mushroom_forest`, `spore_glade`, `tidal_flat`, `coral_reef` |
-| L5 | `enchanting_and_spells` [P.L5.house_trade]. `slave_labour` [P.L7.slavery] |
-| L6 | `sadrith_mora_towers` [P.L6.house_seats]. `wolverine_hall` [P.L6.imperial_forts_and_ports] |
-| L7 | `power_is_rank` [P.L7.house_order] |
-| L8 | `indifferent_piety`: the wizards tolerate the Temple, no more |
-| L9 | `council_of_masters` [P.L9.house_politics]. `imperial_enclave_tension` |
-| L10 | `wizard_tower_dungeons`, `rkuldumz_spire` [P.L10.dwemer_citadels] |
-| L11 | `telvanni_exile_to_the_east` |
-
-#### Telvanni Peninsula (`telvannis`, mainland half; halves: Port Telvannis / Firewatch)
-
-**World truth.** The mainland's wild east: cliffs, coastal mushroom forest and wizard-lords who answer to no one.
-Port Telvannis is the house's old mainland seat and harbour; Firewatch, a walled city at the north, keeps a fire on
-its tower for ships rounding the cape. Between them lie spore forests, Dwemer workings and towers that hire
-adventurers and rarely pay. The peninsula trades slaves and enchanted goods by sea.
+**World truth.** Molag Amur is a black wasteland of lava fields, cinder cones and boiling fumaroles south-east of Red
+Mountain, the harshest country on Vvardenfell outside the Ghostfence. Molag Mar, a fortified adobe canton town shared by
+the Temple and House Redoran, is the sole settlement; the rest belongs to the Erabenimsun, the fiercest and most
+warlike of the four Ashlander tribes. Pilgrims cross its burning passes to reach the holy peaks of Mount Assarnibibi and
+Mount Kand. Fire ferns glow beside the lava vents, kagouti stalk the ravines, and Daedra haunt the basalt shrines.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `peninsula_cliffs`, `fungal_forest_soils` [P.L1.fungal_soils] |
-| L2 | `sea_rain`, `ash_shadow` on the south |
-| L3 | `cliff_springs` |
-| L4 | `coastal_mushroom_forest`, `spore_glade`, `black_sand_beach`, `cliff_heath`, `dwemer_vent_field` |
-| L5 | `sea_trade` [P.L5.house_trade], `slave_shipping` [P.L5.slave_trade] |
-| L6 | `port_telvannis`, `firewatch_beacon_city` [L1.peninsula_cliffs] |
-| L7 | `lord_and_thrall` [P.L7.caste_ladder] |
-| L8 | `mephala_shrines` [P.L8.daedra_veneration] |
-| L9 | `wizard_feuds` [P.L9.house_politics] |
-| L10 | `towers_gone_wrong`, `dwemer_workings` (Arkzak, Bthungdahrk) |
-| L11 | `old_telvanni_seat` |
+| L1 | `lava_field` (mw.L1.red_mountain): crusted black basalt and active lava channels. `cinder_cones`: steep volcanic cones and ash craters. `obsidian_flats` (mw.L1.ebony_and_glass): glassy volcanic talus slopes |
+| L2 | `ash_and_heat` (mw.L2.ash_storms, mw.L2.fumarole_heat, L1.lava_field): scorching geothermal heat and choking ash gusts off the mountain |
+| L3 | `no_rivers` (L1.lava_field, L2.ash_and_heat): bone-dry interior with no surface streams. `pilgrim_cisterns` (L1.cinder_cones, mw.L3.cisterns_and_wells, L3.no_rivers): covered stone cisterns at Molag Mar and along the southern coast |
+| L4 | `fumarole_fern` (mw.L4.lava_field, L1.lava_field, L2.ash_and_heat): fire fern, trama root and scathecraw around hot vents. `sulphur_pool` (L1.cinder_cones, L2.ash_and_heat): yellow mineral vents prowled by kagouti, nix-hounds, cliff racers and feral scamps |
+| L5 | `pilgrim_trade` (mw.L5.guar_and_netch, L3.pilgrim_cisterns): silt-strider and boat transport, guides and hostelries at Molag Mar. `obsidian_and_fire_fern` (L1.obsidian_flats, L4.fumarole_fern): alchemical harvesting of fire salts and fire petals |
+| L6 | `molag_mar_cliff_town` (mw.L6.temple_cities, L3.pilgrim_cisterns, L5.pilgrim_trade): the fortified cantons of Molag Mar above the southern bay. `erabenimsun_camp` (mw.L6.ashlander_camps, L1.cinder_cones): the high ash-basin yurt camp of the Erabenimsun tribe |
+| L7 | `warlike_nomads` (mw.L7.ashlanders, L6.erabenimsun_camp): militant Ashlander khan-chieftains and gulakhans who despise town Dunmer and outlanders |
+| L8 | `holy_mountains` (mw.L8.pilgrimage, L1.cinder_cones, L6.molag_mar_cliff_town): the Temple pilgrimage shrines of Mount Assarnibibi (Vivec's birth) and Mount Kand |
+| L9 | `erabenimsun_raids` (mw.L9.house_politics, L6.molag_mar_cliff_town, L7.warlike_nomads): Erabenimsun warbands ambushing pilgrims and Redoran patrols in the lava passes |
+| L10 | `lava_daedra_shrines` (mw.L10.daedric_ruins, L1.lava_field, L9.erabenimsun_raids): Punabi, Sulipund, Marandus and Daedric ruins surrounded by lava rivers |
+| L11 | `burned_land` (mw.L11.red_mountain_battle, L1.lava_field): "the Fire-Glitter," scarred by First Era eruptions and Lord Vivec's trials |
 
-#### Stonefalls (`stonefalls`, seat Ebonheart; halves: Blacklight and the Velothi foot / Ebonheart and the Inner Sea shore)
+### 1.8 Grazelands (`grazelands`)
 
-**World truth.** The mainland's volcanic west, from the Velothi foothills at Blacklight down to Ebonheart on the
-Inner Sea and Kragenmoor by the Cyrodiil border. Ebonheart is the Empire's city in Morrowind: Legion garrison, the
-trading company's hall and the chamber where the Great Houses' council meets. Lava shields, ash fields and twin
-volcanic peaks fill the interior; Nord homesteads cling to the north, and Dhalmora remembers the old pact that once
-freed Argonian slaves here. Redoran blades guard the border; Hlaalu ships fill the ports.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `lava_shields`, `twin_peaks` (Brothers of Strife), `ash_mountain`, `velothi_foothills` [P.L1.volcanic_shields, P.L1.velothi_wall] |
-| L2 | `ash_falls` [P.L2.ash_storms]. `snow_on_the_foothills` [P.L2.cold_north] |
-| L3 | `inner_sea_shore` [P.L3.inner_sea_coasts]. `lava_tube_springs` |
-| L4 | `basalt_field`, `ash_scrub`, `lava_tube`, `inner_sea_strand`, `foothill_pine` (the only conifers in the province, at the Skyrim edge), `nord_farmstead` |
-| L5 | `ports` (Davon's Watch, Abasipal wharf) [P.L5.house_trade]. `east_empire_hall` [P.L5.east_empire_charter]. `obsidian_and_basalt` |
-| L6 | `ebonheart_council_city` [P.L6.imperial_forts_and_ports]. `blacklight_border_city` [L1.velothi_foothills]. `kragenmoor_on_the_valus_road`. `silgrad_tower` |
-| L7 | `imperial_district_vs_dunmer_quarter` [L6.ebonheart_council_city]. `nord_settlers` (Hrogar's Hold) |
-| L8 | `imperial_chapels` beside Temple shrines |
-| L9 | `grand_council` of the houses at Ebonheart [P.L9.house_politics]. `border_watch` on two frontiers |
-| L10 | `inner_sea_armature` (Dwemer) [P.L10.dwemer_citadels]. `pact_era_forts` (Virak, Arand, Heimlyn Keep) |
-| L11 | `pact_era` [P.L11.pact_era]. `bal_foyen_treaty` |
-
-#### Deshaan (`deshaan`, capital Mournhold)
-
-**World truth.** The mainland heart: wide fungal plains glowing at night, lava canyons and lagoons, and Mournhold, the
-white-and-gold capital of the goddess Almalexia and House Indoril. Below the city lies its ruined older self and Dwemer
-halls. To the east, Tear is the Dres slave-planters' city with the province's great slave market; Narsis is the Hlaalu
-foothold on the mainland. Pilgrims, priests and plantation wealth make Deshaan rich, and its slaves make it uneasy.
+**World truth.** The Grazelands are a rolling green steppe across Vvardenfell's north-east, sheltered in the lee of the
+northern hills to form the only open herding country on the island. Wild wickwheat and hackle-lo leaf carpet the plains,
+where the Zainab and Ahemmusa Ashlander tribes drive their guar herds from spring to spring. Into this nomad pasture the
+Telvanni have pushed the farming village of Vos and the hybrid stone-and-fungus fortress of Tel Vos, ruled by Master
+Aryon, the youngest and most reform-minded Telvanni councillor. Beneath the grass, ten kwama mines are falling silent as
+Blight creeps down from the mountain.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `fungal_plains` [P.L1.fungal_soils]. `obsidian_gorge` (lava canyon) [P.L1.volcanic_shields] |
-| L2 | `mild_inland` [P.L2.wet_south] |
-| L3 | `lagoon_fens` (Silent Mire), `mournhold_aqueducts`: the Temple controls the capital's water [P.L3.who_holds_water] |
-| L4 | `glowing_fungal_plain`, `lagoon_fen`, `lava_canyon`, `paddy_round_tear`, `mournhold_gardens`, `ghost_snake_vale` |
-| L5 | `temple_economy` [P.L8.tribunal]. `dres_plantations` [P.L5.saltrice_plantations]. `slave_market` (Tear) [P.L5.slave_trade]. `hlaalu_narsis_trade` |
-| L6 | `mournhold_capital` [P.L6.temple_cities]. `tear_plantation_city` [L5.dres_plantations]. `narsis` [P.L6.house_seats] |
-| L7 | `priest_nobility` (Indoril) [P.L7.house_order]. `slaves_of_tear` [P.L7.slavery] |
-| L8 | `almalexia_mother` [P.L8.tribunal]. `quarantine_rites` (Quarantine Serk) |
-| L9 | `indoril_vs_dres` over slavery's place in the Temple [P.L9.slavery_question]. `goddess_unseen`: Almalexia rarely appears [P.L9.tribunal_failing] |
-| L10 | `old_mournhold` and `bamz_amschend` (Dwemer under the capital) [P.L10.dwemer_citadels]. `runaway_caves` |
-| L11 | `mournhold_rebuilt` on its own ruins |
+| L1 | `grass_slopes` (mw.L1.fungal_soils): rolling volcanic-loam downs. `kwama_hills` (mw.L1.kwama_hills): low clay hills honeycombed with kwama tunnels |
+| L2 | `lee_of_the_storms` (mw.L2.ash_storms, L1.grass_slopes): northern hills deflect the worst ash, leaving clear skies and sea breezes |
+| L3 | `seasonal_springs` (mw.L3.who_holds_water, L1.grass_slopes, L2.lee_of_the_storms): grassland waterholes known to the Ashlander herders |
+| L4 | `wickwheat_steppe` (mw.L4.grazeland_steppe, L1.grass_slopes, L2.lee_of_the_storms): wild wickwheat, hackle-lo leaf and golden kanet. `guar_commons` (L3.seasonal_springs, L4.wickwheat_steppe): open grazing range of domestic and wild guar, alit and kagouti |
+| L5 | `herding` (mw.L5.guar_and_netch, L4.guar_commons): Ashlander guar hides, meat and trade goods. `vos_farms` (L4.wickwheat_steppe): Telvanni wickwheat and hackle-lo farms around Vos. `egg_mines` (mw.L5.kwama_eggs, L1.kwama_hills): ten grassland egg mines |
+| L6 | `vos_and_tel_vos` (mw.L6.house_seats, L5.vos_farms): the Velothi farming village of Vos and Master Aryon's Imperial-fort-and-mushroom tower at Tel Vos. `zainab_and_ahemmusa_camps` (mw.L6.ashlander_camps, L3.seasonal_springs, L5.herding): the trading Zainab camp and coastal Ahemmusa camp |
+| L7 | `nomads_vs_farmers` (mw.L7.ashlanders, L6.vos_and_tel_vos, L6.zainab_and_ahemmusa_camps): uneasy truce between Zainab traders, Ahemmusa herders and Telvanni settlers |
+| L8 | `ashlander_herd_rites` (mw.L8.ashlander_old_ways, L6.zainab_and_ahemmusa_camps): Wise Women blessing the herds and seeking safe haven at Ald Daedroth |
+| L9 | `grass_rights` (mw.L9.house_politics, L6.vos_and_tel_vos, L7.nomads_vs_farmers): Master Aryon negotiating trade with the Zainab while older Telvanni ignore nomad custom |
+| L10 | `blighted_egg_mines` (mw.L10.blighted_mines, L1.kwama_hills, L9.grass_rights): grass-country mines infected by the Blight. `dwemer_and_sixth_house` (mw.L10.dwemer_citadels, L1.grass_slopes, L9.grass_rights): Dwemer Nchuleft and Sixth House bases at Ainab and Sharapli |
+| L11 | `old_herd_paths` (mw.L11.chimer_era, L4.guar_commons): ancestral Ashlander migration tracks predating the Great House charters |
 
-#### Necrom Coast (proposed `necrom`, today's mainland `molag_amur`)
+### 1.9 Sheogorad (`sheogorad`)
 
-**World truth.** The south-eastern coast, given to the dead. Necrom is Morrowind's great necropolis city, where families
-from across the province carry their dead for burial in terraced tombs, and pilgrims walk processional avenues under
-lanterns. Its harbours (Zaappi, Elamasipal) live off the funeral trade. Some say the city's oldest libraries hold
-knowledge no mortal should, and that a Daedric prince of forbidden lore watches the scholars who stay too long.
+**World truth.** Sheogorad is a cold, storm-battered archipelago of jagged rock islands and treacherous reefs off
+Vvardenfell's northern coast, named for the Mad God. Its sole town is Dagon Fel, a bleak fishing and salvage harbour
+settled by hardy Nords who trade across the Sea of Ghosts with Skyrim and strip the shipwrecks that litter every shoal.
+Across the rocky channels stand solitary Velothi wizard towers, the remote Sanctus Shrine where Temple pilgrims keep a
+vow of silence, and the sprawling island fortress-shrine of Ald Daedroth, where Sheogorath's cultists and Ordinators war
+amid the surf.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `tomb_hills`, `spire_rocks` [P.L1] |
-| L2 | `grey_sea_mist` |
-| L3 | `harbour_springs`, `funeral_wells` |
-| L4 | `tomb_terraces`, `pale_salt_shore`, `glowing_fungus_grove`, `spire_rock_heath`, `cliff_coast` |
-| L5 | `funeral_trade` [P.L8.ancestor_worship]. `pilgrim_hostels` |
-| L6 | `necrom` [P.L6.temple_cities]. `funeral_harbours` [L5.funeral_trade] |
-| L7 | `tomb_keepers`, `mourners` |
-| L8 | `city_of_the_dead` [P.L8.ancestor_worship]. `forbidden_lore` (Hermaeus Mora) [P.L8.daedra_veneration] |
-| L9 | `burial_rights`: who may be buried here and at what price |
-| L10 | `deep_catacombs`, `necromancer_thieves` of bones (Uhaammu and others) |
-| L11 | `oldest_burials` |
+| L1 | `wave_cut_islets` (mw.L1.inner_sea): craggy grey basalt islands and arches. `reefs`: jagged submerged rock shoals along the Sea of Ghosts |
+| L2 | `cold_sea_storms` (mw.L2.cold_north, L1.wave_cut_islets): freezing gales, sleet and heavy surf from the northern sea |
+| L3 | `rain_barrels_and_springs` (mw.L3.cisterns_and_wells, L2.cold_sea_storms): small island rock springs and rainwater casks |
+| L4 | `islet_heath` (L1.wave_cut_islets, L2.cold_sea_storms): stunted heather, kreshweed and gulls. `kelp_bed` (L1.reefs): cold kelp forests with dreugh, slaughterfish and horkers |
+| L5 | `salvage` (L1.reefs, L4.kelp_bed): stripping cargo from ships wrecked on the shoals. `nord_trade` (mw.L5.east_empire_charter, L4.kelp_bed): fishing and northern sea trade out of Dagon Fel |
+| L6 | `dagon_fel_harbour` (mw.L6.coastal_and_river_towns, L3.rain_barrels_and_springs, L5.nord_trade): Nord timber-and-stone houses and tavern ("The End of the World") around a sheltered bay |
+| L7 | `nord_dunmer_mix` (mw.L7.outlander_scorn, L6.dagon_fel_harbour): rough-spoken Nord fishermen, eccentric hermits and outcast Telvanni mages |
+| L8 | `sanctus_shrine` (mw.L8.pilgrimage, L1.wave_cut_islets): the remote Shrine of the Vow of Silence. `mad_god_shrine` (mw.L8.daedra_veneration, L1.wave_cut_islets): the great island temple of Sheogorath at Ald Daedroth |
+| L9 | `wreckers_suspected` (mw.L9.imperial_presence, L5.salvage, L6.dagon_fel_harbour): whispered accusations that islanders lure merchant ships onto the reefs |
+| L10 | `shipwrecks` (mw.L10.smugglers, L1.reefs, L9.wreckers_suspected): dozens of sunken hulls and drowned vaults. `daedric_island_fortress` (mw.L10.daedric_ruins, L1.wave_cut_islets, L8.mad_god_shrine, L9.wreckers_suspected): Ald Daedroth and the Velothi towers of Mawia and Vas |
+| L11 | `nord_landings` (mw.L11.dwemer_war, L6.dagon_fel_harbour): centuries of Nordic raids and settlements along Morrowind's northern islands |
+
+### 1.10 Red Mountain (`red_mountain`)
+
+**World truth.** Red Mountain is Vvardenfell's smoking volcanic heart, encircled by the Tribunal's Ghostfence—a
+shimmering blue wall of ancestor-bone wards raised to quarantine the Blight and the awakened Sixth House. Inside the
+fence, red ash storms howl without cease over black cinder slopes, foyada lava chutes and Dwemer citadels held by Dagoth
+Ur and his ash-vampire brothers. Nothing grows here but blight-twisted scrub, corprus beasts and eyeless ash creatures.
+Ghostgate, the twin-towered fortress spanning the only pass through the fence, is the sole lawful outpost, garrisoned by
+Ordinators and Buoyant Armigers whose wards grow weaker every month.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `caldera` (mw.L1.red_mountain): the smoking summit crater and lava lake of Dagoth Ur. `cinder_slopes`: steep black ash and basalt talus slopes. `foyadas` (mw.L1.red_mountain): ancient lava channels (Esannudan, Ashur-Dan, Ilibaal) cutting down the mountain |
+| L2 | `blight_storms` (mw.L2.blight_storms, L1.caldera): perpetual red ash gales carrying the Corprus Blight. `plume_shadow` (L1.caldera, L2.blight_storms): dark volcanic smoke blotting out the sun |
+| L3 | `none_inside` (L1.caldera, L2.blight_storms): poisoned sulfur vents inside the fence; only Ghostgate's sealed cisterns hold drinkable water |
+| L4 | `cinder_waste` (mw.L4.lava_field, L1.cinder_slopes, L2.blight_storms): scorched ash, corprus weepings and blight-warped scrub. `ghostfence_zone` (L1.foyadas, L4.cinder_waste): ash slaves, ash ghouls, ascended sleepers, corprus stalkers and blighted cliff racers |
+| L5 | `no_economy` (L3.none_inside, L4.cinder_waste): zero civilian trade; Ghostgate is supplied entirely by Temple caravans from Ald'ruhn and Vivec |
+| L6 | `ghostgate` (mw.L6.temple_cities, L1.foyadas, L5.no_economy): the twin-towered Temple fortress (Tower of Dawn and Tower of Dusk) guarding the pass through the Ghostfence |
+| L7 | `garrison_life` (mw.L7.house_order, L6.ghostgate): Buoyant Armigers, Ordinators and Redoran volunteers serving grim tours on the wall |
+| L8 | `fence_of_the_dead` (mw.L8.ancestor_worship, mw.L8.tribunal, L6.ghostgate): the Ghostfence pylons powered by the consecrated bones of Dunmer ancestors |
+| L9 | `fence_weakening` (mw.L9.tribunal_failing, mw.L9.ghostfence_holds, L7.garrison_life, L8.fence_of_the_dead): the Tribunal's annual pilgrimage to the Heart of Lorkhan has failed, and the Ghostfence is faltering |
+| L10 | `sixth_house_citadels` (mw.L10.sixth_house, mw.L10.dwemer_citadels, L1.caldera, L9.fence_weakening): the Dwemer fortresses of Dagoth Ur, Vemynal, Odrosal, Tureynulal and Endusal held by the Ash Vampires |
+| L11 | `red_mountain_battle` (mw.L11.red_mountain_battle, L1.caldera): the First Era battle where the Dwemer vanished and Nerevar fell. `ghostfence_raised` (mw.L11.tribunal_apotheosis, L8.fence_of_the_dead): the raising of the Ghostfence after Dagoth Ur retook the crater in 3E 417 |
+
+### 1.11 Zafirbel Bay (`zafirbel_bay`)
+
+**World truth.** Zafirbel Bay is the island-studded eastern bay of Vvardenfell, the insular heartland of House Telvanni
+on the island. Its seat, Sadrith Mora, is a forest of giant grown emperor-mushroom towers linked by spiraling root
+ramps and vertical levitation shafts where the Telvanni Council meets. Outsiders are confined to the Gateway Inn or to
+Wolverine Hall, an Imperial Legion fortress bolted directly onto the side of the bay to house the Empire's guilds and
+chapel. Across the surrounding coral reefs and islets rise rival wizard spires like Tel Naga and steaming Dwemer sea
+pipes, in a bay where might is law.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `bay_islands` (mw.L1.inner_sea): sheltered volcanic islands enclosing Zafirbel Bay. `dwemer_reef_vents` (mw.L1.dwemer_deeps): submerged geothermal vents and ancient brass pipes |
+| L2 | `mild_bay` (mw.L2.wet_south, L1.bay_islands): warm, humid bay air sheltered from Red Mountain's ash plume |
+| L3 | `rain_and_spores` (mw.L3.cisterns_and_wells, L2.mild_bay): fungal root catchments filtering rainwater for the towers |
+| L4 | `telvanni_mushroom_forest` (mw.L4.mushroom_forest, L1.bay_islands, L2.mild_bay): towering emperor-parasol canopies and spore glades. `coral_reef` (L1.bay_islands): shallow bay waters with dreugh and slaughterfish |
+| L5 | `enchanting_and_spells` (mw.L5.house_trade, L4.telvanni_mushroom_forest): Telvanni alchemy, soul gems and enchanted gear. `slave_labour` (mw.L5.slave_trade, L4.telvanni_mushroom_forest): slave markets and fungal-tower servants |
+| L6 | `sadrith_mora_towers` (mw.L6.house_seats, L4.telvanni_mushroom_forest, L5.enchanting_and_spells): Tel Naga, the Telvanni Council House and fungal shops of Sadrith Mora. `wolverine_hall` (mw.L6.imperial_forts_and_ports, L1.bay_islands): the towering stone Imperial fort and guild complex beside the town |
+| L7 | `power_is_rank` (mw.L7.house_order, L6.sadrith_mora_towers): Telvanni law where winning an argument by assassination or sorcery makes it legal |
+| L8 | `indifferent_piety` (mw.L8.tribunal, mw.L8.imperial_cult, L7.power_is_rank): Telvanni wizards ignore both the Temple and Wolverine Hall's Imperial cult |
+| L9 | `council_of_masters` (mw.L9.house_politics, L6.sadrith_mora_towers, L7.power_is_rank): Mouths speaking for reclusive Magister-Masters in the Council House. `imperial_enclave_tension` (mw.L9.imperial_presence, L6.wolverine_hall, L9.council_of_masters): cold friction between the Legion garrison and Master Neloth |
+| L10 | `wizard_tower_dungeons` (L4.telvanni_mushroom_forest, L6.sadrith_mora_towers, L9.council_of_masters): root-cellar prisons, Daedra summoning vaults and corprus pens under the towers. `rkuldumz_spire` (mw.L10.dwemer_citadels, L1.dwemer_reef_vents, L9.council_of_masters): flooded Dwemer ruins on the bay floor |
+| L11 | `telvanni_exile_to_the_east` (mw.L11.armistice, L6.sadrith_mora_towers): House Telvanni's withdrawal to the eastern islands to avoid Imperial oversight |
+
+### 1.12 Telvanni Peninsula (`telvannis`)
+
+**World truth.** The Telvanni Peninsula is the mainland's wild, cliff-walled north-eastern arm, a realm of giant
+coastal mushroom forests, black sand beaches and archmagisters who answer neither to the Grand Council nor to the
+Empire. At its northern tip stands Port Telvannis, the ancient mainland seat of House Telvanni and a harbour of immense
+fungal spires; to the west rises Firewatch, an Imperial-chartered walled beacon city keeping a lighthouse flame over the
+stormy cape. Between them lie mist-wrapped spore glades, rogue wizard experiments and deep Dwemer steam-works, while
+Telvanni galleys ship slaves and enchanted wares down the coast.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `peninsula_cliffs`: sheer grey basalt sea cliffs along the Padomaic Ocean. `fungal_forest_soils` (mw.L1.fungal_soils): deep ash-loam basins supporting giant mainland fungi |
+| L2 | `sea_rain` (mw.L2.cold_north, L1.peninsula_cliffs): cool ocean rains and mist. `ash_shadow` (mw.L2.ash_storms, L1.fungal_forest_soils): light ash drift over the southern neck |
+| L3 | `cliff_springs` (mw.L3.inner_sea_coasts, L1.peninsula_cliffs, L2.sea_rain): waterfall streams plunging off the coastal bluffs |
+| L4 | `coastal_mushroom_forest` (mw.L4.mushroom_forest, L1.fungal_forest_soils, L2.sea_rain): giant mainland fungal canopies, spore glades and netch herds. `black_sand_beach` (L1.peninsula_cliffs, L3.cliff_springs): volcanic shingle coves and cliff heaths |
+| L5 | `sea_trade` (mw.L5.house_trade, L4.coastal_mushroom_forest): maritime export of potions, telvanni bug musk and enchantments. `slave_shipping` (mw.L5.slave_trade, L4.black_sand_beach): slave galleys supplying the mainland towers |
+| L6 | `port_telvannis` (mw.L6.house_seats, L4.coastal_mushroom_forest, L5.sea_trade): the colossal fungal capital of mainland House Telvanni. `firewatch_beacon_city` (mw.L6.imperial_forts_and_ports, L1.peninsula_cliffs, L5.sea_trade): the walled Imperial port and lighthouse city on the north-west cape |
+| L7 | `lord_and_thrall` (mw.L7.caste_ladder, mw.L7.slavery, L6.port_telvannis): unchecked magister rule over indentured retainers, mercenaries and slaves |
+| L8 | `mephala_shrines` (mw.L8.daedra_veneration, L7.lord_and_thrall): quiet household and cave shrines to Mephala and Boethiah alongside nominal Temple chapels |
+| L9 | `wizard_feuds` (mw.L9.house_politics, L6.port_telvannis, L6.firewatch_beacon_city, L7.lord_and_thrall): open magical warfare between mainland archmagisters and containment of the Imperial charter at Firewatch |
+| L10 | `towers_gone_wrong` (L4.coastal_mushroom_forest, L6.port_telvannis, L9.wizard_feuds): fungal towers abandoned to rogue Daedra or failed experiments. `dwemer_workings` (mw.L10.dwemer_citadels, L1.peninsula_cliffs, L9.wizard_feuds): the Dwemer halls of Arkzak and Bthungdahrk |
+| L11 | `old_telvanni_seat` (mw.L11.chimer_era, L6.port_telvannis): Port Telvannis's unbroken rule since before Vvardenfell was opened to settlement |
+
+### 1.13 Stonefalls (`stonefalls`)
+
+**World truth.** Stonefalls is the mainland's volcanic western march, stretching from the snow-dusted Velothi foothills
+at Blacklight down to Old Ebonheart on the Inner Sea and Kragenmoor by the Valus passes into Cyrodiil. Ebonheart is the
+hinge between Empire and province: a fortress-city holding the Imperial garrison, the East Empire Company's main hall
+and the Grand Council chamber where the five Great Houses meet. Smoking lava shields, basalt columns and the twin peaks
+of the Brothers of Strife dominate the interior, while Redoran border keeps watch Skyrim, Hlaalu ships crowd Davon's
+Watch, and Dhalmora remembers the Second Era Pact.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `lava_shields` (mw.L1.volcanic_shields): smoking mainland lava plains and basalt columns. `twin_peaks` (mw.L1.volcanic_shields): the twin volcanic cones of the Brothers of Strife and Ash Mountain. `velothi_foothills` (mw.L1.velothi_wall): steep western mountain passes bordering Skyrim |
+| L2 | `ash_falls` (mw.L2.ash_storms, L1.lava_shields): warm ash haze and sulfuric steam across the central basin. `snow_on_the_foothills` (mw.L2.cold_north, L1.velothi_foothills): cold mountain winds and snow in the high Velothi passes |
+| L3 | `inner_sea_shore` (mw.L3.inner_sea_coasts, L1.lava_shields): deep-water harbours facing Vvardenfell. `lava_tube_springs` (L1.lava_shields, L2.snow_on_the_foothills): warm mineral streams fed by mountain snowmelt |
+| L4 | `basalt_field` (mw.L4.lava_field, L1.lava_shields, L2.ash_falls): ash scrub, fire fern and giant mushrooms amid lava flows. `foothill_pine` (L1.velothi_foothills, L2.snow_on_the_foothills): hardy pines along the Skyrim border crags |
+| L5 | `ports` (mw.L5.house_trade, L3.inner_sea_shore): maritime shipping through Davon's Watch and Ebonheart. `east_empire_hall` (mw.L5.east_empire_charter, L3.inner_sea_shore): the East Empire Company's mainland warehouse and customs hub. `obsidian_and_basalt` (mw.L5.ebony_mining, L1.lava_shields): quarrying of volcanic stone and ebony |
+| L6 | `ebonheart_council_city` (mw.L6.imperial_forts_and_ports, L3.inner_sea_shore, L5.east_empire_hall): the Imperial fortress-city and Grand Council seat at Ebonheart. `blacklight_border_city` (mw.L6.house_seats, L1.velothi_foothills): the great Redoran mainland capital guarding the northern pass. `kragenmoor_on_the_valus_road` (mw.L6.house_seats, L5.ports): Hlaalu walled city near the Cyrodiil frontier |
+| L7 | `imperial_district_vs_dunmer_quarter` (mw.L7.outlander_scorn, L6.ebonheart_council_city): Imperial legates and factors rubbing shoulders with proud House delegates. `nord_settlers` (L4.foothill_pine, L6.blacklight_border_city): frontier Nord homesteaders at Hrogar's Hold |
+| L8 | `imperial_chapels` (mw.L8.imperial_cult, mw.L8.tribunal, L6.ebonheart_council_city): Nine Divines chapels in Ebonheart standing across the plaza from Tribunal temples |
+| L9 | `grand_council` (mw.L9.house_politics, mw.L9.imperial_presence, L6.ebonheart_council_city, L7.imperial_district_vs_dunmer_quarter): delegates of all five Great Houses debating tariffs, charters and border defence. `border_watch` (L6.blacklight_border_city, L9.grand_council): Redoran and Indoril garrisons watching the Skyrim and Cyrodiil passes |
+| L10 | `inner_sea_armature` (mw.L10.dwemer_citadels, L1.lava_shields, L9.grand_council): Dwemer ruins along the Inner Sea coast. `pact_era_forts` (mw.L10.daedric_ruins, L1.twin_peaks, L9.border_watch): sealed Second Era fortresses at Fort Virak, Fort Arand and Heimlyn Keep |
+| L11 | `pact_era` (mw.L11.pact_era, L6.ebonheart_council_city): the forging of the Ebonheart Pact against the Akaviri invasion. `bal_foyen_treaty` (L3.inner_sea_shore, L11.pact_era): the brief liberation and settlement of former Argonian slaves at Dhalmora |
+
+### 1.14 Deshaan (`deshaan`)
+
+**World truth.** Deshaan is the rich southern heartland of mainland Morrowind: wide bioluminescent fungal plains,
+obsidian gorges and misty lagoons surrounding Mournhold, the white-and-gold sacred capital of the goddess Almalexia, the
+nominal Imperial King of Morrowind, and House Indoril. Beneath Mournhold's concentric plazas lie the buried ruins of Old
+Mournhold and the Dwemer weather-foundry of Bamz-Amschend. To the east, Tear sits in the feverish border marshes as the
+capital of House Dres and the province's largest slave market; to the west, Narsis anchors Hlaalu trade on the river,
+making Deshaan wealthy and uneasy.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `fungal_plains` (mw.L1.fungal_soils): broad fertile mainland basins of rich ash-loam. `obsidian_gorge` (mw.L1.volcanic_shields): deep volcanic-glass canyons cutting the central hills |
+| L2 | `mild_inland` (mw.L2.wet_south, L1.fungal_plains): warm, humid inland climate with summer rains on the eastern marsh edge |
+| L3 | `lagoon_fens` (mw.L3.ascadian_lakes, L1.fungal_plains, L2.mild_inland): the Silent Mire and southern river flats toward Black Marsh. `mournhold_aqueducts` (L1.fungal_plains, mw.L3.who_holds_water, L3.lagoon_fens): Temple-controlled canals and fountains supplying the capital |
+| L4 | `glowing_fungal_plain` (mw.L4.mushroom_forest, L1.fungal_plains, L2.mild_inland): towering bioluminescent mushrooms, kagouti and netch herds. `paddy_round_tear` (mw.L4.bitter_swamp, L3.lagoon_fens): flooded saltrice marshes and reed fens around Tear |
+| L5 | `temple_economy` (mw.L5.house_trade, L3.mournhold_aqueducts): tithes, crafts and court commerce in Mournhold. `dres_plantations` (mw.L5.saltrice_plantations, L4.paddy_round_tear): sprawling slave-worked saltrice and muck estates. `slave_market` (L4.paddy_round_tear, mw.L5.slave_trade, L5.dres_plantations): Tear's great slave pens fed by raids into Black Marsh. `hlaalu_narsis_trade` (mw.L5.house_trade, L1.fungal_plains): river and road caravans through Narsis |
+| L6 | `mournhold_capital` (mw.L6.temple_cities, mw.L6.house_seats, L3.mournhold_aqueducts, L5.temple_economy): the ringed white-and-gold city of Mournhold (Almalexia), seat of the Temple, House Indoril and the Royal Palace. `tear_plantation_city` (mw.L6.house_seats, L5.dres_plantations, L5.slave_market): the canal-cut Dres seat of Tear. `narsis` (mw.L6.house_seats, L5.hlaalu_narsis_trade): the mainland capital of House Hlaalu |
+| L7 | `priest_nobility` (mw.L7.house_order, mw.L7.caste_ladder, L6.mournhold_capital): orthodox Indoril nobles and Ordinators guarding the capital's strict etiquette. `slaves_of_tear` (mw.L7.slavery, L6.tear_plantation_city): thousands of Argonian captives toiling under Dres whip-masters |
+| L8 | `almalexia_mother` (mw.L8.tribunal, L6.mournhold_capital): devotion to Mother Morrowind and her elite Hands of Almalexia in the High Chapel. `quarantine_rites` (mw.L8.pilgrimage, L3.lagoon_fens): Temple healers tending plague history at the Quarantine Serk |
+| L9 | `indoril_vs_dres` (mw.L9.house_politics, mw.L9.slavery_question, L6.mournhold_capital, L6.tear_plantation_city): rivalry between King Hlaalu Helseth's Royal Court, orthodox Indoril canons and Dres slave-lords. `goddess_unseen` (mw.L9.tribunal_failing, L8.almalexia_mother): Almalexia's growing isolation and paranoia as the Heart's power wanes |
+| L10 | `old_mournhold` (mw.L10.dwemer_citadels, L1.fungal_plains, L6.mournhold_capital, L9.goddess_unseen): the buried ruins of First Mournhold and Dwemer Bamz-Amschend beneath the plazas. `runaway_caves` (L1.obsidian_gorge, L7.slaves_of_tear, L9.indoril_vs_dres): marsh and gorge caverns where escaped Argonians and Twin Lamps agents hide |
+| L11 | `mournhold_rebuilt` (mw.L11.armistice, L6.mournhold_capital, L10.old_mournhold): the sacking of First Mournhold by Mehrunes Dagon at the end of the First Era and its rebuilding above the ruins |
+
+### 1.15 Necrom Coast (`necrom`)
+
+**World truth.** The Necrom Coast is mainland Morrowind's solemn south-eastern seaboard, a pale landscape of limestone
+tomb-terraces, basalt sea spires and lantern-lit processional roads given wholly to the dead. At its centre stands
+Necrom, the white-walled City of the Dead, where Dunmer families of every Great House bring their ancestors' ashes and
+bones by barge and bier to be entombed by the Keepers of the Dead. Funeral harbours at Zaappi and Elamasipal live off
+mourners and pilgrims, while deep beneath the catacombs, bone-thieving necromancers and seekers of Hermaeus Mora's
+forbidden libraries pry into vaults meant never to open.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `tomb_hills`: pale coastal limestone bluffs honeycombed with burial vaults. `spire_rocks` (mw.L1.volcanic_shields): tall basalt sea stacks and crags along the eastern shore |
+| L2 | `grey_sea_mist` (mw.L2.wet_south, L1.spire_rocks): cool salt fog rolling in off the Padomaic Ocean |
+| L3 | `harbour_springs` (mw.L3.inner_sea_coasts, L1.tomb_hills, L2.grey_sea_mist): coastal wells and sheltered coves. `funeral_wells` (mw.L3.cisterns_and_wells, L1.tomb_hills): ritual washing basins along the pilgrim avenues |
+| L4 | `tomb_terraces` (L1.tomb_hills, L2.grey_sea_mist): manicured grave terraces, ash-salt shores and white lanterns. `glowing_fungus_grove` (mw.L4.mushroom_forest, L1.tomb_hills, L3.harbour_springs): pale bioluminescent fungi and cliff heaths |
+| L5 | `funeral_trade` (mw.L5.house_trade, L3.harbour_springs): embalmers, urn-makers, funeral barges and bonemeal consecration. `pilgrim_hostels` (L3.funeral_wells, L5.funeral_trade): quiet inns and scriptoria serving mourners from across Morrowind |
+| L6 | `necrom` (mw.L6.temple_cities, L1.tomb_hills, L5.funeral_trade): the white-walled necropolis city of Necrom with its towering catacomb tiers. `funeral_harbours` (mw.L6.coastal_and_river_towns, L3.harbour_springs, L5.funeral_trade): the coastal ports of Zaappi and Elamasipal |
+| L7 | `tomb_keepers` (mw.L7.house_order, L6.necrom): the solemn order of Keepers of the Dead and Ordinator guards who enforce the truce of the necropolis. `mourners` (L5.pilgrim_hostels, L6.necrom): noble corteges and common pilgrims carrying ancestral remains |
+| L8 | `city_of_the_dead` (mw.L8.ancestor_worship, mw.L8.tribunal, L6.necrom, L7.tomb_keepers): the sacred law that all Dunmer dead find peace and counsel their kin within Necrom's walls. `forbidden_lore` (mw.L8.daedra_veneration, L1.spire_rocks): whispered cults of Hermaeus Mora drawn to the city's ancient memories |
+| L9 | `burial_rights` (mw.L9.house_politics, L7.tomb_keepers, L8.city_of_the_dead): Great House competition for prestigious vault tiers and the Temple's strict ban on necromancy |
+| L10 | `deep_catacombs` (mw.L10.ancestral_tombs, L1.tomb_hills, L8.city_of_the_dead, L9.burial_rights): miles of lower ossuaries guarded by bonewalkers and ancient ghosts. `necromancer_thieves` (L1.spire_rocks, L8.forbidden_lore, L9.burial_rights): bone-robbers and Daedric cultists in coastal caves like Uhaammu |
+| L11 | `oldest_burials` (mw.L11.chimer_era, L6.necrom, L10.deep_catacombs): Necrom's foundation in the First Era around the giant bones of the primordial mythic past |
 
 ---
 

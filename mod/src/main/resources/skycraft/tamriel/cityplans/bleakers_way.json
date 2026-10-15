@@ -1,0 +1,99 @@
+{
+  "id": "bleakers_way",
+  "why": [
+    "jerall_mountains.L4.alpine_spruce",
+    "jerall_mountains.L6.foothill_villages"
+  ],
+  "sil": "snowline-timber-clearing",
+  "base": "none",
+  "overlay": "jerall_mountains",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "jerall_mountains"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "bleakers_way_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "bleakers_way_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "bleakers_way_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "bleakers_way_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "lamps",
+      "theme": "bleakers_brazier",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "bleakers_snow",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "bleakers_way_b_1": "Bleaker's Way Goodwill Inn",
+    "bleakers_way_b_2": "Kirsten's Farmhouse",
+    "bleakers_way_b_3": "Roliand Hanus's Cabin",
+    "bleakers_way_b_4": "Ulene Hlervu's Lodge"
+  },
+  "innKey": "bleakers_way_b_1",
+  "names": {
+    "inn": "bleakers_way_b_1"
+  }
+}

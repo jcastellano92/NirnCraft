@@ -1,195 +1,2381 @@
 {
   "_doc": "Scatter kinds. tags: human|nature. ground: soil sand stone snow mud ash. maxSlope/minSlope: height spread over +-2 blocks. radius: clearance from other props. wet: may stand in water. waterMin/waterMax: blocks to water (map). minElev/maxElev: map height. items: how much of the chunk cap it uses. builder: Java builder id (Builders); else variants (entry lists) or cluster. Block specs: id[props] or $token (see Props). Entry forms: {p,b,chance}, {fill:[x0,y0,z0,x1,y1,z1],b}, {p,item,count,damage}, {chest|barrel:[x,y,z],loot}, {skull:[x,y,z]}, {banner:[x,y,z],color}. follow=true places each block on its own column's ground.",
-
-  "cart_wreck": { "purpose": "a merchant cart that broke an axle and was left at the road bend, its load looted", "needs": ["farmland", "roadside", "urban_fringe", "wayside"], "clue": "a toll-keeper chalk mark and a loose wheel",
-    "tags": ["human"], "maxSlope": 1, "radius": 4, "items": 2,
+  "cart_wreck": {
+    "purpose": "a merchant cart that broke an axle and was left at the road bend, its load looted",
+    "needs": [
+      "farmland",
+      "roadside",
+      "urban_fringe",
+      "wayside"
+    ],
+    "clue": "a toll-keeper chalk mark and a loose wheel",
+    "tags": [
+      "human"
+    ],
+    "maxSlope": 1,
+    "radius": 4,
+    "items": 2,
     "variants": [
-      [ {"fill": [0,0,0,2,0,1], "b": "$planks"}, {"p": [1,0,1], "b": "$slab", "chance": 0.5},
-        {"fill": [0,1,0,2,1,0], "b": "$fence"}, {"p": [0,1,1], "b": "$fence"},
-        {"p": [3,0,0], "b": "$log[axis=x]"}, {"p": [4,0,0], "b": "$fence"},
-        {"p": [1,0,-1], "b": "$trapdoor[facing=south,half=bottom,open=true]"}, {"p": [2,0,2], "b": "$slab", "chance": 0.5},
-        {"barrel": [2,1,1], "loot": "explore/camp", "chance": 0.3},
-        {"p": [-1,0,1], "item": "stick", "chance": 0.6} ],
-      [ {"fill": [0,0,0,1,0,2], "b": "$planks"}, {"p": [2,0,1], "b": "$stairs[facing=west,half=bottom]"},
-        {"fill": [0,1,0,0,1,2], "b": "$fence", "chance": 0.7}, {"p": [1,0,3], "b": "$trapdoor[facing=north,half=bottom,open=true]"},
-        {"p": [-1,0,0], "b": "$log[axis=z]"}, {"p": [-1,0,1], "b": "$log[axis=z]"},
-        {"p": [2,0,3], "b": "barrel[facing=up]"}, {"p": [2,1,3], "b": "barrel[facing=north]", "chance": 0.5} ]
+      [
+        {
+          "fill": [
+            0,
+            0,
+            0,
+            2,
+            0,
+            1
+          ],
+          "b": "$planks"
+        },
+        {
+          "p": [
+            1,
+            0,
+            1
+          ],
+          "b": "$slab",
+          "chance": 0.5
+        },
+        {
+          "fill": [
+            0,
+            1,
+            0,
+            2,
+            1,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            0,
+            1,
+            1
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            3,
+            0,
+            0
+          ],
+          "b": "$log[axis=x]"
+        },
+        {
+          "p": [
+            4,
+            0,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            1,
+            0,
+            -1
+          ],
+          "b": "$trapdoor[facing=south,half=bottom,open=true]"
+        },
+        {
+          "p": [
+            2,
+            0,
+            2
+          ],
+          "b": "$slab",
+          "chance": 0.5
+        },
+        {
+          "barrel": [
+            2,
+            1,
+            1
+          ],
+          "loot": "explore/camp",
+          "chance": 0.3
+        },
+        {
+          "p": [
+            -1,
+            0,
+            1
+          ],
+          "item": "stick",
+          "chance": 0.6
+        }
+      ],
+      [
+        {
+          "fill": [
+            0,
+            0,
+            0,
+            1,
+            0,
+            2
+          ],
+          "b": "$planks"
+        },
+        {
+          "p": [
+            2,
+            0,
+            1
+          ],
+          "b": "$stairs[facing=west,half=bottom]"
+        },
+        {
+          "fill": [
+            0,
+            1,
+            0,
+            0,
+            1,
+            2
+          ],
+          "b": "$fence",
+          "chance": 0.7
+        },
+        {
+          "p": [
+            1,
+            0,
+            3
+          ],
+          "b": "$trapdoor[facing=north,half=bottom,open=true]"
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "b": "$log[axis=z]"
+        },
+        {
+          "p": [
+            -1,
+            0,
+            1
+          ],
+          "b": "$log[axis=z]"
+        },
+        {
+          "p": [
+            2,
+            0,
+            3
+          ],
+          "b": "barrel[facing=up]"
+        },
+        {
+          "p": [
+            2,
+            1,
+            3
+          ],
+          "b": "barrel[facing=north]",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.road_hub",
+      "skyrim.L10.bandits_on_roads"
     ]
   },
-  "crate_stack": { "purpose": "goods stacked at a settlement edge awaiting the carter", "needs": ["urban_fringe"], "clue": "a merchant house brand burned on the lid",
-    "tags": ["human"], "radius": 2, "items": 1,
+  "crate_stack": {
+    "purpose": "goods stacked at a settlement edge awaiting the carter",
+    "needs": [
+      "urban_fringe"
+    ],
+    "clue": "a merchant house brand burned on the lid",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "barrel[facing=up]"}, {"p": [1,0,0], "b": "barrel[facing=up]"}, {"p": [0,1,0], "b": "barrel[facing=north]"},
-        {"p": [0,0,1], "b": "composter", "chance": 0.4} ],
-      [ {"p": [0,0,0], "b": "barrel[facing=east]"}, {"p": [0,0,1], "b": "barrel[facing=up]"}, {"p": [1,0,1], "b": "barrel[facing=up]"},
-        {"p": [0,1,1], "b": "barrel[facing=up]", "chance": 0.6}, {"p": [2,0,0], "b": "$slab", "chance": 0.5} ],
-      [ {"p": [0,0,0], "b": "$planks"}, {"p": [1,0,0], "b": "$planks"}, {"p": [0,1,0], "b": "$trapdoor[facing=south,half=bottom]"},
-        {"p": [1,1,0], "b": "$planks", "chance": 0.5}, {"p": [0,0,1], "b": "barrel[facing=up]"} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "barrel[facing=up]"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "barrel[facing=up]"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "barrel[facing=north]"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "composter",
+          "chance": 0.4
+        }
+      ],
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "barrel[facing=east]"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "barrel[facing=up]"
+        },
+        {
+          "p": [
+            1,
+            0,
+            1
+          ],
+          "b": "barrel[facing=up]"
+        },
+        {
+          "p": [
+            0,
+            1,
+            1
+          ],
+          "b": "barrel[facing=up]",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            2,
+            0,
+            0
+          ],
+          "b": "$slab",
+          "chance": 0.5
+        }
+      ],
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$planks"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$planks"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$trapdoor[facing=south,half=bottom]"
+        },
+        {
+          "p": [
+            1,
+            1,
+            0
+          ],
+          "b": "$planks",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "barrel[facing=up]"
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.road_hub",
+      "skyrim.L5.sea_trade"
     ]
   },
-  "firewood_stack": { "purpose": "a woodcutter's seasoned stack beside the track he hauls it down", "needs": ["farmland", "urban_fringe", "wayside"], "clue": "an axe left in the chopping log",
-    "tags": ["human"], "radius": 3, "items": 1,
+  "firewood_stack": {
+    "purpose": "a woodcutter's seasoned stack beside the track he hauls it down",
+    "needs": [
+      "farmland",
+      "urban_fringe",
+      "wayside"
+    ],
+    "clue": "an axe left in the chopping log",
+    "tags": [
+      "human"
+    ],
+    "radius": 3,
+    "items": 1,
     "variants": [
-      [ {"fill": [0,0,0,2,0,0], "b": "$log[axis=x]"}, {"fill": [0,0,1,2,0,1], "b": "$log[axis=x]"},
-        {"fill": [0,1,0,1,1,0], "b": "$log[axis=x]"}, {"p": [0,1,1], "b": "$log[axis=x]"},
-        {"p": [-2,0,0], "b": "$log[axis=y]"}, {"p": [-2,1,0], "item": "iron_axe", "damage": 0.3},
-        {"p": [3,0,1], "b": "$log[axis=z]", "chance": 0.6} ],
-      [ {"fill": [0,0,0,0,1,3], "b": "$log[axis=z]"}, {"fill": [1,0,0,1,0,3], "b": "$log[axis=z]"},
-        {"p": [0,2,1], "b": "$log[axis=z]", "chance": 0.7}, {"p": [2,0,2], "b": "$log[axis=y]"}, {"p": [2,1,2], "item": "stick"} ]
+      [
+        {
+          "fill": [
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          "b": "$log[axis=x]"
+        },
+        {
+          "fill": [
+            0,
+            0,
+            1,
+            2,
+            0,
+            1
+          ],
+          "b": "$log[axis=x]"
+        },
+        {
+          "fill": [
+            0,
+            1,
+            0,
+            1,
+            1,
+            0
+          ],
+          "b": "$log[axis=x]"
+        },
+        {
+          "p": [
+            0,
+            1,
+            1
+          ],
+          "b": "$log[axis=x]"
+        },
+        {
+          "p": [
+            -2,
+            0,
+            0
+          ],
+          "b": "$log[axis=y]"
+        },
+        {
+          "p": [
+            -2,
+            1,
+            0
+          ],
+          "item": "iron_axe",
+          "damage": 0.3
+        },
+        {
+          "p": [
+            3,
+            0,
+            1
+          ],
+          "b": "$log[axis=z]",
+          "chance": 0.6
+        }
+      ],
+      [
+        {
+          "fill": [
+            0,
+            0,
+            0,
+            0,
+            1,
+            3
+          ],
+          "b": "$log[axis=z]"
+        },
+        {
+          "fill": [
+            1,
+            0,
+            0,
+            1,
+            0,
+            3
+          ],
+          "b": "$log[axis=z]"
+        },
+        {
+          "p": [
+            0,
+            2,
+            1
+          ],
+          "b": "$log[axis=z]",
+          "chance": 0.7
+        },
+        {
+          "p": [
+            2,
+            0,
+            2
+          ],
+          "b": "$log[axis=y]"
+        },
+        {
+          "p": [
+            2,
+            1,
+            2
+          ],
+          "item": "stick"
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.timber",
+      "whiterun.L5.riverwood_timber"
     ]
   },
-  "tool_litter": { "purpose": "tools dropped where a farmhand was called away from the work", "needs": ["farmland", "urban_fringe"], "clue": "a half-finished row and a dropped bucket",
-    "tags": ["human"], "radius": 3, "items": 1,
+  "tool_litter": {
+    "purpose": "tools dropped where a farmhand was called away from the work",
+    "needs": [
+      "farmland",
+      "urban_fringe"
+    ],
+    "clue": "a half-finished row and a dropped bucket",
+    "tags": [
+      "human"
+    ],
+    "radius": 3,
+    "items": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "$log[axis=y]"}, {"p": [0,1,0], "item": "iron_axe", "damage": 0.4, "chance": 0.7},
-        {"p": [2,0,1], "item": "iron_shovel", "damage": 0.3}, {"p": [-1,0,2], "item": "bucket", "chance": 0.5},
-        {"p": [1,0,-2], "item": "iron_hoe", "damage": 0.5, "chance": 0.6}, {"p": [-2,0,-1], "item": "shears", "damage": 0.5, "chance": 0.3} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$log[axis=y]"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "item": "iron_axe",
+          "damage": 0.4,
+          "chance": 0.7
+        },
+        {
+          "p": [
+            2,
+            0,
+            1
+          ],
+          "item": "iron_shovel",
+          "damage": 0.3
+        },
+        {
+          "p": [
+            -1,
+            0,
+            2
+          ],
+          "item": "bucket",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            1,
+            0,
+            -2
+          ],
+          "item": "iron_hoe",
+          "damage": 0.5,
+          "chance": 0.6
+        },
+        {
+          "p": [
+            -2,
+            0,
+            -1
+          ],
+          "item": "shears",
+          "damage": 0.5,
+          "chance": 0.3
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.farm_and_mead",
+      "whiterun.L5.river_farms"
     ]
   },
-  "rubbish_heap": { "purpose": "a settlement's midden dug just outside the walls, downwind", "needs": ["urban_fringe"], "clue": "bones of last feast days and broken crockery",
-    "tags": ["human"], "radius": 3, "items": 1,
+  "rubbish_heap": {
+    "purpose": "a settlement's midden dug just outside the walls, downwind",
+    "needs": [
+      "urban_fringe"
+    ],
+    "clue": "bones of last feast days and broken crockery",
+    "tags": [
+      "human"
+    ],
+    "radius": 3,
+    "items": 1,
     "variants": [
-      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [1,-1,0], "b": "podzol"}, {"p": [0,-1,1], "b": "gravel"},
-        {"p": [0,0,0], "b": "gravel"}, {"p": [1,0,0], "b": "coarse_dirt"}, {"p": [0,0,1], "b": "dead_bush", "chance": 0.5},
-        {"p": [-1,0,0], "item": "rotten_flesh", "chance": 0.7},
-        {"p": [1,0,1], "item": "bone", "chance": 0.6}, {"p": [0,0,-1], "item": "bowl", "chance": 0.5}, {"p": [2,0,0], "item": "stick", "chance": 0.5},
-        {"p": [1,1,0], "b": "brown_mushroom", "chance": 0.3} ]
+      [
+        {
+          "p": [
+            0,
+            -1,
+            0
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            1,
+            -1,
+            0
+          ],
+          "b": "podzol"
+        },
+        {
+          "p": [
+            0,
+            -1,
+            1
+          ],
+          "b": "gravel"
+        },
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "gravel"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "dead_bush",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "item": "rotten_flesh",
+          "chance": 0.7
+        },
+        {
+          "p": [
+            1,
+            0,
+            1
+          ],
+          "item": "bone",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            0,
+            0,
+            -1
+          ],
+          "item": "bowl",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            2,
+            0,
+            0
+          ],
+          "item": "stick",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            1,
+            1,
+            0
+          ],
+          "b": "brown_mushroom",
+          "chance": 0.3
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L6.work_villages",
+      "skyrim.L6.busy_centres"
     ]
   },
-  "cairn": { "purpose": "travellers stacking a stone each as a trail marker or a memorial", "needs": ["deep_wild", "roadside", "ruin_adjacent", "wayside", "wild"], "clue": "a scratched direction or a name on the top stone",
-    "tags": ["human"], "radius": 2, "items": 1,
+  "cairn": {
+    "purpose": "travellers stacking a stone each as a trail marker or a memorial",
+    "needs": [
+      "deep_wild",
+      "roadside",
+      "ruin_adjacent",
+      "wayside",
+      "wild"
+    ],
+    "clue": "a scratched direction or a name on the top stone",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "$rock"}, {"p": [1,0,0], "b": "$rock", "chance": 0.6}, {"p": [0,0,1], "b": "$rock", "chance": 0.6},
-        {"p": [0,1,0], "b": "$rock"}, {"p": [0,2,0], "b": "$rockwall"}, {"p": [0,3,0], "b": "$rockslab", "chance": 0.7} ],
-      [ {"p": [0,0,0], "b": "$rock"}, {"p": [0,1,0], "b": "$rockwall"}, {"p": [0,2,0], "b": "$rockslab"}, {"p": [-1,0,0], "b": "$rockslab", "chance": 0.5} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$rock",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "$rock",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            2,
+            0
+          ],
+          "b": "$rockwall"
+        },
+        {
+          "p": [
+            0,
+            3,
+            0
+          ],
+          "b": "$rockslab",
+          "chance": 0.7
+        }
+      ],
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$rockwall"
+        },
+        {
+          "p": [
+            0,
+            2,
+            0
+          ],
+          "b": "$rockslab"
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "b": "$rockslab",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L1.barrow_ridges",
+      "skyrim.L8.ancestor_barrows"
     ]
   },
-  "grave": { "purpose": "a burial of someone who died on this spot, marked by kin or companions", "needs": ["roadside", "ruin_adjacent", "urban_fringe", "wayside", "wild"], "clue": "a sign naming the dead",
-    "tags": ["human"], "radius": 2, "items": 1, "maxSlope": 1, "ground": ["soil", "snow", "sand", "mud"],
+  "grave": {
+    "purpose": "a burial of someone who died on this spot, marked by kin or companions",
+    "needs": [
+      "roadside",
+      "ruin_adjacent",
+      "urban_fringe",
+      "wayside",
+      "wild"
+    ],
+    "clue": "a sign naming the dead",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
+    "maxSlope": 1,
+    "ground": [
+      "soil",
+      "snow",
+      "sand",
+      "mud"
+    ],
     "variants": [
-      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,-1,1], "b": "coarse_dirt"}, {"p": [0,0,-1], "b": "$rockwall"},
-        {"p": [0,1,-1], "b": "$rockslab", "chance": 0.7}, {"p": [0,0,0], "b": ["poppy", "lily_of_the_valley", "azure_bluet", "dandelion"], "chance": 0.7} ],
-      [ {"p": [0,0,-1], "b": "$fence"}, {"p": [0,1,-1], "b": "$fence"}, {"p": [1,1,-1], "b": "$fence"}, {"p": [-1,1,-1], "b": "$fence"},
-        {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,-1,1], "b": "coarse_dirt"}, {"p": [0,0,1], "b": "$rockslab"} ],
-      [ {"p": [0,-1,0], "b": "coarse_dirt"}, {"p": [0,0,-1], "b": "$rock"}, {"p": [0,1,-1], "b": "$rockslab"} ]
+      [
+        {
+          "p": [
+            0,
+            -1,
+            0
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            0,
+            -1,
+            1
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            0,
+            0,
+            -1
+          ],
+          "b": "$rockwall"
+        },
+        {
+          "p": [
+            0,
+            1,
+            -1
+          ],
+          "b": "$rockslab",
+          "chance": 0.7
+        },
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": [
+            "poppy",
+            "lily_of_the_valley",
+            "azure_bluet",
+            "dandelion"
+          ],
+          "chance": 0.7
+        }
+      ],
+      [
+        {
+          "p": [
+            0,
+            0,
+            -1
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            0,
+            1,
+            -1
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            1,
+            1,
+            -1
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            -1,
+            1,
+            -1
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            0,
+            -1,
+            0
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            0,
+            -1,
+            1
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "$rockslab"
+        }
+      ],
+      [
+        {
+          "p": [
+            0,
+            -1,
+            0
+          ],
+          "b": "coarse_dirt"
+        },
+        {
+          "p": [
+            0,
+            0,
+            -1
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            1,
+            -1
+          ],
+          "b": "$rockslab"
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L8.hold_temples",
+      "skyrim.L8.ancestor_barrows"
     ]
   },
-  "rubble_pile": { "purpose": "fallen masonry of a wall that has not been repaired", "needs": ["dungeon_adjacent", "ruin_adjacent", "urban_fringe"], "clue": "a mason's mark on a block", "tags": ["human"], "builder": "rubble_pile", "radius": 4, "items": 2, "ground": ["soil", "sand", "stone", "snow", "mud", "ash"] },
-  "water_trough": { "purpose": "a watering place for stock beside the pens", "needs": ["farmland", "urban_fringe"], "clue": "a worn hoof path",
-    "tags": ["human"], "radius": 2, "items": 1, "maxSlope": 1,
-    "variants": [
-      [ {"p": [0,0,0], "b": "water_cauldron[level=3]"}, {"p": [1,0,0], "b": "$slab", "chance": 0.7} ]
+  "rubble_pile": {
+    "purpose": "fallen masonry of a wall that has not been repaired",
+    "needs": [
+      "dungeon_adjacent",
+      "ruin_adjacent",
+      "urban_fringe"
+    ],
+    "clue": "a mason's mark on a block",
+    "tags": [
+      "human"
+    ],
+    "builder": "rubble_pile",
+    "radius": 4,
+    "items": 2,
+    "ground": [
+      "soil",
+      "sand",
+      "stone",
+      "snow",
+      "mud",
+      "ash"
+    ],
+    "why": [
+      "skyrim.L1.barrow_ridges",
+      "skyrim.L10.draugr_barrows"
     ]
   },
-  "plank_stack": { "purpose": "seasoning timber set aside for a barn that is being built", "needs": ["farmland", "urban_fringe"], "clue": "a carpenter's mark and a saw",
-    "tags": ["human"], "radius": 3, "items": 1,
+  "water_trough": {
+    "purpose": "a watering place for stock beside the pens",
+    "needs": [
+      "farmland",
+      "urban_fringe"
+    ],
+    "clue": "a worn hoof path",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
+    "maxSlope": 1,
     "variants": [
-      [ {"fill": [0,0,0,2,0,1], "b": "$planks"}, {"fill": [0,1,0,1,1,1], "b": "$planks"}, {"p": [2,1,0], "b": "$slab[type=bottom]"},
-        {"p": [0,2,0], "b": "$slab[type=bottom]", "chance": 0.5}, {"p": [3,0,0], "b": "$log[axis=z]", "chance": 0.5} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "water_cauldron[level=3]"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$slab",
+          "chance": 0.7
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.farm_and_mead",
+      "whiterun.L5.river_farms"
     ]
   },
-  "drying_rack": { "purpose": "a rack where hides or herbs are cured near the dwellings", "needs": ["urban_fringe"], "clue": "half-dry pelts of the season's hunt",
-    "tags": ["human"], "radius": 3, "items": 1, "maxSlope": 1,
+  "plank_stack": {
+    "purpose": "seasoning timber set aside for a barn that is being built",
+    "needs": [
+      "farmland",
+      "urban_fringe"
+    ],
+    "clue": "a carpenter's mark and a saw",
+    "tags": [
+      "human"
+    ],
+    "radius": 3,
+    "items": 1,
     "variants": [
-      [ {"fill": [0,0,0,0,2,0], "b": "$fence"}, {"fill": [3,0,0,3,2,0], "b": "$fence"}, {"fill": [1,2,0,2,2,0], "b": "$fence"},
-        {"p": [1,1,0], "b": "brown_wool"}, {"p": [2,1,0], "b": "$wool"},
-        {"p": [2,0,1], "item": "leather", "chance": 0.5} ]
+      [
+        {
+          "fill": [
+            0,
+            0,
+            0,
+            2,
+            0,
+            1
+          ],
+          "b": "$planks"
+        },
+        {
+          "fill": [
+            0,
+            1,
+            0,
+            1,
+            1,
+            1
+          ],
+          "b": "$planks"
+        },
+        {
+          "p": [
+            2,
+            1,
+            0
+          ],
+          "b": "$slab[type=bottom]"
+        },
+        {
+          "p": [
+            0,
+            2,
+            0
+          ],
+          "b": "$slab[type=bottom]",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            3,
+            0,
+            0
+          ],
+          "b": "$log[axis=z]",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.timber",
+      "haafingar.L5.sawmill"
     ]
   },
-  "fire_pit_cold": { "purpose": "the cold firepit of travellers who camped and moved on", "needs": ["deep_wild", "roadside", "shore", "wayside", "wild"], "clue": "ash and a boot print pointing the way they went",
-    "tags": ["human"], "radius": 3, "items": 1,
+  "drying_rack": {
+    "purpose": "a rack where hides or herbs are cured near the dwellings",
+    "needs": [
+      "urban_fringe"
+    ],
+    "clue": "half-dry pelts of the season's hunt",
+    "tags": [
+      "human"
+    ],
+    "radius": 3,
+    "items": 1,
+    "maxSlope": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "campfire[lit=false]"}, {"p": [1,0,0], "b": "$rock"}, {"p": [-1,0,0], "b": "$rock"}, {"p": [0,0,1], "b": "$rock"},
-        {"p": [0,0,-1], "b": "$rock", "chance": 0.6}, {"p": [2,0,2], "b": "$log[axis=x]", "chance": 0.7}, {"p": [-2,0,2], "b": "$log[axis=z]", "chance": 0.5},
-        {"p": [1,0,2], "item": "stick", "chance": 0.5} ]
+      [
+        {
+          "fill": [
+            0,
+            0,
+            0,
+            0,
+            2,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "fill": [
+            3,
+            0,
+            0,
+            3,
+            2,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "fill": [
+            1,
+            2,
+            0,
+            2,
+            2,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            1,
+            1,
+            0
+          ],
+          "b": "brown_wool"
+        },
+        {
+          "p": [
+            2,
+            1,
+            0
+          ],
+          "b": "$wool"
+        },
+        {
+          "p": [
+            2,
+            0,
+            1
+          ],
+          "item": "leather",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L4.tundra_herds",
+      "whiterun.L4.sabre_and_wolf"
     ]
   },
-  "bedroll": { "purpose": "a night's sleeping place of a traveller (placed only inside a camp)", "needs": ["wild"], "clue": "a pack left and a spent torch",
-    "tags": ["human"], "radius": 2, "items": 1, "maxSlope": 1,
+  "fire_pit_cold": {
+    "purpose": "the cold firepit of travellers who camped and moved on",
+    "needs": [
+      "deep_wild",
+      "roadside",
+      "shore",
+      "wayside",
+      "wild"
+    ],
+    "clue": "ash and a boot print pointing the way they went",
+    "tags": [
+      "human"
+    ],
+    "radius": 3,
+    "items": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "brown_carpet"}, {"p": [0,0,1], "b": "brown_carpet"}, {"p": [1,0,0], "b": "brown_carpet", "chance": 0.3},
-        {"p": [1,0,2], "item": "bowl", "chance": 0.4}, {"p": [-1,0,0], "b": "$log[axis=z]", "chance": 0.5} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "campfire[lit=false]"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            0,
+            -1
+          ],
+          "b": "$rock",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            2,
+            0,
+            2
+          ],
+          "b": "$log[axis=x]",
+          "chance": 0.7
+        },
+        {
+          "p": [
+            -2,
+            0,
+            2
+          ],
+          "b": "$log[axis=z]",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            1,
+            0,
+            2
+          ],
+          "item": "stick",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.road_hub",
+      "skyrim.L10.bandits_on_roads"
     ]
   },
-  "warning_cairn": { "purpose": "locals pile stones to warn others off a nearby dungeon mouth", "needs": ["dungeon_adjacent"], "clue": "a name scratched: the last who ventured in",
-    "tags": ["human"], "radius": 2, "items": 1,
+  "bedroll": {
+    "purpose": "a night's sleeping place of a traveller (placed only inside a camp)",
+    "needs": [
+      "wild"
+    ],
+    "clue": "a pack left and a spent torch",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
+    "maxSlope": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "$rock"}, {"p": [1,0,0], "b": "$rock"}, {"p": [0,0,1], "b": "$rock"}, {"p": [-1,0,0], "b": "$rockslab"},
-        {"p": [0,1,0], "b": "$rock"}, {"p": [0,2,0], "b": "$rockwall"} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "brown_carpet"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "brown_carpet"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "brown_carpet",
+          "chance": 0.3
+        },
+        {
+          "p": [
+            1,
+            0,
+            2
+          ],
+          "item": "bowl",
+          "chance": 0.4
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "b": "$log[axis=z]",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L5.road_hub",
+      "skyrim.L10.bandits_on_roads"
     ]
   },
-  "fallen_banner": { "purpose": "a standard dropped where a column was broken", "needs": ["ruin_adjacent"], "clue": "the sigil of the losing side",
-    "tags": ["human"], "radius": 2, "items": 1,
+  "warning_cairn": {
+    "purpose": "locals pile stones to warn others off a nearby dungeon mouth",
+    "needs": [
+      "dungeon_adjacent"
+    ],
+    "clue": "a name scratched: the last who ventured in",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "$fence"}, {"p": [0,1,0], "b": "$fence"}, {"banner": [0,2,0], "color": "$banner"}, {"p": [1,0,0], "b": "$rockslab", "chance": 0.5},
-        {"p": [-1,0,1], "b": "$log[axis=x]", "chance": 0.5} ],
-      [ {"p": [0,0,0], "b": "$fence"}, {"p": [0,1,0], "b": "$fence"}, {"p": [1,0,1], "item": "stick"}, {"p": [-1,0,0], "b": "$rock", "chance": 0.5} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            0,
+            1
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "b": "$rockslab"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$rock"
+        },
+        {
+          "p": [
+            0,
+            2,
+            0
+          ],
+          "b": "$rockwall"
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L10.draugr_barrows",
+      "skyrim.L10.hagravens_and_witches"
     ]
   },
-  "collapsed_wall": { "purpose": "a ruin wall brought down by time and old war", "needs": ["ruin_adjacent"], "clue": "arrow scars on the face",
-    "tags": ["human"], "radius": 4, "items": 2, "maxSlope": 2,
+  "fallen_banner": {
+    "purpose": "a standard dropped where a column was broken",
+    "needs": [
+      "ruin_adjacent"
+    ],
+    "clue": "the sigil of the losing side",
+    "tags": [
+      "human"
+    ],
+    "radius": 2,
+    "items": 1,
     "variants": [
-      [ {"p": [0,0,0], "b": "$brick"}, {"p": [1,0,0], "b": "$mossy"}, {"p": [2,0,0], "b": "$brick"}, {"p": [3,0,0], "b": "$brick", "chance": 0.7},
-        {"p": [4,0,0], "b": "$mossy", "chance": 0.5}, {"p": [0,1,0], "b": "$brick"}, {"p": [1,1,0], "b": "$mossy", "chance": 0.6},
-        {"p": [3,1,0], "b": "$brick", "chance": 0.4}, {"p": [0,2,0], "b": "$rockslab", "chance": 0.5}, {"p": [2,0,1], "b": "$rock", "chance": 0.6},
-        {"p": [4,0,1], "b": "$rock", "chance": 0.5}, {"p": [1,0,-1], "b": "$rockslab", "chance": 0.5} ]
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "banner": [
+            0,
+            2,
+            0
+          ],
+          "color": "$banner"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$rockslab",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            -1,
+            0,
+            1
+          ],
+          "b": "$log[axis=x]",
+          "chance": 0.5
+        }
+      ],
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$fence"
+        },
+        {
+          "p": [
+            1,
+            0,
+            1
+          ],
+          "item": "stick"
+        },
+        {
+          "p": [
+            -1,
+            0,
+            0
+          ],
+          "b": "$rock",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L9.civil_war",
+      "skyrim.L11.great_war"
     ]
   },
-
-  "field_plot": { "purpose": "a tilled plot at a farm, planted in the local crop", "needs": ["farmland"], "clue": "a scarecrow or a seed sack", "tags": ["human"], "builder": "field_plot", "radius": 4, "items": 2, "maxSlope": 1, "ground": ["soil"] },
-  "broken_weapons": { "purpose": "arms left where a fight ended", "needs": ["dungeon_adjacent", "ruin_adjacent"], "clue": "a notched blade of one faction", "tags": ["human"], "builder": "broken_weapons", "radius": 4, "items": 2 },
-  "blood_trail": { "purpose": "drag marks of a kill taken into the dungeon", "needs": ["dungeon_adjacent"], "clue": "a torn pack along the trail", "tags": ["human"], "builder": "blood_trail", "radius": 4, "items": 1, "ground": ["soil", "sand", "stone", "snow", "mud", "ash"] },
-  "fish_rack": { "purpose": "a fisher's drying rack by the water he works", "needs": ["shore"], "clue": "a net and a narrow boat on the shingle", "tags": ["human"], "builder": "fish_rack", "radius": 4, "items": 1, "maxSlope": 1, "waterMin": 3, "waterMax": 30 },
-
-  "boulder_field": { "purpose": "a rockfall or glacial erratics where the slope shed its load", "needs": ["deep_wild", "dungeon_adjacent", "farmland", "roadside", "ruin_adjacent", "shore", "urban_fringe", "wayside", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "boulder_field", "radius": 6, "items": 2, "maxSlope": 4 },
-  "fallen_log": { "purpose": "a tree felled by storm or age, left to rot", "needs": ["deep_wild", "dungeon_adjacent", "farmland", "roadside", "ruin_adjacent", "shore", "urban_fringe", "wayside", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "fallen_log", "radius": 4, "items": 1, "ground": ["soil", "snow", "mud", "sand"], "maxSlope": 3 },
-  "hollow_stump": { "purpose": "an old stump decaying into a shelter for small life", "needs": ["deep_wild", "farmland", "roadside", "ruin_adjacent", "wild"], "clue": "fungus and a nest", "tags": ["nature"], "builder": "hollow_stump", "radius": 3, "items": 1, "ground": ["soil", "mud", "snow"], "maxSlope": 2 },
-  "mushroom_ring": { "purpose": "a damp ring of fungi in the shade of old trees", "needs": ["deep_wild", "farmland", "roadside", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "mushroom_ring", "radius": 5, "items": 1, "ground": ["soil", "mud"], "maxSlope": 1 },
-  "bone_pile": { "purpose": "where a predator drags its kills to feed", "needs": ["deep_wild", "dungeon_adjacent", "farmland", "ruin_adjacent", "wild"], "clue": "gnawed long bones", "tags": ["nature"], "builder": "bone_pile", "radius": 3, "items": 1 },
-  "animal_den": { "purpose": "a predator's lair dug into a bank or beneath roots", "needs": ["deep_wild", "wild"], "clue": "scat and gnawed bones at the entrance", "tags": ["nature"], "builder": "animal_den", "radius": 5, "items": 2, "ground": ["soil", "stone", "snow", "mud"], "maxSlope": 3, "minElev": 66 },
-  "rock_arch": { "purpose": "weathering that cut through a rock ridge", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "rock_arch", "radius": 6, "items": 3, "ground": ["soil", "stone", "sand", "snow", "ash"], "maxSlope": 3, "params": {"scale": 1} },
-  "spire": { "purpose": "a pillar of hard rock left standing by erosion", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "spire", "radius": 4, "items": 2, "maxSlope": 4, "params": {"min": 6, "max": 12} },
-  "ledge": { "purpose": "a shelf where a slope broke away", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "ledge", "radius": 4, "items": 1, "minSlope": 3, "maxSlope": 12, "ground": ["soil", "stone", "snow", "sand", "ash"] },
-  "crystal_outcrop": { "purpose": "mineral-rich rock breaking the surface in high ground", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "crystal_outcrop", "radius": 4, "items": 2, "ground": ["stone", "snow", "ash", "soil"], "minElev": 95, "maxSlope": 4 },
-  "ore_outcrop": { "purpose": "a vein exposed on a slope that miners will find", "needs": ["deep_wild", "wild"], "clue": "a prospector's abandoned pick mark", "tags": ["nature"], "builder": "ore_outcrop", "radius": 4, "items": 2, "ground": ["stone", "snow", "ash", "soil", "sand"], "minElev": 85, "maxSlope": 4 },
-  "wildflowers": { "purpose": "a meadow patch in sun and open ground", "needs": ["deep_wild", "farmland", "roadside", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "wildflowers", "radius": 3, "items": 1, "ground": ["soil", "snow", "mud"], "maxSlope": 2 },
-  "berry_patch": { "purpose": "a bramble patch on forest edge", "needs": ["deep_wild", "farmland", "roadside", "wild"], "clue": "bird tracks and stripped canes", "tags": ["nature"], "builder": "berry_patch", "radius": 3, "items": 1, "ground": ["soil"], "maxSlope": 2 },
-
-  "driftwood": { "purpose": "timber carried by water and stranded at the high-water line", "needs": ["shore"], "clue": "a rope end tied to a log", "tags": ["nature"], "builder": "driftwood", "radius": 4, "items": 1, "wet": true, "waterMax": 14, "maxSlope": 3 },
-  "reed_bed": { "purpose": "shallow edge water where reeds root", "needs": ["shore"], "clue": "none (natural)", "tags": ["nature"], "builder": "reed_bed", "radius": 4, "items": 1, "wet": true, "waterMax": 10, "ground": ["soil", "sand", "mud"], "maxSlope": 2 },
-  "boat_wreck": { "purpose": "a fisher's boat that broke on the shore", "needs": ["shore"], "clue": "a name on the transom", "tags": ["human"], "builder": "boat_wreck", "radius": 5, "items": 3, "wet": true, "waterMax": 12, "maxSlope": 2 },
-  "stepping_stones": { "purpose": "a natural ford of boulders across shallows", "needs": ["shore"], "clue": "none (natural)", "tags": ["nature"], "builder": "stepping_stones", "radius": 6, "items": 1, "wet": true, "waterMax": 8 },
-
-  "camp_leavings": { "purpose": "travellers' camp: fire, bedroll, pack and cold stones", "needs": ["roadside", "shore", "wayside", "wild"], "clue": "the cold fire and a hastily dropped satchel",
-    "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["fire_pit_cold", "firewood_stack", "bedroll", "crate_stack", "tool_litter", "rubbish_heap", "bone_pile"]}
+  "collapsed_wall": {
+    "purpose": "a ruin wall brought down by time and old war",
+    "needs": [
+      "ruin_adjacent"
+    ],
+    "clue": "arrow scars on the face",
+    "tags": [
+      "human"
+    ],
+    "radius": 4,
+    "items": 2,
+    "maxSlope": 2,
+    "variants": [
+      [
+        {
+          "p": [
+            0,
+            0,
+            0
+          ],
+          "b": "$brick"
+        },
+        {
+          "p": [
+            1,
+            0,
+            0
+          ],
+          "b": "$mossy"
+        },
+        {
+          "p": [
+            2,
+            0,
+            0
+          ],
+          "b": "$brick"
+        },
+        {
+          "p": [
+            3,
+            0,
+            0
+          ],
+          "b": "$brick",
+          "chance": 0.7
+        },
+        {
+          "p": [
+            4,
+            0,
+            0
+          ],
+          "b": "$mossy",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            0,
+            1,
+            0
+          ],
+          "b": "$brick"
+        },
+        {
+          "p": [
+            1,
+            1,
+            0
+          ],
+          "b": "$mossy",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            3,
+            1,
+            0
+          ],
+          "b": "$brick",
+          "chance": 0.4
+        },
+        {
+          "p": [
+            0,
+            2,
+            0
+          ],
+          "b": "$rockslab",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            2,
+            0,
+            1
+          ],
+          "b": "$rock",
+          "chance": 0.6
+        },
+        {
+          "p": [
+            4,
+            0,
+            1
+          ],
+          "b": "$rock",
+          "chance": 0.5
+        },
+        {
+          "p": [
+            1,
+            0,
+            -1
+          ],
+          "b": "$rockslab",
+          "chance": 0.5
+        }
+      ]
+    ],
+    "why": [
+      "skyrim.L11.dragon_war",
+      "skyrim.L10.draugr_barrows"
+    ]
   },
-  "farmstead_clutter": { "purpose": "the working edge of a farm: hay, planks, pens, trough", "needs": ["farmland", "urban_fringe"], "clue": "a scarecrow facing the house",
-    "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["plank_stack", "tool_litter", "water_trough", "firewood_stack"]}
+  "field_plot": {
+    "purpose": "a tilled plot at a farm, planted in the local crop",
+    "needs": [
+      "farmland"
+    ],
+    "clue": "a scarecrow or a seed sack",
+    "tags": [
+      "human"
+    ],
+    "builder": "field_plot",
+    "radius": 4,
+    "items": 2,
+    "maxSlope": 1,
+    "ground": [
+      "soil"
+    ],
+    "why": [
+      "skyrim.L5.farm_and_mead",
+      "whiterun.L5.river_farms"
+    ]
   },
-  "cemetery": { "purpose": "a graveyard on the rise outside a settlement", "needs": ["urban_fringe"], "clue": "a sign naming the families",
-    "tags": ["human"], "items": 0,
-    "cluster": {"min": 4, "max": 7, "radius": 6, "members": ["grave", "grave", "grave", "cairn"]}
+  "broken_weapons": {
+    "purpose": "arms left where a fight ended",
+    "needs": [
+      "dungeon_adjacent",
+      "ruin_adjacent"
+    ],
+    "clue": "a notched blade of one faction",
+    "tags": [
+      "human"
+    ],
+    "builder": "broken_weapons",
+    "radius": 4,
+    "items": 2,
+    "why": [
+      "skyrim.L9.civil_war",
+      "skyrim.L10.bandits_on_roads"
+    ]
   },
-  "rubbish_yard": { "purpose": "a settlement's tip: crates, a broken cart and planks", "needs": ["urban_fringe"], "clue": "bones of last feast days",
-    "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["rubbish_heap", "crate_stack", "cart_wreck", "rubble_pile", "plank_stack"]}
+  "blood_trail": {
+    "purpose": "drag marks of a kill taken into the dungeon",
+    "needs": [
+      "dungeon_adjacent"
+    ],
+    "clue": "a torn pack along the trail",
+    "tags": [
+      "human"
+    ],
+    "builder": "blood_trail",
+    "radius": 4,
+    "items": 1,
+    "ground": [
+      "soil",
+      "sand",
+      "stone",
+      "snow",
+      "mud",
+      "ash"
+    ],
+    "why": [
+      "skyrim.L4.below_fauna",
+      "skyrim.L10.hagravens_and_witches"
+    ]
   },
-  "battle_remains": { "purpose": "where two parties fought and neither came back for the dead", "needs": ["ruin_adjacent"], "clue": "a banner and the weapons of both sides",
-    "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 6, "radius": 6, "members": ["broken_weapons", "bone_pile", "rubble_pile", "fallen_banner", "collapsed_wall"]}
+  "fish_rack": {
+    "purpose": "a fisher's drying rack by the water he works",
+    "needs": [
+      "shore"
+    ],
+    "clue": "a net and a narrow boat on the shingle",
+    "tags": [
+      "human"
+    ],
+    "builder": "fish_rack",
+    "radius": 4,
+    "items": 1,
+    "maxSlope": 1,
+    "waterMin": 3,
+    "waterMax": 30,
+    "why": [
+      "skyrim.L3.great_lakes",
+      "skyrim.L5.sea_trade"
+    ]
   },
-  "dungeon_warnings": { "purpose": "bones, spikes and a cairn warning travellers off the nearby dungeon", "needs": ["dungeon_adjacent"], "clue": "a scratched sign with the last victim's name",
-    "tags": ["human"], "items": 0,
-    "cluster": {"min": 3, "max": 5, "radius": 6, "members": ["bone_pile", "warning_cairn", "blood_trail"]}
+  "boulder_field": {
+    "purpose": "a rockfall or glacial erratics where the slope shed its load",
+    "needs": [
+      "deep_wild",
+      "dungeon_adjacent",
+      "farmland",
+      "roadside",
+      "ruin_adjacent",
+      "shore",
+      "urban_fringe",
+      "wayside",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "boulder_field",
+    "radius": 6,
+    "items": 2,
+    "maxSlope": 4,
+    "why": [
+      "skyrim.L1.spine_ranges",
+      "skyrim.L2.snowline_north"
+    ]
   },
-
-  "great_arch": { "purpose": "a large arch carved by wind in the high rocks", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "rock_arch", "params": {"scale": 2}, "items": 0 },
-  "spire_grove": { "purpose": "a stand of pillars where the stone is layered and weak", "needs": ["deep_wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "spire_grove", "items": 0 },
-  "erratic": { "purpose": "a boulder dropped by an ancient glacier", "needs": ["deep_wild", "wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "erratic", "items": 0 },
-  "crystal_bloom": { "purpose": "a cluster of crystals in crystal country", "needs": ["deep_wild"], "clue": "none (natural)", "tags": ["nature"], "builder": "crystal_bloom", "items": 0 },
-  "dragon_bones": { "purpose": "the remains of a dragon slain in an old war", "needs": ["deep_wild"], "clue": "an ancient shaft in the ribs", "tags": ["nature"], "builder": "dragon_bones", "items": 0 },
-  "giant_hollow": { "purpose": "a hollow of felled boulders where a giant's camp stood", "needs": ["deep_wild"], "clue": "a gigantic bone club", "tags": ["nature"], "builder": "giant_hollow", "items": 0 },
-  "stash": { "purpose": "a hunter's or smuggler's cache hidden under a marker", "needs": ["roadside", "wild"], "clue": "a mark on a nearby rock", "tags": ["nature"], "builder": "stash", "items": 0 }
+  "fallen_log": {
+    "purpose": "a tree felled by storm or age, left to rot",
+    "needs": [
+      "deep_wild",
+      "dungeon_adjacent",
+      "farmland",
+      "roadside",
+      "ruin_adjacent",
+      "shore",
+      "urban_fringe",
+      "wayside",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "fallen_log",
+    "radius": 4,
+    "items": 1,
+    "ground": [
+      "soil",
+      "snow",
+      "mud",
+      "sand"
+    ],
+    "maxSlope": 3,
+    "why": [
+      "skyrim.L4.pine_and_birch",
+      "whiterun.L5.riverwood_timber"
+    ]
+  },
+  "hollow_stump": {
+    "purpose": "an old stump decaying into a shelter for small life",
+    "needs": [
+      "deep_wild",
+      "farmland",
+      "roadside",
+      "ruin_adjacent",
+      "wild"
+    ],
+    "clue": "fungus and a nest",
+    "tags": [
+      "nature"
+    ],
+    "builder": "hollow_stump",
+    "radius": 3,
+    "items": 1,
+    "ground": [
+      "soil",
+      "mud",
+      "snow"
+    ],
+    "maxSlope": 2,
+    "why": [
+      "skyrim.L4.pine_and_birch",
+      "skyrim.L4.marsh_life"
+    ]
+  },
+  "mushroom_ring": {
+    "purpose": "a damp ring of fungi in the shade of old trees",
+    "needs": [
+      "deep_wild",
+      "farmland",
+      "roadside",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "mushroom_ring",
+    "radius": 5,
+    "items": 1,
+    "ground": [
+      "soil",
+      "mud"
+    ],
+    "maxSlope": 1,
+    "why": [
+      "skyrim.L4.marsh_life",
+      "skyrim.L4.pine_and_birch"
+    ]
+  },
+  "bone_pile": {
+    "purpose": "where a predator drags its kills to feed",
+    "needs": [
+      "deep_wild",
+      "dungeon_adjacent",
+      "farmland",
+      "ruin_adjacent",
+      "wild"
+    ],
+    "clue": "gnawed long bones",
+    "tags": [
+      "nature"
+    ],
+    "builder": "bone_pile",
+    "radius": 3,
+    "items": 1,
+    "why": [
+      "skyrim.L4.tundra_herds",
+      "whiterun.L4.sabre_and_wolf"
+    ]
+  },
+  "animal_den": {
+    "purpose": "a predator's lair dug into a bank or beneath roots",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "scat and gnawed bones at the entrance",
+    "tags": [
+      "nature"
+    ],
+    "builder": "animal_den",
+    "radius": 5,
+    "items": 2,
+    "ground": [
+      "soil",
+      "stone",
+      "snow",
+      "mud"
+    ],
+    "maxSlope": 3,
+    "minElev": 66,
+    "why": [
+      "whiterun.L4.sabre_and_wolf",
+      "skyrim.L4.pine_and_birch"
+    ]
+  },
+  "rock_arch": {
+    "purpose": "weathering that cut through a rock ridge",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "rock_arch",
+    "radius": 6,
+    "items": 3,
+    "ground": [
+      "soil",
+      "stone",
+      "sand",
+      "snow",
+      "ash"
+    ],
+    "maxSlope": 3,
+    "params": {
+      "scale": 1
+    },
+    "why": [
+      "skyrim.L1.spine_ranges",
+      "skyrim.L1.barrow_ridges"
+    ]
+  },
+  "spire": {
+    "purpose": "a pillar of hard rock left standing by erosion",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "spire",
+    "radius": 4,
+    "items": 2,
+    "maxSlope": 4,
+    "params": {
+      "min": 6,
+      "max": 12
+    },
+    "why": [
+      "skyrim.L1.spine_ranges",
+      "skyrim.L1.barrow_ridges"
+    ]
+  },
+  "ledge": {
+    "purpose": "a shelf where a slope broke away",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "ledge",
+    "radius": 4,
+    "items": 1,
+    "minSlope": 3,
+    "maxSlope": 12,
+    "ground": [
+      "soil",
+      "stone",
+      "snow",
+      "sand",
+      "ash"
+    ],
+    "why": [
+      "skyrim.L1.spine_ranges",
+      "skyrim.L2.snowline_north"
+    ]
+  },
+  "crystal_outcrop": {
+    "purpose": "mineral-rich rock breaking the surface in high ground",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "crystal_outcrop",
+    "radius": 4,
+    "items": 2,
+    "ground": [
+      "stone",
+      "snow",
+      "ash",
+      "soil"
+    ],
+    "minElev": 95,
+    "maxSlope": 4,
+    "why": [
+      "skyrim.L1.ore_belts",
+      "skyrim.L1.dwemer_bedrock"
+    ]
+  },
+  "ore_outcrop": {
+    "purpose": "a vein exposed on a slope that miners will find",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "a prospector's abandoned pick mark",
+    "tags": [
+      "nature"
+    ],
+    "builder": "ore_outcrop",
+    "radius": 4,
+    "items": 2,
+    "ground": [
+      "stone",
+      "snow",
+      "ash",
+      "soil",
+      "sand"
+    ],
+    "minElev": 85,
+    "maxSlope": 4,
+    "why": [
+      "skyrim.L1.ore_belts",
+      "skyrim.L5.mining_wealth"
+    ]
+  },
+  "wildflowers": {
+    "purpose": "a meadow patch in sun and open ground",
+    "needs": [
+      "deep_wild",
+      "farmland",
+      "roadside",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "wildflowers",
+    "radius": 3,
+    "items": 1,
+    "ground": [
+      "soil",
+      "snow",
+      "mud"
+    ],
+    "maxSlope": 2,
+    "why": [
+      "whiterun.L4.steppe_grass",
+      "whiterun.L4.throat_meadow"
+    ]
+  },
+  "berry_patch": {
+    "purpose": "a bramble patch on forest edge",
+    "needs": [
+      "deep_wild",
+      "farmland",
+      "roadside",
+      "wild"
+    ],
+    "clue": "bird tracks and stripped canes",
+    "tags": [
+      "nature"
+    ],
+    "builder": "berry_patch",
+    "radius": 3,
+    "items": 1,
+    "ground": [
+      "soil"
+    ],
+    "maxSlope": 2,
+    "why": [
+      "skyrim.L4.pine_and_birch",
+      "skyrim.L2.sheltered_south"
+    ]
+  },
+  "driftwood": {
+    "purpose": "timber carried by water and stranded at the high-water line",
+    "needs": [
+      "shore"
+    ],
+    "clue": "a rope end tied to a log",
+    "tags": [
+      "nature"
+    ],
+    "builder": "driftwood",
+    "radius": 4,
+    "items": 1,
+    "wet": true,
+    "waterMax": 14,
+    "maxSlope": 3,
+    "why": [
+      "skyrim.L1.northern_coast",
+      "skyrim.L3.white_river"
+    ]
+  },
+  "reed_bed": {
+    "purpose": "shallow edge water where reeds root",
+    "needs": [
+      "shore"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "reed_bed",
+    "radius": 4,
+    "items": 1,
+    "wet": true,
+    "waterMax": 10,
+    "ground": [
+      "soil",
+      "sand",
+      "mud"
+    ],
+    "maxSlope": 2,
+    "why": [
+      "skyrim.L3.hjaal_marsh",
+      "skyrim.L4.marsh_life"
+    ]
+  },
+  "boat_wreck": {
+    "purpose": "a fisher's boat that broke on the shore",
+    "needs": [
+      "shore"
+    ],
+    "clue": "a name on the transom",
+    "tags": [
+      "human"
+    ],
+    "builder": "boat_wreck",
+    "radius": 5,
+    "items": 3,
+    "wet": true,
+    "waterMax": 12,
+    "maxSlope": 2,
+    "why": [
+      "skyrim.L1.northern_coast",
+      "winterhold.L5.wreck_salvage"
+    ]
+  },
+  "stepping_stones": {
+    "purpose": "a natural ford of boulders across shallows",
+    "needs": [
+      "shore"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "stepping_stones",
+    "radius": 6,
+    "items": 1,
+    "wet": true,
+    "waterMax": 8,
+    "why": [
+      "skyrim.L3.white_river",
+      "skyrim.L3.karth_river"
+    ]
+  },
+  "camp_leavings": {
+    "purpose": "travellers' camp: fire, bedroll, pack and cold stones",
+    "needs": [
+      "roadside",
+      "shore",
+      "wayside",
+      "wild"
+    ],
+    "clue": "the cold fire and a hastily dropped satchel",
+    "tags": [
+      "human"
+    ],
+    "items": 0,
+    "cluster": {
+      "min": 3,
+      "max": 6,
+      "radius": 6,
+      "members": [
+        "fire_pit_cold",
+        "firewood_stack",
+        "bedroll",
+        "crate_stack",
+        "tool_litter",
+        "rubbish_heap",
+        "bone_pile"
+      ]
+    },
+    "why": [
+      "skyrim.L5.road_hub",
+      "skyrim.L10.bandits_on_roads"
+    ]
+  },
+  "farmstead_clutter": {
+    "purpose": "the working edge of a farm: hay, planks, pens, trough",
+    "needs": [
+      "farmland",
+      "urban_fringe"
+    ],
+    "clue": "a scarecrow facing the house",
+    "tags": [
+      "human"
+    ],
+    "items": 0,
+    "cluster": {
+      "min": 3,
+      "max": 6,
+      "radius": 6,
+      "members": [
+        "plank_stack",
+        "tool_litter",
+        "water_trough",
+        "firewood_stack"
+      ]
+    },
+    "why": [
+      "skyrim.L5.farm_and_mead",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  "cemetery": {
+    "purpose": "a graveyard on the rise outside a settlement",
+    "needs": [
+      "urban_fringe"
+    ],
+    "clue": "a sign naming the families",
+    "tags": [
+      "human"
+    ],
+    "items": 0,
+    "cluster": {
+      "min": 4,
+      "max": 7,
+      "radius": 6,
+      "members": [
+        "grave",
+        "grave",
+        "grave",
+        "cairn"
+      ]
+    },
+    "why": [
+      "skyrim.L8.hold_temples",
+      "skyrim.L8.ancestor_barrows"
+    ]
+  },
+  "rubbish_yard": {
+    "purpose": "a settlement's tip: crates, a broken cart and planks",
+    "needs": [
+      "urban_fringe"
+    ],
+    "clue": "bones of last feast days",
+    "tags": [
+      "human"
+    ],
+    "items": 0,
+    "cluster": {
+      "min": 3,
+      "max": 6,
+      "radius": 6,
+      "members": [
+        "rubbish_heap",
+        "crate_stack",
+        "cart_wreck",
+        "rubble_pile",
+        "plank_stack"
+      ]
+    },
+    "why": [
+      "skyrim.L6.busy_centres",
+      "skyrim.L6.work_villages"
+    ]
+  },
+  "battle_remains": {
+    "purpose": "where two parties fought and neither came back for the dead",
+    "needs": [
+      "ruin_adjacent"
+    ],
+    "clue": "a banner and the weapons of both sides",
+    "tags": [
+      "human"
+    ],
+    "items": 0,
+    "cluster": {
+      "min": 3,
+      "max": 6,
+      "radius": 6,
+      "members": [
+        "broken_weapons",
+        "bone_pile",
+        "rubble_pile",
+        "fallen_banner",
+        "collapsed_wall"
+      ]
+    },
+    "why": [
+      "skyrim.L9.civil_war",
+      "skyrim.L11.great_war"
+    ]
+  },
+  "dungeon_warnings": {
+    "purpose": "bones, spikes and a cairn warning travellers off the nearby dungeon",
+    "needs": [
+      "dungeon_adjacent"
+    ],
+    "clue": "a scratched sign with the last victim's name",
+    "tags": [
+      "human"
+    ],
+    "items": 0,
+    "cluster": {
+      "min": 3,
+      "max": 5,
+      "radius": 6,
+      "members": [
+        "bone_pile",
+        "warning_cairn",
+        "blood_trail"
+      ]
+    },
+    "why": [
+      "skyrim.L10.draugr_barrows",
+      "skyrim.L8.daedric_wilds"
+    ]
+  },
+  "great_arch": {
+    "purpose": "a large arch carved by wind in the high rocks",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "rock_arch",
+    "params": {
+      "scale": 2
+    },
+    "items": 0,
+    "why": [
+      "skyrim.L1.spine_ranges",
+      "haafingar.L4.rocky_shore"
+    ]
+  },
+  "spire_grove": {
+    "purpose": "a stand of pillars where the stone is layered and weak",
+    "needs": [
+      "deep_wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "spire_grove",
+    "items": 0,
+    "why": [
+      "skyrim.L1.spine_ranges",
+      "skyrim.L1.ore_belts"
+    ]
+  },
+  "erratic": {
+    "purpose": "a boulder dropped by an ancient glacier",
+    "needs": [
+      "deep_wild",
+      "wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "erratic",
+    "items": 0,
+    "why": [
+      "skyrim.L2.polar_coast",
+      "winterhold.L4.glacier_waste"
+    ]
+  },
+  "crystal_bloom": {
+    "purpose": "a cluster of crystals in crystal country",
+    "needs": [
+      "deep_wild"
+    ],
+    "clue": "none (natural)",
+    "tags": [
+      "nature"
+    ],
+    "builder": "crystal_bloom",
+    "items": 0,
+    "why": [
+      "skyrim.L1.dwemer_bedrock",
+      "skyrim.L10.falmer_below"
+    ]
+  },
+  "dragon_bones": {
+    "purpose": "the remains of a dragon slain in an old war",
+    "needs": [
+      "deep_wild"
+    ],
+    "clue": "an ancient shaft in the ribs",
+    "tags": [
+      "nature"
+    ],
+    "builder": "dragon_bones",
+    "items": 0,
+    "why": [
+      "skyrim.L4.dragons",
+      "skyrim.L11.dragon_war"
+    ]
+  },
+  "giant_hollow": {
+    "purpose": "a hollow of felled boulders where a giant's camp stood",
+    "needs": [
+      "deep_wild"
+    ],
+    "clue": "a gigantic bone club",
+    "tags": [
+      "nature"
+    ],
+    "builder": "giant_hollow",
+    "items": 0,
+    "why": [
+      "whiterun.L4.giant_grounds",
+      "whiterun.L10.giant_camps"
+    ]
+  },
+  "stash": {
+    "purpose": "a hunter's or smuggler's cache hidden under a marker",
+    "needs": [
+      "roadside",
+      "wild"
+    ],
+    "clue": "a mark on a nearby rock",
+    "tags": [
+      "nature"
+    ],
+    "builder": "stash",
+    "items": 0,
+    "why": [
+      "skyrim.L10.guilds_in_shadow",
+      "haafingar.L10.smugglers_coves"
+    ]
+  }
 }

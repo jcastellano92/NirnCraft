@@ -1,0 +1,235 @@
+{
+  "id": "saintsport",
+  "sil": "coral-cove-careening-village",
+  "base": "none",
+  "overlay": "stros_mkai",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "saintsport_broken_rudder",
+  "names": {
+    "inn": "saintsport_broken_rudder",
+    "store": "saintsport_tar_and_hemp",
+    "smithy": "saintsport_caulkers_iron_forge"
+  },
+  "titles": {
+    "saintsport_landmark": "Saintsport Cove Beacon-Rock",
+    "saintsport_broken_rudder": "The Broken Rudder Tavern",
+    "saintsport_tar_and_hemp": "Tar-Pot & Hemp-Cable Store",
+    "saintsport_caulkers_iron_forge": "Caulker's Iron & Spike Smithy",
+    "saintsport_turtle_crawl_pier": "Sea-Turtle & Flying-Fish Pier",
+    "saintsport_lime_and_rum_hut": "Lime-Cordial & Salt-Poultice Hut",
+    "saintsport_tava_shell_shrine": "Conch-Shell Shrine of Tava",
+    "saintsport_market_plaza": "Saintsport Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "saintsport_landmark",
+      "overlay": "stros_mkai"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "saintsport_broken_rudder"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "saintsport_tar_and_hemp"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "saintsport_caulkers_iron_forge"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "saintsport_turtle_crawl_pier"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "saintsport_lime_and_rum_hut"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "saintsport_tava_shell_shrine"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        18
+      ],
+      "to": [
+        8,
+        18
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "saintsport_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "stros_mkai"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "stros_mkai"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "flowers",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "id": "eagles_brook",
+  "sil": "mill-stream-stone-bridge-village",
+  "base": "none",
+  "overlay": "glenumbra",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "eagles_brook_trout_and_creel",
+  "names": {
+    "inn": "eagles_brook_trout_and_creel",
+    "store": "eagles_brook_village_chandler",
+    "smithy": "eagles_brook_farrier_forge"
+  },
+  "titles": {
+    "eagles_brook_landmark": "Eagle's Brook Bridge-Chapel",
+    "eagles_brook_trout_and_creel": "The Trout and Creel Inn",
+    "eagles_brook_village_chandler": "Brookside General Store",
+    "eagles_brook_stone_mill": "Eagle's Brook Overshot Mill",
+    "eagles_brook_farrier_forge": "Bridge-Foot Farrier & Smithy",
+    "eagles_brook_watercress_herb": "Watercress & Mint Herbalist",
+    "eagles_brook_mara_cross": "Brook-Bridge Shrine of Mara",
+    "eagles_brook_market_plaza": "Eagle's Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "eagles_brook_landmark",
+      "overlay": "glenumbra"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "eagles_brook_trout_and_creel"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "eagles_brook_village_chandler"
+    },
+    {
+      "kind": "mill",
+      "use": "mill",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "eagles_brook_stone_mill"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "eagles_brook_farrier_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "eagles_brook_watercress_herb"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "eagles_brook_mara_cross"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "eagles_brook_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "glenumbra"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "glenumbra"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "count": 1
+    }
+  ]
+}

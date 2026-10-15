@@ -1,0 +1,19 @@
+{
+  "id": "bangkorai",
+  "tint": {
+    "wall": "minecraft:stone_bricks",
+    "wall2": "minecraft:smooth_sandstone",
+    "low": "minecraft:cobblestone",
+    "roof": "mud_brick",
+    "trim": "oak",
+    "wood": "oak",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:smooth_sandstone",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:smooth_sandstone",
+    "path": "minecraft:cobblestone"
+  }
+}

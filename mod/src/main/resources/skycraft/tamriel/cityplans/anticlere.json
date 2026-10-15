@@ -1,0 +1,369 @@
+{
+  "id": "anticlere",
+  "sil": "warm-bay-vineyard-citadel",
+  "base": "none",
+  "overlay": "anticlere",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "anticlere_golden_chalice",
+  "names": {
+    "inn": "anticlere_golden_chalice",
+    "store": "anticlere_vintage_mercantile",
+    "smithy": "anticlere_gilt_hilt_smithy"
+  },
+  "titles": {
+    "anticlere_landmark": "Castle Anticlere",
+    "anticlere_ducal_keep": "Castle Anticlere Bay-Citadel",
+    "anticlere_golden_chalice": "The Golden Chalice Inn",
+    "anticlere_vintage_mercantile": "Anticlere Wine & Olive Mercantile",
+    "anticlere_gilt_hilt_smithy": "Gilt-Hilt Rapier & Mail Smithy",
+    "anticlere_neroli_perfumery": "Orange-Blossom & Alchemical Still",
+    "anticlere_dibella_rotunda": "Sunlit Rotunda of Dibella",
+    "anticlere_vintners_guild": "Honourable Vintners' Guildhall",
+    "anticlere_treaty_pavilion": "Bay-Treaty Envoys' Manor",
+    "anticlere_harbour_gate": "Vineyard-Quay Customs Watch",
+    "anticlere_courser_stables": "Bay-Road Courser Stables",
+    "anticlere_market_plaza": "Castle Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "anticlere_landmark",
+      "overlay": "anticlere"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "anticlere_ducal_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "anticlere_golden_chalice"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "anticlere_vintage_mercantile"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "anticlere_gilt_hilt_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "anticlere_neroli_perfumery"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "anticlere_dibella_rotunda"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "anticlere_vintners_guild"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "anticlere_treaty_pavilion"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "anticlere_harbour_gate"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "anticlere_courser_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        32
+      ],
+      "to": [
+        8,
+        32
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "anticlere_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "anticlere"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "anticlere"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:akatosh",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "willow",
+      "count": 1
+    },
+    {
+      "type": "waterwheel",
+      "count": 1
+    }
+  ]
+}

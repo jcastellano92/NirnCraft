@@ -1,0 +1,218 @@
+{
+  "id": "fells_run",
+  "sil": "valley-beck-pasture-village",
+  "base": "none",
+  "overlay": "rivenspire",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "fells_run_plough_and_flagon",
+  "names": {
+    "inn": "fells_run_plough_and_flagon",
+    "store": "fells_run_valley_provender",
+    "smithy": "fells_run_scythe_smithy"
+  },
+  "titles": {
+    "fells_run_landmark": "Fell's Run Croft-Belfry",
+    "fells_run_plough_and_flagon": "The Plough and Flagon Inn",
+    "fells_run_valley_provender": "Fell's Run Provender & Seed Store",
+    "fells_run_scythe_smithy": "Scythe & Coulter Smithy",
+    "fells_run_meadow_balm": "Feverfew & Meadow-Balm Herbalist",
+    "fells_run_barley_mill": "Beckside Barley & Oat Mill",
+    "fells_run_mara_hearth_shrine": "Chapel-Croft of Mara",
+    "fells_run_market_plaza": "Fell's Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "fells_run_landmark",
+      "overlay": "rivenspire"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "fells_run_plough_and_flagon"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "fells_run_valley_provender"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "fells_run_scythe_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "fells_run_meadow_balm"
+    },
+    {
+      "kind": "mill",
+      "use": "mill",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "fells_run_barley_mill"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "fells_run_mara_hearth_shrine"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "fells_run_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "rivenspire"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "rivenspire"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:dibella",
+      "count": 1
+    }
+  ]
+}

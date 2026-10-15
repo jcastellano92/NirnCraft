@@ -1,0 +1,95 @@
+{
+  "id": "ghostgate",
+  "why": [
+    "red_mountain.L1.foyadas",
+    "red_mountain.L2.blight_storms"
+  ],
+  "sil": "ghostfence-twin-tower-gate",
+  "base": "none",
+  "overlay": "red_mountain",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        24
+      ],
+      "overlay": "red_mountain"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "red_mountain",
+      "name": "ghostgate_b_1"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        0,
+        16
+      ],
+      "face": "south",
+      "overlay": "red_mountain",
+      "name": "ghostgate_b_2"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -9,
+        0
+      ],
+      "face": "south",
+      "overlay": "red_mountain",
+      "name": "ghostgate_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -16
+      ],
+      "face": "south",
+      "overlay": "red_mountain",
+      "name": "ghostgate_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "ghostfence_pylon",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "tribunal_ghostgate",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "ghostgate_b_1": "Tower of Dawn",
+    "ghostgate_b_2": "Tower of Dusk",
+    "ghostgate_b_3": "Ghostgate Pilgrim Shrine",
+    "ghostgate_b_4": "Buoyant Armiger Armory"
+  }
+}

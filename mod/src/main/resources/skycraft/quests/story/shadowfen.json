@@ -1,0 +1,698 @@
+{
+  "region": "black_marsh/shadowfen",
+  "province": "black_marsh",
+  "line": "story_shadowfen",
+  "category": "main",
+  "title": "The Broken Shackle",
+  "summary": "Former Dres slaver-factors operating from hidden border caches attempt to reopen the northern shackle-run under forged trade passes while Chain-Breaker wardens hunt their signet-presses.",
+  "why": [
+    "shadowfen.L7.chain_breaker_clans",
+    "shadowfen.L8.shackle_cairns",
+    "shadowfen.L9.broken_chain_watch"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "thorn",
+    "places": [
+      "thorn",
+      "sun_scale_hollow",
+      "branchmont",
+      "tsavakazu",
+      "reed_wallow_hollow",
+      "tasahi",
+      "bright_pool_village",
+      "long_tooth_cave",
+      "riverwalk",
+      "shrine_meridia_black_marsh",
+      "shrine_mephala_black_marsh",
+      "shrine_peryite_black_marsh",
+      "dark_claw_hist_grove",
+      "sun_egg_hist_grove",
+      "nushmei",
+      "hixxa_ruins",
+      "niyonmbek",
+      "reed_marsh_hist_grove",
+      "arnesia",
+      "chasecreek",
+      "dark_root_village",
+      "moss_claw_village",
+      "dead_marsh_village",
+      "warm_moon_village",
+      "silt_whisper_village",
+      "dead_leaf_village",
+      "silt_vine_village",
+      "soft_stride_village",
+      "dead_whisper_village",
+      "reed_mist_village",
+      "gray_eye_village"
+    ],
+    "npc": "story_shadowfen_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Have you heard? Iron slave-collars stamped with a fresh border-factor seal were pulled from the reeds near Percolating Mire, and the Chain-Breaker clans at Thorn are calling for trackers.",
+    "notice": "BY WORD OF THE BROKEN-CHAIN WATCH: Any traveller sighting ash-canvas barges or iron shackle-presses between Percolating Mire and Thorn is to report to the reed-wardens at once."
+  },
+  "npcs": [
+    {
+      "id": "story_shadowfen_hook_npc",
+      "name": "Warden of Thorn",
+      "role": "guard",
+      "place": "thorn",
+      "greet": "Have you heard? Iron slave-collars stamped with a fresh border-factor seal were pulled from the reeds near Percolating Mire, and the Chain-Breaker clans at Thorn are calling for trackers.",
+      "talk": [
+        "The trouble across Shadowfen began when sealed dispatches started bypassing Thorn.",
+        "If you mean to help the Chain-Breaker Clans of Shadowfen, start by checking the trail between Thorn and Reed Mist Village."
+      ]
+    },
+    {
+      "id": "story_shadowfen_envoy_npc",
+      "name": "Chronicler of Thorn",
+      "role": "scholar",
+      "place": "reed_mist_village",
+      "greet": "Keep your voice low—everyone at Reed Mist Village is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Reed Mist Village toward Sweet Fen Arch before they vanished into the brush.",
+        "Bring any ciphered tallies back to Thorn so Root-Speaker Xukas-Tei can see the proof."
+      ]
+    },
+    {
+      "id": "story_shadowfen_scout_npc",
+      "name": "Outrider of Sweet Fen Arch",
+      "role": "scout",
+      "place": "sweet_fen_arch",
+      "greet": "You made good time from Reed Mist Village. The saboteurs have fortified the approaches near Thornmarsh.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Thornmarsh with a picked guard.",
+        "Once Thornmarsh is cleared, return to Thorn to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_shadowfen_steward_npc",
+      "name": "Speaker of Thorn",
+      "role": "steward",
+      "place": "thorn",
+      "greet": "Root-Speaker Xukas-Tei awaits word on whether the crisis in Shadowfen has been contained.",
+      "talk": [
+        "The elders of Thorn have prepared the concord table for your return.",
+        "All of Shadowfen owes you a debt for standing between Thorn and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_shadowfen_boss_01": {
+      "name": "Usurper-Captain of Thorn (1)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "thorn",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_02": {
+      "name": "Usurper-Captain of Reed Mist Village (2)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "reed_mist_village",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_03": {
+      "name": "Usurper-Captain of Sweet Fen Arch (3)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "sweet_fen_arch",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_04": {
+      "name": "Usurper-Captain of Thornmarsh (4)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "thornmarsh",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_05": {
+      "name": "Usurper-Captain of Reed Heart Hollow (5)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "reed_heart_hollow",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_06": {
+      "name": "Usurper-Captain of Mud Fang Hist Grove (6)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "mud_fang_hist_grove",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_07": {
+      "name": "Usurper-Captain of Moss Tree Kwama Mine (7)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "moss_tree_kwama_mine",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_shadowfen_boss_08": {
+      "name": "Usurper-Captain of Soft Egg Outpost (8)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "soft_egg_outpost",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_shadowfen_scene_01": [
+      "Warden of Thorn: Examine these marks recovered near Thorn—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Thorn and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Thorn, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_02": [
+      "Warden of Thorn: Examine these marks recovered near Reed Mist Village—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Reed Mist Village and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Reed Mist Village, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_03": [
+      "Warden of Thorn: Examine these marks recovered near Sweet Fen Arch—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Sweet Fen Arch and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Sweet Fen Arch, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_04": [
+      "Warden of Thorn: Examine these marks recovered near Thornmarsh—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Thornmarsh and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Thornmarsh, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_05": [
+      "Warden of Thorn: Examine these marks recovered near Reed Heart Hollow—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Reed Heart Hollow and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Reed Heart Hollow, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_06": [
+      "Warden of Thorn: Examine these marks recovered near Mud Fang Hist Grove—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Mud Fang Hist Grove and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Mud Fang Hist Grove, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_07": [
+      "Warden of Thorn: Examine these marks recovered near Moss Tree Kwama Mine—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Moss Tree Kwama Mine and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Moss Tree Kwama Mine, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_08": [
+      "Warden of Thorn: Examine these marks recovered near Soft Egg Outpost—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Soft Egg Outpost and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Soft Egg Outpost, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_09": [
+      "Warden of Thorn: Examine these marks recovered near Chasecreek—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Chasecreek and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Chasecreek, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_10": [
+      "Warden of Thorn: Examine these marks recovered near Slow Scale Kwama Mine—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Slow Scale Kwama Mine and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Slow Scale Kwama Mine, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_11": [
+      "Warden of Thorn: Examine these marks recovered near Tall Stride Undercroft—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Tall Stride Undercroft and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Tall Stride Undercroft, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_12": [
+      "Warden of Thorn: Examine these marks recovered near Hixna—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Hixna and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Hixna, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_13": [
+      "Warden of Thorn: Examine these marks recovered near Shrine Mephala Black Marsh—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Shrine Mephala Black Marsh and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Shrine Mephala Black Marsh, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_14": [
+      "Warden of Thorn: Examine these marks recovered near Reed Tree Rock—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Reed Tree Rock and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Reed Tree Rock, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_15": [
+      "Warden of Thorn: Examine these marks recovered near Soft Eye Hist Grove—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Soft Eye Hist Grove and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Soft Eye Hist Grove, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_16": [
+      "Warden of Thorn: Examine these marks recovered near Jeevu Rice Paddy—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Jeevu Rice Paddy and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Jeevu Rice Paddy, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_17": [
+      "Warden of Thorn: Examine these marks recovered near Sweet Fen Hist Grove—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Sweet Fen Hist Grove and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Sweet Fen Hist Grove, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_18": [
+      "Warden of Thorn: Examine these marks recovered near Branchmont—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Branchmont and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Branchmont, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_19": [
+      "Warden of Thorn: Examine these marks recovered near Shrine Malacath Black Marsh—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Shrine Malacath Black Marsh and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Shrine Malacath Black Marsh, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_20": [
+      "Warden of Thorn: Examine these marks recovered near Reed Heart Camp—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Reed Heart Camp and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Reed Heart Camp, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_21": [
+      "Warden of Thorn: Examine these marks recovered near Wreck of the Lucky Griffon—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Wreck of the Lucky Griffon and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Wreck of the Lucky Griffon, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_22": [
+      "Warden of Thorn: Examine these marks recovered near Riverwalk—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Riverwalk and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Riverwalk, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_23": [
+      "Warden of Thorn: Examine these marks recovered near Dead Marsh Village—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Dead Marsh Village and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Dead Marsh Village, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_24": [
+      "Warden of Thorn: Examine these marks recovered near Reed Claw Cave—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Reed Claw Cave and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Reed Claw Cave, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_25": [
+      "Warden of Thorn: Examine these marks recovered near Old Tree Grotto—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Old Tree Grotto and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Old Tree Grotto, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_26": [
+      "Warden of Thorn: Examine these marks recovered near Tsavakazu—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Tsavakazu and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Tsavakazu, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_27": [
+      "Warden of Thorn: Examine these marks recovered near Dead Whisper Village—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Dead Whisper Village and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Dead Whisper Village, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_28": [
+      "Warden of Thorn: Examine these marks recovered near Sun Song Cave—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Sun Song Cave and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Sun Song Cave, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_29": [
+      "Warden of Thorn: Examine these marks recovered near Shrine Namira Black Marsh—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Shrine Namira Black Marsh and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Shrine Namira Black Marsh, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_30": [
+      "Warden of Thorn: Examine these marks recovered near Ruins of Mazzatun—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Ruins of Mazzatun and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Ruins of Mazzatun, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_31": [
+      "Warden of Thorn: Examine these marks recovered near Nushmei—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Nushmei and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Nushmei, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_32": [
+      "Warden of Thorn: Examine these marks recovered near Shrine Sheogorath Black Marsh—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Shrine Sheogorath Black Marsh and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Shrine Sheogorath Black Marsh, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_33": [
+      "Warden of Thorn: Examine these marks recovered near Moss Claw Kwama Mine—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Moss Claw Kwama Mine and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Moss Claw Kwama Mine, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_34": [
+      "Warden of Thorn: Examine these marks recovered near Bog Whisper Hollow—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Bog Whisper Hollow and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Bog Whisper Hollow, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_35": [
+      "Warden of Thorn: Examine these marks recovered near Xilee Xanmeer—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Xilee Xanmeer and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Xilee Xanmeer, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_36": [
+      "Warden of Thorn: Examine these marks recovered near Sun Egg Hist Grove—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Sun Egg Hist Grove and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Sun Egg Hist Grove, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_37": [
+      "Warden of Thorn: Examine these marks recovered near Arnesia—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Arnesia and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Arnesia, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_38": [
+      "Warden of Thorn: Examine these marks recovered near Warm Moon Village—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Warm Moon Village and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Warm Moon Village, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_39": [
+      "Warden of Thorn: Examine these marks recovered near Drift Wallow Hist Grove—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Drift Wallow Hist Grove and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Drift Wallow Hist Grove, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_40": [
+      "Warden of Thorn: Examine these marks recovered near Black Wallow Camp—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Black Wallow Camp and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Black Wallow Camp, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_41": [
+      "Warden of Thorn: Examine these marks recovered near Tsexu Ruins—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Tsexu Ruins and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Tsexu Ruins, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_42": [
+      "Warden of Thorn: Examine these marks recovered near Tall Claw Hist Grove—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Tall Claw Hist Grove and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Tall Claw Hist Grove, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_43": [
+      "Warden of Thorn: Examine these marks recovered near Long Tooth Cave—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Long Tooth Cave and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Long Tooth Cave, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_44": [
+      "Warden of Thorn: Examine these marks recovered near Zukeke—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Zukeke and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Zukeke, then bring the recovered charter back to Thorn."
+    ],
+    "story_shadowfen_scene_45": [
+      "Warden of Thorn: Examine these marks recovered near Bright Throat Ruins—they match the cabal troubling Shadowfen.",
+      "Chronicler of Thorn: The seal impressions cite the old charters of the Chain-Breaker Clans of Shadowfen word for word.",
+      "Outrider of Sweet Fen Arch: Our scouts spotted lantern-signals flashing between Bright Throat Ruins and Thornmarsh at dusk.",
+      "Speaker of Thorn: Strike swiftly at Bright Throat Ruins, then bring the recovered charter back to Thorn."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_shadowfen_01_opening",
+      "order": 1,
+      "title": "Iron in the Reed-Beds",
+      "region": "black_marsh/shadowfen",
+      "category": "main",
+      "giver": "story_shadowfen_hook_npc",
+      "start": "npc:story_shadowfen_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "shadowfen.L7.chain_breaker_clans",
+        "shadowfen.L8.shackle_cairns"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Thorn and Reed Mist Village in Shadowfen.",
+      "places": [
+        "thorn",
+        "reed_mist_village"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "thorn",
+          "objective": "Speak with the Warden at Thorn and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "reed_mist_village",
+          "objective": "Examine the disturbed boundary markers at Reed Mist Village"
+        },
+        {
+          "id": 30,
+          "place": "thorn",
+          "objective": "Return the recovered seal-impression to the Chronicler at Thorn"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "thorn",
+          "text": "Speak with the Warden at Thorn and inspect the contested tallies",
+          "scene": "story_shadowfen_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "reed_mist_village",
+          "text": "Examine the disturbed boundary markers at Reed Mist Village"
+        },
+        {
+          "type": "go",
+          "place": "thorn",
+          "text": "Return the recovered seal-impression to the Chronicler at Thorn"
+        }
+      ],
+      "consequence": "world_state:shadowfen_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_shadowfen_02_trail",
+      "order": 2,
+      "title": "The Factor's Ash-Barge",
+      "region": "black_marsh/shadowfen",
+      "category": "main",
+      "giver": "story_shadowfen_envoy_npc",
+      "start": "auto",
+      "prereq": "story_shadowfen_01_opening",
+      "requires": [
+        "story_shadowfen_01_opening"
+      ],
+      "why": [
+        "shadowfen.L8.shackle_cairns",
+        "shadowfen.L9.broken_chain_watch"
+      ],
+      "summary": "Follow the conspirators' supply route from Reed Mist Village to Sweet Fen Arch and seize their cipher-ledger.",
+      "places": [
+        "reed_mist_village",
+        "sweet_fen_arch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "reed_mist_village",
+          "objective": "Track the night-couriers departing Reed Mist Village"
+        },
+        {
+          "id": 20,
+          "place": "sweet_fen_arch",
+          "objective": "Drive off the cabal outriders at Sweet Fen Arch and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "reed_mist_village",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Reed Mist Village"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "reed_mist_village",
+          "text": "Track the night-couriers departing Reed Mist Village",
+          "scene": "story_shadowfen_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "sweet_fen_arch",
+          "text": "Drive off the cabal outriders at Sweet Fen Arch and seize their cipher-box",
+          "boss": "story_shadowfen_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "reed_mist_village",
+          "text": "Deliver the cipher-box to the expedition chronicler at Reed Mist Village"
+        }
+      ],
+      "consequence": "world_state:shadowfen_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_shadowfen_03_sanctum",
+      "order": 3,
+      "title": "Vaults of the Sunken Xanmeer",
+      "region": "black_marsh/shadowfen",
+      "category": "main",
+      "giver": "story_shadowfen_scout_npc",
+      "start": "auto",
+      "prereq": "story_shadowfen_02_trail",
+      "requires": [
+        "story_shadowfen_02_trail"
+      ],
+      "why": [
+        "shadowfen.L9.broken_chain_watch",
+        "shadowfen.L10.ten_maur_wolk_xanmeer"
+      ],
+      "summary": "Secure the outer wards between Sweet Fen Arch and Thornmarsh to lay bare the cabal's stronghold.",
+      "places": [
+        "sweet_fen_arch",
+        "thornmarsh"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sweet_fen_arch",
+          "objective": "Meet the outrider scout at Sweet Fen Arch to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "thornmarsh",
+          "objective": "Scout the fortified threshold at Thornmarsh and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "thorn",
+          "objective": "Carry the ward-key back to the council table at Thorn"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "sweet_fen_arch",
+          "text": "Meet the outrider scout at Sweet Fen Arch to decode the sanctum approach",
+          "scene": "story_shadowfen_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "thornmarsh",
+          "text": "Scout the fortified threshold at Thornmarsh and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "thorn",
+          "text": "Carry the ward-key back to the council table at Thorn"
+        }
+      ],
+      "consequence": "world_state:shadowfen_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_shadowfen_04_finale",
+      "order": 4,
+      "title": "The Shackle-Cairn Reckoning",
+      "region": "black_marsh/shadowfen",
+      "category": "main",
+      "giver": "story_shadowfen_steward_npc",
+      "start": "auto",
+      "prereq": "story_shadowfen_03_sanctum",
+      "requires": [
+        "story_shadowfen_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "shadowfen.L7.chain_breaker_clans",
+        "shadowfen.L10.ten_maur_wolk_xanmeer"
+      ],
+      "summary": "Storm the cabal stronghold at Thornmarsh and witness Root-Speaker Xukas-Tei seal the regional concord at Thorn.",
+      "places": [
+        "thornmarsh",
+        "thorn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "thornmarsh",
+          "objective": "Storm the inner chamber at Thornmarsh and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "thornmarsh",
+          "objective": "Recover the stolen charter-seal of Shadowfen from Thornmarsh"
+        },
+        {
+          "id": 30,
+          "place": "thorn",
+          "objective": "Present the charter-seal at Thorn to restore peace across Shadowfen"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "thornmarsh",
+          "text": "Storm the inner chamber at Thornmarsh and defeat the cabal ringleader",
+          "boss": "story_shadowfen_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "thornmarsh",
+          "text": "Recover the stolen charter-seal of Shadowfen from Thornmarsh"
+        },
+        {
+          "type": "go",
+          "place": "thorn",
+          "text": "Present the charter-seal at Thorn to restore peace across Shadowfen",
+          "scene": "story_shadowfen_scene_04"
+        }
+      ],
+      "consequence": "world_state:shadowfen_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Thorn"
+      }
+    }
+  ]
+}

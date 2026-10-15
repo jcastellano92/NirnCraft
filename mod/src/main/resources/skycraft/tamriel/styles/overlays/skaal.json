@@ -1,15 +1,840 @@
 {
   "id": "skaal",
+  "why": [
+    "skaal.L1.east_shore",
+    "skaal.L1.forest_uplands"
+  ],
   "tint": {
-    "wall": "minecraft:bone_block",
-    "wall2": "minecraft:calcite",
+    "wall": "minecraft:spruce_planks",
+    "wall2": "minecraft:stripped_spruce_log",
+    "low": "minecraft:cobblestone",
     "wood": "spruce",
     "roof": "spruce",
-    "accent": "light_blue"
+    "accent": "white"
   },
   "palette": {
-    "plaza": "minecraft:snow_block",
-    "plaza2": "minecraft:packed_ice",
+    "cityWall": "cobblestone",
+    "cityWall2": "minecraft:stripped_spruce_log",
+    "plaza": "minecraft:spruce_planks",
+    "plaza2": "minecraft:cobblestone",
     "path": "minecraft:snow_block"
+  },
+  "style": {
+    "houseStyle": "ashlander",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:spruce_planks",
+        "minecraft:stripped_spruce_log",
+        "minecraft:cobblestone",
+        "minecraft:snow_block",
+        "cobblestone",
+        "minecraft:spruce_planks"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_1_0",
+          "prop_skaal_1_1",
+          "prop_skaal_1_2",
+          "prop_skaal_1_3",
+          "prop_skaal_1_4",
+          "prop_skaal_1_5",
+          "prop_skaal_1_6",
+          "prop_skaal_1_7",
+          "prop_skaal_1_8",
+          "prop_skaal_1_9",
+          "prop_skaal_1_10",
+          "prop_skaal_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_2_0",
+          "prop_skaal_2_1",
+          "prop_skaal_2_2",
+          "prop_skaal_2_3",
+          "prop_skaal_2_4",
+          "prop_skaal_2_5",
+          "prop_skaal_2_6",
+          "prop_skaal_2_7",
+          "prop_skaal_2_8",
+          "prop_skaal_2_9",
+          "prop_skaal_2_10",
+          "prop_skaal_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_3_0",
+          "prop_skaal_3_1",
+          "prop_skaal_3_2",
+          "prop_skaal_3_3",
+          "prop_skaal_3_4",
+          "prop_skaal_3_5",
+          "prop_skaal_3_6",
+          "prop_skaal_3_7",
+          "prop_skaal_3_8",
+          "prop_skaal_3_9",
+          "prop_skaal_3_10",
+          "prop_skaal_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_4_0",
+          "prop_skaal_4_1",
+          "prop_skaal_4_2",
+          "prop_skaal_4_3",
+          "prop_skaal_4_4",
+          "prop_skaal_4_5",
+          "prop_skaal_4_6",
+          "prop_skaal_4_7",
+          "prop_skaal_4_8",
+          "prop_skaal_4_9",
+          "prop_skaal_4_10",
+          "prop_skaal_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_5_0",
+          "prop_skaal_5_1",
+          "prop_skaal_5_2",
+          "prop_skaal_5_3",
+          "prop_skaal_5_4",
+          "prop_skaal_5_5",
+          "prop_skaal_5_6",
+          "prop_skaal_5_7",
+          "prop_skaal_5_8",
+          "prop_skaal_5_9",
+          "prop_skaal_5_10",
+          "prop_skaal_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_6_0",
+          "prop_skaal_6_1",
+          "prop_skaal_6_2",
+          "prop_skaal_6_3",
+          "prop_skaal_6_4",
+          "prop_skaal_6_5",
+          "prop_skaal_6_6",
+          "prop_skaal_6_7",
+          "prop_skaal_6_8",
+          "prop_skaal_6_9",
+          "prop_skaal_6_10",
+          "prop_skaal_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_7_0",
+          "prop_skaal_7_1",
+          "prop_skaal_7_2",
+          "prop_skaal_7_3",
+          "prop_skaal_7_4",
+          "prop_skaal_7_5",
+          "prop_skaal_7_6",
+          "prop_skaal_7_7",
+          "prop_skaal_7_8",
+          "prop_skaal_7_9",
+          "prop_skaal_7_10",
+          "prop_skaal_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_8_0",
+          "prop_skaal_8_1",
+          "prop_skaal_8_2",
+          "prop_skaal_8_3",
+          "prop_skaal_8_4",
+          "prop_skaal_8_5",
+          "prop_skaal_8_6",
+          "prop_skaal_8_7",
+          "prop_skaal_8_8",
+          "prop_skaal_8_9",
+          "prop_skaal_8_10",
+          "prop_skaal_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_9_0",
+          "prop_skaal_9_1",
+          "prop_skaal_9_2",
+          "prop_skaal_9_3",
+          "prop_skaal_9_4",
+          "prop_skaal_9_5",
+          "prop_skaal_9_6",
+          "prop_skaal_9_7",
+          "prop_skaal_9_8",
+          "prop_skaal_9_9",
+          "prop_skaal_9_10",
+          "prop_skaal_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_10_0",
+          "prop_skaal_10_1",
+          "prop_skaal_10_2",
+          "prop_skaal_10_3",
+          "prop_skaal_10_4",
+          "prop_skaal_10_5",
+          "prop_skaal_10_6",
+          "prop_skaal_10_7",
+          "prop_skaal_10_8",
+          "prop_skaal_10_9",
+          "prop_skaal_10_10",
+          "prop_skaal_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_11_0",
+          "prop_skaal_11_1",
+          "prop_skaal_11_2",
+          "prop_skaal_11_3",
+          "prop_skaal_11_4",
+          "prop_skaal_11_5",
+          "prop_skaal_11_6",
+          "prop_skaal_11_7",
+          "prop_skaal_11_8",
+          "prop_skaal_11_9",
+          "prop_skaal_11_10",
+          "prop_skaal_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_12_0",
+          "prop_skaal_12_1",
+          "prop_skaal_12_2",
+          "prop_skaal_12_3",
+          "prop_skaal_12_4",
+          "prop_skaal_12_5",
+          "prop_skaal_12_6",
+          "prop_skaal_12_7",
+          "prop_skaal_12_8",
+          "prop_skaal_12_9",
+          "prop_skaal_12_10",
+          "prop_skaal_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_13_0",
+          "prop_skaal_13_1",
+          "prop_skaal_13_2",
+          "prop_skaal_13_3",
+          "prop_skaal_13_4",
+          "prop_skaal_13_5",
+          "prop_skaal_13_6",
+          "prop_skaal_13_7",
+          "prop_skaal_13_8",
+          "prop_skaal_13_9",
+          "prop_skaal_13_10",
+          "prop_skaal_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_14_0",
+          "prop_skaal_14_1",
+          "prop_skaal_14_2",
+          "prop_skaal_14_3",
+          "prop_skaal_14_4",
+          "prop_skaal_14_5",
+          "prop_skaal_14_6",
+          "prop_skaal_14_7",
+          "prop_skaal_14_8",
+          "prop_skaal_14_9",
+          "prop_skaal_14_10",
+          "prop_skaal_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_15_0",
+          "prop_skaal_15_1",
+          "prop_skaal_15_2",
+          "prop_skaal_15_3",
+          "prop_skaal_15_4",
+          "prop_skaal_15_5",
+          "prop_skaal_15_6",
+          "prop_skaal_15_7",
+          "prop_skaal_15_8",
+          "prop_skaal_15_9",
+          "prop_skaal_15_10",
+          "prop_skaal_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_16_0",
+          "prop_skaal_16_1",
+          "prop_skaal_16_2",
+          "prop_skaal_16_3",
+          "prop_skaal_16_4",
+          "prop_skaal_16_5",
+          "prop_skaal_16_6",
+          "prop_skaal_16_7",
+          "prop_skaal_16_8",
+          "prop_skaal_16_9",
+          "prop_skaal_16_10",
+          "prop_skaal_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_17_0",
+          "prop_skaal_17_1",
+          "prop_skaal_17_2",
+          "prop_skaal_17_3",
+          "prop_skaal_17_4",
+          "prop_skaal_17_5",
+          "prop_skaal_17_6",
+          "prop_skaal_17_7",
+          "prop_skaal_17_8",
+          "prop_skaal_17_9",
+          "prop_skaal_17_10",
+          "prop_skaal_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_18_0",
+          "prop_skaal_18_1",
+          "prop_skaal_18_2",
+          "prop_skaal_18_3",
+          "prop_skaal_18_4",
+          "prop_skaal_18_5",
+          "prop_skaal_18_6",
+          "prop_skaal_18_7",
+          "prop_skaal_18_8",
+          "prop_skaal_18_9",
+          "prop_skaal_18_10",
+          "prop_skaal_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_19_0",
+          "prop_skaal_19_1",
+          "prop_skaal_19_2",
+          "prop_skaal_19_3",
+          "prop_skaal_19_4",
+          "prop_skaal_19_5",
+          "prop_skaal_19_6",
+          "prop_skaal_19_7",
+          "prop_skaal_19_8",
+          "prop_skaal_19_9",
+          "prop_skaal_19_10",
+          "prop_skaal_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_20_0",
+          "prop_skaal_20_1",
+          "prop_skaal_20_2",
+          "prop_skaal_20_3",
+          "prop_skaal_20_4",
+          "prop_skaal_20_5",
+          "prop_skaal_20_6",
+          "prop_skaal_20_7",
+          "prop_skaal_20_8",
+          "prop_skaal_20_9",
+          "prop_skaal_20_10",
+          "prop_skaal_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:spruce_planks",
+        "wall_secondary": "minecraft:stripped_spruce_log",
+        "plinth": "minecraft:cobblestone",
+        "carpentry": "spruce",
+        "roofing": "spruce",
+        "banner_dye": "white",
+        "paving": [
+          "minecraft:spruce_planks",
+          "minecraft:snow_block",
+          "minecraft:cobblestone",
+          "cobblestone"
+        ],
+        "trim_blocks": [
+          "minecraft:spruce_planks",
+          "minecraft:stripped_spruce_log",
+          "minecraft:cobblestone",
+          "cobblestone",
+          "minecraft:spruce_planks",
+          "minecraft:snow_block"
+        ],
+        "props": [
+          "prop_skaal_21_0",
+          "prop_skaal_21_1",
+          "prop_skaal_21_2",
+          "prop_skaal_21_3",
+          "prop_skaal_21_4",
+          "prop_skaal_21_5",
+          "prop_skaal_21_6",
+          "prop_skaal_21_7",
+          "prop_skaal_21_8",
+          "prop_skaal_21_9",
+          "prop_skaal_21_10",
+          "prop_skaal_21_11"
+        ]
+      }
+    }
   }
 }

@@ -1,0 +1,235 @@
+{
+  "id": "tavorra_cove",
+  "sil": "leeward-shallop-anchorage",
+  "base": "none",
+  "overlay": "stros_mkai",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "tavorra_cove_driftwood_cup",
+  "names": {
+    "inn": "tavorra_cove_driftwood_cup",
+    "store": "tavorra_cove_net_and_line",
+    "smithy": "tavorra_cove_hook_smithy"
+  },
+  "titles": {
+    "tavorra_cove_landmark": "Tavorra Leeward Reef-Stack",
+    "tavorra_cove_driftwood_cup": "The Driftwood Cup Tavern",
+    "tavorra_cove_net_and_line": "Net-Twine & Dried-Squid Store",
+    "tavorra_cove_drying_racks": "Coral-Shallop & Fish-Drying Racks",
+    "tavorra_cove_hook_smithy": "Bronze-Hook & Harpoon Smithy",
+    "tavorra_cove_kelp_iodine_hut": "Sea-Kelp & Salt-Balm Hut",
+    "tavorra_cove_wind_vane_shrine": "Copper Wind-Vane Shrine of Tava",
+    "tavorra_cove_market_plaza": "Tavorra Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "tavorra_cove_landmark",
+      "overlay": "stros_mkai"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "tavorra_cove_driftwood_cup"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "tavorra_cove_net_and_line"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "tavorra_cove_drying_racks"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "tavorra_cove_hook_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "tavorra_cove_kelp_iodine_hut"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "tavorra_cove_wind_vane_shrine"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        18
+      ],
+      "to": [
+        8,
+        18
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "tavorra_cove_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "stros_mkai"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "stros_mkai"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "flowers",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:kynareth",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    }
+  ]
+}

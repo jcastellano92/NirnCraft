@@ -1,0 +1,841 @@
+{
+  "id": "woodhearth",
+  "why": [
+    "greenshade.L1.drowned_coast",
+    "greenshade.L5.bridge_port",
+    "greenshade.L6.woodhearth_seat"
+  ],
+  "tint": {
+    "wall": "minecraft:stripped_oak_wood",
+    "wall2": "minecraft:jungle_planks",
+    "low": "minecraft:mossy_cobblestone",
+    "wood": "jungle",
+    "roof": "oak",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:jungle_planks",
+    "plaza": "minecraft:moss_block",
+    "plaza2": "minecraft:mossy_cobblestone",
+    "path": "minecraft:podzol"
+  },
+  "style": {
+    "houseStyle": "bosmer",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:stripped_oak_wood",
+        "minecraft:jungle_planks",
+        "minecraft:mossy_cobblestone",
+        "minecraft:podzol",
+        "mossy_stone_bricks",
+        "minecraft:moss_block"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_1_0",
+          "prop_woodhearth_1_1",
+          "prop_woodhearth_1_2",
+          "prop_woodhearth_1_3",
+          "prop_woodhearth_1_4",
+          "prop_woodhearth_1_5",
+          "prop_woodhearth_1_6",
+          "prop_woodhearth_1_7",
+          "prop_woodhearth_1_8",
+          "prop_woodhearth_1_9",
+          "prop_woodhearth_1_10",
+          "prop_woodhearth_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_2_0",
+          "prop_woodhearth_2_1",
+          "prop_woodhearth_2_2",
+          "prop_woodhearth_2_3",
+          "prop_woodhearth_2_4",
+          "prop_woodhearth_2_5",
+          "prop_woodhearth_2_6",
+          "prop_woodhearth_2_7",
+          "prop_woodhearth_2_8",
+          "prop_woodhearth_2_9",
+          "prop_woodhearth_2_10",
+          "prop_woodhearth_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_3_0",
+          "prop_woodhearth_3_1",
+          "prop_woodhearth_3_2",
+          "prop_woodhearth_3_3",
+          "prop_woodhearth_3_4",
+          "prop_woodhearth_3_5",
+          "prop_woodhearth_3_6",
+          "prop_woodhearth_3_7",
+          "prop_woodhearth_3_8",
+          "prop_woodhearth_3_9",
+          "prop_woodhearth_3_10",
+          "prop_woodhearth_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_4_0",
+          "prop_woodhearth_4_1",
+          "prop_woodhearth_4_2",
+          "prop_woodhearth_4_3",
+          "prop_woodhearth_4_4",
+          "prop_woodhearth_4_5",
+          "prop_woodhearth_4_6",
+          "prop_woodhearth_4_7",
+          "prop_woodhearth_4_8",
+          "prop_woodhearth_4_9",
+          "prop_woodhearth_4_10",
+          "prop_woodhearth_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_5_0",
+          "prop_woodhearth_5_1",
+          "prop_woodhearth_5_2",
+          "prop_woodhearth_5_3",
+          "prop_woodhearth_5_4",
+          "prop_woodhearth_5_5",
+          "prop_woodhearth_5_6",
+          "prop_woodhearth_5_7",
+          "prop_woodhearth_5_8",
+          "prop_woodhearth_5_9",
+          "prop_woodhearth_5_10",
+          "prop_woodhearth_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_6_0",
+          "prop_woodhearth_6_1",
+          "prop_woodhearth_6_2",
+          "prop_woodhearth_6_3",
+          "prop_woodhearth_6_4",
+          "prop_woodhearth_6_5",
+          "prop_woodhearth_6_6",
+          "prop_woodhearth_6_7",
+          "prop_woodhearth_6_8",
+          "prop_woodhearth_6_9",
+          "prop_woodhearth_6_10",
+          "prop_woodhearth_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_7_0",
+          "prop_woodhearth_7_1",
+          "prop_woodhearth_7_2",
+          "prop_woodhearth_7_3",
+          "prop_woodhearth_7_4",
+          "prop_woodhearth_7_5",
+          "prop_woodhearth_7_6",
+          "prop_woodhearth_7_7",
+          "prop_woodhearth_7_8",
+          "prop_woodhearth_7_9",
+          "prop_woodhearth_7_10",
+          "prop_woodhearth_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_8_0",
+          "prop_woodhearth_8_1",
+          "prop_woodhearth_8_2",
+          "prop_woodhearth_8_3",
+          "prop_woodhearth_8_4",
+          "prop_woodhearth_8_5",
+          "prop_woodhearth_8_6",
+          "prop_woodhearth_8_7",
+          "prop_woodhearth_8_8",
+          "prop_woodhearth_8_9",
+          "prop_woodhearth_8_10",
+          "prop_woodhearth_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_9_0",
+          "prop_woodhearth_9_1",
+          "prop_woodhearth_9_2",
+          "prop_woodhearth_9_3",
+          "prop_woodhearth_9_4",
+          "prop_woodhearth_9_5",
+          "prop_woodhearth_9_6",
+          "prop_woodhearth_9_7",
+          "prop_woodhearth_9_8",
+          "prop_woodhearth_9_9",
+          "prop_woodhearth_9_10",
+          "prop_woodhearth_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_10_0",
+          "prop_woodhearth_10_1",
+          "prop_woodhearth_10_2",
+          "prop_woodhearth_10_3",
+          "prop_woodhearth_10_4",
+          "prop_woodhearth_10_5",
+          "prop_woodhearth_10_6",
+          "prop_woodhearth_10_7",
+          "prop_woodhearth_10_8",
+          "prop_woodhearth_10_9",
+          "prop_woodhearth_10_10",
+          "prop_woodhearth_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_11_0",
+          "prop_woodhearth_11_1",
+          "prop_woodhearth_11_2",
+          "prop_woodhearth_11_3",
+          "prop_woodhearth_11_4",
+          "prop_woodhearth_11_5",
+          "prop_woodhearth_11_6",
+          "prop_woodhearth_11_7",
+          "prop_woodhearth_11_8",
+          "prop_woodhearth_11_9",
+          "prop_woodhearth_11_10",
+          "prop_woodhearth_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_12_0",
+          "prop_woodhearth_12_1",
+          "prop_woodhearth_12_2",
+          "prop_woodhearth_12_3",
+          "prop_woodhearth_12_4",
+          "prop_woodhearth_12_5",
+          "prop_woodhearth_12_6",
+          "prop_woodhearth_12_7",
+          "prop_woodhearth_12_8",
+          "prop_woodhearth_12_9",
+          "prop_woodhearth_12_10",
+          "prop_woodhearth_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_13_0",
+          "prop_woodhearth_13_1",
+          "prop_woodhearth_13_2",
+          "prop_woodhearth_13_3",
+          "prop_woodhearth_13_4",
+          "prop_woodhearth_13_5",
+          "prop_woodhearth_13_6",
+          "prop_woodhearth_13_7",
+          "prop_woodhearth_13_8",
+          "prop_woodhearth_13_9",
+          "prop_woodhearth_13_10",
+          "prop_woodhearth_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_14_0",
+          "prop_woodhearth_14_1",
+          "prop_woodhearth_14_2",
+          "prop_woodhearth_14_3",
+          "prop_woodhearth_14_4",
+          "prop_woodhearth_14_5",
+          "prop_woodhearth_14_6",
+          "prop_woodhearth_14_7",
+          "prop_woodhearth_14_8",
+          "prop_woodhearth_14_9",
+          "prop_woodhearth_14_10",
+          "prop_woodhearth_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_15_0",
+          "prop_woodhearth_15_1",
+          "prop_woodhearth_15_2",
+          "prop_woodhearth_15_3",
+          "prop_woodhearth_15_4",
+          "prop_woodhearth_15_5",
+          "prop_woodhearth_15_6",
+          "prop_woodhearth_15_7",
+          "prop_woodhearth_15_8",
+          "prop_woodhearth_15_9",
+          "prop_woodhearth_15_10",
+          "prop_woodhearth_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_16_0",
+          "prop_woodhearth_16_1",
+          "prop_woodhearth_16_2",
+          "prop_woodhearth_16_3",
+          "prop_woodhearth_16_4",
+          "prop_woodhearth_16_5",
+          "prop_woodhearth_16_6",
+          "prop_woodhearth_16_7",
+          "prop_woodhearth_16_8",
+          "prop_woodhearth_16_9",
+          "prop_woodhearth_16_10",
+          "prop_woodhearth_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_17_0",
+          "prop_woodhearth_17_1",
+          "prop_woodhearth_17_2",
+          "prop_woodhearth_17_3",
+          "prop_woodhearth_17_4",
+          "prop_woodhearth_17_5",
+          "prop_woodhearth_17_6",
+          "prop_woodhearth_17_7",
+          "prop_woodhearth_17_8",
+          "prop_woodhearth_17_9",
+          "prop_woodhearth_17_10",
+          "prop_woodhearth_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_18_0",
+          "prop_woodhearth_18_1",
+          "prop_woodhearth_18_2",
+          "prop_woodhearth_18_3",
+          "prop_woodhearth_18_4",
+          "prop_woodhearth_18_5",
+          "prop_woodhearth_18_6",
+          "prop_woodhearth_18_7",
+          "prop_woodhearth_18_8",
+          "prop_woodhearth_18_9",
+          "prop_woodhearth_18_10",
+          "prop_woodhearth_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_19_0",
+          "prop_woodhearth_19_1",
+          "prop_woodhearth_19_2",
+          "prop_woodhearth_19_3",
+          "prop_woodhearth_19_4",
+          "prop_woodhearth_19_5",
+          "prop_woodhearth_19_6",
+          "prop_woodhearth_19_7",
+          "prop_woodhearth_19_8",
+          "prop_woodhearth_19_9",
+          "prop_woodhearth_19_10",
+          "prop_woodhearth_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_20_0",
+          "prop_woodhearth_20_1",
+          "prop_woodhearth_20_2",
+          "prop_woodhearth_20_3",
+          "prop_woodhearth_20_4",
+          "prop_woodhearth_20_5",
+          "prop_woodhearth_20_6",
+          "prop_woodhearth_20_7",
+          "prop_woodhearth_20_8",
+          "prop_woodhearth_20_9",
+          "prop_woodhearth_20_10",
+          "prop_woodhearth_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:stripped_oak_wood",
+        "wall_secondary": "minecraft:jungle_planks",
+        "plinth": "minecraft:mossy_cobblestone",
+        "carpentry": "jungle",
+        "roofing": "oak",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:moss_block",
+          "minecraft:podzol",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:stripped_oak_wood",
+          "minecraft:jungle_planks",
+          "minecraft:mossy_cobblestone",
+          "mossy_stone_bricks",
+          "minecraft:moss_block",
+          "minecraft:podzol"
+        ],
+        "props": [
+          "prop_woodhearth_21_0",
+          "prop_woodhearth_21_1",
+          "prop_woodhearth_21_2",
+          "prop_woodhearth_21_3",
+          "prop_woodhearth_21_4",
+          "prop_woodhearth_21_5",
+          "prop_woodhearth_21_6",
+          "prop_woodhearth_21_7",
+          "prop_woodhearth_21_8",
+          "prop_woodhearth_21_9",
+          "prop_woodhearth_21_10",
+          "prop_woodhearth_21_11"
+        ]
+      }
+    }
+  }
+}

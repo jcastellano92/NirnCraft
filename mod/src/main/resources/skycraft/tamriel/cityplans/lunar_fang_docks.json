@@ -1,0 +1,99 @@
+{
+  "id": "lunar_fang_docks",
+  "why": [
+    "nibenay_valley.L3.lower_niben_braids",
+    "nibenay_valley.L5.river_labour"
+  ],
+  "sil": "pilings-barge-wharf",
+  "base": "none",
+  "overlay": "nibenay_valley",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "nibenay_valley"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "nibenay_valley",
+      "name": "lunar_fang_docks_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "nibenay_valley",
+      "name": "lunar_fang_docks_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "nibenay_valley",
+      "name": "lunar_fang_docks_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "nibenay_valley",
+      "name": "lunar_fang_docks_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "barge_wharf_stalls",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "pier_beacon",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "lunar_fang_docks_b_1": "Lunar Fang Customs Wharf",
+    "lunar_fang_docks_b_2": "The Barge-Pole Tavern",
+    "lunar_fang_docks_b_3": "Harbour-Clerk's Loft",
+    "lunar_fang_docks_b_4": "Anchor & Chain Smithy"
+  },
+  "innKey": "lunar_fang_docks_b_2",
+  "names": {
+    "inn": "lunar_fang_docks_b_2"
+  }
+}

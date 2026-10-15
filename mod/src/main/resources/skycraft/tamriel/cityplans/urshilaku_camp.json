@@ -1,0 +1,108 @@
+{
+  "id": "urshilaku_camp",
+  "why": [
+    "vvardenfell_ashlands.L1.ash_plain",
+    "vvardenfell_ashlands.L2.ash_storm_track"
+  ],
+  "sil": "ash-dune-yurt-circle",
+  "base": "none",
+  "overlay": "vvardenfell_ashlands",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "vvardenfell_ashlands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "tent",
+      "use": "hovel",
+      "wealth": "poor",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "urshilaku_camp_b_1"
+    },
+    {
+      "kind": "tent",
+      "use": "hovel",
+      "wealth": "poor",
+      "at": [
+        10,
+        30
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "urshilaku_camp_b_2"
+    },
+    {
+      "kind": "tent",
+      "use": "hovel",
+      "wealth": "poor",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "urshilaku_camp_b_3"
+    },
+    {
+      "kind": "tent",
+      "use": "hovel",
+      "wealth": "poor",
+      "at": [
+        -26,
+        -19
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "urshilaku_camp_b_4"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "urshilaku_camp_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "urshilaku_bone_chimes",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "ashlander_firepit",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "urshilaku_camp_b_1": "Ashkhan Sul-Matuul's Yurt",
+    "urshilaku_camp_b_2": "Nibani Maesa's Wise Woman Yurt",
+    "urshilaku_camp_b_3": "Zabamund's Gulakhan Yurt",
+    "urshilaku_camp_b_4": "Kurapli's Hunter Yurt",
+    "urshilaku_camp_b_5": "Urshilaku Guar Pen"
+  }
+}

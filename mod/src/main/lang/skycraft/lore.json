@@ -12,7 +12,6 @@
   "block.skycraft.standing_stone_shadow": "The Shadow Stone",
   "block.skycraft.standing_stone_steed": "The Steed Stone",
   "block.skycraft.standing_stone_tower": "The Tower Stone",
-
   "stone.skycraft.warrior": "The Warrior",
   "stone.skycraft.mage": "The Mage",
   "stone.skycraft.thief": "The Thief",
@@ -56,11 +55,9 @@
   "stone.skycraft.serpent.power": "Serpent's Kiss",
   "stone.skycraft.shadow.power": "Cloak of Shadows",
   "stone.skycraft.tower.power": "The Tower's Key",
-
   "key.skycraft.stone_power": "Standing Stone Power",
   "hud.skycraft.lore.active_stone": "Standing Stone blessing",
   "entity.skycraft.lore.ritual_thrall": "Risen Thrall",
-
   "message.skycraft.lore.stone_already": "You already bear the blessing of %s.",
   "message.skycraft.lore.stone_replaced": "The blessing of %s fades.",
   "message.skycraft.lore.stone_power_hint": "Press %2$s to use %1$s (a few minutes to recharge).",
@@ -73,7 +70,6 @@
   "message.skycraft.lore.shelf_searched": "You have already looked through this shelf.",
   "message.skycraft.lore.shelf_nothing": "Nothing on this shelf is worth reading.",
   "message.skycraft.lore.shelf_found": "You found a book: %s",
-
   "item.skycraft.book": "Worn Book",
   "tooltip.skycraft.lore.unknown_book": "Open it to see what it is about",
   "tooltip.skycraft.lore.author": "by %s",
@@ -86,7 +82,6 @@
   "screen.skycraft.lore.story.untitled": "Unsigned",
   "message.skycraft.lore.story_read": "You read: %s",
   "hud.skycraft.lore.read": "[F] Read  %s",
-
   "book.skycraft.category.history": "History",
   "book.skycraft.category.daedra": "The Daedra",
   "book.skycraft.category.dwemer": "The Dwemer",
@@ -96,7 +91,6 @@
   "book.skycraft.category.poem": "Song and Verse",
   "book.skycraft.category.letter": "Letter",
   "book.skycraft.category.note": "Note",
-
   "book.skycraft.brief_history_nordic_empire": "A Brief History of the Nordic Empire",
   "book.skycraft.nine_holds": "The Nine Holds and How They Came to Be",
   "book.skycraft.winter_without_end": "The Winter Without End",
@@ -151,5 +145,28 @@
   "stone.skycraft.allmaker.water": "The Water Stone",
   "stone.skycraft.allmaker.water.desc": "You breathe and swim freely under water.",
   "stone.skycraft.allmaker.wind": "The Wind Stone",
-  "stone.skycraft.allmaker.wind.desc": "You run lighter, and falls hurt you less."
+  "stone.skycraft.allmaker.wind.desc": "You run lighter, and falls hurt you less.",
+  "book.skycraft.cyrodiil_council_of_ash": "On the Council of Ash and the Empty Ruby Throne",
+  "book.skycraft.cyrodiil_pale_pass_tariffs": "Customs and Cold Iron: A History of Pale Pass",
+  "book.skycraft.cyrodiil_colovian_wool_staple": "Fleece and Oak: Charters of the Colovian Estates",
+  "book.skycraft.cyrodiil_ring_beneath_rings": "Subterranean Masonry of the Imperial Island",
+  "book.skycraft.cyrodiil_ayleid_forest_conduits": "Welkynd Lattices of the Great Forest",
+  "book.skycraft.cyrodiil_corbolo_canal_law": "Two Banks Upon the Corbolo: Cheydinhal Trade Law",
+  "book.skycraft.cyrodiil_weald_vintages": "Cellar-Books of the West Weald Vintners",
+  "book.skycraft.cyrodiil_kvatch_second_wall": "Mortar from the Cinders: Rebuilding Kvatch",
+  "book.skycraft.cyrodiil_lucky_old_lady": "Wish-Coins and Canal-Locks of Old Bravil",
+  "book.skycraft.cyrodiil_niben_mouth_truce": "Mangrove and Milestone: The Leyawiin Border Compacts",
+  "book.skycraft.morrowind_ebonheart_charter_law": "Two Seals on the Inner Sea: Ebonheart Customs Law",
+  "book.skycraft.morrowind_mournhold_godsreach_rites": "Incense and Ashes in Godsreach",
+  "book.skycraft.morrowind_necrom_ossuary_rolls": "White Walls of Necrom: Custodians of the Ancestors",
+  "book.skycraft.morrowind_tel_naga_precedents": "Spore and Precedent: Rulings of Tel Naga",
+  "book.skycraft.morrowind_sheogorad_sanctus_bells": "Silent Bells of Sanctus Shrine",
+  "book.skycraft.morrowind_skar_redoran_councils": "Beneath the Crab-Shell: The Council of Ald'ruhn",
+  "book.skycraft.morrowind_grazelands_wickwheat_pacts": "Wickwheat and Herd-Stone: Compacts of Vos",
+  "book.skycraft.morrowind_holamayan_twilight_lamps": "Lamps of Moonshadow: The Cloister of Holamayan",
+  "book.skycraft.morrowind_caldera_ebony_assays": "Assay-Books of the Odai and Caldera Seam",
+  "book.skycraft.morrowind_bitter_coast_lanterns": "Netch-Lamps in the Mangrove Fog",
+  "book.skycraft.morrowind_vivec_canton_graces": "Underworks and High Fane: The Cantons of Vivec",
+  "book.skycraft.morrowind_ghostgate_two_towers": "Blue Bone and Blight-Wind: The Watch at Ghostgate",
+  "book.skycraft.morrowind_solstheim_ash_and_pine": "Ash-Bulwark and All-Maker Stone: Chronicles of Solstheim"
 }

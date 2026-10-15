@@ -1,0 +1,186 @@
+{
+  "id": "roadside_huntsmans_rest",
+  "why": [
+    "grahtwood.L1.elden_grove_soil",
+    "grahtwood.L4.graht_grove",
+    "grahtwood.L6.elden_root_capital"
+  ],
+  "sil": "valenwood-roadside-huntsmans-rest-plan",
+  "base": "none",
+  "overlay": "grahtwood",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "grahtwood",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "grahtwood",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "roadside_huntsmans_rest_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "roadside_huntsmans_rest_landmark",
+      "overlay": "grahtwood"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 20,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        14
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        8
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -16,
+        7
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -17
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        5,
+        -7
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "roadside_huntsmans_rest_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "roadside_huntsmans_rest_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "roadside_huntsmans_rest_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "roadside_huntsmans_rest_b_5",
+    "smithy": "roadside_huntsmans_rest_b_7"
+  },
+  "titles": {
+    "roadside_huntsmans_rest_b_1": "place.skycraft.roadside_huntsmans_rest Council & Seat Hall",
+    "roadside_huntsmans_rest_b_2": "place.skycraft.roadside_huntsmans_rest High Sanctuary",
+    "roadside_huntsmans_rest_b_3": "place.skycraft.roadside_huntsmans_rest Fighters & Wayfarers Hall",
+    "roadside_huntsmans_rest_b_4": "place.skycraft.roadside_huntsmans_rest Mages & Chroniclers Spire",
+    "roadside_huntsmans_rest_b_5": "place.skycraft.roadside_huntsmans_rest The Lantern & Hearth Inn",
+    "roadside_huntsmans_rest_b_6": "place.skycraft.roadside_huntsmans_rest The Traveler's Rest Tavern",
+    "roadside_huntsmans_rest_b_7": "place.skycraft.roadside_huntsmans_rest Master Forge & Armorer",
+    "roadside_huntsmans_rest_landmark": "High Seat of place.skycraft.roadside_huntsmans_rest",
+    "roadside_huntsmans_rest_plaza": "place.skycraft.roadside_huntsmans_rest Central Plaza"
+  },
+  "innKey": "roadside_huntsmans_rest_b_5"
+}

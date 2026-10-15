@@ -1,0 +1,574 @@
+{
+  "id": "daggerfall",
+  "sil": "river-castle-twin-bank",
+  "base": "none",
+  "overlay": "daggerfall",
+  "radius": 118,
+  "reach": 126,
+  "fill_gap": 2,
+  "inn_key": "daggerfall_Lions_head_inn",
+  "names": {
+    "inn": "daggerfall_Lions_head_inn",
+    "store": "daggerfall_west_bay_mercantile",
+    "smithy": "daggerfall_dragon_armoury"
+  },
+  "titles": {
+    "daggerfall_landmark": "Castle Daggerfall",
+    "daggerfall_castle_keep": "Castle Daggerfall Great Keep",
+    "daggerfall_Lions_head_inn": "The Lion's Head Inn",
+    "daggerfall_crimson_ship": "The Crimson Ship Tavern",
+    "daggerfall_singing_kettle": "The Singing Kettle",
+    "daggerfall_west_bay_mercantile": "West Bay Mercantile",
+    "daggerfall_bridge_chandler": "Guild-Bridge Chandlery",
+    "daggerfall_dragon_armoury": "Order of the Dragon Armoury",
+    "daggerfall_iron_crown_forge": "Iron-Crown Forge & Anvil",
+    "daggerfall_glenumbra_retort": "The Glenumbra Retort",
+    "daggerfall_royal_archivium": "Daggerfall Royal Scriptorium",
+    "daggerfall_iliac_assay": "Iliac Mint & Gold Assay",
+    "daggerfall_tudor_drapers": "High street Wool & Broadcloth",
+    "daggerfall_tannery_row": "Tannery Row Drying-Frames",
+    "daggerfall_boars_head_butcher": "The Boar's Head Victualler",
+    "daggerfall_yew_bowyer": "Ilessan Yew Bowyer",
+    "daggerfall_mages_guild": "Daggerfall Mages Guildhall",
+    "daggerfall_fighters_guild": "Daggerfall Fighters Guildhall",
+    "daggerfall_knights_of_dragon": "Chapterhouse of the Dragon",
+    "daggerfall_kynareth_benevolence": "Cathedral of Kynareth",
+    "daggerfall_royal_crypts": "Royal Crypts of Castle Daggerfall",
+    "daggerfall_bridwell_manor": "Lord Bridwell's Town Manor",
+    "daggerfall_lady_pelline_house": "Madam Pelline's Counting-House",
+    "daggerfall_chamberlain_court": "Royal Chamberlain's Chancery",
+    "daggerfall_harbour_customs": "Cape Mast Customs Warehouse",
+    "daggerfall_twin_span_watch": "Twin-Span Bridge Gatehouse",
+    "daggerfall_kings_mews": "King Gothryd's Courser Stables",
+    "daggerfall_market_plaza": "Castle Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -114
+    ],
+    [
+      114,
+      0
+    ],
+    [
+      0,
+      114
+    ],
+    [
+      -114,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 114,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -49
+      ],
+      "face": "south",
+      "name": "daggerfall_landmark",
+      "overlay": "daggerfall"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        31,
+        -43
+      ],
+      "face": "south",
+      "name": "daggerfall_castle_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        60,
+        -55
+      ],
+      "face": "west",
+      "name": "daggerfall_Lions_head_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        45,
+        -27
+      ],
+      "face": "west",
+      "name": "daggerfall_crimson_ship"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        77,
+        -28
+      ],
+      "face": "west",
+      "name": "daggerfall_singing_kettle"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        52,
+        -8
+      ],
+      "face": "west",
+      "name": "daggerfall_west_bay_mercantile"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        82,
+        4
+      ],
+      "face": "west",
+      "name": "daggerfall_bridge_chandler"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        51,
+        13
+      ],
+      "face": "west",
+      "name": "daggerfall_dragon_armoury"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        74,
+        36
+      ],
+      "face": "west",
+      "name": "daggerfall_iron_crown_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        42,
+        32
+      ],
+      "face": "west",
+      "name": "daggerfall_glenumbra_retort"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        54,
+        62
+      ],
+      "face": "north",
+      "name": "daggerfall_royal_archivium"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        26,
+        46
+      ],
+      "face": "north",
+      "name": "daggerfall_iliac_assay"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        26,
+        78
+      ],
+      "face": "north",
+      "name": "daggerfall_tudor_drapers"
+    },
+    {
+      "kind": "store",
+      "use": "tannery",
+      "wealth": "common",
+      "at": [
+        6,
+        53
+      ],
+      "face": "north",
+      "name": "daggerfall_tannery_row"
+    },
+    {
+      "kind": "store",
+      "use": "butcher",
+      "wealth": "common",
+      "at": [
+        -6,
+        82
+      ],
+      "face": "north",
+      "name": "daggerfall_boars_head_butcher"
+    },
+    {
+      "kind": "store",
+      "use": "fletcher",
+      "wealth": "common",
+      "at": [
+        -15,
+        51
+      ],
+      "face": "north",
+      "name": "daggerfall_yew_bowyer"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -38,
+        73
+      ],
+      "face": "north",
+      "name": "daggerfall_mages_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        41
+      ],
+      "face": "north",
+      "name": "daggerfall_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -63,
+        52
+      ],
+      "face": "east",
+      "name": "daggerfall_knights_of_dragon"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -47,
+        25
+      ],
+      "face": "east",
+      "name": "daggerfall_kynareth_benevolence"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -78,
+        24
+      ],
+      "face": "east",
+      "name": "daggerfall_royal_crypts"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -53,
+        5
+      ],
+      "face": "east",
+      "name": "daggerfall_bridwell_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -82,
+        -8
+      ],
+      "face": "east",
+      "name": "daggerfall_lady_pelline_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -51,
+        -16
+      ],
+      "face": "east",
+      "name": "daggerfall_chamberlain_court"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -72,
+        -39
+      ],
+      "face": "east",
+      "name": "daggerfall_harbour_customs"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -41,
+        -34
+      ],
+      "face": "east",
+      "name": "daggerfall_twin_span_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -51,
+        -64
+      ],
+      "face": "south",
+      "name": "daggerfall_kings_mews"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -100
+      ],
+      "to": [
+        0,
+        100
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -100,
+        0
+      ],
+      "to": [
+        100,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -61,
+        -61
+      ],
+      "to": [
+        61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        -61
+      ],
+      "to": [
+        61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        61
+      ],
+      "to": [
+        -61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -61,
+        61
+      ],
+      "to": [
+        -61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        78
+      ],
+      "to": [
+        8,
+        78
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "daggerfall_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        59
+      ],
+      "overlay": "daggerfall"
+    },
+    {
+      "ring": [
+        59,
+        118
+      ],
+      "overlay": "daggerfall"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:dibella",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:dibella",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

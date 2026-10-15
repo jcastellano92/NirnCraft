@@ -1,0 +1,411 @@
+{
+  "region": "high_rock/anticlere",
+  "title": "The Ash-Tithe of Alcaire",
+  "summary": "Investigate the burning of wayside granaries between Alcaire and Weeping Giant, exposing a clandestine pact between fanatical Flame crusaders and the Skeffington witch-coven.",
+  "why": [
+    "anticlere.L7.pious_burghers",
+    "anticlere.L8.mara_patron",
+    "anticlere.L8.coven_toll",
+    "anticlere.L9.flame_crusade",
+    "anticlere.L10.skeffington_coven"
+  ],
+  "hook": {
+    "place": "alcaire",
+    "places": [
+      "alcaire",
+      "ashmoor_diggings",
+      "balhurst_coven",
+      "brammere_encampment",
+      "briarwick",
+      "castle_valois",
+      "everhelm_hollow",
+      "gauvain_farm",
+      "highwych",
+      "ilessan_hills",
+      "koeglin_mine",
+      "loroylle",
+      "oakcroft_watchtower",
+      "redwych_grotto",
+      "thibault_farm",
+      "tulune",
+      "wynham_cavern"
+    ],
+    "npc": "story_an_almoner_celeste",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_an_almoner_celeste",
+      "name": "Almoner Celeste of Mara",
+      "role": "priest",
+      "place": "alcaire",
+      "greet": "May Mara's hearth warm you, stranger—for someone is setting torches to every tithe-barn on the Alcaire road.",
+      "talk": [
+        "The burghers of Alcaire leave birch-bundles at the forest edge to appease the Skeffington witches, while the Knights of the Flame burn any farmstead suspected of paying that toll.",
+        "Now the castle granary itself has been marked with ash-crosses. Speak with Castellan Renaud at Alcaire Castle before the town starves."
+      ]
+    },
+    {
+      "id": "story_an_castellan_renaud",
+      "name": "Castellan Renaud",
+      "role": "steward",
+      "place": "alcaire_castle",
+      "greet": "If you bring another petition from the Flame's inquisitors, save your breath. My garrison won't torch our own tenant villages.",
+      "talk": [
+        "Preceptor Malo of the Flame claims the witches in Redwych Grotto poisoned the grain, yet his own riders were seen carrying sealed grain-casks toward Weeping Giant.",
+        "Question the miller's bailiff at Weeping Giant and see who truly profits from this crusade."
+      ]
+    },
+    {
+      "id": "story_an_bailiff_hugues",
+      "name": "Bailiff Hugues",
+      "role": "citizen",
+      "place": "weeping_giant",
+      "greet": "Keep your voice down! The Flame's outriders camp on the ridge, and the hedge-crones listen from the willow roots.",
+      "talk": [
+        "Preceptor Malo isn't burning the grain—he's trading it to Mother Griselda of the Skeffington Coven in Redwych Grotto in exchange for hex-jars to drive off the Ykalon border lords!",
+        "They cache the stolen tithes in Baldale Grotto and mix the blight-spores in Everhelm Hollow."
+      ]
+    },
+    {
+      "id": "story_an_sergeant_odile",
+      "name": "Sergeant Odile",
+      "role": "guard",
+      "place": "keep_noel",
+      "greet": "Well met! Castellan Renaud sent word by signal-fire that a free blade was tracking Malo's rogue banner.",
+      "talk": [
+        "Malo has retreated into Everhelm Hollow with his fanatics to finish brewing the ash-blight.",
+        "Strike him down in the cavern and Alcaire's fields will breathe clean air again."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_an_mother_griselda": {
+      "name": "Mother Griselda of Skeffington",
+      "rank": "boss",
+      "place": "redwych_grotto",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.3,
+      "dmg_mult": 1.6
+    },
+    "story_an_preceptor_malo": {
+      "name": "Preceptor Malo the Ash-Brand",
+      "rank": "boss",
+      "place": "everhelm_hollow",
+      "weapon": "steel_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.1,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_an_ash_cross": [
+      "Almoner Celeste of Mara: Look upon the granary lintel—charred birch twigs bound with red thread, smeared over with oil from a knight's lamp.",
+      "Castellan Renaud: A witch's token painted with temple oil. Someone wants the burghers and the forest folk at each other's throats.",
+      "Almoner Celeste of Mara: Ride to Weeping Giant before another homestead is put to the torch."
+    ],
+    "story_an_grotto_bargain": [
+      "Mother Griselda: The knight promised us ten wagons of winter wheat for every blight-pot we laid along the Ykalon boundary!",
+      "Bailiff Hugues: You poisoned the wells of poor tenants who left you butter and birch-charms every frost-moon!",
+      "Mother Griselda: Gold and prayers rot alike in the wet earth, little bailiff. Only fear keeps the axes out of our woods!"
+    ],
+    "story_an_everhelm_pyre": [
+      "Preceptor Malo: When the border fields are ash, the fearful flock to the sanctuary of the Flame—even if I must hire witches to light the kindling!",
+      "Sergeant Odile: You disgrace your spurs and Mara's peace, Malo! Lay down your torch!",
+      "Preceptor Malo: The pyre cleanses all doubts. Come and burn with the chaff!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_anticlere_01_ash_marks",
+      "region": "high_rock/anticlere",
+      "category": "main",
+      "title": "Ash-Crosses on the Granary",
+      "giver": "story_an_almoner_celeste",
+      "start": "npc:story_an_almoner_celeste",
+      "requires": [],
+      "why": [
+        "anticlere.L7.pious_burghers",
+        "anticlere.L8.mara_patron"
+      ],
+      "summary": "Examine the ash-marked granary in Alcaire with Almoner Celeste and consult Castellan Renaud at Alcaire Castle.",
+      "intro": [
+        "Someone has marked the tithe-barns of Alcaire with charred birch crosses, sparking panic between the townsfolk and the Knights of the Flame.",
+        "Inspect the granary marks in Alcaire and report to Castellan Renaud at Alcaire Castle."
+      ],
+      "complete": [
+        "Castellan Renaud suspects that Preceptor Malo's inquisitors are staging the witch-marks to seize tenant grain."
+      ],
+      "journal": {
+        "start": "Almoner Celeste asked me to inspect the ash-crosses in Alcaire and speak with Castellan Renaud at Alcaire Castle.",
+        "done": "Castellan Renaud directed me to Weeping Giant to trace the missing grain wagons."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "alcaire",
+          "text": "Inspect the marked tithe-barns in Alcaire"
+        },
+        {
+          "type": "scene",
+          "place": "alcaire_castle",
+          "target": "scene:story_an_ash_cross",
+          "text": "Examine the birch-and-oil token at Alcaire Castle"
+        },
+        {
+          "type": "talk",
+          "place": "alcaire_castle",
+          "npc": "story_an_castellan_renaud",
+          "text": "Take instructions from Castellan Renaud"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "alcaire",
+        "alcaire_castle"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "alcaire",
+          "objective": "Inspect the marked tithe-barns in Alcaire"
+        },
+        {
+          "id": 20,
+          "place": "alcaire_castle",
+          "objective": "Examine the birch-and-oil token at Alcaire Castle"
+        },
+        {
+          "id": 30,
+          "place": "alcaire_castle",
+          "objective": "Take instructions from Castellan Renaud"
+        }
+      ],
+      "consequence": "guard_banner:anticlere_stage_1"
+    },
+    {
+      "id": "ms1_anticlere_02_weeping_trail",
+      "region": "high_rock/anticlere",
+      "category": "main",
+      "title": "The Toll of Weeping Giant",
+      "giver": "story_an_castellan_renaud",
+      "start": "auto",
+      "requires": [
+        "ms1_anticlere_01_ash_marks"
+      ],
+      "why": [
+        "anticlere.L7.settler_poor",
+        "anticlere.L8.fear_of_the_wood"
+      ],
+      "summary": "Search the ruined way-station at Eaglefield Ruins and question Bailiff Hugues in Weeping Giant.",
+      "intro": [
+        "Wagon ruts lead past Eaglefield Ruins toward the timber hamlet of Weeping Giant.",
+        "Inspect Eaglefield Ruins for discarded grain casks, then speak with Bailiff Hugues in Weeping Giant."
+      ],
+      "complete": [
+        "Bailiff Hugues revealed that Preceptor Malo is secretly bartering stolen tithe-grain to Mother Griselda in Redwych Grotto."
+      ],
+      "journal": {
+        "start": "I should check Eaglefield Ruins for tracks of the missing grain wagons and speak to Bailiff Hugues at Weeping Giant.",
+        "done": "Bailiff Hugues exposed the bargain between Preceptor Malo and Mother Griselda in Redwych Grotto."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "eaglefield_ruins",
+          "text": "Search Eaglefield Ruins for the missing grain wagons"
+        },
+        {
+          "type": "talk",
+          "place": "weeping_giant",
+          "npc": "story_an_bailiff_hugues",
+          "text": "Question Bailiff Hugues in Weeping Giant"
+        }
+      ],
+      "reward": {
+        "gold": 300,
+        "xp": 450
+      },
+      "places": [
+        "eaglefield_ruins",
+        "weeping_giant"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "eaglefield_ruins",
+          "objective": "Search Eaglefield Ruins for the missing grain wagons"
+        },
+        {
+          "id": 20,
+          "place": "weeping_giant",
+          "objective": "Question Bailiff Hugues in Weeping Giant"
+        }
+      ],
+      "consequence": "npc_schedule:anticlere_stage_2"
+    },
+    {
+      "id": "ms1_anticlere_03_redwych_coven",
+      "region": "high_rock/anticlere",
+      "category": "main",
+      "title": "Barter in Redwych Grotto",
+      "giver": "story_an_bailiff_hugues",
+      "start": "auto",
+      "requires": [
+        "ms1_anticlere_02_weeping_trail"
+      ],
+      "why": [
+        "anticlere.L8.coven_toll",
+        "anticlere.L10.skeffington_coven"
+      ],
+      "summary": "Enter Redwych Grotto, confront Mother Griselda of the Skeffington Coven, and destroy her blight-cauldrons.",
+      "intro": [
+        "In the mossy sinkholes of Redwych Grotto, Mother Griselda brews crop-blight in exchange for the Flame's stolen wheat.",
+        "Enter Redwych Grotto and put an end to Mother Griselda's bargain."
+      ],
+      "complete": [
+        "With Mother Griselda slain, ledger-tallies on her altar proved that Preceptor Malo has fortified Everhelm Hollow near Keep Noel."
+      ],
+      "journal": {
+        "start": "I must enter Redwych Grotto and defeat Mother Griselda of the Skeffington Coven.",
+        "done": "I defeated Mother Griselda and found Preceptor Malo's orders pointing to Keep Noel and Everhelm Hollow."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "redwych_grotto",
+          "text": "Enter Redwych Grotto"
+        },
+        {
+          "type": "scene",
+          "place": "redwych_grotto",
+          "target": "scene:story_an_grotto_bargain",
+          "text": "Confront Mother Griselda over the stolen tithe-grain"
+        },
+        {
+          "type": "boss",
+          "place": "redwych_grotto",
+          "target": "story_an_mother_griselda",
+          "text": "Defeat Mother Griselda of Skeffington"
+        }
+      ],
+      "reward": {
+        "gold": 400,
+        "xp": 600
+      },
+      "places": [
+        "redwych_grotto"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "redwych_grotto",
+          "objective": "Enter Redwych Grotto"
+        },
+        {
+          "id": 20,
+          "place": "redwych_grotto",
+          "objective": "Confront Mother Griselda over the stolen tithe-grain"
+        },
+        {
+          "id": 30,
+          "place": "redwych_grotto",
+          "objective": "Defeat Mother Griselda of Skeffington"
+        }
+      ],
+      "consequence": "shrine_state:anticlere_stage_3"
+    },
+    {
+      "id": "ms1_anticlere_04_flame_inquisition",
+      "region": "high_rock/anticlere",
+      "category": "main",
+      "title": "The Ash-Brand's Reckoning",
+      "giver": "story_an_sergeant_odile",
+      "start": "auto",
+      "requires": [
+        "ms1_anticlere_03_redwych_coven"
+      ],
+      "finale": true,
+      "why": [
+        "anticlere.L9.flame_crusade",
+        "anticlere.L9.ykalon_resists"
+      ],
+      "summary": "Meet Sergeant Odile at Keep Noel, storm Everhelm Hollow, and defeat Preceptor Malo the Ash-Brand.",
+      "intro": [
+        "Preceptor Malo and his rogue crusaders are preparing to release the remaining blight-spores from Everhelm Hollow.",
+        "Join Sergeant Odile at Keep Noel, descend into Everhelm Hollow, and bring Malo to justice."
+      ],
+      "complete": [
+        "Preceptor Malo's false crusade has been shattered, and the stolen grain wagons are being returned to the parishes of Alcaire."
+      ],
+      "journal": {
+        "start": "I must rally with Sergeant Odile at Keep Noel, then defeat Preceptor Malo inside Everhelm Hollow.",
+        "done": "I defeated Preceptor Malo in Everhelm Hollow and reported the victory to Almoner Celeste in Alcaire."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "keep_noel",
+          "npc": "story_an_sergeant_odile",
+          "text": "Meet Sergeant Odile at Keep Noel"
+        },
+        {
+          "type": "scene",
+          "place": "everhelm_hollow",
+          "target": "scene:story_an_everhelm_pyre",
+          "text": "Confront Preceptor Malo in Everhelm Hollow"
+        },
+        {
+          "type": "boss",
+          "place": "everhelm_hollow",
+          "target": "story_an_preceptor_malo",
+          "text": "Defeat Preceptor Malo the Ash-Brand"
+        },
+        {
+          "type": "talk",
+          "place": "alcaire",
+          "npc": "story_an_almoner_celeste",
+          "text": "Return to Almoner Celeste in Alcaire"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "keep_noel",
+        "everhelm_hollow",
+        "alcaire"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "keep_noel",
+          "objective": "Meet Sergeant Odile at Keep Noel"
+        },
+        {
+          "id": 20,
+          "place": "everhelm_hollow",
+          "objective": "Confront Preceptor Malo in Everhelm Hollow"
+        },
+        {
+          "id": 30,
+          "place": "everhelm_hollow",
+          "objective": "Defeat Preceptor Malo the Ash-Brand"
+        },
+        {
+          "id": 40,
+          "place": "alcaire",
+          "objective": "Return to Almoner Celeste in Alcaire"
+        }
+      ],
+      "consequence": "settlement_prosperity:anticlere_stage_4"
+    }
+  ]
+}

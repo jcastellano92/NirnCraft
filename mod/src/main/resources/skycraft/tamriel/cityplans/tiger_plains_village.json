@@ -1,0 +1,186 @@
+{
+  "id": "tiger_plains_village",
+  "why": [
+    "ka_po_tun.L1.golden_steppe_mesa",
+    "ka_po_tun.L5.bronze_and_jade_tribute",
+    "ka_po_tun.L6.tiger_plains_shrine_town"
+  ],
+  "sil": "pagoda-terrace-valley",
+  "base": "none",
+  "overlay": "tiger_plains_village",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "tiger_plains_village",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "ka_po_tun",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "tiger_plains_village_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "tiger_plains_village_landmark",
+      "overlay": "tiger_plains_village"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "tiger_plains_village",
+      "name": "tiger_plains_village_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "tiger_plains_village_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "tiger_plains_village_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "tiger_plains_village_b_5",
+    "smithy": "tiger_plains_village_b_7"
+  },
+  "titles": {
+    "tiger_plains_village_b_1": "place.skycraft.tiger_plains_village Council & Seat Hall",
+    "tiger_plains_village_b_2": "place.skycraft.tiger_plains_village High Sanctuary",
+    "tiger_plains_village_b_3": "place.skycraft.tiger_plains_village Fighters & Wayfarers Hall",
+    "tiger_plains_village_b_4": "place.skycraft.tiger_plains_village Mages & Chroniclers Spire",
+    "tiger_plains_village_b_5": "place.skycraft.tiger_plains_village The Lantern & Hearth Inn",
+    "tiger_plains_village_b_6": "place.skycraft.tiger_plains_village The Traveler's Rest Tavern",
+    "tiger_plains_village_b_7": "place.skycraft.tiger_plains_village Master Forge & Armorer",
+    "tiger_plains_village_landmark": "High Seat of place.skycraft.tiger_plains_village",
+    "tiger_plains_village_plaza": "place.skycraft.tiger_plains_village Central Plaza"
+  },
+  "innKey": "tiger_plains_village_b_5"
+}

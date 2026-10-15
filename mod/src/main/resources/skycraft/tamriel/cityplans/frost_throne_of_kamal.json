@@ -1,0 +1,199 @@
+{
+  "id": "frost_throne_of_kamal",
+  "why": [
+    "kamal.L1.volcanic_ice_peaks",
+    "kamal.L5.glacial_iron_and_trophies",
+    "kamal.L6.kamal_pass_watch"
+  ],
+  "sil": "akavir-frost-throne-of-kamal-plan",
+  "base": "none",
+  "overlay": "kamal",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "kamal",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "kamal",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "frost_throne_of_kamal_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "frost_throne_of_kamal_landmark",
+      "overlay": "kamal"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 18,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "kamal",
+      "name": "frost_throne_of_kamal_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "frost_throne_of_kamal_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "frost_throne_of_kamal_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "frost_throne_of_kamal_b_5",
+    "smithy": "frost_throne_of_kamal_b_7"
+  },
+  "titles": {
+    "frost_throne_of_kamal_b_1": "place.skycraft.frost_throne_of_kamal Council & Seat Hall",
+    "frost_throne_of_kamal_b_2": "place.skycraft.frost_throne_of_kamal High Sanctuary",
+    "frost_throne_of_kamal_b_3": "place.skycraft.frost_throne_of_kamal Fighters & Wayfarers Hall",
+    "frost_throne_of_kamal_b_4": "place.skycraft.frost_throne_of_kamal Mages & Chroniclers Spire",
+    "frost_throne_of_kamal_b_5": "place.skycraft.frost_throne_of_kamal The Lantern & Hearth Inn",
+    "frost_throne_of_kamal_b_6": "place.skycraft.frost_throne_of_kamal The Traveler's Rest Tavern",
+    "frost_throne_of_kamal_b_7": "place.skycraft.frost_throne_of_kamal Master Forge & Armorer",
+    "frost_throne_of_kamal_b_8": "place.skycraft.frost_throne_of_kamal Botanicals & Remedies",
+    "frost_throne_of_kamal_landmark": "High Seat of place.skycraft.frost_throne_of_kamal",
+    "frost_throne_of_kamal_plaza": "place.skycraft.frost_throne_of_kamal Central Plaza"
+  },
+  "innKey": "frost_throne_of_kamal_b_5"
+}

@@ -1,0 +1,410 @@
+{
+  "region": "hammerfell/dragontail",
+  "title": "The Iron-Bond of the Dragontail",
+  "summary": "End a ruthless conspiracy in the Dragontail Mountains where corrupt ore-factors and Devilrock fire-witches enslave debt-miners to forge illicit weapons in the volcanic tubes of Shedungent.",
+  "why": [
+    "dragontail.L7.ore_lords",
+    "dragontail.L7.debt_miners",
+    "dragontail.L8.fire_pacts",
+    "dragontail.L9.debt_unrest",
+    "dragontail.L10.devilrock_coven"
+  ],
+  "hook": {
+    "place": "rihad",
+    "places": [
+      "daira_pillar",
+      "haahim_web",
+      "haddocks_market",
+      "haiz_homestead",
+      "koaleb_oasis",
+      "rihad",
+      "saakir_hollow",
+      "shaabah_homestead",
+      "shrine_mephala_hammerfell",
+      "sulalaam_hollow",
+      "taahim_keep",
+      "the_lucky_kettle",
+      "tomb_of_jaama",
+      "torogs_spite",
+      "viridian_watch",
+      "zehts_displeasure"
+    ],
+    "npc": "story_dt_justiciar_malik",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_dt_justiciar_malik",
+      "name": "Justiciar Malik of Rihad",
+      "role": "steward",
+      "place": "rihad",
+      "greet": "Look north to the Dragontail peaks, traveller—black furnace-smoke rises from passes where no legal smelter has burned in twenty years.",
+      "talk": [
+        "In Rihad and Taneth, Crown and Forebear merchants alike buy Dragontail iron, asking no questions about how the ore is dug.",
+        "Three hundred indentured miners from Tigonus vanished when their debt-contracts were bought by Overseer Jabir. Travel to Tigonus and speak with Foreman Tariq."
+      ]
+    },
+    {
+      "id": "story_dt_foreman_tariq",
+      "name": "Foreman Tariq",
+      "role": "citizen",
+      "place": "tigonus",
+      "greet": "Show me your hands—good, no factor's ink on your fingers. Only an honest blade is welcome in Tigonus tonight.",
+      "talk": [
+        "Overseer Jabir collapsed the legal adits to trap our union speakers, then marched the bound miners up to the lava-tubes near Pothago and Shedungent.",
+        "He has struck a fire-pact with the Devilrock Coven at Wether's Cleft to temper contraband blades in volcanic brimstone!"
+      ]
+    },
+    {
+      "id": "story_dt_warden_ayesha",
+      "name": "Warden Ayesha of Arkay",
+      "role": "priest",
+      "place": "pothago",
+      "greet": "Arkay's law forbids binding a debtor's soul after his body fails in the shaft—yet the Devilrock witches are doing worse.",
+      "talk": [
+        "Cinder-Hag Zora guards the slag-chain at Shedungent's outer gate, using flame-wards to keep the miners penned in the lava-tubes.",
+        "Break Zora's ward and confront Overseer Jabir inside Shedungent!"
+      ]
+    },
+    {
+      "id": "story_dt_captain_jalil",
+      "name": "Captain Jalil of the Border-Watch",
+      "role": "guard",
+      "place": "shedungent",
+      "greet": "My border-rangers trailed the contraband weapon-wagons right to the gates of Shedungent!",
+      "talk": [
+        "Overseer Jabir is selling his brimstone-forged steel to both warlords and bandits across the Cyrodiil border.",
+        "We'll free the miners from the galleries while you settle accounts with Jabir at the great anvil!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_dt_cinder_hag_zora": {
+      "name": "Cinder-Hag Zora of Devilrock",
+      "rank": "boss",
+      "place": "pothago",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_dt_overseer_jabir": {
+      "name": "Overseer Jabir the Iron-Broker",
+      "rank": "boss",
+      "place": "shedungent",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_dt_tigonus_shaft": [
+      "Foreman Tariq: Look at the ankle-shackles left by the collapsed shaft—stamped with Overseer Jabir's mark and blackened with volcanic sulfur.",
+      "Justiciar Malik of Rihad: Sulfur from the high lava-tubes above Pothago. He's working the debt-miners in an unlicensed volcanic forge!",
+      "Foreman Tariq: Follow the slag-trail past Wether's Cleft to Pothago and Shedungent!"
+    ],
+    "story_dt_pothago_kiln": [
+      "Cinder-Hag Zora: The mountain's fire hungers for sweat and iron! No miner leaves the lava-tubes while our kilns burn!",
+      "Warden Ayesha of Arkay: Extinguish her brimstone brazier and free the chain-gang!"
+    ],
+    "story_dt_shedungent_forge": [
+      "Overseer Jabir: Crown, Forebear, bandit, or rebel—every hand in Hammerfell buys my Dragontail steel when the war-drums beat!",
+      "Captain Jalil of the Border-Watch: Built on stolen lives and witch-fire, Jabir! Your ledger closes today!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_dragontail_01_missing_shift",
+      "region": "hammerfell/dragontail",
+      "category": "main",
+      "title": "Black Smoke Over Tigonus",
+      "giver": "story_dt_justiciar_malik",
+      "start": "npc:story_dt_justiciar_malik",
+      "requires": [],
+      "why": [
+        "dragontail.L7.ore_lords",
+        "dragontail.L7.debt_miners",
+        "dragontail.L9.debt_unrest"
+      ],
+      "summary": "Travel from Rihad to Tigonus and inspect the collapsed mine-shaft with Foreman Tariq.",
+      "intro": [
+        "Three hundred debt-miners have vanished from the Dragontail shafts while unlicensed furnace-smoke rises from the high passes.",
+        "Speak with Justiciar Malik in Rihad and travel north to Tigonus to question Foreman Tariq."
+      ],
+      "complete": [
+        "Sulfur-blackened shackles at Tigonus proved that Overseer Jabir marched the miners to the volcanic tubes near Pothago and Shedungent."
+      ],
+      "journal": {
+        "start": "Justiciar Malik in Rihad sent me to Tigonus to investigate the disappearance of three hundred debt-miners.",
+        "done": "Foreman Tariq showed me sulfur-stained shackles pointing toward Pothago and Shedungent."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "tigonus",
+          "text": "Travel to the mining town of Tigonus"
+        },
+        {
+          "type": "scene",
+          "place": "tigonus",
+          "target": "scene:story_dt_tigonus_shaft",
+          "text": "Inspect the sulfur-blackened shackles with Foreman Tariq"
+        },
+        {
+          "type": "talk",
+          "place": "tigonus",
+          "npc": "story_dt_foreman_tariq",
+          "text": "Speak with Foreman Tariq in Tigonus"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "tigonus"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tigonus",
+          "objective": "Travel to the mining town of Tigonus"
+        },
+        {
+          "id": 20,
+          "place": "tigonus",
+          "objective": "Inspect the sulfur-blackened shackles with Foreman Tariq"
+        },
+        {
+          "id": 30,
+          "place": "tigonus",
+          "objective": "Speak with Foreman Tariq in Tigonus"
+        }
+      ],
+      "consequence": "guard_banner:dragontail_stage_1"
+    },
+    {
+      "id": "ms1_dragontail_02_devilrock_pact",
+      "region": "hammerfell/dragontail",
+      "category": "main",
+      "title": "Brimstone at Pothago",
+      "giver": "story_dt_foreman_tariq",
+      "start": "auto",
+      "requires": [
+        "ms1_dragontail_01_missing_shift"
+      ],
+      "why": [
+        "dragontail.L8.arkay_patron",
+        "dragontail.L8.fire_pacts",
+        "dragontail.L10.devilrock_coven"
+      ],
+      "summary": "Cross Wether's Cleft, meet Warden Ayesha in Pothago, and defeat Cinder-Hag Zora of the Devilrock Coven.",
+      "intro": [
+        "Overseer Jabir has allied with the Devilrock Coven to guard the outer slag-kilns at Pothago.",
+        "Scout Wether's Cleft, speak with Warden Ayesha in Pothago, and slay Cinder-Hag Zora."
+      ],
+      "complete": [
+        "With Cinder-Hag Zora defeated, the outer chain-gangs at Pothago were freed and pointed you toward the fortress-foundry of Shedungent."
+      ],
+      "journal": {
+        "start": "I must pass Wether's Cleft, meet Warden Ayesha in Pothago, and defeat Cinder-Hag Zora.",
+        "done": "I slew Cinder-Hag Zora at Pothago and broke the flame-ward sealing the road to Shedungent."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "wethers_cleft",
+          "text": "Follow the slag-wagons through Wether's Cleft"
+        },
+        {
+          "type": "talk",
+          "place": "pothago",
+          "npc": "story_dt_warden_ayesha",
+          "text": "Speak with Warden Ayesha in Pothago"
+        },
+        {
+          "type": "scene",
+          "place": "pothago",
+          "target": "scene:story_dt_pothago_kiln",
+          "text": "Confront Cinder-Hag Zora at the slag-kiln"
+        },
+        {
+          "type": "boss",
+          "place": "pothago",
+          "target": "story_dt_cinder_hag_zora",
+          "text": "Defeat Cinder-Hag Zora of Devilrock"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "wethers_cleft",
+        "pothago"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "wethers_cleft",
+          "objective": "Follow the slag-wagons through Wether's Cleft"
+        },
+        {
+          "id": 20,
+          "place": "pothago",
+          "objective": "Speak with Warden Ayesha in Pothago"
+        },
+        {
+          "id": 30,
+          "place": "pothago",
+          "objective": "Confront Cinder-Hag Zora at the slag-kiln"
+        },
+        {
+          "id": 40,
+          "place": "pothago",
+          "objective": "Defeat Cinder-Hag Zora of Devilrock"
+        }
+      ],
+      "consequence": "npc_schedule:dragontail_stage_2"
+    },
+    {
+      "id": "ms1_dragontail_03_shedungent_gates",
+      "region": "hammerfell/dragontail",
+      "category": "main",
+      "title": "The Lava-Tubes of Shedungent",
+      "giver": "story_dt_warden_ayesha",
+      "start": "auto",
+      "requires": [
+        "ms1_dragontail_02_devilrock_pact"
+      ],
+      "why": [
+        "dragontail.L9.arms_for_both",
+        "dragontail.L10.lava_tubes"
+      ],
+      "summary": "Check the caravan staging-post at Mournoth and join Captain Jalil outside Shedungent.",
+      "intro": [
+        "Before assaulting Shedungent, seize the contraband weapon manifests at Mournoth and rally with Captain Jalil at Shedungent's gate.",
+        "Visit Mournoth and speak with Captain Jalil at Shedungent."
+      ],
+      "complete": [
+        "Captain Jalil's border-rangers breached the outer gates of Shedungent to liberate the captive miners."
+      ],
+      "journal": {
+        "start": "I must check the smuggling manifests at Mournoth and meet Captain Jalil at Shedungent.",
+        "done": "Captain Jalil and I breached the outer defenses of Shedungent."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "mournoth",
+          "text": "Seize the iron-smuggling manifests at Mournoth"
+        },
+        {
+          "type": "talk",
+          "place": "shedungent",
+          "npc": "story_dt_captain_jalil",
+          "text": "Rally with Captain Jalil at Shedungent"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "mournoth",
+        "shedungent"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "mournoth",
+          "objective": "Seize the iron-smuggling manifests at Mournoth"
+        },
+        {
+          "id": 20,
+          "place": "shedungent",
+          "objective": "Rally with Captain Jalil at Shedungent"
+        }
+      ],
+      "consequence": "shrine_state:dragontail_stage_3"
+    },
+    {
+      "id": "ms1_dragontail_04_iron_broker_fall",
+      "region": "hammerfell/dragontail",
+      "category": "main",
+      "title": "Breaking the Iron-Bond",
+      "giver": "story_dt_captain_jalil",
+      "start": "auto",
+      "requires": [
+        "ms1_dragontail_03_shedungent_gates"
+      ],
+      "finale": true,
+      "why": [
+        "dragontail.L7.debt_miners",
+        "dragontail.L9.debt_unrest",
+        "dragontail.L10.khulari_mines"
+      ],
+      "summary": "Storm the volcanic foundry of Shedungent, defeat Overseer Jabir, and return the burned debt-ledgers to Justiciar Malik in Rihad.",
+      "intro": [
+        "Inside Shedungent, Overseer Jabir guards the iron-chests containing the miners' indentures and his contraband war-blade stockpiles.",
+        "Defeat Overseer Jabir in Shedungent and report the liberation of the miners to Justiciar Malik in Rihad."
+      ],
+      "complete": [
+        "Overseer Jabir is dead, the unlawful debt-ledgers have been cast into the volcanic fissures, and the freed miners have returned to Tigonus."
+      ],
+      "journal": {
+        "start": "I must defeat Overseer Jabir inside Shedungent and report back to Justiciar Malik in Rihad.",
+        "done": "I slew Overseer Jabir in Shedungent and freed the debt-miners of the Dragontail Mountains."
+      },
+      "objectives": [
+        {
+          "type": "scene",
+          "place": "shedungent",
+          "target": "scene:story_dt_shedungent_forge",
+          "text": "Confront Overseer Jabir at the volcanic anvil of Shedungent"
+        },
+        {
+          "type": "boss",
+          "place": "shedungent",
+          "target": "story_dt_overseer_jabir",
+          "text": "Defeat Overseer Jabir the Iron-Broker"
+        },
+        {
+          "type": "talk",
+          "place": "rihad",
+          "npc": "story_dt_justiciar_malik",
+          "text": "Report the miners' freedom to Justiciar Malik in Rihad"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "shedungent",
+        "rihad"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shedungent",
+          "objective": "Confront Overseer Jabir at the volcanic anvil of Shedungent"
+        },
+        {
+          "id": 20,
+          "place": "shedungent",
+          "objective": "Defeat Overseer Jabir the Iron-Broker"
+        },
+        {
+          "id": 30,
+          "place": "rihad",
+          "objective": "Report the miners' freedom to Justiciar Malik in Rihad"
+        }
+      ],
+      "consequence": "settlement_prosperity:dragontail_stage_4"
+    }
+  ]
+}

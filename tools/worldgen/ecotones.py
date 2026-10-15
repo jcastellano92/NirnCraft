@@ -27,9 +27,11 @@ CELL, MIN_X, MIN_Z = META["cell"], META["min_x"], META["min_z"]
 
 # (region, mode, neighbours, share, [(biome, relative weight)], optional [(biome, weight)] for the peak context)
 SPEC = [
-    # --- Hammerfell: desert -> steppe -> highland, instead of sand next to oak woods
-    ("hammerfell/alikr_desert", "linear", ["hammerfell/bangkorai"], 0.35,
+    # --- Hammerfell & High Rock: desert -> scrub/steppe -> highland/woodland
+    ("hammerfell/alikr_desert", "linear", ["hammerfell/bangkorai", "hammerfell/sentinel", "hammerfell/dragontail"], 0.35,
      [("warm_steppe", 3), ("anequina_badlands", 1)]),
+    ("hammerfell/sentinel", "linear", ["hammerfell/alikr_desert"], 0.3,
+     [("warm_steppe", 2), ("alikr_desert", 1)]),
     ("hammerfell/bangkorai", "linear", ["hammerfell/alikr_desert", "hammerfell/dragontail", "hammerfell/craglorn"],
      0.3, [("warm_steppe", 1)]),
     ("hammerfell/dragontail", "linear", ["hammerfell/bangkorai", "cyrodiil/colovian_highlands"], 0.35,
@@ -37,8 +39,12 @@ SPEC = [
     ("hammerfell/craglorn", "radial", [], 0.4,
      [("warm_steppe", 3), ("bangkorai", 1), ("anequina_badlands", 1)]),
     ("hammerfell/stros_mkai", "none", [], 0.3, [("pellitine_jungle", 1), ("elsweyr_savanna", 1)]),
-    ("high_rock/wrothgar", "linear", ["hammerfell/craglorn"], 0.3, [("bangkorai", 1)]),
-    ("high_rock/wayrest", "linear", ["hammerfell/craglorn"], 0.25, [("warm_steppe", 1)]),
+    ("high_rock/wrothgar", "linear", ["high_rock/bjoulsae", "high_rock/wayrest", "hammerfell/bangkorai"], 0.3,
+     [("bangkorai", 1)]),
+    ("high_rock/wayrest", "linear", ["high_rock/wrothgar", "hammerfell/bangkorai"], 0.25, [("warm_steppe", 1)]),
+    ("high_rock/daggerfall", "linear", ["high_rock/anticlere", "high_rock/glenumbra"], 0.25, [("stormhaven", 1)]),
+    ("high_rock/anticlere", "linear", ["high_rock/daggerfall", "high_rock/glenumbra"], 0.25, [("glenumbra_moors", 1)]),
+    ("high_rock/dwynnen", "linear", ["high_rock/wayrest", "high_rock/anticlere"], 0.25, [("wayrest_farmland", 1)]),
     ("cyrodiil/colovian_highlands", "linear", ["hammerfell/craglorn", "hammerfell/dragontail"], 0.3,
      [("warm_steppe", 1), ("bangkorai", 1)]),
     ("cyrodiil/west_weald", "linear", ["hammerfell/dragontail"], 0.25, [("warm_steppe", 1)]),

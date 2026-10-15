@@ -1,0 +1,99 @@
+{
+  "id": "vlastarus",
+  "why": [
+    "great_forest.L5.timber",
+    "great_forest.L6.road_hamlets"
+  ],
+  "sil": "logging-palisade-clearing",
+  "base": "none",
+  "overlay": "great_forest",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "great_forest"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "mill",
+      "use": "sawmill",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "great_forest",
+      "name": "vlastarus_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "great_forest",
+      "name": "vlastarus_b_2"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "great_forest",
+      "name": "vlastarus_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "great_forest",
+      "name": "vlastarus_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "waterwheel",
+      "theme": "vlastarus_mill",
+      "count": 1
+    },
+    {
+      "type": "tree_row",
+      "theme": "great_forest_oak",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "vlastarus_b_1": "Vlastarus Timber Sawmill",
+    "vlastarus_b_2": "The Split-Oak Tavern",
+    "vlastarus_b_3": "Vlastarus Axe & Wedge",
+    "vlastarus_b_4": "Foreman Marus's Lodge"
+  },
+  "innKey": "vlastarus_b_2",
+  "names": {
+    "inn": "vlastarus_b_2"
+  }
+}

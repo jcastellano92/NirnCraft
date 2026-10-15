@@ -6,7 +6,7 @@ package com.skycraft.dungeons.world;
  */
 public final class CaveRoster {
     public static final int BANDIT = 0, DEN = 1, SPIDER = 2, TROLL = 3, FALMER = 4, FORSWORN = 5, SPRIGGAN = 6,
-            ICE = 7, SKEEVER = 8, SMUGGLER = 9;
+            ICE = 7, SKEEVER = 8, SMUGGLER = 9, SCORPION = 10;
 
     /** Rosters a random cave may roll (Falmer, Forsworn and spriggan caves belong to named places and kits). */
     private static final int[] RANDOM = {BANDIT, DEN, SPIDER, TROLL, SKEEVER, BANDIT, DEN, SMUGGLER};
@@ -17,7 +17,7 @@ public final class CaveRoster {
     /** The roster of a cave piece. Random caves store an index into {@link #RANDOM} offset by 100. */
     public static int of(int flavor) {
         if (flavor >= 100) return RANDOM[Math.floorMod(flavor - 100, RANDOM.length)];
-        return Math.floorMod(flavor, 10);
+        return Math.floorMod(flavor, 11);
     }
 
     /** Flavor value for the {@code i}-th random roll. */

@@ -1,366 +1,438 @@
 {
- "line": "loreweb_summerset",
- "category": "side",
- "bosses": {
-  "lw_sum_1_boss": {
-   "name": "The Hour's Keeper",
-   "type": "skycraft:will_o_wisp",
-   "hp": 3.4,
-   "dmg": 1.5,
-   "level": 30,
-   "drop": "loot:major",
-   "glow": false
-  },
-  "lw_sum_2_boss": {
-   "name": "The Splinter-Prophet",
-   "type": "skycraft:dremora",
-   "hp": 3.4,
-   "dmg": 1.5,
-   "level": 26,
-   "drop": "loot:standard",
-   "glow": false
-  },
-  "lw_sum_3_boss": {
-   "name": "Steward Aelindor",
-   "type": "skycraft:bandit_chief",
-   "hp": 2.8,
-   "dmg": 1.3,
-   "level": 24,
-   "drop": "loot:standard",
-   "glow": false
-  },
-  "lw_sum_4_boss": {
-   "name": "The Loom-Mother",
-   "type": "skycraft:frostbite_spider",
-   "hp": 3.6,
-   "dmg": 1.5,
-   "level": 22,
-   "drop": "loot:standard",
-   "glow": false
-  }
- },
- "quests": [
-  {
-   "id": "lw_sum_1_a",
-   "title": "The Skipped Hour",
-   "region": "summerset/auridon",
-   "start": "find",
-   "find": {
-    "place": "isle_of_contemplation",
-    "offset": [
-     3,
-     4
-    ],
-    "radius": 4,
-    "clue": "lectern",
-    "text": "On the meditation platform a sun-dial's gnomon has been filed to a stub, and beneath it a note in a careful hand: 'Count the bells at dusk. There are twenty-three. Which hour was taken?'"
-   },
-   "requires": [
-    "level:20"
-   ],
-   "desc": "A filed-down sundial on a meditation isle says Alinor's bells chime only twenty-three hours.",
-   "pitch": "A hermit on the Isle of Contemplation insists that one bell of the day is missing, and has been for sixty years.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "colosseum_of_the_old_ways",
-     "text": "Take a rubbing of the grey tile from the Colosseum to the capital's clock-square."
+  "line": "loreweb_summerset",
+  "category": "faction",
+  "bosses": {
+    "lw_sum_1_boss": {
+      "name": "The Hour's Keeper",
+      "type": "skycraft:will_o_wisp",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 30,
+      "drop": "loot:major",
+      "glow": false
     },
-    {
-     "type": "go",
-     "place": "alinor",
-     "text": "Find the bell-ringer's warding-word in Alinor's clock tower."
+    "lw_sum_2_boss": {
+      "name": "The Splinter-Prophet",
+      "type": "skycraft:dremora",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 26,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_sum_3_boss": {
+      "name": "Steward Aelindor",
+      "type": "skycraft:bandit_chief",
+      "hp": 2.8,
+      "dmg": 1.3,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_sum_4_boss": {
+      "name": "The Loom-Mother",
+      "type": "skycraft:frostbite_spider",
+      "hp": 3.6,
+      "dmg": 1.5,
+      "level": 22,
+      "drop": "loot:standard",
+      "glow": false
     }
-   ],
-   "rewards": {
-    "gold": 280,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The missing hour is traced through an old arena, the capital and a vault of false doors to the tower of crystal and the Psijics' rearranging vault."
   },
-  {
-   "id": "lw_sum_1_b",
-   "title": "The Skipped Hour (II)",
-   "region": "summerset/auridon",
-   "start": "auto",
-   "requires": [
-    "quest:lw_sum_1_a"
-   ],
-   "desc": "The missing hour is traced through an old arena, the capital and a vault of false doors to the tower of crystal and the Psijics' rearranging vault.",
-   "pitch": "A hermit on the Isle of Contemplation insists that one bell of the day is missing, and has been for sixty years.",
-   "objectives": [
+  "quests": [
     {
-     "type": "go",
-     "place": "traitors_vault",
-     "text": "Break the wall behind the false doors and retrieve the brick."
-    },
-    {
-     "type": "go",
-     "place": "crystal_tower_summerset",
-     "text": "Remove the cloth from the lens at the tower's summit and look through."
-    },
-    {
-     "type": "kill",
-     "place": "psijic_relic_vaults",
-     "text": "Find the room that is no longer anywhere and take the candle.",
-     "spawn": [
-      {
-       "boss_id": "lw_sum_1_boss"
+      "id": "lw_sum_1_a",
+      "title": "The Skipped Hour",
+      "region": "summerset/auridon",
+      "start": "find",
+      "find": {
+        "place": "isle_of_contemplation",
+        "offset": [
+          3,
+          4
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "On the meditation platform a sun-dial's gnomon has been filed to a stub, and beneath it a note in a careful hand: 'Count the bells at dusk. There are twenty-three. Which hour was taken?'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A filed-down sundial on a meditation isle says Alinor's bells chime only twenty-three hours.",
+      "pitch": "A hermit on the Isle of Contemplation insists that one bell of the day is missing, and has been for sixty years.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "colosseum_of_the_old_ways",
+          "text": "Take a rubbing of the grey tile from the Colosseum to the capital's clock-square."
+        },
+        {
+          "type": "go",
+          "place": "alinor",
+          "text": "Find the bell-ringer's warding-word in Alinor's clock tower."
+        }
+      ],
+      "rewards": {
+        "gold": 280,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The missing hour is traced through an old arena, the capital and a vault of false doors to the tower of crystal and the Psijics' rearranging vault.",
+      "why": [
+        "auridon.L7.marines",
+        "auridon.L7.vulkhel_outsiders"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_1_a_resolved",
+        "flag": "conseq_lw_sum_1_a",
+        "summary": "One thread of the trail ends here and the next begins. The missing hour is traced through an old arena, the capital and a vault of false doors to the tower of crystal and the Psijics' rearranging vault."
       }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 700,
-    "loot": "legendary",
-    "flags": [
-     "lw_sum_1_done"
-    ],
-    "unique": "psijic_longbow"
-   },
-   "outro": "I stepped through the last door into a room that was lit by a single candle and an hour long gone. Someone had killed a man in that hour, and the Order had folded it away. I walked out carrying its name."
-  },
-  {
-   "id": "lw_sum_2_a",
-   "title": "The Glass Fever",
-   "region": "summerset/auridon",
-   "start": "find",
-   "find": {
-    "place": "dawnbreak",
-    "offset": [
-     -6,
-     9
-    ],
-    "radius": 4,
-    "clue": "grave",
-    "text": "A bluff-top grave is covered in a fine scatter of crystal splinters, glinting in the grass. A small wooden marker reads only: 'Glass-fevered. Do not dig.'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A glinting grave on a bluff marked 'Glass-fevered. Do not dig.' and a scatter of crystal splinters.",
-   "pitch": "A woman at Dawnbreak says her husband's eyes glittered like cut glass before he walked into the bluff.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "maras_kiss_public_house",
-     "text": "Take the cider sample from Mara's Kiss and trace the apples to Shattered Grove."
     },
     {
-     "type": "go",
-     "place": "shattered_grove",
-     "text": "Take a grove-shard to the tidal port of Firsthold to match its resonance."
-    },
-    {
-     "type": "go",
-     "place": "firsthold",
-     "text": "Take the quarantine list from Firsthold to the star-ring hill of Skywatch."
-    }
-   ],
-   "rewards": {
-    "gold": 240,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The fever's spread runs through a tavern, a splintered grove and a tide-island to the star-ringed hill, a prison and the red fortress."
-  },
-  {
-   "id": "lw_sum_2_b",
-   "title": "The Glass Fever (II)",
-   "region": "summerset/auridon",
-   "start": "auto",
-   "requires": [
-    "quest:lw_sum_2_a"
-   ],
-   "desc": "The fever's spread runs through a tavern, a splintered grove and a tide-island to the star-ringed hill, a prison and the red fortress.",
-   "pitch": "A woman at Dawnbreak says her husband's eyes glittered like cut glass before he walked into the bluff.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "skywatch",
-     "text": "Re-true the orrery at Skywatch and learn the cult's bearing."
-    },
-    {
-     "type": "go",
-     "place": "the_banished_cells",
-     "text": "Free the cells' refusers and take their testimony to the red fortress."
-    },
-    {
-     "type": "kill",
-     "place": "mehrunes_spite",
-     "text": "Break the seed-crystal at the heart of the red fortress.",
-     "spawn": [
-      {
-       "boss_id": "lw_sum_2_boss"
+      "id": "lw_sum_1_b",
+      "title": "The Skipped Hour (II)",
+      "region": "summerset/auridon",
+      "start": "auto",
+      "requires": [
+        "quest:lw_sum_1_a"
+      ],
+      "desc": "The missing hour is traced through an old arena, the capital and a vault of false doors to the tower of crystal and the Psijics' rearranging vault.",
+      "pitch": "A hermit on the Isle of Contemplation insists that one bell of the day is missing, and has been for sixty years.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "traitors_vault",
+          "text": "Break the wall behind the false doors and retrieve the brick."
+        },
+        {
+          "type": "go",
+          "place": "crystal_tower_summerset",
+          "text": "Remove the cloth from the lens at the tower's summit and look through."
+        },
+        {
+          "type": "kill",
+          "place": "psijic_relic_vaults",
+          "text": "Find the room that is no longer anywhere and take the candle.",
+          "spawn": [
+            {
+              "boss_id": "lw_sum_1_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 700,
+        "loot": "legendary",
+        "flags": [
+          "lw_sum_1_done"
+        ],
+        "unique": "psijic_longbow"
+      },
+      "outro": "I stepped through the last door into a room that was lit by a single candle and an hour long gone. Someone had killed a man in that hour, and the Order had folded it away. I walked out carrying its name.",
+      "why": [
+        "auridon.L7.vulkhel_outsiders",
+        "auridon.L8.propriety_college"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_1_b_resolved",
+        "flag": "conseq_lw_sum_1_b",
+        "summary": "I stepped through the last door into a room that was lit by a single candle and an hour long gone. Someone had killed a man in that hour, and the Order had folded it away. I walked out carrying its name."
       }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 600,
-    "loot": "major",
-    "flags": [
-     "lw_sum_2_done"
-    ],
-    "unique": "alinor_dawnblade"
-   },
-   "outro": "At the red fortress's heart I broke the seed-crystal and the splinters in every vein of Auridon dimmed, one by one. The glass-fevered will take years to recover, but they will."
-  },
-  {
-   "id": "lw_sum_3_a",
-   "title": "The Egg-Tithe",
-   "region": "summerset/summerset_isle",
-   "start": "find",
-   "find": {
-    "place": "kings_haven",
-    "offset": [
-     5,
-     -5
-    ],
-    "radius": 4,
-    "clue": "lectern",
-    "text": "An orchard-keep's accounts list 'egg-tithe, forwarded to the steward at Cloudrest': thirty clutches in each of five seasons, and none in the sixth. 'The gryphons stopped,' it adds. 'Or were stopped.'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "An orchard-keep's ledger lists an egg-tithe forwarded to a steward and a sixth season where no clutch came.",
-   "pitch": "The orchard-keep's reeve says no gryphon has hatched on the coast this spring.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "the_golden_netch",
-     "text": "Follow the dealer's crate from the Golden Netch to the port of Shimmerene."
     },
     {
-     "type": "go",
-     "place": "shimmerene",
-     "text": "Raid the quiet quay at Shimmerene and take the stolen clutch back to its aerie."
-    }
-   ],
-   "rewards": {
-    "gold": 210,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The trail goes from a balloon-inn and a dock to the aerie, the palace of balconies and a lightning-rod fortress."
-  },
-  {
-   "id": "lw_sum_3_b",
-   "title": "The Egg-Tithe (II)",
-   "region": "summerset/summerset_isle",
-   "start": "auto",
-   "requires": [
-    "quest:lw_sum_3_a"
-   ],
-   "desc": "The trail goes from a balloon-inn and a dock to the aerie, the palace of balconies and a lightning-rod fortress.",
-   "pitch": "The orchard-keep's reeve says no gryphon has hatched on the coast this spring.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "gryphon_aerie",
-     "text": "Return the clutch to the aerie and carry the mother's thread of song to Cloudrest."
-    },
-    {
-     "type": "go",
-     "place": "cloudrest",
-     "text": "Open the steward's strongbox under Cloudrest and take the ledger."
-    },
-    {
-     "type": "kill",
-     "place": "tor_hame_khard",
-     "text": "Hatch the clutch in Tor Hame Khard's warm court and sing the palace back to strength.",
-     "spawn": [
-      {
-       "boss_id": "lw_sum_3_boss"
+      "id": "lw_sum_2_a",
+      "title": "The Glass Fever",
+      "region": "summerset/auridon",
+      "start": "find",
+      "find": {
+        "place": "dawnbreak",
+        "offset": [
+          -6,
+          9
+        ],
+        "radius": 4,
+        "clue": "grave",
+        "text": "A bluff-top grave is covered in a fine scatter of crystal splinters, glinting in the grass. A small wooden marker reads only: 'Glass-fevered. Do not dig.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A glinting grave on a bluff marked 'Glass-fevered. Do not dig.' and a scatter of crystal splinters.",
+      "pitch": "A woman at Dawnbreak says her husband's eyes glittered like cut glass before he walked into the bluff.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "maras_kiss_public_house",
+          "text": "Take the cider sample from Mara's Kiss and trace the apples to Shattered Grove."
+        },
+        {
+          "type": "go",
+          "place": "shattered_grove",
+          "text": "Take a grove-shard to the tidal port of Firsthold to match its resonance."
+        },
+        {
+          "type": "go",
+          "place": "firsthold",
+          "text": "Take the quarantine list from Firsthold to the star-ring hill of Skywatch."
+        }
+      ],
+      "rewards": {
+        "gold": 240,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The fever's spread runs through a tavern, a splintered grove and a tide-island to the star-ringed hill, a prison and the red fortress.",
+      "why": [
+        "auridon.L8.propriety_college",
+        "auridon.L9.maormer_front"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_2_a_resolved",
+        "flag": "conseq_lw_sum_2_a",
+        "summary": "One thread of the trail ends here and the next begins. The fever's spread runs through a tavern, a splintered grove and a tide-island to the star-ringed hill, a prison and the red fortress."
       }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 520,
-    "loot": "major",
-    "flags": [
-     "lw_sum_3_done"
-    ]
-   },
-   "outro": "I returned the clutch to the aerie and heard, far above, a single clear note. The balconies of Cloudrest steadied. The steward will have a great deal to explain to the court."
-  },
-  {
-   "id": "lw_sum_4_a",
-   "title": "The Silk Library",
-   "region": "summerset/auridon",
-   "start": "find",
-   "find": {
-    "place": "trebbite_monastery",
-    "offset": [
-     8,
-     3
-    ],
-    "radius": 4,
-    "clue": "urn",
-    "text": "A monastery urn is full of silk-thread spools, each wound around a tiny rolled slip with a word. A monk has tagged them: 'These are the library's lost books. Please do not eat them.'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "An urn of silk-thread spools at a monastery, each wound around a rolled slip with a single word.",
-   "pitch": "The Trebbite monks found silk with words in it and have no idea how it got there.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "dusk",
-     "text": "Take the blank book from Dusk to the library city of Lillandril."
     },
     {
-     "type": "go",
-     "place": "lillandril",
-     "text": "Find the missing librarian's last catalogue entry and follow its bearing."
-    }
-   ],
-   "rewards": {
-    "gold": 180,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The lost words lead through a dune port and the great library to an acropolis and a vault wrapped in webs."
-  },
-  {
-   "id": "lw_sum_4_b",
-   "title": "The Silk Library (II)",
-   "region": "summerset/auridon",
-   "start": "auto",
-   "requires": [
-    "quest:lw_sum_4_a"
-   ],
-   "desc": "The lost words lead through a dune port and the great library to an acropolis and a vault wrapped in webs.",
-   "pitch": "The Trebbite monks found silk with words in it and have no idea how it got there.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "direnni_acropolis",
-     "text": "Take a silk-page from the acropolis to the vault wrapped in webs."
-    },
-    {
-     "type": "kill",
-     "place": "cathedral_of_webs",
-     "text": "Listen to the librarian's reading and decide what to do about the Loom-Mother.",
-     "spawn": [
-      {
-       "boss_id": "lw_sum_4_boss"
+      "id": "lw_sum_2_b",
+      "title": "The Glass Fever (II)",
+      "region": "summerset/auridon",
+      "start": "auto",
+      "requires": [
+        "quest:lw_sum_2_a"
+      ],
+      "desc": "The fever's spread runs through a tavern, a splintered grove and a tide-island to the star-ringed hill, a prison and the red fortress.",
+      "pitch": "A woman at Dawnbreak says her husband's eyes glittered like cut glass before he walked into the bluff.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "skywatch",
+          "text": "Re-true the orrery at Skywatch and learn the cult's bearing."
+        },
+        {
+          "type": "go",
+          "place": "the_banished_cells",
+          "text": "Free the cells' refusers and take their testimony to the red fortress."
+        },
+        {
+          "type": "kill",
+          "place": "mehrunes_spite",
+          "text": "Break the seed-crystal at the heart of the red fortress.",
+          "spawn": [
+            {
+              "boss_id": "lw_sum_2_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 600,
+        "loot": "major",
+        "flags": [
+          "lw_sum_2_done"
+        ],
+        "unique": "alinor_dawnblade"
+      },
+      "outro": "At the red fortress's heart I broke the seed-crystal and the splinters in every vein of Auridon dimmed, one by one. The glass-fevered will take years to recover, but they will.",
+      "why": [
+        "auridon.L9.maormer_front",
+        "auridon.L9.cult_denial"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_2_b_resolved",
+        "flag": "conseq_lw_sum_2_b",
+        "summary": "At the red fortress's heart I broke the seed-crystal and the splinters in every vein of Auridon dimmed, one by one. The glass-fevered will take years to recover, but they will."
       }
-     ],
-     "placement": "structure"
+    },
+    {
+      "id": "lw_sum_3_a",
+      "title": "The Egg-Tithe",
+      "region": "summerset/summerset_isle",
+      "start": "find",
+      "find": {
+        "place": "kings_haven",
+        "offset": [
+          5,
+          -5
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "An orchard-keep's accounts list 'egg-tithe, forwarded to the steward at Cloudrest': thirty clutches in each of five seasons, and none in the sixth. 'The gryphons stopped,' it adds. 'Or were stopped.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "An orchard-keep's ledger lists an egg-tithe forwarded to a steward and a sixth season where no clutch came.",
+      "pitch": "The orchard-keep's reeve says no gryphon has hatched on the coast this spring.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_golden_netch",
+          "text": "Follow the dealer's crate from the Golden Netch to the port of Shimmerene."
+        },
+        {
+          "type": "go",
+          "place": "shimmerene",
+          "text": "Raid the quiet quay at Shimmerene and take the stolen clutch back to its aerie."
+        }
+      ],
+      "rewards": {
+        "gold": 210,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The trail goes from a balloon-inn and a dock to the aerie, the palace of balconies and a lightning-rod fortress.",
+      "why": [
+        "summerset_isle.L8.sacred_numbers",
+        "summerset_isle.L9.house_vs_thalmor"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_3_a_resolved",
+        "flag": "conseq_lw_sum_3_a",
+        "summary": "One thread of the trail ends here and the next begins. The trail goes from a balloon-inn and a dock to the aerie, the palace of balconies and a lightning-rod fortress."
+      }
+    },
+    {
+      "id": "lw_sum_3_b",
+      "title": "The Egg-Tithe (II)",
+      "region": "summerset/summerset_isle",
+      "start": "auto",
+      "requires": [
+        "quest:lw_sum_3_a"
+      ],
+      "desc": "The trail goes from a balloon-inn and a dock to the aerie, the palace of balconies and a lightning-rod fortress.",
+      "pitch": "The orchard-keep's reeve says no gryphon has hatched on the coast this spring.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gryphon_aerie",
+          "text": "Return the clutch to the aerie and carry the mother's thread of song to Cloudrest."
+        },
+        {
+          "type": "go",
+          "place": "cloudrest",
+          "text": "Open the steward's strongbox under Cloudrest and take the ledger."
+        },
+        {
+          "type": "kill",
+          "place": "tor_hame_khard",
+          "text": "Hatch the clutch in Tor Hame Khard's warm court and sing the palace back to strength.",
+          "spawn": [
+            {
+              "boss_id": "lw_sum_3_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 520,
+        "loot": "major",
+        "flags": [
+          "lw_sum_3_done"
+        ]
+      },
+      "outro": "I returned the clutch to the aerie and heard, far above, a single clear note. The balconies of Cloudrest steadied. The steward will have a great deal to explain to the court.",
+      "why": [
+        "summerset_isle.L9.house_vs_thalmor",
+        "summerset_isle.L9.geyser_alarm"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_3_b_resolved",
+        "flag": "conseq_lw_sum_3_b",
+        "summary": "I returned the clutch to the aerie and heard, far above, a single clear note. The balconies of Cloudrest steadied. The steward will have a great deal to explain to the court."
+      }
+    },
+    {
+      "id": "lw_sum_4_a",
+      "title": "The Silk Library",
+      "region": "summerset/auridon",
+      "start": "find",
+      "find": {
+        "place": "trebbite_monastery",
+        "offset": [
+          8,
+          3
+        ],
+        "radius": 4,
+        "clue": "urn",
+        "text": "A monastery urn is full of silk-thread spools, each wound around a tiny rolled slip with a word. A monk has tagged them: 'These are the library's lost books. Please do not eat them.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "An urn of silk-thread spools at a monastery, each wound around a rolled slip with a single word.",
+      "pitch": "The Trebbite monks found silk with words in it and have no idea how it got there.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dusk",
+          "text": "Take the blank book from Dusk to the library city of Lillandril."
+        },
+        {
+          "type": "go",
+          "place": "lillandril",
+          "text": "Find the missing librarian's last catalogue entry and follow its bearing."
+        }
+      ],
+      "rewards": {
+        "gold": 180,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The lost words lead through a dune port and the great library to an acropolis and a vault wrapped in webs.",
+      "why": [
+        "auridon.L10.banished_cells",
+        "auridon.L10.mehrunes_spite"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_4_a_resolved",
+        "flag": "conseq_lw_sum_4_a",
+        "summary": "One thread of the trail ends here and the next begins. The lost words lead through a dune port and the great library to an acropolis and a vault wrapped in webs."
+      }
+    },
+    {
+      "id": "lw_sum_4_b",
+      "title": "The Silk Library (II)",
+      "region": "summerset/auridon",
+      "start": "auto",
+      "requires": [
+        "quest:lw_sum_4_a"
+      ],
+      "desc": "The lost words lead through a dune port and the great library to an acropolis and a vault wrapped in webs.",
+      "pitch": "The Trebbite monks found silk with words in it and have no idea how it got there.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "direnni_acropolis",
+          "text": "Take a silk-page from the acropolis to the vault wrapped in webs."
+        },
+        {
+          "type": "kill",
+          "place": "cathedral_of_webs",
+          "text": "Listen to the librarian's reading and decide what to do about the Loom-Mother.",
+          "spawn": [
+            {
+              "boss_id": "lw_sum_4_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 460,
+        "loot": "major",
+        "flags": [
+          "lw_sum_4_done"
+        ]
+      },
+      "outro": "I found the librarian at a silk-lectern, reading aloud to a roomful of patient spiders. She did not look up. I sat down and listened until the afternoon had gone.",
+      "why": [
+        "auridon.L10.mehrunes_spite",
+        "auridon.L10.heritance_proving_ground"
+      ],
+      "consequence": {
+        "world_state": "lw_sum_4_b_resolved",
+        "flag": "conseq_lw_sum_4_b",
+        "summary": "I found the librarian at a silk-lectern, reading aloud to a roomful of patient spiders. She did not look up. I sat down and listened until the afternoon had gone."
+      }
     }
-   ],
-   "rewards": {
-    "gold": 460,
-    "loot": "major",
-    "flags": [
-     "lw_sum_4_done"
-    ]
-   },
-   "outro": "I found the librarian at a silk-lectern, reading aloud to a roomful of patient spiders. She did not look up. I sat down and listened until the afternoon had gone."
-  }
- ]
+  ]
 }

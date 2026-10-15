@@ -1,0 +1,6539 @@
+{
+  "province": "high_rock",
+  "truth": "High Rock is a wet, broken country of sea bluffs, river meadows and moors, walled on the east by the Wrothgarian Mountains. The Bretons are a people of mixed Nedic and elven blood, shaped by the Direnni elves who ruled them first and split the land into dozens of petty kingdoms. The Warp in the West folded most of the bay's kingdoms into a few crowns, but every former king is now a baron with a keep, a banner and a grudge. Knights, guilds and covens fill the gaps that the law leaves, while the Orcs hold the mountains. Wool, hides, grain, ships and ore fund the crowns and merchant guilds.",
+  "layers": {
+    "L1": [
+      {
+        "id": "wrothgar_spine",
+        "text": "a granite and slate range on the east side, peaks y 300-460, passes y 200-240, with iron, silver and orichalcum veins",
+        "cites": []
+      },
+      {
+        "id": "bay_plain",
+        "text": "clay and alluvial shore plains from Daggerfall to Wayrest",
+        "cites": []
+      },
+      {
+        "id": "sea_bluffs",
+        "text": "sandstone bluffs at Daggerfall and Glenpoint (y 100-120) cut by sea caves",
+        "cites": []
+      },
+      {
+        "id": "north_crags",
+        "text": "dark crags and acid moors over granite in Rivenspire and Glenumbra, with peat",
+        "cites": []
+      },
+      {
+        "id": "bjoulsae_trench",
+        "text": "the Bjoulsae valley cut from the north-east highlands to the bay head",
+        "cites": []
+      },
+      {
+        "id": "balfiera_hill",
+        "text": "a hill island (about y 170) in the eastern bay",
+        "cites": []
+      },
+      {
+        "id": "ocean_cliffs",
+        "text": "a cliffed west coast on the open ocean, with sheltered coves inside the bay",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "westerlies",
+        "text": "ocean winds bring rain to Glenumbra and the bluffs",
+        "cites": [
+          "high_rock.L1.ocean_cliffs"
+        ]
+      },
+      {
+        "id": "bay_fog",
+        "text": "sea fog fills the bay on calm mornings, thickest at the Bjoulsae mouth",
+        "cites": [
+          "high_rock.L1.bjoulsae_trench",
+          "high_rock.L1.bay_plain"
+        ]
+      },
+      {
+        "id": "spine_snow",
+        "text": "snow above about y 260, and a drier lee on the east side",
+        "cites": [
+          "high_rock.L1.wrothgar_spine"
+        ]
+      },
+      {
+        "id": "mild_shore",
+        "text": "the bay shore is mild with a long growing season",
+        "cites": [
+          "high_rock.L1.bay_plain"
+        ]
+      },
+      {
+        "id": "still_woods",
+        "text": "cold damp air pools in the low northern woods",
+        "cites": [
+          "high_rock.L1.north_crags"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "many_rivers",
+        "text": "at least six rivers reach the bay",
+        "cites": [
+          "high_rock.L2.westerlies"
+        ]
+      },
+      {
+        "id": "bjoulsae_artery",
+        "text": "the Bjoulsae is navigable from its mouth to Evermor",
+        "cites": [
+          "high_rock.L1.bjoulsae_trench"
+        ]
+      },
+      {
+        "id": "moor_tarns",
+        "text": "bogs and tarns on the moors",
+        "cites": [
+          "high_rock.L1.north_crags",
+          "high_rock.L2.westerlies"
+        ]
+      },
+      {
+        "id": "water_is_crossings",
+        "text": "water is plentiful, so power over water means mills, fords and bridges; the lord owns them and the peasants pay to grind and to cross",
+        "cites": [
+          "high_rock.L1.bay_plain",
+          "high_rock.L2.westerlies",
+          "high_rock.L3.many_rivers"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "mosaic",
+        "text": "see section 2",
+        "cites": [
+          "high_rock.L1.bay_plain",
+          "high_rock.L1.north_crags",
+          "high_rock.L2.westerlies",
+          "high_rock.L3.many_rivers"
+        ]
+      },
+      {
+        "id": "cliff_harpies",
+        "text": "harpies nest on the bluffs",
+        "cites": [
+          "high_rock.L1.sea_bluffs"
+        ]
+      },
+      {
+        "id": "wood_spiders",
+        "text": "giant spiders in the haunted woods",
+        "cites": [
+          "high_rock.L2.still_woods"
+        ]
+      },
+      {
+        "id": "wereboar_woods",
+        "text": "wereboars and wolves in the oak forests",
+        "cites": [
+          "high_rock.L1.bay_plain",
+          "high_rock.L2.westerlies",
+          "high_rock.L4.mosaic"
+        ]
+      },
+      {
+        "id": "spine_beasts",
+        "text": "trolls, bears and giants in the high valleys",
+        "cites": [
+          "high_rock.L1.wrothgar_spine"
+        ]
+      },
+      {
+        "id": "restless_dead",
+        "text": "ghosts and wraiths gather at old battlefields",
+        "cites": [
+          "high_rock.L1.north_crags",
+          "high_rock.L2.still_woods",
+          "high_rock.L3.moor_tarns"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "wool_and_hides",
+        "text": "sheep on the moors, hides and tanning in Daggerfall",
+        "cites": [
+          "high_rock.L4.mosaic"
+        ]
+      },
+      {
+        "id": "grain_orchards",
+        "text": "grain, orchards and vines on the shore plains",
+        "cites": [
+          "high_rock.L2.mild_shore"
+        ]
+      },
+      {
+        "id": "fish_salt",
+        "text": "fishing and salt pans on the coast",
+        "cites": [
+          "high_rock.L1.sea_bluffs"
+        ]
+      },
+      {
+        "id": "bay_shipping",
+        "text": "Wayrest's ships and the Bjoulsae barges carry the province's trade",
+        "cites": [
+          "high_rock.L3.bjoulsae_artery"
+        ]
+      },
+      {
+        "id": "orc_ore",
+        "text": "Orc and Breton mines in Wrothgar, orichalcum forged in Orsinium",
+        "cites": [
+          "high_rock.L1.wrothgar_spine"
+        ]
+      },
+      {
+        "id": "tolls",
+        "text": "bridge and ford tolls fund the keeps. Who gets rich: the crowns (tolls and taxes), Wayrest's merchant guilds (shipping) and the orders (land grants)",
+        "cites": [
+          "high_rock.L3.water_is_crossings"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "fief_patchwork",
+        "text": "a lord's keep with a village every few kilometres, each at a crossing, mill or harbour",
+        "cites": [
+          "high_rock.L3.water_is_crossings",
+          "high_rock.L5.tolls"
+        ]
+      },
+      {
+        "id": "capitals_at_mouths",
+        "text": "Daggerfall and Wayrest sit where rivers meet the bay",
+        "cites": [
+          "high_rock.L3.many_rivers",
+          "high_rock.L5.bay_shipping"
+        ]
+      },
+      {
+        "id": "mountain_city",
+        "text": "Orsinium on its plateau",
+        "cites": [
+          "high_rock.L1.wrothgar_spine"
+        ]
+      },
+      {
+        "id": "busy_centres",
+        "text": "Wayrest (the Bjoulsae trade) and Daggerfall (the crown, the road and the ferry) are the crowded hearts",
+        "cites": [
+          "high_rock.L5.bay_shipping",
+          "high_rock.L5.tolls"
+        ]
+      },
+      {
+        "id": "failing_edges",
+        "text": "the haunted northern fiefs and the Kambria march lose people every year",
+        "cites": [
+          "high_rock.L2.still_woods",
+          "high_rock.L4.wood_spiders"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "feudal_ladder",
+        "text": "king, baron, knight, burgher, freeholder, tenant",
+        "cites": [
+          "high_rock.L6.fief_patchwork"
+        ]
+      },
+      {
+        "id": "burghers",
+        "text": "Wayrest's guild merchants are richer than many barons",
+        "cites": [
+          "high_rock.L5.bay_shipping"
+        ]
+      },
+      {
+        "id": "tenants_bound",
+        "text": "tenants owe labour and milling fees and cannot leave without the lord's leave",
+        "cites": [
+          "high_rock.L3.water_is_crossings"
+        ]
+      },
+      {
+        "id": "orders_as_police",
+        "text": "the knightly orders keep the roads in place of a royal guard",
+        "cites": [
+          "high_rock.L5.tolls",
+          "high_rock.L6.fief_patchwork"
+        ]
+      },
+      {
+        "id": "outcasts",
+        "text": "witches, Orcs outside Wrothgar and the Reachfolk of the eastern hills live outside the ladder",
+        "cites": [
+          "high_rock.L4.mosaic",
+          "high_rock.L6.failing_edges"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "eight_and_patrons",
+        "text": "the Eight Divines, with each fief's patron temple a point of pride (Kynareth, Mara, Arkay, Stendarr, Dibella, Julianos, Z'en and the Akatosh Chantry all appear)",
+        "cites": [
+          "high_rock.L6.fief_patchwork",
+          "high_rock.L7.feudal_ladder"
+        ]
+      },
+      {
+        "id": "direnni_nostalgia",
+        "text": "nobles boast of elven blood",
+        "cites": [
+          "high_rock.L1.balfiera_hill",
+          "high_rock.L7.feudal_ladder"
+        ]
+      },
+      {
+        "id": "witch_ambivalence",
+        "text": "villagers fear the covens and still pay them for cures",
+        "cites": [
+          "high_rock.L4.mosaic"
+        ]
+      },
+      {
+        "id": "crypt_dead",
+        "text": "the dead lie in crypts under chapels and keeps; ghosts are expected, not shocking",
+        "cites": [
+          "high_rock.L4.restless_dead",
+          "high_rock.L6.fief_patchwork"
+        ]
+      },
+      {
+        "id": "imperial_loyal",
+        "text": "trade makes the Bretons loyal to the Empire and wary of the Thalmor",
+        "cites": [
+          "high_rock.L5.bay_shipping"
+        ]
+      },
+      {
+        "id": "malacath_code",
+        "text": "Orcs follow Malacath's code of the stronghold",
+        "cites": [
+          "high_rock.L6.mountain_city"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "crowns_and_barons",
+        "text": "Daggerfall and Wayrest rule the bay shore through barons who were kings a few generations ago",
+        "cites": [
+          "high_rock.L6.fief_patchwork",
+          "high_rock.L7.feudal_ladder"
+        ]
+      },
+      {
+        "id": "betony_claim",
+        "text": "Daggerfall and Sentinel both claim Betony (see `hammerfell.md`)",
+        "cites": [
+          "high_rock.L1.ocean_cliffs",
+          "high_rock.L5.bay_shipping"
+        ]
+      },
+      {
+        "id": "orsinium_question",
+        "text": "the Orcs want recognition and their old valley; Breton lords want the ore",
+        "cites": [
+          "high_rock.L5.orc_ore",
+          "high_rock.L6.mountain_city",
+          "high_rock.L8.malacath_code"
+        ]
+      },
+      {
+        "id": "north_houses",
+        "text": "Camlorn, Shornhelm, Northpoint and Evermor are older crowns outside the bay with their own feuds",
+        "cites": [
+          "high_rock.L1.north_crags"
+        ]
+      },
+      {
+        "id": "empire_and_thalmor",
+        "text": "the Empire's overlordship is accepted; Thalmor agents watch the mages",
+        "cites": [
+          "high_rock.L8.imperial_loyal"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "covens",
+        "text": "fourteen covens on the bay, eight of them in High Rock",
+        "cites": [
+          "high_rock.L4.mosaic",
+          "high_rock.L8.witch_ambivalence"
+        ]
+      },
+      {
+        "id": "bloodlines",
+        "text": "vampire bloodlines tied to fief groups (Vraseth, Haarvenu, Thrafey, Garlythi, Lyrezi, Montalion)",
+        "cites": [
+          "high_rock.L9.crowns_and_barons"
+        ]
+      },
+      {
+        "id": "undercrofts",
+        "text": "crypts under every keep and chapel",
+        "cites": [
+          "high_rock.L4.restless_dead",
+          "high_rock.L8.crypt_dead"
+        ]
+      },
+      {
+        "id": "direnni_vaults",
+        "text": "elven vaults beneath Balfiera and the oldest keeps",
+        "cites": [
+          "high_rock.L1.balfiera_hill",
+          "high_rock.L8.direnni_nostalgia"
+        ]
+      },
+      {
+        "id": "dwemer_under_spine",
+        "text": "deep Dwemer bastions under the eastern range",
+        "cites": [
+          "high_rock.L1.wrothgar_spine"
+        ]
+      },
+      {
+        "id": "sea_caves",
+        "text": "privateers and smugglers",
+        "cites": [
+          "high_rock.L1.sea_bluffs"
+        ]
+      },
+      {
+        "id": "city_shadows",
+        "text": "a thieves' den and a Dark Brotherhood sanctuary in Daggerfall",
+        "cites": [
+          "high_rock.L6.busy_centres",
+          "high_rock.L9.crowns_and_barons"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "nedic_barrows",
+        "text": "the first people's barrows on the moors",
+        "cites": [
+          "high_rock.L1.north_crags",
+          "high_rock.L8.crypt_dead"
+        ]
+      },
+      {
+        "id": "direnni_hegemony",
+        "text": "an elven clan ruled High Rock from Balfiera's tower; the Breton-Direnni victory over the Alessians on the Glenumbra Moors",
+        "cites": [
+          "high_rock.L1.balfiera_hill",
+          "high_rock.L8.direnni_nostalgia",
+          "high_rock.L10.direnni_vaults"
+        ]
+      },
+      {
+        "id": "orsinium_sieges",
+        "text": "the Orc city fell to a long Breton-Redguard siege in the First Era and has been rebuilt and lost again since",
+        "cites": [
+          "high_rock.L1.wrothgar_spine",
+          "high_rock.L6.mountain_city",
+          "high_rock.L9.orsinium_question"
+        ]
+      },
+      {
+        "id": "covenant_era",
+        "text": "the Second Era alliance of Bretons, Redguards and Orcs",
+        "cites": [
+          "high_rock.L5.bay_shipping",
+          "high_rock.L9.crowns_and_barons"
+        ]
+      },
+      {
+        "id": "war_of_betony",
+        "text": "Daggerfall fought Sentinel over Betony and its king fell",
+        "cites": [
+          "high_rock.L1.ocean_cliffs",
+          "high_rock.L9.betony_claim"
+        ]
+      },
+      {
+        "id": "warp_in_the_west",
+        "text": "a break in time that left the bay's many kingdoms folded into a few, with every outcome partly true",
+        "cites": [
+          "high_rock.L6.fief_patchwork",
+          "high_rock.L9.crowns_and_barons"
+        ]
+      },
+      {
+        "id": "many_wars",
+        "text": "battlefields everywhere",
+        "cites": [
+          "high_rock.L4.restless_dead",
+          "high_rock.L9.crowns_and_barons",
+          "high_rock.L10.undercrofts"
+        ]
+      },
+      {
+        "id": "great_war",
+        "text": "the recent war with the Dominion",
+        "cites": [
+          "high_rock.L8.imperial_loyal",
+          "high_rock.L9.empire_and_thalmor"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "daggerfall": {
+      "truth": "The crown's own country: sea bluffs, a river through the capital, sheep on the moors and fog in the coves. Daggerfall grew rich on hides, wool and the river toll, and it rules seven fiefs whose lords were kings before the Warp. The Glenpoint headland watches for smugglers and Sentinel's ships, because the old war over Betony was never settled. The Vraseth bloodline feeds quietly in the moor keeps. Witches live on the bluffs, and the court uses them while pretending not to.",
+      "layers": {
+        "L1": [
+          {
+            "id": "dagger_bluffs",
+            "text": "bluffs with sea caves either side of the river mouth",
+            "cites": [
+              "high_rock.L1.sea_bluffs"
+            ]
+          },
+          {
+            "id": "glenpoint_headland",
+            "text": "headland cliff over the western sea lane",
+            "cites": [
+              "high_rock.L1.ocean_cliffs"
+            ]
+          },
+          {
+            "id": "ilessan_hills",
+            "text": "hills to y 180 behind the shore",
+            "cites": [
+              "high_rock.L1.bay_plain"
+            ]
+          },
+          {
+            "id": "moor_plateau",
+            "text": "the Glenumbra Moors and Northmoor on peat and granite",
+            "cites": [
+              "high_rock.L1.north_crags"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "wet_west",
+            "text": "ocean rain across the bluffs and hills",
+            "cites": [
+              "high_rock.L1.ocean_cliffs",
+              "daggerfall.L1.dagger_bluffs",
+              "high_rock.L2.westerlies"
+            ]
+          },
+          {
+            "id": "cove_fog",
+            "text": "thick sea fog in the coves",
+            "cites": [
+              "daggerfall.L1.dagger_bluffs"
+            ]
+          },
+          {
+            "id": "moor_wind",
+            "text": "treeless, wind-scoured tops",
+            "cites": [
+              "daggerfall.L1.moor_plateau"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "daggerfall_river",
+            "text": "the river splits round the castle island",
+            "cites": [
+              "daggerfall.L1.ilessan_hills",
+              "daggerfall.L2.wet_west",
+              "high_rock.L3.many_rivers"
+            ]
+          },
+          {
+            "id": "bridge_toll",
+            "text": "two bridges, two toll-houses",
+            "cites": [
+              "daggerfall.L1.dagger_bluffs",
+              "daggerfall.L2.wet_west",
+              "daggerfall.L3.daggerfall_river",
+              "high_rock.L3.water_is_crossings"
+            ]
+          },
+          {
+            "id": "moor_tarns",
+            "text": "dark peat pools across Northmoor and the Glenumbra Moors",
+            "cites": [
+              "daggerfall.L1.moor_plateau",
+              "daggerfall.L2.moor_wind",
+              "high_rock.L3.moor_tarns"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "tannery_reeds",
+            "text": "reed banks below the city vats",
+            "cites": [
+              "daggerfall.L3.daggerfall_river"
+            ]
+          },
+          {
+            "id": "heather_moor",
+            "text": "open heather and standing-stone moors",
+            "cites": [
+              "daggerfall.L1.moor_plateau",
+              "daggerfall.L3.moor_tarns"
+            ]
+          },
+          {
+            "id": "sheep_pasture",
+            "text": "upland turf grazed by moor flocks",
+            "cites": [
+              "daggerfall.L1.moor_plateau",
+              "daggerfall.L2.moor_wind"
+            ]
+          },
+          {
+            "id": "bluff_harpies",
+            "text": "harpies nesting on the sea stacks",
+            "cites": [
+              "daggerfall.L1.dagger_bluffs",
+              "high_rock.L4.cliff_harpies"
+            ]
+          },
+          {
+            "id": "ilessan_spider_dells",
+            "text": "webbed hollows in the hills (18 spider nests in Daggerfall's data)",
+            "cites": [
+              "daggerfall.L1.ilessan_hills",
+              "daggerfall.L2.wet_west"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "hides_and_wool",
+            "text": "Tannery Row and the wool market",
+            "cites": [
+              "daggerfall.L4.sheep_pasture",
+              "high_rock.L5.wool_and_hides"
+            ]
+          },
+          {
+            "id": "river_toll",
+            "text": "bridge dues at the capital",
+            "cites": [
+              "daggerfall.L3.bridge_toll"
+            ]
+          },
+          {
+            "id": "salt_pans",
+            "text": "Product: tanned leather, moor wool, Glenpoint salt",
+            "cites": [
+              "daggerfall.L1.glenpoint_headland"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "capital_on_island",
+            "text": "Daggerfall on its river island",
+            "cites": [
+              "daggerfall.L3.daggerfall_river",
+              "daggerfall.L5.hides_and_wool"
+            ]
+          },
+          {
+            "id": "glenpoint_watch",
+            "text": "headland town and lighthouse over the sea lane",
+            "cites": [
+              "daggerfall.L1.glenpoint_headland",
+              "daggerfall.L5.salt_pans"
+            ]
+          },
+          {
+            "id": "moor_keeps",
+            "text": "Grimley and Northmoor, plus the fief seats of Tulune, Ilessan Hills and Whitefort on Betony",
+            "cites": [
+              "daggerfall.L1.moor_plateau",
+              "daggerfall.L5.hides_and_wool"
+            ]
+          },
+          {
+            "id": "ferry_head",
+            "text": "Daggerfall to Sentinel and Betony",
+            "cites": [
+              "daggerfall.L1.dagger_bluffs",
+              "high_rock.L5.bay_shipping"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "tanners_quarter",
+            "text": "the poor live downwind by the vats",
+            "cites": [
+              "daggerfall.L5.hides_and_wool",
+              "daggerfall.L6.capital_on_island"
+            ]
+          },
+          {
+            "id": "toll_families",
+            "text": "the bridge clerks are a hated, rich caste",
+            "cites": [
+              "daggerfall.L5.river_toll",
+              "daggerfall.L6.capital_on_island"
+            ]
+          },
+          {
+            "id": "shepherds_tenants",
+            "text": "moor shepherds bound to the barons' keeps",
+            "cites": [
+              "daggerfall.L4.sheep_pasture",
+              "daggerfall.L6.moor_keeps",
+              "high_rock.L7.tenants_bound"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "kynareth_patron",
+            "text": "Kynareth in Daggerfall, with Mara in Grimley, Whitefort and Northmoor, Z'en in Glenpoint, Dibella in Tulune and Arkay in Ilessan Hills",
+            "cites": [
+              "daggerfall.L6.capital_on_island",
+              "daggerfall.L7.shepherds_tenants",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "bluff_sisters",
+            "text": "the court consults the Sisters of the Bluff, the Daggerfall Witches, the Glenmoril Witches and the Beldama",
+            "cites": [
+              "daggerfall.L1.dagger_bluffs",
+              "daggerfall.L7.shepherds_tenants",
+              "high_rock.L8.witch_ambivalence"
+            ]
+          },
+          {
+            "id": "lysandus_memory",
+            "text": "the fallen king is mourned in song and feared as a ghost",
+            "cites": [
+              "daggerfall.L6.capital_on_island",
+              "daggerfall.L7.tanners_quarter",
+              "high_rock.L8.crypt_dead"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "court_vs_barons",
+            "text": "Tulune, Grimley and the realm's seven fief barons resent the crown's toll",
+            "cites": [
+              "daggerfall.L5.river_toll",
+              "daggerfall.L6.moor_keeps",
+              "daggerfall.L7.toll_families",
+              "high_rock.L9.crowns_and_barons"
+            ]
+          },
+          {
+            "id": "betony_garrison",
+            "text": "Whitefort's island garrison faces Sentinel across the channel",
+            "cites": [
+              "daggerfall.L1.glenpoint_headland",
+              "daggerfall.L6.glenpoint_watch",
+              "high_rock.L9.betony_claim"
+            ]
+          },
+          {
+            "id": "owl_vs_dragon",
+            "text": "the Knights of the Dragon and the Knights of the Owl compete for the king's favour",
+            "cites": [
+              "daggerfall.L6.capital_on_island",
+              "daggerfall.L6.glenpoint_watch",
+              "daggerfall.L7.toll_families"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "vraseth_keeps",
+            "text": "Vraseth and Garlythi vampire bloodlines in the moor keeps",
+            "cites": [
+              "daggerfall.L6.moor_keeps",
+              "daggerfall.L9.court_vs_barons",
+              "high_rock.L10.bloodlines"
+            ]
+          },
+          {
+            "id": "privateers_hold",
+            "text": "sea-cave fortress under the bluffs",
+            "cites": [
+              "daggerfall.L1.dagger_bluffs",
+              "daggerfall.L6.ferry_head",
+              "high_rock.L10.sea_caves"
+            ]
+          },
+          {
+            "id": "tristore_lab",
+            "text": "a sealed laboratory on Betony",
+            "cites": [
+              "daggerfall.L1.glenpoint_headland",
+              "daggerfall.L9.betony_garrison"
+            ]
+          },
+          {
+            "id": "castle_necromoghan",
+            "text": "a vampire seat in the northern hills",
+            "cites": [
+              "daggerfall.L1.moor_plateau",
+              "daggerfall.L9.court_vs_barons"
+            ]
+          },
+          {
+            "id": "under_daggerfall",
+            "text": "thieves' den and sanctuary in the cellars",
+            "cites": [
+              "daggerfall.L6.capital_on_island",
+              "daggerfall.L9.court_vs_barons",
+              "high_rock.L10.city_shadows"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "glenumbra_moors_battle",
+            "text": "the moor battlefield with its cairns",
+            "cites": [
+              "daggerfall.L1.moor_plateau",
+              "daggerfall.L8.kynareth_patron",
+              "high_rock.L11.direnni_hegemony"
+            ]
+          },
+          {
+            "id": "betony_war",
+            "text": "the sea and island war where King Lysandus fell",
+            "cites": [
+              "daggerfall.L6.glenpoint_watch",
+              "daggerfall.L8.lysandus_memory",
+              "daggerfall.L9.betony_garrison",
+              "high_rock.L11.war_of_betony"
+            ]
+          },
+          {
+            "id": "warp_scars",
+            "text": "seven former petty kingdoms folded under Daggerfall's crown",
+            "cites": [
+              "daggerfall.L6.moor_keeps",
+              "daggerfall.L9.court_vs_barons",
+              "high_rock.L11.warp_in_the_west"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L1.ilessan_hills"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L4.bluff_harpies"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L5.hides_and_wool",
+            "daggerfall.L5.salt_pans"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "bard": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L8.lysandus_memory"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L8.kynareth_patron"
+          ]
+        },
+        "jarl": {
+          "weight": 4,
+          "why": [
+            "daggerfall.L6.capital_on_island",
+            "daggerfall.L6.moor_keeps",
+            "daggerfall.L9.court_vs_barons"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L6.capital_on_island",
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L9.court_vs_barons"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L8.bluff_sisters",
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L8.kynareth_patron"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L6.glenpoint_watch",
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L10.under_daggerfall"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L7.tanners_quarter"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L7.tanners_quarter"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "daggerfall.L6.glenpoint_watch",
+            "daggerfall.L6.moor_keeps",
+            "daggerfall.L7.tanners_quarter"
+          ]
+        },
+        "housekeeper": {
+          "weight": 4,
+          "why": [
+            "daggerfall.L7.tanners_quarter",
+            "daggerfall.L6.glenpoint_watch",
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L6.glenpoint_watch",
+            "daggerfall.L6.moor_keeps"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L8.lysandus_memory",
+            "daggerfall.L11.warp_scars"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L7.tanners_quarter"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "daggerfall.L5.hides_and_wool"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L10.under_daggerfall"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L10.under_daggerfall"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 3,
+          "why": [
+            "daggerfall.L5.hides_and_wool",
+            "daggerfall.L10.under_daggerfall"
+          ]
+        },
+        "survivor": {
+          "weight": 2,
+          "why": [
+            "daggerfall.L9.owl_vs_dragon"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "daggerfall.L11.warp_scars"
+        ],
+        "ruin": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "dwemer": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "falmer": [
+          "daggerfall.L4.tannery_reeds"
+        ],
+        "bandit": [
+          "daggerfall.L5.river_toll"
+        ],
+        "fort": [
+          "daggerfall.L9.betony_garrison",
+          "daggerfall.L10.privateers_hold",
+          "daggerfall.L6.moor_keeps"
+        ],
+        "military": [
+          "daggerfall.L9.court_vs_barons"
+        ],
+        "mage": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "vampire": [
+          "daggerfall.L10.vraseth_keeps",
+          "daggerfall.L10.castle_necromoghan"
+        ],
+        "necromancer": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "hagraven": [
+          "daggerfall.L8.bluff_sisters"
+        ],
+        "forsworn": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "beast": [
+          "daggerfall.L4.ilessan_spider_dells",
+          "daggerfall.L10.privateers_hold",
+          "daggerfall.L10.under_daggerfall"
+        ],
+        "ice": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "mine": [
+          "daggerfall.L1.ilessan_hills",
+          "daggerfall.L10.tristore_lab"
+        ],
+        "grove": [
+          "daggerfall.L8.kynareth_patron",
+          "daggerfall.L8.bluff_sisters"
+        ],
+        "smuggler": [
+          "daggerfall.L10.under_daggerfall"
+        ],
+        "cave": [
+          "daggerfall.L10.vraseth_keeps",
+          "daggerfall.L10.privateers_hold",
+          "daggerfall.L10.castle_necromoghan"
+        ],
+        "giant": [
+          "daggerfall.L4.heather_moor"
+        ],
+        "dragon": [
+          "daggerfall.L9.owl_vs_dragon"
+        ],
+        "tower": [
+          "daggerfall.L10.vraseth_keeps"
+        ],
+        "cabin": [
+          "daggerfall.L6.capital_on_island"
+        ],
+        "wreck": [
+          "daggerfall.L5.hides_and_wool"
+        ]
+      }
+    },
+    "anticlere": {
+      "truth": "River meadows under a long cliff line, the breadbasket of the western bay, with a dark wood to the north. Anticlere is pious and rich in grain, and its Knights of the Flame want to clear the haunted woods of Ykalon and Phrygias and settle them. Every settler party that goes north loses someone. Castle Llugwych sits in that wood, and the Skeffington coven sells safe passage. Orc bands from the old wars still hold strongholds in the Phrygias hills.",
+      "layers": {
+        "L1": [
+          {
+            "id": "anticlere_scarp",
+            "text": "a long cliff line north of the meadows",
+            "cites": []
+          },
+          {
+            "id": "river_meadows",
+            "text": "fertile alluvial plain along the shore",
+            "cites": [
+              "high_rock.L1.bay_plain"
+            ]
+          },
+          {
+            "id": "northern_hollows",
+            "text": "wet hollows behind the scarp",
+            "cites": [
+              "high_rock.L1.north_crags"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "sheltered_meadows",
+            "text": "warm, sheltered air below the scarp",
+            "cites": [
+              "anticlere.L1.anticlere_scarp",
+              "high_rock.L2.mild_shore"
+            ]
+          },
+          {
+            "id": "hollow_fog",
+            "text": "fog sits in the woods all day",
+            "cites": [
+              "anticlere.L1.northern_hollows",
+              "high_rock.L2.still_woods"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "anticlere_river",
+            "text": "meadow river descending from the scarp",
+            "cites": [
+              "anticlere.L1.river_meadows",
+              "anticlere.L2.sheltered_meadows",
+              "high_rock.L3.many_rivers"
+            ]
+          },
+          {
+            "id": "water_meadows",
+            "text": "flooded in spring",
+            "cites": [
+              "anticlere.L1.river_meadows",
+              "anticlere.L2.sheltered_meadows",
+              "anticlere.L3.anticlere_river"
+            ]
+          },
+          {
+            "id": "mill_chain",
+            "text": "a mill at every weir, each a fief's",
+            "cites": [
+              "anticlere.L1.river_meadows",
+              "anticlere.L2.sheltered_meadows",
+              "high_rock.L3.water_is_crossings"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "water_meadow",
+            "text": "willow, rush and hay flats",
+            "cites": [
+              "anticlere.L3.water_meadows"
+            ]
+          },
+          {
+            "id": "wheat_fields",
+            "text": "the grain belt of the western bay",
+            "cites": [
+              "anticlere.L2.sheltered_meadows",
+              "anticlere.L3.water_meadows"
+            ]
+          },
+          {
+            "id": "haunted_wood",
+            "text": "dead oaks, crows, spider nests (16 in Ykalon in Daggerfall's data)",
+            "cites": [
+              "anticlere.L1.northern_hollows",
+              "anticlere.L2.hollow_fog"
+            ]
+          },
+          {
+            "id": "scarp_scrub",
+            "text": "thorn and juniper along the cliff edge",
+            "cites": [
+              "anticlere.L1.anticlere_scarp"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "grain_and_mills",
+            "text": "flour milling and brewing across the six fiefs",
+            "cites": [
+              "anticlere.L4.wheat_fields",
+              "anticlere.L3.mill_chain"
+            ]
+          },
+          {
+            "id": "charcoal_burners",
+            "text": "the only trade in the wood. Product: flour, Anticlere ale, haunted-wood nightshade",
+            "cites": [
+              "anticlere.L4.haunted_wood"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "anticlere_meadow_city",
+            "text": "Anticlere, seat of the realm",
+            "cites": [
+              "anticlere.L3.anticlere_river",
+              "anticlere.L5.grain_and_mills"
+            ]
+          },
+          {
+            "id": "settler_villages",
+            "text": "new, half-built villages on the wood edge by Ykalon and Urvaius",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L5.charcoal_burners"
+            ]
+          },
+          {
+            "id": "scarp_keeps",
+            "text": "fief keeps of Shalgora, Daenia and Phrygias under the scarp and hills",
+            "cites": [
+              "anticlere.L1.anticlere_scarp",
+              "anticlere.L5.grain_and_mills"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "pious_burghers",
+            "text": "rich mill-owners and temple patrons",
+            "cites": [
+              "anticlere.L5.grain_and_mills",
+              "anticlere.L6.anticlere_meadow_city"
+            ]
+          },
+          {
+            "id": "settler_poor",
+            "text": "landless families promised land in the wood",
+            "cites": [
+              "anticlere.L6.settler_villages"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "mara_patron",
+            "text": "Mara in Anticlere and Ykalon, Arkay in Shalgora, Dibella in Daenia, and Stendarr in Urvaius and Phrygias",
+            "cites": [
+              "anticlere.L6.anticlere_meadow_city",
+              "anticlere.L7.pious_burghers",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "fear_of_the_wood",
+            "text": "barred shutters and warding herbs along the northern edge",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L6.settler_villages"
+            ]
+          },
+          {
+            "id": "coven_toll",
+            "text": "settlers pay the Skeffington coven for charms",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L7.settler_poor",
+              "high_rock.L8.witch_ambivalence"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "flame_crusade",
+            "text": "the Knights of the Flame push north to win new fiefs",
+            "cites": [
+              "anticlere.L5.grain_and_mills",
+              "anticlere.L6.settler_villages",
+              "anticlere.L8.mara_patron",
+              "high_rock.L9.crowns_and_barons"
+            ]
+          },
+          {
+            "id": "ykalon_resists",
+            "text": "the lords of Ykalon and Phrygias prefer the wood empty",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L6.scarp_keeps",
+              "anticlere.L8.coven_toll"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "castle_llugwych",
+            "text": "ruined castle and dungeon deep in the Ykalon wood",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L9.ykalon_resists"
+            ]
+          },
+          {
+            "id": "skeffington_coven",
+            "text": "the Skeffington Witches' circle in the hollow",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L8.coven_toll",
+              "high_rock.L10.covens"
+            ]
+          },
+          {
+            "id": "phrygias_orc_bands",
+            "text": "Orc strongholds in the Phrygias hills (7 in Daggerfall's data)",
+            "cites": [
+              "anticlere.L1.northern_hollows",
+              "anticlere.L9.ykalon_resists"
+            ]
+          },
+          {
+            "id": "haarvenu_shalgora",
+            "text": "Haarvenu, Thrafey and Garlythi vampire haunts",
+            "cites": [
+              "anticlere.L6.scarp_keeps",
+              "anticlere.L9.flame_crusade",
+              "high_rock.L10.bloodlines"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "petty_kingdoms",
+            "text": "six old baronies folded into Anticlere's realm",
+            "cites": [
+              "anticlere.L6.scarp_keeps",
+              "anticlere.L9.ykalon_resists",
+              "high_rock.L11.warp_in_the_west"
+            ]
+          },
+          {
+            "id": "failed_clearances",
+            "text": "two earlier attempts to settle the wood, their ruins still standing",
+            "cites": [
+              "anticlere.L4.haunted_wood",
+              "anticlere.L6.settler_villages",
+              "anticlere.L10.castle_llugwych"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "anticlere.L1.river_meadows"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "farmer": {
+          "weight": 4,
+          "why": [
+            "anticlere.L5.grain_and_mills",
+            "anticlere.L3.anticlere_river",
+            "anticlere.L3.water_meadows"
+          ]
+        },
+        "farmhand": {
+          "weight": 4,
+          "why": [
+            "anticlere.L5.grain_and_mills",
+            "anticlere.L3.anticlere_river",
+            "anticlere.L3.water_meadows"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "anticlere.L5.grain_and_mills",
+            "anticlere.L5.charcoal_burners",
+            "anticlere.L4.haunted_wood"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "anticlere.L5.charcoal_burners"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "anticlere.L5.charcoal_burners"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "anticlere.L5.charcoal_burners"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city",
+            "anticlere.L6.settler_villages"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "anticlere.L8.mara_patron"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "anticlere.L7.pious_burghers"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "anticlere.L8.mara_patron"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "anticlere.L10.castle_llugwych"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "anticlere.L7.pious_burghers"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "anticlere.L7.settler_poor"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city",
+            "anticlere.L6.settler_villages"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "anticlere.L6.anticlere_meadow_city"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "anticlere.L11.petty_kingdoms"
+          ]
+        },
+        "labourer": {
+          "weight": 4,
+          "why": [
+            "anticlere.L5.grain_and_mills",
+            "anticlere.L7.pious_burghers",
+            "anticlere.L7.settler_poor"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "anticlere.L5.grain_and_mills",
+            "anticlere.L7.pious_burghers"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "anticlere.L7.pious_burghers"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "anticlere.L7.pious_burghers"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "anticlere.L5.grain_and_mills"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "anticlere.L9.flame_crusade"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "ruin": [
+          "anticlere.L10.castle_llugwych",
+          "anticlere.L11.failed_clearances"
+        ],
+        "dwemer": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "falmer": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "bandit": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "fort": [
+          "anticlere.L9.flame_crusade"
+        ],
+        "military": [
+          "anticlere.L9.flame_crusade"
+        ],
+        "mage": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "vampire": [
+          "anticlere.L10.haarvenu_shalgora"
+        ],
+        "necromancer": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "hagraven": [
+          "anticlere.L10.skeffington_coven",
+          "anticlere.L8.coven_toll"
+        ],
+        "forsworn": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "beast": [
+          "anticlere.L4.haunted_wood"
+        ],
+        "ice": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "mine": [
+          "anticlere.L1.river_meadows"
+        ],
+        "grove": [
+          "anticlere.L4.water_meadow"
+        ],
+        "smuggler": [
+          "anticlere.L10.skeffington_coven"
+        ],
+        "cave": [
+          "anticlere.L10.haarvenu_shalgora"
+        ],
+        "giant": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "dragon": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "tower": [
+          "anticlere.L10.castle_llugwych"
+        ],
+        "cabin": [
+          "anticlere.L5.grain_and_mills"
+        ],
+        "wreck": [
+          "anticlere.L5.grain_and_mills"
+        ]
+      }
+    },
+    "dwynnen": {
+      "truth": "A gorge-cut march between the two crowns, the smallest and hardest realm on the northern shore. Dwynnen city spans a deep limestone gorge with a single stone bridge that carries the North Shore Road. Its Order of the Raven fought on the losing side of the old petty wars and the realm still owes Wayrest's bankers for it. Disbanded soldiers turned bandit fill the Kambria crossroads, which is why Daggerfall's data gives Kambria nine prisons and eight bandit holds. Giants and harpies come down from the eastern hills toward Alcaire and Koegria.",
+      "layers": {
+        "L1": [
+          {
+            "id": "dwynnen_gorge",
+            "text": "a limestone gorge with caves (karst)",
+            "cites": []
+          },
+          {
+            "id": "march_hills",
+            "text": "hills to the east toward the Wrothgarian foothills",
+            "cites": []
+          },
+          {
+            "id": "bhoriane_ore",
+            "text": "small iron and lead workings",
+            "cites": [
+              "high_rock.L1.wrothgar_spine"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "gorge_shade",
+            "text": "cool, shaded, misty floor",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge"
+            ]
+          },
+          {
+            "id": "hill_storms",
+            "text": "squalls sweeping down from the eastern hills",
+            "cites": [
+              "dwynnen.L1.march_hills"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "gorge_river",
+            "text": "fast karst river at the gorge floor",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge",
+              "dwynnen.L2.gorge_shade",
+              "high_rock.L3.many_rivers"
+            ]
+          },
+          {
+            "id": "gorge_bridge",
+            "text": "the one crossing for the north shore road",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge",
+              "dwynnen.L2.gorge_shade",
+              "high_rock.L3.water_is_crossings"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "gorge_fern_wood",
+            "text": "mossy fern woods in the gorge",
+            "cites": [
+              "dwynnen.L2.gorge_shade"
+            ]
+          },
+          {
+            "id": "karst_bat_caves",
+            "text": "limestone sinkholes and bat caves",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge"
+            ]
+          },
+          {
+            "id": "giant_meadows",
+            "text": "high hill pastures where giants roam",
+            "cites": [
+              "dwynnen.L1.march_hills"
+            ]
+          },
+          {
+            "id": "harpy_tors",
+            "text": "rocky tors above Koegria and Alcaire",
+            "cites": [
+              "dwynnen.L1.march_hills",
+              "high_rock.L4.cliff_harpies"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "bridge_toll",
+            "text": "road dues on the single gorge span",
+            "cites": [
+              "dwynnen.L3.gorge_bridge"
+            ]
+          },
+          {
+            "id": "bhoriane_mines",
+            "text": "lead and iron pits in Bhoriane",
+            "cites": [
+              "dwynnen.L1.bhoriane_ore"
+            ]
+          },
+          {
+            "id": "mercenary_trade",
+            "text": "Product: lead, Dwynnen lime, hired swords",
+            "cites": [
+              "dwynnen.L3.gorge_bridge",
+              "dwynnen.L4.giant_meadows"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "gorge_bridge_city",
+            "text": "Dwynnen city spanning the limestone chasm",
+            "cites": [
+              "dwynnen.L3.gorge_bridge",
+              "dwynnen.L5.bridge_toll"
+            ]
+          },
+          {
+            "id": "crossroads_jail",
+            "text": "Kambria's prison keep on the shore road",
+            "cites": [
+              "dwynnen.L3.gorge_bridge",
+              "dwynnen.L5.mercenary_trade"
+            ]
+          },
+          {
+            "id": "frontier_keeps",
+            "text": "the fief keeps of Bhoriane, Koegria and Alcaire",
+            "cites": [
+              "dwynnen.L4.giant_meadows",
+              "dwynnen.L5.bhoriane_mines"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "debt_poverty",
+            "text": "high taxes, poor tenants across the five fiefs",
+            "cites": [
+              "dwynnen.L5.bridge_toll",
+              "dwynnen.L6.frontier_keeps"
+            ]
+          },
+          {
+            "id": "ex_soldiers",
+            "text": "disbanded pikemen and men-at-arms without pay",
+            "cites": [
+              "dwynnen.L5.mercenary_trade",
+              "dwynnen.L6.crossroads_jail"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "dibella_patron",
+            "text": "Dibella in Dwynnen, Z'en in Kambria, Stendarr in Bhoriane, Julianos in Koegria and Kynareth in Alcaire",
+            "cites": [
+              "dwynnen.L6.gorge_bridge_city",
+              "dwynnen.L7.debt_poverty",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "raven_omens",
+            "text": "crows read as the Order of the Raven's luck",
+            "cites": [
+              "dwynnen.L4.gorge_fern_wood",
+              "dwynnen.L7.ex_soldiers"
+            ]
+          },
+          {
+            "id": "alcaire_coven",
+            "text": "the Witches of Alcaire on the hill edge",
+            "cites": [
+              "dwynnen.L4.giant_meadows",
+              "dwynnen.L7.debt_poverty",
+              "high_rock.L8.witch_ambivalence"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "raven_debt",
+            "text": "the Order of the Raven backed a losing king and owes Wayrest's bankers",
+            "cites": [
+              "dwynnen.L5.mercenary_trade",
+              "dwynnen.L7.debt_poverty",
+              "dwynnen.L8.raven_omens"
+            ]
+          },
+          {
+            "id": "deserter_bands",
+            "text": "unpaid soldiers turned highwaymen around Kambria",
+            "cites": [
+              "dwynnen.L6.crossroads_jail",
+              "dwynnen.L7.ex_soldiers"
+            ]
+          },
+          {
+            "id": "two_crowns_squeeze",
+            "text": "both Daggerfall and Wayrest court Dwynnen's five fiefs",
+            "cites": [
+              "dwynnen.L6.gorge_bridge_city",
+              "dwynnen.L7.debt_poverty",
+              "high_rock.L9.crowns_and_barons"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "deserter_holds",
+            "text": "bandit forts and prison holds in Kambria",
+            "cites": [
+              "dwynnen.L6.crossroads_jail",
+              "dwynnen.L9.deserter_bands"
+            ]
+          },
+          {
+            "id": "hearthsly_citadel",
+            "text": "the realm's largest citadel dungeon in Daggerfall's data",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge",
+              "dwynnen.L9.raven_debt"
+            ]
+          },
+          {
+            "id": "thrafey_gorge",
+            "text": "Thrafey, Vraseth, Montalion and Lyrezi vampire haunts",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge",
+              "dwynnen.L9.two_crowns_squeeze",
+              "high_rock.L10.bloodlines"
+            ]
+          },
+          {
+            "id": "karst_vaults",
+            "text": "flooded limestone caverns under the bridge",
+            "cites": [
+              "dwynnen.L1.dwynnen_gorge",
+              "dwynnen.L4.karst_bat_caves"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "petty_wars",
+            "text": "border wars between the shore kingdoms",
+            "cites": [
+              "dwynnen.L6.frontier_keeps",
+              "dwynnen.L9.two_crowns_squeeze",
+              "high_rock.L11.warp_in_the_west"
+            ]
+          },
+          {
+            "id": "raven_defeat",
+            "text": "the campaign that broke the Raven knights' treasury",
+            "cites": [
+              "dwynnen.L7.ex_soldiers",
+              "dwynnen.L9.raven_debt",
+              "dwynnen.L10.hearthsly_citadel"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "dwynnen.L5.bhoriane_mines",
+            "dwynnen.L1.bhoriane_ore"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L5.bhoriane_mines"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L5.bhoriane_mines"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L4.gorge_fern_wood"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L4.gorge_fern_wood"
+          ]
+        },
+        "merchant": {
+          "weight": 4,
+          "why": [
+            "dwynnen.L5.bridge_toll",
+            "dwynnen.L5.mercenary_trade",
+            "dwynnen.L6.crossroads_jail"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L5.mercenary_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L5.mercenary_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "dwynnen.L5.bridge_toll",
+            "dwynnen.L6.crossroads_jail"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "dwynnen.L5.bridge_toll",
+            "dwynnen.L6.crossroads_jail"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L8.dibella_patron"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L9.two_crowns_squeeze"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L6.gorge_bridge_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L9.two_crowns_squeeze"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L8.dibella_patron"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L6.gorge_bridge_city"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L10.deserter_holds"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L10.deserter_holds"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L6.gorge_bridge_city"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L7.ex_soldiers"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "dwynnen.L5.bhoriane_mines",
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "dwynnen.L5.bhoriane_mines"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L7.debt_poverty"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L5.bridge_toll"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "dwynnen.L9.raven_debt"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "ruin": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "dwemer": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "falmer": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "bandit": [
+          "dwynnen.L10.deserter_holds",
+          "dwynnen.L5.bridge_toll"
+        ],
+        "fort": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "military": [
+          "dwynnen.L9.raven_debt"
+        ],
+        "mage": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "vampire": [
+          "dwynnen.L10.thrafey_gorge"
+        ],
+        "necromancer": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "hagraven": [
+          "dwynnen.L8.alcaire_coven"
+        ],
+        "forsworn": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "beast": [
+          "dwynnen.L4.karst_bat_caves",
+          "dwynnen.L10.karst_vaults"
+        ],
+        "ice": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "mine": [
+          "dwynnen.L5.bhoriane_mines",
+          "dwynnen.L1.bhoriane_ore"
+        ],
+        "grove": [
+          "dwynnen.L4.gorge_fern_wood"
+        ],
+        "smuggler": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "cave": [
+          "dwynnen.L10.deserter_holds",
+          "dwynnen.L10.thrafey_gorge",
+          "dwynnen.L10.karst_vaults"
+        ],
+        "giant": [
+          "dwynnen.L4.giant_meadows"
+        ],
+        "dragon": [
+          "dwynnen.L10.deserter_holds"
+        ],
+        "tower": [
+          "dwynnen.L10.deserter_holds",
+          "dwynnen.L3.gorge_bridge"
+        ],
+        "cabin": [
+          "dwynnen.L6.gorge_bridge_city"
+        ],
+        "wreck": [
+          "dwynnen.L5.bridge_toll"
+        ]
+      }
+    },
+    "wayrest": {
+      "truth": "The richest city on the bay, at the mouth of the Bjoulsae. Wayrest's merchant guilds own the ships, the quays and half the barons' debts; the crown owns the harbour chain and wants the rest. Out in the bay the Direnni Tower stands on Balfiera, older than any Breton crown. Inland, the Orsinium Area is a Breton fief round the ruins of a fallen Orc city, and Orsinium wants it back. A dead king of Daggerfall lies in Menevia, which is either an honour or a theft depending on who tells it.",
+      "layers": {
+        "L1": [
+          {
+            "id": "bjoulsae_mouth",
+            "text": "estuary, channel islands and mud flats",
+            "cites": [
+              "high_rock.L1.bjoulsae_trench"
+            ]
+          },
+          {
+            "id": "castle_spur",
+            "text": "a rock spur at one horn of the harbour",
+            "cites": []
+          },
+          {
+            "id": "orsinium_valley",
+            "text": "a mountain-wood valley north-east of the city",
+            "cites": [
+              "high_rock.L1.wrothgar_spine"
+            ]
+          },
+          {
+            "id": "balfiera",
+            "text": "the high island in the eastern bay",
+            "cites": [
+              "high_rock.L1.balfiera_hill"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "estuary_fog",
+            "text": "thick morning mist over the river mouth and flats",
+            "cites": [
+              "wayrest.L1.bjoulsae_mouth",
+              "high_rock.L2.bay_fog"
+            ]
+          },
+          {
+            "id": "mild_harbour",
+            "text": "sheltered, frost-free anchorage",
+            "cites": [
+              "wayrest.L1.bjoulsae_mouth",
+              "high_rock.L2.mild_shore"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "bjoulsae_artery",
+            "text": "the main river trade highway into the bay",
+            "cites": [
+              "wayrest.L1.bjoulsae_mouth",
+              "wayrest.L2.mild_harbour",
+              "high_rock.L3.bjoulsae_artery"
+            ]
+          },
+          {
+            "id": "harbour_chain",
+            "text": "the crown can close the harbour",
+            "cites": [
+              "wayrest.L1.castle_spur"
+            ]
+          },
+          {
+            "id": "tidal_flats",
+            "text": "wide mud channels at low tide",
+            "cites": [
+              "wayrest.L1.bjoulsae_mouth"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "salt_marsh",
+            "text": "samphire and reed beds around the estuary",
+            "cites": [
+              "wayrest.L3.tidal_flats"
+            ]
+          },
+          {
+            "id": "mud_flats",
+            "text": "mudcrab and wading-bird flats",
+            "cites": [
+              "wayrest.L3.tidal_flats"
+            ]
+          },
+          {
+            "id": "channel_isles",
+            "text": "low islands in the river mouth",
+            "cites": [
+              "wayrest.L1.bjoulsae_mouth",
+              "wayrest.L3.tidal_flats"
+            ]
+          },
+          {
+            "id": "orc_valley_wood",
+            "text": "steep oak and pine woods in the Orsinium Area",
+            "cites": [
+              "wayrest.L1.orsinium_valley"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "guild_shipping",
+            "text": "merchant fleets and Bjoulsae barges",
+            "cites": [
+              "wayrest.L3.bjoulsae_artery",
+              "high_rock.L5.bay_shipping"
+            ]
+          },
+          {
+            "id": "shipyards",
+            "text": "drydocks and ropewalks on the estuary",
+            "cites": [
+              "wayrest.L1.castle_spur",
+              "wayrest.L3.bjoulsae_artery"
+            ]
+          },
+          {
+            "id": "chain_dues",
+            "text": "Product: ships' stores, Bjoulsae fish, Balfiera pilgrim tokens",
+            "cites": [
+              "wayrest.L3.harbour_chain"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "harbour_capital",
+            "text": "Wayrest, the busiest place in High Rock, with Menevia and Gavaudon on its land approaches",
+            "cites": [
+              "wayrest.L1.castle_spur",
+              "wayrest.L3.bjoulsae_artery",
+              "wayrest.L5.guild_shipping"
+            ]
+          },
+          {
+            "id": "pilgrim_isle",
+            "text": "Blackhead fief keep serves the Direnni Tower's pilgrims",
+            "cites": [
+              "wayrest.L1.balfiera",
+              "wayrest.L5.guild_shipping"
+            ]
+          },
+          {
+            "id": "border_keep",
+            "text": "Reytry fief keep faces the contested Orc valley",
+            "cites": [
+              "wayrest.L1.orsinium_valley",
+              "wayrest.L4.orc_valley_wood"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "guild_lords",
+            "text": "shipping magnates and bankers richer than barons",
+            "cites": [
+              "wayrest.L5.guild_shipping",
+              "wayrest.L6.harbour_capital",
+              "high_rock.L7.burghers"
+            ]
+          },
+          {
+            "id": "dockers",
+            "text": "the poor quarter on the flats",
+            "cites": [
+              "wayrest.L5.shipyards",
+              "wayrest.L6.harbour_capital"
+            ]
+          },
+          {
+            "id": "chancery_clerks",
+            "text": "customs scribes and Rose knights at the harbour gates",
+            "cites": [
+              "wayrest.L5.chain_dues",
+              "wayrest.L6.harbour_capital"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "akatosh_chantry",
+            "text": "Akatosh Chantry in Wayrest and Blackhead, Julianos in Menevia, Z'en in Gavaudon and Arkay in Reytry",
+            "cites": [
+              "wayrest.L6.harbour_capital",
+              "wayrest.L7.guild_lords",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "direnni_awe",
+            "text": "pilgrimages and elven lineage claims centred on Balfiera",
+            "cites": [
+              "wayrest.L1.balfiera",
+              "wayrest.L6.pilgrim_isle",
+              "high_rock.L8.direnni_nostalgia"
+            ]
+          },
+          {
+            "id": "lysandus_dispute",
+            "text": "Menevia guards the tomb of Daggerfall's slain king",
+            "cites": [
+              "wayrest.L6.border_keep",
+              "wayrest.L7.chancery_clerks",
+              "high_rock.L8.crypt_dead"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "crown_vs_guild",
+            "text": "the crown and the merchant houses struggle over the harbour chain",
+            "cites": [
+              "wayrest.L5.guild_shipping",
+              "wayrest.L5.chain_dues",
+              "wayrest.L7.guild_lords"
+            ]
+          },
+          {
+            "id": "orsinium_area_claim",
+            "text": "Reytry's baron and Orsinium both claim the valley fief",
+            "cites": [
+              "wayrest.L1.orsinium_valley",
+              "wayrest.L6.border_keep",
+              "high_rock.L9.orsinium_question"
+            ]
+          },
+          {
+            "id": "menevia_tomb_quarrel",
+            "text": "Daggerfall resents Lysandus lying in Wayrest's realm",
+            "cites": [
+              "wayrest.L6.harbour_capital",
+              "wayrest.L8.lysandus_dispute"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "woodborne_hall",
+            "text": "a fortified manor house with a hidden political secret",
+            "cites": [
+              "wayrest.L6.harbour_capital",
+              "wayrest.L9.crown_vs_guild"
+            ]
+          },
+          {
+            "id": "lysandus_tomb",
+            "text": "the royal crypt in Menevia",
+            "cites": [
+              "wayrest.L8.lysandus_dispute",
+              "wayrest.L9.menevia_tomb_quarrel"
+            ]
+          },
+          {
+            "id": "direnni_tower",
+            "text": "the ancient Adamantine spire and its deep vaults",
+            "cites": [
+              "wayrest.L1.balfiera",
+              "wayrest.L8.direnni_awe",
+              "high_rock.L10.direnni_vaults"
+            ]
+          },
+          {
+            "id": "tamarilyn_coven",
+            "text": "the Tamarilyn Witches in Menevia",
+            "cites": [
+              "wayrest.L4.orc_valley_wood",
+              "wayrest.L9.menevia_tomb_quarrel",
+              "high_rock.L10.covens"
+            ]
+          },
+          {
+            "id": "montalion_harbour",
+            "text": "Montalion and Lyrezi vampire bloodlines",
+            "cites": [
+              "wayrest.L6.harbour_capital",
+              "wayrest.L9.crown_vs_guild",
+              "high_rock.L10.bloodlines"
+            ]
+          },
+          {
+            "id": "old_orsinium",
+            "text": "stratified Orc city ruin in the Orsinium Area (see section 6)",
+            "cites": [
+              "wayrest.L1.orsinium_valley",
+              "wayrest.L9.orsinium_area_claim"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "direnni_seat",
+            "text": "Balfiera's tower, oldest monument in High Rock",
+            "cites": [
+              "wayrest.L1.balfiera",
+              "wayrest.L8.direnni_awe",
+              "wayrest.L10.direnni_tower",
+              "high_rock.L11.direnni_hegemony"
+            ]
+          },
+          {
+            "id": "orsinium_strata",
+            "text": "three sacked Orc cities layered in one valley",
+            "cites": [
+              "wayrest.L1.orsinium_valley",
+              "wayrest.L9.orsinium_area_claim",
+              "wayrest.L10.old_orsinium",
+              "high_rock.L11.orsinium_sieges"
+            ]
+          },
+          {
+            "id": "covenant_capital",
+            "text": "Wayrest led the Second Era alliance",
+            "cites": [
+              "wayrest.L5.guild_shipping",
+              "wayrest.L6.harbour_capital",
+              "high_rock.L11.covenant_era"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "wayrest.L5.chain_dues"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "wayrest.L5.chain_dues"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "wayrest.L3.tidal_flats"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "wayrest.L3.tidal_flats"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "wayrest.L4.orc_valley_wood"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "wayrest.L4.orc_valley_wood"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "wayrest.L5.shipyards",
+            "wayrest.L5.chain_dues",
+            "wayrest.L3.harbour_chain"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "wayrest.L5.chain_dues"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "wayrest.L4.orc_valley_wood"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "wayrest.L4.salt_marsh"
+          ]
+        },
+        "merchant": {
+          "weight": 4,
+          "why": [
+            "wayrest.L5.shipyards",
+            "wayrest.L5.chain_dues",
+            "wayrest.L6.harbour_capital"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "wayrest.L6.harbour_capital"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "wayrest.L5.chain_dues"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "wayrest.L8.akatosh_chantry"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "wayrest.L6.harbour_capital"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "wayrest.L6.harbour_capital"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "wayrest.L7.guild_lords"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "wayrest.L8.direnni_awe"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "wayrest.L8.direnni_awe"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "wayrest.L6.border_keep"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "wayrest.L5.guild_shipping"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "wayrest.L7.guild_lords"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "wayrest.L7.dockers"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "wayrest.L7.dockers"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "wayrest.L7.dockers"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "wayrest.L7.guild_lords"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "wayrest.L11.direnni_seat"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "wayrest.L5.shipyards",
+            "wayrest.L7.dockers"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "wayrest.L5.shipyards",
+            "wayrest.L7.dockers"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "wayrest.L7.guild_lords"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "wayrest.L7.guild_lords"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 3,
+          "why": [
+            "wayrest.L5.guild_shipping",
+            "wayrest.L7.guild_lords"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "wayrest.L9.crown_vs_guild"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "wayrest.L10.lysandus_tomb",
+          "wayrest.L8.lysandus_dispute"
+        ],
+        "ruin": [
+          "wayrest.L10.lysandus_tomb",
+          "wayrest.L10.old_orsinium",
+          "wayrest.L8.lysandus_dispute"
+        ],
+        "dwemer": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "falmer": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "bandit": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "fort": [
+          "wayrest.L10.woodborne_hall",
+          "wayrest.L6.border_keep"
+        ],
+        "military": [
+          "wayrest.L9.crown_vs_guild"
+        ],
+        "mage": [
+          "wayrest.L8.direnni_awe"
+        ],
+        "vampire": [
+          "wayrest.L10.montalion_harbour"
+        ],
+        "necromancer": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "hagraven": [
+          "wayrest.L10.tamarilyn_coven"
+        ],
+        "forsworn": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "beast": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "ice": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "mine": [
+          "wayrest.L5.chain_dues"
+        ],
+        "grove": [
+          "wayrest.L4.orc_valley_wood"
+        ],
+        "smuggler": [
+          "wayrest.L10.tamarilyn_coven",
+          "wayrest.L10.montalion_harbour",
+          "wayrest.L5.shipyards"
+        ],
+        "cave": [
+          "wayrest.L10.montalion_harbour"
+        ],
+        "giant": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "dragon": [
+          "wayrest.L10.woodborne_hall"
+        ],
+        "tower": [
+          "wayrest.L10.direnni_tower"
+        ],
+        "cabin": [
+          "wayrest.L6.harbour_capital"
+        ],
+        "wreck": [
+          "wayrest.L5.guild_shipping"
+        ]
+      }
+    },
+    "wrothgar": {
+      "truth": "The mountain wall of High Rock: granite peaks, high cold valleys and the richest ore in the province. In the north the Orcs keep Orsinium on its plateau and live by Malacath's code in strongholds that each work a mine. In the south, Breton barons in Newing work the same ore with hired miners and call the valleys theirs. Orsinium has been sacked and rebuilt more than once, and every fall left a ruin and a grudge. The Daughters of Wroth keep a coven in the high woods. Dwemer halls run under the range.",
+      "layers": {
+        "L1": [
+          {
+            "id": "granite_peaks",
+            "text": "high granite and slate summits to y 460",
+            "cites": [
+              "high_rock.L1.wrothgar_spine"
+            ]
+          },
+          {
+            "id": "orsinium_plateau",
+            "text": "a defensible mountain plateau in the north",
+            "cites": []
+          },
+          {
+            "id": "high_passes",
+            "text": "passes at y 200-240 (Wayrest, Newing, Orsinium)",
+            "cites": []
+          },
+          {
+            "id": "ore_veins",
+            "text": "iron, silver, orichalcum",
+            "cites": [
+              "high_rock.L1.wrothgar_spine"
+            ]
+          },
+          {
+            "id": "natural_arches",
+            "text": "wind-cut arches on the ridges",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "alpine_cold",
+            "text": "long winters and deep snow on the heights",
+            "cites": [
+              "wrothgar.L1.granite_peaks",
+              "high_rock.L2.spine_snow"
+            ]
+          },
+          {
+            "id": "lee_dry",
+            "text": "the east side is drier",
+            "cites": [
+              "wrothgar.L1.granite_peaks",
+              "high_rock.L2.spine_snow"
+            ]
+          },
+          {
+            "id": "pass_storms",
+            "text": "sudden blizzards closing the saddles",
+            "cites": [
+              "wrothgar.L1.high_passes"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "snowmelt_streams",
+            "text": "feed the Bjoulsae",
+            "cites": [
+              "wrothgar.L2.alpine_cold"
+            ]
+          },
+          {
+            "id": "stronghold_springs",
+            "text": "each stronghold sits on its own spring",
+            "cites": [
+              "wrothgar.L1.orsinium_plateau"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "pine_larch_slopes",
+            "text": "dark conifer forests on the mid-slopes",
+            "cites": [
+              "wrothgar.L2.alpine_cold"
+            ]
+          },
+          {
+            "id": "alpine_meadow",
+            "text": "short summer grass in the saddles",
+            "cites": [
+              "wrothgar.L1.high_passes",
+              "wrothgar.L2.alpine_cold"
+            ]
+          },
+          {
+            "id": "scree_fields",
+            "text": "bare rock and talus fans",
+            "cites": [
+              "wrothgar.L1.granite_peaks"
+            ]
+          },
+          {
+            "id": "snowfields",
+            "text": "permanent snow above y 300",
+            "cites": [
+              "wrothgar.L1.granite_peaks",
+              "wrothgar.L2.alpine_cold"
+            ]
+          },
+          {
+            "id": "troll_ledges",
+            "text": "frost trolls on the crags",
+            "cites": [
+              "wrothgar.L1.granite_peaks",
+              "high_rock.L4.spine_beasts"
+            ]
+          },
+          {
+            "id": "bear_valleys",
+            "text": "bears and wolves in the timbered valleys",
+            "cites": [
+              "wrothgar.L3.snowmelt_streams",
+              "high_rock.L4.spine_beasts"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "stronghold_mines",
+            "text": "Daggerfall's data gives the range 175 mines and 66 Orc strongholds",
+            "cites": [
+              "wrothgar.L1.ore_veins"
+            ]
+          },
+          {
+            "id": "orichalcum_forges",
+            "text": "clan forges and the Great Forge of Orsinium",
+            "cites": [
+              "wrothgar.L1.ore_veins",
+              "wrothgar.L5.stronghold_mines"
+            ]
+          },
+          {
+            "id": "newing_barons",
+            "text": "Product: orichalcum, iron, Orc steel, goat hides",
+            "cites": [
+              "wrothgar.L1.ore_veins"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "orsinium_city",
+            "text": "the Orc capital on its northern plateau",
+            "cites": [
+              "wrothgar.L1.orsinium_plateau",
+              "wrothgar.L5.orichalcum_forges",
+              "high_rock.L6.mountain_city"
+            ]
+          },
+          {
+            "id": "stronghold_per_mine",
+            "text": "palisaded clan strongholds across the range",
+            "cites": [
+              "wrothgar.L3.stronghold_springs",
+              "wrothgar.L5.stronghold_mines"
+            ]
+          },
+          {
+            "id": "newing_shelf_city",
+            "text": "Newing, seat of the Wrothgarian Mountains fief in the south",
+            "cites": [
+              "wrothgar.L1.high_passes",
+              "wrothgar.L5.newing_barons"
+            ]
+          },
+          {
+            "id": "pass_inns",
+            "text": "Kirkwall and the switchback waystations",
+            "cites": [
+              "wrothgar.L1.high_passes"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "chief_and_wives",
+            "text": "chief, forge-wife, wise-woman",
+            "cites": [
+              "wrothgar.L5.stronghold_mines",
+              "wrothgar.L6.stronghold_per_mine"
+            ]
+          },
+          {
+            "id": "clanless",
+            "text": "Orcs cast out by the code become raiders",
+            "cites": [
+              "wrothgar.L6.stronghold_per_mine",
+              "wrothgar.L7.chief_and_wives"
+            ]
+          },
+          {
+            "id": "hired_miners",
+            "text": "poor Breton and Orc labour in the south",
+            "cites": [
+              "wrothgar.L5.newing_barons",
+              "wrothgar.L6.newing_shelf_city"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "malacath",
+            "text": "the stronghold code of blood price and trial",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L7.chief_and_wives",
+              "high_rock.L8.malacath_code"
+            ]
+          },
+          {
+            "id": "trinimac_memory",
+            "text": "the Orcs' account of their own origin",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L7.chief_and_wives"
+            ]
+          },
+          {
+            "id": "kynareth_newing",
+            "text": "Kynareth's temple in the Breton mining seat",
+            "cites": [
+              "wrothgar.L6.newing_shelf_city",
+              "wrothgar.L7.hired_miners",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "names_matter",
+            "text": "an Orc's name and deeds are his wealth",
+            "cites": [
+              "wrothgar.L6.stronghold_per_mine",
+              "wrothgar.L7.chief_and_wives"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "ore_rights",
+            "text": "Newing's barons against the clans",
+            "cites": [
+              "wrothgar.L5.stronghold_mines",
+              "wrothgar.L5.newing_barons",
+              "wrothgar.L6.newing_shelf_city"
+            ]
+          },
+          {
+            "id": "orsinium_succession",
+            "text": "chiefs compete for the city's throne by trial",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L7.chief_and_wives",
+              "wrothgar.L8.malacath"
+            ]
+          },
+          {
+            "id": "recognition",
+            "text": "Orsinium's drive for imperial recognition",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L8.names_matter",
+              "high_rock.L9.orsinium_question"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "clanless_raiders",
+            "text": "outcast Orc war-bands in high caves and ruins",
+            "cites": [
+              "wrothgar.L7.clanless",
+              "wrothgar.L9.ore_rights"
+            ]
+          },
+          {
+            "id": "daughters_of_wroth",
+            "text": "the mountain witch coven",
+            "cites": [
+              "wrothgar.L4.pine_larch_slopes",
+              "wrothgar.L8.kynareth_newing",
+              "high_rock.L10.covens"
+            ]
+          },
+          {
+            "id": "shedungent",
+            "text": "a mountain laboratory and fortress in Daggerfall's data",
+            "cites": [
+              "wrothgar.L1.high_passes",
+              "wrothgar.L9.ore_rights"
+            ]
+          },
+          {
+            "id": "dwemer_halls",
+            "text": "Mthartzel-style bastions, Rkindaleft, Zthenganaz",
+            "cites": [
+              "wrothgar.L1.ore_veins",
+              "wrothgar.L5.stronghold_mines",
+              "high_rock.L10.dwemer_under_spine"
+            ]
+          },
+          {
+            "id": "lyrezi_heights",
+            "text": "Lyrezi vampire haunts in the southern baronies",
+            "cites": [
+              "wrothgar.L6.newing_shelf_city",
+              "wrothgar.L9.ore_rights",
+              "high_rock.L10.bloodlines"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "three_sieges",
+            "text": "the repeated rise and sacking of Orsinium",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L8.names_matter",
+              "wrothgar.L9.recognition",
+              "high_rock.L11.orsinium_sieges"
+            ]
+          },
+          {
+            "id": "paragons_memorial",
+            "text": "the Paragons' Remembrance monument and vault",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L8.trinimac_memory",
+              "wrothgar.L9.orsinium_succession"
+            ]
+          },
+          {
+            "id": "covenant_orcs",
+            "text": "the Second Era compact with High Rock and Hammerfell",
+            "cites": [
+              "wrothgar.L6.orsinium_city",
+              "wrothgar.L9.recognition",
+              "high_rock.L11.covenant_era"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L5.stronghold_mines",
+            "wrothgar.L5.newing_barons",
+            "wrothgar.L1.ore_veins"
+          ]
+        },
+        "smith": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L5.stronghold_mines",
+            "wrothgar.L5.orichalcum_forges",
+            "wrothgar.L5.newing_barons"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L4.pine_larch_slopes",
+            "wrothgar.L4.alpine_meadow",
+            "wrothgar.L4.bear_valleys"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "woodcutter": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L4.pine_larch_slopes",
+            "wrothgar.L4.alpine_meadow",
+            "wrothgar.L4.bear_valleys"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "hunter": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L4.pine_larch_slopes",
+            "wrothgar.L4.bear_valleys"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "fletcher": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L4.pine_larch_slopes",
+            "wrothgar.L4.alpine_meadow",
+            "wrothgar.L4.bear_valleys"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L8.kynareth_newing"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L6.newing_shelf_city",
+            "wrothgar.L6.pass_inns"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L6.pass_inns"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L6.newing_shelf_city",
+            "wrothgar.L6.pass_inns"
+          ]
+        },
+        "bard": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L8.kynareth_newing"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L8.kynareth_newing"
+          ]
+        },
+        "jarl": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L6.orsinium_city",
+            "wrothgar.L6.newing_shelf_city",
+            "wrothgar.L9.orsinium_succession"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L6.orsinium_city",
+            "wrothgar.L6.newing_shelf_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L7.chief_and_wives"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L8.kynareth_newing",
+            "wrothgar.L6.newing_shelf_city"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L8.malacath"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L9.recognition",
+            "wrothgar.L6.newing_shelf_city"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L10.clanless_raiders"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L7.hired_miners"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L7.hired_miners"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L6.stronghold_per_mine",
+            "wrothgar.L6.newing_shelf_city",
+            "wrothgar.L7.clanless"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L6.newing_shelf_city"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "wrothgar.L6.newing_shelf_city"
+          ]
+        },
+        "elder": {
+          "weight": 4,
+          "why": [
+            "wrothgar.L7.clanless",
+            "wrothgar.L8.malacath",
+            "wrothgar.L8.kynareth_newing"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L5.stronghold_mines",
+            "wrothgar.L7.hired_miners"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "wrothgar.L5.stronghold_mines",
+            "wrothgar.L7.hired_miners"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L7.chief_and_wives"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L7.chief_and_wives"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L5.stronghold_mines"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "wrothgar.L9.ore_rights"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "ruin": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "dwemer": [
+          "wrothgar.L10.dwemer_halls"
+        ],
+        "falmer": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "bandit": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "fort": [
+          "wrothgar.L10.shedungent"
+        ],
+        "military": [
+          "wrothgar.L9.recognition"
+        ],
+        "mage": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "vampire": [
+          "wrothgar.L10.lyrezi_heights"
+        ],
+        "necromancer": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "hagraven": [
+          "wrothgar.L10.daughters_of_wroth"
+        ],
+        "forsworn": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "beast": [
+          "wrothgar.L4.troll_ledges",
+          "wrothgar.L4.bear_valleys",
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "ice": [
+          "wrothgar.L4.snowfields",
+          "wrothgar.L4.troll_ledges"
+        ],
+        "mine": [
+          "wrothgar.L5.stronghold_mines",
+          "wrothgar.L5.newing_barons",
+          "wrothgar.L1.ore_veins"
+        ],
+        "grove": [
+          "wrothgar.L4.pine_larch_slopes",
+          "wrothgar.L4.alpine_meadow"
+        ],
+        "smuggler": [
+          "wrothgar.L10.daughters_of_wroth"
+        ],
+        "cave": [
+          "wrothgar.L10.clanless_raiders",
+          "wrothgar.L10.lyrezi_heights",
+          "wrothgar.L4.troll_ledges"
+        ],
+        "giant": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "dragon": [
+          "wrothgar.L10.lyrezi_heights"
+        ],
+        "tower": [
+          "wrothgar.L10.clanless_raiders"
+        ],
+        "cabin": [
+          "wrothgar.L6.orsinium_city"
+        ],
+        "wreck": [
+          "wrothgar.L5.stronghold_mines"
+        ]
+      }
+    },
+    "glenumbra": {
+      "truth": "Glenumbra is the wettest, oldest country in High Rock: ocean cliffs on the western sea, wide heather moors over granite and peat, and mist-filled valleys climbing north from the Iliac crowns. Camlorn stands on a rocky hill above the moors as a walled cathedral city of gothic spires, famous for its bells, its weavers and its court. Out on the peat bogs the earth-witches of the Glenmoril Wyrd guard an ancient sacred grove against corruption, uneasy neighbours to Mara's cathedral priests. Cairns and barrows mark the First-Era battlefield where Bretons and Direnni broke the Alessian army, and restless dead stir whenever the sea fog rolls inland.",
+      "layers": {
+        "L1": [
+          {
+            "id": "ocean_cliffs",
+            "text": "sea cliffs and stacks along the western ocean",
+            "cites": [
+              "high_rock.L1.ocean_cliffs"
+            ]
+          },
+          {
+            "id": "camlorn_hill",
+            "text": "a granite hill rising above the moorland",
+            "cites": []
+          },
+          {
+            "id": "western_moors",
+            "text": "peat plateaus and granite tors north of the Iliac window",
+            "cites": [
+              "high_rock.L1.north_crags"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "atlantic_squalls",
+            "text": "the wettest country in High Rock, lashed by sea rain",
+            "cites": [
+              "glenumbra.L1.ocean_cliffs",
+              "high_rock.L2.westerlies"
+            ]
+          },
+          {
+            "id": "moor_mist",
+            "text": "cold fog pooling across the peat hollows",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "high_rock.L2.still_woods"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "peat_bogs",
+            "text": "black pools, sphagnum channels and bog streams",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "glenumbra.L2.atlantic_squalls",
+              "high_rock.L3.moor_tarns"
+            ]
+          },
+          {
+            "id": "camlorn_stream",
+            "text": "mill streams draining the hill into the western sea",
+            "cites": [
+              "glenumbra.L1.camlorn_hill",
+              "glenumbra.L2.atlantic_squalls",
+              "high_rock.L3.many_rivers"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "heather_and_bog",
+            "text": "heather, bracken and cotton grass",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "glenumbra.L3.peat_bogs"
+            ]
+          },
+          {
+            "id": "wyrd_grove",
+            "text": "an ancient oak grove tended by earth-witches",
+            "cites": [
+              "glenumbra.L2.moor_mist",
+              "glenumbra.L3.peat_bogs"
+            ]
+          },
+          {
+            "id": "moor_wolves",
+            "text": "wolves, werewolves and bog bodies on the moors",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "high_rock.L4.wereboar_woods"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "wool_and_cloth",
+            "text": "sheep runs on the moors and Camlorn's cloth looms",
+            "cites": [
+              "glenumbra.L4.heather_and_bog",
+              "high_rock.L5.wool_and_hides"
+            ]
+          },
+          {
+            "id": "peat_cutting",
+            "text": "dried peat blocks burned in every hearth",
+            "cites": [
+              "glenumbra.L3.peat_bogs"
+            ]
+          },
+          {
+            "id": "cliff_fishing",
+            "text": "cold-water fishing coves",
+            "cites": [
+              "glenumbra.L1.ocean_cliffs",
+              "high_rock.L5.fish_salt"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "camlorn_city",
+            "text": "the cathedral capital on its hill (spire-hill-gothic)",
+            "cites": [
+              "glenumbra.L1.camlorn_hill",
+              "glenumbra.L5.wool_and_cloth"
+            ]
+          },
+          {
+            "id": "cliff_villages",
+            "text": "fishing and shepherd hamlets along the coast",
+            "cites": [
+              "glenumbra.L1.ocean_cliffs",
+              "glenumbra.L5.cliff_fishing"
+            ]
+          },
+          {
+            "id": "moor_steadings",
+            "text": "isolated stone farms beside the bog causeways",
+            "cites": [
+              "glenumbra.L3.peat_bogs",
+              "glenumbra.L5.peat_cutting"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "camlorn_court",
+            "text": "an old northern royal house, guild weavers and cathedral canons",
+            "cites": [
+              "glenumbra.L5.wool_and_cloth",
+              "glenumbra.L6.camlorn_city",
+              "high_rock.L7.feudal_ladder"
+            ]
+          },
+          {
+            "id": "wyrd_sisters",
+            "text": "the Glenmoril Wyrd living by old nature pacts outside feudal law",
+            "cites": [
+              "glenumbra.L4.wyrd_grove",
+              "high_rock.L7.outcasts"
+            ]
+          },
+          {
+            "id": "bog_tenants",
+            "text": "poor shepherds and peat-cutters",
+            "cites": [
+              "glenumbra.L5.peat_cutting",
+              "glenumbra.L6.moor_steadings",
+              "high_rock.L7.tenants_bound"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "mara_cathedral",
+            "text": "Camlorn's great cathedral and its famous bell rings",
+            "cites": [
+              "glenumbra.L6.camlorn_city",
+              "glenumbra.L7.camlorn_court",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "wyrd_rites",
+            "text": "green-magic rites that townsfolk both fear and seek",
+            "cites": [
+              "glenumbra.L4.wyrd_grove",
+              "glenumbra.L7.wyrd_sisters",
+              "high_rock.L8.witch_ambivalence"
+            ]
+          },
+          {
+            "id": "moor_cairns",
+            "text": "offerings left at battle cairns to quiet the dead",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "glenumbra.L4.moor_wolves",
+              "high_rock.L8.crypt_dead"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "wyrd_vs_clergy",
+            "text": "tension between Camlorn's cathedral canons and the Glenmoril Wyrd over the sacred grove",
+            "cites": [
+              "glenumbra.L7.wyrd_sisters",
+              "glenumbra.L8.mara_cathedral",
+              "high_rock.L9.north_houses"
+            ]
+          },
+          {
+            "id": "northern_pride",
+            "text": "Camlorn guards its independence from Daggerfall's southern crown",
+            "cites": [
+              "glenumbra.L6.camlorn_city",
+              "glenumbra.L7.camlorn_court",
+              "high_rock.L9.north_houses"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "cath_bedraud",
+            "text": "a vast tiered cemetery and necromancer-haunted crypt",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "glenumbra.L8.moor_cairns",
+              "glenumbra.L9.wyrd_vs_clergy"
+            ]
+          },
+          {
+            "id": "tomb_of_lost_kings",
+            "text": "royal barrows of the early Breton kings",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "glenumbra.L9.northern_pride",
+              "high_rock.L10.undercrofts"
+            ]
+          },
+          {
+            "id": "mthartzel",
+            "text": "a deep Dwemer bastion on the eastern ridge",
+            "cites": [
+              "glenumbra.L1.camlorn_hill",
+              "high_rock.L10.dwemer_under_spine"
+            ]
+          },
+          {
+            "id": "werewolf_packs",
+            "text": "beast-blood packs hunting the moor roads",
+            "cites": [
+              "glenumbra.L4.moor_wolves",
+              "glenumbra.L9.wyrd_vs_clergy"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "alessian_defeat",
+            "text": "the Breton-Direnni victory over the Alessian Order on the Glenumbra Moors",
+            "cites": [
+              "glenumbra.L1.western_moors",
+              "glenumbra.L8.moor_cairns",
+              "high_rock.L11.direnni_hegemony"
+            ]
+          },
+          {
+            "id": "old_crown_of_camlorn",
+            "text": "one of the oldest kingdoms of northern High Rock",
+            "cites": [
+              "glenumbra.L6.camlorn_city",
+              "glenumbra.L9.northern_pride",
+              "glenumbra.L10.tomb_of_lost_kings"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "glenumbra.L5.cliff_fishing",
+            "glenumbra.L3.camlorn_stream"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L5.cliff_fishing"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "glenumbra.L5.wool_and_cloth",
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L6.cliff_villages"
+          ]
+        },
+        "cook": {
+          "weight": 4,
+          "why": [
+            "glenumbra.L5.cliff_fishing",
+            "glenumbra.L6.cliff_villages",
+            "glenumbra.L6.moor_steadings"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "glenumbra.L8.mara_cathedral",
+            "glenumbra.L8.moor_cairns"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "glenumbra.L6.camlorn_city",
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "glenumbra.L6.camlorn_city",
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L8.wyrd_rites"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L9.wyrd_vs_clergy"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L10.cath_bedraud"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.bog_tenants"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L6.cliff_villages"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "elder": {
+          "weight": 4,
+          "why": [
+            "glenumbra.L7.camlorn_court",
+            "glenumbra.L7.wyrd_sisters",
+            "glenumbra.L11.old_crown_of_camlorn"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.bog_tenants"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L5.wool_and_cloth"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "glenumbra.L7.camlorn_court"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "glenumbra.L9.wyrd_vs_clergy"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "glenumbra.L10.tomb_of_lost_kings",
+          "glenumbra.L11.old_crown_of_camlorn"
+        ],
+        "ruin": [
+          "glenumbra.L10.tomb_of_lost_kings"
+        ],
+        "dwemer": [
+          "glenumbra.L10.mthartzel"
+        ],
+        "falmer": [
+          "glenumbra.L10.cath_bedraud"
+        ],
+        "bandit": [
+          "glenumbra.L10.werewolf_packs"
+        ],
+        "fort": [
+          "glenumbra.L9.wyrd_vs_clergy"
+        ],
+        "military": [
+          "glenumbra.L9.wyrd_vs_clergy"
+        ],
+        "mage": [
+          "glenumbra.L10.cath_bedraud",
+          "glenumbra.L8.wyrd_rites"
+        ],
+        "vampire": [
+          "glenumbra.L10.werewolf_packs"
+        ],
+        "necromancer": [
+          "glenumbra.L10.cath_bedraud",
+          "glenumbra.L8.moor_cairns"
+        ],
+        "hagraven": [
+          "glenumbra.L4.wyrd_grove"
+        ],
+        "forsworn": [
+          "glenumbra.L10.cath_bedraud"
+        ],
+        "beast": [
+          "glenumbra.L10.werewolf_packs"
+        ],
+        "ice": [
+          "glenumbra.L10.cath_bedraud"
+        ],
+        "mine": [
+          "glenumbra.L5.wool_and_cloth"
+        ],
+        "grove": [
+          "glenumbra.L4.wyrd_grove"
+        ],
+        "smuggler": [
+          "glenumbra.L5.cliff_fishing"
+        ],
+        "cave": [
+          "glenumbra.L10.cath_bedraud"
+        ],
+        "giant": [
+          "glenumbra.L4.heather_and_bog"
+        ],
+        "dragon": [
+          "glenumbra.L10.cath_bedraud"
+        ],
+        "tower": [
+          "glenumbra.L10.cath_bedraud"
+        ],
+        "cabin": [
+          "glenumbra.L6.cliff_villages",
+          "glenumbra.L6.moor_steadings",
+          "glenumbra.L5.cliff_fishing"
+        ],
+        "wreck": [
+          "glenumbra.L5.wool_and_cloth"
+        ]
+      }
+    },
+    "rivenspire": {
+      "truth": "Rivenspire is a cold, stern country of dark granite crags, narrow gorges and wind-scoured plateaus along the northern sea. Shornhelm sits in a mountain gap as a disciplined military city beneath a red stone keep, where three rival noble houses share watch duties and quarrel over the crown. On the northern cliffs, Northpoint guides timber and ore ships into harbour by its twin beacon lamps. Ravens nest on every tor, and the land feels older and bleaker than the bay shore: Nedic crag barrows crown the ridges, vampire-tainted bloodlines plot in stone manors, and the shattered spire of Doomcrag casts a shadow over the western hills.",
+      "layers": {
+        "L1": [
+          {
+            "id": "dark_crags",
+            "text": "jagged black granite crags and high gorges",
+            "cites": [
+              "high_rock.L1.north_crags"
+            ]
+          },
+          {
+            "id": "shornhelm_gap",
+            "text": "the fortified pass between upper and lower Rivenspire",
+            "cites": [
+              "rivenspire.L1.dark_crags"
+            ]
+          },
+          {
+            "id": "northpoint_cliffs",
+            "text": "sheer northern sea cliffs with a sheltered harbour cove",
+            "cites": [
+              "high_rock.L1.ocean_cliffs"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "northern_gales",
+            "text": "cold gales off the northern sea",
+            "cites": [
+              "rivenspire.L1.northpoint_cliffs",
+              "high_rock.L2.westerlies"
+            ]
+          },
+          {
+            "id": "crag_frost",
+            "text": "early frosts and dry, biting wind in the gorges",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "high_rock.L2.still_woods"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "gorge_torrents",
+            "text": "fast, cold rivers cutting through narrow rock trenches",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "rivenspire.L2.crag_frost",
+              "high_rock.L3.many_rivers"
+            ]
+          },
+          {
+            "id": "northpoint_harbour",
+            "text": "the deep-water anchorage on the northern coast",
+            "cites": [
+              "rivenspire.L1.northpoint_cliffs",
+              "rivenspire.L2.northern_gales"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "crag_pine_and_lichen",
+            "text": "stunted pine, juniper, thorn and grey lichen",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "rivenspire.L2.crag_frost"
+            ]
+          },
+          {
+            "id": "crag_ravens",
+            "text": "ravens, harpies and mountain wolves on the tors",
+            "cites": [
+              "rivenspire.L1.dark_crags"
+            ]
+          },
+          {
+            "id": "dead_grass_hollows",
+            "text": "blighted hollows round the western ruins",
+            "cites": [
+              "rivenspire.L2.crag_frost",
+              "rivenspire.L4.crag_pine_and_lichen"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "quarry_and_iron",
+            "text": "granite quarries and iron seams in the crags",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "high_rock.L5.orc_ore"
+            ]
+          },
+          {
+            "id": "northpoint_shipping",
+            "text": "northern sea trade in dried fish, stone and timber",
+            "cites": [
+              "rivenspire.L3.northpoint_harbour",
+              "high_rock.L5.bay_shipping"
+            ]
+          },
+          {
+            "id": "goat_and_rye",
+            "text": "hardy rye terraces and mountain goat herds",
+            "cites": [
+              "rivenspire.L4.crag_pine_and_lichen"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "shornhelm_city",
+            "text": "the walled grid city under its red keep guarding the pass",
+            "cites": [
+              "rivenspire.L1.shornhelm_gap",
+              "rivenspire.L5.quarry_and_iron"
+            ]
+          },
+          {
+            "id": "northpoint_port",
+            "text": "the cliff port and its twin beacon towers",
+            "cites": [
+              "rivenspire.L1.northpoint_cliffs",
+              "rivenspire.L3.northpoint_harbour",
+              "rivenspire.L5.northpoint_shipping"
+            ]
+          },
+          {
+            "id": "crag_watch_keeps",
+            "text": "watch keeps along the gorge roads",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "rivenspire.L5.goat_and_rye"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "three_houses",
+            "text": "rival noble houses of Shornhelm sharing the garrison",
+            "cites": [
+              "rivenspire.L6.shornhelm_city",
+              "high_rock.L7.feudal_ladder"
+            ]
+          },
+          {
+            "id": "garrison_folk",
+            "text": "smiths, soldiers and quarrymen raised under martial law",
+            "cites": [
+              "rivenspire.L5.quarry_and_iron",
+              "rivenspire.L6.shornhelm_city"
+            ]
+          },
+          {
+            "id": "cliff_sailors",
+            "text": "hardy mariners of the northern sea",
+            "cites": [
+              "rivenspire.L5.northpoint_shipping",
+              "rivenspire.L6.northpoint_port"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "stendarr_and_arkay",
+            "text": "stern devotion to Stendarr's watch and Arkay's burial law",
+            "cites": [
+              "rivenspire.L6.shornhelm_city",
+              "rivenspire.L7.garrison_folk",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "night_muster",
+            "text": "the traditional torchlit muster on Shornhelm's walls",
+            "cites": [
+              "rivenspire.L6.shornhelm_city",
+              "rivenspire.L7.three_houses"
+            ]
+          },
+          {
+            "id": "second_lamp_custom",
+            "text": "the harbour guild's vigil over Northpoint's second beacon lamp",
+            "cites": [
+              "rivenspire.L6.northpoint_port",
+              "rivenspire.L7.cliff_sailors"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "house_rivalry",
+            "text": "the noble houses of Shornhelm scheme over the succession and garrison command",
+            "cites": [
+              "rivenspire.L6.shornhelm_city",
+              "rivenspire.L7.three_houses",
+              "high_rock.L9.north_houses"
+            ]
+          },
+          {
+            "id": "lighthouse_sabotage",
+            "text": "wreckers and rival merchants dispute the Northpoint lamps",
+            "cites": [
+              "rivenspire.L5.northpoint_shipping",
+              "rivenspire.L8.second_lamp_custom"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "doomcrag",
+            "text": "a shattered ancient spire and vampire-haunted vault in the western crags",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "rivenspire.L4.dead_grass_hollows",
+              "rivenspire.L9.house_rivalry"
+            ]
+          },
+          {
+            "id": "crag_barrows",
+            "text": "Nedic and early Breton hill tombs",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "rivenspire.L8.stendarr_and_arkay",
+              "high_rock.L10.undercrofts"
+            ]
+          },
+          {
+            "id": "wreckers_coves",
+            "text": "smuggler caves below the northern cliffs",
+            "cites": [
+              "rivenspire.L1.northpoint_cliffs",
+              "rivenspire.L9.lighthouse_sabotage",
+              "high_rock.L10.sea_caves"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "nedic_crag_kings",
+            "text": "the first hill-kings buried on the tors",
+            "cites": [
+              "rivenspire.L1.dark_crags",
+              "rivenspire.L10.crag_barrows",
+              "high_rock.L11.nedic_barrows"
+            ]
+          },
+          {
+            "id": "doomcrag_fall",
+            "text": "the ancient curse and collapse that blighted western Rivenspire",
+            "cites": [
+              "rivenspire.L4.dead_grass_hollows",
+              "rivenspire.L9.house_rivalry",
+              "rivenspire.L10.doomcrag"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "lumberjack": {
+          "weight": 3,
+          "why": [
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L4.crag_pine_and_lichen"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L5.northpoint_shipping"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L5.northpoint_shipping"
+          ]
+        },
+        "woodcutter": {
+          "weight": 3,
+          "why": [
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L4.crag_pine_and_lichen"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "rivenspire.L5.quarry_and_iron",
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L3.northpoint_harbour"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "butcher": {
+          "weight": 3,
+          "why": [
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L5.goat_and_rye"
+          ]
+        },
+        "fletcher": {
+          "weight": 3,
+          "why": [
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L4.crag_pine_and_lichen"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L6.crag_watch_keeps"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "rivenspire.L5.northpoint_shipping",
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L5.northpoint_shipping"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L6.crag_watch_keeps"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L5.northpoint_shipping"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L6.crag_watch_keeps"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L8.stendarr_and_arkay"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L6.shornhelm_city"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L6.shornhelm_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L8.stendarr_and_arkay"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L6.crag_watch_keeps"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L10.wreckers_coves"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L6.shornhelm_city"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "rivenspire.L7.garrison_folk"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L7.three_houses"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L5.quarry_and_iron"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "rivenspire.L9.house_rivalry"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "rivenspire.L10.crag_barrows"
+        ],
+        "ruin": [
+          "rivenspire.L10.crag_barrows"
+        ],
+        "dwemer": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "falmer": [
+          "rivenspire.L10.wreckers_coves"
+        ],
+        "bandit": [
+          "rivenspire.L10.wreckers_coves"
+        ],
+        "fort": [
+          "rivenspire.L9.house_rivalry"
+        ],
+        "military": [
+          "rivenspire.L9.house_rivalry"
+        ],
+        "mage": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "vampire": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "necromancer": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "hagraven": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "forsworn": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "beast": [
+          "rivenspire.L10.wreckers_coves"
+        ],
+        "ice": [
+          "rivenspire.L10.wreckers_coves"
+        ],
+        "mine": [
+          "rivenspire.L5.quarry_and_iron"
+        ],
+        "grove": [
+          "rivenspire.L4.crag_pine_and_lichen"
+        ],
+        "smuggler": [
+          "rivenspire.L10.wreckers_coves"
+        ],
+        "cave": [
+          "rivenspire.L10.doomcrag",
+          "rivenspire.L10.wreckers_coves"
+        ],
+        "giant": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "dragon": [
+          "rivenspire.L10.doomcrag"
+        ],
+        "tower": [
+          "rivenspire.L9.lighthouse_sabotage"
+        ],
+        "cabin": [
+          "rivenspire.L6.shornhelm_city"
+        ],
+        "wreck": [
+          "rivenspire.L10.wreckers_coves"
+        ]
+      }
+    },
+    "stormhaven": {
+      "truth": "Stormhaven is the green woodland belt north of the Iliac crowns: rolling hills of oak and beech, clear streams and old stone highways linking Anticlere and Dwynnen to the Bjoulsae and Wayrest. It is Mara's heartland in High Rock, a country of wayside shrines, abbey farms and pilgrim inns where travellers stop on their way to the great cathedrals. Beneath that gentle surface, petty barons tax the pilgrim roads, Daedric revellers lure the unwary into hidden demesnes, and the Stone Giant weeps beside the highway while bandits and coven witches work the deep forest glens.",
+      "layers": {
+        "L1": [
+          {
+            "id": "rolling_uplands",
+            "text": "limestone ridges and rolling clay hills north of the shore realms",
+            "cites": [
+              "high_rock.L1.bay_plain",
+              "high_rock.L1.north_crags"
+            ]
+          },
+          {
+            "id": "weeping_crag",
+            "text": "a carved stone outcrop overlooking the central highway",
+            "cites": [
+              "stormhaven.L1.rolling_uplands"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "mild_woodland_rain",
+            "text": "warm summers and steady rain sheltered from the fiercest sea gales",
+            "cites": [
+              "stormhaven.L1.rolling_uplands",
+              "high_rock.L2.mild_shore",
+              "high_rock.L2.westerlies"
+            ]
+          },
+          {
+            "id": "glen_mist",
+            "text": "morning mist in the wooded hollows",
+            "cites": [
+              "stormhaven.L1.rolling_uplands",
+              "high_rock.L2.still_woods"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "headwater_streams",
+            "text": "clear streams feeding south into the shore rivers and east toward the Bjoulsae",
+            "cites": [
+              "stormhaven.L1.rolling_uplands",
+              "stormhaven.L2.mild_woodland_rain",
+              "high_rock.L3.many_rivers"
+            ]
+          },
+          {
+            "id": "abbey_wells",
+            "text": "blessed springs and stone bridges along the pilgrim road",
+            "cites": [
+              "stormhaven.L1.rolling_uplands",
+              "stormhaven.L2.mild_woodland_rain",
+              "stormhaven.L3.headwater_streams",
+              "high_rock.L3.water_is_crossings"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "oak_and_beech",
+            "text": "tall deciduous forest with bluebells, boar and deer",
+            "cites": [
+              "stormhaven.L2.mild_woodland_rain",
+              "stormhaven.L3.headwater_streams"
+            ]
+          },
+          {
+            "id": "wereboar_thickets",
+            "text": "tangled deep-wood thickets haunted by wereboars and wolves",
+            "cites": [
+              "stormhaven.L2.glen_mist",
+              "stormhaven.L4.oak_and_beech",
+              "high_rock.L4.wereboar_woods"
+            ]
+          },
+          {
+            "id": "spriggan_springs",
+            "text": "mossy glades round the woodland springs",
+            "cites": [
+              "stormhaven.L2.glen_mist",
+              "stormhaven.L3.abbey_wells"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "abbey_farms",
+            "text": "orchards, bee-yards, cider presses and abbey grain fields",
+            "cites": [
+              "stormhaven.L2.mild_woodland_rain",
+              "stormhaven.L3.abbey_wells",
+              "high_rock.L5.grain_orchards"
+            ]
+          },
+          {
+            "id": "pilgrim_hospitality",
+            "text": "inns, stables and relic-sellers serving the road traffic",
+            "cites": [
+              "stormhaven.L3.abbey_wells",
+              "high_rock.L5.tolls"
+            ]
+          },
+          {
+            "id": "charcoal_and_timber",
+            "text": "coppiced oak and beech timber for Wayrest's yards",
+            "cites": [
+              "stormhaven.L4.oak_and_beech"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "koeglin_village",
+            "text": "a thriving road village and market in the oak hills",
+            "cites": [
+              "stormhaven.L3.headwater_streams",
+              "stormhaven.L5.abbey_farms"
+            ]
+          },
+          {
+            "id": "weeping_giant",
+            "text": "a fortified coaching inn and pilgrim stop by the carved stone landmark",
+            "cites": [
+              "stormhaven.L1.weeping_crag",
+              "stormhaven.L5.pilgrim_hospitality"
+            ]
+          },
+          {
+            "id": "abbey_prioris",
+            "text": "walled priories and wayside chapels",
+            "cites": [
+              "stormhaven.L3.abbey_wells",
+              "stormhaven.L5.abbey_farms"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "abbey_stewards",
+            "text": "priory stewards and road-barons who live off pilgrim dues",
+            "cites": [
+              "stormhaven.L5.abbey_farms",
+              "stormhaven.L6.abbey_prioris",
+              "high_rock.L7.feudal_ladder"
+            ]
+          },
+          {
+            "id": "pilgrim_bands",
+            "text": "travellers, mendicants and pardoners on the highway",
+            "cites": [
+              "stormhaven.L5.pilgrim_hospitality",
+              "stormhaven.L6.koeglin_village"
+            ]
+          },
+          {
+            "id": "wood_outlaws",
+            "text": "poachers and highwaymen hiding in the beech woods",
+            "cites": [
+              "stormhaven.L4.wereboar_thickets",
+              "high_rock.L7.outcasts"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "mara_heartland",
+            "text": "wayside shrines to Mara and Kynareth at every crossroads",
+            "cites": [
+              "stormhaven.L6.abbey_prioris",
+              "stormhaven.L7.pilgrim_bands",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "wayside_miracles",
+            "text": "local tales of healing springs and saintly relics",
+            "cites": [
+              "stormhaven.L3.abbey_wells",
+              "stormhaven.L7.pilgrim_bands"
+            ]
+          },
+          {
+            "id": "revel_temptation",
+            "text": "secret drinking cults and Daedric bargains behind inn doors",
+            "cites": [
+              "stormhaven.L5.pilgrim_hospitality",
+              "stormhaven.L7.pilgrim_bands"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "pilgrim_tolls",
+            "text": "road-barons and priories quarrel over bridge tolls and safe-conduct fees",
+            "cites": [
+              "stormhaven.L5.pilgrim_hospitality",
+              "stormhaven.L7.abbey_stewards",
+              "high_rock.L9.crowns_and_barons"
+            ]
+          },
+          {
+            "id": "highway_banditry",
+            "text": "outlaw bands preying on merchants between Anticlere and Wayrest",
+            "cites": [
+              "stormhaven.L6.weeping_giant",
+              "stormhaven.L7.wood_outlaws"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "sanguines_demesne",
+            "text": "a Daedric-touched ruin of endless revelry hidden in the woods",
+            "cites": [
+              "stormhaven.L4.oak_and_beech",
+              "stormhaven.L8.revel_temptation",
+              "stormhaven.L9.pilgrim_tolls"
+            ]
+          },
+          {
+            "id": "moiras_hope",
+            "text": "an overgrown keep and crypt seized by bandits and necromancers",
+            "cites": [
+              "stormhaven.L4.wereboar_thickets",
+              "stormhaven.L9.highway_banditry",
+              "high_rock.L10.undercrofts"
+            ]
+          },
+          {
+            "id": "woodland_covens",
+            "text": "hagraven and witch circles in the deep glens",
+            "cites": [
+              "stormhaven.L4.spriggan_springs",
+              "stormhaven.L9.pilgrim_tolls",
+              "high_rock.L10.covens"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "old_pilgrim_way",
+            "text": "the ancient sacred road linking the shrines of central High Rock",
+            "cites": [
+              "stormhaven.L3.abbey_wells",
+              "stormhaven.L6.abbey_prioris",
+              "stormhaven.L8.mara_heartland"
+            ]
+          },
+          {
+            "id": "giant_stone_legend",
+            "text": "the First-Era legend of the Weeping Giant carved beside the highway",
+            "cites": [
+              "stormhaven.L1.weeping_crag",
+              "stormhaven.L6.weeping_giant",
+              "stormhaven.L10.moiras_hope"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L1.rolling_uplands"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "stormhaven.L5.charcoal_and_timber",
+            "stormhaven.L4.oak_and_beech",
+            "stormhaven.L4.wereboar_thickets"
+          ]
+        },
+        "miller": {
+          "weight": 3,
+          "why": [
+            "stormhaven.L5.abbey_farms",
+            "stormhaven.L5.charcoal_and_timber"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.charcoal_and_timber"
+          ]
+        },
+        "woodcutter": {
+          "weight": 3,
+          "why": [
+            "stormhaven.L5.charcoal_and_timber",
+            "stormhaven.L4.oak_and_beech"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L4.oak_and_beech"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.charcoal_and_timber"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L4.spriggan_springs"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "stormhaven.L5.pilgrim_hospitality",
+            "stormhaven.L6.koeglin_village"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L6.koeglin_village"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "stormhaven.L5.pilgrim_hospitality",
+            "stormhaven.L6.koeglin_village",
+            "stormhaven.L6.weeping_giant"
+          ]
+        },
+        "cook": {
+          "weight": 4,
+          "why": [
+            "stormhaven.L5.abbey_farms",
+            "stormhaven.L5.pilgrim_hospitality",
+            "stormhaven.L6.weeping_giant"
+          ]
+        },
+        "server": {
+          "weight": 4,
+          "why": [
+            "stormhaven.L5.pilgrim_hospitality",
+            "stormhaven.L6.koeglin_village",
+            "stormhaven.L6.weeping_giant"
+          ]
+        },
+        "bard": {
+          "weight": 3,
+          "why": [
+            "stormhaven.L5.pilgrim_hospitality",
+            "stormhaven.L8.revel_temptation"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L8.mara_heartland"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L6.koeglin_village"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L6.koeglin_village"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L8.mara_heartland"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L9.pilgrim_tolls"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L10.sanguines_demesne"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L6.koeglin_village"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L11.old_pilgrim_way"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L7.abbey_stewards"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L5.abbey_farms"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "stormhaven.L9.pilgrim_tolls"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "ruin": [
+          "stormhaven.L10.sanguines_demesne",
+          "stormhaven.L11.old_pilgrim_way",
+          "stormhaven.L8.mara_heartland"
+        ],
+        "dwemer": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "falmer": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "bandit": [
+          "stormhaven.L10.moiras_hope",
+          "stormhaven.L5.pilgrim_hospitality"
+        ],
+        "fort": [
+          "stormhaven.L6.weeping_giant"
+        ],
+        "military": [
+          "stormhaven.L9.pilgrim_tolls"
+        ],
+        "mage": [
+          "stormhaven.L10.moiras_hope"
+        ],
+        "vampire": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "necromancer": [
+          "stormhaven.L10.moiras_hope",
+          "stormhaven.L10.woodland_covens"
+        ],
+        "hagraven": [
+          "stormhaven.L10.woodland_covens"
+        ],
+        "forsworn": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "beast": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "ice": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "mine": [
+          "stormhaven.L1.rolling_uplands"
+        ],
+        "grove": [
+          "stormhaven.L4.spriggan_springs"
+        ],
+        "smuggler": [
+          "stormhaven.L10.woodland_covens"
+        ],
+        "cave": [
+          "stormhaven.L10.moiras_hope"
+        ],
+        "giant": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "dragon": [
+          "stormhaven.L10.sanguines_demesne"
+        ],
+        "tower": [
+          "stormhaven.L10.moiras_hope",
+          "stormhaven.L9.highway_banditry"
+        ],
+        "cabin": [
+          "stormhaven.L5.abbey_farms"
+        ],
+        "wreck": [
+          "stormhaven.L5.abbey_farms"
+        ]
+      }
+    },
+    "bjoulsae": {
+      "truth": "The Bjoulsae region follows High Rock's great eastern river from its highland lakes down through a steep valley between Wrothgar and the Druadach Mountains. Evermor stands on a lake island reached by a stone causeway, its cathedral and water-relic drawing pilgrims while its barges carry Wrothgar's ore and timber down to Wayrest. Across the eastern ridges lies Skyrim's Reach, so this is a marchland of watchtowers, border forts and horse ranches: Reachfolk raiders slip over the passes to burn river steads, and drowned crypts lie beneath the island foundations of the lake.",
+      "layers": {
+        "L1": [
+          {
+            "id": "bjoulsae_trench",
+            "text": "the deep river trench cut from the north-eastern highlands",
+            "cites": [
+              "high_rock.L1.bjoulsae_trench"
+            ]
+          },
+          {
+            "id": "evermor_lake_basin",
+            "text": "a highland lake with rocky islands at the river's head",
+            "cites": [
+              "bjoulsae.L1.bjoulsae_trench"
+            ]
+          },
+          {
+            "id": "druadach_march",
+            "text": "steep eastern ridges bordering Skyrim's Reach",
+            "cites": [
+              "high_rock.L1.wrothgar_spine"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "valley_funnel_wind",
+            "text": "wind and river fog funnelling along the trench",
+            "cites": [
+              "bjoulsae.L1.bjoulsae_trench",
+              "high_rock.L2.bay_fog"
+            ]
+          },
+          {
+            "id": "eastern_rain_shadow",
+            "text": "colder, drier air in the lee of the mountain wall, with snow on the passes",
+            "cites": [
+              "bjoulsae.L1.druadach_march",
+              "high_rock.L2.spine_snow"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "upper_bjoulsae",
+            "text": "the navigable river highway from Evermor down to Wayrest",
+            "cites": [
+              "bjoulsae.L1.bjoulsae_trench",
+              "bjoulsae.L2.valley_funnel_wind",
+              "high_rock.L3.bjoulsae_artery"
+            ]
+          },
+          {
+            "id": "lake_islands",
+            "text": "island channels and reed-fringed shallows controlled by the causeway gates",
+            "cites": [
+              "bjoulsae.L1.evermor_lake_basin",
+              "bjoulsae.L2.valley_funnel_wind",
+              "bjoulsae.L3.upper_bjoulsae"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "reed_beds",
+            "text": "alder, willow and dense reed margins teeming with waterfowl and fish",
+            "cites": [
+              "bjoulsae.L3.lake_islands"
+            ]
+          },
+          {
+            "id": "valley_meadows",
+            "text": "open horse pastures along the river terraces",
+            "cites": [
+              "bjoulsae.L1.bjoulsae_trench",
+              "bjoulsae.L2.eastern_rain_shadow"
+            ]
+          },
+          {
+            "id": "march_scrub",
+            "text": "rocky juniper slopes with bears, wolves and hagraven nests",
+            "cites": [
+              "bjoulsae.L1.druadach_march",
+              "high_rock.L4.spine_beasts"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "barge_trade",
+            "text": "flat-bottomed barges carrying highland timber, wool and ore to Wayrest",
+            "cites": [
+              "bjoulsae.L3.upper_bjoulsae",
+              "high_rock.L5.bay_shipping"
+            ]
+          },
+          {
+            "id": "horse_breeding",
+            "text": "Bjoulsae river-horse ranches",
+            "cites": [
+              "bjoulsae.L4.valley_meadows"
+            ]
+          },
+          {
+            "id": "lake_fisheries",
+            "text": "eel traps, smokehouses and reed-cutting on the lake",
+            "cites": [
+              "bjoulsae.L3.lake_islands",
+              "bjoulsae.L4.reed_beds"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "evermor_city",
+            "text": "the walled island-causeway city and cathedral seat",
+            "cites": [
+              "bjoulsae.L1.evermor_lake_basin",
+              "bjoulsae.L3.lake_islands",
+              "bjoulsae.L5.barge_trade"
+            ]
+          },
+          {
+            "id": "druadach_border_fort",
+            "text": "a fortified pass keep watching the road toward Markarth",
+            "cites": [
+              "bjoulsae.L1.druadach_march",
+              "bjoulsae.L5.horse_breeding"
+            ]
+          },
+          {
+            "id": "barge_landings",
+            "text": "river wharves and lock villages",
+            "cites": [
+              "bjoulsae.L3.upper_bjoulsae",
+              "bjoulsae.L5.lake_fisheries"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "evermor_nobles",
+            "text": "border lords and river-guild masters",
+            "cites": [
+              "bjoulsae.L5.barge_trade",
+              "bjoulsae.L6.evermor_city",
+              "high_rock.L7.feudal_ladder"
+            ]
+          },
+          {
+            "id": "barge_men_and_riders",
+            "text": "tough river boatmen and mounted march wardens",
+            "cites": [
+              "bjoulsae.L5.barge_trade",
+              "bjoulsae.L5.horse_breeding"
+            ]
+          },
+          {
+            "id": "reachfolk_bands",
+            "text": "Reachfolk clans living in the eastern crags outside Breton law",
+            "cites": [
+              "bjoulsae.L1.druadach_march",
+              "high_rock.L7.outcasts"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "water_relic_veneration",
+            "text": "Evermor's cathedral cult around a sacred water-relic of Kynareth and Mara",
+            "cites": [
+              "bjoulsae.L3.lake_islands",
+              "bjoulsae.L6.evermor_city",
+              "high_rock.L8.eight_and_patrons"
+            ]
+          },
+          {
+            "id": "horsemens_oaths",
+            "text": "frontier pride and mounted border musters",
+            "cites": [
+              "bjoulsae.L5.horse_breeding",
+              "bjoulsae.L7.barge_men_and_riders"
+            ]
+          },
+          {
+            "id": "old_gods_in_the_hills",
+            "text": "Reachfolk briar-magic and hagraven totems on the eastern ridges",
+            "cites": [
+              "bjoulsae.L4.march_scrub",
+              "bjoulsae.L7.reachfolk_bands"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "reachfolk_raids",
+            "text": "Reachfolk war-bands raid across the Druadach passes and clash with Evermor's patrols",
+            "cites": [
+              "bjoulsae.L6.druadach_border_fort",
+              "bjoulsae.L7.reachfolk_bands",
+              "high_rock.L9.north_houses"
+            ]
+          },
+          {
+            "id": "barge_tolls",
+            "text": "Evermor and Wayrest haggle over lock dues on the Bjoulsae",
+            "cites": [
+              "bjoulsae.L5.barge_trade",
+              "bjoulsae.L7.evermor_nobles"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "drowned_undercroft",
+            "text": "flooded vaults beneath Evermor's island cathedral",
+            "cites": [
+              "bjoulsae.L3.lake_islands",
+              "bjoulsae.L8.water_relic_veneration",
+              "bjoulsae.L9.barge_tolls"
+            ]
+          },
+          {
+            "id": "island_crypts",
+            "text": "ancient barrows and crypts on the outer lake islets",
+            "cites": [
+              "bjoulsae.L1.evermor_lake_basin",
+              "bjoulsae.L9.reachfolk_raids",
+              "high_rock.L10.undercrofts"
+            ]
+          },
+          {
+            "id": "reach_redoubts",
+            "text": "hagraven and Reachfolk crag camps in the eastern hills",
+            "cites": [
+              "bjoulsae.L1.druadach_march",
+              "bjoulsae.L4.march_scrub",
+              "bjoulsae.L9.reachfolk_raids"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "founding_of_evermor",
+            "text": "the early river kingdom built over an older sunken shrine",
+            "cites": [
+              "bjoulsae.L3.lake_islands",
+              "bjoulsae.L6.evermor_city",
+              "bjoulsae.L10.drowned_undercroft"
+            ]
+          },
+          {
+            "id": "druadach_border_wars",
+            "text": "centuries of pass wars against Nords and Reachfolk",
+            "cites": [
+              "bjoulsae.L1.druadach_march",
+              "bjoulsae.L6.druadach_border_fort",
+              "bjoulsae.L9.reachfolk_raids",
+              "high_rock.L11.many_wars"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "bjoulsae.L5.lake_fisheries",
+            "bjoulsae.L3.lake_islands",
+            "bjoulsae.L4.reed_beds"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L4.march_scrub"
+          ]
+        },
+        "butcher": {
+          "weight": 3,
+          "why": [
+            "bjoulsae.L5.lake_fisheries",
+            "bjoulsae.L4.reed_beds"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "bjoulsae.L5.barge_trade",
+            "bjoulsae.L6.druadach_border_fort"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "bjoulsae.L5.barge_trade",
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "bjoulsae.L6.evermor_city",
+            "bjoulsae.L6.druadach_border_fort",
+            "bjoulsae.L6.barge_landings"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L5.lake_fisheries"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "bjoulsae.L6.evermor_city",
+            "bjoulsae.L6.druadach_border_fort"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L8.water_relic_veneration"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L6.evermor_city"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L6.evermor_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L6.evermor_city"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L8.old_gods_in_the_hills"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "bjoulsae.L6.evermor_city",
+            "bjoulsae.L6.druadach_border_fort"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L10.drowned_undercroft"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "bjoulsae.L6.evermor_city",
+            "bjoulsae.L6.barge_landings",
+            "bjoulsae.L7.reachfolk_bands"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L6.evermor_city"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L6.evermor_city"
+          ]
+        },
+        "elder": {
+          "weight": 4,
+          "why": [
+            "bjoulsae.L7.reachfolk_bands",
+            "bjoulsae.L8.old_gods_in_the_hills",
+            "bjoulsae.L11.founding_of_evermor"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L5.barge_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "bjoulsae.L7.evermor_nobles"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "bjoulsae.L9.reachfolk_raids"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "bjoulsae.L10.island_crypts"
+        ],
+        "ruin": [
+          "bjoulsae.L10.island_crypts",
+          "bjoulsae.L11.founding_of_evermor"
+        ],
+        "dwemer": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "falmer": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "bandit": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "fort": [
+          "bjoulsae.L6.druadach_border_fort"
+        ],
+        "military": [
+          "bjoulsae.L9.reachfolk_raids"
+        ],
+        "mage": [
+          "bjoulsae.L8.old_gods_in_the_hills"
+        ],
+        "vampire": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "necromancer": [
+          "bjoulsae.L10.reach_redoubts",
+          "bjoulsae.L8.old_gods_in_the_hills"
+        ],
+        "hagraven": [
+          "bjoulsae.L10.reach_redoubts",
+          "bjoulsae.L4.march_scrub",
+          "bjoulsae.L8.old_gods_in_the_hills"
+        ],
+        "forsworn": [
+          "bjoulsae.L10.reach_redoubts",
+          "bjoulsae.L9.reachfolk_raids",
+          "bjoulsae.L7.reachfolk_bands"
+        ],
+        "beast": [
+          "bjoulsae.L4.reed_beds",
+          "bjoulsae.L4.march_scrub"
+        ],
+        "ice": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "mine": [
+          "bjoulsae.L5.barge_trade"
+        ],
+        "grove": [
+          "bjoulsae.L4.reed_beds"
+        ],
+        "smuggler": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "cave": [
+          "bjoulsae.L4.march_scrub"
+        ],
+        "giant": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "dragon": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "tower": [
+          "bjoulsae.L10.drowned_undercroft"
+        ],
+        "cabin": [
+          "bjoulsae.L6.evermor_city"
+        ],
+        "wreck": [
+          "bjoulsae.L5.barge_trade"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "warm_vineyards",
+      "b": "wrothgar.L4.snowfields",
+      "reason": "Wrothgar's permanent alpine snowfields above y 300 cannot sustain lowland vineyards or orchards"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "orichalcum_smelter",
+      "b": "wayrest.L4.mud_flats",
+      "reason": "Estuary mud flats have no orichalcum veins; orichalcum is mined in the Wrothgarian spine"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "malacath_stronghold_altar",
+      "b": "wayrest.L8.akatosh_chantry",
+      "reason": "Breton Chantry cathedrals do not host Malacath stronghold altars"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "ayleid_automatons",
+      "b": "daggerfall.L10.privateers_hold",
+      "reason": "High Rock's elder-race layer is Direnni and Dwemer, not Ayleid, and sea-cave holds house privateers"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "high_rock.L5.grain_orchards",
+        "high_rock.L5.orc_ore",
+        "high_rock.L1.wrothgar_spine"
+      ]
+    },
+    "smith": {
+      "weight": 3,
+      "why": [
+        "high_rock.L5.grain_orchards",
+        "high_rock.L5.orc_ore"
+      ]
+    },
+    "jeweler": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.orc_ore"
+      ]
+    },
+    "farmer": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.grain_orchards"
+      ]
+    },
+    "farmhand": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.grain_orchards"
+      ]
+    },
+    "lumberjack": {
+      "weight": 4,
+      "why": [
+        "high_rock.L4.wood_spiders",
+        "high_rock.L4.wereboar_woods",
+        "high_rock.L4.spine_beasts"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.grain_orchards"
+      ]
+    },
+    "mill_hand": {
+      "weight": 1,
+      "why": [
+        "high_rock.L5.wool_and_hides"
+      ]
+    },
+    "woodcutter": {
+      "weight": 3,
+      "why": [
+        "high_rock.L4.wereboar_woods",
+        "high_rock.L4.spine_beasts"
+      ]
+    },
+    "fisher": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.fish_salt"
+      ]
+    },
+    "hunter": {
+      "weight": 3,
+      "why": [
+        "high_rock.L4.wereboar_woods",
+        "high_rock.L4.spine_beasts"
+      ]
+    },
+    "butcher": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.fish_salt"
+      ]
+    },
+    "fletcher": {
+      "weight": 2,
+      "why": [
+        "high_rock.L4.spine_beasts"
+      ]
+    },
+    "alchemist": {
+      "weight": 1,
+      "why": [
+        "high_rock.L5.wool_and_hides"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "high_rock.L5.bay_shipping",
+        "high_rock.L6.fief_patchwork",
+        "high_rock.L6.busy_centres"
+      ]
+    },
+    "tailor": {
+      "weight": 3,
+      "why": [
+        "high_rock.L5.wool_and_hides",
+        "high_rock.L5.bay_shipping"
+      ]
+    },
+    "bookseller": {
+      "weight": 4,
+      "why": [
+        "high_rock.L5.bay_shipping",
+        "high_rock.L6.busy_centres",
+        "high_rock.L8.eight_and_patrons"
+      ]
+    },
+    "innkeeper": {
+      "weight": 3,
+      "why": [
+        "high_rock.L6.fief_patchwork",
+        "high_rock.L6.busy_centres"
+      ]
+    },
+    "cook": {
+      "weight": 2,
+      "why": [
+        "high_rock.L5.fish_salt"
+      ]
+    },
+    "server": {
+      "weight": 2,
+      "why": [
+        "high_rock.L6.busy_centres"
+      ]
+    },
+    "bard": {
+      "weight": 1,
+      "why": [
+        "high_rock.L5.wool_and_hides"
+      ]
+    },
+    "priest": {
+      "weight": 3,
+      "why": [
+        "high_rock.L8.eight_and_patrons",
+        "high_rock.L8.crypt_dead"
+      ]
+    },
+    "jarl": {
+      "weight": 2,
+      "why": [
+        "high_rock.L6.capitals_at_mouths"
+      ]
+    },
+    "steward": {
+      "weight": 2,
+      "why": [
+        "high_rock.L6.capitals_at_mouths"
+      ]
+    },
+    "housecarl": {
+      "weight": 1,
+      "why": [
+        "high_rock.L7.feudal_ladder"
+      ]
+    },
+    "court_wizard": {
+      "weight": 1,
+      "why": [
+        "high_rock.L7.feudal_ladder"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "high_rock.L8.eight_and_patrons"
+      ]
+    },
+    "guard": {
+      "weight": 2,
+      "why": [
+        "high_rock.L9.empire_and_thalmor"
+      ]
+    },
+    "fence": {
+      "weight": 4,
+      "why": [
+        "high_rock.L10.sea_caves",
+        "high_rock.L10.city_shadows",
+        "high_rock.L5.tolls"
+      ]
+    },
+    "prisoner": {
+      "weight": 1,
+      "why": [
+        "high_rock.L7.feudal_ladder"
+      ]
+    },
+    "beggar": {
+      "weight": 2,
+      "why": [
+        "high_rock.L6.failing_edges"
+      ]
+    },
+    "citizen": {
+      "weight": 2,
+      "why": [
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    "housekeeper": {
+      "weight": 1,
+      "why": [
+        "high_rock.L7.feudal_ladder"
+      ]
+    },
+    "child": {
+      "weight": 1,
+      "why": [
+        "high_rock.L7.feudal_ladder"
+      ]
+    },
+    "elder": {
+      "weight": 4,
+      "why": [
+        "high_rock.L7.feudal_ladder",
+        "high_rock.L8.malacath_code",
+        "high_rock.L11.direnni_hegemony"
+      ]
+    },
+    "labourer": {
+      "weight": 3,
+      "why": [
+        "high_rock.L5.orc_ore",
+        "high_rock.L7.tenants_bound"
+      ]
+    },
+    "worker": {
+      "weight": 3,
+      "why": [
+        "high_rock.L5.orc_ore",
+        "high_rock.L7.tenants_bound"
+      ]
+    },
+    "guild_leader": {
+      "weight": 3,
+      "why": [
+        "high_rock.L7.burghers",
+        "high_rock.L10.city_shadows"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 3,
+      "why": [
+        "high_rock.L7.burghers",
+        "high_rock.L10.city_shadows"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 4,
+      "why": [
+        "high_rock.L5.tolls",
+        "high_rock.L7.burghers",
+        "high_rock.L10.city_shadows"
+      ]
+    },
+    "survivor": {
+      "weight": 1,
+      "why": [
+        "high_rock.L9.crowns_and_barons"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "high_rock.L11.nedic_barrows"
+    ],
+    "ruin": [
+      "high_rock.L11.nedic_barrows"
+    ],
+    "dwemer": [
+      "high_rock.L10.dwemer_under_spine"
+    ],
+    "falmer": [
+      "high_rock.L10.covens"
+    ],
+    "bandit": [
+      "high_rock.L10.sea_caves",
+      "high_rock.L5.tolls"
+    ],
+    "fort": [
+      "high_rock.L9.crowns_and_barons"
+    ],
+    "military": [
+      "high_rock.L9.crowns_and_barons"
+    ],
+    "mage": [
+      "high_rock.L10.covens"
+    ],
+    "vampire": [
+      "high_rock.L10.bloodlines"
+    ],
+    "necromancer": [
+      "high_rock.L8.crypt_dead"
+    ],
+    "hagraven": [
+      "high_rock.L10.covens",
+      "high_rock.L8.witch_ambivalence"
+    ],
+    "forsworn": [
+      "high_rock.L7.outcasts"
+    ],
+    "beast": [
+      "high_rock.L4.wood_spiders",
+      "high_rock.L4.spine_beasts",
+      "high_rock.L10.sea_caves"
+    ],
+    "ice": [
+      "high_rock.L4.spine_beasts"
+    ],
+    "mine": [
+      "high_rock.L5.grain_orchards",
+      "high_rock.L5.orc_ore",
+      "high_rock.L1.wrothgar_spine"
+    ],
+    "grove": [
+      "high_rock.L4.spine_beasts"
+    ],
+    "smuggler": [
+      "high_rock.L10.covens",
+      "high_rock.L10.sea_caves",
+      "high_rock.L10.city_shadows"
+    ],
+    "cave": [
+      "high_rock.L10.bloodlines",
+      "high_rock.L10.sea_caves",
+      "high_rock.L1.sea_bluffs"
+    ],
+    "giant": [
+      "high_rock.L4.wood_spiders",
+      "high_rock.L4.spine_beasts"
+    ],
+    "dragon": [
+      "high_rock.L10.covens"
+    ],
+    "tower": [
+      "high_rock.L3.water_is_crossings"
+    ],
+    "cabin": [
+      "high_rock.L6.fief_patchwork",
+      "high_rock.L5.fish_salt"
+    ],
+    "wreck": [
+      "high_rock.L5.wool_and_hides"
+    ]
+  }
+}

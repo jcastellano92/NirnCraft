@@ -2,47 +2,147 @@
   "line": "solstheim",
   "category": "side",
   "region": "morrowind/solstheim",
-  "speakers": {"miraak": "Miraak", "cultist": "Miraak Cultist", "hermaeus": "Hermaeus Mora", "allmaker": "The All-Maker's Stone"},
+  "speakers": {
+    "miraak": "Miraak",
+    "cultist": "Miraak Cultist",
+    "hermaeus": "Hermaeus Mora",
+    "allmaker": "The All-Maker's Stone"
+  },
   "npcs": [
-    {"id": "geldis", "name": "Geldis Sadri", "role": "innkeeper", "place": "raven_rock", "offset": [6, 4], "greet": "The Retching Netch serves the best sujamma on Solstheim. It's also the only sujamma on Solstheim."},
-    {"id": "frea", "name": "Frea", "role": "adventurer", "place": "skaal_village", "offset": [3, 2], "female": true, "greet": "The All-Maker's stones are sick, and my people walk in their sleep. If you can help, help. If not, stand aside."},
-    {"id": "storn", "name": "Storn Crag-Strider", "role": "priest", "place": "skaal_village", "offset": [0, 0], "greet": "I am the shaman of the Skaal. The wind has gone strange, and the stones cry out in a voice I don't know."},
-    {"id": "neloth", "name": "Neloth", "role": "mage", "place": "tel_mithryn", "offset": [0, 0], "greet": "If you're here to waste my time, do it efficiently. If not, you may be useful."}
+    {
+      "id": "geldis",
+      "name": "Geldis Sadri",
+      "role": "innkeeper",
+      "place": "raven_rock",
+      "offset": [
+        6,
+        4
+      ],
+      "greet": "The Retching Netch serves the best sujamma on Solstheim. It's also the only sujamma on Solstheim."
+    },
+    {
+      "id": "frea",
+      "name": "Frea",
+      "role": "adventurer",
+      "place": "skaal_village",
+      "offset": [
+        3,
+        2
+      ],
+      "female": true,
+      "greet": "The All-Maker's stones are sick, and my people walk in their sleep. If you can help, help. If not, stand aside."
+    },
+    {
+      "id": "storn",
+      "name": "Storn Crag-Strider",
+      "role": "priest",
+      "place": "skaal_village",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "I am the shaman of the Skaal. The wind has gone strange, and the stones cry out in a voice I don't know."
+    },
+    {
+      "id": "neloth",
+      "name": "Neloth",
+      "role": "mage",
+      "place": "tel_mithryn",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "If you're here to waste my time, do it efficiently. If not, you may be useful."
+    }
   ],
   "relics": [
-    {"id": "miraak_note", "name": "Cultist's Orders", "desc": "'The usurper is in Skyrim. Go to Solstheim, find the stones, serve Miraak.' Unsigned.", "icon": 11},
-    {"id": "black_book_waking", "name": "Black Book: Waking Dreams", "desc": "Bound in something that is not leather. The pages move when you aren't looking.", "icon": 7},
-    {"id": "black_book_epistolary", "name": "Black Book: Epistolary Acumen", "desc": "A Black Book recovered from a Dwemer ruin. It wants to be read.", "icon": 7}
+    {
+      "id": "miraak_note",
+      "name": "Cultist's Orders",
+      "desc": "'The usurper is in Skyrim. Go to Solstheim, find the stones, serve Miraak.' Unsigned.",
+      "icon": 11
+    },
+    {
+      "id": "black_book_waking",
+      "name": "Black Book: Waking Dreams",
+      "desc": "Bound in something that is not leather. The pages move when you aren't looking.",
+      "icon": 7
+    },
+    {
+      "id": "black_book_epistolary",
+      "name": "Black Book: Epistolary Acumen",
+      "desc": "A Black Book recovered from a Dwemer ruin. It wants to be read.",
+      "icon": 7
+    }
   ],
   "scenes": {
     "cultists": [
-      ["cultist", "You are no Dragonborn! The true Dragonborn is coming. Miraak will take what you stole."]
+      [
+        "cultist",
+        "You are no Dragonborn! The true Dragonborn is coming. Miraak will take what you stole."
+      ]
     ],
     "voyage": [
-      ["narrator", "The Northern Maiden noses out of Windhelm's harbor and turns north and east, into the Sea of Ghosts. Two days later, ash falls on the deck."],
-      ["narrator", "Raven Rock: a Dunmer town under a sky the color of an old bruise. Red Mountain smokes on the horizon."]
+      [
+        "narrator",
+        "The Northern Maiden noses out of Windhelm's harbor and turns north and east, into the Sea of Ghosts. Two days later, ash falls on the deck."
+      ],
+      [
+        "narrator",
+        "Raven Rock: a Dunmer town under a sky the color of an old bruise. Red Mountain smokes on the horizon."
+      ]
     ],
     "earth_stone": [
-      ["narrator", "Your Voice slams into the stone. The black shell around it shatters, and the townsfolk who were building it blink, as if waking."],
-      ["allmaker", "The stone is cleansed. Somewhere far off, someone screams in frustration."]
+      [
+        "narrator",
+        "Your Voice slams into the stone. The black shell around it shatters, and the townsfolk who were building it blink, as if waking."
+      ],
+      [
+        "allmaker",
+        "The stone is cleansed. Somewhere far off, someone screams in frustration."
+      ]
     ],
     "miraak_appears": [
-      ["miraak", "You've come far, but not far enough. Every soul you take, I will take from you. Solstheim is mine already. Soon, so is Skyrim."],
-      ["narrator", "A masked figure in robes of tentacle and scale lifts his hand, and the dragon you just slew goes still. Its soul streams into him instead of you."]
+      [
+        "miraak",
+        "You've come far, but not far enough. Every soul you take, I will take from you. Solstheim is mine already. Soon, so is Skyrim."
+      ],
+      [
+        "narrator",
+        "A masked figure in robes of tentacle and scale lifts his hand, and the dragon you just slew goes still. Its soul streams into him instead of you."
+      ]
     ],
     "stone_cleansed": [
-      ["allmaker", "Another stone of the All-Maker is clean. The wind on Solstheim smells a little more like the sea and a little less like ink."]
+      [
+        "allmaker",
+        "Another stone of the All-Maker is clean. The wind on Solstheim smells a little more like the sea and a little less like ink."
+      ]
     ],
     "apocrypha": [
-      ["narrator", "The Black Book opens in your hands and the world folds. Green sky. Black water. Towers of books, and tentacles where a horizon should be."],
-      ["hermaeus", "Another Dragonborn in my realm. How interesting. Miraak was my champion. Perhaps he still is. Prove otherwise."]
+      [
+        "narrator",
+        "The Black Book opens in your hands and the world folds. Green sky. Black water. Towers of books, and tentacles where a horizon should be."
+      ],
+      [
+        "hermaeus",
+        "Another Dragonborn in my realm. How interesting. Miraak was my champion. Perhaps he still is. Prove otherwise."
+      ]
     ],
     "summit": [
-      ["miraak", "Hermaeus Mora gave me knowledge, and then chains. I will have neither. You came to my summit: then die here, little rival."]
+      [
+        "miraak",
+        "Hermaeus Mora gave me knowledge, and then chains. I will have neither. You came to my summit: then die here, little rival."
+      ]
     ],
     "miraak_falls": [
-      ["hermaeus", "Miraak, you thought you could hide your plans from me? You were mine from the moment you opened my book. And now, so is your successor."],
-      ["narrator", "Tentacles pierce Miraak through. His power, and the souls he stole, pour out of him and into you."]
+      [
+        "hermaeus",
+        "Miraak, you thought you could hide your plans from me? You were mine from the moment you opened my book. And now, so is your successor."
+      ],
+      [
+        "narrator",
+        "Tentacles pierce Miraak through. His power, and the souls he stole, pour out of him and into you."
+      ]
     ]
   },
   "quests": [
@@ -50,117 +150,457 @@
       "id": "sol_dragonborn",
       "title": "Dragonborn",
       "start": "auto",
-      "requires": ["level:15", "quest:main_dragon_rising"],
+      "requires": [
+        "level:15",
+        "quest:main_dragon_rising"
+      ],
       "desc": "Masked cultists attacked me on the road, calling me a false Dragonborn. Their orders mention a place called Solstheim and a man named Miraak.",
       "objectives": [
-        {"type": "clear", "at_player": true, "text": "Fight off the masked cultists", "actions": "scene:cultists;relic:miraak_note",
-         "spawn": [{"type": "skycraft:necromancer", "count": 2, "name": "Miraak Cultist"}]},
-        {"type": "go", "place": "windhelm", "text": "Take ship from Windhelm's docks", "offset": [80, 20], "radius": 30,
-         "actions": "scene:voyage;flight:raven_rock"},
-        {"type": "deliver", "npc": "geldis", "relic": "miraak_note", "text": "Ask about Miraak in Raven Rock", "topic": "Have you heard of someone called Miraak?",
-         "reply": "Miraak? No. But half the town wakes up every morning with blisters on their hands and no memory of the night. They walk out to the old stone by the shore and build something. You might look at that."}
+        {
+          "type": "clear",
+          "at_player": true,
+          "text": "Fight off the masked cultists",
+          "actions": "scene:cultists;relic:miraak_note",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "count": 2,
+              "name": "Miraak Cultist"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "windhelm",
+          "text": "Take ship from Windhelm's docks",
+          "offset": [
+            80,
+            20
+          ],
+          "radius": 30,
+          "actions": "scene:voyage;flight:raven_rock"
+        },
+        {
+          "type": "deliver",
+          "npc": "geldis",
+          "relic": "miraak_note",
+          "text": "Ask about Miraak in Raven Rock",
+          "topic": "Have you heard of someone called Miraak?",
+          "reply": "Miraak? No. But half the town wakes up every morning with blisters on their hands and no memory of the night. They walk out to the old stone by the shore and build something. You might look at that.",
+          "place": "raven_rock"
+        }
       ],
-      "rewards": {"gold": 300}
+      "rewards": {
+        "gold": 300
+      },
+      "why": [
+        "solstheim.L9.first_dragonborn_returns",
+        "raven_rock.L9.mine_or_farm"
+      ],
+      "consequence": {
+        "world_state": "sol_dragonborn_resolved",
+        "flag": "conseq_sol_dragonborn",
+        "summary": "Completed Dragonborn."
+      }
     },
     {
       "id": "sol_temple_of_miraak",
       "title": "The Temple of Miraak",
       "start": "auto",
-      "requires": ["quest:sol_dragonborn"],
+      "requires": [
+        "quest:sol_dragonborn"
+      ],
       "on_start": "relocate:frea:temple_of_miraak:-6:8",
       "desc": "The people of Raven Rock sleepwalk to an old standing stone and build a shrine around it. The Earth Stone. My Voice might break whatever holds them.",
       "objectives": [
-        {"type": "go", "place": "earth_stone", "text": "Go to the Earth Stone"},
-        {"type": "shout", "shout": "unrelenting_force", "place": "earth_stone", "radius": 24, "text": "Free the Earth Stone with Unrelenting Force", "actions": "scene:earth_stone"},
-        {"type": "go", "place": "temple_of_miraak", "text": "Travel to the Temple of Miraak"},
-        {"type": "clear", "place": "temple_of_miraak", "placement": "structure", "text": "Fight through the Temple of Miraak",
-         "spawn": [{"type": "skycraft:necromancer", "count": 2, "name": "Miraak Cultist"}, {"type": "skycraft:draugr", "count": 3}]},
-        {"type": "kill", "place": "temple_of_miraak", "placement": "structure", "text": "Defeat the temple's dragon",
-         "spawn": [{"type": "skycraft:dragon", "name": "Relonikiv", "target": true, "boss": true}],
-         "actions": "scene:miraak_appears"},
-        {"type": "talk", "npc": "frea", "text": "Speak with Frea", "topic": "Who was that?",
-         "reply": "Miraak. The first Dragonborn. He's been gone for millennia and he's not gone at all. Come to my village. Our shaman will know what to do."}
+        {
+          "type": "go",
+          "place": "earth_stone",
+          "text": "Go to the Earth Stone"
+        },
+        {
+          "type": "shout",
+          "shout": "unrelenting_force",
+          "place": "earth_stone",
+          "radius": 24,
+          "text": "Free the Earth Stone with Unrelenting Force",
+          "actions": "scene:earth_stone"
+        },
+        {
+          "type": "go",
+          "place": "temple_of_miraak",
+          "text": "Travel to the Temple of Miraak"
+        },
+        {
+          "type": "clear",
+          "place": "temple_of_miraak",
+          "placement": "structure",
+          "text": "Fight through the Temple of Miraak",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "count": 2,
+              "name": "Miraak Cultist"
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "temple_of_miraak",
+          "placement": "structure",
+          "text": "Defeat the temple's dragon",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "name": "Relonikiv",
+              "target": true,
+              "boss": true
+            }
+          ],
+          "actions": "scene:miraak_appears"
+        },
+        {
+          "type": "talk",
+          "npc": "frea",
+          "text": "Speak with Frea",
+          "topic": "Who was that?",
+          "reply": "Miraak. The first Dragonborn. He's been gone for millennia and he's not gone at all. Come to my village. Our shaman will know what to do.",
+          "place": "skaal_village"
+        }
       ],
-      "rewards": {"gold": 400}
+      "rewards": {
+        "gold": 400
+      },
+      "why": [
+        "solstheim.L9.first_dragonborn_returns",
+        "skaal.L9.stones_poisoned"
+      ],
+      "consequence": {
+        "world_state": "sol_temple_of_miraak_resolved",
+        "flag": "conseq_sol_temple_of_miraak",
+        "summary": "Completed The Temple of Miraak."
+      }
     },
     {
       "id": "sol_cleansing_the_stones",
       "title": "The Fate of the Skaal",
       "start": "auto",
-      "requires": ["quest:sol_temple_of_miraak"],
+      "requires": [
+        "quest:sol_temple_of_miraak"
+      ],
       "desc": "The Skaal shaman Storn says Miraak is using the All-Maker's stones to bend Solstheim to his will. Each must be cleansed with my Voice.",
       "objectives": [
-        {"type": "talk", "npc": "storn", "text": "Speak with Storn in the Skaal village", "topic": "Frea says you can help.",
-         "reply": "The All-Maker's stones: Wind, Sun, Water, Beast, Tree. Miraak has poisoned them all. Your Voice cleansed the Earth Stone; cleanse the others, and he loses his grip on my people."},
-        {"type": "shout", "shout": "unrelenting_force", "place": "wind_stone", "radius": 24, "text": "Cleanse the Wind Stone", "actions": "scene:stone_cleansed",
-         "spawn": [{"type": "skycraft:necromancer", "count": 1, "name": "Miraak Cultist"}]},
-        {"type": "shout", "shout": "unrelenting_force", "place": "sun_stone", "radius": 24, "text": "Cleanse the Sun Stone", "actions": "scene:stone_cleansed"},
-        {"type": "shout", "shout": "unrelenting_force", "place": "water_stone", "radius": 24, "text": "Cleanse the Water Stone", "actions": "scene:stone_cleansed"},
-        {"type": "shout", "shout": "unrelenting_force", "place": "beast_stone", "radius": 24, "text": "Cleanse the Beast Stone", "actions": "scene:stone_cleansed"},
-        {"type": "shout", "shout": "unrelenting_force", "place": "tree_stone", "radius": 24, "text": "Cleanse the Tree Stone", "actions": "scene:stone_cleansed"},
-        {"type": "talk", "npc": "storn", "text": "Return to Storn", "topic": "The stones are clean.",
-         "reply": "I feel it. The wind is ours again. But Miraak drew his power from a Black Book. To face him you'll need one too. Neloth, the Telvanni wizard, collects such things."}
+        {
+          "type": "talk",
+          "npc": "storn",
+          "text": "Speak with Storn in the Skaal village",
+          "topic": "Frea says you can help.",
+          "reply": "The All-Maker's stones: Wind, Sun, Water, Beast, Tree. Miraak has poisoned them all. Your Voice cleansed the Earth Stone; cleanse the others, and he loses his grip on my people.",
+          "place": "skaal_village"
+        },
+        {
+          "type": "shout",
+          "shout": "unrelenting_force",
+          "place": "wind_stone",
+          "radius": 24,
+          "text": "Cleanse the Wind Stone",
+          "actions": "scene:stone_cleansed",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "count": 1,
+              "name": "Miraak Cultist"
+            }
+          ]
+        },
+        {
+          "type": "shout",
+          "shout": "unrelenting_force",
+          "place": "sun_stone",
+          "radius": 24,
+          "text": "Cleanse the Sun Stone",
+          "actions": "scene:stone_cleansed"
+        },
+        {
+          "type": "shout",
+          "shout": "unrelenting_force",
+          "place": "water_stone",
+          "radius": 24,
+          "text": "Cleanse the Water Stone",
+          "actions": "scene:stone_cleansed"
+        },
+        {
+          "type": "shout",
+          "shout": "unrelenting_force",
+          "place": "beast_stone",
+          "radius": 24,
+          "text": "Cleanse the Beast Stone",
+          "actions": "scene:stone_cleansed"
+        },
+        {
+          "type": "shout",
+          "shout": "unrelenting_force",
+          "place": "tree_stone",
+          "radius": 24,
+          "text": "Cleanse the Tree Stone",
+          "actions": "scene:stone_cleansed"
+        },
+        {
+          "type": "talk",
+          "npc": "storn",
+          "text": "Return to Storn",
+          "topic": "The stones are clean.",
+          "reply": "I feel it. The wind is ours again. But Miraak drew his power from a Black Book. To face him you'll need one too. Neloth, the Telvanni wizard, collects such things.",
+          "place": "skaal_village"
+        }
       ],
-      "rewards": {"gold": 500, "words": ["bend_will:1:1"], "flags": ["allmaker_stones"]}
+      "rewards": {
+        "gold": 500,
+        "words": [
+          "bend_will:1:1"
+        ],
+        "flags": [
+          "allmaker_stones"
+        ]
+      },
+      "why": [
+        "skaal.L9.stones_poisoned",
+        "solstheim.L8.all_maker"
+      ],
+      "consequence": {
+        "world_state": "sol_cleansing_the_stones_resolved",
+        "flag": "conseq_sol_cleansing_the_stones",
+        "summary": "Completed The Fate of the Skaal."
+      }
     },
     {
       "id": "sol_path_of_knowledge",
       "title": "The Path of Knowledge",
       "start": "auto",
-      "requires": ["quest:sol_cleansing_the_stones"],
+      "requires": [
+        "quest:sol_cleansing_the_stones"
+      ],
       "desc": "Neloth knows of a Black Book in Nchardak, a Dwemer ruin in the east of Solstheim. Reading it may show me how Miraak learned his power.",
       "objectives": [
-        {"type": "talk", "npc": "neloth", "text": "Speak with Neloth at Tel Mithryn", "topic": "I need a Black Book.",
-         "reply": "Naturally. There is one in Nchardak, behind a great many Dwemer puzzles and a great many Dwemer machines. Fetch it. Don't read it on my floor."},
-        {"type": "go", "place": "nchardak", "text": "Travel to Nchardak"},
-        {"type": "clear", "place": "nchardak", "placement": "structure", "text": "Fight past Nchardak's guardians",
-         "spawn": [{"type": "skycraft:dwarven_spider", "count": 2}, {"type": "skycraft:dwarven_centurion", "count": 1}]},
-        {"type": "retrieve", "place": "nchardak", "relic": "black_book_epistolary", "radius": 12, "text": "Take the Black Book from Nchardak"},
-        {"type": "go", "place": "nchardak", "radius": 16, "text": "Read the Black Book", "actions": "scene:apocrypha;teleport_dim:skycraft:apocrypha"},
-        {"type": "clear", "place": "apocrypha_chapter_one", "radius": 40, "text": "Survive Apocrypha's Seekers",
-         "spawn": [{"type": "skycraft:seeker", "count": 3, "name": "Seeker"}, {"type": "skycraft:lurker", "count": 1, "name": "Lurker"}],
-         "journal": "Inside the Black Book, Hermaeus Mora granted me a word of a Shout that bends the will of others. Miraak learned it here, long ago."},
-        {"type": "cond", "cond": "dim:minecraft:overworld", "place": "apocrypha_chapter_one", "radius": 40,
-         "text": "Find the Black Book that closes the chapter and read your way out"}
+        {
+          "type": "talk",
+          "npc": "neloth",
+          "text": "Speak with Neloth at Tel Mithryn",
+          "topic": "I need a Black Book.",
+          "reply": "Naturally. There is one in Nchardak, behind a great many Dwemer puzzles and a great many Dwemer machines. Fetch it. Don't read it on my floor.",
+          "place": "tel_mithryn"
+        },
+        {
+          "type": "go",
+          "place": "nchardak",
+          "text": "Travel to Nchardak"
+        },
+        {
+          "type": "clear",
+          "place": "nchardak",
+          "placement": "structure",
+          "text": "Fight past Nchardak's guardians",
+          "spawn": [
+            {
+              "type": "skycraft:dwarven_spider",
+              "count": 2
+            },
+            {
+              "type": "skycraft:dwarven_centurion",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "nchardak",
+          "relic": "black_book_epistolary",
+          "radius": 12,
+          "text": "Take the Black Book from Nchardak"
+        },
+        {
+          "type": "go",
+          "place": "nchardak",
+          "radius": 16,
+          "text": "Read the Black Book",
+          "actions": "scene:apocrypha;teleport_dim:skycraft:apocrypha"
+        },
+        {
+          "type": "clear",
+          "place": "apocrypha_chapter_one",
+          "radius": 40,
+          "text": "Survive Apocrypha's Seekers",
+          "spawn": [
+            {
+              "type": "skycraft:seeker",
+              "count": 3,
+              "name": "Seeker"
+            },
+            {
+              "type": "skycraft:lurker",
+              "count": 1,
+              "name": "Lurker"
+            }
+          ],
+          "journal": "Inside the Black Book, Hermaeus Mora granted me a word of a Shout that bends the will of others. Miraak learned it here, long ago."
+        },
+        {
+          "type": "cond",
+          "cond": "dim:minecraft:overworld",
+          "place": "apocrypha_chapter_one",
+          "radius": 40,
+          "text": "Find the Black Book that closes the chapter and read your way out"
+        }
       ],
-      "rewards": {"gold": 400, "words": ["bend_will:2:2"]}
+      "rewards": {
+        "gold": 400,
+        "words": [
+          "bend_will:2:2"
+        ]
+      },
+      "why": [
+        "isinfier.L10.nchardak_ice_city",
+        "solstheim.L10.black_book_altars"
+      ],
+      "consequence": {
+        "world_state": "sol_path_of_knowledge_resolved",
+        "flag": "conseq_sol_path_of_knowledge",
+        "summary": "Completed The Path of Knowledge."
+      }
     },
     {
       "id": "sol_summit_of_apocrypha",
       "title": "At the Summit of Apocrypha",
       "start": "auto",
-      "requires": ["quest:sol_path_of_knowledge"],
+      "requires": [
+        "quest:sol_path_of_knowledge"
+      ],
       "on_start": "relic:black_book_waking",
       "desc": "Storn read the Black Book Waking Dreams, and gave his life to show me the way to Miraak. It is time to face the first Dragonborn.",
       "objectives": [
-        {"type": "go", "place": "temple_of_miraak", "text": "Read Waking Dreams at the Temple of Miraak",
-         "actions": "take:black_book_waking;scene:summit;retire:storn;teleport_dim:skycraft:apocrypha"},
-        {"type": "clear", "place": "summit_of_apocrypha", "radius": 40, "text": "Fight Miraak's dragon on the Summit of Apocrypha",
-         "spawn": [{"type": "skycraft:dragon", "count": 1, "name": "Sahrotaar"}]},
-        {"type": "kill", "place": "summit_of_apocrypha", "text": "Defeat Miraak",
-         "spawn": [{"type": "skycraft:miraak", "name": "Miraak, the First Dragonborn", "target": true, "boss": true, "hp": 4.0, "dmg": 1.4}],
-         "actions": "scene:miraak_falls"},
-        {"type": "cond", "cond": "dim:minecraft:overworld", "place": "summit_of_apocrypha", "radius": 40,
-         "text": "Read the Black Book on the Summit to return to Solstheim"}
+        {
+          "type": "go",
+          "place": "temple_of_miraak",
+          "text": "Read Waking Dreams at the Temple of Miraak",
+          "actions": "take:black_book_waking;scene:summit;retire:storn;teleport_dim:skycraft:apocrypha"
+        },
+        {
+          "type": "clear",
+          "place": "summit_of_apocrypha",
+          "radius": 40,
+          "text": "Fight Miraak's dragon on the Summit of Apocrypha",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "count": 1,
+              "name": "Sahrotaar"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "summit_of_apocrypha",
+          "text": "Defeat Miraak",
+          "spawn": [
+            {
+              "type": "skycraft:miraak",
+              "name": "Miraak, the First Dragonborn",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.4
+            }
+          ],
+          "actions": "scene:miraak_falls"
+        },
+        {
+          "type": "cond",
+          "cond": "dim:minecraft:overworld",
+          "place": "summit_of_apocrypha",
+          "radius": 40,
+          "text": "Read the Black Book on the Summit to return to Solstheim"
+        }
       ],
-      "rewards": {"gold": 2000, "souls": 3, "title": "first_and_last", "flags": ["miraak_slain"],
-                  "items": [{"item": "minecraft:netherite_helmet", "name": "Miraak's Mask", "enchant": {"protection": 4}}]}
+      "rewards": {
+        "gold": 2000,
+        "souls": 3,
+        "title": "first_and_last",
+        "flags": [
+          "miraak_slain"
+        ],
+        "items": [
+          {
+            "item": "minecraft:netherite_helmet",
+            "name": "Miraak's Mask",
+            "enchant": {
+              "protection": 4
+            }
+          }
+        ]
+      },
+      "why": [
+        "solstheim.L9.first_dragonborn_returns",
+        "solstheim.L10.black_book_altars"
+      ],
+      "consequence": {
+        "world_state": "sol_summit_of_apocrypha_resolved",
+        "flag": "conseq_sol_summit_of_apocrypha",
+        "summary": "Completed At the Summit of Apocrypha."
+      }
     },
     {
       "id": "sol_ash_spawn",
       "title": "March of the Dead",
       "start": "npc:geldis",
-      "requires": ["quest:sol_dragonborn"],
+      "requires": [
+        "quest:sol_dragonborn"
+      ],
       "offer": "Raven Rock looks worried.",
       "pitch": "Ash spawn. They crawl out of the ash itself and walk on the wall. The Redoran Guard can't hold them every night. Help them, and the Council will pay.",
       "desc": "Raven Rock is attacked by ash spawn, creatures of ash that walk out of the wastes.",
       "objectives": [
-        {"type": "clear", "place": "raven_rock", "offset": [-60, -40], "radius": 40, "text": "Destroy the ash spawn at Raven Rock's wall",
-         "spawn": [{"type": "skycraft:ash_spawn", "count": 5, "name": "Ash Spawn"}]},
-        {"type": "talk", "npc": "geldis", "text": "Report to Geldis Sadri", "topic": "The ash spawn are gone, for now.",
-         "reply": "For now is more than we usually get. The Council sends its thanks. And so does my bar tab."}
+        {
+          "type": "clear",
+          "place": "raven_rock",
+          "offset": [
+            -60,
+            -40
+          ],
+          "radius": 40,
+          "text": "Destroy the ash spawn at Raven Rock's wall",
+          "spawn": [
+            {
+              "type": "skycraft:ash_spawn",
+              "count": 5,
+              "name": "Ash Spawn"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "geldis",
+          "text": "Report to Geldis Sadri",
+          "topic": "The ash spawn are gone, for now.",
+          "reply": "For now is more than we usually get. The Council sends its thanks. And so does my bar tab.",
+          "place": "raven_rock"
+        }
       ],
-      "rewards": {"gold": 500}
+      "rewards": {
+        "gold": 500
+      },
+      "why": [
+        "raven_rock.L10.ash_spawn_wall",
+        "raven_rock.L9.mine_or_farm"
+      ],
+      "consequence": {
+        "world_state": "sol_ash_spawn_resolved",
+        "flag": "conseq_sol_ash_spawn",
+        "summary": "Completed March of the Dead."
+      }
     }
   ]
 }

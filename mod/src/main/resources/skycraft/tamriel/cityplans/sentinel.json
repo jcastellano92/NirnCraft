@@ -5,75 +5,850 @@
   "reach": 110,
   "radius": 110,
   "overlay": "sentinel",
-  "names": {"inn": "sentinel_oasis_rest", "store": "sentinel_spice_and_silk", "smithy": "sentinel_scimitar_works"},
+  "names": {
+    "inn": "sentinel_oasis_rest",
+    "store": "sentinel_spice_and_silk",
+    "smithy": "sentinel_scimitar_works"
+  },
   "innKey": "sentinel_oasis_rest",
-  "gates": [[0, 105], [105, 0], [-105, 0]],
-  "walls": [{"r": 105, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "gates": [
+    [
+      0,
+      105
+    ],
+    [
+      105,
+      0
+    ],
+    [
+      -105,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 105,
+      "sides": 16,
+      "h": 10,
+      "gates": [
+        0,
+        1.5708,
+        -1.5708
+      ],
+      "flags": [
+        "major"
+      ]
+    }
+  ],
   "landmarks": [
-    {"id": "dome_palace", "at": [0, -74], "size": [31, 31], "h": 36, "margin": 2, "overlay": "sentinel_gold"},
-    {"id": "dome_temple", "at": [50, -14], "size": [23, 23], "h": 30, "margin": 2, "name": "stendarr", "overlay": "sentinel"},
-    {"id": "awning_row", "at": [-40, 38], "size": [7, 45], "h": 7, "name": "blue", "face": "S"},
-    {"id": "awning_row", "at": [-24, 38], "size": [7, 45], "h": 7, "name": "yellow", "face": "S"}
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        -74
+      ],
+      "size": [
+        31,
+        31
+      ],
+      "h": 36,
+      "margin": 2,
+      "overlay": "sentinel_gold"
+    },
+    {
+      "id": "dome_temple",
+      "at": [
+        50,
+        -14
+      ],
+      "size": [
+        23,
+        23
+      ],
+      "h": 30,
+      "margin": 2,
+      "name": "stendarr",
+      "overlay": "sentinel"
+    },
+    {
+      "id": "awning_row",
+      "at": [
+        -40,
+        38
+      ],
+      "size": [
+        7,
+        45
+      ],
+      "h": 7,
+      "name": "blue",
+      "face": "S"
+    },
+    {
+      "id": "awning_row",
+      "at": [
+        -24,
+        38
+      ],
+      "size": [
+        7,
+        45
+      ],
+      "h": 7,
+      "name": "yellow",
+      "face": "S"
+    }
   ],
   "buildings": [
-    {"kind": "tower", "at": [-62, -36], "size": [7, 7], "h": 30, "margin": 1},
-    {"kind": "barracks", "at": [-44, -40], "size": [9, 15], "face": "E"}
+    {
+      "kind": "tower",
+      "at": [
+        -62,
+        -36
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "h": 30,
+      "margin": 1,
+      "name": "sentinel_tower_1"
+    },
+    {
+      "kind": "barracks",
+      "at": [
+        -44,
+        -40
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "E",
+      "name": "sentinel_barracks_2"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        0,
+        -64
+      ],
+      "face": "south",
+      "name": "sentinel_castle_sentinel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "wealthy",
+      "at": [
+        -24,
+        18
+      ],
+      "face": "east",
+      "name": "sentinel_oasis_rest"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "wealthy",
+      "at": [
+        24,
+        18
+      ],
+      "face": "west",
+      "name": "sentinel_spice_and_silk"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "wealthy",
+      "at": [
+        -36,
+        -14
+      ],
+      "face": "east",
+      "name": "sentinel_scimitar_works"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        36,
+        -14
+      ],
+      "face": "west",
+      "name": "sentinel_tuwhacca_mosque"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -46,
+        -34
+      ],
+      "face": "east",
+      "name": "sentinel_order_of_the_candle"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        46,
+        -34
+      ],
+      "face": "west",
+      "name": "sentinel_mages_astrologers"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -54,
+        4
+      ],
+      "face": "east",
+      "name": "sentinel_fighters_hall"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -34,
+        -48
+      ],
+      "face": "south",
+      "name": "sentinel_camaron_villa"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        34,
+        -48
+      ],
+      "face": "south",
+      "name": "sentinel_aya_court"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        18,
+        -26
+      ],
+      "face": "west",
+      "name": "sentinel_gold_suq"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "wealthy",
+      "at": [
+        -18,
+        -26
+      ],
+      "face": "east",
+      "name": "sentinel_indigo_dyers"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        48,
+        12
+      ],
+      "face": "west",
+      "name": "sentinel_chart_house"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "wealthy",
+      "at": [
+        -48,
+        12
+      ],
+      "face": "east",
+      "name": "sentinel_ambergris_shop"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -32,
+        52
+      ],
+      "face": "north",
+      "name": "sentinel_crimson_dhow"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "wealthy",
+      "at": [
+        32,
+        52
+      ],
+      "face": "north",
+      "name": "sentinel_admiralty_customs"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -54,
+        44
+      ],
+      "face": "north",
+      "name": "sentinel_pearl_wharf"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        54,
+        44
+      ],
+      "face": "north",
+      "name": "sentinel_mole_battery"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "noble",
+      "at": [
+        -64,
+        -24
+      ],
+      "face": "east",
+      "name": "sentinel_na_totambu_crypt"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        0,
+        76
+      ],
+      "face": "north",
+      "name": "sentinel_camel_caravan_yard"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        36
+      ],
+      "face": "east",
+      "name": "sentinel_factors_arcade"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "at": [
+        22,
+        36
+      ],
+      "face": "west",
+      "name": "sentinel_sky_cistern_house"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 104], [10, 86], [-8, 68], [6, 48], [0, 28], [-4, 10], [0, -10], [0, -44]], "width": 5, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-104, 0], [-84, 12], [-62, 4], [-40, 16], [-20, 8], [0, 12]], "width": 5, "major": true, "tag": "cross"},
-    {"type": "path", "via": [[104, 0], [84, 10], [62, 2], [40, 14], [20, 8], [0, 12]], "width": 5, "major": true, "tag": "cross"},
-    {"type": "loop", "at": [0, 8], "rx": 62, "rz": 56, "wobble": 5, "lobes": 3, "phase": 0.9, "width": 3, "rank": 1, "tag": "ring"},
-    {"type": "loop", "at": [0, 14], "rx": 88, "rz": 70, "wobble": 7, "lobes": 5, "phase": 0.1, "width": 3, "rank": 1, "tag": "ring"},
-    {"type": "path", "via": [[-92, 88], [-60, 80], [-32, 90], [0, 84], [32, 90], [60, 80], [92, 88]], "width": 3, "tag": "quay"},
-    {"type": "path", "via": [[-60, -20], [-44, -36], [-20, -40], [0, -44]], "width": 3, "tag": "ring"},
-    {"type": "path", "via": [[60, -50], [40, -54], [20, -50], [0, -44]], "width": 3, "tag": "ring"},
-    {"type": "path", "via": [[-40, 30], [-24, 38], [-10, 56]], "width": 2, "tag": "ring"},
-    {"type": "path", "via": [[36, 30], [30, 46], [18, 60]], "width": 2, "tag": "ring"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          104
+        ],
+        [
+          10,
+          86
+        ],
+        [
+          -8,
+          68
+        ],
+        [
+          6,
+          48
+        ],
+        [
+          0,
+          28
+        ],
+        [
+          -4,
+          10
+        ],
+        [
+          0,
+          -10
+        ],
+        [
+          0,
+          -44
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -104,
+          0
+        ],
+        [
+          -84,
+          12
+        ],
+        [
+          -62,
+          4
+        ],
+        [
+          -40,
+          16
+        ],
+        [
+          -20,
+          8
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          104,
+          0
+        ],
+        [
+          84,
+          10
+        ],
+        [
+          62,
+          2
+        ],
+        [
+          40,
+          14
+        ],
+        [
+          20,
+          8
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        8
+      ],
+      "rx": 62,
+      "rz": 56,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 0.9,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        14
+      ],
+      "rx": 88,
+      "rz": 70,
+      "wobble": 7,
+      "lobes": 5,
+      "phase": 0.1,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -92,
+          88
+        ],
+        [
+          -60,
+          80
+        ],
+        [
+          -32,
+          90
+        ],
+        [
+          0,
+          84
+        ],
+        [
+          32,
+          90
+        ],
+        [
+          60,
+          80
+        ],
+        [
+          92,
+          88
+        ]
+      ],
+      "width": 3,
+      "tag": "quay"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -60,
+          -20
+        ],
+        [
+          -44,
+          -36
+        ],
+        [
+          -20,
+          -40
+        ],
+        [
+          0,
+          -44
+        ]
+      ],
+      "width": 3,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          60,
+          -50
+        ],
+        [
+          40,
+          -54
+        ],
+        [
+          20,
+          -50
+        ],
+        [
+          0,
+          -44
+        ]
+      ],
+      "width": 3,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          30
+        ],
+        [
+          -24,
+          38
+        ],
+        [
+          -10,
+          56
+        ]
+      ],
+      "width": 2,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          36,
+          30
+        ],
+        [
+          30,
+          46
+        ],
+        [
+          18,
+          60
+        ]
+      ],
+      "width": 2,
+      "tag": "ring"
+    }
   ],
   "plazas": [
-    {"at": [0, 40], "size": 17, "variant": 2, "stalls": 6},
-    {"at": [66, 56], "size": 11, "name": "sentinel_ward_bazaar_of_winds"}
+    {
+      "at": [
+        0,
+        40
+      ],
+      "size": 17,
+      "variant": 2,
+      "stalls": 6
+    },
+    {
+      "at": [
+        66,
+        56
+      ],
+      "size": 11,
+      "name": "sentinel_ward_bazaar_of_winds"
+    }
   ],
   "quarters": [
-    {"rect": [-110, -110, 110, -30], "overlay": "sentinel_gold"}
+    {
+      "rect": [
+        -110,
+        -110,
+        110,
+        -30
+      ],
+      "overlay": "sentinel_gold"
+    }
   ],
   "zones": [
-    {"at": [0, -60], "r": 36, "zone": "noble"},
-    {"at": [0, 40], "r": 28, "zone": "centre"},
-    {"at": [66, 56], "r": 26, "zone": "craft"},
-    {"at": [-70, 60], "r": 28, "zone": "poor"}
+    {
+      "at": [
+        0,
+        -60
+      ],
+      "r": 36,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        40
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        66,
+        56
+      ],
+      "r": 26,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -70,
+        60
+      ],
+      "r": 28,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 100, "target": 0.6},
+  "fabric": {
+    "radius": 100,
+    "target": 0.6
+  },
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "sentinel_oasis_rest", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "sentinel_scimitar_works", "on": "cross"},
-    {"kind": "store", "count": 3, "name": "sentinel_spice_and_silk", "on": "cross"},
-    {"kind": "alchemist", "on": "ring"},
-    {"kind": "temple", "size": [11, 17], "on": "ring"},
-    {"kind": "manor", "count": 4, "flags": ["upper", "rich"], "on": "ring"}
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "sentinel_oasis_rest",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "sentinel_scimitar_works",
+      "on": "cross"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "name": "sentinel_spice_and_silk",
+      "on": "cross"
+    },
+    {
+      "kind": "alchemist",
+      "on": "ring"
+    },
+    {
+      "kind": "temple",
+      "size": [
+        11,
+        17
+      ],
+      "on": "ring"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "ring"
+    }
   ],
   "features": [
-    {"type": "pool", "count": 2, "where": "square"},
-    {"type": "fountain", "count": 2, "where": "square"},
-    {"type": "great_tree", "theme": "acacia", "count": 2, "where": "free"},
-    {"type": "statue", "theme": "divine:zenithar", "where": "square"},
-    {"type": "statue", "theme": "divine:stendarr", "at": [50, 10]},
-    {"type": "shrine", "theme": "divine:zenithar", "count": 2, "where": "street", "tag": "cross"},
-    {"type": "memorial", "count": 2, "where": "free"},
-    {"type": "banners", "count": 4, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
-    {"type": "market", "count": 2, "where": "free"},
-    {"type": "aqueduct", "where": "edge"},
-    {"type": "basin", "where": "edge"},
-    {"type": "garden", "where": "free"},
-    {"type": "flowers", "count": 2, "where": "street", "tag": "ring"},
-    {"type": "bench", "where": "square"}
+    {
+      "type": "pool",
+      "count": 2,
+      "where": "square"
+    },
+    {
+      "type": "fountain",
+      "count": 2,
+      "where": "square"
+    },
+    {
+      "type": "great_tree",
+      "theme": "acacia",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "statue",
+      "theme": "divine:zenithar",
+      "where": "square"
+    },
+    {
+      "type": "statue",
+      "theme": "divine:stendarr",
+      "at": [
+        50,
+        10
+      ]
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 2,
+      "where": "street",
+      "tag": "cross"
+    },
+    {
+      "type": "memorial",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 4,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "market",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "aqueduct",
+      "where": "edge"
+    },
+    {
+      "type": "basin",
+      "where": "edge"
+    },
+    {
+      "type": "garden",
+      "where": "free"
+    },
+    {
+      "type": "flowers",
+      "count": 2,
+      "where": "street",
+      "tag": "ring"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    }
   ],
   "titles": {
     "sentinel_oasis_rest": "The Oasis Rest",
-    "sentinel_spice_and_silk": "Spice and Silk",
-    "sentinel_scimitar_works": "Scimitar Works",
-    "sentinel_ward_bazaar_of_winds": "Bazaar of Winds"
+    "sentinel_spice_and_silk": "Spice and Silk Caravanserai",
+    "sentinel_scimitar_works": "Ansei Scimitar Works",
+    "sentinel_ward_bazaar_of_winds": "Bazaar of Winds",
+    "sentinel_castle_sentinel": "Palace of the Crown",
+    "sentinel_tuwhacca_mosque": "Domed Sanctuary of Tu'whacca",
+    "sentinel_order_of_the_candle": "Chapterhouse of the Candle",
+    "sentinel_mages_astrologers": "Hall of the Star-Readers",
+    "sentinel_fighters_hall": "Wardens of the Coast Guildhall",
+    "sentinel_camaron_villa": "Royal House Camaron Pavilion",
+    "sentinel_aya_court": "Vizier's Turquoise Court",
+    "sentinel_gold_suq": "Goldsmiths & Filigree Suq",
+    "sentinel_indigo_dyers": "Indigo & Saffron Loom-House",
+    "sentinel_chart_house": "Iliac Pilot & Astrolabe House",
+    "sentinel_ambergris_shop": "Ambergris & Myrrh Apothecary",
+    "sentinel_crimson_dhow": "The Crimson Dhow Tavern",
+    "sentinel_admiralty_customs": "Royal Admiralty Customs Quay",
+    "sentinel_pearl_wharf": "Pearl-Divers & Tunny Pier",
+    "sentinel_mole_battery": "Harbour Chain & Lantern Battery",
+    "sentinel_na_totambu_crypt": "Na-Totambu Ancestor Vault",
+    "sentinel_camel_caravan_yard": "South Gate Camel & Courser Yard",
+    "sentinel_factors_arcade": "Forebear Merchant Arcade",
+    "sentinel_sky_cistern_house": "House of the Seven Cisterns",
+    "sentinel_tower_1": "Sentinel Tower 1",
+    "sentinel_barracks_2": "Sentinel Barracks 2"
   }
 }

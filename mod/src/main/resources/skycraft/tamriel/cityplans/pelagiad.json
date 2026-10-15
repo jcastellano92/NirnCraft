@@ -1,0 +1,112 @@
+{
+  "id": "pelagiad",
+  "why": [
+    "ascadian_isles.L1.fertile_lowland",
+    "morrowind.L9.imperial_occupation"
+  ],
+  "sil": "imperial-legion-crossroads-fort",
+  "base": "none",
+  "overlay": "ascadian_isles",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "ascadian_isles"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "pelagiad_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        10,
+        30
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "pelagiad_b_2"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "pelagiad_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -26,
+        -19
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "pelagiad_b_4"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "pelagiad_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "theme": "pelagiad_green_well",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "theme": "pelagiad_legion",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "pelagiad_b_1": "Fort Pelagiad Keep",
+    "pelagiad_b_2": "Halfway Tavern",
+    "pelagiad_b_3": "Mebestian Ence's Trader",
+    "pelagiad_b_4": "Sadhil's Legion Smithy",
+    "pelagiad_b_5": "Ahnassi's House"
+  },
+  "innKey": "pelagiad_b_2",
+  "names": {
+    "inn": "pelagiad_b_2"
+  }
+}

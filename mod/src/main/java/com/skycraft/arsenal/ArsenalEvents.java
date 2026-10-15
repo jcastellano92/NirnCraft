@@ -61,8 +61,49 @@ public final class ArsenalEvents {
     private static final String RECORDED = "skycraft_recorded";
     private static final String PREPARED = "skycraft_arsenal_prepared";
     private static final String BOUND_ARROW = "skycraft_bound_arrow";
+    private static final java.util.UUID AFFIX_WEAPON_UUID = java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d40");
+    private static final java.util.UUID[] AFFIX_ARMOR_UUIDS = {
+            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d41"),
+            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d42"),
+            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d43"),
+            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d44")
+    };
+    private static final java.util.UUID AFFIX_SHIELD_UUID = java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d45");
 
     private ArsenalEvents() {}
+
+    // ------------------------------------------------------------------ affix stat modifiers
+
+    @SubscribeEvent
+    public static void onAffixAttributes(net.minecraftforge.event.ItemAttributeModifierEvent event) {
+        ItemStack stack = event.getItemStack();
+        if (!com.skycraft.loot.affix.ItemAffixes.hasAffixes(stack)) return;
+        net.minecraft.world.entity.EquipmentSlot slot = event.getSlotType();
+        if (stack.getItem() instanceof net.minecraft.world.item.ArmorItem armor) {
+            float mult = com.skycraft.loot.affix.ItemAffixes.armorMultiplier(stack);
+            if (slot == armor.getEquipmentSlot() && slot.getType() == net.minecraft.world.entity.EquipmentSlot.Type.ARMOR && Math.abs(mult - 1.0f) > 0.001f) {
+                event.addModifier(Attributes.ARMOR, new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        AFFIX_ARMOR_UUIDS[slot.getIndex()], "Skycraft affix armor", mult - 1.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE));
+            }
+        } else if (stack.getItem() instanceof net.minecraft.world.item.ShieldItem) {
+            float mult = com.skycraft.loot.affix.ItemAffixes.armorMultiplier(stack);
+            if (slot == net.minecraft.world.entity.EquipmentSlot.OFFHAND && Math.abs(mult - 1.0f) > 0.001f) {
+                event.addModifier(Attributes.ARMOR, new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        AFFIX_SHIELD_UUID, "Skycraft affix shield", (mult - 1.0) * 4.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
+            }
+        } else if (slot == net.minecraft.world.entity.EquipmentSlot.MAINHAND
+                && !(stack.getItem() instanceof ProjectileWeaponItem)
+                && com.skycraft.crafting.Tempering.kind(stack) == com.skycraft.crafting.Tempering.Kind.WEAPON) {
+            float mult = com.skycraft.loot.affix.ItemAffixes.damageMultiplier(stack);
+            if (Math.abs(mult - 1.0f) > 0.001f) {
+                event.addModifier(Attributes.ATTACK_DAMAGE, new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        AFFIX_WEAPON_UUID, "Skycraft affix damage", mult - 1.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE));
+            }
+        }
+    }
 
     // ------------------------------------------------------------------ arrows leaving the bow
 
@@ -73,6 +114,13 @@ public final class ArsenalEvents {
         if (pd.getBoolean(PREPARED)) return;
         pd.putBoolean(PREPARED, true);
         if (!(arrow.getOwner() instanceof LivingEntity owner)) return;
+
+        ItemStack rangedWeapon = owner.getUseItem();
+        if (!(rangedWeapon.getItem() instanceof ProjectileWeaponItem)) rangedWeapon = owner.getMainHandItem();
+        if (!(rangedWeapon.getItem() instanceof ProjectileWeaponItem)) rangedWeapon = owner.getOffhandItem();
+        if (com.skycraft.loot.affix.ItemAffixes.hasAffixes(rangedWeapon)) {
+            arrow.setBaseDamage(arrow.getBaseDamage() * com.skycraft.loot.affix.ItemAffixes.damageMultiplier(rangedWeapon));
+        }
 
         if (arrow.shotFromCrossbow()) {
             SkyCrossbowItem crossbow = owner.getMainHandItem().getItem() instanceof SkyCrossbowItem c ? c
@@ -224,6 +272,8 @@ public final class ArsenalEvents {
         }
         if (!loot.isEmpty() && loot.getMaxStackSize() == 1) {
             loot.setDamageValue(random.nextInt(Math.max(1, loot.getMaxDamage() / 3)));
+            com.skycraft.tamriel.Region region = com.skycraft.economy.EconomyLoot.regionAt(victim.level(), victim.blockPosition());
+            if (region != null) com.skycraft.loot.affix.ItemAffixes.setRegionHint(region.id());
             LeveledGear.decorate(loot, level, random, 0.05f, 0.05f);
         }
         event.getDrops().add(new ItemEntity(victim.level(), victim.getX(), victim.getY() + 0.5, victim.getZ(), loot));

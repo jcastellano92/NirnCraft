@@ -1,0 +1,667 @@
+{
+  "region": "akavir/tang_mo",
+  "province": "akavir",
+  "line": "story_tang_mo",
+  "category": "main",
+  "title": "The Mist-Bridge of Thousand Isles",
+  "summary": "Island ranger clans at Tang Mo Harbor Village and Tang Mo Watch defend the rope-bridge straits and relight the ancestral spire-incense against raiders in the mist.",
+  "why": [
+    "tang_mo.L7.island_ranger_clans",
+    "tang_mo.L8.ancestral_spire_shrines",
+    "tang_mo.L9.strait_bridge_defense"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "tang_mo_harbor_village",
+    "places": [
+      "tang_mo_harbor_village"
+    ],
+    "npc": "story_tang_mo_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Sea-fog thicker than wool has settled over Tang Mo Watch, and someone has cut the warning-gongs along the suspension spans leading to the Thousand Monkey Tree.",
+    "notice": "TANG MO HARBOR TERRACE: Agile climbers and guards needed to restring the mist-gongs and secure Tang Mo Watch."
+  },
+  "npcs": [
+    {
+      "id": "story_tang_mo_hook_npc",
+      "name": "Warden of Tang Mo Harbor Village",
+      "role": "guard",
+      "place": "tang_mo_harbor_village",
+      "greet": "Sea-fog thicker than wool has settled over Tang Mo Watch, and someone has cut the warning-gongs along the suspension spans leading to the Thousand Monkey Tree.",
+      "talk": [
+        "The trouble across Tang Mo began when sealed dispatches started bypassing Tang Mo Harbor Village.",
+        "If you mean to help the Thousand-Isle Ranger Clans, start by checking the trail between Tang Mo Harbor Village and Thousand Monkey Tree."
+      ]
+    },
+    {
+      "id": "story_tang_mo_envoy_npc",
+      "name": "Chronicler of Tang Mo Harbor Village",
+      "role": "scholar",
+      "place": "thousand_monkey_tree",
+      "greet": "Keep your voice low—everyone at Thousand Monkey Tree is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Thousand Monkey Tree toward Tang Mo Watch before they vanished into the brush.",
+        "Bring any ciphered tallies back to Tang Mo Harbor Village so Bridge-Warden Sun-Kao can see the proof."
+      ]
+    },
+    {
+      "id": "story_tang_mo_scout_npc",
+      "name": "Outrider of Tang Mo Watch",
+      "role": "scout",
+      "place": "tang_mo_watch",
+      "greet": "You made good time from Thousand Monkey Tree. The saboteurs have fortified the approaches near Tang Mo Watch.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Tang Mo Watch with a picked guard.",
+        "Once Tang Mo Watch is cleared, return to Tang Mo Harbor Village to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_tang_mo_steward_npc",
+      "name": "Speaker of Tang Mo Harbor Village",
+      "role": "steward",
+      "place": "tang_mo_harbor_village",
+      "greet": "Bridge-Warden Sun-Kao awaits word on whether the crisis in Tang Mo has been contained.",
+      "talk": [
+        "The elders of Tang Mo Harbor Village have prepared the concord table for your return.",
+        "All of Tang Mo owes you a debt for standing between Tang Mo Harbor Village and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_tang_mo_boss_01": {
+      "name": "Usurper-Captain of Tang Mo Harbor Village (1)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "tang_mo_harbor_village",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_02": {
+      "name": "Usurper-Captain of Thousand Monkey Tree (2)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "thousand_monkey_tree",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_03": {
+      "name": "Usurper-Captain of Tang Mo Watch (3)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "tang_mo_watch",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_04": {
+      "name": "Usurper-Captain of Tang Mo Harbor Village (4)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "tang_mo_harbor_village",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_05": {
+      "name": "Usurper-Captain of Thousand Monkey Tree (5)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "thousand_monkey_tree",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_06": {
+      "name": "Usurper-Captain of Tang Mo Watch (6)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "tang_mo_watch",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_07": {
+      "name": "Usurper-Captain of Tang Mo Harbor Village (7)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "tang_mo_harbor_village",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_tang_mo_boss_08": {
+      "name": "Usurper-Captain of Thousand Monkey Tree (8)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "thousand_monkey_tree",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_tang_mo_scene_01": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_02": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_03": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_04": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_05": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_06": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_07": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_08": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_09": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_10": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_11": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_12": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_13": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_14": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_15": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_16": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_17": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_18": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_19": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_20": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_21": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_22": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_23": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_24": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_25": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_26": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_27": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_28": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_29": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_30": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_31": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_32": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_33": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_34": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_35": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_36": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_37": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_38": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_39": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_40": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_41": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_42": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_43": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Harbor Village—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Harbor Village and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Harbor Village, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_44": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Thousand Monkey Tree—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Thousand Monkey Tree and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Thousand Monkey Tree, then bring the recovered charter back to Tang Mo Harbor Village."
+    ],
+    "story_tang_mo_scene_45": [
+      "Warden of Tang Mo Harbor Village: Examine these marks recovered near Tang Mo Watch—they match the cabal troubling Tang Mo.",
+      "Chronicler of Tang Mo Harbor Village: The seal impressions cite the old charters of the Thousand-Isle Ranger Clans word for word.",
+      "Outrider of Tang Mo Watch: Our scouts spotted lantern-signals flashing between Tang Mo Watch and Tang Mo Watch at dusk.",
+      "Speaker of Tang Mo Harbor Village: Strike swiftly at Tang Mo Watch, then bring the recovered charter back to Tang Mo Harbor Village."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_tang_mo_01_opening",
+      "order": 1,
+      "title": "Cut Ropes in the Sea-Mist",
+      "region": "akavir/tang_mo",
+      "category": "main",
+      "giver": "story_tang_mo_hook_npc",
+      "start": "npc:story_tang_mo_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "tang_mo.L7.island_ranger_clans",
+        "tang_mo.L8.ancestral_spire_shrines"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Tang Mo Harbor Village and Thousand Monkey Tree in Tang Mo.",
+      "places": [
+        "tang_mo_harbor_village",
+        "thousand_monkey_tree"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tang_mo_harbor_village",
+          "objective": "Speak with the Warden at Tang Mo Harbor Village and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "thousand_monkey_tree",
+          "objective": "Examine the disturbed boundary markers at Thousand Monkey Tree"
+        },
+        {
+          "id": 30,
+          "place": "tang_mo_harbor_village",
+          "objective": "Return the recovered seal-impression to the Chronicler at Tang Mo Harbor Village"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tang_mo_harbor_village",
+          "text": "Speak with the Warden at Tang Mo Harbor Village and inspect the contested tallies",
+          "scene": "story_tang_mo_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "thousand_monkey_tree",
+          "text": "Examine the disturbed boundary markers at Thousand Monkey Tree"
+        },
+        {
+          "type": "go",
+          "place": "tang_mo_harbor_village",
+          "text": "Return the recovered seal-impression to the Chronicler at Tang Mo Harbor Village"
+        }
+      ],
+      "consequence": "world_state:tang_mo_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_tang_mo_02_trail",
+      "order": 2,
+      "title": "Gongs of Tang Mo Watch",
+      "region": "akavir/tang_mo",
+      "category": "main",
+      "giver": "story_tang_mo_envoy_npc",
+      "start": "auto",
+      "prereq": "story_tang_mo_01_opening",
+      "requires": [
+        "story_tang_mo_01_opening"
+      ],
+      "why": [
+        "tang_mo.L8.ancestral_spire_shrines",
+        "tang_mo.L9.strait_bridge_defense"
+      ],
+      "summary": "Follow the conspirators' supply route from Thousand Monkey Tree to Tang Mo Watch and seize their cipher-ledger.",
+      "places": [
+        "thousand_monkey_tree",
+        "tang_mo_watch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "thousand_monkey_tree",
+          "objective": "Track the night-couriers departing Thousand Monkey Tree"
+        },
+        {
+          "id": 20,
+          "place": "tang_mo_watch",
+          "objective": "Drive off the cabal outriders at Tang Mo Watch and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "thousand_monkey_tree",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Thousand Monkey Tree"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "thousand_monkey_tree",
+          "text": "Track the night-couriers departing Thousand Monkey Tree",
+          "scene": "story_tang_mo_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "tang_mo_watch",
+          "text": "Drive off the cabal outriders at Tang Mo Watch and seize their cipher-box",
+          "boss": "story_tang_mo_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "thousand_monkey_tree",
+          "text": "Deliver the cipher-box to the expedition chronicler at Thousand Monkey Tree"
+        }
+      ],
+      "consequence": "world_state:tang_mo_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_tang_mo_03_sanctum",
+      "order": 3,
+      "title": "Incense of the Spire-Shrine",
+      "region": "akavir/tang_mo",
+      "category": "main",
+      "giver": "story_tang_mo_scout_npc",
+      "start": "auto",
+      "prereq": "story_tang_mo_02_trail",
+      "requires": [
+        "story_tang_mo_02_trail"
+      ],
+      "why": [
+        "tang_mo.L9.strait_bridge_defense",
+        "tang_mo.L10.mist_pillar_sanctums"
+      ],
+      "summary": "Secure the outer wards between Tang Mo Watch and Tang Mo Watch to lay bare the cabal's stronghold.",
+      "places": [
+        "tang_mo_watch"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tang_mo_watch",
+          "objective": "Meet the outrider scout at Tang Mo Watch to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "tang_mo_watch",
+          "objective": "Scout the fortified threshold at Tang Mo Watch and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "tang_mo_harbor_village",
+          "objective": "Carry the ward-key back to the council table at Tang Mo Harbor Village"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tang_mo_watch",
+          "text": "Meet the outrider scout at Tang Mo Watch to decode the sanctum approach",
+          "scene": "story_tang_mo_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "tang_mo_watch",
+          "text": "Scout the fortified threshold at Tang Mo Watch and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "tang_mo_harbor_village",
+          "text": "Carry the ward-key back to the council table at Tang Mo Harbor Village"
+        }
+      ],
+      "consequence": "world_state:tang_mo_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_tang_mo_04_finale",
+      "order": 4,
+      "title": "Stand at the Cloud-Span",
+      "region": "akavir/tang_mo",
+      "category": "main",
+      "giver": "story_tang_mo_steward_npc",
+      "start": "auto",
+      "prereq": "story_tang_mo_03_sanctum",
+      "requires": [
+        "story_tang_mo_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "tang_mo.L7.island_ranger_clans",
+        "tang_mo.L10.mist_pillar_sanctums"
+      ],
+      "summary": "Storm the cabal stronghold at Tang Mo Watch and witness Bridge-Warden Sun-Kao seal the regional concord at Tang Mo Harbor Village.",
+      "places": [
+        "tang_mo_watch",
+        "tang_mo_harbor_village"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tang_mo_watch",
+          "objective": "Storm the inner chamber at Tang Mo Watch and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "tang_mo_watch",
+          "objective": "Recover the stolen charter-seal of Tang Mo from Tang Mo Watch"
+        },
+        {
+          "id": 30,
+          "place": "tang_mo_harbor_village",
+          "objective": "Present the charter-seal at Tang Mo Harbor Village to restore peace across Tang Mo"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "tang_mo_watch",
+          "text": "Storm the inner chamber at Tang Mo Watch and defeat the cabal ringleader",
+          "boss": "story_tang_mo_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "tang_mo_watch",
+          "text": "Recover the stolen charter-seal of Tang Mo from Tang Mo Watch"
+        },
+        {
+          "type": "go",
+          "place": "tang_mo_harbor_village",
+          "text": "Present the charter-seal at Tang Mo Harbor Village to restore peace across Tang Mo",
+          "scene": "story_tang_mo_scene_04"
+        }
+      ],
+      "consequence": "world_state:tang_mo_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Tang Mo Harbor Village"
+      }
+    }
+  ]
+}

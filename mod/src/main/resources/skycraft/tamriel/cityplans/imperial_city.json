@@ -1,60 +1,541 @@
 {
   "id": "imperial_city",
-  "base": "java",
-  "sil": "ring-island",
-  "landmarks": [
-    {"id": "glass_dome", "at": [84, -84], "size": [25, 25], "h": 20, "margin": 2, "overlay": "imperial_garden"}
+  "why": [
+    "heartlands.L1.island_bedrock",
+    "heartlands.L5.capital_economy",
+    "heartlands.L6.imperial_city",
+    "heartlands.L8.temple_of_the_one",
+    "heartlands.L11.white_gold_tower"
   ],
-  "plazas": [
-    {"at": [26, -74], "size": 11, "variant": 3, "name": "imperial_ward_temple"},
-    {"at": [44, 82], "size": 11, "variant": 1, "name": "imperial_ward_talos_plaza"},
-    {"at": [-84, -84], "size": 13, "variant": 2, "name": "imperial_ward_elven_gardens"},
-    {"at": [-80, 46], "size": 11, "variant": 3, "name": "imperial_ward_arena"},
-    {"at": [40, 126], "size": 11, "name": "imperial_ward_waterfront"},
-    {"at": [84, -44], "size": 11, "variant": 2, "name": "imperial_ward_arboretum"}
+  "sil": "ring-island",
+  "base": "java",
+  "overlay": "imperial_palace",
+  "radius": 160,
+  "reach": 176,
+  "innKey": "ic_merchants_inn",
+  "names": {
+    "inn": "ic_merchants_inn",
+    "store": "ic_copious_coinpurse",
+    "smithy": "ic_fighting_chance"
+  },
+  "gates": [
+    [
+      -148,
+      0
+    ],
+    [
+      0,
+      -148
+    ],
+    [
+      148,
+      0
+    ],
+    [
+      0,
+      148
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "white_gold_tower",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "ic_white_gold_tower",
+      "overlay": "imperial_palace"
+    },
+    {
+      "id": "arena",
+      "at": [
+        52,
+        -26
+      ],
+      "face": "west",
+      "name": "ic_imperial_arena",
+      "overlay": "imperial_arena"
+    },
+    {
+      "id": "talos",
+      "at": [
+        -48,
+        24
+      ],
+      "face": "east",
+      "name": "ic_talos_statue",
+      "overlay": "imperial_market"
+    }
   ],
   "quarters": [
-    {"rect": [-122, -34, -56, 34], "overlay": "imperial_arena"},
-    {"rect": [-30, -132, 30, -70], "overlay": "imperial_palace"},
-    {"ring": [0, 46], "overlay": "imperial_palace"},
-    {"ring": [46, 92], "overlay": "imperial_market"},
-    {"ring": [92, 136], "overlay": "imperial_garden"},
-    {"ring": [136, 260], "overlay": "imperial_waterfront"}
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "imperial_palace"
+    },
+    {
+      "rect": [
+        -42,
+        -96,
+        42,
+        -38
+      ],
+      "overlay": "imperial_market"
+    },
+    {
+      "rect": [
+        32,
+        -52,
+        96,
+        0
+      ],
+      "overlay": "imperial_arena"
+    },
+    {
+      "rect": [
+        32,
+        0,
+        96,
+        56
+      ],
+      "overlay": "imperial_garden"
+    },
+    {
+      "rect": [
+        -96,
+        -56,
+        -32,
+        0
+      ],
+      "overlay": "imperial_garden"
+    },
+    {
+      "rect": [
+        -64,
+        96,
+        0,
+        136
+      ],
+      "overlay": "imperial_waterfront"
+    }
   ],
-  "zones": [
-    {"at": [0, -100], "r": 40, "zone": "noble"},
-    {"at": [20, 20], "r": 40, "zone": "centre"},
-    {"at": [-70, 40], "r": 30, "zone": "craft"},
-    {"at": [90, 60], "r": 30, "zone": "common"},
-    {"at": [-90, -70], "r": 24, "zone": "noble"}
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        0,
+        56
+      ],
+      "face": "south",
+      "overlay": "imperial_palace",
+      "name": "ic_temple_of_the_one"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        108
+      ],
+      "face": "south",
+      "overlay": "imperial_palace",
+      "name": "ic_arcane_university"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        18,
+        104
+      ],
+      "face": "south",
+      "overlay": "imperial_palace",
+      "name": "ic_mystic_archives"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -18,
+        104
+      ],
+      "face": "south",
+      "overlay": "imperial_palace",
+      "name": "ic_chironasium"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        20,
+        52
+      ],
+      "face": "south",
+      "overlay": "imperial_palace",
+      "name": "ic_seridur_manor"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        56,
+        -28
+      ],
+      "face": "south",
+      "overlay": "imperial_arena",
+      "name": "ic_arena_bloodworks_hall"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        68,
+        -14
+      ],
+      "face": "south",
+      "overlay": "imperial_arena",
+      "name": "ic_arena_barracks"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        0,
+        -56
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_copious_coinpurse"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        18,
+        -58
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_gilded_carafe"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -22,
+        -46
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_fighting_chance"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        22,
+        -46
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_slash_n_smash"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -14,
+        -72
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_first_edition"
+    },
+    {
+      "kind": "alchemist",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        14,
+        -72
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_rindirs_staffs"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        0,
+        -76
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_divine_elegance"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -28,
+        -66
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_main_ingredient"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        28,
+        -66
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_merchants_inn"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -28,
+        -54
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_red_diamond_jewelry"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        0,
+        -88
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_office_imperial_commerce"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -52,
+        28
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_umbacano_manor"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -64,
+        16
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_tiber_septim_hotel"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        -38,
+        42
+      ],
+      "face": "south",
+      "overlay": "imperial_market",
+      "name": "ic_agarmir_house"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -52,
+        -28
+      ],
+      "face": "south",
+      "overlay": "imperial_garden",
+      "name": "ic_king_and_queen_tavern"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -64,
+        -16
+      ],
+      "face": "south",
+      "overlay": "imperial_garden",
+      "name": "ic_elven_gardens_manor"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        -38,
+        -42
+      ],
+      "face": "south",
+      "overlay": "imperial_garden",
+      "name": "ic_jastira_nanus_house"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        52,
+        28
+      ],
+      "face": "south",
+      "overlay": "imperial_garden",
+      "name": "ic_arboretum_pavilion"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        38,
+        -96
+      ],
+      "face": "south",
+      "overlay": "imperial_palace",
+      "name": "ic_imperial_prison_bastion"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -36,
+        114
+      ],
+      "face": "south",
+      "overlay": "imperial_waterfront",
+      "name": "ic_bloated_float"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -52,
+        110
+      ],
+      "face": "south",
+      "overlay": "imperial_waterfront",
+      "name": "ic_east_empire_warehouse"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        -22,
+        118
+      ],
+      "face": "south",
+      "overlay": "imperial_waterfront",
+      "name": "ic_armand_christophe_shack"
+    }
   ],
-  "fabric": {"radius": 140, "target": 0.5},
   "features": [
-    {"type": "great_tree", "theme": "oak", "at": [-84, -66]},
-    {"type": "great_tree", "theme": "birch", "at": [84, -62]},
-    {"type": "statue", "theme": "emperor", "at": [0, 40]},
-    {"type": "statue", "theme": "divine:talos", "at": [44, 66]},
-    {"type": "statue", "theme": "divine:akatosh", "where": "square"},
-    {"type": "fountain", "count": 2, "where": "square"},
-    {"type": "pool", "where": "free"},
-    {"type": "memorial", "count": 2, "where": "square"},
-    {"type": "bell_tower", "count": 2, "where": "free"},
-    {"type": "banners", "count": 4, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "free"},
-    {"type": "garden", "count": 2, "where": "free"},
-    {"type": "market", "where": "free"},
-    {"type": "aqueduct", "where": "edge"},
-    {"type": "tree_row", "count": 2, "where": "free"},
-    {"type": "shrine", "theme": "divine:arkay", "where": "free"},
-    {"type": "flowers", "count": 2, "where": "free"},
-    {"type": "bench", "count": 2, "where": "square"}
+    {
+      "type": "statue",
+      "theme": "divine:talos",
+      "count": 2
+    },
+    {
+      "type": "fountain",
+      "theme": "imperial_marble",
+      "count": 3
+    },
+    {
+      "type": "garden",
+      "theme": "arboretum",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "dragon_empire",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "white_gold",
+      "count": 4
+    },
+    {
+      "type": "memorial",
+      "theme": "emperor_pelagius",
+      "count": 2
+    }
   ],
   "titles": {
-    "imperial_ward_temple": "Temple District",
-    "imperial_ward_talos_plaza": "Talos Plaza District",
-    "imperial_ward_elven_gardens": "Elven Gardens District",
-    "imperial_ward_arena": "Arena District",
-    "imperial_ward_waterfront": "Waterfront District",
-    "imperial_ward_arboretum": "Arboretum District"
+    "ic_white_gold_tower": "White-Gold Tower",
+    "ic_imperial_arena": "Imperial Arena",
+    "ic_talos_statue": "Plaza of Talos",
+    "ic_temple_of_the_one": "Temple of the One",
+    "ic_arcane_university": "Arcane University",
+    "ic_mystic_archives": "Mystic Archives",
+    "ic_chironasium": "The Chironasium",
+    "ic_seridur_manor": "Seridur's Manor",
+    "ic_arena_bloodworks_hall": "Imperial Arena Bloodworks",
+    "ic_arena_barracks": "Gladiators' Barracks",
+    "ic_copious_coinpurse": "The Copious Coinpurse",
+    "ic_gilded_carafe": "The Gilded Carafe",
+    "ic_fighting_chance": "A Fighting Chance",
+    "ic_slash_n_smash": "Slash 'N Smash",
+    "ic_first_edition": "First Edition Books",
+    "ic_rindirs_staffs": "Rindir's Staffs",
+    "ic_divine_elegance": "Divine Elegance",
+    "ic_main_ingredient": "The Main Ingredient",
+    "ic_merchants_inn": "The Merchants Inn",
+    "ic_red_diamond_jewelry": "Red Diamond Jewelry",
+    "ic_office_imperial_commerce": "Office of Imperial Commerce",
+    "ic_umbacano_manor": "Umbacano Manor",
+    "ic_tiber_septim_hotel": "Tiber Septim Hotel",
+    "ic_agarmir_house": "Agarmir's Townhouse",
+    "ic_king_and_queen_tavern": "The King and Queen Tavern",
+    "ic_elven_gardens_manor": "Elven Gardens Manor",
+    "ic_jastira_nanus_house": "Jastira Nanus's Townhouse",
+    "ic_arboretum_pavilion": "Arboretum Emperor Pavilion",
+    "ic_imperial_prison_bastion": "Imperial Prison Bastion",
+    "ic_bloated_float": "The Bloated Float Inn",
+    "ic_east_empire_warehouse": "Imperial Trading Company Warehouse",
+    "ic_armand_christophe_shack": "Waterfront Doyen's Shack"
   }
 }

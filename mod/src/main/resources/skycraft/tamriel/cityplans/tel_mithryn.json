@@ -1,0 +1,99 @@
+{
+  "id": "tel_mithryn",
+  "why": [
+    "isinfier.L1.ash_shelf_plain",
+    "solstheim.L1.ash_plain"
+  ],
+  "sil": "lone-fungal-tower",
+  "base": "none",
+  "overlay": "tel_mithryn",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "tel_mithryn"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "tel_mithryn",
+      "name": "tel_mithryn_b_1"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        0,
+        30
+      ],
+      "face": "south",
+      "overlay": "tel_mithryn",
+      "name": "tel_mithryn_b_2"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -9,
+        0
+      ],
+      "face": "south",
+      "overlay": "tel_mithryn",
+      "name": "tel_mithryn_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -30
+      ],
+      "face": "south",
+      "overlay": "tel_mithryn",
+      "name": "tel_mithryn_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "tel_mithryn_fungus",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "ash_spore_lantern",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "tel_mithryn_b_1": "Tel Mithryn Central Tower",
+    "tel_mithryn_b_2": "Elynea Mothren's Apothecary Pod",
+    "tel_mithryn_b_3": "Varona's Steward Pod",
+    "tel_mithryn_b_4": "Talvas's Staff Enchanter Pod"
+  },
+  "innKey": "tel_mithryn_b_3",
+  "names": {
+    "inn": "tel_mithryn_b_3"
+  }
+}

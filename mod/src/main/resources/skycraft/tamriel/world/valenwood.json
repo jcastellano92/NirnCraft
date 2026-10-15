@@ -1,0 +1,3342 @@
+{
+  "province": "valenwood",
+  "truth": "Valenwood is the forest that its people have sworn never to harm. The Bosmer keep the Green Pact: no living plant of Valenwood may be cut or eaten by them, so they live on meat, bone, hide and sap, and buy grain and timber from Khajiit and Imperial traders. Their cities grow inside giant graht-oaks where status rises with height from root to crown, and Falinesti walks between four seasonal sites while Ayleid ruins lie beneath the roots. Elden Root is the Dominion's forest capital, where Thalmor envoys stand beside a Camoran king while the Silvenar and Green Lady speak for the Pact against Colovian poachers and Maormer raiders.",
+  "layers": {
+    "L1": [
+      {
+        "id": "forest_basin",
+        "text": "a low basin of deep humus over old sediments, little exposed rock",
+        "cites": []
+      },
+      {
+        "id": "river_gorges",
+        "text": "the Xylo and the Strid and their feeders cut 20-40 blocks below the forest floor",
+        "cites": []
+      },
+      {
+        "id": "march_knolls",
+        "text": "sandstone knolls and low ridges in Reaper's March, to 60-120 blocks",
+        "cites": []
+      },
+      {
+        "id": "karst_sinks",
+        "text": "sinkhole lakes where limestone lies under the humus",
+        "cites": []
+      },
+      {
+        "id": "delta_coast",
+        "text": "mangrove deltas and drowned river mouths on the south and west coast",
+        "cites": []
+      },
+      {
+        "id": "poor_ore",
+        "text": "little metal near the surface, some bog iron only",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "warm_wet",
+        "text": "warm and wet all year, wettest in the south-west",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L1.delta_coast"
+        ]
+      },
+      {
+        "id": "under_canopy",
+        "text": "below the crowns the floor is dim, still and humid",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L2.warm_wet"
+        ]
+      },
+      {
+        "id": "drier_march",
+        "text": "Reaper's March is drier and seasonal, grading into Elsweyr's savanna",
+        "cites": [
+          "valenwood.L1.march_knolls"
+        ]
+      },
+      {
+        "id": "south_storms",
+        "text": "sea storms and sea mists from the south-west",
+        "cites": [
+          "valenwood.L1.delta_coast"
+        ]
+      },
+      {
+        "id": "four_seasons_felt",
+        "text": "the forest's seasons show as leaf colour, fruiting and migration rather than snow",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L2.warm_wet"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "river_net",
+        "text": "the Xylo in the north-west, the Strid on the Cyrodiil border, and many forest rivers",
+        "cites": [
+          "valenwood.L1.river_gorges",
+          "valenwood.L2.warm_wet"
+        ]
+      },
+      {
+        "id": "crown_cisterns",
+        "text": "rain caught in the hollows and bromeliad pools of the giant trees; tree-cities drink from their own trees",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L2.under_canopy"
+        ]
+      },
+      {
+        "id": "sink_lakes",
+        "text": "clear karst sinkhole pools",
+        "cites": [
+          "valenwood.L1.karst_sinks"
+        ]
+      },
+      {
+        "id": "who_holds_water",
+        "text": "water is everywhere; what is held is the trees: Treethanes control the city-trees and so the cisterns, the shelter and the height",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L3.crown_cisterns"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "canopy_layers",
+        "text": "four vertical layers (floor, understorey, canopy, emergent crowns), each with its own life",
+        "cites": [
+          "valenwood.L2.under_canopy"
+        ]
+      },
+      {
+        "id": "graht_oaks",
+        "text": "giant trees in groves on the deepest soils, the only places large enough for cities",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L2.warm_wet"
+        ]
+      },
+      {
+        "id": "pact_forest",
+        "text": "the forest grows uncut wherever Bosmer live, because their covenant forbids harming its plants; old growth reaches to every doorstep",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L4.graht_oaks",
+          "valenwood.L4.canopy_layers"
+        ]
+      },
+      {
+        "id": "game_abundance",
+        "text": "deer, boar, wild pigs, birds and timber mammoths in glades",
+        "cites": [
+          "valenwood.L2.warm_wet",
+          "valenwood.L4.pact_forest"
+        ]
+      },
+      {
+        "id": "predators",
+        "text": "big cats in the March, giant spiders and wasps in the understorey, hoarvors in wet hollows, imga in the canopy",
+        "cites": [
+          "valenwood.L3.river_net",
+          "valenwood.L4.canopy_layers"
+        ]
+      },
+      {
+        "id": "green_hostiles",
+        "text": "spriggans, stranglers and walking plant-beasts guard old groves",
+        "cites": [
+          "valenwood.L1.forest_basin",
+          "valenwood.L4.pact_forest"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "meat_and_jagga",
+        "text": "hunting, pig-keeping and smokehouses; jagga is fermented from pig's milk",
+        "cites": [
+          "valenwood.L4.game_abundance"
+        ]
+      },
+      {
+        "id": "bone_hide_craft",
+        "text": "bows of horn and bone, armour of hide and bone, because local wood may not be cut and metal is scarce",
+        "cites": [
+          "valenwood.L1.poor_ore",
+          "valenwood.L4.pact_forest"
+        ]
+      },
+      {
+        "id": "pact_imports",
+        "text": "grain, bread, timber, paper, wine and iron bought from Elsweyr and Cyrodiil",
+        "cites": [
+          "valenwood.L4.pact_forest"
+        ]
+      },
+      {
+        "id": "sap_given",
+        "text": "graht-oaks yield sap through openings sung into the bark; tapping is a priestly craft, not cutting",
+        "cites": [
+          "valenwood.L4.graht_oaks",
+          "valenwood.L4.pact_forest"
+        ]
+      },
+      {
+        "id": "ports",
+        "text": "Woodhearth, Haven, Southpoint and Velyn Harbor import what the Pact forbids",
+        "cites": [
+          "valenwood.L1.delta_coast",
+          "valenwood.L5.pact_imports"
+        ]
+      },
+      {
+        "id": "pelts_and_feathers",
+        "text": "the export trade",
+        "cites": [
+          "valenwood.L4.game_abundance"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "tree_cities",
+        "text": "cities stand where graht-oaks stand, not where rivers cross",
+        "cites": [
+          "valenwood.L3.crown_cisterns",
+          "valenwood.L4.graht_oaks"
+        ]
+      },
+      {
+        "id": "walking_city",
+        "text": "Falinesti, a giant tree that migrates among four seasonal sites",
+        "cites": [
+          "valenwood.L2.four_seasons_felt",
+          "valenwood.L4.graht_oaks"
+        ]
+      },
+      {
+        "id": "delta_ports",
+        "text": "coastal stilt and root ports",
+        "cites": [
+          "valenwood.L1.delta_coast",
+          "valenwood.L5.ports"
+        ]
+      },
+      {
+        "id": "march_border_towns",
+        "text": "the March's towns sit on knolls and fords on the Elsweyr and Cyrodiil roads, mixed Bosmer and Khajiit",
+        "cites": [
+          "valenwood.L1.march_knolls",
+          "valenwood.L5.pact_imports"
+        ]
+      },
+      {
+        "id": "busy_centres",
+        "text": "Elden Root (capital and Dominion seat), Woodhearth (port), Falinesti (wherever it stands), Arenthia and Rawl'kha (border trade)",
+        "cites": [
+          "valenwood.L5.ports",
+          "valenwood.L5.pact_imports",
+          "valenwood.L6.tree_cities"
+        ]
+      },
+      {
+        "id": "poor_places",
+        "text": "ground camps under the city-trees, hunting villages whose game has thinned, coastal villages after a raid",
+        "cites": [
+          "valenwood.L4.game_abundance",
+          "valenwood.L6.tree_cities"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "vertical_rank",
+        "text": "the higher you live the higher you stand: Treethane and court in the crown, craftsmen on the trunk tiers, hunters on the boughs, the poor and outsiders at the roots and on the ground",
+        "cites": [
+          "valenwood.L6.tree_cities"
+        ]
+      },
+      {
+        "id": "treethanes",
+        "text": "each city's ruler",
+        "cites": [
+          "valenwood.L3.who_holds_water",
+          "valenwood.L6.tree_cities"
+        ]
+      },
+      {
+        "id": "hunters_honoured",
+        "text": "the best hunters are the city's heroes",
+        "cites": [
+          "valenwood.L5.meat_and_jagga"
+        ]
+      },
+      {
+        "id": "spinners",
+        "text": "priest-storytellers who keep and shape the people's story",
+        "cites": [
+          "valenwood.L6.tree_cities"
+        ]
+      },
+      {
+        "id": "outsider_traders",
+        "text": "Khajiit and Imperial merchants handle plant goods the Bosmer cannot, so they are needed and kept low",
+        "cites": [
+          "valenwood.L5.pact_imports"
+        ]
+      },
+      {
+        "id": "pact_breakers",
+        "text": "Bosmer who break the Pact are cast out to the ground or beyond",
+        "cites": [
+          "valenwood.L4.pact_forest"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "yffre_faith",
+        "text": "Y'ffre the Storyteller, giver of the Pact; shrines are story-stones and living groves",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L7.spinners"
+        ]
+      },
+      {
+        "id": "meat_mandate",
+        "text": "the slain are to be eaten, within three days, and nothing is wasted",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L5.meat_and_jagga"
+        ]
+      },
+      {
+        "id": "wild_hunt",
+        "text": "a rite of transformation into a ravening host, called in extremity and feared by all",
+        "cites": [
+          "valenwood.L4.pact_forest"
+        ]
+      },
+      {
+        "id": "silvenar_and_lady",
+        "text": "the Silvenar embodies the people's will, the Green Lady is its champion; their bond is the Pact made flesh",
+        "cites": [
+          "valenwood.L7.treethanes",
+          "valenwood.L8.yffre_faith"
+        ]
+      },
+      {
+        "id": "wilderking",
+        "text": "a forest-spirit protector bound to Greenshade",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L8.yffre_faith"
+        ]
+      },
+      {
+        "id": "burial_trees",
+        "text": "the dead are given back to the forest in burial trees and root tombs",
+        "cites": [
+          "valenwood.L4.pact_forest"
+        ]
+      },
+      {
+        "id": "songs_not_stone",
+        "text": "history is sung and spun, not carved",
+        "cites": [
+          "valenwood.L7.spinners"
+        ]
+      },
+      {
+        "id": "outsiders",
+        "text": "wary of Colovians, uneasy partners of the Thalmor, rivals and friends of the Khajiit",
+        "cites": [
+          "valenwood.L5.pact_imports"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "camoran_court",
+        "text": "a Camoran king in Elden Root, seated with Thalmor support; Valenwood is a Dominion province",
+        "cites": [
+          "valenwood.L7.treethanes"
+        ]
+      },
+      {
+        "id": "thalmor_in_the_crown",
+        "text": "Thalmor envoys live in the crown of the Elden Tree",
+        "cites": [
+          "valenwood.L7.vertical_rank",
+          "valenwood.L9.camoran_court"
+        ]
+      },
+      {
+        "id": "silvenar_vs_thalmor",
+        "text": "the Silvenar guards the Pact against Dominion improvements",
+        "cites": [
+          "valenwood.L8.silvenar_and_lady",
+          "valenwood.L9.camoran_court"
+        ]
+      },
+      {
+        "id": "strid_border",
+        "text": "Colovian loggers and poachers on the Strid; old border wars",
+        "cites": [
+          "valenwood.L3.river_net",
+          "valenwood.L5.pact_imports"
+        ]
+      },
+      {
+        "id": "march_truce",
+        "text": "a renewed truce between Bosmer and Khajiit elders in the March",
+        "cites": [
+          "valenwood.L6.march_border_towns"
+        ]
+      },
+      {
+        "id": "maormer_raids",
+        "text": "Pyandonean raiders on the south-west coast",
+        "cites": [
+          "valenwood.L2.south_storms",
+          "valenwood.L5.ports"
+        ]
+      },
+      {
+        "id": "the_arrival",
+        "text": "winter festival when Falinesti reaches its winter site with a great hunt and a plantless feast",
+        "cites": [
+          "valenwood.L6.walking_city",
+          "valenwood.L8.meat_mandate"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "ayleid_vaults",
+        "text": "Ayleid ruins under the roots; stone survives only where the floor is firm",
+        "cites": [
+          "valenwood.L1.forest_basin"
+        ]
+      },
+      {
+        "id": "root_tombs",
+        "text": "burial trees and root tombs",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L8.burial_trees"
+        ]
+      },
+      {
+        "id": "spriggan_groves",
+        "text": "warded ancient glades",
+        "cites": [
+          "valenwood.L4.green_hostiles"
+        ]
+      },
+      {
+        "id": "wild_hunt_grounds",
+        "text": "sites where hunts were called; still wrong",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L8.wild_hunt"
+        ]
+      },
+      {
+        "id": "poacher_camps",
+        "text": "illegal Colovian logging camps on the Strid",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L9.strid_border"
+        ]
+      },
+      {
+        "id": "maormer_beachheads",
+        "text": "sea-elf raid coves",
+        "cites": [
+          "valenwood.L1.delta_coast",
+          "valenwood.L9.maormer_raids"
+        ]
+      },
+      {
+        "id": "feast_lodges",
+        "text": "hunters' lodges where the Mandate is abused into cannibal cults",
+        "cites": [
+          "valenwood.L4.game_abundance",
+          "valenwood.L8.meat_mandate"
+        ]
+      },
+      {
+        "id": "hircine_packs",
+        "text": "werewolf packs of Hircine's hunters",
+        "cites": [
+          "valenwood.L4.predators",
+          "valenwood.L7.hunters_honoured"
+        ]
+      },
+      {
+        "id": "septim_forts",
+        "text": "Imperial border forts, now held by bandits, Khajiit or Thalmor",
+        "cites": [
+          "valenwood.L1.march_knolls",
+          "valenwood.L9.strid_border"
+        ]
+      },
+      {
+        "id": "thalmor_cells",
+        "text": "dissidents held in hollow trees",
+        "cites": [
+          "valenwood.L4.graht_oaks",
+          "valenwood.L9.thalmor_in_the_crown"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "dawn_pact",
+        "text": "the covenant with Y'ffre in the forest's first age",
+        "cites": [
+          "valenwood.L4.pact_forest",
+          "valenwood.L8.yffre_faith"
+        ]
+      },
+      {
+        "id": "ayleid_age",
+        "text": "Ayleid settlement in the north and east",
+        "cites": [
+          "valenwood.L10.ayleid_vaults"
+        ]
+      },
+      {
+        "id": "camoran_line",
+        "text": "an ancient royal line, including a Third Era usurper who overran the province",
+        "cites": [
+          "valenwood.L9.camoran_court"
+        ]
+      },
+      {
+        "id": "imperial_province",
+        "text": "the Septim era, its forts and trading posts",
+        "cites": [
+          "valenwood.L10.septim_forts"
+        ]
+      },
+      {
+        "id": "dominion_union",
+        "text": "early Fourth Era union with Summerset under the Thalmor",
+        "cites": [
+          "valenwood.L9.thalmor_in_the_crown"
+        ]
+      },
+      {
+        "id": "great_war",
+        "text": "Bosmer archers in the Dominion's war against the Empire",
+        "cites": [
+          "valenwood.L9.camoran_court"
+        ]
+      },
+      {
+        "id": "walking_legend",
+        "text": "Falinesti's walk, sung by every Spinner",
+        "cites": [
+          "valenwood.L6.walking_city",
+          "valenwood.L7.spinners"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "grahtwood": {
+      "truth": "Grahtwood is the heart of the forest and of the Dominion's hold on it. The Elden Tree rises over everything, a city in one trunk with the Camoran court and the Thalmor in its crown and the poor among its roots. Around it stand old Ayleid vaults the Thalmor's scholars are reopening, burial trees, timber-mammoth glades and the winter site of Falinesti. The south coast is a separate world: Haven and Southpoint, delta ports on mangrove roots that buy the grain and iron the Pact forbids, watching the sea for Maormer sails.",
+      "layers": {
+        "L1": [
+          {
+            "id": "elden_grove_soil",
+            "text": "the deepest humus soils in the central basin",
+            "cites": []
+          },
+          {
+            "id": "grahtwood_sinks",
+            "text": "limestone sinkholes under the forest floor",
+            "cites": []
+          },
+          {
+            "id": "south_deltas",
+            "text": "mangrove deltas on the southern coast",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "deep_canopy",
+            "text": "dim, humid air beneath the giant crowns",
+            "cites": [
+              "valenwood.L2.under_canopy",
+              "grahtwood.L1.elden_grove_soil"
+            ]
+          },
+          {
+            "id": "coastal_wet",
+            "text": "sea fogs and warm squalls on the delta coast",
+            "cites": [
+              "valenwood.L2.south_storms",
+              "grahtwood.L1.south_deltas"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "elden_cisterns",
+            "text": "high bromeliad and hollow reservoirs in the Elden Tree",
+            "cites": [
+              "valenwood.L3.crown_cisterns",
+              "grahtwood.L2.deep_canopy"
+            ]
+          },
+          {
+            "id": "lady_solace_fen",
+            "text": "flooded karst fen",
+            "cites": [
+              "valenwood.L3.sink_lakes",
+              "grahtwood.L1.grahtwood_sinks"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "graht_grove",
+            "text": "giant city-oaks",
+            "cites": [
+              "valenwood.L4.graht_oaks",
+              "grahtwood.L1.elden_grove_soil"
+            ]
+          },
+          {
+            "id": "old_growth_floor",
+            "text": "dense uncut forest to the door",
+            "cites": [
+              "valenwood.L4.pact_forest",
+              "grahtwood.L2.deep_canopy"
+            ]
+          },
+          {
+            "id": "mammoth_glade",
+            "text": "natural treefall glades with timber mammoths",
+            "cites": [
+              "valenwood.L4.game_abundance",
+              "grahtwood.L1.elden_grove_soil"
+            ]
+          },
+          {
+            "id": "sink_lake",
+            "text": "clear fern-ringed sink pools",
+            "cites": [
+              "grahtwood.L1.grahtwood_sinks",
+              "grahtwood.L3.lady_solace_fen"
+            ]
+          },
+          {
+            "id": "mangrove_delta",
+            "text": "coastal mangrove roots",
+            "cites": [
+              "grahtwood.L1.south_deltas",
+              "grahtwood.L2.coastal_wet"
+            ]
+          },
+          {
+            "id": "burial_grove",
+            "text": "old trees hung with bone tokens",
+            "cites": [
+              "valenwood.L4.pact_forest",
+              "grahtwood.L1.elden_grove_soil"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "sap_tappers",
+            "text": "priestly sap singers",
+            "cites": [
+              "valenwood.L5.sap_given",
+              "grahtwood.L4.graht_grove"
+            ]
+          },
+          {
+            "id": "capital_market",
+            "text": "imported grain, wood and iron at the roots",
+            "cites": [
+              "valenwood.L5.pact_imports",
+              "grahtwood.L4.graht_grove"
+            ]
+          },
+          {
+            "id": "delta_trade",
+            "text": "Haven and Southpoint maritime trade",
+            "cites": [
+              "valenwood.L5.ports",
+              "grahtwood.L1.south_deltas"
+            ]
+          },
+          {
+            "id": "kwama_tenders",
+            "text": "Burroot egg-mines",
+            "cites": [
+              "valenwood.L5.meat_and_jagga",
+              "grahtwood.L1.elden_grove_soil"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "elden_root_capital",
+            "text": "the capital grown inside the Elden Tree",
+            "cites": [
+              "valenwood.L6.tree_cities",
+              "grahtwood.L1.elden_grove_soil",
+              "grahtwood.L4.graht_grove"
+            ]
+          },
+          {
+            "id": "haven_port",
+            "text": "southern port seat",
+            "cites": [
+              "valenwood.L6.delta_ports",
+              "grahtwood.L1.south_deltas"
+            ]
+          },
+          {
+            "id": "redfur_post",
+            "text": "trading post for outsiders at the forest edge",
+            "cites": [
+              "grahtwood.L5.capital_market"
+            ]
+          },
+          {
+            "id": "falinesti_winter_site",
+            "text": "the southern seasonal clearing of the walking city",
+            "cites": [
+              "valenwood.L6.walking_city",
+              "grahtwood.L4.graht_grove"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "crown_court_thalmor",
+            "text": "Camoran courtiers and Thalmor envoys in the highest boughs",
+            "cites": [
+              "valenwood.L7.vertical_rank",
+              "grahtwood.L6.elden_root_capital"
+            ]
+          },
+          {
+            "id": "root_poor",
+            "text": "ground-dwellers and outsider peddlers among the roots",
+            "cites": [
+              "valenwood.L7.vertical_rank",
+              "grahtwood.L6.elden_root_capital"
+            ]
+          },
+          {
+            "id": "delta_merchants",
+            "text": "port factors at Haven and Southpoint",
+            "cites": [
+              "grahtwood.L5.delta_trade"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "elden_temple",
+            "text": "story-shrines in the trunk",
+            "cites": [
+              "valenwood.L8.yffre_faith",
+              "grahtwood.L6.elden_root_capital"
+            ]
+          },
+          {
+            "id": "crown_lamp",
+            "text": "a sacred light in the Elden Tree's crown said to show the Pact holds",
+            "cites": [
+              "grahtwood.L3.elden_cisterns",
+              "grahtwood.L6.elden_root_capital"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "court_vs_voice",
+            "text": "the Camoran court and the Silvenar's Voice in the same tree",
+            "cites": [
+              "valenwood.L9.silvenar_vs_thalmor",
+              "grahtwood.L7.crown_court_thalmor"
+            ]
+          },
+          {
+            "id": "ayleid_digs",
+            "text": "Thalmor scholars reopening sealed Ayleid vaults",
+            "cites": [
+              "valenwood.L9.thalmor_in_the_crown",
+              "grahtwood.L7.crown_court_thalmor"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "ayleid_vaults_grahtwood",
+            "text": "Ne Salas, Laeloria, Reliquary of Stars and Ossuary of Telacar",
+            "cites": [
+              "valenwood.L10.ayleid_vaults",
+              "grahtwood.L1.elden_grove_soil",
+              "grahtwood.L9.ayleid_digs"
+            ]
+          },
+          {
+            "id": "maarselok_lair",
+            "text": "a blighted dragon lair from the Second Era",
+            "cites": [
+              "valenwood.L4.green_hostiles",
+              "grahtwood.L1.elden_grove_soil"
+            ]
+          },
+          {
+            "id": "elden_grove",
+            "text": "Arena's staff dungeon under the ancient roots",
+            "cites": [
+              "valenwood.L10.root_tombs",
+              "grahtwood.L4.burial_grove"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "cormount_battle",
+            "text": "a dynastic border battle remembered by a memorial grove",
+            "cites": [
+              "valenwood.L11.camoran_line",
+              "grahtwood.L6.elden_root_capital"
+            ]
+          },
+          {
+            "id": "ayleid_north",
+            "text": "the Ayleid refugee kingdoms under the oaks",
+            "cites": [
+              "valenwood.L11.ayleid_age",
+              "grahtwood.L10.ayleid_vaults_grahtwood"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 4,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L5.kwama_tenders",
+            "grahtwood.L1.grahtwood_sinks"
+          ]
+        },
+        "smith": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L5.kwama_tenders"
+          ]
+        },
+        "jeweler": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L5.kwama_tenders"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L5.capital_market"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L5.capital_market"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L4.old_growth_floor",
+            "grahtwood.L4.mammoth_glade"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L5.capital_market"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L5.sap_tappers"
+          ]
+        },
+        "woodcutter": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L4.old_growth_floor",
+            "grahtwood.L4.mammoth_glade"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L4.sink_lake",
+            "grahtwood.L4.mangrove_delta"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L4.old_growth_floor"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L5.sap_tappers"
+          ]
+        },
+        "fletcher": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L4.mammoth_glade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L5.sap_tappers"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L5.delta_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 4,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L5.delta_trade",
+            "grahtwood.L7.crown_court_thalmor"
+          ]
+        },
+        "bookseller": {
+          "weight": 4,
+          "why": [
+            "grahtwood.L5.capital_market",
+            "grahtwood.L5.delta_trade",
+            "grahtwood.L8.elden_temple"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L5.sap_tappers"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L5.sap_tappers"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L8.elden_temple",
+            "grahtwood.L8.crown_lamp"
+          ]
+        },
+        "jarl": {
+          "weight": 4,
+          "why": [
+            "grahtwood.L6.elden_root_capital",
+            "grahtwood.L6.haven_port",
+            "grahtwood.L7.crown_court_thalmor"
+          ]
+        },
+        "steward": {
+          "weight": 4,
+          "why": [
+            "grahtwood.L6.elden_root_capital",
+            "grahtwood.L6.haven_port",
+            "grahtwood.L7.crown_court_thalmor"
+          ]
+        },
+        "housecarl": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L7.crown_court_thalmor",
+            "grahtwood.L9.court_vs_voice"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L7.crown_court_thalmor",
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L8.elden_temple"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L10.ayleid_vaults_grahtwood"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L7.crown_court_thalmor"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L7.root_poor"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L6.haven_port"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L8.crown_lamp"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "grahtwood.L5.kwama_tenders",
+            "grahtwood.L7.root_poor"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L5.kwama_tenders"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L7.crown_court_thalmor"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L7.crown_court_thalmor"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "grahtwood.L5.capital_market"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "grahtwood.L9.court_vs_voice"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "grahtwood.L8.crown_lamp"
+        ],
+        "ruin": [
+          "grahtwood.L8.elden_temple"
+        ],
+        "dwemer": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "falmer": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "bandit": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "fort": [
+          "grahtwood.L9.court_vs_voice"
+        ],
+        "military": [
+          "grahtwood.L9.court_vs_voice"
+        ],
+        "mage": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "vampire": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "necromancer": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "hagraven": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "forsworn": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "beast": [
+          "grahtwood.L4.old_growth_floor",
+          "grahtwood.L10.elden_grove"
+        ],
+        "ice": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "mine": [
+          "grahtwood.L5.capital_market",
+          "grahtwood.L5.kwama_tenders",
+          "grahtwood.L1.grahtwood_sinks"
+        ],
+        "grove": [
+          "grahtwood.L4.graht_grove",
+          "grahtwood.L4.mammoth_glade",
+          "grahtwood.L4.mangrove_delta"
+        ],
+        "smuggler": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "cave": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "giant": [
+          "grahtwood.L4.graht_grove",
+          "grahtwood.L4.mammoth_glade"
+        ],
+        "dragon": [
+          "grahtwood.L10.maarselok_lair"
+        ],
+        "tower": [
+          "grahtwood.L10.ayleid_vaults_grahtwood"
+        ],
+        "cabin": [
+          "grahtwood.L6.elden_root_capital"
+        ],
+        "wreck": [
+          "grahtwood.L5.sap_tappers"
+        ]
+      }
+    },
+    "greenshade": {
+      "truth": "Greenshade is the wet, misty west where marsh, mangrove and graht-oak meet the Abecean Sea. Woodhearth is a city of rope bridges strung among tall coastal trees, a port the Pact allows to trade with Summerset and Senchal, with the poorest Bosmer and outsiders camped on the muddy ground below. The Wilderking, the forest's spirit-guardian, holds court in a hollow grove the living rarely find. The burned Ayleid City of Ash and the shifting Labyrinth lie inland. Maormer raiders camp on the drowned coast, and the Spinners say the Wilderking has gone quiet.",
+      "layers": {
+        "L1": [
+          {
+            "id": "drowned_coast",
+            "text": "subsided beaches and mangrove estuaries on the western sea",
+            "cites": []
+          },
+          {
+            "id": "mire_basins",
+            "text": "low peat-and-clay hollows inland",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sea_mists",
+            "text": "rolling salt fog off the Abecean",
+            "cites": [
+              "valenwood.L2.south_storms",
+              "greenshade.L1.drowned_coast"
+            ]
+          },
+          {
+            "id": "wettest_west",
+            "text": "heavy year-round rain",
+            "cites": [
+              "valenwood.L2.warm_wet",
+              "greenshade.L1.mire_basins"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "marsh_water",
+            "text": "Gathongor's Mire and Verrant Morass",
+            "cites": [
+              "greenshade.L1.mire_basins",
+              "greenshade.L2.wettest_west"
+            ]
+          },
+          {
+            "id": "woodhearth_bay",
+            "text": "sheltered harbour sound",
+            "cites": [
+              "greenshade.L1.drowned_coast"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "mire_fen",
+            "text": "reeds, stranglers and hoarvors",
+            "cites": [
+              "greenshade.L3.marsh_water"
+            ]
+          },
+          {
+            "id": "mangrove_delta",
+            "text": "coastal mangrove roots",
+            "cites": [
+              "greenshade.L1.drowned_coast",
+              "greenshade.L3.woodhearth_bay"
+            ]
+          },
+          {
+            "id": "bridge_canopy",
+            "text": "tall straight trees linked by rope bridges",
+            "cites": [
+              "valenwood.L4.canopy_layers",
+              "greenshade.L3.woodhearth_bay"
+            ]
+          },
+          {
+            "id": "wisp_hollow",
+            "text": "shaded hollows lit by wisps",
+            "cites": [
+              "greenshade.L2.sea_mists",
+              "greenshade.L3.marsh_water"
+            ]
+          },
+          {
+            "id": "spriggan_grove",
+            "text": "vine-draped ancient ruins",
+            "cites": [
+              "valenwood.L4.green_hostiles",
+              "greenshade.L1.mire_basins"
+            ]
+          },
+          {
+            "id": "drowned_beach",
+            "text": "dead surf-washed trunks",
+            "cites": [
+              "greenshade.L1.drowned_coast"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "bridge_port",
+            "text": "shipping with Summerset and Senchal",
+            "cites": [
+              "valenwood.L5.ports",
+              "greenshade.L3.woodhearth_bay"
+            ]
+          },
+          {
+            "id": "net_fishing",
+            "text": "bay and estuary fisheries",
+            "cites": [
+              "greenshade.L3.woodhearth_bay"
+            ]
+          },
+          {
+            "id": "reed_weaving",
+            "text": "craft from dead fallen reed only",
+            "cites": [
+              "valenwood.L4.pact_forest",
+              "greenshade.L4.mire_fen"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "woodhearth_seat",
+            "text": "the rope-bridge port city",
+            "cites": [
+              "valenwood.L6.tree_cities",
+              "greenshade.L3.woodhearth_bay",
+              "greenshade.L4.bridge_canopy"
+            ]
+          },
+          {
+            "id": "greenheart",
+            "text": "a marsh town inside a hollow tree",
+            "cites": [
+              "valenwood.L6.tree_cities",
+              "greenshade.L1.mire_basins"
+            ]
+          },
+          {
+            "id": "marbruk",
+            "text": "a glade fort-town of outsiders and Bosmer on the road east",
+            "cites": [
+              "valenwood.L5.pact_imports",
+              "greenshade.L1.mire_basins"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "bridge_district_rank",
+            "text": "high bridge tiers above the docks",
+            "cites": [
+              "valenwood.L7.vertical_rank",
+              "greenshade.L6.woodhearth_seat"
+            ]
+          },
+          {
+            "id": "ground_camp",
+            "text": "the poorest of Valenwood on the mud floor",
+            "cites": [
+              "valenwood.L6.poor_places",
+              "greenshade.L6.woodhearth_seat"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "wilderking_court",
+            "text": "the living spirit-throne of the western woods",
+            "cites": [
+              "valenwood.L8.wilderking",
+              "greenshade.L4.spriggan_grove"
+            ]
+          },
+          {
+            "id": "spinners_of_greenshade",
+            "text": "story-priests of the mire",
+            "cites": [
+              "valenwood.L7.spinners",
+              "greenshade.L6.greenheart"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "wilderking_silent",
+            "text": "the forest guardian no longer answers the Spinners",
+            "cites": [
+              "greenshade.L8.wilderking_court"
+            ]
+          },
+          {
+            "id": "maormer_shore",
+            "text": "sea-elf landings along the western coves",
+            "cites": [
+              "valenwood.L9.maormer_raids",
+              "greenshade.L1.drowned_coast"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "wilderking_spirits",
+            "text": "groves of the Wilderking's corrupted servants",
+            "cites": [
+              "greenshade.L4.spriggan_grove",
+              "greenshade.L9.wilderking_silent"
+            ]
+          },
+          {
+            "id": "city_of_ash",
+            "text": "burned Ayleid citadel",
+            "cites": [
+              "valenwood.L10.ayleid_vaults",
+              "greenshade.L1.mire_basins"
+            ]
+          },
+          {
+            "id": "labyrinth",
+            "text": "shifting root-and-stone maze",
+            "cites": [
+              "valenwood.L10.ayleid_vaults",
+              "greenshade.L4.spriggan_grove"
+            ]
+          },
+          {
+            "id": "maormer_camp",
+            "text": "fortified sea-elf beachheads",
+            "cites": [
+              "valenwood.L10.maormer_beachheads",
+              "greenshade.L1.drowned_coast",
+              "greenshade.L9.maormer_shore"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "ash_fire",
+            "text": "the burning of the western Ayleid city",
+            "cites": [
+              "valenwood.L11.ayleid_age",
+              "greenshade.L10.city_of_ash"
+            ]
+          },
+          {
+            "id": "wilderking_line",
+            "text": "each Wilderking chosen from a mortal host",
+            "cites": [
+              "valenwood.L11.dawn_pact",
+              "greenshade.L8.wilderking_court"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "greenshade.L5.net_fishing",
+            "greenshade.L3.woodhearth_bay",
+            "greenshade.L4.mangrove_delta"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "greenshade.L5.net_fishing"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "greenshade.L6.marbruk"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "greenshade.L6.woodhearth_seat",
+            "greenshade.L6.marbruk"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "greenshade.L5.net_fishing"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "greenshade.L6.woodhearth_seat",
+            "greenshade.L6.marbruk"
+          ]
+        },
+        "bard": {
+          "weight": 2,
+          "why": [
+            "greenshade.L8.spinners_of_greenshade"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "greenshade.L5.reed_weaving"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "greenshade.L6.woodhearth_seat"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "greenshade.L6.woodhearth_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "greenshade.L7.bridge_district_rank"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "greenshade.L8.wilderking_court",
+            "greenshade.L6.woodhearth_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "greenshade.L8.wilderking_court"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "greenshade.L6.woodhearth_seat"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "greenshade.L10.wilderking_spirits"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "greenshade.L7.bridge_district_rank"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "greenshade.L7.ground_camp"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "greenshade.L6.woodhearth_seat",
+            "greenshade.L6.greenheart",
+            "greenshade.L6.marbruk"
+          ]
+        },
+        "housekeeper": {
+          "weight": 4,
+          "why": [
+            "greenshade.L7.bridge_district_rank",
+            "greenshade.L6.woodhearth_seat",
+            "greenshade.L6.greenheart"
+          ]
+        },
+        "child": {
+          "weight": 4,
+          "why": [
+            "greenshade.L7.bridge_district_rank",
+            "greenshade.L6.woodhearth_seat",
+            "greenshade.L6.greenheart"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "greenshade.L7.bridge_district_rank"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "greenshade.L7.bridge_district_rank",
+            "greenshade.L7.ground_camp"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "greenshade.L7.bridge_district_rank"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "greenshade.L7.bridge_district_rank"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "greenshade.L7.bridge_district_rank"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "greenshade.L5.bridge_port"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "greenshade.L9.wilderking_silent"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "ruin": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "dwemer": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "falmer": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "bandit": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "fort": [
+          "greenshade.L10.maormer_camp",
+          "greenshade.L6.marbruk"
+        ],
+        "military": [
+          "greenshade.L9.wilderking_silent"
+        ],
+        "mage": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "vampire": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "necromancer": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "hagraven": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "forsworn": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "beast": [
+          "greenshade.L4.mire_fen"
+        ],
+        "ice": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "mine": [
+          "greenshade.L5.bridge_port"
+        ],
+        "grove": [
+          "greenshade.L4.mangrove_delta",
+          "greenshade.L4.spriggan_grove"
+        ],
+        "smuggler": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "cave": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "giant": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "dragon": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "tower": [
+          "greenshade.L10.wilderking_spirits"
+        ],
+        "cabin": [
+          "greenshade.L5.net_fishing"
+        ],
+        "wreck": [
+          "greenshade.L5.bridge_port"
+        ]
+      }
+    },
+    "malabal_tor": {
+      "truth": "Malabal Tor is the deep jungle of the north-west on the Xylo River, the Bosmer heartland that the Dominion reaches least. The city of Silvenar is a hidden court under hollowed root arches, where the Silvenar holds audience and the Green Lady trains. Falinesti stands here in summer. Wood Orc enclaves keep an uneasy truce with their hunting neighbours, Velyn Harbor trades on the coast, and the oldest Wild Hunt grounds lie in the jungle where hoarvors breed. Here the Pact is kept most strictly and the Thalmor are least welcome.",
+      "layers": {
+        "L1": [
+          {
+            "id": "xylo_gorge",
+            "text": "the steep 30-block gorge of the Xylo River",
+            "cites": []
+          },
+          {
+            "id": "jungle_floor",
+            "text": "deep wet humus in the north-western basin",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "hothouse",
+            "text": "steaming, rain-drenched understorey air",
+            "cites": [
+              "valenwood.L2.warm_wet",
+              "valenwood.L2.under_canopy",
+              "malabal_tor.L1.jungle_floor"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "xylo_basin",
+            "text": "the Xylo and its waterfalls",
+            "cites": [
+              "valenwood.L3.river_net",
+              "malabal_tor.L1.xylo_gorge"
+            ]
+          },
+          {
+            "id": "velyn_bay",
+            "text": "the north-western harbour mouth",
+            "cites": [
+              "valenwood.L1.delta_coast",
+              "malabal_tor.L1.xylo_gorge"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "jungle_understorey",
+            "text": "lianas, giant ferns, wasps and spiders",
+            "cites": [
+              "malabal_tor.L1.jungle_floor",
+              "malabal_tor.L2.hothouse"
+            ]
+          },
+          {
+            "id": "xylo_gorge_walls",
+            "text": "hanging roots and spray",
+            "cites": [
+              "malabal_tor.L1.xylo_gorge",
+              "malabal_tor.L3.xylo_basin"
+            ]
+          },
+          {
+            "id": "hoarvor_hollow",
+            "text": "rot-pools where hoarvors breed",
+            "cites": [
+              "valenwood.L4.predators",
+              "malabal_tor.L2.hothouse"
+            ]
+          },
+          {
+            "id": "root_amphitheatre",
+            "text": "arching roots lit by fireflies",
+            "cites": [
+              "valenwood.L4.graht_oaks",
+              "malabal_tor.L1.jungle_floor"
+            ]
+          },
+          {
+            "id": "canopy_high",
+            "text": "tallest crowns where imga nest",
+            "cites": [
+              "valenwood.L4.canopy_layers",
+              "malabal_tor.L2.hothouse"
+            ]
+          },
+          {
+            "id": "orc_clearing",
+            "text": "stump-cleared forge rings of the Wood Orcs",
+            "cites": [
+              "malabal_tor.L1.jungle_floor"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "strict_hunters",
+            "text": "bone-bow hunting and smokehouses",
+            "cites": [
+              "valenwood.L5.meat_and_jagga",
+              "malabal_tor.L4.jungle_understorey"
+            ]
+          },
+          {
+            "id": "velyn_trade",
+            "text": "coastal shipping",
+            "cites": [
+              "valenwood.L5.ports",
+              "malabal_tor.L3.velyn_bay"
+            ]
+          },
+          {
+            "id": "orc_smiths",
+            "text": "iron work traded to Bosmer",
+            "cites": [
+              "valenwood.L1.poor_ore",
+              "malabal_tor.L4.orc_clearing"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "silvenar_seat",
+            "text": "the hidden court city under root arches",
+            "cites": [
+              "valenwood.L6.tree_cities",
+              "malabal_tor.L4.root_amphitheatre"
+            ]
+          },
+          {
+            "id": "falinesti_summer_site",
+            "text": "the northern summer site of the walking tree",
+            "cites": [
+              "valenwood.L6.walking_city",
+              "malabal_tor.L4.canopy_high"
+            ]
+          },
+          {
+            "id": "velyn_harbor",
+            "text": "western port town",
+            "cites": [
+              "malabal_tor.L3.velyn_bay",
+              "malabal_tor.L5.velyn_trade"
+            ]
+          },
+          {
+            "id": "orc_enclaves",
+            "text": "the strongholds of Drabul and Jathsogur",
+            "cites": [
+              "malabal_tor.L4.orc_clearing",
+              "malabal_tor.L5.orc_smiths"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "silvenar_court",
+            "text": "keepers of the people's voice",
+            "cites": [
+              "valenwood.L8.silvenar_and_lady",
+              "malabal_tor.L6.silvenar_seat"
+            ]
+          },
+          {
+            "id": "orc_outsiders",
+            "text": "Wood Orc clans living outside the Pact",
+            "cites": [
+              "malabal_tor.L6.orc_enclaves"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "strictest_pact",
+            "text": "orthodox Meat Mandate observance",
+            "cites": [
+              "valenwood.L4.pact_forest",
+              "malabal_tor.L5.strict_hunters"
+            ]
+          },
+          {
+            "id": "green_lady_trials",
+            "text": "the martial trials of the forest's champion",
+            "cites": [
+              "valenwood.L8.silvenar_and_lady",
+              "malabal_tor.L6.silvenar_seat"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "lady_succession",
+            "text": "the Green Lady's trial for a successor",
+            "cites": [
+              "malabal_tor.L8.green_lady_trials"
+            ]
+          },
+          {
+            "id": "orc_truce",
+            "text": "tension over Wood Orc timber cutting",
+            "cites": [
+              "malabal_tor.L6.orc_enclaves",
+              "malabal_tor.L8.strictest_pact"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "wild_hunt_grounds_xylo",
+            "text": "ancient transformation glades",
+            "cites": [
+              "valenwood.L10.wild_hunt_grounds",
+              "malabal_tor.L4.jungle_understorey",
+              "malabal_tor.L9.lady_succession"
+            ]
+          },
+          {
+            "id": "tomb_of_the_apostates",
+            "text": "Pact-breakers sealed in living wood",
+            "cites": [
+              "valenwood.L10.root_tombs",
+              "malabal_tor.L4.root_amphitheatre"
+            ]
+          },
+          {
+            "id": "hoarvor_pit",
+            "text": "subterranean blood-tick caverns",
+            "cites": [
+              "malabal_tor.L1.jungle_floor",
+              "malabal_tor.L4.hoarvor_hollow"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "apostates",
+            "text": "Bosmer who once broke the Pact and were entombed in a tree",
+            "cites": [
+              "valenwood.L11.dawn_pact",
+              "malabal_tor.L10.tomb_of_the_apostates"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.orc_smiths"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.orc_smiths"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L4.orc_clearing"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L5.velyn_trade",
+            "malabal_tor.L3.velyn_bay"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L5.velyn_trade",
+            "malabal_tor.L5.orc_smiths"
+          ]
+        },
+        "tailor": {
+          "weight": 4,
+          "why": [
+            "malabal_tor.L5.velyn_trade",
+            "malabal_tor.L5.orc_smiths",
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L5.velyn_trade",
+            "malabal_tor.L5.orc_smiths"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L6.silvenar_seat"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L6.silvenar_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L8.strictest_pact"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L6.silvenar_seat",
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L6.silvenar_seat",
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L7.silvenar_court",
+            "malabal_tor.L6.silvenar_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L8.strictest_pact"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L6.silvenar_seat"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L10.wild_hunt_grounds_xylo"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "malabal_tor.L6.silvenar_seat",
+            "malabal_tor.L6.velyn_harbor",
+            "malabal_tor.L7.orc_outsiders"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L6.silvenar_seat",
+            "malabal_tor.L6.velyn_harbor"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "malabal_tor.L6.silvenar_seat",
+            "malabal_tor.L6.velyn_harbor"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L7.orc_outsiders"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.orc_smiths"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "malabal_tor.L5.orc_smiths"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L7.silvenar_court"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L5.strict_hunters"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "malabal_tor.L9.lady_succession"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "malabal_tor.L10.tomb_of_the_apostates",
+          "malabal_tor.L11.apostates"
+        ],
+        "ruin": [
+          "malabal_tor.L10.tomb_of_the_apostates",
+          "malabal_tor.L11.apostates"
+        ],
+        "dwemer": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "falmer": [
+          "malabal_tor.L10.hoarvor_pit"
+        ],
+        "bandit": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "fort": [
+          "malabal_tor.L9.lady_succession"
+        ],
+        "military": [
+          "malabal_tor.L9.lady_succession"
+        ],
+        "mage": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "vampire": [
+          "malabal_tor.L10.hoarvor_pit"
+        ],
+        "necromancer": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "hagraven": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "forsworn": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "beast": [
+          "malabal_tor.L4.jungle_understorey",
+          "malabal_tor.L10.hoarvor_pit"
+        ],
+        "ice": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "mine": [
+          "malabal_tor.L5.orc_smiths"
+        ],
+        "grove": [
+          "malabal_tor.L4.jungle_understorey"
+        ],
+        "smuggler": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "cave": [
+          "malabal_tor.L10.hoarvor_pit"
+        ],
+        "giant": [
+          "malabal_tor.L4.jungle_understorey"
+        ],
+        "dragon": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "tower": [
+          "malabal_tor.L10.wild_hunt_grounds_xylo"
+        ],
+        "cabin": [
+          "malabal_tor.L5.strict_hunters"
+        ],
+        "wreck": [
+          "malabal_tor.L5.strict_hunters"
+        ]
+      }
+    },
+    "reapers_march": {
+      "truth": "Reaper's March is the borderland where Valenwood meets Elsweyr and Cyrodiil, a country of drier red knolls and golden savanna between oak groves. Bosmer and Khajiit share it under a truce renewed with a bone laid on a stone altar each generation. Arenthia hangs its gardens over a waterfall; Rawl'kha is a Khajiit temple-city among the trees; old Imperial forts watch the roads. Werewolf packs of Hircine's hunters run the knolls, the Maw of Lorkhaj glowers on the Khajiit side, and this year one bone of the truce is missing.",
+      "layers": {
+        "L1": [
+          {
+            "id": "knolls",
+            "text": "red sandstone knolls and dry ridges up to 120 blocks",
+            "cites": []
+          },
+          {
+            "id": "strid_valley",
+            "text": "the incised border gorge of the Strid River",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "dry_season",
+            "text": "warm dry winds off the Elsweyr plateau",
+            "cites": [
+              "valenwood.L2.drier_march",
+              "reapers_march.L1.knolls"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "waterdancer_falls",
+            "text": "the high cascade at Arenthia",
+            "cites": [
+              "valenwood.L3.river_net",
+              "reapers_march.L1.knolls"
+            ]
+          },
+          {
+            "id": "strid",
+            "text": "the border river facing Colovia",
+            "cites": [
+              "valenwood.L3.river_net",
+              "reapers_march.L1.strid_valley"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "savanna_grove_mosaic",
+            "text": "golden grass with oak islands and big cats",
+            "cites": [
+              "reapers_march.L1.knolls",
+              "reapers_march.L2.dry_season"
+            ]
+          },
+          {
+            "id": "knoll_scrub",
+            "text": "thorn and red rock",
+            "cites": [
+              "reapers_march.L1.knolls",
+              "reapers_march.L2.dry_season"
+            ]
+          },
+          {
+            "id": "riverine_gallery",
+            "text": "tall riverside trees",
+            "cites": [
+              "reapers_march.L3.strid"
+            ]
+          },
+          {
+            "id": "khajiit_fields",
+            "text": "farmed grain and cane plots round Khajiit towns",
+            "cites": [
+              "reapers_march.L1.knolls",
+              "reapers_march.L3.waterdancer_falls"
+            ]
+          },
+          {
+            "id": "henge_heath",
+            "text": "short turf around bone-white stones",
+            "cites": [
+              "reapers_march.L1.knolls"
+            ]
+          },
+          {
+            "id": "poacher_scar",
+            "text": "felled stumps along the Colovian bank",
+            "cites": [
+              "reapers_march.L1.strid_valley",
+              "reapers_march.L3.strid"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "grain_road",
+            "text": "the Pact caravan trade from Elsweyr",
+            "cites": [
+              "valenwood.L5.pact_imports",
+              "reapers_march.L2.dry_season"
+            ]
+          },
+          {
+            "id": "khajiit_farming",
+            "text": "Khajiit farm here as they are not bound by the Pact",
+            "cites": [
+              "valenwood.L5.pact_imports",
+              "reapers_march.L4.khajiit_fields"
+            ]
+          },
+          {
+            "id": "border_tolls",
+            "text": "bridge and road customs",
+            "cites": [
+              "valenwood.L6.march_border_towns",
+              "reapers_march.L3.strid"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "arenthia_seat",
+            "text": "the waterfall seat of the March",
+            "cites": [
+              "reapers_march.L1.knolls",
+              "reapers_march.L3.waterdancer_falls"
+            ]
+          },
+          {
+            "id": "rawlkha",
+            "text": "Khajiit market and temple city",
+            "cites": [
+              "reapers_march.L4.khajiit_fields",
+              "reapers_march.L5.khajiit_farming"
+            ]
+          },
+          {
+            "id": "border_cluster",
+            "text": "Eagle Vale, Emperor's Run, Longvale and Wasten Brukbrook",
+            "cites": [
+              "reapers_march.L3.strid",
+              "reapers_march.L5.border_tolls"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "mixed_town_rank",
+            "text": "Bosmer high and Khajiit low in Arenthia, reversed in Rawl'kha",
+            "cites": [
+              "valenwood.L7.vertical_rank",
+              "reapers_march.L6.arenthia_seat",
+              "reapers_march.L6.rawlkha"
+            ]
+          },
+          {
+            "id": "truce_elders",
+            "text": "joint Bosmer-Khajiit border arbiters",
+            "cites": [
+              "valenwood.L9.march_truce",
+              "reapers_march.L6.arenthia_seat"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "bone_truce_rite",
+            "text": "generational oath at Reaper's Henge",
+            "cites": [
+              "valenwood.L9.march_truce",
+              "reapers_march.L4.henge_heath"
+            ]
+          },
+          {
+            "id": "moonmont",
+            "text": "Khajiit lunar shrine on the border",
+            "cites": [
+              "valenwood.L8.outsiders",
+              "reapers_march.L6.rawlkha"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "missing_bone",
+            "text": "a stolen truce-bone threatening border war",
+            "cites": [
+              "reapers_march.L7.truce_elders",
+              "reapers_march.L8.bone_truce_rite"
+            ]
+          },
+          {
+            "id": "colovian_pressure",
+            "text": "Colovian loggers and poachers crossing the Strid",
+            "cites": [
+              "valenwood.L9.strid_border",
+              "reapers_march.L4.poacher_scar"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "hircine_packs_march",
+            "text": "werewolf hunting packs on the knolls",
+            "cites": [
+              "valenwood.L10.hircine_packs",
+              "reapers_march.L1.knolls",
+              "reapers_march.L4.savanna_grove_mosaic"
+            ]
+          },
+          {
+            "id": "maw_of_lorkhaj",
+            "text": "a sealed Khajiit dro-m'Athra dark site",
+            "cites": [
+              "reapers_march.L1.knolls",
+              "reapers_march.L8.moonmont"
+            ]
+          },
+          {
+            "id": "septim_forts_march",
+            "text": "Grimwatch and Sphinxmoth border forts",
+            "cites": [
+              "valenwood.L10.septim_forts",
+              "reapers_march.L1.strid_valley",
+              "reapers_march.L9.colovian_pressure"
+            ]
+          },
+          {
+            "id": "selenes_web",
+            "text": "Arena's starting dungeon in the March",
+            "cites": [
+              "valenwood.L4.green_hostiles",
+              "reapers_march.L4.savanna_grove_mosaic"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "march_wars",
+            "text": "the Three Banners and Colovian border campaigns",
+            "cites": [
+              "valenwood.L11.imperial_province",
+              "reapers_march.L10.septim_forts_march"
+            ]
+          },
+          {
+            "id": "thizzrini",
+            "text": "the grand arena of the old border wars",
+            "cites": [
+              "reapers_march.L6.rawlkha",
+              "reapers_march.L11.march_wars"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "farmer": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L5.khajiit_farming"
+          ]
+        },
+        "farmhand": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L5.khajiit_farming"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "miller": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L5.khajiit_farming"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "butcher": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L5.khajiit_farming",
+            "reapers_march.L4.khajiit_fields"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "merchant": {
+          "weight": 4,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L5.border_tolls",
+            "reapers_march.L6.rawlkha"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L6.rawlkha"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L5.border_tolls",
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L5.khajiit_farming"
+          ]
+        },
+        "server": {
+          "weight": 4,
+          "why": [
+            "reapers_march.L5.grain_road",
+            "reapers_march.L5.border_tolls",
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L8.moonmont"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L7.mixed_town_rank"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L8.bone_truce_rite"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "reapers_march.L9.missing_bone",
+            "reapers_march.L6.arenthia_seat",
+            "reapers_march.L6.border_cluster"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L10.hircine_packs_march"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L7.mixed_town_rank"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L7.mixed_town_rank"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L6.arenthia_seat",
+            "reapers_march.L7.mixed_town_rank"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L7.mixed_town_rank",
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "reapers_march.L7.mixed_town_rank",
+            "reapers_march.L6.arenthia_seat"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L11.thizzrini"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L5.khajiit_farming"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "reapers_march.L5.khajiit_farming"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L7.mixed_town_rank"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L7.mixed_town_rank"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L5.grain_road"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "reapers_march.L9.missing_bone"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "ruin": [
+          "reapers_march.L8.moonmont"
+        ],
+        "dwemer": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "falmer": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "bandit": [
+          "reapers_march.L5.grain_road",
+          "reapers_march.L5.border_tolls"
+        ],
+        "fort": [
+          "reapers_march.L9.missing_bone",
+          "reapers_march.L10.septim_forts_march",
+          "reapers_march.L6.border_cluster"
+        ],
+        "military": [
+          "reapers_march.L9.missing_bone"
+        ],
+        "mage": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "vampire": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "necromancer": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "hagraven": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "forsworn": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "beast": [
+          "reapers_march.L4.savanna_grove_mosaic",
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "ice": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "mine": [
+          "reapers_march.L5.grain_road"
+        ],
+        "grove": [
+          "reapers_march.L4.savanna_grove_mosaic"
+        ],
+        "smuggler": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "cave": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "giant": [
+          "reapers_march.L4.henge_heath"
+        ],
+        "dragon": [
+          "reapers_march.L10.hircine_packs_march"
+        ],
+        "tower": [
+          "reapers_march.L9.colovian_pressure"
+        ],
+        "cabin": [
+          "reapers_march.L5.khajiit_farming"
+        ],
+        "wreck": [
+          "reapers_march.L5.grain_road"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "bosmer_ploughed_crop_field",
+      "b": "valenwood.L4.pact_forest",
+      "reason": "The Green Pact forbids Bosmer from clearing forest or ploughing plant crops in Valenwood"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "bosmer_lumber_mill",
+      "b": "valenwood.L8.yffre_faith",
+      "reason": "Cutting living Valenwood timber violates Y'ffre's Green Pact; wood must be imported or gathered dead"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "open_talos_shrine",
+      "b": "grahtwood.L7.crown_court_thalmor",
+      "reason": "Elden Root's Dominion capital hosts Thalmor envoys in the crown and enforces the ban on Talos worship"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "dwemer_constructs",
+      "b": "valenwood.L10.ayleid_vaults",
+      "reason": "Valenwood's subterranean ruins are Ayleid white-stone vaults and root tombs, not Dwemer halls"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.pact_imports",
+        "valenwood.L1.forest_basin",
+        "valenwood.L1.river_gorges"
+      ]
+    },
+    "smith": {
+      "weight": 3,
+      "why": [
+        "valenwood.L5.bone_hide_craft",
+        "valenwood.L5.pact_imports"
+      ]
+    },
+    "jeweler": {
+      "weight": 1,
+      "why": [
+        "valenwood.L5.meat_and_jagga"
+      ]
+    },
+    "farmer": {
+      "weight": 2,
+      "why": [
+        "valenwood.L5.pact_imports"
+      ]
+    },
+    "farmhand": {
+      "weight": 2,
+      "why": [
+        "valenwood.L5.pact_imports"
+      ]
+    },
+    "lumberjack": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.bone_hide_craft",
+        "valenwood.L5.pact_imports",
+        "valenwood.L5.ports"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "valenwood.L5.pact_imports"
+      ]
+    },
+    "mill_hand": {
+      "weight": 2,
+      "why": [
+        "valenwood.L5.pact_imports"
+      ]
+    },
+    "woodcutter": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.pact_imports",
+        "valenwood.L4.pact_forest",
+        "valenwood.L4.game_abundance"
+      ]
+    },
+    "fisher": {
+      "weight": 3,
+      "why": [
+        "valenwood.L3.sink_lakes",
+        "valenwood.L4.pact_forest"
+      ]
+    },
+    "hunter": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.meat_and_jagga",
+        "valenwood.L5.pelts_and_feathers",
+        "valenwood.L4.pact_forest"
+      ]
+    },
+    "butcher": {
+      "weight": 2,
+      "why": [
+        "valenwood.L5.meat_and_jagga"
+      ]
+    },
+    "fletcher": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.meat_and_jagga",
+        "valenwood.L5.pact_imports",
+        "valenwood.L4.game_abundance"
+      ]
+    },
+    "alchemist": {
+      "weight": 1,
+      "why": [
+        "valenwood.L5.meat_and_jagga"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.pelts_and_feathers",
+        "valenwood.L6.march_border_towns",
+        "valenwood.L6.busy_centres"
+      ]
+    },
+    "tailor": {
+      "weight": 4,
+      "why": [
+        "valenwood.L5.pelts_and_feathers",
+        "valenwood.L7.vertical_rank",
+        "valenwood.L7.outsider_traders"
+      ]
+    },
+    "bookseller": {
+      "weight": 3,
+      "why": [
+        "valenwood.L5.pelts_and_feathers",
+        "valenwood.L6.busy_centres"
+      ]
+    },
+    "innkeeper": {
+      "weight": 4,
+      "why": [
+        "valenwood.L6.march_border_towns",
+        "valenwood.L6.busy_centres",
+        "valenwood.L6.poor_places"
+      ]
+    },
+    "cook": {
+      "weight": 2,
+      "why": [
+        "valenwood.L6.poor_places"
+      ]
+    },
+    "server": {
+      "weight": 4,
+      "why": [
+        "valenwood.L6.march_border_towns",
+        "valenwood.L6.busy_centres",
+        "valenwood.L6.poor_places"
+      ]
+    },
+    "bard": {
+      "weight": 2,
+      "why": [
+        "valenwood.L8.songs_not_stone"
+      ]
+    },
+    "priest": {
+      "weight": 3,
+      "why": [
+        "valenwood.L8.yffre_faith",
+        "valenwood.L8.burial_trees"
+      ]
+    },
+    "jarl": {
+      "weight": 4,
+      "why": [
+        "valenwood.L6.busy_centres",
+        "valenwood.L7.vertical_rank",
+        "valenwood.L9.camoran_court"
+      ]
+    },
+    "steward": {
+      "weight": 3,
+      "why": [
+        "valenwood.L6.busy_centres",
+        "valenwood.L7.vertical_rank"
+      ]
+    },
+    "housecarl": {
+      "weight": 4,
+      "why": [
+        "valenwood.L7.vertical_rank",
+        "valenwood.L7.hunters_honoured",
+        "valenwood.L9.camoran_court"
+      ]
+    },
+    "court_wizard": {
+      "weight": 3,
+      "why": [
+        "valenwood.L7.vertical_rank",
+        "valenwood.L6.busy_centres"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "valenwood.L8.yffre_faith"
+      ]
+    },
+    "guard": {
+      "weight": 4,
+      "why": [
+        "valenwood.L9.camoran_court",
+        "valenwood.L9.strid_border",
+        "valenwood.L6.march_border_towns"
+      ]
+    },
+    "fence": {
+      "weight": 1,
+      "why": [
+        "valenwood.L10.ayleid_vaults"
+      ]
+    },
+    "prisoner": {
+      "weight": 1,
+      "why": [
+        "valenwood.L7.vertical_rank"
+      ]
+    },
+    "beggar": {
+      "weight": 3,
+      "why": [
+        "valenwood.L7.vertical_rank",
+        "valenwood.L6.poor_places"
+      ]
+    },
+    "citizen": {
+      "weight": 4,
+      "why": [
+        "valenwood.L6.march_border_towns",
+        "valenwood.L6.busy_centres",
+        "valenwood.L6.poor_places"
+      ]
+    },
+    "housekeeper": {
+      "weight": 3,
+      "why": [
+        "valenwood.L6.march_border_towns",
+        "valenwood.L6.busy_centres"
+      ]
+    },
+    "child": {
+      "weight": 3,
+      "why": [
+        "valenwood.L6.march_border_towns",
+        "valenwood.L6.busy_centres"
+      ]
+    },
+    "elder": {
+      "weight": 2,
+      "why": [
+        "valenwood.L8.songs_not_stone"
+      ]
+    },
+    "labourer": {
+      "weight": 2,
+      "why": [
+        "valenwood.L7.vertical_rank"
+      ]
+    },
+    "worker": {
+      "weight": 1,
+      "why": [
+        "valenwood.L5.meat_and_jagga"
+      ]
+    },
+    "guild_leader": {
+      "weight": 1,
+      "why": [
+        "valenwood.L7.vertical_rank"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 1,
+      "why": [
+        "valenwood.L7.vertical_rank"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 1,
+      "why": [
+        "valenwood.L5.meat_and_jagga"
+      ]
+    },
+    "survivor": {
+      "weight": 1,
+      "why": [
+        "valenwood.L9.camoran_court"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "valenwood.L10.root_tombs",
+      "valenwood.L8.burial_trees"
+    ],
+    "ruin": [
+      "valenwood.L10.ayleid_vaults",
+      "valenwood.L10.root_tombs",
+      "valenwood.L8.yffre_faith"
+    ],
+    "dwemer": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "falmer": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "bandit": [
+      "valenwood.L10.septim_forts"
+    ],
+    "fort": [
+      "valenwood.L9.strid_border",
+      "valenwood.L10.septim_forts",
+      "valenwood.L6.march_border_towns"
+    ],
+    "military": [
+      "valenwood.L9.strid_border"
+    ],
+    "mage": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "vampire": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "necromancer": [
+      "valenwood.L8.burial_trees"
+    ],
+    "hagraven": [
+      "valenwood.L4.pact_forest"
+    ],
+    "forsworn": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "beast": [
+      "valenwood.L4.predators",
+      "valenwood.L10.hircine_packs",
+      "valenwood.L10.thalmor_cells"
+    ],
+    "ice": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "mine": [
+      "valenwood.L5.pact_imports",
+      "valenwood.L1.forest_basin",
+      "valenwood.L1.river_gorges"
+    ],
+    "grove": [
+      "valenwood.L4.graht_oaks",
+      "valenwood.L4.game_abundance",
+      "valenwood.L4.green_hostiles"
+    ],
+    "smuggler": [
+      "valenwood.L10.maormer_beachheads"
+    ],
+    "cave": [
+      "valenwood.L10.septim_forts",
+      "valenwood.L1.karst_sinks"
+    ],
+    "giant": [
+      "valenwood.L4.graht_oaks",
+      "valenwood.L4.game_abundance",
+      "valenwood.L4.predators"
+    ],
+    "dragon": [
+      "valenwood.L10.ayleid_vaults"
+    ],
+    "tower": [
+      "valenwood.L10.septim_forts"
+    ],
+    "cabin": [
+      "valenwood.L6.poor_places"
+    ],
+    "wreck": [
+      "valenwood.L5.meat_and_jagga"
+    ]
+  }
+}

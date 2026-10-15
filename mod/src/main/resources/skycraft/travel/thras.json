@@ -1,0 +1,394 @@
+{
+  "province": "thras",
+  "why": [
+    "coral_kingdom.L1.agonir_coral_caldera",
+    "coral_kingdom.L2.phosphorescent_brine_haze"
+  ],
+  "modes": [
+    "boat",
+    "caravan",
+    "wayshrine"
+  ],
+  "nodes": [
+    {
+      "id": "sload_spawning_pools",
+      "place": "sload_spawning_pools",
+      "name": "place.skycraft.sload_spawning_pools",
+      "region": "thras/coral_kingdom",
+      "x": -16045,
+      "z": 16258,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_01",
+      "name": "travel.skycraft.wayshrine.coral_kingdom.01",
+      "region": "thras/coral_kingdom",
+      "x": -15410,
+      "z": 16730,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_02",
+      "name": "travel.skycraft.wayshrine.coral_kingdom.02",
+      "region": "thras/coral_kingdom",
+      "x": -16418,
+      "z": 17341,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_03",
+      "name": "travel.skycraft.wayshrine.coral_kingdom.03",
+      "region": "thras/coral_kingdom",
+      "x": -14600,
+      "z": 17800,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_04",
+      "name": "travel.skycraft.wayshrine.coral_kingdom.04",
+      "region": "thras/coral_kingdom",
+      "x": -15362,
+      "z": 16682,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "id": "wayshrine_coral_kingdom_05",
+      "name": "travel.skycraft.wayshrine.coral_kingdom.05",
+      "region": "thras/coral_kingdom",
+      "x": -14648,
+      "z": 17776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "from": "sload_spawning_pools",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -16045,
+          16258
+        ],
+        [
+          -15410,
+          16730
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "sload_spawning_pools",
+      "to": "wayshrine_coral_kingdom_04",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -16045,
+          16258
+        ],
+        [
+          -15362,
+          16682
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_01",
+      "to": "wayshrine_coral_kingdom_04",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -15410,
+          16730
+        ],
+        [
+          -15362,
+          16682
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_01",
+      "to": "sload_spawning_pools",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -15410,
+          16730
+        ],
+        [
+          -16045,
+          16258
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_02",
+      "to": "sload_spawning_pools",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -16418,
+          17341
+        ],
+        [
+          -16045,
+          16258
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_02",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -16418,
+          17341
+        ],
+        [
+          -15410,
+          16730
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_03",
+      "to": "wayshrine_coral_kingdom_05",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -14600,
+          17800
+        ],
+        [
+          -14648,
+          17776
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_03",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -14600,
+          17800
+        ],
+        [
+          -15410,
+          16730
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_04",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -15362,
+          16682
+        ],
+        [
+          -15410,
+          16730
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_04",
+      "to": "sload_spawning_pools",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -15362,
+          16682
+        ],
+        [
+          -16045,
+          16258
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_05",
+      "to": "wayshrine_coral_kingdom_03",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -14648,
+          17776
+        ],
+        [
+          -14600,
+          17800
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_coral_kingdom_05",
+      "to": "wayshrine_coral_kingdom_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -14648,
+          17776
+        ],
+        [
+          -15410,
+          16730
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "coral_kingdom.L1.agonir_coral_caldera",
+        "coral_kingdom.L2.phosphorescent_brine_haze"
+      ]
+    }
+  ]
+}

@@ -99,6 +99,7 @@ public class LeveledGear extends LootItemConditionalFunction {
             return out;
         }
         decorate(out, level, random, enchantChance, qualityChance);
+        com.skycraft.loot.affix.ItemAffixes.applyFromContext(out, context, qualityChance);
         if ((kind == Kind.WEAPON || kind == Kind.BOW)
                 && context.getParamOrNull(LootContextParams.DAMAGE_SOURCE) == null
                 && !(context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof net.minecraft.world.entity.Mob)
@@ -247,6 +248,7 @@ public class LeveledGear extends LootItemConditionalFunction {
      * lists when the province has nothing of that kind.
      */
     public static ItemStack regional(String gearKey, Kind kind, int level, RandomSource random) {
+        com.skycraft.loot.affix.ItemAffixes.setRegionHint(gearKey);
         List<Item> items = new ArrayList<>();
         List<Integer> weights = new ArrayList<>();
         int total = 0;
@@ -340,6 +342,9 @@ public class LeveledGear extends LootItemConditionalFunction {
 
     private static void equip(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ItemStack stack, float dropChance) {
         if (stack.isEmpty()) return;
+        com.skycraft.tamriel.Region region = com.skycraft.economy.EconomyLoot.regionAt(mob.level(), mob.blockPosition());
+        String regionId = region != null ? region.id() : com.skycraft.loot.affix.ItemAffixes.consumeRegionHint();
+        com.skycraft.loot.affix.ItemAffixes.apply(stack, regionId, "corpse", npcLevel(mob), mob.getRandom(), regionId, slot.ordinal());
         mob.setItemSlot(slot, stack);
         mob.setDropChance(slot, dropChance);
     }
@@ -387,6 +392,11 @@ public class LeveledGear extends LootItemConditionalFunction {
             int q = 1 + random.nextInt(Math.max(1, Math.min(5, 1 + level / 12)));
             Tempering.setQuality(stack, Math.min(5, q));
         }
+        String hint = com.skycraft.loot.affix.ItemAffixes.consumeRegionHint();
+        String src = Math.abs(qualityChance - 0.1f) < 0.01f ? "merchant"
+                : qualityChance >= 0.32f ? "boss"
+                : qualityChance <= 0.06f ? "corpse" : "container";
+        com.skycraft.loot.affix.ItemAffixes.apply(stack, hint, src, level, random, hint, 0);
     }
 
     /** Puts one leveled enchantment on the item (Skyrim's enchanted leveled items: "of Embers", "of Scorching"...). */

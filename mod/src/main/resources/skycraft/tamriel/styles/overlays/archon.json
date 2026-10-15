@@ -1,0 +1,841 @@
+{
+  "id": "archon",
+  "why": [
+    "helstrom.L1.helstrom_root_dome",
+    "helstrom.L4.elder_hist_canopy",
+    "helstrom.L6.helstrom_ring_and_thorn_port"
+  ],
+  "tint": {
+    "wall": "minecraft:mangrove_planks",
+    "wall2": "minecraft:mossy_stone_bricks",
+    "low": "minecraft:mud_bricks",
+    "wood": "mangrove",
+    "roof": "mud_brick",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:mud_bricks",
+    "path": "minecraft:packed_mud"
+  },
+  "style": {
+    "houseStyle": "argonian",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:mangrove_planks",
+        "minecraft:mossy_stone_bricks",
+        "minecraft:mud_bricks",
+        "minecraft:packed_mud",
+        "mossy_stone_bricks",
+        "minecraft:mud_bricks"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_1_0",
+          "prop_archon_1_1",
+          "prop_archon_1_2",
+          "prop_archon_1_3",
+          "prop_archon_1_4",
+          "prop_archon_1_5",
+          "prop_archon_1_6",
+          "prop_archon_1_7",
+          "prop_archon_1_8",
+          "prop_archon_1_9",
+          "prop_archon_1_10",
+          "prop_archon_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_2_0",
+          "prop_archon_2_1",
+          "prop_archon_2_2",
+          "prop_archon_2_3",
+          "prop_archon_2_4",
+          "prop_archon_2_5",
+          "prop_archon_2_6",
+          "prop_archon_2_7",
+          "prop_archon_2_8",
+          "prop_archon_2_9",
+          "prop_archon_2_10",
+          "prop_archon_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_3_0",
+          "prop_archon_3_1",
+          "prop_archon_3_2",
+          "prop_archon_3_3",
+          "prop_archon_3_4",
+          "prop_archon_3_5",
+          "prop_archon_3_6",
+          "prop_archon_3_7",
+          "prop_archon_3_8",
+          "prop_archon_3_9",
+          "prop_archon_3_10",
+          "prop_archon_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_4_0",
+          "prop_archon_4_1",
+          "prop_archon_4_2",
+          "prop_archon_4_3",
+          "prop_archon_4_4",
+          "prop_archon_4_5",
+          "prop_archon_4_6",
+          "prop_archon_4_7",
+          "prop_archon_4_8",
+          "prop_archon_4_9",
+          "prop_archon_4_10",
+          "prop_archon_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_5_0",
+          "prop_archon_5_1",
+          "prop_archon_5_2",
+          "prop_archon_5_3",
+          "prop_archon_5_4",
+          "prop_archon_5_5",
+          "prop_archon_5_6",
+          "prop_archon_5_7",
+          "prop_archon_5_8",
+          "prop_archon_5_9",
+          "prop_archon_5_10",
+          "prop_archon_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_6_0",
+          "prop_archon_6_1",
+          "prop_archon_6_2",
+          "prop_archon_6_3",
+          "prop_archon_6_4",
+          "prop_archon_6_5",
+          "prop_archon_6_6",
+          "prop_archon_6_7",
+          "prop_archon_6_8",
+          "prop_archon_6_9",
+          "prop_archon_6_10",
+          "prop_archon_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_7_0",
+          "prop_archon_7_1",
+          "prop_archon_7_2",
+          "prop_archon_7_3",
+          "prop_archon_7_4",
+          "prop_archon_7_5",
+          "prop_archon_7_6",
+          "prop_archon_7_7",
+          "prop_archon_7_8",
+          "prop_archon_7_9",
+          "prop_archon_7_10",
+          "prop_archon_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_8_0",
+          "prop_archon_8_1",
+          "prop_archon_8_2",
+          "prop_archon_8_3",
+          "prop_archon_8_4",
+          "prop_archon_8_5",
+          "prop_archon_8_6",
+          "prop_archon_8_7",
+          "prop_archon_8_8",
+          "prop_archon_8_9",
+          "prop_archon_8_10",
+          "prop_archon_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_9_0",
+          "prop_archon_9_1",
+          "prop_archon_9_2",
+          "prop_archon_9_3",
+          "prop_archon_9_4",
+          "prop_archon_9_5",
+          "prop_archon_9_6",
+          "prop_archon_9_7",
+          "prop_archon_9_8",
+          "prop_archon_9_9",
+          "prop_archon_9_10",
+          "prop_archon_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_10_0",
+          "prop_archon_10_1",
+          "prop_archon_10_2",
+          "prop_archon_10_3",
+          "prop_archon_10_4",
+          "prop_archon_10_5",
+          "prop_archon_10_6",
+          "prop_archon_10_7",
+          "prop_archon_10_8",
+          "prop_archon_10_9",
+          "prop_archon_10_10",
+          "prop_archon_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_11_0",
+          "prop_archon_11_1",
+          "prop_archon_11_2",
+          "prop_archon_11_3",
+          "prop_archon_11_4",
+          "prop_archon_11_5",
+          "prop_archon_11_6",
+          "prop_archon_11_7",
+          "prop_archon_11_8",
+          "prop_archon_11_9",
+          "prop_archon_11_10",
+          "prop_archon_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_12_0",
+          "prop_archon_12_1",
+          "prop_archon_12_2",
+          "prop_archon_12_3",
+          "prop_archon_12_4",
+          "prop_archon_12_5",
+          "prop_archon_12_6",
+          "prop_archon_12_7",
+          "prop_archon_12_8",
+          "prop_archon_12_9",
+          "prop_archon_12_10",
+          "prop_archon_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_13_0",
+          "prop_archon_13_1",
+          "prop_archon_13_2",
+          "prop_archon_13_3",
+          "prop_archon_13_4",
+          "prop_archon_13_5",
+          "prop_archon_13_6",
+          "prop_archon_13_7",
+          "prop_archon_13_8",
+          "prop_archon_13_9",
+          "prop_archon_13_10",
+          "prop_archon_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_14_0",
+          "prop_archon_14_1",
+          "prop_archon_14_2",
+          "prop_archon_14_3",
+          "prop_archon_14_4",
+          "prop_archon_14_5",
+          "prop_archon_14_6",
+          "prop_archon_14_7",
+          "prop_archon_14_8",
+          "prop_archon_14_9",
+          "prop_archon_14_10",
+          "prop_archon_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_15_0",
+          "prop_archon_15_1",
+          "prop_archon_15_2",
+          "prop_archon_15_3",
+          "prop_archon_15_4",
+          "prop_archon_15_5",
+          "prop_archon_15_6",
+          "prop_archon_15_7",
+          "prop_archon_15_8",
+          "prop_archon_15_9",
+          "prop_archon_15_10",
+          "prop_archon_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_16_0",
+          "prop_archon_16_1",
+          "prop_archon_16_2",
+          "prop_archon_16_3",
+          "prop_archon_16_4",
+          "prop_archon_16_5",
+          "prop_archon_16_6",
+          "prop_archon_16_7",
+          "prop_archon_16_8",
+          "prop_archon_16_9",
+          "prop_archon_16_10",
+          "prop_archon_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_17_0",
+          "prop_archon_17_1",
+          "prop_archon_17_2",
+          "prop_archon_17_3",
+          "prop_archon_17_4",
+          "prop_archon_17_5",
+          "prop_archon_17_6",
+          "prop_archon_17_7",
+          "prop_archon_17_8",
+          "prop_archon_17_9",
+          "prop_archon_17_10",
+          "prop_archon_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_18_0",
+          "prop_archon_18_1",
+          "prop_archon_18_2",
+          "prop_archon_18_3",
+          "prop_archon_18_4",
+          "prop_archon_18_5",
+          "prop_archon_18_6",
+          "prop_archon_18_7",
+          "prop_archon_18_8",
+          "prop_archon_18_9",
+          "prop_archon_18_10",
+          "prop_archon_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_19_0",
+          "prop_archon_19_1",
+          "prop_archon_19_2",
+          "prop_archon_19_3",
+          "prop_archon_19_4",
+          "prop_archon_19_5",
+          "prop_archon_19_6",
+          "prop_archon_19_7",
+          "prop_archon_19_8",
+          "prop_archon_19_9",
+          "prop_archon_19_10",
+          "prop_archon_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_20_0",
+          "prop_archon_20_1",
+          "prop_archon_20_2",
+          "prop_archon_20_3",
+          "prop_archon_20_4",
+          "prop_archon_20_5",
+          "prop_archon_20_6",
+          "prop_archon_20_7",
+          "prop_archon_20_8",
+          "prop_archon_20_9",
+          "prop_archon_20_10",
+          "prop_archon_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_archon_21_0",
+          "prop_archon_21_1",
+          "prop_archon_21_2",
+          "prop_archon_21_3",
+          "prop_archon_21_4",
+          "prop_archon_21_5",
+          "prop_archon_21_6",
+          "prop_archon_21_7",
+          "prop_archon_21_8",
+          "prop_archon_21_9",
+          "prop_archon_21_10",
+          "prop_archon_21_11"
+        ]
+      }
+    }
+  }
+}

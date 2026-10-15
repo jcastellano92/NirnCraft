@@ -10,105 +10,385 @@
     "side_sol_kruug_voice": "Kruug Three-Tusks"
   },
   "npcs": [
-    {"id": "side_sol_galdrem", "name": "Galdrem Hlaren", "role": "miner", "place": "raven_rock", "offset": [10, -8],
-     "greet": "Ebony pays for every roof in Raven Rock. Some days it collects."},
-    {"id": "side_sol_ulvesa", "name": "Captain Ulvesa Dreth", "role": "housecarl", "place": "raven_rock", "offset": [-6, 12], "female": true,
-     "greet": "Redoran guard. State your business, and keep your hands where my archers can admire them."},
-    {"id": "side_sol_varon", "name": "Varon Telas", "role": "housecarl", "place": "raven_rock", "offset": [-12, 6],
-     "greet": "Quiet watch tonight. I like quiet watches. I have had enough of the other kind."},
-    {"id": "side_sol_cassius", "name": "Cassius Brenn", "role": "citizen", "place": "raven_rock", "offset": [14, 10],
-     "greet": "I was a Legion courier, once. Ran messages to Frostmoth. Ran fast, too. Well. Most of them."},
-    {"id": "side_sol_torvar", "name": "Torvar Ashdrinker", "role": "bard", "place": "raven_rock", "offset": [4, 16],
-     "greet": "Skald, from Windhelm. I came for a saga and found mostly ash. Good for the voice, they tell me."},
-    {"id": "side_sol_olvir", "name": "Olvir", "role": "citizen", "place": "raven_rock", "offset": [-16, -10],
-     "greet": "I'm not from here. I mean, I'm Skaal. I'm just here. Buying things. For my mother."},
-    {"id": "side_sol_bjornolf", "name": "Bjornolf Whitecairn", "role": "hunter", "place": "skaal_village", "offset": [8, 4],
-     "greet": "The All-Maker gives the hunt. A good hunter knows when to stop taking."},
-    {"id": "side_sol_eirvald", "name": "Eirvald Rimehand", "role": "blacksmith", "place": "skaal_village", "offset": [-6, -6],
-     "greet": "Stalhrim does not melt in a forge. It listens to it. Most smiths cannot hear the difference."},
-    {"id": "side_sol_yrsa", "name": "Yrsa Wolf-Speaker", "role": "priest", "place": "skaal_village", "offset": [-10, 8], "female": true,
-     "greet": "The wolves sing louder this season. Something is teaching them old songs."},
-    {"id": "side_sol_astrid", "name": "Astrid Cold-Hearth", "role": "innkeeper", "place": "thirsk_mead_hall", "offset": [5, 3], "female": true,
-     "greet": "Mead's warm, the fire's warmer, and if you're looking for Hrolf, so am I."},
-    {"id": "side_sol_ragnvi", "name": "Ragnvi Spear-Widow", "role": "adventurer", "place": "thirsk_mead_hall", "offset": [-6, 4], "female": true,
-     "greet": "Thirsk has a hall, a cask and a grudge. The grudge is older than the cask."},
-    {"id": "side_sol_ilvesa", "name": "Ilvesa Tavrin", "role": "scholar", "place": "tel_mithryn", "offset": [10, -6], "female": true,
-     "greet": "I study the Dwemer under a Telvanni roof. That is two kinds of arrogance to tiptoe around."}
+    {
+      "id": "side_sol_galdrem",
+      "name": "Galdrem Hlaren",
+      "role": "miner",
+      "place": "raven_rock",
+      "offset": [
+        10,
+        -8
+      ],
+      "greet": "Ebony pays for every roof in Raven Rock. Some days it collects."
+    },
+    {
+      "id": "side_sol_ulvesa",
+      "name": "Captain Ulvesa Dreth",
+      "role": "housecarl",
+      "place": "raven_rock",
+      "offset": [
+        -6,
+        12
+      ],
+      "female": true,
+      "greet": "Redoran guard. State your business, and keep your hands where my archers can admire them."
+    },
+    {
+      "id": "side_sol_varon",
+      "name": "Varon Telas",
+      "role": "housecarl",
+      "place": "raven_rock",
+      "offset": [
+        -12,
+        6
+      ],
+      "greet": "Quiet watch tonight. I like quiet watches. I have had enough of the other kind."
+    },
+    {
+      "id": "side_sol_cassius",
+      "name": "Cassius Brenn",
+      "role": "citizen",
+      "place": "raven_rock",
+      "offset": [
+        14,
+        10
+      ],
+      "greet": "I was a Legion courier, once. Ran messages to Frostmoth. Ran fast, too. Well. Most of them."
+    },
+    {
+      "id": "side_sol_torvar",
+      "name": "Torvar Ashdrinker",
+      "role": "bard",
+      "place": "raven_rock",
+      "offset": [
+        4,
+        16
+      ],
+      "greet": "Skald, from Windhelm. I came for a saga and found mostly ash. Good for the voice, they tell me."
+    },
+    {
+      "id": "side_sol_olvir",
+      "name": "Olvir",
+      "role": "citizen",
+      "place": "raven_rock",
+      "offset": [
+        -16,
+        -10
+      ],
+      "greet": "I'm not from here. I mean, I'm Skaal. I'm just here. Buying things. For my mother."
+    },
+    {
+      "id": "side_sol_bjornolf",
+      "name": "Bjornolf Whitecairn",
+      "role": "hunter",
+      "place": "skaal_village",
+      "offset": [
+        8,
+        4
+      ],
+      "greet": "The All-Maker gives the hunt. A good hunter knows when to stop taking."
+    },
+    {
+      "id": "side_sol_eirvald",
+      "name": "Eirvald Rimehand",
+      "role": "blacksmith",
+      "place": "skaal_village",
+      "offset": [
+        -6,
+        -6
+      ],
+      "greet": "Stalhrim does not melt in a forge. It listens to it. Most smiths cannot hear the difference."
+    },
+    {
+      "id": "side_sol_yrsa",
+      "name": "Yrsa Wolf-Speaker",
+      "role": "priest",
+      "place": "skaal_village",
+      "offset": [
+        -10,
+        8
+      ],
+      "female": true,
+      "greet": "The wolves sing louder this season. Something is teaching them old songs."
+    },
+    {
+      "id": "side_sol_astrid",
+      "name": "Astrid Cold-Hearth",
+      "role": "innkeeper",
+      "place": "thirsk_mead_hall",
+      "offset": [
+        5,
+        3
+      ],
+      "female": true,
+      "greet": "Mead's warm, the fire's warmer, and if you're looking for Hrolf, so am I."
+    },
+    {
+      "id": "side_sol_ragnvi",
+      "name": "Ragnvi Spear-Widow",
+      "role": "adventurer",
+      "place": "thirsk_mead_hall",
+      "offset": [
+        -6,
+        4
+      ],
+      "female": true,
+      "greet": "Thirsk has a hall, a cask and a grudge. The grudge is older than the cask."
+    },
+    {
+      "id": "side_sol_ilvesa",
+      "name": "Ilvesa Tavrin",
+      "role": "scholar",
+      "place": "tel_mithryn",
+      "offset": [
+        10,
+        -6
+      ],
+      "female": true,
+      "greet": "I study the Dwemer under a Telvanni roof. That is two kinds of arrogance to tiptoe around."
+    }
   ],
   "relics": [
-    {"id": "side_sol_tally_board", "name": "Foreman's Tally-Board", "desc": "Chalk marks past the Redoran safe-line, and a bonus figure circled twice.", "icon": 11},
-    {"id": "side_sol_duty_roster", "name": "Frostmoth Duty Roster", "desc": "A Legion roster, last entry: 'Relief requested. Courier Brenn dispatched.'", "icon": 11},
-    {"id": "side_sol_claim_letter", "name": "Hrolf's Claim Letter", "desc": "A stalhrim claim and a letter to Astrid, written in a hand that was getting cold.", "icon": 11},
-    {"id": "side_sol_seal_ring", "name": "Eyvind's Seal-Ring", "desc": "An iron ring stamped with a lock, worn smooth by a jailer's thumb.", "icon": 19},
-    {"id": "side_sol_resonance_prism", "name": "Resonance Prism", "desc": "A Dwemer prism of smoky crystal. It hums a single note when held to the ear.", "icon": 19},
-    {"id": "side_sol_war_totem", "name": "Riekling War-Totem", "desc": "A carved tusk bearing the old seal of Thirsk, and tally-marks of mead never paid.", "icon": 19},
-    {"id": "side_sol_skaal_mitten", "name": "Embroidered Mitten", "desc": "A Skaal mitten stitched with a snow-hare. Someone's mother made this.", "icon": 19}
+    {
+      "id": "side_sol_tally_board",
+      "name": "Foreman's Tally-Board",
+      "desc": "Chalk marks past the Redoran safe-line, and a bonus figure circled twice.",
+      "icon": 11
+    },
+    {
+      "id": "side_sol_duty_roster",
+      "name": "Frostmoth Duty Roster",
+      "desc": "A Legion roster, last entry: 'Relief requested. Courier Brenn dispatched.'",
+      "icon": 11
+    },
+    {
+      "id": "side_sol_claim_letter",
+      "name": "Hrolf's Claim Letter",
+      "desc": "A stalhrim claim and a letter to Astrid, written in a hand that was getting cold.",
+      "icon": 11
+    },
+    {
+      "id": "side_sol_seal_ring",
+      "name": "Eyvind's Seal-Ring",
+      "desc": "An iron ring stamped with a lock, worn smooth by a jailer's thumb.",
+      "icon": 19
+    },
+    {
+      "id": "side_sol_resonance_prism",
+      "name": "Resonance Prism",
+      "desc": "A Dwemer prism of smoky crystal. It hums a single note when held to the ear.",
+      "icon": 19
+    },
+    {
+      "id": "side_sol_war_totem",
+      "name": "Riekling War-Totem",
+      "desc": "A carved tusk bearing the old seal of Thirsk, and tally-marks of mead never paid.",
+      "icon": 19
+    },
+    {
+      "id": "side_sol_skaal_mitten",
+      "name": "Embroidered Mitten",
+      "desc": "A Skaal mitten stitched with a snow-hare. Someone's mother made this.",
+      "icon": 19
+    }
   ],
   "places": {
-    "side_sol_nchurdrel_spire": {"x": 4740, "z": -2910, "r": 24, "name": "The Spire of Nchurdrel"}
+    "side_sol_nchurdrel_spire": {
+      "x": 4740,
+      "z": -2910,
+      "r": 24,
+      "name": "The Spire of Nchurdrel"
+    }
   },
   "bosses": {
-    "side_sol_drovas": {"name": "Drovas Rethelo, Ash-Risen", "type": "skycraft:ash_spawn", "hp": 3.0, "dmg": 1.3,
-      "level": 20, "drop": "loot:standard,skycraft:ebony_ingot", "glow": false},
-    "side_sol_ulfgar": {"name": "Ulfgar Salt-Bitten", "type": "skycraft:bandit_chief", "hp": 3.5, "dmg": 1.4,
-      "level": 22, "weapon": "skycraft:nordic_war_axe",
-      "gear": {"head": "skycraft:fur_helmet", "chest": "skycraft:nordic_chestplate"}, "drop": "loot:major", "glow": false},
-    "side_sol_callo_shade": {"name": "Shade of Tribune Severa Callo", "type": "minecraft:wither_skeleton", "hp": 3.5, "dmg": 1.5,
-      "level": 24, "weapon": "skycraft:imperial_sword",
-      "gear": {"head": "skycraft:imperial_helmet", "chest": "skycraft:imperial_chestplate"}, "drop": "loot:major", "glow": true},
-    "side_sol_hjornskar": {"name": "Hjornskar the Snow-Walker", "type": "skycraft:bear", "hp": 4.5, "dmg": 1.6,
-      "level": 28, "drop": "loot:major", "glow": true},
-    "side_sol_hollow_wind": {"name": "The Hollow Wind", "type": "skycraft:ice_wraith", "hp": 4.0, "dmg": 1.5,
-      "level": 28, "drop": "loot:major,skycraft:stalhrim", "glow": true},
-    "side_sol_rimeback": {"name": "Old Rimeback", "type": "skycraft:troll", "hp": 5.0, "dmg": 1.6,
-      "level": 30, "drop": "loot:major", "glow": false},
-    "side_sol_vorgrim": {"name": "Thane Vorgrim Ice-Mouth", "type": "skycraft:draugr_deathlord", "hp": 5.0, "dmg": 1.8,
-      "level": 34, "weapon": "skycraft:nordic_greatsword",
-      "gear": {"head": "skycraft:nordic_helmet", "chest": "skycraft:nordic_chestplate"}, "drop": "loot:major", "glow": true},
-    "side_sol_gharnvald": {"name": "Gharnvald the Twice-Hunted", "type": "skycraft:werewolf", "hp": 5.0, "dmg": 1.8,
-      "level": 36, "drop": "loot:major", "glow": false},
-    "side_sol_arbiter": {"name": "The Arbiter of Nchurdrel", "type": "skycraft:dwarven_sphere", "hp": 5.0, "dmg": 1.8,
-      "level": 38, "drop": "loot:major,skycraft:dwarven_metal_ingot", "glow": false},
-    "side_sol_kruug": {"name": "Kruug Three-Tusks", "type": "skycraft:riekling", "hp": 6.0, "dmg": 2.0,
-      "level": 40, "drop": "loot:legendary", "glow": false}
+    "side_sol_drovas": {
+      "name": "Drovas Rethelo, Ash-Risen",
+      "type": "skycraft:ash_spawn",
+      "hp": 3.0,
+      "dmg": 1.3,
+      "level": 20,
+      "drop": "loot:standard,skycraft:ebony_ingot",
+      "glow": false
+    },
+    "side_sol_ulfgar": {
+      "name": "Ulfgar Salt-Bitten",
+      "type": "skycraft:bandit_chief",
+      "hp": 3.5,
+      "dmg": 1.4,
+      "level": 22,
+      "weapon": "skycraft:nordic_war_axe",
+      "gear": {
+        "head": "skycraft:fur_helmet",
+        "chest": "skycraft:nordic_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": false
+    },
+    "side_sol_callo_shade": {
+      "name": "Shade of Tribune Severa Callo",
+      "type": "minecraft:wither_skeleton",
+      "hp": 3.5,
+      "dmg": 1.5,
+      "level": 24,
+      "weapon": "skycraft:imperial_sword",
+      "gear": {
+        "head": "skycraft:imperial_helmet",
+        "chest": "skycraft:imperial_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "side_sol_hjornskar": {
+      "name": "Hjornskar the Snow-Walker",
+      "type": "skycraft:bear",
+      "hp": 4.5,
+      "dmg": 1.6,
+      "level": 28,
+      "drop": "loot:major",
+      "glow": true
+    },
+    "side_sol_hollow_wind": {
+      "name": "The Hollow Wind",
+      "type": "skycraft:ice_wraith",
+      "hp": 4.0,
+      "dmg": 1.5,
+      "level": 28,
+      "drop": "loot:major,skycraft:stalhrim",
+      "glow": true
+    },
+    "side_sol_rimeback": {
+      "name": "Old Rimeback",
+      "type": "skycraft:troll",
+      "hp": 5.0,
+      "dmg": 1.6,
+      "level": 30,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "side_sol_vorgrim": {
+      "name": "Thane Vorgrim Ice-Mouth",
+      "type": "skycraft:draugr_deathlord",
+      "hp": 5.0,
+      "dmg": 1.8,
+      "level": 34,
+      "weapon": "skycraft:nordic_greatsword",
+      "gear": {
+        "head": "skycraft:nordic_helmet",
+        "chest": "skycraft:nordic_chestplate"
+      },
+      "drop": "loot:major",
+      "glow": true
+    },
+    "side_sol_gharnvald": {
+      "name": "Gharnvald the Twice-Hunted",
+      "type": "skycraft:werewolf",
+      "hp": 5.0,
+      "dmg": 1.8,
+      "level": 36,
+      "drop": "loot:major",
+      "glow": false
+    },
+    "side_sol_arbiter": {
+      "name": "The Arbiter of Nchurdrel",
+      "type": "skycraft:dwarven_sphere",
+      "hp": 5.0,
+      "dmg": 1.8,
+      "level": 38,
+      "drop": "loot:major,skycraft:dwarven_metal_ingot",
+      "glow": false
+    },
+    "side_sol_kruug": {
+      "name": "Kruug Three-Tusks",
+      "type": "skycraft:riekling",
+      "hp": 6.0,
+      "dmg": 2.0,
+      "level": 40,
+      "drop": "loot:legendary",
+      "glow": false
+    }
   },
   "scenes": {
     "side_sol_gallery_collapse": [
-      ["narrator", "The new deep gallery is half rubble. Grey ash trickles through the cracks like sand in an hourglass, and behind the fall someone is tapping on the rock: three short, three long."],
-      ["side_sol_trapped_miner", "Drovas went past the red marks! We told him! There's a hollow back here, and something in it's breathing!"]
+      [
+        "narrator",
+        "The new deep gallery is half rubble. Grey ash trickles through the cracks like sand in an hourglass, and behind the fall someone is tapping on the rock: three short, three long."
+      ],
+      [
+        "side_sol_trapped_miner",
+        "Drovas went past the red marks! We told him! There's a hollow back here, and something in it's breathing!"
+      ]
     ],
     "side_sol_deserter_post": [
-      ["narrator", "Varon's guard post at Ashfallow Citadel is empty. His bonemold cuirass hangs neatly on its peg, and scratched into the wall above it is a short line: 'Father, I won't.'"]
+      [
+        "narrator",
+        "Varon's guard post at Ashfallow Citadel is empty. His bonemold cuirass hangs neatly on its peg, and scratched into the wall above it is a short line: 'Father, I won't.'"
+      ]
     ],
     "side_sol_frostmoth_muster": [
-      ["narrator", "A horn sounds from the empty walls of Fort Frostmoth. Pale shapes in Legion red form ranks in the courtyard, and a sharp voice calls the roll."],
-      ["side_sol_callo_voice", "Relief column is late. Courier Brenn is late. Hold the walls, legionaries. The Empire does not forget its garrisons."]
+      [
+        "narrator",
+        "A horn sounds from the empty walls of Fort Frostmoth. Pale shapes in Legion red form ranks in the courtyard, and a sharp voice calls the roll."
+      ],
+      [
+        "side_sol_callo_voice",
+        "Relief column is late. Courier Brenn is late. Hold the walls, legionaries. The Empire does not forget its garrisons."
+      ]
     ],
     "side_sol_brodir_waste": [
-      ["narrator", "A she-bear and two cubs lie in the snow at Brodir Grove, skinned and left. The meat has not been taken. The arrows have Skaal fletching, white goose with a single black band."]
+      [
+        "narrator",
+        "A she-bear and two cubs lie in the snow at Brodir Grove, skinned and left. The meat has not been taken. The arrows have Skaal fletching, white goose with a single black band."
+      ]
     ],
     "side_sol_snow_walker": [
-      ["narrator", "The wind on Hvitkald Peak drops to nothing. Then the snow itself stands up, broad as a hut, with eyes like old ice and no footprints behind it."]
+      [
+        "narrator",
+        "The wind on Hvitkald Peak drops to nothing. Then the snow itself stands up, broad as a hut, with eyes like old ice and no footprints behind it."
+      ]
     ],
     "side_sol_vorgrim_wakes": [
-      ["narrator", "The ring slides off the jailer's finger. Somewhere deeper in Gyldenhul, a door that has been shut for an age swings open by itself."],
-      ["side_sol_vorgrim_voice", "Eyvind's line, come at last to let me out. How kind. I will start my thanks with you."]
+      [
+        "narrator",
+        "The ring slides off the jailer's finger. Somewhere deeper in Gyldenhul, a door that has been shut for an age swings open by itself."
+      ],
+      [
+        "side_sol_vorgrim_voice",
+        "Eyvind's line, come at last to let me out. How kind. I will start my thanks with you."
+      ]
     ],
     "side_sol_hunt_begins": [
-      ["narrator", "A horn blows on Frykte Peak, though no one is there to blow it. Hounds bay in the dark below, and the moon looks down like an eye."],
-      ["side_sol_hunt_voice", "Prey is named. Prey runs. Prey is the stranger at the peak. The hunt ends at dawn, or at the throat."]
+      [
+        "narrator",
+        "A horn blows on Frykte Peak, though no one is there to blow it. Hounds bay in the dark below, and the moon looks down like an eye."
+      ],
+      [
+        "side_sol_hunt_voice",
+        "Prey is named. Prey runs. Prey is the stranger at the peak. The hunt ends at dawn, or at the throat."
+      ]
     ],
     "side_sol_spire_song": [
-      ["narrator", "The Spire of Nchurdrel is singing: one long, deep tone that rises from its foundations and makes your teeth ache. Brass gears turn behind every wall, counting something."]
+      [
+        "narrator",
+        "The Spire of Nchurdrel is singing: one long, deep tone that rises from its foundations and makes your teeth ache. Brass gears turn behind every wall, counting something."
+      ]
     ],
     "side_sol_spire_silent": [
-      ["narrator", "The prism comes free, and the Spire's note stops halfway through. Every gear in the tower halts. Whatever it was counting for four thousand years, it will never finish."]
+      [
+        "narrator",
+        "The prism comes free, and the Spire's note stops halfway through. Every gear in the tower halts. Whatever it was counting for four thousand years, it will never finish."
+      ]
     ],
     "side_sol_kruug_speaks": [
-      ["side_sol_kruug_voice", "Tall-folk break promise! Grandfather-chief take spear for mead-peace. Tall-folk stop mead. So Kruug take hall. Fair. Fair!"]
+      [
+        "side_sol_kruug_voice",
+        "Tall-folk break promise! Grandfather-chief take spear for mead-peace. Tall-folk stop mead. So Kruug take hall. Fair. Fair!"
+      ]
     ],
     "side_sol_wind_wrong": [
-      ["narrator", "The Skaal cache at the Stalhrim Source has been broken open. The ward-stones around it are scattered, and the wind moves in a slow circle here, as if looking for something it lost."]
+      [
+        "narrator",
+        "The Skaal cache at the Stalhrim Source has been broken open. The ward-stones around it are scattered, and the wind moves in a slow circle here, as if looking for something it lost."
+      ]
     ]
   },
   "quests": [
@@ -116,297 +396,995 @@
       "id": "side_sol_the_black_vein",
       "title": "The Black Vein",
       "start": "npc:side_sol_galdrem",
-      "requires": ["level:15"],
+      "requires": [
+        "level:15"
+      ],
       "offer": "Is something wrong at the mine?",
       "pitch": "The new deep gallery came down this morning. Three of my miners are behind the fall, and our foreman Drovas went in after them and hasn't come out. The Redoran guard says wait for the council. I say the council can dig its own way in.",
       "desc": "Galdrem Hlaren says the deep gallery of Raven Rock's ebony mine collapsed with three miners and the foreman, Drovas Rethelo, still inside.",
       "objectives": [
-        {"type": "go", "place": "raven_rock_mine", "text": "Go into the collapsed gallery of the Raven Rock mine", "actions": "scene:side_sol_gallery_collapse"},
-        {"type": "clear", "place": "raven_rock_mine", "placement": "structure", "text": "Kill the ash spawn pouring through the breach",
-         "spawn": [{"type": "skycraft:ash_spawn", "count": 3, "name": "Ash Crawler"}]},
-        {"type": "retrieve", "place": "raven_rock_mine", "placement": "structure", "relic": "side_sol_tally_board", "text": "Find the foreman's tally-board",
-         "journal": "Drovas pushed the dig past the Redoran safe-line for a bonus, and broke into a hollow full of old ash. That is what brought the gallery down."},
-        {"type": "kill", "place": "raven_rock_mine", "placement": "structure", "text": "Put down what's left of Drovas Rethelo",
-         "spawn": [{"boss_id": "side_sol_drovas"}, {"type": "skycraft:ash_spawn", "count": 1}],
-         "journal": "The ash took Drovas and stood him up again. I gave him what rest I could. The trapped miners walked out behind me, blinking."},
-        {"type": "deliver", "npc": "side_sol_galdrem", "relic": "side_sol_tally_board", "text": "Bring the tally-board to Galdrem",
-         "topic": "Your miners are out. Drovas didn't make it, and this is why.",
-         "reply": "Past the red marks. For a bonus. His widow lives two doors from me. What do I tell the council?",
-         "choices": [
-           {"label": "The truth. Mark the line in stone so nobody else crosses it.", "reply": "Hard on his widow. Better for everyone else's. I'll do it.", "actions": "flag:side_sol_mine_truth"},
-           {"label": "That the rock was bad. Let his widow keep the pension.", "reply": "A soft lie for a hard town. All right. Take this, and keep it to yourself as well.", "actions": "flag:side_sol_mine_lie;loot:standard"}
-         ]}
+        {
+          "type": "go",
+          "place": "raven_rock_mine",
+          "text": "Go into the collapsed gallery of the Raven Rock mine",
+          "actions": "scene:side_sol_gallery_collapse"
+        },
+        {
+          "type": "clear",
+          "place": "raven_rock_mine",
+          "placement": "structure",
+          "text": "Kill the ash spawn pouring through the breach",
+          "spawn": [
+            {
+              "type": "skycraft:ash_spawn",
+              "count": 3,
+              "name": "Ash Crawler"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "raven_rock_mine",
+          "placement": "structure",
+          "relic": "side_sol_tally_board",
+          "text": "Find the foreman's tally-board",
+          "journal": "Drovas pushed the dig past the Redoran safe-line for a bonus, and broke into a hollow full of old ash. That is what brought the gallery down."
+        },
+        {
+          "type": "kill",
+          "place": "raven_rock_mine",
+          "placement": "structure",
+          "text": "Put down what's left of Drovas Rethelo",
+          "spawn": [
+            {
+              "boss_id": "side_sol_drovas"
+            },
+            {
+              "type": "skycraft:ash_spawn",
+              "count": 1
+            }
+          ],
+          "journal": "The ash took Drovas and stood him up again. I gave him what rest I could. The trapped miners walked out behind me, blinking."
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_galdrem",
+          "relic": "side_sol_tally_board",
+          "text": "Bring the tally-board to Galdrem",
+          "topic": "Your miners are out. Drovas didn't make it, and this is why.",
+          "reply": "Past the red marks. For a bonus. His widow lives two doors from me. What do I tell the council?",
+          "choices": [
+            {
+              "label": "The truth. Mark the line in stone so nobody else crosses it.",
+              "reply": "Hard on his widow. Better for everyone else's. I'll do it.",
+              "actions": "flag:side_sol_mine_truth"
+            },
+            {
+              "label": "That the rock was bad. Let his widow keep the pension.",
+              "reply": "A soft lie for a hard town. All right. Take this, and keep it to yourself as well.",
+              "actions": "flag:side_sol_mine_lie;loot:standard"
+            }
+          ]
+        }
       ],
       "outro": "The deep gallery is sealed with a red line painted across the rock. The miners walk past it every morning and don't look at it.",
-      "rewards": {"gold": 400, "loot": "standard",
-                  "items": [{"item": "skycraft:bonemold_helmet", "name": "Gallery Helm", "enchant": {"protection": 2, "projectile_protection": 1}}]}
+      "rewards": {
+        "gold": 400,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "skycraft:bonemold_helmet",
+            "name": "Gallery Helm",
+            "enchant": {
+              "protection": 2,
+              "projectile_protection": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_deserter",
       "title": "Father, I Won't",
       "start": "npc:side_sol_ulvesa",
-      "requires": ["level:18"],
+      "requires": [
+        "level:18"
+      ],
       "on_start": "relocate:side_sol_varon:wreck_of_the_strident_squall:3:4",
       "offer": "Your guard looks a man short.",
       "pitch": "One of mine, Varon Telas, walked off his post at Ashfallow Citadel last night. Good soldier, which makes it worse. Desertion in time of reavers is a hanging matter. Find him and bring him back, and I'll decide whether to hang him after I've heard why.",
       "desc": "Captain Ulvesa Dreth of the Raven Rock guard says Varon Telas deserted his post at Ashfallow Citadel. She wants him found.",
       "objectives": [
-        {"type": "go", "place": "ashfallow_citadel", "text": "Search Varon's post at Ashfallow Citadel", "actions": "scene:side_sol_deserter_post"},
-        {"type": "go", "place": "wreck_of_the_strident_squall", "text": "Follow his tracks to the wreck of the Strident Squall"},
-        {"type": "clear", "place": "wreck_of_the_strident_squall", "placement": "near", "text": "Fight through the reavers at the wreck",
-         "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Salt-Bitten Reaver"}]},
-        {"type": "kill", "place": "wreck_of_the_strident_squall", "placement": "near", "text": "Defeat the reaver chief",
-         "spawn": [{"boss_id": "side_sol_ulfgar"}, {"type": "skycraft:bandit", "count": 1, "name": "Salt-Bitten Reaver"}]},
-        {"type": "talk", "npc": "side_sol_varon", "text": "Speak with Varon Telas",
-         "topic": "Your captain wants you back. What happened?",
-         "reply": "Ulfgar was my father. He found me in Raven Rock and told me to leave the citadel gate open one night, or he'd tell the council whose son I was. I couldn't open it and I couldn't stay. So I came to tell him no. He took it badly."},
-        {"type": "talk", "npc": "side_sol_ulvesa", "text": "Report to Captain Ulvesa",
-         "topic": "Varon ran so he wouldn't have to betray you. The reaver chief was his father.",
-         "reply": "And he went to face him alone instead of telling me. Brave, stupid and loyal, in that order. What would you have me do with him?",
-         "choices": [
-           {"label": "Take him back. He chose Raven Rock over blood.", "reply": "A week of latrine duty for leaving his post, and then he's back on the wall.", "actions": "flag:side_sol_varon_pardoned;relocate:side_sol_varon:raven_rock:-12:6"},
-           {"label": "Let him go to the Skaal. He can't serve under your eye now.", "reply": "Hm. Perhaps that's kinder. I'll strike his name, not hang it.", "actions": "flag:side_sol_varon_exiled;relocate:side_sol_varon:skaal_village:12:-4"}
-         ]}
+        {
+          "type": "go",
+          "place": "ashfallow_citadel",
+          "text": "Search Varon's post at Ashfallow Citadel",
+          "actions": "scene:side_sol_deserter_post"
+        },
+        {
+          "type": "go",
+          "place": "wreck_of_the_strident_squall",
+          "text": "Follow his tracks to the wreck of the Strident Squall"
+        },
+        {
+          "type": "clear",
+          "place": "wreck_of_the_strident_squall",
+          "placement": "near",
+          "text": "Fight through the reavers at the wreck",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3,
+              "name": "Salt-Bitten Reaver"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "wreck_of_the_strident_squall",
+          "placement": "near",
+          "text": "Defeat the reaver chief",
+          "spawn": [
+            {
+              "boss_id": "side_sol_ulfgar"
+            },
+            {
+              "type": "skycraft:bandit",
+              "count": 1,
+              "name": "Salt-Bitten Reaver"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "side_sol_varon",
+          "text": "Speak with Varon Telas",
+          "topic": "Your captain wants you back. What happened?",
+          "reply": "Ulfgar was my father. He found me in Raven Rock and told me to leave the citadel gate open one night, or he'd tell the council whose son I was. I couldn't open it and I couldn't stay. So I came to tell him no. He took it badly."
+        },
+        {
+          "type": "talk",
+          "npc": "side_sol_ulvesa",
+          "text": "Report to Captain Ulvesa",
+          "topic": "Varon ran so he wouldn't have to betray you. The reaver chief was his father.",
+          "reply": "And he went to face him alone instead of telling me. Brave, stupid and loyal, in that order. What would you have me do with him?",
+          "choices": [
+            {
+              "label": "Take him back. He chose Raven Rock over blood.",
+              "reply": "A week of latrine duty for leaving his post, and then he's back on the wall.",
+              "actions": "flag:side_sol_varon_pardoned;relocate:side_sol_varon:raven_rock:-12:6"
+            },
+            {
+              "label": "Let him go to the Skaal. He can't serve under your eye now.",
+              "reply": "Hm. Perhaps that's kinder. I'll strike his name, not hang it.",
+              "actions": "flag:side_sol_varon_exiled;relocate:side_sol_varon:skaal_village:12:-4"
+            }
+          ]
+        }
       ],
       "outro": "Varon Telas said no to his father, once, and meant it. On Solstheim that counts for more than a uniform.",
-      "rewards": {"gold": 500, "loot": "standard",
-                  "items": [{"item": "skycraft:nordic_war_axe", "name": "Salt-Bitten Axe", "enchant": {"sharpness": 2, "knockback": 1}}]}
+      "rewards": {
+        "gold": 500,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "skycraft:nordic_war_axe",
+            "name": "Salt-Bitten Axe",
+            "enchant": {
+              "sharpness": 2,
+              "knockback": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_last_muster",
       "title": "The Last Muster at Frostmoth",
       "start": "find",
-      "find": {"place": "fort_frostmoth", "offset": [-60, 45], "clue": "grave",
-               "text": "A Legion headstone, half buried in ash: 'Tribune Severa Callo. She held.' Beneath, scratched in later by a less careful hand: 'Still holding.' The ground around the stone is churned, as if by boots that came and went at night."},
-      "requires": ["level:20"],
+      "find": {
+        "place": "fort_frostmoth",
+        "offset": [
+          -60,
+          45
+        ],
+        "clue": "grave",
+        "text": "A Legion headstone, half buried in ash: 'Tribune Severa Callo. She held.' Beneath, scratched in later by a less careful hand: 'Still holding.' The ground around the stone is churned, as if by boots that came and went at night."
+      },
+      "requires": [
+        "level:20"
+      ],
       "desc": "Near Fort Frostmoth I found the grave of a Legion tribune, Severa Callo. Someone wrote that she is still holding the fort.",
       "objectives": [
-        {"type": "cond", "cond": "night", "place": "fort_frostmoth", "text": "Return to Fort Frostmoth after dark", "actions": "scene:side_sol_frostmoth_muster"},
-        {"type": "clear", "place": "fort_frostmoth", "placement": "structure", "text": "Break the ghostly garrison",
-         "spawn": [{"type": "minecraft:skeleton", "count": 4, "name": "Frostmoth Legionary"}]},
-        {"type": "kill", "place": "fort_frostmoth", "placement": "structure", "text": "Relieve Tribune Callo of her command",
-         "spawn": [{"boss_id": "side_sol_callo_shade"}, {"type": "minecraft:skeleton", "count": 2, "name": "Frostmoth Legionary"}]},
-        {"type": "retrieve", "place": "fort_frostmoth", "placement": "structure", "relic": "side_sol_duty_roster", "text": "Take the tribune's duty roster",
-         "journal": "The roster's last entry asks for relief and names the courier sent to fetch it: Brenn. An old man in Raven Rock carries that name."},
-        {"type": "deliver", "npc": "side_sol_cassius", "relic": "side_sol_duty_roster", "text": "Bring the roster to Cassius Brenn in Raven Rock",
-         "topic": "Frostmoth's garrison was still waiting for you. They called your name at muster.",
-         "reply": "I never reached the ship. The ash came down, I hid in a cave for three days, and when I came out I just... kept walking. Fifty years. Is she still there?",
-         "choices": [
-           {"label": "Go and stand one muster. Tell them relief has come.", "reply": "Yes. Yes, I owe her that. I'll go tonight, in my old cloak, if it still fits.", "actions": "flag:side_sol_brenn_reported"},
-           {"label": "She's at rest. Let it go.", "reply": "At rest. Then I'll try to be, too. Take this. It was hers. I took it from her desk the day I left, as a promise to come back.", "actions": "flag:side_sol_brenn_released;loot:standard"}
-         ]}
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "fort_frostmoth",
+          "text": "Return to Fort Frostmoth after dark",
+          "actions": "scene:side_sol_frostmoth_muster"
+        },
+        {
+          "type": "clear",
+          "place": "fort_frostmoth",
+          "placement": "structure",
+          "text": "Break the ghostly garrison",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 4,
+              "name": "Frostmoth Legionary"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fort_frostmoth",
+          "placement": "structure",
+          "text": "Relieve Tribune Callo of her command",
+          "spawn": [
+            {
+              "boss_id": "side_sol_callo_shade"
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 2,
+              "name": "Frostmoth Legionary"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "fort_frostmoth",
+          "placement": "structure",
+          "relic": "side_sol_duty_roster",
+          "text": "Take the tribune's duty roster",
+          "journal": "The roster's last entry asks for relief and names the courier sent to fetch it: Brenn. An old man in Raven Rock carries that name."
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_cassius",
+          "relic": "side_sol_duty_roster",
+          "text": "Bring the roster to Cassius Brenn in Raven Rock",
+          "topic": "Frostmoth's garrison was still waiting for you. They called your name at muster.",
+          "reply": "I never reached the ship. The ash came down, I hid in a cave for three days, and when I came out I just... kept walking. Fifty years. Is she still there?",
+          "choices": [
+            {
+              "label": "Go and stand one muster. Tell them relief has come.",
+              "reply": "Yes. Yes, I owe her that. I'll go tonight, in my old cloak, if it still fits.",
+              "actions": "flag:side_sol_brenn_reported"
+            },
+            {
+              "label": "She's at rest. Let it go.",
+              "reply": "At rest. Then I'll try to be, too. Take this. It was hers. I took it from her desk the day I left, as a promise to come back.",
+              "actions": "flag:side_sol_brenn_released;loot:standard"
+            }
+          ]
+        }
       ],
       "outro": "A garrison held Frostmoth for fifty years after the war forgot it. Relief came late, but it came.",
-      "rewards": {"gold": 550, "loot": "standard",
-                  "items": [{"item": "skycraft:imperial_sword", "name": "Frostmoth's Last Order", "enchant": {"smite": 2, "sharpness": 2}}]}
+      "rewards": {
+        "gold": 550,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "skycraft:imperial_sword",
+            "name": "Frostmoth's Last Order",
+            "enchant": {
+              "smite": 2,
+              "sharpness": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_snow_walker",
       "title": "The Bear Who Walks in Snow",
       "start": "npc:side_sol_bjornolf",
-      "requires": ["level:22"],
+      "requires": [
+        "level:22"
+      ],
       "offer": "You look like a hunter with a problem.",
       "pitch": "Two of our hunters are dead, torn by a white bear bigger than any beast has a right to be. The shaman calls it a spirit-beast, sent by the All-Maker. I call it a bear. It hunts near Hvitkald Peak. Help me end it before it comes to the village.",
       "desc": "Bjornolf Whitecairn of the Skaal says a great white bear killed two hunters near Hvitkald Peak. He wants it dead before it reaches the village.",
       "objectives": [
-        {"type": "go", "place": "brodir_grove", "text": "Search Brodir Grove where the hunters fell", "actions": "scene:side_sol_brodir_waste",
-         "journal": "A mother bear and her cubs were killed here and left to rot, with Skaal arrows in them. The fletching is Bjornolf's."},
-        {"type": "clear", "place": "brodir_grove", "placement": "near", "text": "Drive off the wolves feeding on the waste",
-         "spawn": [{"type": "skycraft:wolf", "count": 3, "name": "Carrion Wolf"}]},
-        {"type": "go", "place": "hvitkald_peak", "text": "Climb to Hvitkald Peak"},
-        {"type": "wait", "place": "hvitkald_peak", "hours": 2, "text": "Wait on the peak for the Snow-Walker", "actions": "scene:side_sol_snow_walker"},
-        {"type": "kill", "place": "hvitkald_peak", "placement": "near", "text": "Face Hjornskar the Snow-Walker",
-         "spawn": [{"boss_id": "side_sol_hjornskar"}],
-         "journal": "The Snow-Walker fell without a sound and melted back into the drifts. Only its pelt was left, as white as fresh snow."},
-        {"type": "talk", "npc": "side_sol_bjornolf", "text": "Confront Bjornolf about Brodir Grove",
-         "topic": "Your arrows were in a she-bear and two cubs at Brodir Grove, and you left the meat to rot.",
-         "reply": "We were showing off. Three hides in one morning. Then we heard it coming and ran. The bear wasn't sent to punish the village. It was sent for us.",
-         "choices": [
-           {"label": "Tell the shaman. The Skaal deserve to know.", "reply": "Yes. I'll go to the shaman and do whatever penance is set. Take this. I haven't earned it.", "actions": "flag:side_sol_bjornolf_confessed"},
-           {"label": "It's done. Hunt better from now on.", "reply": "I will. Every kill, every scrap. I swear it on the All-Maker.", "actions": "flag:side_sol_bjornolf_silent;loot:standard"}
-         ]}
+        {
+          "type": "go",
+          "place": "brodir_grove",
+          "text": "Search Brodir Grove where the hunters fell",
+          "actions": "scene:side_sol_brodir_waste",
+          "journal": "A mother bear and her cubs were killed here and left to rot, with Skaal arrows in them. The fletching is Bjornolf's."
+        },
+        {
+          "type": "clear",
+          "place": "brodir_grove",
+          "placement": "near",
+          "text": "Drive off the wolves feeding on the waste",
+          "spawn": [
+            {
+              "type": "skycraft:wolf",
+              "count": 3,
+              "name": "Carrion Wolf"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "hvitkald_peak",
+          "text": "Climb to Hvitkald Peak"
+        },
+        {
+          "type": "wait",
+          "place": "hvitkald_peak",
+          "hours": 2,
+          "text": "Wait on the peak for the Snow-Walker",
+          "actions": "scene:side_sol_snow_walker"
+        },
+        {
+          "type": "kill",
+          "place": "hvitkald_peak",
+          "placement": "near",
+          "text": "Face Hjornskar the Snow-Walker",
+          "spawn": [
+            {
+              "boss_id": "side_sol_hjornskar"
+            }
+          ],
+          "journal": "The Snow-Walker fell without a sound and melted back into the drifts. Only its pelt was left, as white as fresh snow."
+        },
+        {
+          "type": "talk",
+          "npc": "side_sol_bjornolf",
+          "text": "Confront Bjornolf about Brodir Grove",
+          "topic": "Your arrows were in a she-bear and two cubs at Brodir Grove, and you left the meat to rot.",
+          "reply": "We were showing off. Three hides in one morning. Then we heard it coming and ran. The bear wasn't sent to punish the village. It was sent for us.",
+          "choices": [
+            {
+              "label": "Tell the shaman. The Skaal deserve to know.",
+              "reply": "Yes. I'll go to the shaman and do whatever penance is set. Take this. I haven't earned it.",
+              "actions": "flag:side_sol_bjornolf_confessed"
+            },
+            {
+              "label": "It's done. Hunt better from now on.",
+              "reply": "I will. Every kill, every scrap. I swear it on the All-Maker.",
+              "actions": "flag:side_sol_bjornolf_silent;loot:standard"
+            }
+          ]
+        }
       ],
       "outro": "The Skaal say the All-Maker gives the hunt. On Hvitkald Peak I learned that it also takes it back.",
-      "rewards": {"gold": 600, "loot": "standard",
-                  "items": [{"item": "skycraft:fur_chestplate", "name": "Snow-Walker's Pelt", "enchant": {"protection": 3, "thorns": 1}}]}
+      "rewards": {
+        "gold": 600,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "skycraft:fur_chestplate",
+            "name": "Snow-Walker's Pelt",
+            "enchant": {
+              "protection": 3,
+              "thorns": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_stalhrim_debt",
       "title": "The Stalhrim Debt",
       "start": "npc:side_sol_eirvald",
-      "requires": ["level:24"],
+      "requires": [
+        "level:24"
+      ],
       "offer": "Is your forge cold, smith?",
       "pitch": "Cold as my temper. Our stalhrim cache at the Source was broken open and half of it is gone. Worse, the wind there has gone wrong, and the hunters say something walks in it. Find out who took our ice, and quiet that wind.",
       "desc": "Eirvald Rimehand, the Skaal smith, says the village's stalhrim cache at the Stalhrim Source was robbed and that something now walks the wind there.",
       "objectives": [
-        {"type": "go", "place": "stalhrim_source", "text": "Go to the Stalhrim Source", "actions": "scene:side_sol_wind_wrong"},
-        {"type": "clear", "place": "stalhrim_source", "placement": "near", "text": "Destroy the wraiths circling the broken wards",
-         "spawn": [{"type": "skycraft:ice_wraith", "count": 2}]},
-        {"type": "kill", "place": "stalhrim_source", "placement": "near", "text": "Banish the Hollow Wind",
-         "spawn": [{"boss_id": "side_sol_hollow_wind"}]},
-        {"type": "retrieve", "place": "stalhrim_source", "placement": "near", "offset": [4, -3], "relic": "side_sol_skaal_mitten", "text": "Pick up the mitten caught in the wards",
-         "journal": "A child-sized Skaal mitten, stitched with a snow-hare. Eirvald's apprentice Olvir wears the other one. He has been in Raven Rock all week."},
-        {"type": "talk", "npc": "side_sol_olvir", "text": "Find Olvir in Raven Rock",
-         "topic": "You left a mitten at the Stalhrim Source.",
-         "reply": "My mother's cough is the bad kind. The healer here wants coin, and stalhrim is coin. I only took what I could carry. I didn't know the wards held anything in."},
-        {"type": "deliver", "npc": "side_sol_eirvald", "relic": "side_sol_skaal_mitten", "text": "Return to Eirvald with the truth",
-         "topic": "The wraith is gone. The thief was Olvir. He sold the ice to pay for his mother's healer.",
-         "reply": "Olvir. He could have asked. The village would have paid. Pride is a Skaal sickness worse than any cough.",
-         "choices": [
-           {"label": "Forgive him, and help his mother.", "reply": "The village will pay the healer, and Olvir will work the debt off at my forge. Twice over.", "actions": "flag:side_sol_olvir_forgiven"},
-           {"label": "He broke the wards. Let him answer for it.", "reply": "Then he stays in Raven Rock. I'll still send for his mother's healer. I'm not a monster.", "actions": "flag:side_sol_olvir_cast_out;loot:standard"}
-         ]}
+        {
+          "type": "go",
+          "place": "stalhrim_source",
+          "text": "Go to the Stalhrim Source",
+          "actions": "scene:side_sol_wind_wrong"
+        },
+        {
+          "type": "clear",
+          "place": "stalhrim_source",
+          "placement": "near",
+          "text": "Destroy the wraiths circling the broken wards",
+          "spawn": [
+            {
+              "type": "skycraft:ice_wraith",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "stalhrim_source",
+          "placement": "near",
+          "text": "Banish the Hollow Wind",
+          "spawn": [
+            {
+              "boss_id": "side_sol_hollow_wind"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "stalhrim_source",
+          "placement": "near",
+          "offset": [
+            4,
+            -3
+          ],
+          "relic": "side_sol_skaal_mitten",
+          "text": "Pick up the mitten caught in the wards",
+          "journal": "A child-sized Skaal mitten, stitched with a snow-hare. Eirvald's apprentice Olvir wears the other one. He has been in Raven Rock all week."
+        },
+        {
+          "type": "talk",
+          "npc": "side_sol_olvir",
+          "text": "Find Olvir in Raven Rock",
+          "topic": "You left a mitten at the Stalhrim Source.",
+          "reply": "My mother's cough is the bad kind. The healer here wants coin, and stalhrim is coin. I only took what I could carry. I didn't know the wards held anything in."
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_eirvald",
+          "relic": "side_sol_skaal_mitten",
+          "text": "Return to Eirvald with the truth",
+          "topic": "The wraith is gone. The thief was Olvir. He sold the ice to pay for his mother's healer.",
+          "reply": "Olvir. He could have asked. The village would have paid. Pride is a Skaal sickness worse than any cough.",
+          "choices": [
+            {
+              "label": "Forgive him, and help his mother.",
+              "reply": "The village will pay the healer, and Olvir will work the debt off at my forge. Twice over.",
+              "actions": "flag:side_sol_olvir_forgiven"
+            },
+            {
+              "label": "He broke the wards. Let him answer for it.",
+              "reply": "Then he stays in Raven Rock. I'll still send for his mother's healer. I'm not a monster.",
+              "actions": "flag:side_sol_olvir_cast_out;loot:standard"
+            }
+          ]
+        }
       ],
       "outro": "The wind at the Stalhrim Source blows in a straight line again. Eirvald says that is how you know the ice is content.",
-      "rewards": {"gold": 650, "loot": "standard",
-                  "items": [{"item": "skycraft:stalhrim_mace", "name": "Rimehand's Debt", "enchant": {"sharpness": 2, "knockback": 1}}]}
+      "rewards": {
+        "gold": 650,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "skycraft:stalhrim_mace",
+            "name": "Rimehand's Debt",
+            "enchant": {
+              "sharpness": 2,
+              "knockback": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_what_the_ice_keeps",
       "title": "What the Ice Keeps",
       "start": "find",
-      "find": {"place": "glacial_cave", "offset": [70, 40], "clue": "skeleton",
-               "text": "A man frozen sitting up against a rock, coat buttoned to the chin, a stalhrim pick across his knees. A sealed letter in his glove is addressed to 'Astrid, at Thirsk'. Huge, knuckled tracks lead from him toward the Glacial Cave."},
-      "requires": ["level:26"],
+      "find": {
+        "place": "glacial_cave",
+        "offset": [
+          70,
+          40
+        ],
+        "clue": "skeleton",
+        "text": "A man frozen sitting up against a rock, coat buttoned to the chin, a stalhrim pick across his knees. A sealed letter in his glove is addressed to 'Astrid, at Thirsk'. Huge, knuckled tracks lead from him toward the Glacial Cave."
+      },
+      "requires": [
+        "level:26"
+      ],
       "desc": "In the frozen north of Solstheim I found a prospector frozen beside his pick, with a letter for someone named Astrid at Thirsk. Troll tracks lead into the Glacial Cave.",
       "objectives": [
-        {"type": "go", "place": "glacial_cave", "text": "Follow the tracks to the Glacial Cave"},
-        {"type": "clear", "place": "glacial_cave", "placement": "structure", "text": "Kill the frost trolls in the cave",
-         "spawn": [{"type": "skycraft:troll", "count": 3, "name": "Frost Troll"}]},
-        {"type": "kill", "place": "glacial_cave", "placement": "structure", "text": "Kill Old Rimeback",
-         "spawn": [{"boss_id": "side_sol_rimeback"}]},
-        {"type": "retrieve", "place": "glacial_cave", "placement": "structure", "relic": "side_sol_claim_letter", "text": "Recover the prospector's claim from the trolls' den",
-         "journal": "The trolls had dragged Hrolf's pack into their den. His claim marks a stalhrim seam deep in the cave, and his letter leaves it to Astrid, whatever his partner Kjeld says."},
-        {"type": "deliver", "npc": "side_sol_astrid", "relic": "side_sol_claim_letter", "text": "Bring Hrolf's letter to Astrid at Thirsk",
-         "topic": "I found Hrolf near the Glacial Cave. I'm sorry. He left you this.",
-         "reply": "Kjeld told me Hrolf sold the claim and ran off to Skyrim. Kjeld's been drinking on Hrolf's money all winter. Well. What do I do with a stalhrim seam?",
-         "choices": [
-           {"label": "Give it to the Skaal. It's their ice, really.", "reply": "Hrolf would grumble, then agree. He always did. The Skaal will remember Thirsk kindly for it.", "actions": "flag:side_sol_claim_to_skaal"},
-           {"label": "Work it. And throw Kjeld out of your hall.", "reply": "Oh, Kjeld's leaving tonight. Through the door or the window, his choice. Here, the first of the claim's luck.", "actions": "flag:side_sol_claim_kept;loot:major"}
-         ]}
+        {
+          "type": "go",
+          "place": "glacial_cave",
+          "text": "Follow the tracks to the Glacial Cave"
+        },
+        {
+          "type": "clear",
+          "place": "glacial_cave",
+          "placement": "structure",
+          "text": "Kill the frost trolls in the cave",
+          "spawn": [
+            {
+              "type": "skycraft:troll",
+              "count": 3,
+              "name": "Frost Troll"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "glacial_cave",
+          "placement": "structure",
+          "text": "Kill Old Rimeback",
+          "spawn": [
+            {
+              "boss_id": "side_sol_rimeback"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "glacial_cave",
+          "placement": "structure",
+          "relic": "side_sol_claim_letter",
+          "text": "Recover the prospector's claim from the trolls' den",
+          "journal": "The trolls had dragged Hrolf's pack into their den. His claim marks a stalhrim seam deep in the cave, and his letter leaves it to Astrid, whatever his partner Kjeld says."
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_astrid",
+          "relic": "side_sol_claim_letter",
+          "text": "Bring Hrolf's letter to Astrid at Thirsk",
+          "topic": "I found Hrolf near the Glacial Cave. I'm sorry. He left you this.",
+          "reply": "Kjeld told me Hrolf sold the claim and ran off to Skyrim. Kjeld's been drinking on Hrolf's money all winter. Well. What do I do with a stalhrim seam?",
+          "choices": [
+            {
+              "label": "Give it to the Skaal. It's their ice, really.",
+              "reply": "Hrolf would grumble, then agree. He always did. The Skaal will remember Thirsk kindly for it.",
+              "actions": "flag:side_sol_claim_to_skaal"
+            },
+            {
+              "label": "Work it. And throw Kjeld out of your hall.",
+              "reply": "Oh, Kjeld's leaving tonight. Through the door or the window, his choice. Here, the first of the claim's luck.",
+              "actions": "flag:side_sol_claim_kept;loot:major"
+            }
+          ]
+        }
       ],
       "outro": "Hrolf found what he was looking for and froze sitting on it. The ice kept him and his letter until someone came along to read it.",
-      "rewards": {"gold": 700, "loot": "standard",
-                  "items": [{"item": "skycraft:fur_boots", "name": "Hrolf's Ice-Walkers", "enchant": {"frost_walker": 1, "feather_falling": 2}}]}
+      "rewards": {
+        "gold": 700,
+        "loot": "standard",
+        "items": [
+          {
+            "item": "skycraft:fur_boots",
+            "name": "Hrolf's Ice-Walkers",
+            "enchant": {
+              "frost_walker": 1,
+              "feather_falling": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_jailer_of_gyldenhul",
       "title": "The Jailer of Gyldenhul",
       "start": "npc:side_sol_torvar",
-      "requires": ["level:30"],
+      "requires": [
+        "level:30"
+      ],
       "offer": "What saga brings a skald to Solstheim?",
       "pitch": "My forefather, Thane Vorgrim, lies in Gyldenhul Barrow, honored above all the old Nords of this isle, or so my grandmother sang it. I'd like to stand at his tomb before I write his saga. The barrow is full of draugr, and I am full of mead. Come with me in spirit, and in person.",
       "desc": "Torvar Ashdrinker, a skald from Windhelm, wants to visit the tomb of his ancestor Thane Vorgrim in Gyldenhul Barrow so he can write his saga.",
       "objectives": [
-        {"type": "go", "place": "gyldenhul_barrow", "text": "Enter Gyldenhul Barrow"},
-        {"type": "clear", "place": "gyldenhul_barrow", "placement": "structure", "text": "Fight through the barrow's draugr",
-         "spawn": [{"type": "skycraft:draugr", "count": 4, "name": "Gyldenhul Draugr"}]},
-        {"type": "retrieve", "place": "gyldenhul_barrow", "placement": "structure", "relic": "side_sol_seal_ring", "text": "Take the ring from the bones by the sealed door",
-         "actions": "scene:side_sol_vorgrim_wakes",
-         "journal": "The bones at the door were Eyvind's, the barrow's jailer, and the carvings name him as Torvar's true forefather. Vorgrim was never honored here. He was locked in. And I just let him out."},
-        {"type": "kill", "place": "gyldenhul_barrow", "placement": "structure", "text": "Put Thane Vorgrim back in the dark",
-         "spawn": [{"boss_id": "side_sol_vorgrim"}, {"type": "skycraft:draugr", "count": 2}]},
-        {"type": "deliver", "npc": "side_sol_torvar", "relic": "side_sol_seal_ring", "text": "Bring Eyvind's ring to Torvar in Raven Rock",
-         "topic": "Vorgrim wasn't your ancestor. He was a prisoner. Your forefather was his jailer, Eyvind.",
-         "reply": "A jailer. Not a thane. A man who sat by a door for the rest of his life so no one else would have to. Hm. That's a better saga, isn't it?",
-         "choices": [
-           {"label": "Sing Eyvind's saga. The true one.", "reply": "'The Long Watch of Eyvind.' Sober, even. I'll sing it in Windhelm and watch them weep.", "actions": "flag:side_sol_eyvind_sung"},
-           {"label": "Sing the old one. Nobody wants a jailer's saga.", "reply": "Coward's choice. Profitable, though. Here's an advance on the first performance.", "actions": "flag:side_sol_vorgrim_sung;loot:major"}
-         ]}
+        {
+          "type": "go",
+          "place": "gyldenhul_barrow",
+          "text": "Enter Gyldenhul Barrow"
+        },
+        {
+          "type": "clear",
+          "place": "gyldenhul_barrow",
+          "placement": "structure",
+          "text": "Fight through the barrow's draugr",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 4,
+              "name": "Gyldenhul Draugr"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "gyldenhul_barrow",
+          "placement": "structure",
+          "relic": "side_sol_seal_ring",
+          "text": "Take the ring from the bones by the sealed door",
+          "actions": "scene:side_sol_vorgrim_wakes",
+          "journal": "The bones at the door were Eyvind's, the barrow's jailer, and the carvings name him as Torvar's true forefather. Vorgrim was never honored here. He was locked in. And I just let him out."
+        },
+        {
+          "type": "kill",
+          "place": "gyldenhul_barrow",
+          "placement": "structure",
+          "text": "Put Thane Vorgrim back in the dark",
+          "spawn": [
+            {
+              "boss_id": "side_sol_vorgrim"
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_torvar",
+          "relic": "side_sol_seal_ring",
+          "text": "Bring Eyvind's ring to Torvar in Raven Rock",
+          "topic": "Vorgrim wasn't your ancestor. He was a prisoner. Your forefather was his jailer, Eyvind.",
+          "reply": "A jailer. Not a thane. A man who sat by a door for the rest of his life so no one else would have to. Hm. That's a better saga, isn't it?",
+          "choices": [
+            {
+              "label": "Sing Eyvind's saga. The true one.",
+              "reply": "'The Long Watch of Eyvind.' Sober, even. I'll sing it in Windhelm and watch them weep.",
+              "actions": "flag:side_sol_eyvind_sung"
+            },
+            {
+              "label": "Sing the old one. Nobody wants a jailer's saga.",
+              "reply": "Coward's choice. Profitable, though. Here's an advance on the first performance.",
+              "actions": "flag:side_sol_vorgrim_sung;loot:major"
+            }
+          ]
+        }
       ],
       "outro": "Eyvind kept his door shut for a lifetime and a long death. I opened it in an afternoon, and spent the evening closing it again.",
-      "rewards": {"gold": 850, "loot": "major",
-                  "items": [{"item": "skycraft:nordic_shield", "name": "Eyvind's Long Watch", "enchant": {"protection": 3, "unbreaking": 2}}]}
+      "rewards": {
+        "gold": 850,
+        "loot": "major",
+        "items": [
+          {
+            "item": "skycraft:nordic_shield",
+            "name": "Eyvind's Long Watch",
+            "enchant": {
+              "protection": 3,
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_hunt_that_did_not_end",
       "title": "The Hunt That Did Not End",
       "start": "find",
-      "find": {"place": "headwaters_of_harstrad", "offset": [-60, 50], "clue": "totem",
-               "text": "A log totem crowned with a wolf skull and a ring of antlers. The Skaal hunt-sign carved into it is upside down: the hunter beneath the prey. Every few heartbeats, far off toward Frykte Peak, a horn sounds."},
-      "requires": ["level:32"],
+      "find": {
+        "place": "headwaters_of_harstrad",
+        "offset": [
+          -60,
+          50
+        ],
+        "clue": "totem",
+        "text": "A log totem crowned with a wolf skull and a ring of antlers. The Skaal hunt-sign carved into it is upside down: the hunter beneath the prey. Every few heartbeats, far off toward Frykte Peak, a horn sounds."
+      },
+      "requires": [
+        "level:32"
+      ],
       "desc": "By the headwaters of the Harstrad I found an old hunt-totem carved upside down. A horn keeps sounding from Frykte Peak, and nobody is there to blow it.",
       "objectives": [
-        {"type": "cond", "cond": "night", "place": "frykte_peak", "text": "Go to Frykte Peak when the moon is up", "actions": "scene:side_sol_hunt_begins;effect:glowing:60",
-         "journal": "An echo of an old hunt rides on Frykte Peak. It named me its prey."},
-        {"type": "clear", "at_player": true, "text": "Survive the hounds of the echo",
-         "spawn": [{"type": "skycraft:wolf", "count": 4, "name": "Hound of the Echo"}]},
-        {"type": "wait", "place": "frykte_peak", "hours": 3, "text": "Hold Frykte Peak until the hunt comes for you"},
-        {"type": "kill", "place": "frykte_peak", "placement": "near", "text": "Kill the huntsman, Gharnvald the Twice-Hunted",
-         "spawn": [{"boss_id": "side_sol_gharnvald"}, {"type": "skycraft:wolf", "count": 2, "name": "Hound of the Echo"}],
-         "journal": "Gharnvald was a Nord who tried to cheat in the Huntsman's own game by staking a Skaal guide as bait. He has been hunter and hunted on this peak ever since, and he was glad to stop."},
-        {"type": "talk", "npc": "side_sol_yrsa", "text": "Tell Yrsa Wolf-Speaker in the Skaal village",
-         "topic": "There was an old hunt still riding on Frykte Peak. A Nord named Gharnvald.",
-         "reply": "Gharnvald. My grandmother's grandmother was the guide he staked out. She lived, and cursed him. The Huntsman of Daedra likes a curse with teeth. What became of the totem?",
-         "choices": [
-           {"label": "Burn the totem. The hunt is over.", "reply": "Good. Let the wolves forget that song.", "actions": "flag:side_sol_totem_burned"},
-           {"label": "Leave it. A warning for the next cheat.", "reply": "The Skaal have never been short of warnings. One more won't hurt. Take this from the hunt's leavings.", "actions": "flag:side_sol_totem_kept;loot:major"}
-         ]}
+        {
+          "type": "cond",
+          "cond": "night",
+          "place": "frykte_peak",
+          "text": "Go to Frykte Peak when the moon is up",
+          "actions": "scene:side_sol_hunt_begins;effect:glowing:60",
+          "journal": "An echo of an old hunt rides on Frykte Peak. It named me its prey."
+        },
+        {
+          "type": "clear",
+          "at_player": true,
+          "text": "Survive the hounds of the echo",
+          "spawn": [
+            {
+              "type": "skycraft:wolf",
+              "count": 4,
+              "name": "Hound of the Echo"
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "place": "frykte_peak",
+          "hours": 3,
+          "text": "Hold Frykte Peak until the hunt comes for you"
+        },
+        {
+          "type": "kill",
+          "place": "frykte_peak",
+          "placement": "near",
+          "text": "Kill the huntsman, Gharnvald the Twice-Hunted",
+          "spawn": [
+            {
+              "boss_id": "side_sol_gharnvald"
+            },
+            {
+              "type": "skycraft:wolf",
+              "count": 2,
+              "name": "Hound of the Echo"
+            }
+          ],
+          "journal": "Gharnvald was a Nord who tried to cheat in the Huntsman's own game by staking a Skaal guide as bait. He has been hunter and hunted on this peak ever since, and he was glad to stop."
+        },
+        {
+          "type": "talk",
+          "npc": "side_sol_yrsa",
+          "text": "Tell Yrsa Wolf-Speaker in the Skaal village",
+          "topic": "There was an old hunt still riding on Frykte Peak. A Nord named Gharnvald.",
+          "reply": "Gharnvald. My grandmother's grandmother was the guide he staked out. She lived, and cursed him. The Huntsman of Daedra likes a curse with teeth. What became of the totem?",
+          "choices": [
+            {
+              "label": "Burn the totem. The hunt is over.",
+              "reply": "Good. Let the wolves forget that song.",
+              "actions": "flag:side_sol_totem_burned"
+            },
+            {
+              "label": "Leave it. A warning for the next cheat.",
+              "reply": "The Skaal have never been short of warnings. One more won't hurt. Take this from the hunt's leavings.",
+              "actions": "flag:side_sol_totem_kept;loot:major"
+            }
+          ]
+        }
       ],
       "outro": "Hircine's hunts are supposed to end at dawn. This one ran for three hundred years, until it caught someone willing to finish it.",
-      "rewards": {"gold": 950, "loot": "major",
-                  "items": [{"item": "skycraft:wolf_chestplate", "name": "Pelt of the Twice-Hunted", "enchant": {"protection": 3, "feather_falling": 2}}]}
+      "rewards": {
+        "gold": 950,
+        "loot": "major",
+        "items": [
+          {
+            "item": "skycraft:wolf_chestplate",
+            "name": "Pelt of the Twice-Hunted",
+            "enchant": {
+              "protection": 3,
+              "feather_falling": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_spire_of_nchurdrel",
       "title": "The Spire of Nchurdrel",
       "start": "npc:side_sol_ilvesa",
-      "requires": ["level:34"],
+      "requires": [
+        "level:34"
+      ],
       "offer": "What are you studying?",
       "pitch": "A Dwemer spire south of here that has been humming one note since before the Telvanni came to Solstheim. At its heart is a resonance prism, I'm sure of it. My master would give an arm for it, and would probably mean mine. Fetch it, and I'll pay well.",
       "desc": "Ilvesa Tavrin, a scholar at Tel Mithryn, wants the resonance prism from the heart of the Dwemer Spire of Nchurdrel.",
       "objectives": [
-        {"type": "go", "place": "side_sol_nchurdrel_spire", "text": "Go to the Spire of Nchurdrel", "actions": "scene:side_sol_spire_song"},
-        {"type": "clear", "place": "side_sol_nchurdrel_spire", "placement": "structure", "text": "Destroy the spire's guardian spiders",
-         "spawn": [{"type": "skycraft:dwarven_spider", "count": 4}]},
-        {"type": "kill", "place": "side_sol_nchurdrel_spire", "placement": "structure", "text": "Defeat the Arbiter of Nchurdrel",
-         "spawn": [{"boss_id": "side_sol_arbiter"}, {"type": "skycraft:dwarven_sphere", "count": 1}]},
-        {"type": "retrieve", "place": "side_sol_nchurdrel_spire", "placement": "structure", "relic": "side_sol_resonance_prism", "text": "Take the resonance prism from the spire's heart",
-         "actions": "scene:side_sol_spire_silent",
-         "journal": "The spire stopped singing when I took the prism. Whatever sum the Dwemer set it to work out, it will never finish now."},
-        {"type": "deliver", "npc": "side_sol_ilvesa", "relic": "side_sol_resonance_prism", "text": "Bring the prism to Ilvesa at Tel Mithryn",
-         "topic": "The prism. The spire went silent when I took it.",
-         "reply": "Silent? Four thousand years of calculation, and we pulled out the last digit. I'm not sure whether to weep or take notes. Both, probably.",
-         "choices": [
-           {"label": "Keep it. Find out what it was counting.", "reply": "I will. And I'll never tell my master it was here. Take your fee, and a little more.", "actions": "flag:side_sol_prism_studied;loot:major"},
-           {"label": "Put it back. Some sums should finish.", "reply": "Put it... You're right. I'll take it back myself, before I change my mind.", "actions": "flag:side_sol_prism_returned"}
-         ]}
+        {
+          "type": "go",
+          "place": "side_sol_nchurdrel_spire",
+          "text": "Go to the Spire of Nchurdrel",
+          "actions": "scene:side_sol_spire_song"
+        },
+        {
+          "type": "clear",
+          "place": "side_sol_nchurdrel_spire",
+          "placement": "structure",
+          "text": "Destroy the spire's guardian spiders",
+          "spawn": [
+            {
+              "type": "skycraft:dwarven_spider",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "side_sol_nchurdrel_spire",
+          "placement": "structure",
+          "text": "Defeat the Arbiter of Nchurdrel",
+          "spawn": [
+            {
+              "boss_id": "side_sol_arbiter"
+            },
+            {
+              "type": "skycraft:dwarven_sphere",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "side_sol_nchurdrel_spire",
+          "placement": "structure",
+          "relic": "side_sol_resonance_prism",
+          "text": "Take the resonance prism from the spire's heart",
+          "actions": "scene:side_sol_spire_silent",
+          "journal": "The spire stopped singing when I took the prism. Whatever sum the Dwemer set it to work out, it will never finish now."
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_ilvesa",
+          "relic": "side_sol_resonance_prism",
+          "text": "Bring the prism to Ilvesa at Tel Mithryn",
+          "topic": "The prism. The spire went silent when I took it.",
+          "reply": "Silent? Four thousand years of calculation, and we pulled out the last digit. I'm not sure whether to weep or take notes. Both, probably.",
+          "choices": [
+            {
+              "label": "Keep it. Find out what it was counting.",
+              "reply": "I will. And I'll never tell my master it was here. Take your fee, and a little more.",
+              "actions": "flag:side_sol_prism_studied;loot:major"
+            },
+            {
+              "label": "Put it back. Some sums should finish.",
+              "reply": "Put it... You're right. I'll take it back myself, before I change my mind.",
+              "actions": "flag:side_sol_prism_returned"
+            }
+          ]
+        }
       ],
       "outro": "Somewhere in the Spire of Nchurdrel, a Dwemer calculation is either running again or never will. I've decided I'd rather not know the answer.",
-      "rewards": {"gold": 1000, "loot": "major",
-                  "items": [{"item": "skycraft:dwarven_bow", "name": "Nchurdrel's Last Note", "enchant": {"power": 3, "infinity": 1}}]}
+      "rewards": {
+        "gold": 1000,
+        "loot": "major",
+        "items": [
+          {
+            "item": "skycraft:dwarven_bow",
+            "name": "Nchurdrel's Last Note",
+            "enchant": {
+              "power": 3,
+              "infinity": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "side_sol_the_spear_of_thirsk",
       "title": "The Spear of Thirsk",
       "start": "npc:side_sol_ragnvi",
-      "requires": ["level:40"],
+      "requires": [
+        "level:40"
+      ],
       "offer": "What grudge does Thirsk have?",
       "pitch": "Rieklings. Two generations ago they took the chieftain's spear from this hall, and now a chief called Kruug Three-Tusks has gathered every tribe from Bristleback to Benkongerike and comes raiding for our casks. Break him, and bring the spear home to Thirsk.",
       "desc": "Ragnvi Spear-Widow of Thirsk Mead Hall says a riekling chief, Kruug Three-Tusks, has united the tribes and is raiding Thirsk. The rieklings also hold the hall's old spear.",
       "objectives": [
-        {"type": "clear", "place": "thirsk_mead_hall", "placement": "near", "text": "Drive the riekling raiders out of Thirsk",
-         "spawn": [{"type": "skycraft:riekling", "count": 5, "name": "Three-Tusk Raider"}]},
-        {"type": "go", "place": "bristleback_cave", "text": "Strike back at the rieklings in Bristleback Cave"},
-        {"type": "retrieve", "place": "bristleback_cave", "placement": "structure", "relic": "side_sol_war_totem", "text": "Take the tribe's war-totem",
-         "spawn": [{"type": "skycraft:riekling", "count": 4, "name": "Bristleback Warrior"}],
-         "journal": "The war-totem bears the old seal of Thirsk and a long row of tally-marks: mead promised, mead delivered, then mead promised and never sent."},
-        {"type": "go", "place": "benkongerike", "text": "March on Kruug's camp at Benkongerike", "actions": "scene:side_sol_kruug_speaks"},
-        {"type": "clear", "place": "benkongerike", "placement": "structure", "text": "Fight through Kruug's war-band",
-         "spawn": [{"type": "skycraft:riekling", "count": 4, "name": "Three-Tusk Warrior"}, {"type": "skycraft:troll", "count": 1, "name": "Kruug's War-Troll"}]},
-        {"type": "kill", "place": "benkongerike", "placement": "structure", "text": "Defeat Kruug Three-Tusks",
-         "spawn": [{"boss_id": "side_sol_kruug"}, {"type": "skycraft:riekling", "count": 2}],
-         "journal": "Kruug is dead, and the old spear of Thirsk was in his hand. It was never stolen. Ragnvi's grandfather traded it for peace, then stopped paying the price."},
-        {"type": "deliver", "npc": "side_sol_ragnvi", "relic": "side_sol_war_totem", "text": "Bring the war-totem and the truth to Ragnvi",
-         "topic": "Your grandfather gave the spear to the rieklings for peace, and Thirsk stopped sending the mead.",
-         "reply": "That old miser. He told the hall it was taken in battle, and we drank to his courage every winter. The spear's yours, by right of the fight. What of the tribes?",
-         "choices": [
-           {"label": "Send them the mead you owe. Make the peace again.", "reply": "A cask a season, carried by me personally. Grandfather would hate it. Good.", "actions": "flag:side_sol_thirsk_peace"},
-           {"label": "They've lost their chief. Let them be.", "reply": "Then Thirsk will sleep with an axe under the bench for a while. Here, the hall's thanks.", "actions": "flag:side_sol_thirsk_wary;loot:major"}
-         ]}
+        {
+          "type": "clear",
+          "place": "thirsk_mead_hall",
+          "placement": "near",
+          "text": "Drive the riekling raiders out of Thirsk",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "count": 5,
+              "name": "Three-Tusk Raider"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "bristleback_cave",
+          "text": "Strike back at the rieklings in Bristleback Cave"
+        },
+        {
+          "type": "retrieve",
+          "place": "bristleback_cave",
+          "placement": "structure",
+          "relic": "side_sol_war_totem",
+          "text": "Take the tribe's war-totem",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "count": 4,
+              "name": "Bristleback Warrior"
+            }
+          ],
+          "journal": "The war-totem bears the old seal of Thirsk and a long row of tally-marks: mead promised, mead delivered, then mead promised and never sent."
+        },
+        {
+          "type": "go",
+          "place": "benkongerike",
+          "text": "March on Kruug's camp at Benkongerike",
+          "actions": "scene:side_sol_kruug_speaks"
+        },
+        {
+          "type": "clear",
+          "place": "benkongerike",
+          "placement": "structure",
+          "text": "Fight through Kruug's war-band",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "count": 4,
+              "name": "Three-Tusk Warrior"
+            },
+            {
+              "type": "skycraft:troll",
+              "count": 1,
+              "name": "Kruug's War-Troll"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "benkongerike",
+          "placement": "structure",
+          "text": "Defeat Kruug Three-Tusks",
+          "spawn": [
+            {
+              "boss_id": "side_sol_kruug"
+            },
+            {
+              "type": "skycraft:riekling",
+              "count": 2
+            }
+          ],
+          "journal": "Kruug is dead, and the old spear of Thirsk was in his hand. It was never stolen. Ragnvi's grandfather traded it for peace, then stopped paying the price."
+        },
+        {
+          "type": "deliver",
+          "npc": "side_sol_ragnvi",
+          "relic": "side_sol_war_totem",
+          "text": "Bring the war-totem and the truth to Ragnvi",
+          "topic": "Your grandfather gave the spear to the rieklings for peace, and Thirsk stopped sending the mead.",
+          "reply": "That old miser. He told the hall it was taken in battle, and we drank to his courage every winter. The spear's yours, by right of the fight. What of the tribes?",
+          "choices": [
+            {
+              "label": "Send them the mead you owe. Make the peace again.",
+              "reply": "A cask a season, carried by me personally. Grandfather would hate it. Good.",
+              "actions": "flag:side_sol_thirsk_peace"
+            },
+            {
+              "label": "They've lost their chief. Let them be.",
+              "reply": "Then Thirsk will sleep with an axe under the bench for a while. Here, the hall's thanks.",
+              "actions": "flag:side_sol_thirsk_wary;loot:major"
+            }
+          ]
+        }
       ],
       "outro": "The Spear of Thirsk was a peace-price, not a trophy. I carry it now, and I know exactly what it cost.",
-      "rewards": {"gold": 1300, "loot": "legendary", "unique": "riekling_spear_of_thirsk", "perks": 1}
+      "rewards": {
+        "gold": 1300,
+        "loot": "legendary",
+        "unique": "riekling_spear_of_thirsk",
+        "perks": 1
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     }
   ]
 }

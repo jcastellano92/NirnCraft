@@ -38,7 +38,9 @@ public enum Kit implements StringRepresentable {
     SLOAD("sload"),
     FALMER("falmer"),
     ICE("ice"),
-    FORSWORN("forsworn");
+    FORSWORN("forsworn"),
+    BRETON_KEEP_RUIN("breton_keep_ruin"),
+    SCORPION_DEN("scorpion_den");
 
     public static final Codec<Kit> CODEC = StringRepresentable.fromEnum(Kit::values);
 
@@ -90,6 +92,10 @@ public enum Kit implements StringRepresentable {
             case ALTMER -> roll % 2 == 0 ? new Spawn("minecraft:vex", "Crystal Sentinel") : new Spawn("minecraft:skeleton", "Aldmeri Guardian");
             case REDGUARD -> roll % 2 == 0 ? new Spawn("minecraft:husk", "Yokudan Mummy") : new Spawn("minecraft:skeleton", "Ansei Ghost");
             case BRETON -> roll % 3 == 0 ? new Spawn("minecraft:witch", "Witch") : new Spawn(Mobs.bandit(), null);
+            case BRETON_KEEP_RUIN -> roll % 3 == 0 ? new Spawn(Mobs.necromancer(), "Keep Necromancer")
+                    : roll % 2 == 0 ? new Spawn("minecraft:skeleton", "Fallen Knight")
+                    : new Spawn(Mobs.bandit(), "Keep Brigand");
+            case SCORPION_DEN -> roll % 3 == 0 ? new Spawn(Mobs.spider(), "Dune Spider") : new Spawn(Mobs.giantScorpion(), "Giant Scorpion");
             case ORC -> new Spawn(Mobs.bandit(), "Orc Berserker");
             case AKAVIRI -> roll % 2 == 0 ? new Spawn("minecraft:vindicator", "Tsaesci Warrior") : new Spawn("minecraft:pillager", "Tsaesci Archer");
             case ATMORAN -> roll % 3 == 0 ? new Spawn(Mobs.iceWraith(), null) : new Spawn(Mobs.draugr(), null);
@@ -115,6 +121,8 @@ public enum Kit implements StringRepresentable {
             case ALTMER -> new Spawn("minecraft:evoker", "Aldmeri Sorcerer");
             case REDGUARD -> new Spawn("minecraft:wither_skeleton", "Ansei Sword-Lord");
             case BRETON -> new Spawn(Mobs.vampireMaster(), "Lord of the Keep");
+            case BRETON_KEEP_RUIN -> new Spawn(Mobs.vampireMaster(), "Castellan of the Keep");
+            case SCORPION_DEN -> new Spawn(Mobs.giantScorpion(), "Broodmother Scorpion");
             case ORC -> new Spawn(Mobs.banditChief(), "Orc Warlord");
             case AKAVIRI -> new Spawn(Mobs.deathlord(), "Tsaesci Lord");
             case ATMORAN -> new Spawn(Mobs.deathlord(), "Atmoran Ice-King");
@@ -316,6 +324,18 @@ public enum Kit implements StringRepresentable {
                         .ceilings(Blocks.SPRUCE_PLANKS, 3, Blocks.TUFF, 4)
                         .pillar(Blocks.SPRUCE_LOG, Blocks.BONE_BLOCK).stairs(Blocks.COBBLESTONE_STAIRS, Blocks.COBBLESTONE_SLAB, Blocks.COBBLESTONE_WALL)
                         .light(Deco.campfire(false, true)).accent(Blocks.BONE_BLOCK).trim(Blocks.MOSSY_COBBLESTONE);
+                case BRETON_KEEP_RUIN -> b.walls(Blocks.STONE_BRICKS, 6, Blocks.MOSSY_STONE_BRICKS, 4, Blocks.CRACKED_STONE_BRICKS, 3, Blocks.DEEPSLATE_TILES, 3)
+                        .floors(Blocks.DEEPSLATE_TILES, 5, Blocks.STONE_BRICKS, 4, Blocks.MOSSY_STONE_BRICKS, 2)
+                        .ceilings(Blocks.DEEPSLATE_TILES, 4, Blocks.STONE_BRICKS, 4)
+                        .pillar(Blocks.DEEPSLATE_TILES, Blocks.CHISELED_STONE_BRICKS).stairs(Blocks.DEEPSLATE_TILE_STAIRS, Blocks.DEEPSLATE_TILE_SLAB, Blocks.STONE_BRICK_WALL)
+                        .light(Deco.lantern(true, true)).accent(Blocks.BLUE_WOOL).trim(Blocks.DEEPSLATE_TILES)
+                        .rock(Blocks.COBBLESTONE, Blocks.STONE_BRICKS);
+                case SCORPION_DEN -> b.walls(Blocks.CUT_SANDSTONE, 5, Blocks.RED_SANDSTONE, 4, Blocks.SANDSTONE, 4, Blocks.TERRACOTTA, 2, Blocks.ORANGE_TERRACOTTA, 1)
+                        .floors(Blocks.SAND, 4, Blocks.RED_SAND, 3, Blocks.CUT_SANDSTONE, 3)
+                        .ceilings(Blocks.SANDSTONE, 5, Blocks.RED_SANDSTONE, 3)
+                        .pillar(Blocks.CUT_RED_SANDSTONE, Blocks.CHISELED_RED_SANDSTONE).stairs(Blocks.RED_SANDSTONE_STAIRS, Blocks.CUT_SANDSTONE_SLAB, Blocks.SANDSTONE_WALL)
+                        .light(Deco.lantern(false, true)).accent(Blocks.BONE_BLOCK).trim(Blocks.CHISELED_SANDSTONE)
+                        .rock(Blocks.SANDSTONE, Blocks.SAND);
                 default -> b.walls(Blocks.STONE_BRICKS, 9, Blocks.MOSSY_STONE_BRICKS, 4, Blocks.CRACKED_STONE_BRICKS, 5, Blocks.TUFF, 1)
                         .floors(Blocks.DEEPSLATE_TILES, 11, Blocks.CRACKED_DEEPSLATE_TILES, 4, Blocks.STONE_BRICKS, 3, Blocks.MOSSY_STONE_BRICKS, 2)
                         .ceilings(Blocks.STONE_BRICKS, 10, Blocks.MOSSY_STONE_BRICKS, 5, Blocks.CRACKED_STONE_BRICKS, 5)

@@ -19,27 +19,31 @@ and data formats, is in [TAMRIEL.md](TAMRIEL.md).
 
 ## Provinces and regions
 
-There are **79 regions**. Each has its own biome palette, weather, music, culture, and a level band. Danger rises
-with distance from Whiterun. `/skycraft-tamriel where` (operators) names the region you stand in.
+There are **83 regions** (75 land regions across 11 province groupings plus 8 seas). Each has its own 11-layer causal
+world-model sheet (`WorldSheets`), biome palette, 6+ micro-biomes, weather, music, culture, festival calendar, and a
+level band (`max - min <= 20`). Danger rises with distance from Whiterun. `/skycraft-tamriel where` and
+`/skycraft-world sheet <region>` (operators) inspect the region you stand in.
 
 | Province | Regions (level band) |
 | --- | --- |
-| Skyrim | Whiterun Hold (1–10), Falkreath Hold (5–22), Hjaalmarch (5–24), Haafingar (5–24), The Rift (6–26), The Pale (6–26), Eastmarch (8–28), The Reach (8–30), Winterhold (10–30) |
+| Skyrim | Whiterun Hold (1–10), Falkreath Hold (5–22), Hjaalmarch (5–24), Haafingar (5–24), The Rift (6–26), The Pale (6–26), Eastmarch (8–28), The Reach (8–28), Winterhold (10–30) |
 | Cyrodiil | Heartlands, Colovian Highlands, Great Forest, Jerall Mountains, Nibenay Basin, Nibenay Valley, West Weald, Gold Coast, Blackwood (5–28) |
-| Morrowind | Solstheim, Stonefalls, Deshaan, Ascadian Isles, West Gash, Bitter Coast, Grazelands, Ashlands, Molag Amur, Azura's Coast, Telvannis, Sheogorad, Red Mountain (15–45) |
-| High Rock | Wayrest, Bjoulsae River, Stormhaven, Glenumbra, Wrothgar, Rivenspire (15–42) |
-| Hammerfell | Bangkorai, Craglorn, Alik'r Desert, Hew's Bane, Dragontail Mountains, Stros M'Kai (18–45) |
-| Black Marsh | Shadowfen, Stormhold, Gideon, Helstrom, Lilmoth, Murkmire (18–45) |
-| Elsweyr | Anequina, Rimmen, Torval, Pellitine, Senchal (18–45) |
-| Valenwood | Reaper's March, Grahtwood, Malabal Tor, Greenshade (18–45) |
-| Summerset | Auridon, Summerset Isle, Artaeum (22–45) |
+| Morrowind | Solstheim, Stonefalls, Deshaan, Ascadian Isles, West Gash, Bitter Coast, Grazelands, Ashlands, Molag Amur, Azura's Coast, Telvannis, Sheogorad, Red Mountain (12–42) |
+| High Rock | Daggerfall, Glenumbra, Stormhaven, Wayrest, Rivenspire, Kambria, Northpoint, Bjoulsae River, Wrothgar, Bangkorai Pass, Western Reach, Dellese Isles (12–38) |
+| Hammerfell | Sentinel, Alik'r Desert, Myrkwasa, Satakalaam, Lainlyn, Bergama, Sunforge, Hew's Bane, Taneth, Rihad, Craglorn, Stros M'Kai, Dragontail Mountains (14–40) |
+| Black Marsh | Shadowfen, Stormhold, Gideon, Helstrom, Lilmoth, Murkmire (16–40) |
+| Elsweyr | Anequina, Rimmen, Torval, Pellitine, Senchal (16–40) |
+| Valenwood | Reaper's March, Grahtwood, Malabal Tor, Greenshade (16–40) |
+| Summerset | Auridon, Summerset Isle, Artaeum (20–42) |
 | Seas | Sea of Ghosts, Iliac Bay, Topal Bay, Inner Sea, Abecean Sea, Padomaic and Eltheric Oceans, the open sea |
-| Beyond Tamriel | Atmora (ice waste, frozen forest), Akavir (Tsaesci, Kamal, Tang Mo, Ka Po' Tun), Yokuda (desert, sunken isles), Pyandonea, Thras (30–60) |
+| Beyond Tamriel | Atmora (ice waste, frozen forest), Akavir (Tsaesci, Kamal, Tang Mo, Ka Po' Tun), Yokuda (desert, sunken isles), Pyandonea, Thras (28–50) |
 
-## Biomes
+## Biomes and Micro-Biomes
 
-There are **113 biomes**, each with its own blocks, trees, grasses and sky. A region picks among its palette by
-terrain (coast, river, lake, marsh, lowland, upland, peak, cave) and by local climate, and borders blend.
+There are **113 biomes** and **533 micro-biomes**, each with its own blocks, trees, grasses, weather, ambience and
+spawn tables. A region picks among its palette by terrain (coast, river, lake, marsh, lowland, upland, peak, cave) and
+evaluates `6–8` causal micro-biome rules driven by elevation, slope, aspect, rainshadow (`rainshadow.png`), geothermal
+heat (`heat.png`), water distance and ridge proximity (`>= 3` micro-biome transitions per km of road).
 
 * **Skyrim:** Whiterun's tundra and plains, pine and snowy pine forests, misty Falkreath, the Rift's autumn aspens,
   the Reach's red crags, Hjaalmarch's marshes, Eastmarch's volcanic tundra and hot springs, the Pale's snowfields,
@@ -53,83 +57,83 @@ terrain (coast, river, lake, marsh, lowland, upland, peak, cave) and by local cl
   * Elsweyr: badlands, dunes, savanna and moon-sugar fields.
   * Valenwood: rainforest and walkable Graht-oaks.
   * Summerset: crystal coasts and flowering meadows.
-  * Hammerfell: the Alik'r and the Dragontail Mountains.
-  * High Rock: moors, farmland and the Wrothgarian peaks.
+  * Hammerfell & High Rock (Iliac Bay): the Alik'r, Sunforge mesas, Dragontail peaks, Glenumbra moors, Bjoulsae riverlands and Wrothgarian peaks.
 * **Underground:** Dwemer caverns, Blackreach-like Falmer glow caves, ice caves, lava caves and mushroom grottos,
   alongside vanilla's dripstone, lush and deep dark caves.
 
-`/skybiome` (operators) shows why a biome was chosen at a position.
+`/skybiome` (operators) shows why a biome and micro-biome were chosen at a position.
 
 ## Places
 
-There are **602 named places**, each at its real position:
+There are **7,546 named places**, each at its real position and linked to its region's causal world-model sheet:
 
 | Kind | Count |
 | --- | --- |
-| Capitals and cities | 18 capitals, 30 cities |
-| Towns, villages and farms | 14 towns, 19 villages, 22 farms |
-| Named dungeons (barrows, caves, mines, Dwemer ruins, forts...) | 266 |
-| Forts | 27 |
-| Landmarks | 29 |
-| Daedric shrines (all 16 Princes in each of 8 provinces, plus Skyrim's own) | 133 |
-| Standing Stones | 17 (the 13 guardian stones, with the Warrior, Mage and Thief together, and Solstheim's 6 All-Maker stones) |
-| Dragon mounds | 24 |
-| Word Walls with a fixed place | 3, plus 46 landmarks that hold a wall |
+| Capitals and cities | 18 capitals, 64 cities |
+| Towns, villages and farms | 222 towns, 487 villages, 154 farms (`354` bespoke cityplans) |
+| Named dungeons (barrows, caves, mines, Dwemer ruins, Ayleid ruins, xanmeer...) | 1,869 (including `118` bespoke marquee dungeon plans) |
+| Forts | 231 |
+| Camps | 1,303 |
+| Shrines and sacred groves | 505 shrines, 172 groves |
+| Landmarks, standing stones, dragon mounds and unmarked sites | 2,521 |
 
 * **Skyrim's settlements:**
-  * The nine hold capitals are built to their own layouts: Whiterun, Solitude, Windhelm, Riften, Markarth, Falkreath,
+  * The nine hold capitals are built to their own multi-tiered layouts with real connecting stone stairs, recognizable
+    trade shops, multi-room inns, and grand Jarl halls: Whiterun, Solitude, Windhelm, Riften, Markarth, Falkreath,
     Morthal, Dawnstar and Winterhold.
-  * Also built by hand: Helgen, the College of Winterhold, Dragon Bridge and Raven Rock.
-  * Then the towns, villages and farms: Riverwood, Rorikstead, Ivarstead, Karthwasten, Kynesgrove, Shor's Stone,
-    Darkwater Crossing, Old Hroldan, Soljund's Sinkhole, Stonehills and more.
-* **Provincial capitals,** also hand-planned: the Imperial City on its island in Lake Rumare, Mournhold, Vivec,
-  Alinor, Sentinel, Wayrest, Orsinium, Elden Root, Lilmoth and Torval. Each province's other cities (Bruma, Chorrol,
-  Anvil, Balmora, Daggerfall, Rimmen and others) stand at their lore positions.
+  * Also built by bespoke cityplans: Helgen, the College of Winterhold, Dragon Bridge, Raven Rock, Riverwood,
+    Rorikstead, Ivarstead, Karthwasten, Kynesgrove, Shor's Stone, Darkwater Crossing, Old Hroldan, Soljund's Sinkhole,
+    Stonehills, Narzulbur, Mor Khazgur, Dushnikh Yal, Largashbur, Half-Moon Mill, Anga's Mill, Mixwater Mill,
+    Solitude Sawmill, Honningbrew Meadery, Nightgate Inn, the Thalmor Embassy and Amol.
+* **Provincial capitals and cities,** also hand-planned (`354` cityplans across Tamriel): the Imperial City on its
+  island in Lake Rumare, Mournhold, Vivec, Alinor, Sentinel, Wayrest, Daggerfall, Orsinium, Elden Root, Lilmoth and
+  Torval, plus every major city and town across all 11 province groupings.
 * **Culture kits.** Settlements are built from 14 culture kits with 27 palettes. Nord alone has ten styles, from
   Whiterun timber to Markarth stone; there are Dunmer Hlaalu, Redoran, Telvanni and Velothi; and Imperial, Argonian,
   Khajiit, Bosmer, Altmer, Redguard, Breton, Orc, Akaviri, Atmoran, Yokudan and Maormer.
 * **Unique sites.** High Hrothgar and the Seven Thousand Steps, the Throat of the World, Bleak Falls Barrow (with its
   claw door), Labyrinthian, Ustengrav, Saarthal, Ysgramor's Tomb, Forelhost, Sky Haven Temple, Kolskeggr Mine, the
-  shrines of Azura and Meridia, and **Blackreach**, which runs from Mzinchaleft's Great Lift past the Tower of Mzark to
-  the Alftand and Raldbthar lifts.
-* **Generic sites** fill the gaps by culture:
-  * Skyrim: bandit camps, caves and dens, forts, watchtowers, lighthouses, shipwrecks, giant camps, hagraven lairs,
-    vampire lairs, mines, groves, Forsworn camps and the Legion's and Stormcloaks' camps.
-  * The provinces' ruins: Ayleid ruins, Velothi tombs and Daedric ruins, xanmeer, moon temples, tree tombs, crystal
-    vaults, sea vaults, coral pits, Yokudan and Atmoran tombs, and Akaviri ruins.
-  * Generic towns, villages, hamlets, farmsteads and roadside taverns.
+  Adamantine Tower (Direnni Tower), Fang Lair, Salas En, Orsinium Old Ruin, Sancre Tor, Miscarcand, Dagoth Ur,
+  Sotha Sil's Clockwork City entrance, and **Blackreach**, which runs from Mzinchaleft's Great Lift past the Tower of
+  Mzark to the Alftand and Raldbthar lifts.
 
 ## Beyond Tamriel
 
 * **Atmora** lies to the north (frozen), **Akavir** to the east (Tsaesci jungles, Kamal snowfields, the Tang Mo
   islands, the Ka Po' Tun steppe), **Yokuda** to the west (desert and a sunken archipelago), and **Pyandonea** and
   **Thras** to the south-west (jungle isles and coral).
-* **Endless lands.** Further out, the world never ends. Every 12,288-block cell holds an ocean, an archipelago or a
-  continent. Each landmass has a generated "Uncharted" name, its own regions and one of ten realm types (frozen,
-  temperate, ash, swamp, desert, jungle, crystal, savanna, mushroom, alpine). These lands reuse every biome, and have
-  their own caves, forts, camps and expeditions.
+* **Endless lands (P7).** Beyond the `28,160 × 21,504` fixed Tamriel raster (`|x| > 14,080` or `|z| > 10,752`), the
+  world never ends. Every **4,096 × 4,096** tile is deterministically generated from `(worldSeed, tileX, tileZ)` in
+  under 50 ms (`TilePlanner`, `TileSheetGenerator`), producing a full 11-layer causal `WorldSheets` model, terrain
+  heightfield, hydrology, `1–3` settlements, `8–15` dungeons, road network, and a 3-quest regional story arc. Operators
+  can inspect or teleport to tiles with `/skycraft-world tile <tx> <tz>` and `/skycraft-world tp-tile <tx> <tz>`.
 
 ## Travel
 
-* **Discovery.** Reaching a place shows a "DISCOVERED" banner and adds it to your map. Entering a new region or
-  province shows its name.
+* **Discovery.** Reaching a place shows a "DISCOVERED" banner and adds it to your map. Entering a new region for the
+  first time shows its region banner with local rumours, plays a regional music sting, and delivers a narrator arrival
+  hook. Undiscovered places within 150 blocks appear as a subtle compass hint.
 * **The map** (**M**) is painted parchment with relief, coasts, rivers and borders. It shows province and region
   names, the places you know, quest targets, your party, other players and a custom marker. Unexplored land stays
   under fog of war.
 * **Fast travel.** Pick any discovered place. It isn't allowed while you're in combat, with enemies within 16
   blocks, over-encumbered, riding, falling, in jail, or to another dimension. In singleplayer it advances the clock
   one hour per 400 blocks. Survival Mode can block it entirely (`blockFastTravel`).
-* **Carriages.**
-  * Drivers wait outside capitals and cities. They go to every capital and city of their own province, plus any
-    you've discovered in other provinces, up to 14 destinations.
-  * Fares inside Skyrim are 20–50 Septims and grow with distance elsewhere.
-  * Routes across open sea aren't offered. Ships are planned.
-* **Silt striders** link Vvardenfell's ports.
+* **Multi-modal travel network (`TravelNetworks`).** Every province has culturally authentic travel routes (`p90 <= 500`,
+  `max <= 800` blocks to a travel node on land):
+  * **Carriages & caravans:** connect hold capitals, provincial cities, and towns along highway corridors.
+  * **Ships, ferries & river boats:** sail open-water A* sea routes around headlands (Sea of Ghosts, Iliac Bay,
+    Abecean, Topal Bay, Inner Sea, Padomaic Ocean) and major rivers (White River, Niben, Bjoulsae).
+  * **Silt striders, boats, propylon indices, Mages Guild guides & Divine/Almsivi Intervention:** link Morrowind's
+    mainland and Vvardenfell.
+  * **Standing stones & wilderness wayshrines:** act as free travel and blessing nodes across every region.
 * **Horses.** Six breeds are sold at stables, and wild horses can be tamed. Call yours with **H**. Riding trains the
   Riding skill.
 * **Roads.**
-  * Roads join neighbouring settlements, with bridges, signposts and lanterns.
-  * Khajiit caravans, travellers and guard patrols walk them, and bandits lie in wait.
+  * Roads join neighbouring settlements, with switchbacks, bridges, tunnels, signposts (naming the next settlement,
+    roadside inn, and nearby dungeons) and lanterns.
+  * Khajiit caravans, travellers and guard patrols walk them, and 125+ regional encounter scenes (including non-hostile
+    wonder moments) unfold along them while keeping road hostility quiet (`<= 5%` day, `<= 20%` night).
   * Road building runs on a per-tick budget (`skycraft-roads.toml`).
 
 ## Weather and sky

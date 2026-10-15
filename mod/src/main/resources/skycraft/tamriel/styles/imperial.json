@@ -1,73 +1,1061 @@
 {
   "_doc": "Imperial (Cyrodiilic) style sheet: plastered and stone houses under red tile, planned axes and squares.",
   "windows": "pane",
-  "faith": ["akatosh", "dibella", "julianos", "mara", "stendarr", "zenithar", "arkay", "kynareth"],
-  "crops": ["wheat", "carrots", "potatoes", "tomato", "beetroots", "vines", "orchard"],
-  "animals": ["chicken", "cow", "sheep", "pig", "dog", "cat"],
-  "colors": ["red", "yellow", "purple", "white"],
-  "forms": {"grid": 4, "crossroads": 3, "linear": 2, "hilltop": 1},
+  "faith": [
+    "akatosh",
+    "dibella",
+    "julianos",
+    "mara",
+    "stendarr",
+    "zenithar",
+    "arkay",
+    "kynareth"
+  ],
+  "crops": [
+    "wheat",
+    "carrots",
+    "potatoes",
+    "tomato",
+    "beetroots",
+    "vines",
+    "orchard"
+  ],
+  "animals": [
+    "chicken",
+    "cow",
+    "sheep",
+    "pig",
+    "dog",
+    "cat"
+  ],
+  "colors": [
+    "red",
+    "yellow",
+    "purple",
+    "white"
+  ],
+  "forms": {
+    "grid": 4,
+    "crossroads": 3,
+    "linear": 2,
+    "hilltop": 1
+  },
   "roofs": {
-    "poor": {"gable": 2, "thatch": 2, "shed": 1},
-    "common": {"gable": 2, "hip": 3},
-    "wealthy": {"hip": 4, "gable": 1, "slate": 1},
-    "noble": {"hip": 3, "dome": 1}
+    "poor": {
+      "gable": 2,
+      "thatch": 2,
+      "shed": 1
+    },
+    "common": {
+      "gable": 2,
+      "hip": 3
+    },
+    "wealthy": {
+      "hip": 4,
+      "gable": 1,
+      "slate": 1
+    },
+    "noble": {
+      "hip": 3,
+      "dome": 1
+    }
   },
-  "halls": {"hip": 2, "dome": 1},
+  "halls": {
+    "hip": 2,
+    "dome": 1
+  },
   "footprints": {
-    "poor": {"rect": 1},
-    "common": {"rect": 3, "l": 2},
-    "wealthy": {"l": 2, "t": 1, "rect": 1, "u": 1},
-    "noble": {"u": 2, "t": 1, "l": 1}
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 3,
+      "l": 2
+    },
+    "wealthy": {
+      "l": 2,
+      "t": 1,
+      "rect": 1,
+      "u": 1
+    },
+    "noble": {
+      "u": 2,
+      "t": 1,
+      "l": 1
+    }
   },
-  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
-  "rules": {"timber": 0.5, "porch": 0.2, "balcony": 0.3, "outsideStairs": 0.25, "shutters": 0.5, "flowerBoxes": 0.5,
-    "chimney": 0.8, "annex": 0.35, "banners": 0.6, "lanterns": 0.7, "awning": 0.5, "dormers": 0.1, "tower": 0.3},
-  "tiers": {
+  "storeys": {
     "poor": [
-      {"name": "daub cottage", "wall": "mushroom_stem", "low": "cobblestone", "roof": "spruce", "wood": "oak", "accent": "brown"},
-      {"name": "field stone", "wall": "cobblestone", "wall2": "mossy_cobblestone", "low": "cobblestone", "roof": "oak", "wood": "oak", "timber": false},
-      {"name": "mud brick", "wall": "packed_mud", "wall2": "mud_bricks", "low": "cobblestone", "roof": "mud_brick", "wood": "spruce", "timber": false}
+      1,
+      1
     ],
     "common": [
-      {"name": "white plaster", "wall": "mushroom_stem", "low": "stone_bricks", "roof": "brick", "wood": "dark_oak", "accent": "red"},
-      {"name": "grey ashlar", "wall": "diorite", "wall2": "andesite", "low": "stone_bricks", "roof": "brick", "wood": "oak", "timber": false, "accent": "yellow"},
-      {"name": "warm plaster", "wall": "smooth_sandstone", "low": "stone_bricks", "roof": "granite", "wood": "oak", "timber": false, "accent": "red"},
-      {"name": "timbered", "wall": "white_terracotta", "low": "cobblestone", "roof": "spruce", "wood": "spruce", "accent": "purple"}
+      1,
+      2
     ],
     "wealthy": [
-      {"name": "marble trim", "wall": "polished_diorite", "low": "stone_bricks", "roof": "brick", "trim": "stone_brick", "wood": "oak", "timber": false, "accent": "red"},
-      {"name": "dressed stone", "wall": "stone_bricks", "wall2": "chiseled_stone_bricks", "low": "polished_andesite", "roof": "brick", "wood": "dark_oak", "timber": false, "accent": "yellow"},
-      {"name": "calcite villa", "wall": "calcite", "low": "polished_andesite", "roof": "polished_granite", "wood": "oak", "timber": false, "accent": "purple"}
+      2,
+      2
     ],
     "noble": [
-      {"name": "palazzo", "wall": "smooth_quartz", "low": "chiseled_stone_bricks", "roof": "brick", "trim": "quartz", "wood": "dark_oak", "column": "quartz_pillar", "timber": false, "accent": "red"},
-      {"name": "patrician", "wall": "polished_diorite", "wall2": "calcite", "low": "stone_bricks", "roof": "deepslate_tile", "trim": "stone_brick", "wood": "dark_oak", "column": "quartz_pillar", "timber": false, "accent": "purple"},
-      {"name": "old colovian", "wall": "stone_bricks", "low": "polished_andesite", "roof": "granite", "wood": "spruce", "column": "polished_basalt", "timber": false, "accent": "yellow"}
+      2,
+      3
+    ]
+  },
+  "rules": {
+    "timber": 0.5,
+    "porch": 0.2,
+    "balcony": 0.3,
+    "outsideStairs": 0.25,
+    "shutters": 0.5,
+    "flowerBoxes": 0.5,
+    "chimney": 0.8,
+    "annex": 0.35,
+    "banners": 0.6,
+    "lanterns": 0.7,
+    "awning": 0.5,
+    "dormers": 0.1,
+    "tower": 0.3
+  },
+  "tiers": {
+    "poor": [
+      {
+        "name": "daub cottage",
+        "wall": "mushroom_stem",
+        "low": "cobblestone",
+        "roof": "spruce",
+        "wood": "oak",
+        "accent": "brown"
+      },
+      {
+        "name": "field stone",
+        "wall": "cobblestone",
+        "wall2": "mossy_cobblestone",
+        "low": "cobblestone",
+        "roof": "oak",
+        "wood": "oak",
+        "timber": false
+      },
+      {
+        "name": "mud brick",
+        "wall": "packed_mud",
+        "wall2": "mud_bricks",
+        "low": "cobblestone",
+        "roof": "mud_brick",
+        "wood": "spruce",
+        "timber": false
+      }
+    ],
+    "common": [
+      {
+        "name": "white plaster",
+        "wall": "mushroom_stem",
+        "low": "stone_bricks",
+        "roof": "brick",
+        "wood": "dark_oak",
+        "accent": "red"
+      },
+      {
+        "name": "grey ashlar",
+        "wall": "diorite",
+        "wall2": "andesite",
+        "low": "stone_bricks",
+        "roof": "brick",
+        "wood": "oak",
+        "timber": false,
+        "accent": "yellow"
+      },
+      {
+        "name": "warm plaster",
+        "wall": "smooth_sandstone",
+        "low": "stone_bricks",
+        "roof": "granite",
+        "wood": "oak",
+        "timber": false,
+        "accent": "red"
+      },
+      {
+        "name": "timbered",
+        "wall": "white_terracotta",
+        "low": "cobblestone",
+        "roof": "spruce",
+        "wood": "spruce",
+        "accent": "purple"
+      }
+    ],
+    "wealthy": [
+      {
+        "name": "marble trim",
+        "wall": "polished_diorite",
+        "low": "stone_bricks",
+        "roof": "brick",
+        "trim": "stone_brick",
+        "wood": "oak",
+        "timber": false,
+        "accent": "red"
+      },
+      {
+        "name": "dressed stone",
+        "wall": "stone_bricks",
+        "wall2": "chiseled_stone_bricks",
+        "low": "polished_andesite",
+        "roof": "brick",
+        "wood": "dark_oak",
+        "timber": false,
+        "accent": "yellow"
+      },
+      {
+        "name": "calcite villa",
+        "wall": "calcite",
+        "low": "polished_andesite",
+        "roof": "polished_granite",
+        "wood": "oak",
+        "timber": false,
+        "accent": "purple"
+      }
+    ],
+    "noble": [
+      {
+        "name": "palazzo",
+        "wall": "smooth_quartz",
+        "low": "chiseled_stone_bricks",
+        "roof": "brick",
+        "trim": "quartz",
+        "wood": "dark_oak",
+        "column": "quartz_pillar",
+        "timber": false,
+        "accent": "red"
+      },
+      {
+        "name": "patrician",
+        "wall": "polished_diorite",
+        "wall2": "calcite",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "trim": "stone_brick",
+        "wood": "dark_oak",
+        "column": "quartz_pillar",
+        "timber": false,
+        "accent": "purple"
+      },
+      {
+        "name": "old colovian",
+        "wall": "stone_bricks",
+        "low": "polished_andesite",
+        "roof": "granite",
+        "wood": "spruce",
+        "column": "polished_basalt",
+        "timber": false,
+        "accent": "yellow"
+      }
     ]
   },
   "styles": {
-    "imperial_city": {
-      "forms": {"grid": 5, "cluster": 1},
+    "imperial_alpine": {
+      "forms": {
+        "hilltop": 3,
+        "crossroads": 3,
+        "linear": 2
+      },
+      "windows": "pane",
+      "pitch": 2,
+      "rules": {
+        "timber": 0.75,
+        "porch": 0.35,
+        "balcony": 0.25,
+        "flowerBoxes": 0.4,
+        "chimney": 0.95,
+        "shutters": 0.7,
+        "dormers": 0.35,
+        "banners": 0.65,
+        "lanterns": 0.8
+      },
+      "roofs": {
+        "poor": {
+          "thatch": 2,
+          "steep": 2,
+          "gable": 1
+        },
+        "common": {
+          "steep": 3,
+          "slate": 2,
+          "gable": 2
+        },
+        "wealthy": {
+          "slate": 3,
+          "steep": 2,
+          "hip": 1
+        },
+        "noble": {
+          "slate": 3,
+          "hip": 2,
+          "steep": 1
+        }
+      },
       "tiers": {
         "poor": [
-          {"wall": "diorite", "low": "stone_bricks", "roof": "brick", "wood": "oak", "timber": false},
-          {"wall": "calcite", "low": "cobblestone", "roof": "brick", "wood": "oak", "timber": false},
-          {"wall": "stone_bricks", "low": "cobblestone", "roof": "granite", "wood": "spruce", "timber": false}
+          {
+            "name": "bruma logger cabin",
+            "wall": "spruce_planks",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": true,
+            "accent": "red"
+          },
+          {
+            "name": "jerall miner shack",
+            "wall": "cobblestone",
+            "low": "stone_bricks",
+            "roof": "spruce",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          },
+          {
+            "name": "snow-pass bothy",
+            "wall": "mushroom_stem",
+            "low": "cobblestone",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "accent": "yellow"
+          },
+          {
+            "name": "applewatch croft",
+            "wall": "stripped_spruce_log",
+            "low": "mossy_cobblestone",
+            "roof": "spruce",
+            "wood": "spruce",
+            "accent": "white"
+          }
         ],
         "common": [
-          {"wall": "polished_diorite", "low": "stone_bricks", "roof": "brick", "wood": "oak", "timber": false},
-          {"wall": "calcite", "low": "chiseled_stone_bricks", "roof": "brick", "wood": "dark_oak", "timber": false},
-          {"wall": "quartz_bricks", "low": "stone_bricks", "roof": "polished_granite", "wood": "oak", "timber": false}
+          {
+            "name": "bruma half-timber house",
+            "wall": "mushroom_stem",
+            "wall2": "spruce_planks",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "accent": "red"
+          },
+          {
+            "name": "nord-imperial longhouse",
+            "wall": "stripped_spruce_log",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "wood": "dark_oak",
+            "accent": "yellow"
+          },
+          {
+            "name": "cloud-ruler foothill house",
+            "wall": "stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "accent": "blue"
+          },
+          {
+            "name": "jerall slate gable",
+            "wall": "white_terracotta",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "accent": "red"
+          }
         ],
         "wealthy": [
-          {"wall": "smooth_quartz", "wall2": "quartz_bricks", "low": "chiseled_stone_bricks", "roof": "brick", "wood": "dark_oak", "timber": false},
-          {"wall": "quartz_bricks", "low": "polished_diorite", "roof": "deepslate_tile", "wood": "oak", "timber": false},
-          {"wall": "calcite", "wall2": "smooth_quartz", "low": "stone_bricks", "roof": "brick", "wood": "birch", "timber": false}
+          {
+            "name": "bruma merchant hall",
+            "wall": "stone_bricks",
+            "wall2": "mushroom_stem",
+            "low": "chiseled_stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "red"
+          },
+          {
+            "name": "pale-pass factor lodge",
+            "wall": "calcite",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "window": "glass_pane",
+            "accent": "yellow"
+          },
+          {
+            "name": "silver-guild comptoir",
+            "wall": "polished_diorite",
+            "low": "polished_andesite",
+            "roof": "blackstone",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "purple"
+          }
         ],
         "noble": [
-          {"wall": "smooth_quartz", "low": "quartz_bricks", "roof": "brick", "trim": "quartz", "column": "quartz_pillar", "wood": "dark_oak", "timber": false},
-          {"wall": "quartz_bricks", "wall2": "chiseled_quartz_block", "low": "smooth_quartz", "roof": "polished_granite", "trim": "quartz", "column": "quartz_pillar", "wood": "dark_oak", "timber": false},
-          {"wall": "calcite", "low": "quartz_bricks", "roof": "deepslate_tile", "trim": "quartz", "column": "quartz_pillar", "wood": "birch", "timber": false}
+          {
+            "name": "castle bruma solar",
+            "wall": "stone_bricks",
+            "wall2": "chiseled_stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "carvain winter manor",
+            "wall": "calcite",
+            "low": "chiseled_stone_bricks",
+            "roof": "polished_blackstone_brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "yellow"
+          },
+          {
+            "name": "dragonguard commandery",
+            "wall": "polished_diorite",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "window": "glass_pane",
+            "accent": "white"
+          }
+        ]
+      }
+    },
+    "imperial_warm": {
+      "forms": {
+        "grid": 3,
+        "hilltop": 3,
+        "crossroads": 2
+      },
+      "windows": "pane",
+      "rules": {
+        "timber": 0.45,
+        "porch": 0.3,
+        "balcony": 0.45,
+        "flowerBoxes": 0.7,
+        "chimney": 0.75,
+        "shutters": 0.65,
+        "awning": 0.6,
+        "banners": 0.65,
+        "lanterns": 0.75
+      },
+      "roofs": {
+        "poor": {
+          "gable": 3,
+          "shed": 2
+        },
+        "common": {
+          "hip": 3,
+          "gable": 2
+        },
+        "wealthy": {
+          "hip": 4,
+          "gable": 1
+        },
+        "noble": {
+          "hip": 3,
+          "dome": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "vine-worker cottage",
+            "wall": "white_terracotta",
+            "low": "cobblestone",
+            "roof": "brick",
+            "wood": "oak",
+            "accent": "red"
+          },
+          {
+            "name": "press-yard shed",
+            "wall": "sandstone",
+            "low": "stone_bricks",
+            "roof": "acacia",
+            "wood": "oak",
+            "accent": "yellow"
+          },
+          {
+            "name": "olive-terracer hut",
+            "wall": "mushroom_stem",
+            "low": "cobblestone",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "accent": "green"
+          }
+        ],
+        "common": [
+          {
+            "name": "skingrad arch-bridge house",
+            "wall": "stone_bricks",
+            "wall2": "mushroom_stem",
+            "low": "polished_andesite",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "accent": "red"
+          },
+          {
+            "name": "weald vintner townhouse",
+            "wall": "calcite",
+            "low": "stone_bricks",
+            "roof": "brick",
+            "wood": "oak",
+            "accent": "purple"
+          },
+          {
+            "name": "cheydinhal willow-gable",
+            "wall": "white_terracotta",
+            "low": "stone_bricks",
+            "roof": "warped_Wart",
+            "wood": "dark_oak",
+            "accent": "blue"
+          },
+          {
+            "name": "corbolo bridge house",
+            "wall": "polished_diorite",
+            "low": "cobblestone",
+            "roof": "brick",
+            "wood": "spruce",
+            "accent": "yellow"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "surilie wine-chateau",
+            "wall": "calcite",
+            "wall2": "stone_bricks",
+            "low": "chiseled_stone_bricks",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "red"
+          },
+          {
+            "name": "nibenese silk-villa",
+            "wall": "quartz_bricks",
+            "low": "polished_diorite",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "purple"
+          },
+          {
+            "name": "gold-road patrician house",
+            "wall": "polished_diorite",
+            "low": "stone_bricks",
+            "roof": "brick",
+            "wood": "oak",
+            "window": "glass_pane",
+            "accent": "yellow"
+          }
+        ],
+        "noble": [
+          {
+            "name": "hassildor court-palace",
+            "wall": "chiseled_stone_bricks",
+            "wall2": "calcite",
+            "low": "polished_andesite",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "indarys river-palazzo",
+            "wall": "quartz_bricks",
+            "low": "chiseled_stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "purple"
+          },
+          {
+            "name": "white-gold senatorial villa",
+            "wall": "smooth_quartz",
+            "low": "quartz_bricks",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "white"
+          }
+        ]
+      }
+    },
+    "imperial_coast": {
+      "forms": {
+        "grid": 3,
+        "linear": 3,
+        "crossroads": 2
+      },
+      "windows": "pane",
+      "rules": {
+        "timber": 0.15,
+        "porch": 0.45,
+        "balcony": 0.55,
+        "flowerBoxes": 0.65,
+        "chimney": 0.5,
+        "shutters": 0.75,
+        "awning": 0.7,
+        "banners": 0.6,
+        "lanterns": 0.8
+      },
+      "roofs": {
+        "poor": {
+          "shed": 2,
+          "gable": 2
+        },
+        "common": {
+          "hip": 3,
+          "gable": 2
+        },
+        "wealthy": {
+          "hip": 4,
+          "dome": 1
+        },
+        "noble": {
+          "dome": 2,
+          "hip": 3
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "anvil dockside shanty",
+            "wall": "smooth_sandstone",
+            "low": "sandstone",
+            "roof": "acacia",
+            "wood": "jungle",
+            "timber": false,
+            "accent": "yellow"
+          },
+          {
+            "name": "gold-coast net-house",
+            "wall": "white_terracotta",
+            "low": "cobblestone",
+            "roof": "brick",
+            "wood": "oak",
+            "timber": false,
+            "accent": "blue"
+          },
+          {
+            "name": "strident-mouth Lime cottage",
+            "wall": "calcite",
+            "low": "sandstone",
+            "roof": "acacia",
+            "wood": "birch",
+            "timber": false,
+            "accent": "white"
+          }
+        ],
+        "common": [
+          {
+            "name": "anvil whitewashed townhouse",
+            "wall": "calcite",
+            "wall2": "smooth_sandstone",
+            "low": "cut_sandstone",
+            "roof": "brick",
+            "wood": "jungle",
+            "timber": false,
+            "accent": "orange"
+          },
+          {
+            "name": "abecean factor house",
+            "wall": "white_terracotta",
+            "low": "stone_bricks",
+            "roof": "acacia",
+            "wood": "oak",
+            "timber": false,
+            "accent": "blue"
+          },
+          {
+            "name": "kvatch bluff residence",
+            "wall": "smooth_sandstone",
+            "low": "polished_diorite",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "anvil shipping loggia",
+            "wall": "smooth_quartz",
+            "wall2": "calcite",
+            "low": "cut_sandstone",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "blue"
+          },
+          {
+            "name": "benirus-row villa",
+            "wall": "calcite",
+            "low": "chiseled_stone_bricks",
+            "roof": "brick",
+            "wood": "jungle",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "yellow"
+          },
+          {
+            "name": "gold-coast customs palazzo",
+            "wall": "polished_diorite",
+            "low": "smooth_sandstone",
+            "roof": "acacia",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "noble": [
+          {
+            "name": "castle anvil sea-keep",
+            "wall": "smooth_quartz",
+            "wall2": "chiseled_quartz_block",
+            "low": "cut_sandstone",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "yellow"
+          },
+          {
+            "name": "kvatch acropolis hall",
+            "wall": "calcite",
+            "low": "chiseled_stone_bricks",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "topal admiral's palazzo",
+            "wall": "quartz_bricks",
+            "low": "polished_diorite",
+            "roof": "brick",
+            "wood": "jungle",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "blue"
+          }
+        ]
+      }
+    },
+    "imperial_slum": {
+      "forms": {
+        "linear": 4,
+        "crossroads": 3,
+        "grid": 1
+      },
+      "windows": "pane",
+      "rules": {
+        "timber": 0.85,
+        "porch": 0.4,
+        "balcony": 0.5,
+        "outsideStairs": 0.65,
+        "flowerBoxes": 0.15,
+        "chimney": 0.5,
+        "shutters": 0.5,
+        "awning": 0.55,
+        "lanterns": 0.6
+      },
+      "roofs": {
+        "poor": {
+          "shed": 3,
+          "thatch": 2,
+          "gable": 1
+        },
+        "common": {
+          "gable": 3,
+          "shed": 2
+        },
+        "wealthy": {
+          "gable": 3,
+          "hip": 2
+        },
+        "noble": {
+          "hip": 3,
+          "gable": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "bravil canal rookery",
+            "wall": "spruce_planks",
+            "low": "mossy_cobblestone",
+            "roof": "dark_oak",
+            "wood": "spruce",
+            "accent": "brown"
+          },
+          {
+            "name": "waterfront plank shanty",
+            "wall": "oak_planks",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "wood": "oak",
+            "accent": "gray"
+          },
+          {
+            "name": "blackwood bayou stilt-hut",
+            "wall": "mangrove_planks",
+            "low": "mud_bricks",
+            "roof": "dark_oak",
+            "wood": "mangrove",
+            "accent": "green"
+          }
+        ],
+        "common": [
+          {
+            "name": "bravil two-storey boardwalk house",
+            "wall": "spruce_planks",
+            "wall2": "oak_planks",
+            "low": "mossy_stone_bricks",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "accent": "brown"
+          },
+          {
+            "name": "niben barge-chandler loft",
+            "wall": "mushroom_stem",
+            "low": "mossy_cobblestone",
+            "roof": "spruce",
+            "wood": "spruce",
+            "accent": "yellow"
+          },
+          {
+            "name": "leyawiin tide-alley house",
+            "wall": "white_terracotta",
+            "low": "mossy_stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "mangrove",
+            "accent": "green"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "bravil factor warehouse",
+            "wall": "mossy_stone_bricks",
+            "wall2": "spruce_planks",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "yellow"
+          },
+          {
+            "name": "leyawiin rice-guild house",
+            "wall": "calcite",
+            "low": "mossy_stone_bricks",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "purple"
+          },
+          {
+            "name": "topal customs house",
+            "wall": "stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "window": "glass_pane",
+            "accent": "red"
+          }
+        ],
+        "noble": [
+          {
+            "name": "castle bravil timber-keep",
+            "wall": "stone_bricks",
+            "wall2": "mossy_stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "yellow"
+          },
+          {
+            "name": "castle leyawiin estuary hall",
+            "wall": "calcite",
+            "low": "chiseled_stone_bricks",
+            "roof": "brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "purple"
+          },
+          {
+            "name": "blackwood march-warden manor",
+            "wall": "polished_diorite",
+            "low": "mossy_stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "green"
+          }
+        ]
+      }
+    },
+    "imperial_oak": {
+      "forms": {
+        "crossroads": 3,
+        "grid": 3,
+        "hilltop": 2
+      },
+      "windows": "pane",
+      "rules": {
+        "timber": 0.65,
+        "porch": 0.35,
+        "balcony": 0.3,
+        "flowerBoxes": 0.6,
+        "chimney": 0.85,
+        "shutters": 0.65,
+        "dormers": 0.25,
+        "banners": 0.65,
+        "lanterns": 0.75
+      },
+      "roofs": {
+        "poor": {
+          "thatch": 2,
+          "gable": 2
+        },
+        "common": {
+          "gable": 3,
+          "hip": 2
+        },
+        "wealthy": {
+          "hip": 3,
+          "slate": 2
+        },
+        "noble": {
+          "hip": 3,
+          "slate": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "colovian sheep-fold cottage",
+            "wall": "cobblestone",
+            "low": "stone_bricks",
+            "roof": "spruce",
+            "wood": "oak",
+            "accent": "yellow"
+          },
+          {
+            "name": "great-forest woodcutter house",
+            "wall": "mushroom_stem",
+            "low": "cobblestone",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "accent": "green"
+          },
+          {
+            "name": "hackdirt quarry shack",
+            "wall": "andesite",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "wood": "spruce",
+            "accent": "brown"
+          }
+        ],
+        "common": [
+          {
+            "name": "chorrol oak-plaza house",
+            "wall": "mushroom_stem",
+            "wall2": "stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "accent": "yellow"
+          },
+          {
+            "name": "weynon priory lodge",
+            "wall": "stone_bricks",
+            "low": "cobblestone",
+            "roof": "brick",
+            "wood": "oak",
+            "accent": "red"
+          },
+          {
+            "name": "colovian drover inn",
+            "wall": "white_terracotta",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "accent": "blue"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "chorrol guildhall residence",
+            "wall": "stone_bricks",
+            "wall2": "calcite",
+            "low": "chiseled_stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "yellow"
+          },
+          {
+            "name": "odill grange manor",
+            "wall": "polished_diorite",
+            "low": "stone_bricks",
+            "roof": "brick",
+            "wood": "oak",
+            "window": "glass_pane",
+            "accent": "red"
+          },
+          {
+            "name": "fighters-guild chapter hall",
+            "wall": "stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "blue"
+          }
+        ],
+        "noble": [
+          {
+            "name": "castle chorrol keep",
+            "wall": "stone_bricks",
+            "wall2": "chiseled_stone_bricks",
+            "low": "polished_andesite",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "yellow"
+          },
+          {
+            "name": "battlehorn lord's hall",
+            "wall": "polished_diorite",
+            "low": "chiseled_stone_bricks",
+            "roof": "polished_blackstone_brick",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "valga countess solar",
+            "wall": "calcite",
+            "low": "stone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "glass_pane",
+            "accent": "white"
+          }
         ]
       }
     }

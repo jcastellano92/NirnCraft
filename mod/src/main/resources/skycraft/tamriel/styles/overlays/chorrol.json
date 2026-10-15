@@ -1,0 +1,29 @@
+{
+  "id": "chorrol",
+  "why": [
+    "colovian_highlands.L1.karst_valleys",
+    "colovian_highlands.L6.chorrol_crossroads",
+    "colovian_highlands.L7.colovian_pride"
+  ],
+  "tint": {
+    "wall": "minecraft:white_terracotta",
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:stone_bricks",
+    "wood": "dark_oak",
+    "roof": "deepslate_tile",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:andesite",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:cobblestone",
+    "path": "minecraft:gravel"
+  },
+  "style": {
+    "forms": {
+      "courtyard": 8,
+      "cruciform": 6
+    }
+  }
+}

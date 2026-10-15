@@ -1,0 +1,411 @@
+{
+  "region": "high_rock/daggerfall",
+  "title": "The Gilded Charter of Castle Daggerfall",
+  "summary": "Unravel a conspiracy between cliffside privateers, rebel barons, and an ancient Vraseth bloodline mentor beneath Castle Daggerfall before the Betony garrison mutinies.",
+  "why": [
+    "daggerfall.L7.toll_families",
+    "daggerfall.L8.lysandus_memory",
+    "daggerfall.L9.court_vs_barons",
+    "daggerfall.L9.owl_vs_dragon",
+    "daggerfall.L10.under_daggerfall"
+  ],
+  "hook": {
+    "place": "daggerfall",
+    "places": [
+      "ashmoor_diggings",
+      "balhurst_coven",
+      "brammere_encampment",
+      "castle_valois",
+      "daggerfall",
+      "daggerfall_outlaws_refuge",
+      "fontaine_homestead",
+      "gauvain_farm",
+      "highwych",
+      "ilessan_hills",
+      "linhaven_cave",
+      "loroylle",
+      "raventhorpe_sanctum",
+      "roadside_hearth_and_harp",
+      "thorncliff_caverns",
+      "thornhaven_watch"
+    ],
+    "npc": "story_df_envoy_genevieve",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_df_envoy_genevieve",
+      "name": "Envoy Genevieve Montrose",
+      "role": "steward",
+      "place": "daggerfall",
+      "greet": "Hold, traveller! Have you come up the bluff road or across the Ilessan boundary? The Crown's charter chests were seized before dawn.",
+      "talk": [
+        "Three baronial toll-collectors were found drained of blood beside the harbour chain, and the Knights of the Dragon are blaming the Owl's clerks.",
+        "If the Betony garrison isn't paid by moonrise, the cliff captains will sell the sea-gate keys to the privateers in Thorncliff Caverns."
+      ]
+    },
+    {
+      "id": "story_df_sir_baptiste",
+      "name": "Sir Baptiste of the Owl",
+      "role": "knight",
+      "place": "castle_daggerfall",
+      "greet": "Speak softly. Half the Dragon's lancers in this courtyard take coin from Woodborne's cousins.",
+      "talk": [
+        "The stolen chest didn't just hold silver—it held the red-wax Betony muster rolls and an older parchment sealed with the Vraseth crest.",
+        "Trace the harbour smugglers through Ilessan Hills to Thorncliff Caverns before the tide floods the sea-vault."
+      ]
+    },
+    {
+      "id": "story_df_sister_maelle",
+      "name": "Sister Maelle of the Bluff",
+      "role": "priest",
+      "place": "ilessan_hills",
+      "greet": "Kynareth's wind carries salt and old iron today. You hunt the men who broke the harbour chain?",
+      "talk": [
+        "They rode past Linwold Monument with muffled hooves, bearing lanterns of blue tallow that only burn in the old baronial crypts.",
+        "Take this storm-blessed oil; the things waking beneath Loroylle and Woodborne Hall do not fear ordinary steel."
+      ]
+    },
+    {
+      "id": "story_df_captain_vauquelin",
+      "name": "Captain Vauquelin",
+      "role": "guard",
+      "place": "woodborne_hall",
+      "greet": "Put up your blade! My company was locked out of the inner keep when Lord Amaury opened the lower cistern.",
+      "talk": [
+        "Amaury swore the Vraseth court-mentor would restore the pre-Warp baronies if we surrendered the Betony seal.",
+        "Break the ward in the undercroft and we will hold the gate against his privateers!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_df_bosun_kerguelen": {
+      "name": "Bosun Kerguelen the Salt-Hound",
+      "rank": "boss",
+      "place": "thorncliff_caverns",
+      "weapon": "steel_sword",
+      "helmet": "leather_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.5
+    },
+    "story_df_archon_amaury_vraseth": {
+      "name": "Lord Amaury of the Vraseth Charter",
+      "rank": "boss",
+      "place": "loroylle",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.2,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_df_harbour_chain": [
+      "Envoy Genevieve Montrose: Look at the links of the harbour chain—sheared clean through with alchemical frost from a Tristore flask.",
+      "Sir Baptiste of the Owl: And see the wax crumb left on the bollard? Crimson boar-tallow, stamped with an unmerged baronial signet.",
+      "Envoy Genevieve Montrose: Then the privateers at Thorncliff are only the oarsmen. Someone inside the peerage is steering the hull."
+    ],
+    "story_df_thorncliff_parley": [
+      "Bosun Kerguelen: You're late, Owl-dog! The charter chest has already gone up the ridge toward Woodborne Hall and Loroylle!",
+      "Sir Baptiste of the Owl: And the three toll-clerks drained white on the quay—was that part of your freight, pirate?",
+      "Bosun Kerguelen: That was the passenger's tithe. Draw your iron if you want to ask him yourself!"
+    ],
+    "story_df_vraseth_sanctum": [
+      "Lord Amaury: For three hundred years the Vraseth elders kept the true rolls of the bay while Castle Daggerfall fattened on toll-silver!",
+      "Sir Baptiste of the Owl: You sold the Betony watchtowers to throat-slitters and blood-drinkers for a dead title, Amaury!",
+      "Lord Amaury: Titles only die when no hand dares sign them in blood. Come—witness the old peerage!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_daggerfall_01_broken_chain",
+      "region": "high_rock/daggerfall",
+      "category": "main",
+      "title": "The Broken Harbour Chain",
+      "giver": "story_df_envoy_genevieve",
+      "start": "npc:story_df_envoy_genevieve",
+      "requires": [],
+      "why": [
+        "daggerfall.L7.toll_families",
+        "daggerfall.L9.owl_vs_dragon"
+      ],
+      "summary": "Inspect the severed harbour chain at Daggerfall with Envoy Genevieve and report the baronial conspiracy to Sir Baptiste at Castle Daggerfall.",
+      "intro": [
+        "Before dawn, smugglers sheared the great harbour chain of Daggerfall and carried off the Betony garrison's pay-chest and muster rolls.",
+        "Examine the crime scene with Envoy Genevieve and bring your findings to Sir Baptiste of the Order of the Owl at Castle Daggerfall."
+      ],
+      "complete": [
+        "Sir Baptiste recognized the alchemical frost residue and the pre-Warp baronial wax immediately: a faction of disgruntled bluff barons has allied with cliff privateers."
+      ],
+      "journal": {
+        "start": "Envoy Genevieve Montrose asked me to inspect the severed harbour chain in Daggerfall and consult Sir Baptiste at Castle Daggerfall.",
+        "done": "We confirmed that the stolen Betony charter chest was taken by privateers working for a rebel baron."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "daggerfall",
+          "text": "Inspect the harbour quay in Daggerfall"
+        },
+        {
+          "type": "scene",
+          "place": "daggerfall",
+          "target": "scene:story_df_harbour_chain",
+          "text": "Examine the severed chain with Envoy Genevieve"
+        },
+        {
+          "type": "talk",
+          "place": "castle_daggerfall",
+          "npc": "story_df_sir_baptiste",
+          "text": "Report to Sir Baptiste at Castle Daggerfall"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "daggerfall",
+        "castle_daggerfall"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "daggerfall",
+          "objective": "Inspect the harbour quay in Daggerfall"
+        },
+        {
+          "id": 20,
+          "place": "daggerfall",
+          "objective": "Examine the severed chain with Envoy Genevieve"
+        },
+        {
+          "id": 30,
+          "place": "castle_daggerfall",
+          "objective": "Report to Sir Baptiste at Castle Daggerfall"
+        }
+      ],
+      "consequence": "guard_banner:daggerfall_stage_1"
+    },
+    {
+      "id": "ms1_daggerfall_02_bluff_trail",
+      "region": "high_rock/daggerfall",
+      "category": "main",
+      "title": "Lanterns on the Sea-Bluff",
+      "giver": "story_df_sir_baptiste",
+      "start": "auto",
+      "requires": [
+        "ms1_daggerfall_01_broken_chain"
+      ],
+      "why": [
+        "daggerfall.L7.shepherds_tenants",
+        "daggerfall.L8.kynareth_patron"
+      ],
+      "summary": "Track the smugglers' pack-train past Linwold Monument to Ilessan Hills and take Sister Maelle's storm-blessed oil.",
+      "intro": [
+        "The thieves avoided the Dragon knights' turnpikes by cutting across the shepherd ridges between Linwold Monument and Ilessan Hills.",
+        "Search the monument stones for their drop-marks and speak with Sister Maelle in Ilessan Hills."
+      ],
+      "complete": [
+        "Sister Maelle confirmed that blue graveyard lanterns were carried toward Thorncliff Caverns on the coast."
+      ],
+      "journal": {
+        "start": "I must follow the smugglers' trail to Linwold Monument and speak with Sister Maelle at Ilessan Hills.",
+        "done": "Sister Maelle gave me storm-blessed oil and pointed me toward the privateer anchorage in Thorncliff Caverns."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "linwold_monument",
+          "text": "Search the stones at Linwold Monument for smuggler drop-marks"
+        },
+        {
+          "type": "talk",
+          "place": "ilessan_hills",
+          "npc": "story_df_sister_maelle",
+          "text": "Speak with Sister Maelle in Ilessan Hills"
+        }
+      ],
+      "reward": {
+        "gold": 300,
+        "xp": 450
+      },
+      "places": [
+        "linwold_monument",
+        "ilessan_hills"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "linwold_monument",
+          "objective": "Search the stones at Linwold Monument for smuggler drop-marks"
+        },
+        {
+          "id": 20,
+          "place": "ilessan_hills",
+          "objective": "Speak with Sister Maelle in Ilessan Hills"
+        }
+      ],
+      "consequence": "npc_schedule:daggerfall_stage_2"
+    },
+    {
+      "id": "ms1_daggerfall_03_privateers_hold",
+      "region": "high_rock/daggerfall",
+      "category": "main",
+      "title": "The Salt-Hound's Anchorage",
+      "giver": "story_df_sister_maelle",
+      "start": "auto",
+      "requires": [
+        "ms1_daggerfall_02_bluff_trail"
+      ],
+      "why": [
+        "daggerfall.L9.betony_garrison",
+        "daggerfall.L10.privateers_hold"
+      ],
+      "summary": "Storm Thorncliff Caverns, defeat Bosun Kerguelen, and recover the Betony garrison pay-chest.",
+      "intro": [
+        "Bosun Kerguelen's sea-rovers use the flooded limestone arches of Thorncliff Caverns to unload contraband beneath the bluff.",
+        "Enter Thorncliff Caverns, confront Kerguelen, and find where the Vraseth charter was taken."
+      ],
+      "complete": [
+        "Bosun Kerguelen fell in the sea-cave, revealing that Lord Amaury carried the Vraseth blood-charter up to Woodborne Hall and the crypts of Loroylle."
+      ],
+      "journal": {
+        "start": "I must enter Thorncliff Caverns and defeat Bosun Kerguelen to recover the stolen chests.",
+        "done": "I recovered the garrison silver from Thorncliff Caverns and learned that Lord Amaury took the charter to Woodborne Hall and Loroylle."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "thorncliff_caverns",
+          "text": "Enter the sea-caves of Thorncliff Caverns"
+        },
+        {
+          "type": "scene",
+          "place": "thorncliff_caverns",
+          "target": "scene:story_df_thorncliff_parley",
+          "text": "Confront Bosun Kerguelen in the anchorage"
+        },
+        {
+          "type": "boss",
+          "place": "thorncliff_caverns",
+          "target": "story_df_bosun_kerguelen",
+          "text": "Defeat Bosun Kerguelen the Salt-Hound"
+        }
+      ],
+      "reward": {
+        "gold": 400,
+        "xp": 600
+      },
+      "places": [
+        "thorncliff_caverns"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "thorncliff_caverns",
+          "objective": "Enter the sea-caves of Thorncliff Caverns"
+        },
+        {
+          "id": 20,
+          "place": "thorncliff_caverns",
+          "objective": "Confront Bosun Kerguelen in the anchorage"
+        },
+        {
+          "id": 30,
+          "place": "thorncliff_caverns",
+          "objective": "Defeat Bosun Kerguelen the Salt-Hound"
+        }
+      ],
+      "consequence": "shrine_state:daggerfall_stage_3"
+    },
+    {
+      "id": "ms1_daggerfall_04_vraseth_charter",
+      "region": "high_rock/daggerfall",
+      "category": "main",
+      "title": "Blood on the Red Wax",
+      "giver": "story_df_captain_vauquelin",
+      "start": "auto",
+      "requires": [
+        "ms1_daggerfall_03_privateers_hold"
+      ],
+      "finale": true,
+      "why": [
+        "daggerfall.L9.court_vs_barons",
+        "daggerfall.L10.vraseth_keeps",
+        "daggerfall.L10.under_daggerfall"
+      ],
+      "summary": "Rally Captain Vauquelin at Woodborne Hall, descend into Loroylle, and destroy Lord Amaury of the Vraseth Charter.",
+      "intro": [
+        "Lord Amaury has sealed himself inside the ancient vaults of Loroylle beyond Woodborne Hall to awaken a Vraseth blood-scryer and forge a new feudal covenant.",
+        "Coordinate with Captain Vauquelin at Woodborne Hall, breach Loroylle, and end Amaury's rebellion."
+      ],
+      "complete": [
+        "With Lord Amaury defeated and the Betony muster rolls returned to Castle Daggerfall, the Knights of the Owl and Dragon have renewed the harbour watch."
+      ],
+      "journal": {
+        "start": "I must meet Captain Vauquelin at Woodborne Hall, then enter Loroylle and defeat Lord Amaury.",
+        "done": "I slew Lord Amaury in Loroylle and returned the sealed charter to Envoy Genevieve in Daggerfall."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "woodborne_hall",
+          "npc": "story_df_captain_vauquelin",
+          "text": "Rally Captain Vauquelin outside Woodborne Hall"
+        },
+        {
+          "type": "scene",
+          "place": "loroylle",
+          "target": "scene:story_df_vraseth_sanctum",
+          "text": "Interrupt the Vraseth blood-charter rite in Loroylle"
+        },
+        {
+          "type": "boss",
+          "place": "loroylle",
+          "target": "story_df_archon_amaury_vraseth",
+          "text": "Defeat Lord Amaury of the Vraseth Charter"
+        },
+        {
+          "type": "talk",
+          "place": "daggerfall",
+          "npc": "story_df_envoy_genevieve",
+          "text": "Return the charter chest to Envoy Genevieve in Daggerfall"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "woodborne_hall",
+        "loroylle",
+        "daggerfall"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "woodborne_hall",
+          "objective": "Rally Captain Vauquelin outside Woodborne Hall"
+        },
+        {
+          "id": 20,
+          "place": "loroylle",
+          "objective": "Interrupt the Vraseth blood-charter rite in Loroylle"
+        },
+        {
+          "id": 30,
+          "place": "loroylle",
+          "objective": "Defeat Lord Amaury of the Vraseth Charter"
+        },
+        {
+          "id": 40,
+          "place": "daggerfall",
+          "objective": "Return the charter chest to Envoy Genevieve in Daggerfall"
+        }
+      ],
+      "consequence": "settlement_prosperity:daggerfall_stage_4"
+    }
+  ]
+}

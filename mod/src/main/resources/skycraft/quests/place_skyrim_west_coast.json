@@ -1,640 +1,1732 @@
 {
- "line": "place_skyrim_west_coast",
- "category": "side",
- "npcs": [
-  {"id": "pln_skyrim_west_coast_aulus", "name": "Aulus Carvain", "role": "merchant", "place": "solitude", "offset": [4, -3],
-   "female": false, "greet": "East Empire Company, Solitude office. If you've come about the lighthouse, sit down. If you've come about a job, sit down faster."},
-  {"id": "pln_skyrim_west_coast_verulus", "name": "Verulus Agrippa", "role": "scholar", "place": "solitude", "offset": [-5, 4],
-   "female": false, "greet": "Mind the papers. No, not those. Or those. Just stand very still and tell me what you want."},
-  {"id": "pln_skyrim_west_coast_hulda", "name": "Hulda", "role": "citizen", "place": "dragon_bridge", "offset": [3, 2],
-   "female": true, "greet": "You came up the south road? Did you pass anyone on it? A young man with an axe too big for him?"},
-  {"id": "pln_skyrim_west_coast_ottar", "name": "Ottar", "role": "farmer", "place": "katlas_farm", "offset": [2, -2],
-   "female": false, "greet": "Need a horse brushed? A carriage? Or... you haven't seen a girl with red braids, have you? On the north road?"},
-  {"id": "pln_skyrim_west_coast_sigrun", "name": "Sigrun Ice-Vein", "role": "miner", "place": "stonehills", "offset": [-3, 3],
-   "female": true, "greet": "Rockwallow's closed to strangers. Unless you're the sort of stranger who goes down holes for a living."},
-  {"id": "pln_skyrim_west_coast_brynja", "name": "Brynja", "role": "hunter", "place": "morthal", "offset": [5, 1],
-   "female": true, "greet": "Don't tell me to stop hoping. Everyone in this town has told me to stop hoping."},
-  {"id": "pln_skyrim_west_coast_thorvar", "name": "Thorvar Mist-Eye", "role": "steward", "place": "morthal", "offset": [-4, -5],
-   "female": false, "greet": "Highmoon Hall's business is the Jarl's business. Unless you've news of my patrol. Then it's mine."},
-  {"id": "pln_skyrim_west_coast_idrin", "name": "Idrin Sarethi", "role": "apothecary", "place": "morthal", "offset": [2, 6],
-   "female": false, "greet": "Salves, tinctures, cures for marsh-cough. Nothing with spider in it, not this month. Don't ask."}
- ],
- "relics": [
-  {"id": "plr_solitude_lighthouse_lens", "name": "Keeper's Brass Lens", "desc": "A heavy ring of brass and ground glass, scratched where it was wrenched from its cradle."},
-  {"id": "plr_dainty_sload_manifest", "name": "True Manifest of the Dainty Sload", "desc": "A sea captain's ledger page listing forty crates of skooma and the Solitude names who paid for them."},
-  {"id": "plr_orphans_tear_strongbox", "name": "Pay Chest of the Orphan's Tear", "desc": "An iron strongbox stamped with the East Empire Company seal, its chain snapped at the bulkhead."},
-  {"id": "plr_widows_watch_ruins_ring", "name": "Whalebone Ring", "desc": "A plain ring of white whalebone, worn thin on one side by a thumb that turned it for years."},
-  {"id": "plr_ravenscar_hollow_clasp", "name": "Freydis's Bronze Clasp", "desc": "A small bronze cloak-clasp shaped like a horse's head, polished bright by a brother's worry."},
-  {"id": "plr_shadowgreen_cavern_heartsap", "name": "Vial of Shadowgreen Heartsap", "desc": "A sealed glass vial of sap that glows a faint, living green in the dark."},
-  {"id": "plr_lower_steepfall_burrow_horn", "name": "Asgeir's Hunting Horn", "desc": "A ram's horn bound in iron, carved with a hunter's name and his father's before him."},
-  {"id": "plr_northwatch_keep_beads", "name": "Hjorvar's Iron Prayer Beads", "desc": "Nine beads of dark Ironback iron on a leather thong, the ninth worn smooth by an old priest's fingers."},
-  {"id": "plr_pinemoon_cave_payroll", "name": "Legion Payroll Strongbox", "desc": "A small iron box under an Imperial seal, still unbroken, with tooth marks on the lid."},
-  {"id": "plr_ironback_hideout_icon", "name": "Iron Icon of Talos", "desc": "A small statue of Talos cast from Ironback ore, rough and heavy, hidden for years under a hearthstone."},
-  {"id": "plr_wolfskull_cave_circlet", "name": "Circlet of Wolf Teeth", "desc": "A ring of yellowed wolf teeth on blackened silver wire. It feels colder than it should."},
-  {"id": "plr_rimerock_burrow_journal", "name": "Elenthir's Journal", "desc": "An exile's journal in neat Altmeri script, full of the Dominion's business in Skyrim."},
-  {"id": "plr_statue_to_meridia_bundle", "name": "Black-Corded Bone Bundle", "desc": "Finger bones bound with black cord around a shard of grave-stone. Meridia's light flickers near it."},
-  {"id": "plr_haafingar_stormcloak_camp_letter", "name": "Ragnvald's Letter", "desc": "A letter folded and unfolded so many times its creases have gone soft as cloth."},
-  {"id": "plr_volskygge_axe", "name": "Eirik's Father's Axe", "desc": "A fisherman's woodaxe, too heavy for its last owner, its haft notched with a family's tally of winters."},
-  {"id": "plr_folgunthur_rubbing", "name": "Folgunthur Lineage Rubbing", "desc": "A long sheet of charcoal rubbing, every name in the barrow, damp at one corner."},
-  {"id": "plr_movarths_lair_ring", "name": "Geirlund's Wedding Ring", "desc": "A plain silver band on a string, taken from a vampire's neck."},
-  {"id": "plr_kjenstag_ruins_horn", "name": "Kjenstag's Bronze Horn", "desc": "An ancient bronze horn, green with age, that hums faintly when held near the marsh."},
-  {"id": "plr_mzinchaleft_token", "name": "Knud's Miner's Token", "desc": "A stamped copper disc from the Rockwallow Mine, marked with the Ice-Vein family's sign."},
-  {"id": "plr_fort_snowhawk_journal", "name": "Vigdis's Embalming Journal", "desc": "A necromancer's journal, its margins full of measurements taken from Morthal's own guards."},
-  {"id": "plr_labyrinthian_notebook", "name": "Notebook of the Lines", "desc": "A College student's notebook of chalked lines and floor patterns from Labyrinthian, ending mid-word."},
-  {"id": "plr_chillwind_depths_compass", "name": "Brannoc's Brass Compass", "desc": "A trapper's brass compass on a Falmer thong, its needle still pointing faithfully north."},
-  {"id": "plr_brood_cavern_satchel", "name": "Idrin's Satchel", "desc": "A Dunmer alchemist's leather satchel, wrapped in webbing, with two years of recipes inside."},
-  {"id": "plr_orotheim_key", "name": "Key to the Work-Pen", "desc": "A crude iron key on a bandit chief's belt-ring, greasy from handling."}
- ],
- "quests": [
-  {
-   "id": "pl_solitude_lighthouse",
-   "title": "The Darkened Lamp",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "The Solitude Lighthouse has gone dark three times this month, and a Company cutter has been lost on the rocks. The keeper's log says the great lens was stolen and taken to Brinewater Grotto.",
-   "pitch": "The lighthouse keeps going dark and ships keep dying. The Company's offering coin to anyone who can get that lamp burning again. Ask for Aulus at the warehouse.",
-   "objectives": [
-    {"type": "go", "place": "solitude_lighthouse", "text": "Look over the darkened lighthouse",
-     "journal": "The lamp-room is empty and the brass cradle broken. The keeper's log names Brinewater Grotto."},
-    {"type": "retrieve", "place": "brinewater_grotto", "placement": "structure", "relic": "plr_solitude_lighthouse_lens",
-     "text": "Recover the keeper's brass lens from Brinewater Grotto",
-     "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Brinewater Wrecker"}],
-     "journal": "The lens was wrapped in sailcloth in the wreckers' chest. There was no sign of old Ulfgar but his hammer."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_aulus", "relic": "plr_solitude_lighthouse_lens",
-     "text": "Bring the lens to Aulus Carvain at the Company office in Solitude",
-     "topic": "I have the lighthouse lens.",
-     "reply": "By the Nine. I'll have it back in its cradle before dark. Ulfgar? ...No. I'll send a boat. I'll send two. Here, the Company's fifty, and a little more from me."}
-   ],
-   "rewards": {"gold": 150, "items": ["skycraft:silver_ring"]},
-   "outro": "The light burns over the Karth again. Ships round the point safely, and somewhere in the dark the wreckers curse your name."
-  },
-  {
-   "id": "pl_brinewater_grotto",
-   "title": "Three Short, One Long",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A signal roster from Brinewater Grotto shows a wrecker crew luring ships onto the rocks north of Solitude. Their leader, Saltjaw Hroar, sells the plunder to the smugglers of Broken Oar.",
-   "pitch": "There's a crew in Brinewater Grotto that makes shipwrecks happen. Hroar, they call the leader. Saltjaw. If somebody shut his jaw for good, the docks would drink to them for a month.",
-   "objectives": [
-    {"type": "clear", "place": "brinewater_grotto", "placement": "structure", "text": "Clear the wreckers out of Brinewater Grotto",
-     "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Brinewater Wrecker"}]},
-    {"type": "kill", "place": "brinewater_grotto", "placement": "structure", "text": "Kill Saltjaw Hroar",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Saltjaw Hroar", "target": true, "boss": true, "hp": 1.4}],
-     "journal": "Hroar is dead. No more lanterns will swing at the grotto mouth."}
-   ],
-   "rewards": {"gold": 180},
-   "outro": "The grotto mouth stays dark at night now, as a sea cave should."
-  },
-  {
-   "id": "pl_dainty_sload",
-   "title": "Sweet Cargo",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A deckhand of the Dainty Sload left a confession: the ship carries forty crates of skooma, and the captain's true manifest names the Solitude men who paid for it.",
-   "pitch": "That pretty ship anchored under the cliffs? She's carrying skooma, or so the gossip goes. The Company would pay well for proof. Proof's in the captain's sea chest, they say.",
-   "objectives": [
-    {"type": "retrieve", "place": "dainty_sload", "placement": "structure", "relic": "plr_dainty_sload_manifest",
-     "text": "Find the true manifest in the captain's sea chest",
-     "spawn": [{"type": "npc:thug", "count": 2, "name": "Sload Deckhand"}]},
-    {"type": "kill", "place": "dainty_sload", "placement": "structure", "text": "Deal with Captain Marisa Vellenus",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Captain Marisa Vellenus", "target": true, "boss": true, "hp": 1.3}]},
-    {"type": "talk", "npc": "pln_skyrim_west_coast_aulus", "text": "Show the manifest to Aulus Carvain in Solitude",
-     "topic": "I have the Dainty Sload's real manifest.",
-     "reply": "Let me see. Forty crates... Varo... and this name. This is my own superior's hand. Gods. What do you want me to do with it?",
-     "choices": [
-      {"label": "Give him everything, names and all.", "actions": "take:plr_dainty_sload_manifest",
-       "reply": "Then I'll take it over his head, to the Jarl's steward, and I'll probably lose my post for it. Good. A man should lose something for doing right, or it doesn't count."},
-      {"label": "Tear off the deckhand's name first, then hand it over.", "actions": "take:plr_dainty_sload_manifest",
-       "reply": "Joric Saltmane. Yes, I see. He'd be the first to hang, wouldn't he, and the last to deserve it. Burn that strip. I never saw it."}
-     ]}
-   ],
-   "rewards": {"gold": 200},
-   "outro": "The Dainty Sload's crates go into the sea under Company eyes, and one or two Solitude merchants find urgent business in Cyrodiil."
-  },
-  {
-   "id": "pl_broken_oar_grotto",
-   "title": "The Broken Oars",
-   "region": "skyrim/haafingar",
-   "start": "npc:pln_skyrim_west_coast_aulus",
-   "offer": "Any work for the Company?",
-   "pitch": "There's a man called Rhosen Varo who used to captain for us. Now he captains against us, from a cave on the north shore with a stolen ship in it. He buys everything the wreckers steal. End him, and the Company will remember you kindly. That's rarer than gold.",
-   "requires": ["level:10"],
-   "desc": "Aulus Carvain of the East Empire Company wants Captain Rhosen Varo, the smuggler of Broken Oar Grotto, dealt with for good.",
-   "objectives": [
-    {"type": "go", "place": "broken_oar_grotto", "text": "Find Broken Oar Grotto on the northern shore"},
-    {"type": "clear", "place": "broken_oar_grotto", "placement": "structure", "text": "Fight through Varo's crew",
-     "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Broken Oar Smuggler"}]},
-    {"type": "kill", "place": "broken_oar_grotto", "placement": "structure", "text": "Kill Captain Rhosen Varo",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Captain Rhosen Varo", "target": true, "boss": true, "hp": 1.6, "dmg": 1.2}],
-     "journal": "Varo is dead. In his ledger, the bribes to the Castle Dour key-keeper are written out to the copper."}
-   ],
-   "rewards": {"gold": 300, "items": ["skycraft:imperial_sword"]},
-   "outro": "The Company tows Varo's stolen ship back to Solitude and paints a new name on her. Aulus asks you to choose it."
-  },
-  {
-   "id": "pl_orphans_tear",
-   "title": "Salvage Rights",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "The last log of the Orphan's Tear says her captain chained the Company's pay chest to the bulkhead before she struck. It may still be aboard.",
-   "pitch": "The Orphan's Tear went down with eight hundred septims of Company pay aboard. Captain chained it to the bulkhead, so the story goes. Half the coast has tried for it. Mind the slaughterfish.",
-   "objectives": [
-    {"type": "retrieve", "place": "orphans_tear", "placement": "structure", "relic": "plr_orphans_tear_strongbox",
-     "text": "Recover the pay chest from the wreck",
-     "spawn": [{"type": "skycraft:slaughterfish", "count": 3}, {"type": "skycraft:mudcrab", "count": 2}],
-     "journal": "The chest was where the captain said, chained to the bulkhead. Beside it, a cabin boy's hammock, still slung."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_aulus", "relic": "plr_orphans_tear_strongbox",
-     "text": "Return the pay chest to the East Empire Company in Solitude",
-     "topic": "The Orphan's Tear's pay chest. Her captain wanted the widows paid first.",
-     "reply": "Then they will be. I'll see to the list myself. And the boy, Tamsin? ...I'll write to Honorhall. Someone should."}
-   ],
-   "rewards": {"gold": 160},
-   "outro": "The widows of the Orphan's Tear are paid in full that winter. The Company calls it a salvage fee. Aulus calls it an apology."
-  },
-  {
-   "id": "pl_widows_watch_ruins",
-   "title": "The Last Lantern",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A verse carved into the stair at Widow's Watch asks that the widow's whalebone ring be carried down to the sea at the Orphan's Tear, so that she may stop keeping her lantern lit.",
-   "pitch": "There's a green light at the top of Widow's Watch. Old Brandr says she's waiting for her ring to go back to the sea. Strange errand, but it'd be a kindness.",
-   "objectives": [
-    {"type": "retrieve", "place": "widows_watch_ruins", "placement": "structure", "relic": "plr_widows_watch_ruins_ring",
-     "text": "Find the widow's whalebone ring at the top of the tower",
-     "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Restless Watcher"}],
-     "journal": "The ring lay on the top step, beside a lantern that burns without oil."},
-    {"type": "go", "place": "orphans_tear", "text": "Give the ring to the sea at the Orphan's Tear",
-     "actions": "take:plr_widows_watch_ruins_ring",
-     "journal": "The ring sank without a sound. Behind me, on the headland, the green light went out."}
-   ],
-   "rewards": {"gold": 90, "items": ["skycraft:amulet_of_mara"]},
-   "outro": "The fishermen say Widow's Watch is dark now on foggy nights. Some of them miss the light."
-  },
-  {
-   "id": "pl_ravenscar_hollow",
-   "title": "Feathers and Bone",
-   "region": "skyrim/haafingar",
-   "start": "npc:pln_skyrim_west_coast_ottar",
-   "offer": "Who is the girl with red braids?",
-   "pitch": "Freydis. My sister. She went up toward Ravenscar Hollow to talk to a crow-woman, and she never came back. The guards laugh at me. Please. Take Mother's clasp to her. She'll know it. She'll remember us.",
-   "desc": "Ottar, the stableboy at Katla's Farm, believes his sister Freydis went to the hagravens of Ravenscar Hollow. He wants her brought home, or at least found.",
-   "objectives": [
-    {"type": "talk", "npc": "pln_skyrim_west_coast_ottar", "text": "Take the clasp from Ottar",
-     "topic": "Give me the clasp. I'll find her.",
-     "reply": "It's a horse's head. Mother wore it every day. Freydis used to steal it to wear to the market. Go. Please.",
-     "actions": "relic:plr_ravenscar_hollow_clasp"},
-    {"type": "kill", "place": "ravenscar_hollow", "placement": "structure", "text": "Confront the crow-mother of Ravenscar Hollow",
-     "spawn": [{"type": "skycraft:hagraven", "name": "Mother Cawlwyn", "target": true, "boss": true, "hp": 1.4},
-               {"type": "skycraft:forsworn", "count": 2}],
-     "journal": "The crow-mother is dead. Among her things was a letter from Freydis. Of Freydis herself there was only a trail of black feathers leading north into the hills."},
-    {"type": "talk", "npc": "pln_skyrim_west_coast_ottar", "text": "Tell Ottar what became of his sister",
-     "topic": "I found what's left of the crow-mother's nest.",
-     "reply": "And Freydis? Tell me straight.",
-     "choices": [
-      {"label": "Give him the clasp and the truth: she went willingly.", "actions": "take:plr_ravenscar_hollow_clasp",
-       "reply": "Willingly. ...She always asked why. About everything. I'll keep the clasp by the door. If she comes back, she'll know where to find it."},
-      {"label": "Tell him she died, and that it was quick.", "actions": "take:plr_ravenscar_hollow_clasp",
-       "reply": "Quick. Good. That's good. I'll bury the clasp under the birch by the paddock. She liked that tree. Thank you for telling me. I think I needed it to be over."}
-     ]}
-   ],
-   "rewards": {"gold": 140, "items": ["skycraft:fur_boots"]},
-   "outro": "On some evenings, Katla says, a crow sits on the paddock fence and watches Ottar work, and he talks to it as if it might answer."
-  },
-  {
-   "id": "pl_shadowgreen_cavern",
-   "title": "Heartwood for the Embassy",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A Thalmor botanist hid a vial of glowing heartsap in the roots of Shadowgreen Cavern rather than send it to Alinor. She suggested a scholar in Solitude might give a fairer price.",
-   "pitch": "There's an elf-botanist's stash in that green cave north of the embassy. Some glowing sap the Thalmor wanted. Old Verulus in Solitude would pay to get his hands on it before they do.",
-   "objectives": [
-    {"type": "retrieve", "place": "shadowgreen_cavern", "placement": "structure", "relic": "plr_shadowgreen_cavern_heartsap",
-     "text": "Find the hidden vial in the roots of the heart-tree",
-     "spawn": [{"type": "skycraft:spriggan", "count": 2}],
-     "journal": "The vial was wedged deep in the roots. The spriggans did not want it to leave."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_verulus", "relic": "plr_shadowgreen_cavern_heartsap",
-     "text": "Bring the heartsap to Verulus Agrippa in Solitude",
-     "topic": "Heartsap from Shadowgreen. The Thalmor wanted it.",
-     "reply": "Did they! Then I'll study it twice as carefully, out of spite. A living sap that needs no sun. Do you know what Alinor would do with that? Nor do I. That's precisely what worries me."}
-   ],
-   "rewards": {"gold": 170, "items": ["skycraft:soul_gem_lesser"]},
-   "outro": "Verulus publishes a short, furious pamphlet on root-magic. The Thalmor Embassy buys three copies."
-  },
-  {
-   "id": "pl_lower_steepfall_burrow",
-   "title": "Greyback",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "The trapper Asgeir Coldhand tracked a white-backed troll called Greyback to the Lower Steepfall Burrow and never came back. His father's hunting horn went with him.",
-   "pitch": "Asgeir Coldhand went after the white troll at Steepfall. Swore he'd hang its hide in the Winking Skeever. Somebody ought to finish the hunt, and bring his horn home.",
-   "objectives": [
-    {"type": "kill", "place": "lower_steepfall_burrow", "placement": "structure", "text": "Kill Greyback, the white-backed troll",
-     "spawn": [{"type": "skycraft:troll", "name": "Greyback", "target": true, "boss": true, "hp": 1.6}]},
-    {"type": "retrieve", "place": "lower_steepfall_burrow", "placement": "structure", "relic": "plr_lower_steepfall_burrow_horn",
-     "text": "Recover Asgeir's hunting horn",
-     "journal": "Asgeir's bones lay at the back of the den, his horn still in his hand. He never blew it."}
-   ],
-   "rewards": {"gold": 150, "items": ["skycraft:fur_chestplate"]},
-   "outro": "Greyback's white hide fetches a fine price in Solitude. Asgeir's horn hangs over the bar at the Winking Skeever, where he always meant it to be."
-  },
-  {
-   "id": "pl_northwatch_keep",
-   "title": "Names in the Ledger",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "requires": ["level:14"],
-   "desc": "The Thalmor register at Northwatch Keep lists an old priest of Talos, Hjorvar the Grey, taken from the Ironback Hideout. His interrogator is Justiciar Ancarion.",
-   "pitch": "There's an old Talos priest the elves took to Northwatch. Hjorvar. Everyone who prayed with him is still free, because he hasn't talked. Somebody ought to make sure the elf asking the questions stops asking.",
-   "objectives": [
-    {"type": "go", "place": "northwatch_keep", "text": "Get into Northwatch Keep"},
-    {"type": "clear", "place": "northwatch_keep", "placement": "structure", "text": "Overcome the Thalmor guard",
-     "spawn": [{"type": "npc:thalmor", "count": 3, "name": "Northwatch Warden"}]},
-    {"type": "kill", "place": "northwatch_keep", "placement": "structure", "text": "Kill Justiciar Ancarion",
-     "spawn": [{"type": "npc:thalmor", "name": "Justiciar Ancarion", "target": true, "boss": true, "hp": 1.6, "dmg": 1.2}]},
-    {"type": "retrieve", "place": "northwatch_keep", "placement": "structure", "relic": "plr_northwatch_keep_beads",
-     "text": "Find what became of Hjorvar the Grey",
-     "journal": "Hjorvar died in his cell two days ago, his prayer still scratched fresh into the wall. He never gave them a single name. His iron beads were in his hand."}
-   ],
-   "rewards": {"gold": 320, "items": ["skycraft:elven_sword"]},
-   "outro": "Word reaches the Ironback faithful that Hjorvar died silent. On the first Sundas of the next month, they meet again."
-  },
-  {
-   "id": "pl_pinemoon_cave",
-   "title": "The Coin-Biter",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "The Fort Hraggstad payroll was stolen on the Dragon Bridge road by bandits wearing pine sprigs. The quartermaster believes it went to Pinemoon Cave, where Rolf Coin-Biter holds court.",
-   "pitch": "The Legion payroll got lifted on the Dragon Bridge road again. Pinemoon gang, wearing pine in their caps, bold as you like. The quartermaster at Hraggstad would kiss whoever brings that strongbox back.",
-   "objectives": [
-    {"type": "clear", "place": "pinemoon_cave", "placement": "structure", "text": "Clear out the Pinemoon gang",
-     "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Pinemoon Bandit"}]},
-    {"type": "kill", "place": "pinemoon_cave", "placement": "structure", "text": "Kill Rolf Coin-Biter",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Rolf Coin-Biter", "target": true, "boss": true, "hp": 1.3}],
-     "actions": "relic:plr_pinemoon_cave_payroll",
-     "journal": "Rolf kept the payroll strongbox under his bedroll, seal unbroken. He'd only bitten the lid."},
-    {"type": "go", "place": "fort_hraggstad", "text": "Return the payroll to the quartermaster at Fort Hraggstad",
-     "actions": "take:plr_pinemoon_cave_payroll",
-     "journal": "Quartermaster Calo counted it twice, then a third time, and then shook my hand for a very long while."}
-   ],
-   "rewards": {"gold": 160, "items": ["skycraft:imperial_light_chestplate"]},
-   "outro": "The garrison at Fort Hraggstad gets paid for the first time in two months. Several soldiers stop talking about cousins in the Stormcloak camp."
-  },
-  {
-   "id": "pl_ironback_hideout",
-   "title": "Under the Hearthstone",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "The Talos faithful of the Ironback Hideout hid an iron icon of Talos under their hearthstone before the Thalmor came. The embassy still watches the cabin.",
-   "pitch": "The faithful at Ironback hid something under their hearth before the elves came. It's still there, they say, and so are the elves some nights. If you remember the Ninth, you know what to do.",
-   "objectives": [
-    {"type": "go", "place": "ironback_hideout", "text": "Go to the Ironback Hideout"},
-    {"type": "retrieve", "place": "ironback_hideout", "placement": "structure", "relic": "plr_ironback_hideout_icon",
-     "text": "Lift the hearthstone and take the icon to safety",
-     "spawn": [{"type": "npc:thalmor", "count": 2, "name": "Embassy Watcher"}],
-     "journal": "The icon was where Sigrid said, heavy and cold and rough. The watchers will not report it now."}
-   ],
-   "rewards": {"gold": 120, "items": ["skycraft:amulet_of_talos"]},
-   "outro": "The icon is in your keeping now. Somewhere in Haafingar, an old man's prayer has been answered."
-  },
-  {
-   "id": "pl_wolfskull_cave",
-   "title": "The Wolf Queen's Choir",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "Brother Ulvarr's ritual notes describe a choir of necromancers at Wolfskull Cave preparing to call on the Wolf Queen's name with the dead stolen from Solitude's Hall of the Dead.",
-   "pitch": "Green fire over Wolfskull Cave again, and three graves dug up in the Hall of the Dead. Somebody's playing at the Wolf Queen's old games. Somebody ought to stop the game.",
-   "objectives": [
-    {"type": "clear", "place": "wolfskull_cave", "placement": "structure", "text": "Break the necromancers' choir",
-     "spawn": [{"type": "skycraft:necromancer", "count": 2}, {"type": "minecraft:skeleton", "count": 3, "name": "Stolen Dead"}]},
-    {"type": "kill", "place": "wolfskull_cave", "placement": "structure", "text": "Kill Brother Ulvarr",
-     "spawn": [{"type": "skycraft:necromancer", "name": "Brother Ulvarr", "target": true, "boss": true, "hp": 1.5, "dmg": 1.2}],
-     "actions": "relic:plr_wolfskull_cave_circlet",
-     "journal": "Ulvarr wore a circlet of wolf teeth for the ritual. It is cold as a grave. The green fire has gone out."}
-   ],
-   "rewards": {"gold": 200, "items": ["skycraft:soul_gem_common"]},
-   "outro": "The priests of Arkay in Solitude rebury the stolen dead with their names, and no green light burns over Wolfskull for the rest of the year."
-  },
-  {
-   "id": "pl_rimerock_burrow",
-   "title": "The Exile's Door",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "requires": ["level:12"],
-   "desc": "An Altmer exile, Elenthir, hid from the Thalmor in Rimerock Burrow behind a bound dremora. His journal says the binding is failing, and that his notes on the Dominion should reach someone in Solitude.",
-   "pitch": "There's an elf hiding from the other elves up at Rimerock. Had a daedra guarding his door, last anyone heard. If the daedra's loose, the elf's dead, and whatever he knew is lying in the snow.",
-   "objectives": [
-    {"type": "kill", "place": "rimerock_burrow", "placement": "structure", "text": "Banish the dremora that slipped its binding",
-     "spawn": [{"type": "skycraft:dremora", "name": "Valkynaz Morith", "target": true, "boss": true, "hp": 1.6, "dmg": 1.3}]},
-    {"type": "retrieve", "place": "rimerock_burrow", "placement": "structure", "relic": "plr_rimerock_burrow_journal",
-     "text": "Recover Elenthir's journal",
-     "journal": "Elenthir is dead. The dremora left his journal untouched on the desk, as if out of courtesy."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_verulus", "relic": "plr_rimerock_burrow_journal",
-     "text": "Bring the exile's journal to Verulus Agrippa in Solitude",
-     "topic": "An exile's journal, about the Thalmor in Skyrim.",
-     "reply": "Elenthir. I corresponded with him for a year and never knew where he lived. This will be copied, and the copies will travel. Quietly. Footnotes are a slower weapon than swords, but they last longer."}
-   ],
-   "rewards": {"gold": 240, "items": ["skycraft:spell_tome_lesser_ward"]},
-   "outro": "Copies of an exile's journal begin to circulate in Solitude, unsigned. The Thalmor Embassy is not amused."
-  },
-  {
-   "id": "pl_pinefrost_tower",
-   "title": "The Exile's Reserve",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "Elenthir the exile hid a box of soul gems and coin at the foot of Pinefrost Tower: twelve paces downhill from the seaward side, under a flat grey stone with a hand-shaped lichen.",
-   "pitch": "That elf up at Rimerock left a stash somewhere near Pinefrost Tower, so the story goes. Under a stone with lichen like a hand. Spend it on something the Thalmor would hate, he said.",
-   "objectives": [
-    {"type": "retrieve", "place": "pinefrost_tower", "offset": [0, -12], "item": "skycraft:soul_gem_common",
-     "text": "Dig under the lichen-marked stone below Pinefrost Tower",
-     "journal": "Under the stone, a small box: two charged soul gems and a purse of septims, and a note that just says 'Spite them well.'"}
-   ],
-   "rewards": {"gold": 120, "items": ["skycraft:soul_gem_lesser"]},
-   "outro": "The exile's reserve is yours. He asked only that it be spent on something the Thalmor would hate."
-  },
-  {
-   "id": "pl_statue_to_meridia",
-   "title": "Bones at the Lady's Feet",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A pilgrim from Dragon Bridge saw necromancers leave a bundle of bones at the steps of Meridia's statue. The Lady's light dims where it lies.",
-   "pitch": "Some pilgrim's saying there are necromancers fouling Meridia's steps up on Kilkreath. Leaving bones about. The Lady doesn't take kindly to that, and neither do the pilgrims.",
-   "objectives": [
-    {"type": "clear", "place": "statue_to_meridia", "text": "Drive off the desecrators on the mountain",
-     "spawn": [{"type": "skycraft:necromancer", "count": 1}, {"type": "minecraft:skeleton", "count": 3, "name": "Bone Porter"}]},
-    {"type": "retrieve", "place": "statue_to_meridia", "relic": "plr_statue_to_meridia_bundle",
-     "text": "Take up the black-corded bundle by the steps"},
-    {"type": "go", "place": "statue_to_meridia", "radius": 6, "text": "Cast the bundle into the Lady's light",
-     "actions": "take:plr_statue_to_meridia_bundle",
-     "journal": "The bones burned white and were gone. The star in Meridia's hand blazed for a moment, as if in thanks, or in judgement."}
-   ],
-   "rewards": {"gold": 150, "items": ["skycraft:silver_ring"]},
-   "outro": "Pilgrims climb Kilkreath again with their lanterns, and Helvi of Dragon Bridge leaves a new lantern by the plinth with your name scratched on it."
-  },
-  {
-   "id": "pl_clearpine_pond",
-   "title": "Skjaldi's Share",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A Pinemoon bandit buried his share of a Legion payroll at Clearpine Pond, by the rotten stump on the north shore, a forearm deep.",
-   "pitch": "One of the Pinemoon lot buried something at Clearpine Pond, old Fenric says. North shore, by a stump. Fenric won't touch it. Says it's thieves' money and thieves' luck.",
-   "objectives": [
-    {"type": "retrieve", "place": "clearpine_pond", "offset": [0, -10], "item": "skycraft:gold_ring",
-     "text": "Dig by the rotten stump on the north shore of Clearpine Pond",
-     "journal": "A purse of Legion septims and a gold ring with a little eagle on it. The escort who wore it never came home."}
-   ],
-   "rewards": {"gold": 90},
-   "outro": "Skjaldi's share is yours now. The ring with the little eagle might mean something to somebody at Fort Hraggstad."
-  },
-  {
-   "id": "pl_haafingar_stormcloak_camp",
-   "title": "A Letter to the Bridge",
-   "region": "skyrim/haafingar",
-   "start": "manual",
-   "desc": "A Stormcloak soldier, Ragnvald, wrote a letter to his mother Hulda in Dragon Bridge and never sent it. He asked that a friend carry it home.",
-   "pitch": "There's a Dragon Bridge boy up in the rebel camp. Hulda's eldest. She'd give her right arm for a word from him, and I hear he's written one he hasn't the nerve to send.",
-   "objectives": [
-    {"type": "retrieve", "place": "haafingar_stormcloak_camp", "placement": "structure", "relic": "plr_haafingar_stormcloak_camp_letter",
-     "text": "Find Ragnvald's unsent letter in the Stormcloak camp"},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_hulda", "relic": "plr_haafingar_stormcloak_camp_letter",
-     "text": "Carry the letter to Hulda in Dragon Bridge",
-     "topic": "Your son Ragnvald wrote to you. He couldn't send it himself.",
-     "reply": "From Ragnvald? ...He can see our chimney. The fool can see our chimney and he never once came down. I'll keep this under my pillow. Don't tell him I cried. Tell him I threw it in the fire."}
-   ],
-   "rewards": {"gold": 80, "items": ["skycraft:amulet_of_mara"]},
-   "outro": "That night a lamp burns in Hulda's window until dawn, facing the hills."
-  },
-  {
-   "id": "pl_volskygge",
-   "title": "The Unburied Brother",
-   "region": "skyrim/haafingar",
-   "start": "npc:pln_skyrim_west_coast_hulda",
-   "offer": "Who are you waiting for?",
-   "pitch": "My Eirik. My youngest. He went up to Volskygge, the barrow on the mountain, after treasure, with his father's axe. That was nine days ago. His brother's gone to the war and his father's gone to the sea. Please. I can't lose them all.",
-   "requires": ["level:10"],
-   "desc": "Hulda of Dragon Bridge begs for news of her son Eirik, who climbed to the barrow of Volskygge after treasure nine days ago.",
-   "objectives": [
-    {"type": "go", "place": "volskygge", "text": "Climb to Volskygge and search for Eirik"},
-    {"type": "kill", "place": "volskygge", "placement": "structure", "text": "Destroy Hrokk Iron-Jaw, warden of the barrow",
-     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Hrokk Iron-Jaw", "target": true, "boss": true, "hp": 1.5},
-               {"type": "skycraft:draugr", "count": 3}]},
-    {"type": "retrieve", "place": "volskygge", "placement": "structure", "relic": "plr_volskygge_axe",
-     "text": "Find what became of Eirik",
-     "journal": "Eirik died behind his barricade with his torch burned out. His mother's letter was still in his pack, unread."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_hulda", "relic": "plr_volskygge_axe",
-     "text": "Bring Eirik's axe home to Hulda",
-     "topic": "I found Eirik. I'm sorry.",
-     "reply": "...His father's axe. It was always too heavy for him. Thank you for not leaving him up there in the dark. I'll cook supper tonight anyway. Habit. Someone should eat it."}
-   ],
-   "rewards": {"gold": 220, "items": ["skycraft:steel_war_axe"]},
-   "outro": "Hulda hangs the axe over her hearth. She still watches the road in the evenings, but now she watches the hills where Ragnvald is."
-  },
-  {
-   "id": "pl_folgunthur",
-   "title": "The Lineage of Folgunthur",
-   "region": "skyrim/hjaalmarch",
-   "start": "npc:pln_skyrim_west_coast_verulus",
-   "offer": "You look worried, scholar.",
-   "pitch": "Worried? I am never worried; I am occasionally concerned. My apprentice Junia went down into Folgunthur to copy the lineage tablet and was due back on Turdas. It is now the following Turdas. If you are going south, through the marsh... I would take it as a professional courtesy. A personal one, also. Footnote it as you like.",
-   "desc": "Verulus Agrippa's apprentice Junia went into the flooded barrow of Folgunthur to copy its lineage tablet and has not returned.",
-   "objectives": [
-    {"type": "go", "place": "folgunthur", "text": "Enter Folgunthur and search for Junia"},
-    {"type": "kill", "place": "folgunthur", "placement": "structure", "text": "Lay the drowned warden to rest",
-     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "The Drowned Warden", "target": true, "boss": true, "hp": 1.4},
-               {"type": "skycraft:draugr", "count": 2}]},
-    {"type": "retrieve", "place": "folgunthur", "placement": "structure", "relic": "plr_folgunthur_rubbing",
-     "text": "Recover Junia's rubbing of the lineage tablet",
-     "journal": "Junia died in her alcove with the rubbing rolled tight against her chest, dry, every name complete."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_verulus", "relic": "plr_folgunthur_rubbing",
-     "text": "Bring the rubbing to Verulus in Solitude",
-     "topic": "Junia didn't make it. But she finished the rubbing.",
-     "reply": "...Of course she finished it. She was always going to finish it. She wrote that I was wrong? Then I was wrong. It will be published under her name. First author. No footnote."}
-   ],
-   "rewards": {"gold": 220, "items": ["skycraft:spell_tome_ironflesh"]},
-   "outro": "The Folgunthur Lineage, by Junia Fulvia, is read aloud at the Bards College. Verulus sits at the back and does not correct a single word."
-  },
-  {
-   "id": "pl_movarths_lair",
-   "title": "Brynja's Vow",
-   "region": "skyrim/hjaalmarch",
-   "start": "npc:pln_skyrim_west_coast_brynja",
-   "offer": "What happened to your husband?",
-   "pitch": "Geirlund went to check his traps and left his bow on the path to Movarth's Lair, strung and set down neat as you please. That's no bear. Something asked him to put it down. I've a silver knife and no courage left. You look like you have both.",
-   "requires": ["level:12"],
-   "desc": "Brynja of Morthal believes her husband Geirlund was taken by vampires into Movarth's Lair, north-east of town.",
-   "objectives": [
-    {"type": "go", "place": "movarths_lair", "text": "Find Movarth's Lair in the marsh"},
-    {"type": "kill", "place": "movarths_lair", "placement": "structure", "text": "Destroy the vampire Vessa",
-     "spawn": [{"type": "skycraft:vampire", "name": "Vessa Nightcoil", "target": true, "boss": true, "hp": 1.6, "dmg": 1.2},
-               {"type": "skycraft:vampire", "count": 2, "name": "Lair Thrall"}]},
-    {"type": "retrieve", "place": "movarths_lair", "placement": "structure", "relic": "plr_movarths_lair_ring",
-     "text": "Take back Geirlund's wedding ring",
-     "journal": "Geirlund was beyond saving. Vessa wore his ring on a string about her neck. His last pages asked for fire, and I gave the lair fire."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_brynja", "relic": "plr_movarths_lair_ring",
-     "text": "Bring the ring to Brynja in Morthal",
-     "topic": "Geirlund's ring. He was thinking of you, at the end.",
-     "reply": "I knew it. I knew it wasn't a bear. ...Thank you. I'll wear it on my own hand now, next to mine. Morthal can say what it likes about hoping."}
-   ],
-   "rewards": {"gold": 260, "items": ["skycraft:steel_dagger"]},
-   "outro": "Brynja keeps hunting the marsh, two rings on one hand and a silver knife at her belt. The townsfolk stop telling her what to hope."
-  },
-  {
-   "id": "pl_kjenstag_ruins",
-   "title": "The Lantern-Bearer's Horn",
-   "region": "skyrim/hjaalmarch",
-   "start": "manual",
-   "desc": "The runes at Kjenstag Ruins say the lantern-bearer's ghost walks because grave robbers stole his bronze horn. A Morthal guard saw the horn lying in the robbers' old camp nearby.",
-   "pitch": "That light at Kjenstag? It's a dead man looking for his horn, the old stones say. Robbers took it. Guardsman Aslak says it's lying in the reeds right there. Somebody should just give the poor thing back.",
-   "objectives": [
-    {"type": "retrieve", "place": "kjenstag_ruins", "offset": [14, 8], "relic": "plr_kjenstag_ruins_horn",
-     "text": "Find the bronze horn in the grave robbers' old camp",
-     "spawn": [{"type": "skycraft:will_o_wisp", "count": 2}],
-     "journal": "The horn hums in my hand like a held breath. The marsh-lights did not want me to have it."},
-    {"type": "go", "place": "kjenstag_ruins", "radius": 6, "text": "Return the horn to the lantern-bearer at the stone circle",
-     "actions": "take:plr_kjenstag_ruins_horn",
-     "journal": "I set the horn on the fallen lintel. The lantern came across the circle, stopped, and went out. Far off, very faintly, something blew a single long note."}
-   ],
-   "rewards": {"gold": 130, "items": ["skycraft:soul_gem_lesser"]},
-   "outro": "No light walks Kjenstag now. The Morthal folk say the marsh is darker for it, and safer, and a little lonelier."
-  },
-  {
-   "id": "pl_mzinchaleft",
-   "title": "Ice-Vein's Brother",
-   "region": "skyrim/hjaalmarch",
-   "start": "npc:pln_skyrim_west_coast_sigrun",
-   "offer": "Is something wrong at the mine?",
-   "pitch": "I sent five men into Mzinchaleft after Dwemer metal. My brother Knud led them. One came back, and he only talks to his bed board. He says Knud gave him a token for me and he dropped it running, past the first great door. I want it. I want to know. And I'm too much of a coward to go myself.",
-   "requires": ["level:10"],
-   "desc": "Sigrun Ice-Vein, foreman of the Rockwallow Mine at Stonehills, wants to know what became of her brother Knud and his crew in the Dwemer ruin of Mzinchaleft.",
-   "objectives": [
-    {"type": "go", "place": "mzinchaleft", "text": "Enter Mzinchaleft"},
-    {"type": "retrieve", "place": "mzinchaleft", "placement": "structure", "relic": "plr_mzinchaleft_token",
-     "text": "Find Knud's miner's token past the first great door",
-     "spawn": [{"type": "skycraft:falmer", "count": 3}, {"type": "skycraft:dwarven_spider", "count": 2}],
-     "journal": "The token lay by the brass pillar with the broken arm. Knud's journal lay a little further on, in the lift-house. He did not reach the door."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_sigrun", "relic": "plr_mzinchaleft_token",
-     "text": "Bring the token to Sigrun at Stonehills",
-     "topic": "Knud's token. And his last words: brick up the east tunnel.",
-     "reply": "Even at the end he was giving orders. ...We'll brick it tonight. All of us. And I'll put this on the shift board, where his name always was."}
-   ],
-   "rewards": {"gold": 220, "items": ["skycraft:dwarven_helmet"]},
-   "outro": "The east tunnel of the Rockwallow Mine is bricked and blessed. Sigrun Ice-Vein never goes below the third level again."
-  },
-  {
-   "id": "pl_fort_snowhawk",
-   "title": "The Missing Patrol",
-   "region": "skyrim/hjaalmarch",
-   "start": "npc:pln_skyrim_west_coast_thorvar",
-   "offer": "Has something happened to your patrol?",
-   "pitch": "Three of the Jarl's guards went to look at the smoke over Fort Snowhawk. Sten, Ofrid and Hallgerd. Hallgerd's mother asks me every morning. I sent them, so it's mine to answer. Find them. If the worst has happened, find who did it.",
-   "requires": ["level:8"],
-   "desc": "Thorvar Mist-Eye, steward of Highmoon Hall, sent three guards to investigate Fort Snowhawk. None returned.",
-   "objectives": [
-    {"type": "clear", "place": "fort_snowhawk", "placement": "structure", "text": "Put down the marsh dead in Fort Snowhawk",
-     "spawn": [{"type": "minecraft:zombie", "count": 3, "name": "Marsh Thrall"}, {"type": "skycraft:necromancer", "count": 1}]},
-    {"type": "kill", "place": "fort_snowhawk", "placement": "structure", "text": "Kill Vigdis the Pale",
-     "spawn": [{"type": "skycraft:necromancer", "name": "Vigdis the Pale", "target": true, "boss": true, "hp": 1.5, "dmg": 1.2}],
-     "actions": "relic:plr_fort_snowhawk_journal",
-     "journal": "Vigdis is dead. Her journal names all three guards. Hallgerd's charcoal note was hidden in the cage."},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_thorvar", "relic": "plr_fort_snowhawk_journal",
-     "text": "Bring Vigdis's journal to Thorvar in Morthal",
-     "topic": "Your patrol is dead. Here's the one who did it, in her own words.",
-     "reply": "...Hallgerd wrote that it wasn't my fault. That's like her. I'll read it to her mother myself. And then I'll burn this book, and then I'll have a drink, and then I'll be steward again."}
-   ],
-   "rewards": {"gold": 200, "items": ["skycraft:steel_sword"]},
-   "outro": "Three pyres burn outside Morthal's walls. Jarl Idgrod stands at the window of Highmoon Hall the whole night, watching them."
-  },
-  {
-   "id": "pl_labyrinthian",
-   "title": "The Pattern in the Floor",
-   "region": "skyrim/hjaalmarch",
-   "start": "manual",
-   "requires": ["level:14"],
-   "desc": "A College student named Teneras mapped the lines in Labyrinthian's floors that the dead will not cross, and hid his notebook under a loose slab in the hall of the broken masks.",
-   "pitch": "Another College student lost in Labyrinthian, they say. This one left notes about lines in the floor that the dead won't cross. If those notes are real, they're worth more than gold to the next poor fool who goes in.",
-   "objectives": [
-    {"type": "go", "place": "labyrinthian", "text": "Enter the ruins of Labyrinthian"},
-    {"type": "retrieve", "place": "labyrinthian", "placement": "structure", "relic": "plr_labyrinthian_notebook",
-     "text": "Find Teneras's notebook in the hall of the broken masks",
-     "spawn": [{"type": "minecraft:skeleton", "count": 3}, {"type": "skycraft:draugr", "count": 2}],
-     "journal": "The notebook was under the slab, exactly as he said. The last pattern is unfinished: a word in the old tongue, half-drawn."}
-   ],
-   "rewards": {"gold": 260, "items": ["skycraft:spell_tome_lesser_ward"]},
-   "outro": "Teneras's lines hold true. The College will want the notebook, and his tutor will have to admit he was wrong."
-  },
-  {
-   "id": "pl_chillwind_depths",
-   "title": "Down the Fox-Hole",
-   "region": "skyrim/hjaalmarch",
-   "start": "manual",
-   "requires": ["level:12"],
-   "desc": "The trapper Orla's partner Brannoc chased a fox into Chillwind Depths and was taken by the Falmer. Their masked leader wears his brass compass as a trophy.",
-   "pitch": "Orla the trapper's been sitting outside Chillwind Depths for days. Her man went down after a fox and the blind elves got him. She just wants his compass back. Something to bury.",
-   "objectives": [
-    {"type": "go", "place": "chillwind_depths", "text": "Descend into Chillwind Depths"},
-    {"type": "kill", "place": "chillwind_depths", "placement": "structure", "text": "Kill the masked Falmer who took Brannoc",
-     "spawn": [{"type": "skycraft:falmer", "name": "Chitin-Mask", "target": true, "boss": true, "hp": 1.5},
-               {"type": "skycraft:falmer", "count": 2}, {"type": "skycraft:chaurus", "count": 1}],
-     "actions": "relic:plr_chillwind_depths_compass",
-     "journal": "The compass hung from Chitin-Mask's neck. Its needle still points north, toward the surface, toward Orla."}
-   ],
-   "rewards": {"gold": 220, "items": ["skycraft:chitin_dagger"]},
-   "outro": "Orla buries the compass by the cave mouth, facing north, and moves her traplines to the far side of the Reach."
-  },
-  {
-   "id": "pl_brood_cavern",
-   "title": "The White Mother",
-   "region": "skyrim/hjaalmarch",
-   "start": "manual",
-   "desc": "The Dunmer alchemist Idrin Sarethi lost his satchel of recipes in Brood Cavern, in the web of a frost-white spider the size of a cart. He offers what he has for its return.",
-   "pitch": "Idrin, the Dunmer who sells salves in Morthal, came back from Brood Cavern white as milk. Left two years of recipes in there with the biggest spider he's ever seen. He'll pay. Not much. But he'll pay.",
-   "objectives": [
-    {"type": "kill", "place": "brood_cavern", "placement": "structure", "text": "Kill the White Mother of Brood Cavern",
-     "spawn": [{"type": "skycraft:frostbite_spider", "name": "The White Mother", "target": true, "boss": true, "hp": 2.0},
-               {"type": "skycraft:frostbite_spider", "count": 3}]},
-    {"type": "retrieve", "place": "brood_cavern", "placement": "structure", "relic": "plr_brood_cavern_satchel",
-     "text": "Cut Idrin's satchel free of the web"},
-    {"type": "deliver", "npc": "pln_skyrim_west_coast_idrin", "relic": "plr_brood_cavern_satchel",
-     "text": "Return the satchel to Idrin Sarethi in Morthal",
-     "topic": "Your satchel. The White Mother won't be needing it.",
-     "reply": "My notes! All of them! Oh, you've no idea. Here, take what's in the purse, and this: never mix frostbite venom with deathbell, whatever anyone tells you. That alone is worth more than the gold."}
-   ],
-   "rewards": {"gold": 120, "items": ["skycraft:soul_gem_lesser"]},
-   "outro": "Idrin Sarethi's shop reopens with a new sign: 'Now With Spider.'"
-  },
-  {
-   "id": "pl_orotheim",
-   "title": "The Toll at Orotheim",
-   "region": "skyrim/hjaalmarch",
-   "start": "manual",
-   "desc": "The Orotheim gang charges a toll on the Rorikstead road and works those who can't pay in a pen inside their cave. Their chief keeps the pen key on his belt.",
-   "pitch": "The Orotheim gang's got farmhands from three villages working off a toll that never gets smaller. The chief keeps the key on his belt. It's not the sort of thing a key should be kept on.",
-   "objectives": [
-    {"type": "clear", "place": "orotheim", "placement": "structure", "text": "Break the Orotheim gang",
-     "spawn": [{"type": "skycraft:bandit", "count": 3, "name": "Orotheim Tollman"}]},
-    {"type": "kill", "place": "orotheim", "placement": "structure", "text": "Kill the Orotheim chief",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Brodir Toll-Taker", "target": true, "boss": true, "hp": 1.3}],
-     "actions": "relic:plr_orotheim_key",
-     "journal": "Brodir's key opens the work-pen. Lars Eriksson and four others walk out into daylight, blinking."}
-   ],
-   "rewards": {"gold": 170, "items": ["skycraft:studded_helmet"]},
-   "outro": "The road to Rorikstead is free again. A few weeks later a cart of fresh bread arrives for you at the nearest inn, paid for by grateful farmers."
-  },
-  {
-   "id": "pl_eldersblood_peak",
-   "title": "The Storm-Wing's Price",
-   "region": "skyrim/hjaalmarch",
-   "start": "manual",
-   "requires": ["level:18"],
-   "desc": "A grey, scarred dragon has risen from the old burial mound south of Morthal and made its perch on Eldersblood Peak. It takes a cow a week from the herders of Hjaalmarch, and soon it will want more.",
-   "pitch": "The storm-wing's back on Eldersblood Peak, like in the old stories. Grima's lost eleven head and her boys are sharpening spears. Someone with more than a spear needs to go up there before they do.",
-   "objectives": [
-    {"type": "go", "place": "eldersblood_peak", "text": "Climb Eldersblood Peak"},
-    {"type": "kill", "place": "eldersblood_peak", "text": "Slay the storm-wing",
-     "spawn": [{"type": "skycraft:dragon", "name": "Strunmahzin the Storm-Wing", "target": true, "boss": true, "hp": 1.0}],
-     "journal": "The storm-wing has fallen on its own perch. The marsh clans' old price is paid at last, in iron, as the stones asked."}
-   ],
-   "rewards": {"gold": 400, "items": ["skycraft:soul_gem_greater"]},
-   "outro": "Grima's sons carve a new line on the summit ring. The herders of Hjaalmarch drive their cattle up to the high pastures again."
-  }
- ]
+  "line": "place_skyrim_west_coast",
+  "category": "side",
+  "npcs": [
+    {
+      "id": "pln_skyrim_west_coast_aulus",
+      "name": "Aulus Carvain",
+      "role": "merchant",
+      "place": "solitude",
+      "offset": [
+        4,
+        -3
+      ],
+      "female": false,
+      "greet": "East Empire Company, Solitude office. If you've come about the lighthouse, sit down. If you've come about a job, sit down faster."
+    },
+    {
+      "id": "pln_skyrim_west_coast_verulus",
+      "name": "Verulus Agrippa",
+      "role": "scholar",
+      "place": "solitude",
+      "offset": [
+        -5,
+        4
+      ],
+      "female": false,
+      "greet": "Mind the papers. No, not those. Or those. Just stand very still and tell me what you want."
+    },
+    {
+      "id": "pln_skyrim_west_coast_hulda",
+      "name": "Hulda",
+      "role": "citizen",
+      "place": "dragon_bridge",
+      "offset": [
+        3,
+        2
+      ],
+      "female": true,
+      "greet": "You came up the south road? Did you pass anyone on it? A young man with an axe too big for him?"
+    },
+    {
+      "id": "pln_skyrim_west_coast_ottar",
+      "name": "Ottar",
+      "role": "farmer",
+      "place": "katlas_farm",
+      "offset": [
+        2,
+        -2
+      ],
+      "female": false,
+      "greet": "Need a horse brushed? A carriage? Or... you haven't seen a girl with red braids, have you? On the north road?"
+    },
+    {
+      "id": "pln_skyrim_west_coast_sigrun",
+      "name": "Sigrun Ice-Vein",
+      "role": "miner",
+      "place": "stonehills",
+      "offset": [
+        -3,
+        3
+      ],
+      "female": true,
+      "greet": "Rockwallow's closed to strangers. Unless you're the sort of stranger who goes down holes for a living."
+    },
+    {
+      "id": "pln_skyrim_west_coast_brynja",
+      "name": "Brynja",
+      "role": "hunter",
+      "place": "morthal",
+      "offset": [
+        5,
+        1
+      ],
+      "female": true,
+      "greet": "Don't tell me to stop hoping. Everyone in this town has told me to stop hoping."
+    },
+    {
+      "id": "pln_skyrim_west_coast_thorvar",
+      "name": "Thorvar Mist-Eye",
+      "role": "steward",
+      "place": "morthal",
+      "offset": [
+        -4,
+        -5
+      ],
+      "female": false,
+      "greet": "Highmoon Hall's business is the Jarl's business. Unless you've news of my patrol. Then it's mine."
+    },
+    {
+      "id": "pln_skyrim_west_coast_idrin",
+      "name": "Idrin Sarethi",
+      "role": "apothecary",
+      "place": "morthal",
+      "offset": [
+        2,
+        6
+      ],
+      "female": false,
+      "greet": "Salves, tinctures, cures for marsh-cough. Nothing with spider in it, not this month. Don't ask."
+    }
+  ],
+  "relics": [
+    {
+      "id": "plr_solitude_lighthouse_lens",
+      "name": "Keeper's Brass Lens",
+      "desc": "A heavy ring of brass and ground glass, scratched where it was wrenched from its cradle."
+    },
+    {
+      "id": "plr_dainty_sload_manifest",
+      "name": "True Manifest of the Dainty Sload",
+      "desc": "A sea captain's ledger page listing forty crates of skooma and the Solitude names who paid for them."
+    },
+    {
+      "id": "plr_orphans_tear_strongbox",
+      "name": "Pay Chest of the Orphan's Tear",
+      "desc": "An iron strongbox stamped with the East Empire Company seal, its chain snapped at the bulkhead."
+    },
+    {
+      "id": "plr_widows_watch_ruins_ring",
+      "name": "Whalebone Ring",
+      "desc": "A plain ring of white whalebone, worn thin on one side by a thumb that turned it for years."
+    },
+    {
+      "id": "plr_ravenscar_hollow_clasp",
+      "name": "Freydis's Bronze Clasp",
+      "desc": "A small bronze cloak-clasp shaped like a horse's head, polished bright by a brother's worry."
+    },
+    {
+      "id": "plr_shadowgreen_cavern_heartsap",
+      "name": "Vial of Shadowgreen Heartsap",
+      "desc": "A sealed glass vial of sap that glows a faint, living green in the dark."
+    },
+    {
+      "id": "plr_lower_steepfall_burrow_horn",
+      "name": "Asgeir's Hunting Horn",
+      "desc": "A ram's horn bound in iron, carved with a hunter's name and his father's before him."
+    },
+    {
+      "id": "plr_northwatch_keep_beads",
+      "name": "Hjorvar's Iron Prayer Beads",
+      "desc": "Nine beads of dark Ironback iron on a leather thong, the ninth worn smooth by an old priest's fingers."
+    },
+    {
+      "id": "plr_pinemoon_cave_payroll",
+      "name": "Legion Payroll Strongbox",
+      "desc": "A small iron box under an Imperial seal, still unbroken, with tooth marks on the lid."
+    },
+    {
+      "id": "plr_ironback_hideout_icon",
+      "name": "Iron Icon of Talos",
+      "desc": "A small statue of Talos cast from Ironback ore, rough and heavy, hidden for years under a hearthstone."
+    },
+    {
+      "id": "plr_wolfskull_cave_circlet",
+      "name": "Circlet of Wolf Teeth",
+      "desc": "A ring of yellowed wolf teeth on blackened silver wire. It feels colder than it should."
+    },
+    {
+      "id": "plr_rimerock_burrow_journal",
+      "name": "Elenthir's Journal",
+      "desc": "An exile's journal in neat Altmeri script, full of the Dominion's business in Skyrim."
+    },
+    {
+      "id": "plr_statue_to_meridia_bundle",
+      "name": "Black-Corded Bone Bundle",
+      "desc": "Finger bones bound with black cord around a shard of grave-stone. Meridia's light flickers near it."
+    },
+    {
+      "id": "plr_haafingar_stormcloak_camp_letter",
+      "name": "Ragnvald's Letter",
+      "desc": "A letter folded and unfolded so many times its creases have gone soft as cloth."
+    },
+    {
+      "id": "plr_volskygge_axe",
+      "name": "Eirik's Father's Axe",
+      "desc": "A fisherman's woodaxe, too heavy for its last owner, its haft notched with a family's tally of winters."
+    },
+    {
+      "id": "plr_folgunthur_rubbing",
+      "name": "Folgunthur Lineage Rubbing",
+      "desc": "A long sheet of charcoal rubbing, every name in the barrow, damp at one corner."
+    },
+    {
+      "id": "plr_movarths_lair_ring",
+      "name": "Geirlund's Wedding Ring",
+      "desc": "A plain silver band on a string, taken from a vampire's neck."
+    },
+    {
+      "id": "plr_kjenstag_ruins_horn",
+      "name": "Kjenstag's Bronze Horn",
+      "desc": "An ancient bronze horn, green with age, that hums faintly when held near the marsh."
+    },
+    {
+      "id": "plr_mzinchaleft_token",
+      "name": "Knud's Miner's Token",
+      "desc": "A stamped copper disc from the Rockwallow Mine, marked with the Ice-Vein family's sign."
+    },
+    {
+      "id": "plr_fort_snowhawk_journal",
+      "name": "Vigdis's Embalming Journal",
+      "desc": "A necromancer's journal, its margins full of measurements taken from Morthal's own guards."
+    },
+    {
+      "id": "plr_labyrinthian_notebook",
+      "name": "Notebook of the Lines",
+      "desc": "A College student's notebook of chalked lines and floor patterns from Labyrinthian, ending mid-word."
+    },
+    {
+      "id": "plr_chillwind_depths_compass",
+      "name": "Brannoc's Brass Compass",
+      "desc": "A trapper's brass compass on a Falmer thong, its needle still pointing faithfully north."
+    },
+    {
+      "id": "plr_brood_cavern_satchel",
+      "name": "Idrin's Satchel",
+      "desc": "A Dunmer alchemist's leather satchel, wrapped in webbing, with two years of recipes inside."
+    },
+    {
+      "id": "plr_orotheim_key",
+      "name": "Key to the Work-Pen",
+      "desc": "A crude iron key on a bandit chief's belt-ring, greasy from handling."
+    }
+  ],
+  "quests": [
+    {
+      "id": "pl_solitude_lighthouse",
+      "title": "The Darkened Lamp",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "The Solitude Lighthouse has gone dark three times this month, and a Company cutter has been lost on the rocks. The keeper's log says the great lens was stolen and taken to Brinewater Grotto.",
+      "pitch": "The lighthouse keeps going dark and ships keep dying. The Company's offering coin to anyone who can get that lamp burning again. Ask for Aulus at the warehouse.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "solitude_lighthouse",
+          "text": "Look over the darkened lighthouse",
+          "journal": "The lamp-room is empty and the brass cradle broken. The keeper's log names Brinewater Grotto."
+        },
+        {
+          "type": "retrieve",
+          "place": "brinewater_grotto",
+          "placement": "structure",
+          "relic": "plr_solitude_lighthouse_lens",
+          "text": "Recover the keeper's brass lens from Brinewater Grotto",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3,
+              "name": "Brinewater Wrecker"
+            }
+          ],
+          "journal": "The lens was wrapped in sailcloth in the wreckers' chest. There was no sign of old Ulfgar but his hammer."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_aulus",
+          "relic": "plr_solitude_lighthouse_lens",
+          "text": "Bring the lens to Aulus Carvain at the Company office in Solitude",
+          "topic": "I have the lighthouse lens.",
+          "reply": "By the Nine. I'll have it back in its cradle before dark. Ulfgar? ...No. I'll send a boat. I'll send two. Here, the Company's fifty, and a little more from me."
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "skycraft:silver_ring"
+        ]
+      },
+      "outro": "The light burns over the Karth again. Ships round the point safely, and somewhere in the dark the wreckers curse your name.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_brinewater_grotto",
+      "title": "Three Short, One Long",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A signal roster from Brinewater Grotto shows a wrecker crew luring ships onto the rocks north of Solitude. Their leader, Saltjaw Hroar, sells the plunder to the smugglers of Broken Oar.",
+      "pitch": "There's a crew in Brinewater Grotto that makes shipwrecks happen. Hroar, they call the leader. Saltjaw. If somebody shut his jaw for good, the docks would drink to them for a month.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "brinewater_grotto",
+          "placement": "structure",
+          "text": "Clear the wreckers out of Brinewater Grotto",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4,
+              "name": "Brinewater Wrecker"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "brinewater_grotto",
+          "placement": "structure",
+          "text": "Kill Saltjaw Hroar",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Saltjaw Hroar",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            }
+          ],
+          "journal": "Hroar is dead. No more lanterns will swing at the grotto mouth."
+        }
+      ],
+      "rewards": {
+        "gold": 180
+      },
+      "outro": "The grotto mouth stays dark at night now, as a sea cave should.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_dainty_sload",
+      "title": "Sweet Cargo",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A deckhand of the Dainty Sload left a confession: the ship carries forty crates of skooma, and the captain's true manifest names the Solitude men who paid for it.",
+      "pitch": "That pretty ship anchored under the cliffs? She's carrying skooma, or so the gossip goes. The Company would pay well for proof. Proof's in the captain's sea chest, they say.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "dainty_sload",
+          "placement": "structure",
+          "relic": "plr_dainty_sload_manifest",
+          "text": "Find the true manifest in the captain's sea chest",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Sload Deckhand"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "dainty_sload",
+          "placement": "structure",
+          "text": "Deal with Captain Marisa Vellenus",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Captain Marisa Vellenus",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_west_coast_aulus",
+          "text": "Show the manifest to Aulus Carvain in Solitude",
+          "topic": "I have the Dainty Sload's real manifest.",
+          "reply": "Let me see. Forty crates... Varo... and this name. This is my own superior's hand. Gods. What do you want me to do with it?",
+          "choices": [
+            {
+              "label": "Give him everything, names and all.",
+              "actions": "take:plr_dainty_sload_manifest",
+              "reply": "Then I'll take it over his head, to the Jarl's steward, and I'll probably lose my post for it. Good. A man should lose something for doing right, or it doesn't count."
+            },
+            {
+              "label": "Tear off the deckhand's name first, then hand it over.",
+              "actions": "take:plr_dainty_sload_manifest",
+              "reply": "Joric Saltmane. Yes, I see. He'd be the first to hang, wouldn't he, and the last to deserve it. Burn that strip. I never saw it."
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 200
+      },
+      "outro": "The Dainty Sload's crates go into the sea under Company eyes, and one or two Solitude merchants find urgent business in Cyrodiil.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_broken_oar_grotto",
+      "title": "The Broken Oars",
+      "region": "skyrim/haafingar",
+      "start": "npc:pln_skyrim_west_coast_aulus",
+      "offer": "Any work for the Company?",
+      "pitch": "There's a man called Rhosen Varo who used to captain for us. Now he captains against us, from a cave on the north shore with a stolen ship in it. He buys everything the wreckers steal. End him, and the Company will remember you kindly. That's rarer than gold.",
+      "requires": [
+        "level:10"
+      ],
+      "desc": "Aulus Carvain of the East Empire Company wants Captain Rhosen Varo, the smuggler of Broken Oar Grotto, dealt with for good.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "broken_oar_grotto",
+          "text": "Find Broken Oar Grotto on the northern shore"
+        },
+        {
+          "type": "clear",
+          "place": "broken_oar_grotto",
+          "placement": "structure",
+          "text": "Fight through Varo's crew",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4,
+              "name": "Broken Oar Smuggler"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "broken_oar_grotto",
+          "placement": "structure",
+          "text": "Kill Captain Rhosen Varo",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Captain Rhosen Varo",
+              "target": true,
+              "boss": true,
+              "hp": 1.6,
+              "dmg": 1.2
+            }
+          ],
+          "journal": "Varo is dead. In his ledger, the bribes to the Castle Dour key-keeper are written out to the copper."
+        }
+      ],
+      "rewards": {
+        "gold": 300,
+        "items": [
+          "skycraft:imperial_sword"
+        ]
+      },
+      "outro": "The Company tows Varo's stolen ship back to Solitude and paints a new name on her. Aulus asks you to choose it.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_orphans_tear",
+      "title": "Salvage Rights",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "The last log of the Orphan's Tear says her captain chained the Company's pay chest to the bulkhead before she struck. It may still be aboard.",
+      "pitch": "The Orphan's Tear went down with eight hundred septims of Company pay aboard. Captain chained it to the bulkhead, so the story goes. Half the coast has tried for it. Mind the slaughterfish.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "orphans_tear",
+          "placement": "structure",
+          "relic": "plr_orphans_tear_strongbox",
+          "text": "Recover the pay chest from the wreck",
+          "spawn": [
+            {
+              "type": "skycraft:slaughterfish",
+              "count": 3
+            },
+            {
+              "type": "skycraft:mudcrab",
+              "count": 2
+            }
+          ],
+          "journal": "The chest was where the captain said, chained to the bulkhead. Beside it, a cabin boy's hammock, still slung."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_aulus",
+          "relic": "plr_orphans_tear_strongbox",
+          "text": "Return the pay chest to the East Empire Company in Solitude",
+          "topic": "The Orphan's Tear's pay chest. Her captain wanted the widows paid first.",
+          "reply": "Then they will be. I'll see to the list myself. And the boy, Tamsin? ...I'll write to Honorhall. Someone should."
+        }
+      ],
+      "rewards": {
+        "gold": 160
+      },
+      "outro": "The widows of the Orphan's Tear are paid in full that winter. The Company calls it a salvage fee. Aulus calls it an apology.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_widows_watch_ruins",
+      "title": "The Last Lantern",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A verse carved into the stair at Widow's Watch asks that the widow's whalebone ring be carried down to the sea at the Orphan's Tear, so that she may stop keeping her lantern lit.",
+      "pitch": "There's a green light at the top of Widow's Watch. Old Brandr says she's waiting for her ring to go back to the sea. Strange errand, but it'd be a kindness.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "widows_watch_ruins",
+          "placement": "structure",
+          "relic": "plr_widows_watch_ruins_ring",
+          "text": "Find the widow's whalebone ring at the top of the tower",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "name": "Restless Watcher"
+            }
+          ],
+          "journal": "The ring lay on the top step, beside a lantern that burns without oil."
+        },
+        {
+          "type": "go",
+          "place": "orphans_tear",
+          "text": "Give the ring to the sea at the Orphan's Tear",
+          "actions": "take:plr_widows_watch_ruins_ring",
+          "journal": "The ring sank without a sound. Behind me, on the headland, the green light went out."
+        }
+      ],
+      "rewards": {
+        "gold": 90,
+        "items": [
+          "skycraft:amulet_of_mara"
+        ]
+      },
+      "outro": "The fishermen say Widow's Watch is dark now on foggy nights. Some of them miss the light.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_ravenscar_hollow",
+      "title": "Feathers and Bone",
+      "region": "skyrim/haafingar",
+      "start": "npc:pln_skyrim_west_coast_ottar",
+      "offer": "Who is the girl with red braids?",
+      "pitch": "Freydis. My sister. She went up toward Ravenscar Hollow to talk to a crow-woman, and she never came back. The guards laugh at me. Please. Take Mother's clasp to her. She'll know it. She'll remember us.",
+      "desc": "Ottar, the stableboy at Katla's Farm, believes his sister Freydis went to the hagravens of Ravenscar Hollow. He wants her brought home, or at least found.",
+      "objectives": [
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_west_coast_ottar",
+          "text": "Take the clasp from Ottar",
+          "topic": "Give me the clasp. I'll find her.",
+          "reply": "It's a horse's head. Mother wore it every day. Freydis used to steal it to wear to the market. Go. Please.",
+          "actions": "relic:plr_ravenscar_hollow_clasp"
+        },
+        {
+          "type": "kill",
+          "place": "ravenscar_hollow",
+          "placement": "structure",
+          "text": "Confront the crow-mother of Ravenscar Hollow",
+          "spawn": [
+            {
+              "type": "skycraft:hagraven",
+              "name": "Mother Cawlwyn",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            },
+            {
+              "type": "skycraft:forsworn",
+              "count": 2
+            }
+          ],
+          "journal": "The crow-mother is dead. Among her things was a letter from Freydis. Of Freydis herself there was only a trail of black feathers leading north into the hills."
+        },
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_west_coast_ottar",
+          "text": "Tell Ottar what became of his sister",
+          "topic": "I found what's left of the crow-mother's nest.",
+          "reply": "And Freydis? Tell me straight.",
+          "choices": [
+            {
+              "label": "Give him the clasp and the truth: she went willingly.",
+              "actions": "take:plr_ravenscar_hollow_clasp",
+              "reply": "Willingly. ...She always asked why. About everything. I'll keep the clasp by the door. If she comes back, she'll know where to find it."
+            },
+            {
+              "label": "Tell him she died, and that it was quick.",
+              "actions": "take:plr_ravenscar_hollow_clasp",
+              "reply": "Quick. Good. That's good. I'll bury the clasp under the birch by the paddock. She liked that tree. Thank you for telling me. I think I needed it to be over."
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 140,
+        "items": [
+          "skycraft:fur_boots"
+        ]
+      },
+      "outro": "On some evenings, Katla says, a crow sits on the paddock fence and watches Ottar work, and he talks to it as if it might answer.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_shadowgreen_cavern",
+      "title": "Heartwood for the Embassy",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A Thalmor botanist hid a vial of glowing heartsap in the roots of Shadowgreen Cavern rather than send it to Alinor. She suggested a scholar in Solitude might give a fairer price.",
+      "pitch": "There's an elf-botanist's stash in that green cave north of the embassy. Some glowing sap the Thalmor wanted. Old Verulus in Solitude would pay to get his hands on it before they do.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "shadowgreen_cavern",
+          "placement": "structure",
+          "relic": "plr_shadowgreen_cavern_heartsap",
+          "text": "Find the hidden vial in the roots of the heart-tree",
+          "spawn": [
+            {
+              "type": "skycraft:spriggan",
+              "count": 2
+            }
+          ],
+          "journal": "The vial was wedged deep in the roots. The spriggans did not want it to leave."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_verulus",
+          "relic": "plr_shadowgreen_cavern_heartsap",
+          "text": "Bring the heartsap to Verulus Agrippa in Solitude",
+          "topic": "Heartsap from Shadowgreen. The Thalmor wanted it.",
+          "reply": "Did they! Then I'll study it twice as carefully, out of spite. A living sap that needs no sun. Do you know what Alinor would do with that? Nor do I. That's precisely what worries me."
+        }
+      ],
+      "rewards": {
+        "gold": 170,
+        "items": [
+          "skycraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "Verulus publishes a short, furious pamphlet on root-magic. The Thalmor Embassy buys three copies.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_lower_steepfall_burrow",
+      "title": "Greyback",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "The trapper Asgeir Coldhand tracked a white-backed troll called Greyback to the Lower Steepfall Burrow and never came back. His father's hunting horn went with him.",
+      "pitch": "Asgeir Coldhand went after the white troll at Steepfall. Swore he'd hang its hide in the Winking Skeever. Somebody ought to finish the hunt, and bring his horn home.",
+      "objectives": [
+        {
+          "type": "kill",
+          "place": "lower_steepfall_burrow",
+          "placement": "structure",
+          "text": "Kill Greyback, the white-backed troll",
+          "spawn": [
+            {
+              "type": "skycraft:troll",
+              "name": "Greyback",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "lower_steepfall_burrow",
+          "placement": "structure",
+          "relic": "plr_lower_steepfall_burrow_horn",
+          "text": "Recover Asgeir's hunting horn",
+          "journal": "Asgeir's bones lay at the back of the den, his horn still in his hand. He never blew it."
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "skycraft:fur_chestplate"
+        ]
+      },
+      "outro": "Greyback's white hide fetches a fine price in Solitude. Asgeir's horn hangs over the bar at the Winking Skeever, where he always meant it to be.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_northwatch_keep",
+      "title": "Names in the Ledger",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "requires": [
+        "level:14"
+      ],
+      "desc": "The Thalmor register at Northwatch Keep lists an old priest of Talos, Hjorvar the Grey, taken from the Ironback Hideout. His interrogator is Justiciar Ancarion.",
+      "pitch": "There's an old Talos priest the elves took to Northwatch. Hjorvar. Everyone who prayed with him is still free, because he hasn't talked. Somebody ought to make sure the elf asking the questions stops asking.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "northwatch_keep",
+          "text": "Get into Northwatch Keep"
+        },
+        {
+          "type": "clear",
+          "place": "northwatch_keep",
+          "placement": "structure",
+          "text": "Overcome the Thalmor guard",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 3,
+              "name": "Northwatch Warden"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "northwatch_keep",
+          "placement": "structure",
+          "text": "Kill Justiciar Ancarion",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "name": "Justiciar Ancarion",
+              "target": true,
+              "boss": true,
+              "hp": 1.6,
+              "dmg": 1.2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "northwatch_keep",
+          "placement": "structure",
+          "relic": "plr_northwatch_keep_beads",
+          "text": "Find what became of Hjorvar the Grey",
+          "journal": "Hjorvar died in his cell two days ago, his prayer still scratched fresh into the wall. He never gave them a single name. His iron beads were in his hand."
+        }
+      ],
+      "rewards": {
+        "gold": 320,
+        "items": [
+          "skycraft:elven_sword"
+        ]
+      },
+      "outro": "Word reaches the Ironback faithful that Hjorvar died silent. On the first Sundas of the next month, they meet again.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_pinemoon_cave",
+      "title": "The Coin-Biter",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "The Fort Hraggstad payroll was stolen on the Dragon Bridge road by bandits wearing pine sprigs. The quartermaster believes it went to Pinemoon Cave, where Rolf Coin-Biter holds court.",
+      "pitch": "The Legion payroll got lifted on the Dragon Bridge road again. Pinemoon gang, wearing pine in their caps, bold as you like. The quartermaster at Hraggstad would kiss whoever brings that strongbox back.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "pinemoon_cave",
+          "placement": "structure",
+          "text": "Clear out the Pinemoon gang",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3,
+              "name": "Pinemoon Bandit"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "pinemoon_cave",
+          "placement": "structure",
+          "text": "Kill Rolf Coin-Biter",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Rolf Coin-Biter",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ],
+          "actions": "relic:plr_pinemoon_cave_payroll",
+          "journal": "Rolf kept the payroll strongbox under his bedroll, seal unbroken. He'd only bitten the lid."
+        },
+        {
+          "type": "go",
+          "place": "fort_hraggstad",
+          "text": "Return the payroll to the quartermaster at Fort Hraggstad",
+          "actions": "take:plr_pinemoon_cave_payroll",
+          "journal": "Quartermaster Calo counted it twice, then a third time, and then shook my hand for a very long while."
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "skycraft:imperial_light_chestplate"
+        ]
+      },
+      "outro": "The garrison at Fort Hraggstad gets paid for the first time in two months. Several soldiers stop talking about cousins in the Stormcloak camp.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_ironback_hideout",
+      "title": "Under the Hearthstone",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "The Talos faithful of the Ironback Hideout hid an iron icon of Talos under their hearthstone before the Thalmor came. The embassy still watches the cabin.",
+      "pitch": "The faithful at Ironback hid something under their hearth before the elves came. It's still there, they say, and so are the elves some nights. If you remember the Ninth, you know what to do.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ironback_hideout",
+          "text": "Go to the Ironback Hideout"
+        },
+        {
+          "type": "retrieve",
+          "place": "ironback_hideout",
+          "placement": "structure",
+          "relic": "plr_ironback_hideout_icon",
+          "text": "Lift the hearthstone and take the icon to safety",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 2,
+              "name": "Embassy Watcher"
+            }
+          ],
+          "journal": "The icon was where Sigrid said, heavy and cold and rough. The watchers will not report it now."
+        }
+      ],
+      "rewards": {
+        "gold": 120,
+        "items": [
+          "skycraft:amulet_of_talos"
+        ]
+      },
+      "outro": "The icon is in your keeping now. Somewhere in Haafingar, an old man's prayer has been answered.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_wolfskull_cave",
+      "title": "The Wolf Queen's Choir",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "Brother Ulvarr's ritual notes describe a choir of necromancers at Wolfskull Cave preparing to call on the Wolf Queen's name with the dead stolen from Solitude's Hall of the Dead.",
+      "pitch": "Green fire over Wolfskull Cave again, and three graves dug up in the Hall of the Dead. Somebody's playing at the Wolf Queen's old games. Somebody ought to stop the game.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "wolfskull_cave",
+          "placement": "structure",
+          "text": "Break the necromancers' choir",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "count": 2
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "name": "Stolen Dead"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "wolfskull_cave",
+          "placement": "structure",
+          "text": "Kill Brother Ulvarr",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "name": "Brother Ulvarr",
+              "target": true,
+              "boss": true,
+              "hp": 1.5,
+              "dmg": 1.2
+            }
+          ],
+          "actions": "relic:plr_wolfskull_cave_circlet",
+          "journal": "Ulvarr wore a circlet of wolf teeth for the ritual. It is cold as a grave. The green fire has gone out."
+        }
+      ],
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:soul_gem_common"
+        ]
+      },
+      "outro": "The priests of Arkay in Solitude rebury the stolen dead with their names, and no green light burns over Wolfskull for the rest of the year.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_rimerock_burrow",
+      "title": "The Exile's Door",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "requires": [
+        "level:12"
+      ],
+      "desc": "An Altmer exile, Elenthir, hid from the Thalmor in Rimerock Burrow behind a bound dremora. His journal says the binding is failing, and that his notes on the Dominion should reach someone in Solitude.",
+      "pitch": "There's an elf hiding from the other elves up at Rimerock. Had a daedra guarding his door, last anyone heard. If the daedra's loose, the elf's dead, and whatever he knew is lying in the snow.",
+      "objectives": [
+        {
+          "type": "kill",
+          "place": "rimerock_burrow",
+          "placement": "structure",
+          "text": "Banish the dremora that slipped its binding",
+          "spawn": [
+            {
+              "type": "skycraft:dremora",
+              "name": "Valkynaz Morith",
+              "target": true,
+              "boss": true,
+              "hp": 1.6,
+              "dmg": 1.3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "rimerock_burrow",
+          "placement": "structure",
+          "relic": "plr_rimerock_burrow_journal",
+          "text": "Recover Elenthir's journal",
+          "journal": "Elenthir is dead. The dremora left his journal untouched on the desk, as if out of courtesy."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_verulus",
+          "relic": "plr_rimerock_burrow_journal",
+          "text": "Bring the exile's journal to Verulus Agrippa in Solitude",
+          "topic": "An exile's journal, about the Thalmor in Skyrim.",
+          "reply": "Elenthir. I corresponded with him for a year and never knew where he lived. This will be copied, and the copies will travel. Quietly. Footnotes are a slower weapon than swords, but they last longer."
+        }
+      ],
+      "rewards": {
+        "gold": 240,
+        "items": [
+          "skycraft:spell_tome_lesser_ward"
+        ]
+      },
+      "outro": "Copies of an exile's journal begin to circulate in Solitude, unsigned. The Thalmor Embassy is not amused.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_pinefrost_tower",
+      "title": "The Exile's Reserve",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "Elenthir the exile hid a box of soul gems and coin at the foot of Pinefrost Tower: twelve paces downhill from the seaward side, under a flat grey stone with a hand-shaped lichen.",
+      "pitch": "That elf up at Rimerock left a stash somewhere near Pinefrost Tower, so the story goes. Under a stone with lichen like a hand. Spend it on something the Thalmor would hate, he said.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "pinefrost_tower",
+          "offset": [
+            0,
+            -12
+          ],
+          "item": "skycraft:soul_gem_common",
+          "text": "Dig under the lichen-marked stone below Pinefrost Tower",
+          "journal": "Under the stone, a small box: two charged soul gems and a purse of septims, and a note that just says 'Spite them well.'"
+        }
+      ],
+      "rewards": {
+        "gold": 120,
+        "items": [
+          "skycraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "The exile's reserve is yours. He asked only that it be spent on something the Thalmor would hate.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_statue_to_meridia",
+      "title": "Bones at the Lady's Feet",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A pilgrim from Dragon Bridge saw necromancers leave a bundle of bones at the steps of Meridia's statue. The Lady's light dims where it lies.",
+      "pitch": "Some pilgrim's saying there are necromancers fouling Meridia's steps up on Kilkreath. Leaving bones about. The Lady doesn't take kindly to that, and neither do the pilgrims.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "statue_to_meridia",
+          "text": "Drive off the desecrators on the mountain",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "count": 1
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "name": "Bone Porter"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "statue_to_meridia",
+          "relic": "plr_statue_to_meridia_bundle",
+          "text": "Take up the black-corded bundle by the steps"
+        },
+        {
+          "type": "go",
+          "place": "statue_to_meridia",
+          "radius": 6,
+          "text": "Cast the bundle into the Lady's light",
+          "actions": "take:plr_statue_to_meridia_bundle",
+          "journal": "The bones burned white and were gone. The star in Meridia's hand blazed for a moment, as if in thanks, or in judgement."
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "skycraft:silver_ring"
+        ]
+      },
+      "outro": "Pilgrims climb Kilkreath again with their lanterns, and Helvi of Dragon Bridge leaves a new lantern by the plinth with your name scratched on it.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_clearpine_pond",
+      "title": "Skjaldi's Share",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A Pinemoon bandit buried his share of a Legion payroll at Clearpine Pond, by the rotten stump on the north shore, a forearm deep.",
+      "pitch": "One of the Pinemoon lot buried something at Clearpine Pond, old Fenric says. North shore, by a stump. Fenric won't touch it. Says it's thieves' money and thieves' luck.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "clearpine_pond",
+          "offset": [
+            0,
+            -10
+          ],
+          "item": "skycraft:gold_ring",
+          "text": "Dig by the rotten stump on the north shore of Clearpine Pond",
+          "journal": "A purse of Legion septims and a gold ring with a little eagle on it. The escort who wore it never came home."
+        }
+      ],
+      "rewards": {
+        "gold": 90
+      },
+      "outro": "Skjaldi's share is yours now. The ring with the little eagle might mean something to somebody at Fort Hraggstad.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_haafingar_stormcloak_camp",
+      "title": "A Letter to the Bridge",
+      "region": "skyrim/haafingar",
+      "start": "manual",
+      "desc": "A Stormcloak soldier, Ragnvald, wrote a letter to his mother Hulda in Dragon Bridge and never sent it. He asked that a friend carry it home.",
+      "pitch": "There's a Dragon Bridge boy up in the rebel camp. Hulda's eldest. She'd give her right arm for a word from him, and I hear he's written one he hasn't the nerve to send.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "haafingar_stormcloak_camp",
+          "placement": "structure",
+          "relic": "plr_haafingar_stormcloak_camp_letter",
+          "text": "Find Ragnvald's unsent letter in the Stormcloak camp"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_hulda",
+          "relic": "plr_haafingar_stormcloak_camp_letter",
+          "text": "Carry the letter to Hulda in Dragon Bridge",
+          "topic": "Your son Ragnvald wrote to you. He couldn't send it himself.",
+          "reply": "From Ragnvald? ...He can see our chimney. The fool can see our chimney and he never once came down. I'll keep this under my pillow. Don't tell him I cried. Tell him I threw it in the fire."
+        }
+      ],
+      "rewards": {
+        "gold": 80,
+        "items": [
+          "skycraft:amulet_of_mara"
+        ]
+      },
+      "outro": "That night a lamp burns in Hulda's window until dawn, facing the hills.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_volskygge",
+      "title": "The Unburied Brother",
+      "region": "skyrim/haafingar",
+      "start": "npc:pln_skyrim_west_coast_hulda",
+      "offer": "Who are you waiting for?",
+      "pitch": "My Eirik. My youngest. He went up to Volskygge, the barrow on the mountain, after treasure, with his father's axe. That was nine days ago. His brother's gone to the war and his father's gone to the sea. Please. I can't lose them all.",
+      "requires": [
+        "level:10"
+      ],
+      "desc": "Hulda of Dragon Bridge begs for news of her son Eirik, who climbed to the barrow of Volskygge after treasure nine days ago.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "volskygge",
+          "text": "Climb to Volskygge and search for Eirik"
+        },
+        {
+          "type": "kill",
+          "place": "volskygge",
+          "placement": "structure",
+          "text": "Destroy Hrokk Iron-Jaw, warden of the barrow",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Hrokk Iron-Jaw",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "volskygge",
+          "placement": "structure",
+          "relic": "plr_volskygge_axe",
+          "text": "Find what became of Eirik",
+          "journal": "Eirik died behind his barricade with his torch burned out. His mother's letter was still in his pack, unread."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_hulda",
+          "relic": "plr_volskygge_axe",
+          "text": "Bring Eirik's axe home to Hulda",
+          "topic": "I found Eirik. I'm sorry.",
+          "reply": "...His father's axe. It was always too heavy for him. Thank you for not leaving him up there in the dark. I'll cook supper tonight anyway. Habit. Someone should eat it."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:steel_war_axe"
+        ]
+      },
+      "outro": "Hulda hangs the axe over her hearth. She still watches the road in the evenings, but now she watches the hills where Ragnvald is.",
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
+    },
+    {
+      "id": "pl_folgunthur",
+      "title": "The Lineage of Folgunthur",
+      "region": "skyrim/hjaalmarch",
+      "start": "npc:pln_skyrim_west_coast_verulus",
+      "offer": "You look worried, scholar.",
+      "pitch": "Worried? I am never worried; I am occasionally concerned. My apprentice Junia went down into Folgunthur to copy the lineage tablet and was due back on Turdas. It is now the following Turdas. If you are going south, through the marsh... I would take it as a professional courtesy. A personal one, also. Footnote it as you like.",
+      "desc": "Verulus Agrippa's apprentice Junia went into the flooded barrow of Folgunthur to copy its lineage tablet and has not returned.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "folgunthur",
+          "text": "Enter Folgunthur and search for Junia"
+        },
+        {
+          "type": "kill",
+          "place": "folgunthur",
+          "placement": "structure",
+          "text": "Lay the drowned warden to rest",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "The Drowned Warden",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "folgunthur",
+          "placement": "structure",
+          "relic": "plr_folgunthur_rubbing",
+          "text": "Recover Junia's rubbing of the lineage tablet",
+          "journal": "Junia died in her alcove with the rubbing rolled tight against her chest, dry, every name complete."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_verulus",
+          "relic": "plr_folgunthur_rubbing",
+          "text": "Bring the rubbing to Verulus in Solitude",
+          "topic": "Junia didn't make it. But she finished the rubbing.",
+          "reply": "...Of course she finished it. She was always going to finish it. She wrote that I was wrong? Then I was wrong. It will be published under her name. First author. No footnote."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:spell_tome_ironflesh"
+        ]
+      },
+      "outro": "The Folgunthur Lineage, by Junia Fulvia, is read aloud at the Bards College. Verulus sits at the back and does not correct a single word.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_movarths_lair",
+      "title": "Brynja's Vow",
+      "region": "skyrim/hjaalmarch",
+      "start": "npc:pln_skyrim_west_coast_brynja",
+      "offer": "What happened to your husband?",
+      "pitch": "Geirlund went to check his traps and left his bow on the path to Movarth's Lair, strung and set down neat as you please. That's no bear. Something asked him to put it down. I've a silver knife and no courage left. You look like you have both.",
+      "requires": [
+        "level:12"
+      ],
+      "desc": "Brynja of Morthal believes her husband Geirlund was taken by vampires into Movarth's Lair, north-east of town.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "movarths_lair",
+          "text": "Find Movarth's Lair in the marsh"
+        },
+        {
+          "type": "kill",
+          "place": "movarths_lair",
+          "placement": "structure",
+          "text": "Destroy the vampire Vessa",
+          "spawn": [
+            {
+              "type": "skycraft:vampire",
+              "name": "Vessa Nightcoil",
+              "target": true,
+              "boss": true,
+              "hp": 1.6,
+              "dmg": 1.2
+            },
+            {
+              "type": "skycraft:vampire",
+              "count": 2,
+              "name": "Lair Thrall"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "movarths_lair",
+          "placement": "structure",
+          "relic": "plr_movarths_lair_ring",
+          "text": "Take back Geirlund's wedding ring",
+          "journal": "Geirlund was beyond saving. Vessa wore his ring on a string about her neck. His last pages asked for fire, and I gave the lair fire."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_brynja",
+          "relic": "plr_movarths_lair_ring",
+          "text": "Bring the ring to Brynja in Morthal",
+          "topic": "Geirlund's ring. He was thinking of you, at the end.",
+          "reply": "I knew it. I knew it wasn't a bear. ...Thank you. I'll wear it on my own hand now, next to mine. Morthal can say what it likes about hoping."
+        }
+      ],
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "skycraft:steel_dagger"
+        ]
+      },
+      "outro": "Brynja keeps hunting the marsh, two rings on one hand and a silver knife at her belt. The townsfolk stop telling her what to hope.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_kjenstag_ruins",
+      "title": "The Lantern-Bearer's Horn",
+      "region": "skyrim/hjaalmarch",
+      "start": "manual",
+      "desc": "The runes at Kjenstag Ruins say the lantern-bearer's ghost walks because grave robbers stole his bronze horn. A Morthal guard saw the horn lying in the robbers' old camp nearby.",
+      "pitch": "That light at Kjenstag? It's a dead man looking for his horn, the old stones say. Robbers took it. Guardsman Aslak says it's lying in the reeds right there. Somebody should just give the poor thing back.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "kjenstag_ruins",
+          "offset": [
+            14,
+            8
+          ],
+          "relic": "plr_kjenstag_ruins_horn",
+          "text": "Find the bronze horn in the grave robbers' old camp",
+          "spawn": [
+            {
+              "type": "skycraft:will_o_wisp",
+              "count": 2
+            }
+          ],
+          "journal": "The horn hums in my hand like a held breath. The marsh-lights did not want me to have it."
+        },
+        {
+          "type": "go",
+          "place": "kjenstag_ruins",
+          "radius": 6,
+          "text": "Return the horn to the lantern-bearer at the stone circle",
+          "actions": "take:plr_kjenstag_ruins_horn",
+          "journal": "I set the horn on the fallen lintel. The lantern came across the circle, stopped, and went out. Far off, very faintly, something blew a single long note."
+        }
+      ],
+      "rewards": {
+        "gold": 130,
+        "items": [
+          "skycraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "No light walks Kjenstag now. The Morthal folk say the marsh is darker for it, and safer, and a little lonelier.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_mzinchaleft",
+      "title": "Ice-Vein's Brother",
+      "region": "skyrim/hjaalmarch",
+      "start": "npc:pln_skyrim_west_coast_sigrun",
+      "offer": "Is something wrong at the mine?",
+      "pitch": "I sent five men into Mzinchaleft after Dwemer metal. My brother Knud led them. One came back, and he only talks to his bed board. He says Knud gave him a token for me and he dropped it running, past the first great door. I want it. I want to know. And I'm too much of a coward to go myself.",
+      "requires": [
+        "level:10"
+      ],
+      "desc": "Sigrun Ice-Vein, foreman of the Rockwallow Mine at Stonehills, wants to know what became of her brother Knud and his crew in the Dwemer ruin of Mzinchaleft.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "mzinchaleft",
+          "text": "Enter Mzinchaleft"
+        },
+        {
+          "type": "retrieve",
+          "place": "mzinchaleft",
+          "placement": "structure",
+          "relic": "plr_mzinchaleft_token",
+          "text": "Find Knud's miner's token past the first great door",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "count": 3
+            },
+            {
+              "type": "skycraft:dwarven_spider",
+              "count": 2
+            }
+          ],
+          "journal": "The token lay by the brass pillar with the broken arm. Knud's journal lay a little further on, in the lift-house. He did not reach the door."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_sigrun",
+          "relic": "plr_mzinchaleft_token",
+          "text": "Bring the token to Sigrun at Stonehills",
+          "topic": "Knud's token. And his last words: brick up the east tunnel.",
+          "reply": "Even at the end he was giving orders. ...We'll brick it tonight. All of us. And I'll put this on the shift board, where his name always was."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:dwarven_helmet"
+        ]
+      },
+      "outro": "The east tunnel of the Rockwallow Mine is bricked and blessed. Sigrun Ice-Vein never goes below the third level again.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_fort_snowhawk",
+      "title": "The Missing Patrol",
+      "region": "skyrim/hjaalmarch",
+      "start": "npc:pln_skyrim_west_coast_thorvar",
+      "offer": "Has something happened to your patrol?",
+      "pitch": "Three of the Jarl's guards went to look at the smoke over Fort Snowhawk. Sten, Ofrid and Hallgerd. Hallgerd's mother asks me every morning. I sent them, so it's mine to answer. Find them. If the worst has happened, find who did it.",
+      "requires": [
+        "level:8"
+      ],
+      "desc": "Thorvar Mist-Eye, steward of Highmoon Hall, sent three guards to investigate Fort Snowhawk. None returned.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "fort_snowhawk",
+          "placement": "structure",
+          "text": "Put down the marsh dead in Fort Snowhawk",
+          "spawn": [
+            {
+              "type": "minecraft:zombie",
+              "count": 3,
+              "name": "Marsh Thrall"
+            },
+            {
+              "type": "skycraft:necromancer",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fort_snowhawk",
+          "placement": "structure",
+          "text": "Kill Vigdis the Pale",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "name": "Vigdis the Pale",
+              "target": true,
+              "boss": true,
+              "hp": 1.5,
+              "dmg": 1.2
+            }
+          ],
+          "actions": "relic:plr_fort_snowhawk_journal",
+          "journal": "Vigdis is dead. Her journal names all three guards. Hallgerd's charcoal note was hidden in the cage."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_thorvar",
+          "relic": "plr_fort_snowhawk_journal",
+          "text": "Bring Vigdis's journal to Thorvar in Morthal",
+          "topic": "Your patrol is dead. Here's the one who did it, in her own words.",
+          "reply": "...Hallgerd wrote that it wasn't my fault. That's like her. I'll read it to her mother myself. And then I'll burn this book, and then I'll have a drink, and then I'll be steward again."
+        }
+      ],
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:steel_sword"
+        ]
+      },
+      "outro": "Three pyres burn outside Morthal's walls. Jarl Idgrod stands at the window of Highmoon Hall the whole night, watching them.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_labyrinthian",
+      "title": "The Pattern in the Floor",
+      "region": "skyrim/hjaalmarch",
+      "start": "manual",
+      "requires": [
+        "level:14"
+      ],
+      "desc": "A College student named Teneras mapped the lines in Labyrinthian's floors that the dead will not cross, and hid his notebook under a loose slab in the hall of the broken masks.",
+      "pitch": "Another College student lost in Labyrinthian, they say. This one left notes about lines in the floor that the dead won't cross. If those notes are real, they're worth more than gold to the next poor fool who goes in.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "labyrinthian",
+          "text": "Enter the ruins of Labyrinthian"
+        },
+        {
+          "type": "retrieve",
+          "place": "labyrinthian",
+          "placement": "structure",
+          "relic": "plr_labyrinthian_notebook",
+          "text": "Find Teneras's notebook in the hall of the broken masks",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ],
+          "journal": "The notebook was under the slab, exactly as he said. The last pattern is unfinished: a word in the old tongue, half-drawn."
+        }
+      ],
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "skycraft:spell_tome_lesser_ward"
+        ]
+      },
+      "outro": "Teneras's lines hold true. The College will want the notebook, and his tutor will have to admit he was wrong.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_chillwind_depths",
+      "title": "Down the Fox-Hole",
+      "region": "skyrim/hjaalmarch",
+      "start": "manual",
+      "requires": [
+        "level:12"
+      ],
+      "desc": "The trapper Orla's partner Brannoc chased a fox into Chillwind Depths and was taken by the Falmer. Their masked leader wears his brass compass as a trophy.",
+      "pitch": "Orla the trapper's been sitting outside Chillwind Depths for days. Her man went down after a fox and the blind elves got him. She just wants his compass back. Something to bury.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "chillwind_depths",
+          "text": "Descend into Chillwind Depths"
+        },
+        {
+          "type": "kill",
+          "place": "chillwind_depths",
+          "placement": "structure",
+          "text": "Kill the masked Falmer who took Brannoc",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "name": "Chitin-Mask",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:falmer",
+              "count": 2
+            },
+            {
+              "type": "skycraft:chaurus",
+              "count": 1
+            }
+          ],
+          "actions": "relic:plr_chillwind_depths_compass",
+          "journal": "The compass hung from Chitin-Mask's neck. Its needle still points north, toward the surface, toward Orla."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:chitin_dagger"
+        ]
+      },
+      "outro": "Orla buries the compass by the cave mouth, facing north, and moves her traplines to the far side of the Reach.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_brood_cavern",
+      "title": "The White Mother",
+      "region": "skyrim/hjaalmarch",
+      "start": "manual",
+      "desc": "The Dunmer alchemist Idrin Sarethi lost his satchel of recipes in Brood Cavern, in the web of a frost-white spider the size of a cart. He offers what he has for its return.",
+      "pitch": "Idrin, the Dunmer who sells salves in Morthal, came back from Brood Cavern white as milk. Left two years of recipes in there with the biggest spider he's ever seen. He'll pay. Not much. But he'll pay.",
+      "objectives": [
+        {
+          "type": "kill",
+          "place": "brood_cavern",
+          "placement": "structure",
+          "text": "Kill the White Mother of Brood Cavern",
+          "spawn": [
+            {
+              "type": "skycraft:frostbite_spider",
+              "name": "The White Mother",
+              "target": true,
+              "boss": true,
+              "hp": 2.0
+            },
+            {
+              "type": "skycraft:frostbite_spider",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "brood_cavern",
+          "placement": "structure",
+          "relic": "plr_brood_cavern_satchel",
+          "text": "Cut Idrin's satchel free of the web"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_west_coast_idrin",
+          "relic": "plr_brood_cavern_satchel",
+          "text": "Return the satchel to Idrin Sarethi in Morthal",
+          "topic": "Your satchel. The White Mother won't be needing it.",
+          "reply": "My notes! All of them! Oh, you've no idea. Here, take what's in the purse, and this: never mix frostbite venom with deathbell, whatever anyone tells you. That alone is worth more than the gold."
+        }
+      ],
+      "rewards": {
+        "gold": 120,
+        "items": [
+          "skycraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "Idrin Sarethi's shop reopens with a new sign: 'Now With Spider.'",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_orotheim",
+      "title": "The Toll at Orotheim",
+      "region": "skyrim/hjaalmarch",
+      "start": "manual",
+      "desc": "The Orotheim gang charges a toll on the Rorikstead road and works those who can't pay in a pen inside their cave. Their chief keeps the pen key on his belt.",
+      "pitch": "The Orotheim gang's got farmhands from three villages working off a toll that never gets smaller. The chief keeps the key on his belt. It's not the sort of thing a key should be kept on.",
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "orotheim",
+          "placement": "structure",
+          "text": "Break the Orotheim gang",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3,
+              "name": "Orotheim Tollman"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "orotheim",
+          "placement": "structure",
+          "text": "Kill the Orotheim chief",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Brodir Toll-Taker",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            }
+          ],
+          "actions": "relic:plr_orotheim_key",
+          "journal": "Brodir's key opens the work-pen. Lars Eriksson and four others walk out into daylight, blinking."
+        }
+      ],
+      "rewards": {
+        "gold": 170,
+        "items": [
+          "skycraft:studded_helmet"
+        ]
+      },
+      "outro": "The road to Rorikstead is free again. A few weeks later a cart of fresh bread arrives for you at the nearest inn, paid for by grateful farmers.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    },
+    {
+      "id": "pl_eldersblood_peak",
+      "title": "The Storm-Wing's Price",
+      "region": "skyrim/hjaalmarch",
+      "start": "manual",
+      "requires": [
+        "level:18"
+      ],
+      "desc": "A grey, scarred dragon has risen from the old burial mound south of Morthal and made its perch on Eldersblood Peak. It takes a cow a week from the herders of Hjaalmarch, and soon it will want more.",
+      "pitch": "The storm-wing's back on Eldersblood Peak, like in the old stories. Grima's lost eleven head and her boys are sharpening spears. Someone with more than a spear needs to go up there before they do.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "eldersblood_peak",
+          "text": "Climb Eldersblood Peak"
+        },
+        {
+          "type": "kill",
+          "place": "eldersblood_peak",
+          "text": "Slay the storm-wing",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "name": "Strunmahzin the Storm-Wing",
+              "target": true,
+              "boss": true,
+              "hp": 1.0
+            }
+          ],
+          "journal": "The storm-wing has fallen on its own perch. The marsh clans' old price is paid at last, in iron, as the stones asked."
+        }
+      ],
+      "rewards": {
+        "gold": 400,
+        "items": [
+          "skycraft:soul_gem_greater"
+        ]
+      },
+      "outro": "Grima's sons carve a new line on the summit ring. The herders of Hjaalmarch drive their cattle up to the high pastures again.",
+      "why": [
+        "hjaalmarch.L9.jarl_apart",
+        "hjaalmarch.L8.fear_of_the_dark"
+      ]
+    }
+  ]
 }

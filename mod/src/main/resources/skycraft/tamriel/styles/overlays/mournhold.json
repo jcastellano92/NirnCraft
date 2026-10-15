@@ -1,0 +1,840 @@
+{
+  "id": "mournhold",
+  "why": [
+    "deshaan.L1.fungal_plains",
+    "deshaan.L5.temple_economy"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_quartz",
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:chiseled_quartz_block",
+    "wood": "warped",
+    "roof": "warped",
+    "accent": "cyan"
+  },
+  "palette": {
+    "cityWall": "quartz",
+    "cityWall2": "minecraft:calcite",
+    "plaza": "minecraft:smooth_quartz",
+    "plaza2": "minecraft:chiseled_quartz_block",
+    "path": "minecraft:smooth_quartz"
+  },
+  "style": {
+    "houseStyle": "indoril",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:smooth_quartz",
+        "minecraft:calcite",
+        "minecraft:chiseled_quartz_block",
+        "minecraft:smooth_quartz",
+        "quartz",
+        "minecraft:smooth_quartz"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_1_0",
+          "prop_mournhold_1_1",
+          "prop_mournhold_1_2",
+          "prop_mournhold_1_3",
+          "prop_mournhold_1_4",
+          "prop_mournhold_1_5",
+          "prop_mournhold_1_6",
+          "prop_mournhold_1_7",
+          "prop_mournhold_1_8",
+          "prop_mournhold_1_9",
+          "prop_mournhold_1_10",
+          "prop_mournhold_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_2_0",
+          "prop_mournhold_2_1",
+          "prop_mournhold_2_2",
+          "prop_mournhold_2_3",
+          "prop_mournhold_2_4",
+          "prop_mournhold_2_5",
+          "prop_mournhold_2_6",
+          "prop_mournhold_2_7",
+          "prop_mournhold_2_8",
+          "prop_mournhold_2_9",
+          "prop_mournhold_2_10",
+          "prop_mournhold_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_3_0",
+          "prop_mournhold_3_1",
+          "prop_mournhold_3_2",
+          "prop_mournhold_3_3",
+          "prop_mournhold_3_4",
+          "prop_mournhold_3_5",
+          "prop_mournhold_3_6",
+          "prop_mournhold_3_7",
+          "prop_mournhold_3_8",
+          "prop_mournhold_3_9",
+          "prop_mournhold_3_10",
+          "prop_mournhold_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_4_0",
+          "prop_mournhold_4_1",
+          "prop_mournhold_4_2",
+          "prop_mournhold_4_3",
+          "prop_mournhold_4_4",
+          "prop_mournhold_4_5",
+          "prop_mournhold_4_6",
+          "prop_mournhold_4_7",
+          "prop_mournhold_4_8",
+          "prop_mournhold_4_9",
+          "prop_mournhold_4_10",
+          "prop_mournhold_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_5_0",
+          "prop_mournhold_5_1",
+          "prop_mournhold_5_2",
+          "prop_mournhold_5_3",
+          "prop_mournhold_5_4",
+          "prop_mournhold_5_5",
+          "prop_mournhold_5_6",
+          "prop_mournhold_5_7",
+          "prop_mournhold_5_8",
+          "prop_mournhold_5_9",
+          "prop_mournhold_5_10",
+          "prop_mournhold_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_6_0",
+          "prop_mournhold_6_1",
+          "prop_mournhold_6_2",
+          "prop_mournhold_6_3",
+          "prop_mournhold_6_4",
+          "prop_mournhold_6_5",
+          "prop_mournhold_6_6",
+          "prop_mournhold_6_7",
+          "prop_mournhold_6_8",
+          "prop_mournhold_6_9",
+          "prop_mournhold_6_10",
+          "prop_mournhold_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_7_0",
+          "prop_mournhold_7_1",
+          "prop_mournhold_7_2",
+          "prop_mournhold_7_3",
+          "prop_mournhold_7_4",
+          "prop_mournhold_7_5",
+          "prop_mournhold_7_6",
+          "prop_mournhold_7_7",
+          "prop_mournhold_7_8",
+          "prop_mournhold_7_9",
+          "prop_mournhold_7_10",
+          "prop_mournhold_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_8_0",
+          "prop_mournhold_8_1",
+          "prop_mournhold_8_2",
+          "prop_mournhold_8_3",
+          "prop_mournhold_8_4",
+          "prop_mournhold_8_5",
+          "prop_mournhold_8_6",
+          "prop_mournhold_8_7",
+          "prop_mournhold_8_8",
+          "prop_mournhold_8_9",
+          "prop_mournhold_8_10",
+          "prop_mournhold_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_9_0",
+          "prop_mournhold_9_1",
+          "prop_mournhold_9_2",
+          "prop_mournhold_9_3",
+          "prop_mournhold_9_4",
+          "prop_mournhold_9_5",
+          "prop_mournhold_9_6",
+          "prop_mournhold_9_7",
+          "prop_mournhold_9_8",
+          "prop_mournhold_9_9",
+          "prop_mournhold_9_10",
+          "prop_mournhold_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_10_0",
+          "prop_mournhold_10_1",
+          "prop_mournhold_10_2",
+          "prop_mournhold_10_3",
+          "prop_mournhold_10_4",
+          "prop_mournhold_10_5",
+          "prop_mournhold_10_6",
+          "prop_mournhold_10_7",
+          "prop_mournhold_10_8",
+          "prop_mournhold_10_9",
+          "prop_mournhold_10_10",
+          "prop_mournhold_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_11_0",
+          "prop_mournhold_11_1",
+          "prop_mournhold_11_2",
+          "prop_mournhold_11_3",
+          "prop_mournhold_11_4",
+          "prop_mournhold_11_5",
+          "prop_mournhold_11_6",
+          "prop_mournhold_11_7",
+          "prop_mournhold_11_8",
+          "prop_mournhold_11_9",
+          "prop_mournhold_11_10",
+          "prop_mournhold_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_12_0",
+          "prop_mournhold_12_1",
+          "prop_mournhold_12_2",
+          "prop_mournhold_12_3",
+          "prop_mournhold_12_4",
+          "prop_mournhold_12_5",
+          "prop_mournhold_12_6",
+          "prop_mournhold_12_7",
+          "prop_mournhold_12_8",
+          "prop_mournhold_12_9",
+          "prop_mournhold_12_10",
+          "prop_mournhold_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_13_0",
+          "prop_mournhold_13_1",
+          "prop_mournhold_13_2",
+          "prop_mournhold_13_3",
+          "prop_mournhold_13_4",
+          "prop_mournhold_13_5",
+          "prop_mournhold_13_6",
+          "prop_mournhold_13_7",
+          "prop_mournhold_13_8",
+          "prop_mournhold_13_9",
+          "prop_mournhold_13_10",
+          "prop_mournhold_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_14_0",
+          "prop_mournhold_14_1",
+          "prop_mournhold_14_2",
+          "prop_mournhold_14_3",
+          "prop_mournhold_14_4",
+          "prop_mournhold_14_5",
+          "prop_mournhold_14_6",
+          "prop_mournhold_14_7",
+          "prop_mournhold_14_8",
+          "prop_mournhold_14_9",
+          "prop_mournhold_14_10",
+          "prop_mournhold_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_15_0",
+          "prop_mournhold_15_1",
+          "prop_mournhold_15_2",
+          "prop_mournhold_15_3",
+          "prop_mournhold_15_4",
+          "prop_mournhold_15_5",
+          "prop_mournhold_15_6",
+          "prop_mournhold_15_7",
+          "prop_mournhold_15_8",
+          "prop_mournhold_15_9",
+          "prop_mournhold_15_10",
+          "prop_mournhold_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_16_0",
+          "prop_mournhold_16_1",
+          "prop_mournhold_16_2",
+          "prop_mournhold_16_3",
+          "prop_mournhold_16_4",
+          "prop_mournhold_16_5",
+          "prop_mournhold_16_6",
+          "prop_mournhold_16_7",
+          "prop_mournhold_16_8",
+          "prop_mournhold_16_9",
+          "prop_mournhold_16_10",
+          "prop_mournhold_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_17_0",
+          "prop_mournhold_17_1",
+          "prop_mournhold_17_2",
+          "prop_mournhold_17_3",
+          "prop_mournhold_17_4",
+          "prop_mournhold_17_5",
+          "prop_mournhold_17_6",
+          "prop_mournhold_17_7",
+          "prop_mournhold_17_8",
+          "prop_mournhold_17_9",
+          "prop_mournhold_17_10",
+          "prop_mournhold_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_18_0",
+          "prop_mournhold_18_1",
+          "prop_mournhold_18_2",
+          "prop_mournhold_18_3",
+          "prop_mournhold_18_4",
+          "prop_mournhold_18_5",
+          "prop_mournhold_18_6",
+          "prop_mournhold_18_7",
+          "prop_mournhold_18_8",
+          "prop_mournhold_18_9",
+          "prop_mournhold_18_10",
+          "prop_mournhold_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_19_0",
+          "prop_mournhold_19_1",
+          "prop_mournhold_19_2",
+          "prop_mournhold_19_3",
+          "prop_mournhold_19_4",
+          "prop_mournhold_19_5",
+          "prop_mournhold_19_6",
+          "prop_mournhold_19_7",
+          "prop_mournhold_19_8",
+          "prop_mournhold_19_9",
+          "prop_mournhold_19_10",
+          "prop_mournhold_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_20_0",
+          "prop_mournhold_20_1",
+          "prop_mournhold_20_2",
+          "prop_mournhold_20_3",
+          "prop_mournhold_20_4",
+          "prop_mournhold_20_5",
+          "prop_mournhold_20_6",
+          "prop_mournhold_20_7",
+          "prop_mournhold_20_8",
+          "prop_mournhold_20_9",
+          "prop_mournhold_20_10",
+          "prop_mournhold_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:chiseled_quartz_block",
+        "carpentry": "warped",
+        "roofing": "warped",
+        "banner_dye": "cyan",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:chiseled_quartz_block",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:chiseled_quartz_block",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:smooth_quartz"
+        ],
+        "props": [
+          "prop_mournhold_21_0",
+          "prop_mournhold_21_1",
+          "prop_mournhold_21_2",
+          "prop_mournhold_21_3",
+          "prop_mournhold_21_4",
+          "prop_mournhold_21_5",
+          "prop_mournhold_21_6",
+          "prop_mournhold_21_7",
+          "prop_mournhold_21_8",
+          "prop_mournhold_21_9",
+          "prop_mournhold_21_10",
+          "prop_mournhold_21_11"
+        ]
+      }
+    }
+  }
+}

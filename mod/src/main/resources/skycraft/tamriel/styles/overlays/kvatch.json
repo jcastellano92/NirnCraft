@@ -1,0 +1,29 @@
+{
+  "id": "kvatch",
+  "why": [
+    "gold_coast.L1.kvatch_hill",
+    "gold_coast.L6.kvatch_on_the_hill",
+    "gold_coast.L11.kvatch_burned"
+  ],
+  "tint": {
+    "wall": "minecraft:cracked_stone_bricks",
+    "wall2": "minecraft:blackstone",
+    "low": "minecraft:deepslate_bricks",
+    "wood": "dark_oak",
+    "roof": "deepslate_tile",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:blackstone",
+    "plaza": "minecraft:cracked_stone_bricks",
+    "plaza2": "minecraft:basalt",
+    "path": "minecraft:coarse_dirt"
+  },
+  "style": {
+    "forms": {
+      "keep": 8,
+      "courtyard": 4
+    }
+  }
+}

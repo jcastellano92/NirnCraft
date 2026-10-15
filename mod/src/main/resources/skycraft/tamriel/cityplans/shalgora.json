@@ -1,0 +1,356 @@
+{
+  "id": "shalgora",
+  "sil": "karst-hollow-walled-fief",
+  "base": "none",
+  "overlay": "anticlere",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "shalgora_cuckoo_and_crown",
+  "names": {
+    "inn": "shalgora_cuckoo_and_crown",
+    "store": "shalgora_bailiwick_store",
+    "smithy": "shalgora_horseshoe_forge"
+  },
+  "titles": {
+    "shalgora_landmark": "Shalgora Hollow Priory",
+    "shalgora_fief_keep": "Shalgora Karst-Hollow Keep",
+    "shalgora_cuckoo_and_crown": "The Cuckoo and Crown Inn",
+    "shalgora_bailiwick_store": "Bailiwick Wool & Tallow Store",
+    "shalgora_horseshoe_forge": "Karst-Iron Forge & Farrier",
+    "shalgora_cave_moss_still": "Cave-Moss & Lavender Still",
+    "shalgora_julianos_priory": "Scriptorium-Chapel of Julianos",
+    "shalgora_vidame_manor": "Vidame's Limestone Manor",
+    "shalgora_tapestry_looms": "Shalgora Heraldic Tapestry Looms",
+    "shalgora_pass_watch": "Hollow-Gate Watchhouse",
+    "shalgora_post_mews": "Post-Chaise Stables",
+    "shalgora_market_plaza": "Shalgora Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "shalgora_landmark",
+      "overlay": "anticlere"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "shalgora_fief_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "shalgora_cuckoo_and_crown"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "shalgora_bailiwick_store"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "shalgora_horseshoe_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "shalgora_cave_moss_still"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "shalgora_julianos_priory"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "shalgora_vidame_manor"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "shalgora_tapestry_looms"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "shalgora_pass_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "shalgora_post_mews"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "shalgora_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "anticlere"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "anticlere"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

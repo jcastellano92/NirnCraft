@@ -1,5 +1,10 @@
 {
   "id": "bravil",
+  "why": [
+    "nibenay_valley.L1.river_flats",
+    "nibenay_valley.L3.bravil_mud",
+    "nibenay_valley.L6.bravil_ferry_city"
+  ],
   "tint": {
     "wall": "minecraft:spruce_planks",
     "wall2": "minecraft:mossy_cobblestone",

@@ -3,37 +3,129 @@
   "category": "faction",
   "faction": "east_empire_company",
   "region": "morrowind/stonefalls",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "raven_rock_mine": {"x": 4380, "z": -2960, "r": 26, "name": "Raven Rock Ebony Mine"},
-    "riekling_warren": {"x": 4500, "z": -3010, "r": 30, "name": "Riekling Warren"},
-    "ashfall_smugglers_cave": {"x": 4440, "z": -2830, "r": 28, "name": "Ashfall Smugglers' Cave"}
+    "raven_rock_mine": {
+      "x": 4380,
+      "z": -2960,
+      "r": 26,
+      "name": "Raven Rock Ebony Mine"
+    },
+    "riekling_warren": {
+      "x": 4500,
+      "z": -3010,
+      "r": 30,
+      "name": "Riekling Warren"
+    },
+    "ashfall_smugglers_cave": {
+      "x": 4440,
+      "z": -2830,
+      "r": 28,
+      "name": "Ashfall Smugglers' Cave"
+    }
   },
   "npcs": [
-    {"id": "canctunian_ponius", "name": "Canctunian Ponius", "role": "steward", "place": "ebonheart", "offset": [5, -4], "hall": "east_empire_company",
-     "greet": "The East Empire Company moves the wealth of an Empire, and I move the Company. Keep your hands clean and your ledgers cleaner."},
-    {"id": "carnius_magius", "name": "Carnius Magius", "role": "merchant", "place": "raven_rock", "offset": [-6, 8],
-     "greet": "Factor of Raven Rock. This colony runs on ebony, and the ebony runs through me. Remember that, and we'll get along famously."},
-    {"id": "falco_galenus", "name": "Falco Galenus", "role": "steward", "place": "raven_rock", "offset": [8, -6],
-     "greet": "Somebody has to keep the colony's books honest. Apparently that somebody is me, whether I like it or not."},
-    {"id": "lucretia_valga", "name": "Lucretia Valga", "role": "scholar", "place": "anvil", "offset": [12, -6], "female": true,
-     "greet": "Imperial Commissioner of Charters. Every company in the Empire trades by the Emperor's leave, and I decide how long that leave lasts."}
+    {
+      "id": "canctunian_ponius",
+      "name": "Canctunian Ponius",
+      "role": "steward",
+      "place": "ebonheart",
+      "offset": [
+        5,
+        -4
+      ],
+      "hall": "east_empire_company",
+      "greet": "The East Empire Company moves the wealth of an Empire, and I move the Company. Keep your hands clean and your ledgers cleaner."
+    },
+    {
+      "id": "carnius_magius",
+      "name": "Carnius Magius",
+      "role": "merchant",
+      "place": "raven_rock",
+      "offset": [
+        -6,
+        8
+      ],
+      "greet": "Factor of Raven Rock. This colony runs on ebony, and the ebony runs through me. Remember that, and we'll get along famously."
+    },
+    {
+      "id": "falco_galenus",
+      "name": "Falco Galenus",
+      "role": "steward",
+      "place": "raven_rock",
+      "offset": [
+        8,
+        -6
+      ],
+      "greet": "Somebody has to keep the colony's books honest. Apparently that somebody is me, whether I like it or not."
+    },
+    {
+      "id": "lucretia_valga",
+      "name": "Lucretia Valga",
+      "role": "scholar",
+      "place": "anvil",
+      "offset": [
+        12,
+        -6
+      ],
+      "female": true,
+      "greet": "Imperial Commissioner of Charters. Every company in the Empire trades by the Emperor's leave, and I decide how long that leave lasts."
+    }
   ],
   "relics": [
-    {"id": "ebony_sample", "name": "Raven Rock Ebony Sample", "desc": "A dense, gleaming chunk from the first seam of the Raven Rock mine.", "icon": 26},
-    {"id": "stamped_ebony", "name": "Company-Stamped Ebony", "desc": "Ebony bearing the East Empire Company's stamp, found in a smugglers' cave. It should never have left the warehouse.", "icon": 26},
-    {"id": "magius_letters", "name": "Carnius Magius's Letters", "desc": "Letters arranging the sale of Company ebony to smugglers, signed in the factor's own hand.", "icon": 11},
-    {"id": "lost_strongbox", "name": "Company Strongbox", "desc": "A waterlogged strongbox from the lost ship, holding the colony's quarterly accounts and its pay chest.", "icon": 11},
-    {"id": "colony_report", "name": "Raven Rock Colony Report", "desc": "Falco Galenus's report on the colony: the mine, the rieklings, the smugglers, the factor, and the recovered cargo.", "icon": 7}
+    {
+      "id": "ebony_sample",
+      "name": "Raven Rock Ebony Sample",
+      "desc": "A dense, gleaming chunk from the first seam of the Raven Rock mine.",
+      "icon": 26
+    },
+    {
+      "id": "stamped_ebony",
+      "name": "Company-Stamped Ebony",
+      "desc": "Ebony bearing the East Empire Company's stamp, found in a smugglers' cave. It should never have left the warehouse.",
+      "icon": 26
+    },
+    {
+      "id": "magius_letters",
+      "name": "Carnius Magius's Letters",
+      "desc": "Letters arranging the sale of Company ebony to smugglers, signed in the factor's own hand.",
+      "icon": 11
+    },
+    {
+      "id": "lost_strongbox",
+      "name": "Company Strongbox",
+      "desc": "A waterlogged strongbox from the lost ship, holding the colony's quarterly accounts and its pay chest.",
+      "icon": 11
+    },
+    {
+      "id": "colony_report",
+      "name": "Raven Rock Colony Report",
+      "desc": "Falco Galenus's report on the colony: the mine, the rieklings, the smugglers, the factor, and the recovered cargo.",
+      "icon": 7
+    }
   ],
   "scenes": {
     "eec_magius_exposed": [
-      ["falco_galenus", "These are his letters. Company ebony sold to smugglers for half its worth, and the difference in his own pocket. For years."],
-      ["carnius_magius", "You think Ebonheart cares? This colony survives because I make it profitable. Guards! Our guest is leaving. Permanently."]
+      [
+        "falco_galenus",
+        "These are his letters. Company ebony sold to smugglers for half its worth, and the difference in his own pocket. For years."
+      ],
+      [
+        "carnius_magius",
+        "You think Ebonheart cares? This colony survives because I make it profitable. Guards! Our guest is leaving. Permanently."
+      ]
     ],
     "eec_charter": [
-      ["lucretia_valga", "A colony that pays, a factor who stole and was caught, a lost ship's accounts recovered from the Sea of Ghosts. That is more than most companies bring me."],
-      ["lucretia_valga", "The Company's charter is renewed for twenty years, with the Emperor's seal. Tell Ponius he owes you a great deal. I suspect he knows."]
+      [
+        "lucretia_valga",
+        "A colony that pays, a factor who stole and was caught, a lost ship's accounts recovered from the Sea of Ghosts. That is more than most companies bring me."
+      ],
+      [
+        "lucretia_valga",
+        "The Company's charter is renewed for twenty years, with the Emperor's seal. Tell Ponius he owes you a great deal. I suspect he knows."
+      ]
     ]
   },
   "quests": [
@@ -41,137 +133,476 @@
       "id": "eec_porters_papers",
       "title": "Porter's Papers",
       "start": "npc:canctunian_ponius",
-      "requires": ["!faction:east_empire_company", "!faction:camonna_tong"],
+      "requires": [
+        "!faction:east_empire_company",
+        "!faction:camonna_tong"
+      ],
       "offer": "I hear the Company is hiring.",
       "pitch": "We always are. Our warehouse on the Ebonheart docks has been losing goods to mudcrabs, and I'm told the slaughterfish in the harbour are getting bold. Clear the docks, and you'll be on the payroll as a Porter.",
       "desc": "Canctunian Ponius of the East Empire Company in Ebonheart will hire me as a Porter if I clear the docks of the creatures plaguing the Company's warehouse.",
       "objectives": [
-        {"type": "clear", "place": "ebonheart", "offset": [40, 30], "text": "Clear the creatures from the Company docks",
-         "spawn": [{"type": "skycraft:mudcrab", "count": 3}, {"type": "skycraft:slaughterfish", "count": 2}]},
-        {"type": "talk", "npc": "canctunian_ponius", "text": "Report to Canctunian Ponius",
-         "topic": "The docks are clear.",
-         "reply": "Good. Welcome to the East Empire Company, Porter. Here are your papers. Lose them and you're nobody; keep them and you're the Empire's own."}
+        {
+          "type": "clear",
+          "place": "ebonheart",
+          "offset": [
+            40,
+            30
+          ],
+          "text": "Clear the creatures from the Company docks",
+          "spawn": [
+            {
+              "type": "skycraft:mudcrab",
+              "count": 3
+            },
+            {
+              "type": "skycraft:slaughterfish",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "canctunian_ponius",
+          "text": "Report to Canctunian Ponius",
+          "topic": "The docks are clear.",
+          "reply": "Good. Welcome to the East Empire Company, Porter. Here are your papers. Lose them and you're nobody; keep them and you're the Empire's own.",
+          "place": "ebonheart"
+        }
       ],
       "outro": "I joined the East Empire Company in Ebonheart as a Porter.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:imperial_sword", "skycraft:imperial_light_chestplate"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:imperial_sword",
+          "skycraft:imperial_light_chestplate"
+        ]
+      },
+      "region": "morrowind/stonefalls",
+      "why": [
+        "morrowind/stonefalls.L7.imperial_district_vs_dunmer_quarter",
+        "morrowind/stonefalls.L8.imperial_chapels"
+      ],
+      "consequence": {
+        "world_state": "eec_porters_papers_resolved",
+        "flag": "conseq_eec_porters_papers",
+        "summary": "I joined the East Empire Company in Ebonheart as a Porter."
+      }
     },
     {
       "id": "eec_raven_rock_colony",
       "title": "The Raven Rock Colony",
       "start": "npc:canctunian_ponius",
-      "requires": ["quest:eec_porters_papers|faction:east_empire_company"],
+      "requires": [
+        "quest:eec_porters_papers|faction:east_empire_company"
+      ],
       "offer": "Do you have work beyond the docks?",
       "pitch": "The Company has founded a colony on Solstheim, at Raven Rock, around an ebony seam. The factor there, Carnius Magius, reports problems with the mine. Go and help him open it, and keep your eyes open. His reports are very short.",
       "desc": "Canctunian Ponius sent me to Raven Rock, the Company's ebony colony on Solstheim, to help Factor Carnius Magius open the mine.",
       "objectives": [
-        {"type": "go", "place": "raven_rock", "text": "Travel to Raven Rock on Solstheim"},
-        {"type": "talk", "npc": "carnius_magius", "text": "Report to Factor Carnius Magius",
-         "topic": "Ponius sent me to help open the mine.",
-         "reply": "Help? Excellent. Things nest in the mine at night: rieklings, and worse. Clear them, bring me a sample of the first seam, and I'll write Ponius a glowing report."},
-        {"type": "clear", "place": "raven_rock_mine", "placement": "structure", "text": "Clear the creatures out of the Raven Rock mine",
-         "spawn": [{"type": "skycraft:riekling", "count": 3}, {"type": "skycraft:frostbite_spider", "count": 1}]},
-        {"type": "retrieve", "place": "raven_rock_mine", "relic": "ebony_sample", "radius": 10, "text": "Take a sample from the first ebony seam"},
-        {"type": "deliver", "npc": "falco_galenus", "relic": "ebony_sample", "text": "Give the ebony sample to Falco Galenus to log",
-         "topic": "Magius asked for this sample.",
-         "reply": "And he'll have it, after I've weighed it and logged it. Someone around here should. You'd be surprised how often Company ebony goes missing between the mine and the ship."}
+        {
+          "type": "go",
+          "place": "raven_rock",
+          "text": "Travel to Raven Rock on Solstheim"
+        },
+        {
+          "type": "talk",
+          "npc": "carnius_magius",
+          "text": "Report to Factor Carnius Magius",
+          "topic": "Ponius sent me to help open the mine.",
+          "reply": "Help? Excellent. Things nest in the mine at night: rieklings, and worse. Clear them, bring me a sample of the first seam, and I'll write Ponius a glowing report.",
+          "place": "raven_rock"
+        },
+        {
+          "type": "clear",
+          "place": "raven_rock",
+          "placement": "structure",
+          "text": "Clear the creatures out of the Raven Rock mine",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "count": 3
+            },
+            {
+              "type": "skycraft:frostbite_spider",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "raven_rock",
+          "relic": "ebony_sample",
+          "radius": 10,
+          "text": "Take a sample from the first ebony seam"
+        },
+        {
+          "type": "deliver",
+          "npc": "falco_galenus",
+          "relic": "ebony_sample",
+          "text": "Give the ebony sample to Falco Galenus to log",
+          "topic": "Magius asked for this sample.",
+          "reply": "And he'll have it, after I've weighed it and logged it. Someone around here should. You'd be surprised how often Company ebony goes missing between the mine and the ship.",
+          "place": "raven_rock"
+        }
       ],
       "outro": "I helped open the Raven Rock ebony mine. Falco Galenus, the colony's clerk, hinted that Company ebony keeps going missing.",
-      "rewards": {"gold": 300, "faction_points": 2}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 2
+      },
+      "region": "morrowind/stonefalls",
+      "why": [
+        "morrowind/stonefalls.L7.nord_settlers",
+        "morrowind/stonefalls.L9.grand_council"
+      ],
+      "consequence": {
+        "world_state": "eec_raven_rock_colony_resolved",
+        "flag": "conseq_eec_raven_rock_colony",
+        "summary": "I helped open the Raven Rock ebony mine. Falco Galenus, the colony's clerk, hinted that Company ebony keeps going missing."
+      }
     },
     {
       "id": "eec_rieklings_and_smugglers",
       "title": "Rieklings and Smugglers",
       "start": "npc:falco_galenus",
-      "requires": ["quest:eec_raven_rock_colony"],
+      "requires": [
+        "quest:eec_raven_rock_colony"
+      ],
       "offer": "What's going wrong in Raven Rock?",
       "pitch": "Two things. Rieklings from a warren to the east have been raiding the mine carts. And there's a smugglers' cave north of town where, I'm told, Company ebony turns up for sale. Deal with the first. Then look into the second, quietly.",
       "desc": "Falco Galenus asked me to put an end to riekling raids on the mine carts and to look into smugglers selling Company ebony north of Raven Rock.",
       "objectives": [
-        {"type": "go", "place": "riekling_warren", "text": "Find the riekling warren"},
-        {"type": "clear", "place": "riekling_warren", "text": "Clear out the rieklings",
-         "spawn": [{"type": "skycraft:riekling", "count": 4}]},
-        {"type": "kill", "place": "riekling_warren", "text": "Kill the riekling chief",
-         "spawn": [{"type": "skycraft:riekling", "name": "Riekling Chief", "target": true, "boss": true, "hp": 2.5, "dmg": 1.3}]},
-        {"type": "clear", "place": "ashfall_smugglers_cave", "placement": "structure", "text": "Raid the smugglers' cave",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Ebony Smuggler", "hostile": true}]},
-        {"type": "retrieve", "place": "ashfall_smugglers_cave", "relic": "stamped_ebony", "radius": 10, "text": "Search the cave for Company goods"},
-        {"type": "retrieve", "place": "ashfall_smugglers_cave", "offset": [5, -5], "relic": "magius_letters", "radius": 10, "text": "Search the smugglers' chest for papers",
-         "journal": "The letters arranging each sale were signed by Carnius Magius. The factor himself was selling the colony's ebony."},
-        {"type": "deliver", "npc": "falco_galenus", "relic": "stamped_ebony", "text": "Bring the stamped ebony to Falco Galenus",
-         "topic": "The rieklings are dealt with. And the smugglers had Company ebony.",
-         "reply": "I knew it. And you found letters too? Keep them. We'll need them when we face him."}
+        {
+          "type": "go",
+          "place": "thirsk_mead_hall",
+          "text": "Find the riekling warren"
+        },
+        {
+          "type": "clear",
+          "place": "thirsk_mead_hall",
+          "text": "Clear out the rieklings",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "thirsk_mead_hall",
+          "text": "Kill the riekling chief",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "name": "Riekling Chief",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.3
+            }
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "raven_rock",
+          "placement": "structure",
+          "text": "Raid the smugglers' cave",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Ebony Smuggler",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "raven_rock",
+          "relic": "stamped_ebony",
+          "radius": 10,
+          "text": "Search the cave for Company goods"
+        },
+        {
+          "type": "retrieve",
+          "place": "raven_rock",
+          "offset": [
+            5,
+            -5
+          ],
+          "relic": "magius_letters",
+          "radius": 10,
+          "text": "Search the smugglers' chest for papers",
+          "journal": "The letters arranging each sale were signed by Carnius Magius. The factor himself was selling the colony's ebony."
+        },
+        {
+          "type": "deliver",
+          "npc": "falco_galenus",
+          "relic": "stamped_ebony",
+          "text": "Bring the stamped ebony to Falco Galenus",
+          "topic": "The rieklings are dealt with. And the smugglers had Company ebony.",
+          "reply": "I knew it. And you found letters too? Keep them. We'll need them when we face him.",
+          "place": "raven_rock"
+        }
       ],
       "outro": "I cleared the riekling warren and raided the smugglers' cave. The letters there prove that Factor Carnius Magius has been selling the colony's ebony.",
-      "rewards": {"gold": 400, "faction_points": 3}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3
+      },
+      "region": "morrowind/stonefalls",
+      "why": [
+        "morrowind/stonefalls.L8.imperial_chapels",
+        "morrowind/stonefalls.L9.border_watch"
+      ],
+      "consequence": {
+        "world_state": "eec_rieklings_and_smugglers_resolved",
+        "flag": "conseq_eec_rieklings_and_smugglers",
+        "summary": "I cleared the riekling warren and raided the smugglers' cave. The letters there prove that Factor Carnius Magius has been selling the colony's ebony."
+      }
     },
     {
       "id": "eec_the_factors_ledger",
       "title": "The Factor's Ledger",
       "start": "auto",
-      "requires": ["quest:eec_rieklings_and_smugglers"],
+      "requires": [
+        "quest:eec_rieklings_and_smugglers"
+      ],
       "desc": "With Carnius Magius's own letters in hand, Falco Galenus and I mean to confront the factor of Raven Rock.",
       "objectives": [
-        {"type": "deliver", "npc": "falco_galenus", "relic": "magius_letters", "text": "Give the letters to Falco Galenus",
-         "topic": "Here are the letters. It's time.",
-         "reply": "Then let's go and see him together.",
-         "actions": "scene:eec_magius_exposed"},
-        {"type": "clear", "place": "raven_rock", "offset": [-6, 8], "radius": 14, "text": "Defeat the factor's bought guards",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Magius's Bodyguard", "hostile": true}]},
-        {"type": "kill", "place": "raven_rock", "offset": [-6, 8], "text": "Stop Carnius Magius",
-         "spawn": [{"type": "npc:merchant", "name": "Carnius Magius", "target": true, "boss": true, "hp": 2.0, "hostile": true, "weapon": "skycraft:steel_dagger"}],
-         "actions": "retire:carnius_magius"},
-        {"type": "talk", "npc": "falco_galenus", "text": "Speak with Falco Galenus",
-         "topic": "It's over. The colony needs a new factor.",
-         "reply": "It does. I'll write to Ponius tonight and keep things running until he answers. Which means I'll keep the books honest. At last."}
+        {
+          "type": "deliver",
+          "npc": "falco_galenus",
+          "relic": "magius_letters",
+          "text": "Give the letters to Falco Galenus",
+          "topic": "Here are the letters. It's time.",
+          "reply": "Then let's go and see him together.",
+          "actions": "scene:eec_magius_exposed",
+          "place": "raven_rock"
+        },
+        {
+          "type": "clear",
+          "place": "raven_rock",
+          "offset": [
+            -6,
+            8
+          ],
+          "radius": 14,
+          "text": "Defeat the factor's bought guards",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Magius's Bodyguard",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "raven_rock",
+          "offset": [
+            -6,
+            8
+          ],
+          "text": "Stop Carnius Magius",
+          "spawn": [
+            {
+              "type": "npc:merchant",
+              "name": "Carnius Magius",
+              "target": true,
+              "boss": true,
+              "hp": 2.0,
+              "hostile": true,
+              "weapon": "skycraft:steel_dagger"
+            }
+          ],
+          "actions": "retire:carnius_magius"
+        },
+        {
+          "type": "talk",
+          "npc": "falco_galenus",
+          "text": "Speak with Falco Galenus",
+          "topic": "It's over. The colony needs a new factor.",
+          "reply": "It does. I'll write to Ponius tonight and keep things running until he answers. Which means I'll keep the books honest. At last.",
+          "place": "raven_rock"
+        }
       ],
       "outro": "I exposed and stopped Carnius Magius, the corrupt factor of Raven Rock. Falco Galenus now runs the colony.",
-      "rewards": {"gold": 500, "faction_points": 4}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "region": "morrowind/stonefalls",
+      "why": [
+        "morrowind/stonefalls.L9.grand_council",
+        "morrowind/stonefalls.L10.inner_sea_armature"
+      ],
+      "consequence": {
+        "world_state": "eec_the_factors_ledger_resolved",
+        "flag": "conseq_eec_the_factors_ledger",
+        "summary": "I exposed and stopped Carnius Magius, the corrupt factor of Raven Rock. Falco Galenus now runs the colony."
+      }
     },
     {
       "id": "eec_sea_of_ghosts",
       "title": "Lost in the Sea of Ghosts",
       "start": "npc:falco_galenus",
-      "requires": ["quest:eec_the_factors_ledger"],
+      "requires": [
+        "quest:eec_the_factors_ledger"
+      ],
       "offer": "Anything else before I report to Ebonheart?",
       "pitch": "One thing. The colony's last supply ship ran aground on the north coast with the quarterly accounts and the miners' pay. Wreckers have been picking at it. Bring back the strongbox, or Ebonheart will think we lost it on purpose.",
       "desc": "The Raven Rock colony's supply ship ran aground on the Sea of Ghosts coast. Falco needs its strongbox, with the colony's accounts and pay chest, before wreckers find it.",
       "objectives": [
-        {"type": "go", "place": "wreck_of_the_strident_squall", "text": "Find the wreck on the north coast"},
-        {"type": "clear", "place": "wreck_of_the_strident_squall", "text": "Drive off the wreckers and the creatures around the wreck",
-         "spawn": [{"type": "npc:thug", "count": 2, "name": "Wrecker", "hostile": true}, {"type": "skycraft:mudcrab", "count": 2}, {"type": "skycraft:slaughterfish", "count": 1}]},
-        {"type": "retrieve", "place": "wreck_of_the_strident_squall", "relic": "lost_strongbox", "radius": 10, "text": "Recover the Company strongbox"},
-        {"type": "deliver", "npc": "falco_galenus", "relic": "lost_strongbox", "text": "Bring the strongbox to Falco Galenus",
-         "topic": "The strongbox. Wet, but whole.",
-         "reply": "The pay chest is all here, and the accounts can be dried. The miners will cheer you tonight. Take my report to the Commissioner in Anvil; the Company's charter is up for renewal, and Ponius wants you to carry it.",
-         "actions": "relic:colony_report"}
+        {
+          "type": "go",
+          "place": "wreck_of_the_strident_squall",
+          "text": "Find the wreck on the north coast"
+        },
+        {
+          "type": "clear",
+          "place": "wreck_of_the_strident_squall",
+          "text": "Drive off the wreckers and the creatures around the wreck",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Wrecker",
+              "hostile": true
+            },
+            {
+              "type": "skycraft:mudcrab",
+              "count": 2
+            },
+            {
+              "type": "skycraft:slaughterfish",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "wreck_of_the_strident_squall",
+          "relic": "lost_strongbox",
+          "radius": 10,
+          "text": "Recover the Company strongbox"
+        },
+        {
+          "type": "deliver",
+          "npc": "falco_galenus",
+          "relic": "lost_strongbox",
+          "text": "Bring the strongbox to Falco Galenus",
+          "topic": "The strongbox. Wet, but whole.",
+          "reply": "The pay chest is all here, and the accounts can be dried. The miners will cheer you tonight. Take my report to the Commissioner in Anvil; the Company's charter is up for renewal, and Ponius wants you to carry it.",
+          "actions": "relic:colony_report",
+          "place": "raven_rock"
+        }
       ],
       "outro": "I recovered the colony's strongbox from the wreck on the Sea of Ghosts. Falco has entrusted me with his report for the Company's charter renewal in Anvil.",
-      "rewards": {"gold": 600, "faction_points": 5}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 5
+      },
+      "region": "morrowind/stonefalls",
+      "why": [
+        "morrowind/stonefalls.L9.border_watch",
+        "morrowind/stonefalls.L10.pact_era_forts"
+      ],
+      "consequence": {
+        "world_state": "eec_sea_of_ghosts_resolved",
+        "flag": "conseq_eec_sea_of_ghosts",
+        "summary": "I recovered the colony's strongbox from the wreck on the Sea of Ghosts. Falco has entrusted me with his report for the Company's charter renewal in Anvil."
+      }
     },
     {
       "id": "eec_charter_renewed",
       "title": "The Charter Renewed",
       "start": "auto",
-      "requires": ["quest:eec_sea_of_ghosts"],
+      "requires": [
+        "quest:eec_sea_of_ghosts"
+      ],
       "desc": "The East Empire Company's Imperial charter is up for renewal in Anvil. I am carrying Falco Galenus's report on the Raven Rock colony to the Commissioner of Charters, Lucretia Valga.",
       "objectives": [
-        {"type": "go", "place": "anvil", "text": "Travel to Anvil"},
-        {"type": "deliver", "npc": "lucretia_valga", "relic": "colony_report", "text": "Present the colony report to Commissioner Lucretia Valga",
-         "topic": "The East Empire Company's report on the Raven Rock colony, Commissioner.",
-         "reply": "Let me read it. Hm. A corrupt factor removed by your own people? That is unusual honesty for a company. Tell me plainly what terms you want."},
-        {"type": "talk", "npc": "lucretia_valga", "text": "Negotiate the terms of the charter",
-         "choices": [
-           {"label": "Exclusive rights to Solstheim ebony, for twenty years.", "reply": "Bold. But the report earns it. Granted, with the usual Imperial tithe.", "actions": "flag:eec_charter_exclusive;scene:eec_charter"},
-           {"label": "Fair terms, and a seat for Raven Rock's miners in the colony's council.", "reply": "Unusual. Thoughtful. The Emperor likes colonies that don't riot. Granted.", "actions": "flag:eec_charter_fair;scene:eec_charter"}
-         ]},
-        {"type": "talk", "npc": "canctunian_ponius", "text": "Report to Canctunian Ponius in Ebonheart",
-         "topic": "The charter is renewed for twenty years.",
-         "reply": "Twenty years! The board will want to give you a statue. I'll settle for making you a Commissioner of the Company, and giving you a very large bonus."}
+        {
+          "type": "go",
+          "place": "anvil",
+          "text": "Travel to Anvil"
+        },
+        {
+          "type": "deliver",
+          "npc": "lucretia_valga",
+          "relic": "colony_report",
+          "text": "Present the colony report to Commissioner Lucretia Valga",
+          "topic": "The East Empire Company's report on the Raven Rock colony, Commissioner.",
+          "reply": "Let me read it. Hm. A corrupt factor removed by your own people? That is unusual honesty for a company. Tell me plainly what terms you want.",
+          "place": "anvil"
+        },
+        {
+          "type": "talk",
+          "npc": "lucretia_valga",
+          "text": "Negotiate the terms of the charter",
+          "choices": [
+            {
+              "label": "Exclusive rights to Solstheim ebony, for twenty years.",
+              "reply": "Bold. But the report earns it. Granted, with the usual Imperial tithe.",
+              "actions": "flag:eec_charter_exclusive;scene:eec_charter"
+            },
+            {
+              "label": "Fair terms, and a seat for Raven Rock's miners in the colony's council.",
+              "reply": "Unusual. Thoughtful. The Emperor likes colonies that don't riot. Granted.",
+              "actions": "flag:eec_charter_fair;scene:eec_charter"
+            }
+          ],
+          "place": "anvil"
+        },
+        {
+          "type": "talk",
+          "npc": "canctunian_ponius",
+          "text": "Report to Canctunian Ponius in Ebonheart",
+          "topic": "The charter is renewed for twenty years.",
+          "reply": "Twenty years! The board will want to give you a statue. I'll settle for making you a Commissioner of the Company, and giving you a very large bonus.",
+          "place": "ebonheart"
+        }
       ],
       "outro": "I secured the renewal of the East Empire Company's Imperial charter in Anvil. Canctunian Ponius made me a Commissioner of the Company.",
-      "rewards": {"gold": 1800, "faction_points": 6, "flags": ["eec_charter_renewed"], "perks": 1,
-                  "items": [{"item": "skycraft:ebony_sword", "name": "Raven Rock Ebony Blade", "enchant": {"sharpness": 4, "unbreaking": 3}},
-                            {"item": "skycraft:gold_ring", "name": "Commissioner's Seal Ring", "enchant": {"protection": 2}}]}
+      "rewards": {
+        "gold": 1800,
+        "faction_points": 6,
+        "flags": [
+          "eec_charter_renewed"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "skycraft:ebony_sword",
+            "name": "Raven Rock Ebony Blade",
+            "enchant": {
+              "sharpness": 4,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:gold_ring",
+            "name": "Commissioner's Seal Ring",
+            "enchant": {
+              "protection": 2
+            }
+          }
+        ]
+      },
+      "region": "morrowind/stonefalls",
+      "why": [
+        "morrowind/stonefalls.L10.inner_sea_armature",
+        "morrowind.L9.imperial_presence"
+      ],
+      "consequence": {
+        "world_state": "eec_charter_renewed_resolved",
+        "flag": "conseq_eec_charter_renewed",
+        "summary": "I secured the renewal of the East Empire Company's Imperial charter in Anvil. Canctunian Ponius made me a Commissioner of the Company."
+      }
     }
   ]
 }

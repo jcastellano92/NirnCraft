@@ -1090,5 +1090,10 @@
    "a": "pass_3",
    "b": "ash_crypt"
   }
+ ],
+ "why": [
+  "vvardenfell_ashlands.L1.ash_plain",
+  "vvardenfell_ashlands.L1.velothi_strongholds",
+  "vvardenfell_ashlands.L2.blight_season"
  ]
 }

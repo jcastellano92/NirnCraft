@@ -55,6 +55,14 @@ public final class FortRooms {
             // the cell block: the garrison's prisoners, and their gaoler
             prison(p, room);
             p.feature("setpiece:cell_block");
+        } else if (p.kit == Kit.BRETON_KEEP_RUIN || room.theme() == Theme.BRETON_KEEP_RUIN) {
+            switch (room.kind() % 5) {
+                case 0 -> keepGatehouse(p, room);
+                case 1 -> knightlyArmory(p, room);
+                case 2 -> hauntedCrypt(p, room);
+                case 3 -> prison(p, room);
+                default -> mess(p, room);
+            }
         } else switch (room.kind() % 5) {
             case 0 -> prison(p, room);
             case 1 -> armory(p, room);
@@ -176,6 +184,70 @@ public final class FortRooms {
                 else if (roll == 3) p.set(x, room.floor, z, Blocks.BARREL.defaultBlockState());
             }
         }
+    }
+
+    /** Breton keep gatehouse gallery: portcullis iron bars, collapsed masonry, and heraldic blue hangings. */
+    static void keepGatehouse(Painter p, Room room) {
+        p.feature("room:keep_gatehouse");
+        BuiltBuilder.cornerPillars(p, room, 1);
+        Direction side = blankWall(room);
+        if (side != null) {
+            int half = room.half(side);
+            Direction right = side.getClockWise();
+            for (int s = -1; s <= 1; s++) {
+                int x = room.localX(side, half - 1, s), z = room.localZ(side, half - 1, s);
+                for (int dy = 1; dy <= 2; dy++) {
+                    p.set(x, room.floor + dy, z, Deco.bars(Blocks.IRON_BARS, right.getAxis()));
+                }
+            }
+            for (int s : new int[]{-2, 2}) {
+                int x = room.localX(side, half - 1, s), z = room.localZ(side, half - 1, s);
+                if (!room.interior(x, z)) continue;
+                p.set(x, room.floor + 1, z, Blocks.BLUE_WOOL.defaultBlockState());
+                p.set(x, room.floor + 2, z, Blocks.GOLD_BLOCK.defaultBlockState());
+            }
+        }
+        for (int x = room.minX + 1; x < room.maxX; x++) {
+            for (int z = room.minZ + 1; z < room.maxZ; z++) {
+                if (room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
+                if (p.chance(x, room.floor, z, 75, 11)) {
+                    p.set(x, room.floor, z, Blocks.CRACKED_STONE_BRICKS.defaultBlockState());
+                }
+            }
+        }
+    }
+
+    /** Breton knightly armory: heraldic banners, smithing stations, and strongboxes. */
+    static void knightlyArmory(Painter p, Room room) {
+        p.feature("room:knightly_armory");
+        armory(p, room);
+        Direction side = blankWall(room);
+        if (side != null) {
+            int half = room.half(side);
+            for (int s : new int[]{-2, 0, 2}) {
+                int x = room.localX(side, half - 1, s), z = room.localZ(side, half - 1, s);
+                if (!room.interior(x, z) || room.nearDoor(x, z, 1)) continue;
+                p.set(x, room.floor + 2, z, s == 0 ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.BLUE_WOOL.defaultBlockState());
+            }
+        }
+    }
+
+    /** Breton haunted crypt cellar: deepslate sarcophagi, soul candles, and fallen knights. */
+    static void hauntedCrypt(Painter p, Room room) {
+        p.feature("room:haunted_crypt");
+        boolean alongX = room.halfX() >= room.halfZ();
+        int half = alongX ? room.halfX() : room.halfZ();
+        for (int a = -half + 2; a <= half - 2; a += 3) {
+            for (int s : new int[]{-2, 2}) {
+                int x = alongX ? room.cx + a : room.cx + s, z = alongX ? room.cz + s : room.cz + a;
+                if (!room.interior(x, z) || room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
+                p.set(x, room.floor, z, Blocks.DEEPSLATE_TILES.defaultBlockState());
+                p.set(x, room.floor + 1, z, p.chance(x, room.floor, z, 76, 2)
+                        ? Deco.candle(Blocks.BLUE_CANDLE, 3, true)
+                        : Deco.skull(Blocks.SKELETON_SKULL, p.roll(x, 0, z, 77, 16)));
+            }
+        }
+        BarrowRooms.urns(p, room, 1);
     }
 
     /** The chief's hall: a seat of furs, the strongbox and bodyguards. */

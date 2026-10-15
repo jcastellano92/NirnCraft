@@ -1,18 +1,841 @@
 {
   "id": "lilmoth",
+  "why": [
+    "lilmoth.L1.topal_silt_delta",
+    "lilmoth.L5.smuggler_and_spice_quays",
+    "lilmoth.L6.lilmoth_harbour"
+  ],
   "tint": {
-    "wood": "mangrove",
     "wall": "minecraft:mangrove_planks",
-    "wall2": "minecraft:stripped_mangrove_log",
-    "roof": "mangrove",
-    "light": "minecraft:lantern",
-    "accent": "red"
+    "wall2": "minecraft:mossy_stone_bricks",
+    "low": "minecraft:mud_bricks",
+    "wood": "mangrove",
+    "roof": "mud_brick",
+    "accent": "green"
   },
   "palette": {
-    "cityWall": "mud_bricks",
-    "cityWall2": "minecraft:packed_mud",
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
     "plaza": "minecraft:mud_bricks",
-    "plaza2": "minecraft:packed_mud",
-    "path": "minecraft:coarse_dirt"
+    "plaza2": "minecraft:mud_bricks",
+    "path": "minecraft:packed_mud"
+  },
+  "style": {
+    "houseStyle": "argonian",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:mangrove_planks",
+        "minecraft:mossy_stone_bricks",
+        "minecraft:mud_bricks",
+        "minecraft:packed_mud",
+        "mossy_stone_bricks",
+        "minecraft:mud_bricks"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_1_0",
+          "prop_lilmoth_1_1",
+          "prop_lilmoth_1_2",
+          "prop_lilmoth_1_3",
+          "prop_lilmoth_1_4",
+          "prop_lilmoth_1_5",
+          "prop_lilmoth_1_6",
+          "prop_lilmoth_1_7",
+          "prop_lilmoth_1_8",
+          "prop_lilmoth_1_9",
+          "prop_lilmoth_1_10",
+          "prop_lilmoth_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_2_0",
+          "prop_lilmoth_2_1",
+          "prop_lilmoth_2_2",
+          "prop_lilmoth_2_3",
+          "prop_lilmoth_2_4",
+          "prop_lilmoth_2_5",
+          "prop_lilmoth_2_6",
+          "prop_lilmoth_2_7",
+          "prop_lilmoth_2_8",
+          "prop_lilmoth_2_9",
+          "prop_lilmoth_2_10",
+          "prop_lilmoth_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_3_0",
+          "prop_lilmoth_3_1",
+          "prop_lilmoth_3_2",
+          "prop_lilmoth_3_3",
+          "prop_lilmoth_3_4",
+          "prop_lilmoth_3_5",
+          "prop_lilmoth_3_6",
+          "prop_lilmoth_3_7",
+          "prop_lilmoth_3_8",
+          "prop_lilmoth_3_9",
+          "prop_lilmoth_3_10",
+          "prop_lilmoth_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_4_0",
+          "prop_lilmoth_4_1",
+          "prop_lilmoth_4_2",
+          "prop_lilmoth_4_3",
+          "prop_lilmoth_4_4",
+          "prop_lilmoth_4_5",
+          "prop_lilmoth_4_6",
+          "prop_lilmoth_4_7",
+          "prop_lilmoth_4_8",
+          "prop_lilmoth_4_9",
+          "prop_lilmoth_4_10",
+          "prop_lilmoth_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_5_0",
+          "prop_lilmoth_5_1",
+          "prop_lilmoth_5_2",
+          "prop_lilmoth_5_3",
+          "prop_lilmoth_5_4",
+          "prop_lilmoth_5_5",
+          "prop_lilmoth_5_6",
+          "prop_lilmoth_5_7",
+          "prop_lilmoth_5_8",
+          "prop_lilmoth_5_9",
+          "prop_lilmoth_5_10",
+          "prop_lilmoth_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_6_0",
+          "prop_lilmoth_6_1",
+          "prop_lilmoth_6_2",
+          "prop_lilmoth_6_3",
+          "prop_lilmoth_6_4",
+          "prop_lilmoth_6_5",
+          "prop_lilmoth_6_6",
+          "prop_lilmoth_6_7",
+          "prop_lilmoth_6_8",
+          "prop_lilmoth_6_9",
+          "prop_lilmoth_6_10",
+          "prop_lilmoth_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_7_0",
+          "prop_lilmoth_7_1",
+          "prop_lilmoth_7_2",
+          "prop_lilmoth_7_3",
+          "prop_lilmoth_7_4",
+          "prop_lilmoth_7_5",
+          "prop_lilmoth_7_6",
+          "prop_lilmoth_7_7",
+          "prop_lilmoth_7_8",
+          "prop_lilmoth_7_9",
+          "prop_lilmoth_7_10",
+          "prop_lilmoth_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_8_0",
+          "prop_lilmoth_8_1",
+          "prop_lilmoth_8_2",
+          "prop_lilmoth_8_3",
+          "prop_lilmoth_8_4",
+          "prop_lilmoth_8_5",
+          "prop_lilmoth_8_6",
+          "prop_lilmoth_8_7",
+          "prop_lilmoth_8_8",
+          "prop_lilmoth_8_9",
+          "prop_lilmoth_8_10",
+          "prop_lilmoth_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_9_0",
+          "prop_lilmoth_9_1",
+          "prop_lilmoth_9_2",
+          "prop_lilmoth_9_3",
+          "prop_lilmoth_9_4",
+          "prop_lilmoth_9_5",
+          "prop_lilmoth_9_6",
+          "prop_lilmoth_9_7",
+          "prop_lilmoth_9_8",
+          "prop_lilmoth_9_9",
+          "prop_lilmoth_9_10",
+          "prop_lilmoth_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_10_0",
+          "prop_lilmoth_10_1",
+          "prop_lilmoth_10_2",
+          "prop_lilmoth_10_3",
+          "prop_lilmoth_10_4",
+          "prop_lilmoth_10_5",
+          "prop_lilmoth_10_6",
+          "prop_lilmoth_10_7",
+          "prop_lilmoth_10_8",
+          "prop_lilmoth_10_9",
+          "prop_lilmoth_10_10",
+          "prop_lilmoth_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_11_0",
+          "prop_lilmoth_11_1",
+          "prop_lilmoth_11_2",
+          "prop_lilmoth_11_3",
+          "prop_lilmoth_11_4",
+          "prop_lilmoth_11_5",
+          "prop_lilmoth_11_6",
+          "prop_lilmoth_11_7",
+          "prop_lilmoth_11_8",
+          "prop_lilmoth_11_9",
+          "prop_lilmoth_11_10",
+          "prop_lilmoth_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_12_0",
+          "prop_lilmoth_12_1",
+          "prop_lilmoth_12_2",
+          "prop_lilmoth_12_3",
+          "prop_lilmoth_12_4",
+          "prop_lilmoth_12_5",
+          "prop_lilmoth_12_6",
+          "prop_lilmoth_12_7",
+          "prop_lilmoth_12_8",
+          "prop_lilmoth_12_9",
+          "prop_lilmoth_12_10",
+          "prop_lilmoth_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_13_0",
+          "prop_lilmoth_13_1",
+          "prop_lilmoth_13_2",
+          "prop_lilmoth_13_3",
+          "prop_lilmoth_13_4",
+          "prop_lilmoth_13_5",
+          "prop_lilmoth_13_6",
+          "prop_lilmoth_13_7",
+          "prop_lilmoth_13_8",
+          "prop_lilmoth_13_9",
+          "prop_lilmoth_13_10",
+          "prop_lilmoth_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_14_0",
+          "prop_lilmoth_14_1",
+          "prop_lilmoth_14_2",
+          "prop_lilmoth_14_3",
+          "prop_lilmoth_14_4",
+          "prop_lilmoth_14_5",
+          "prop_lilmoth_14_6",
+          "prop_lilmoth_14_7",
+          "prop_lilmoth_14_8",
+          "prop_lilmoth_14_9",
+          "prop_lilmoth_14_10",
+          "prop_lilmoth_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_15_0",
+          "prop_lilmoth_15_1",
+          "prop_lilmoth_15_2",
+          "prop_lilmoth_15_3",
+          "prop_lilmoth_15_4",
+          "prop_lilmoth_15_5",
+          "prop_lilmoth_15_6",
+          "prop_lilmoth_15_7",
+          "prop_lilmoth_15_8",
+          "prop_lilmoth_15_9",
+          "prop_lilmoth_15_10",
+          "prop_lilmoth_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_16_0",
+          "prop_lilmoth_16_1",
+          "prop_lilmoth_16_2",
+          "prop_lilmoth_16_3",
+          "prop_lilmoth_16_4",
+          "prop_lilmoth_16_5",
+          "prop_lilmoth_16_6",
+          "prop_lilmoth_16_7",
+          "prop_lilmoth_16_8",
+          "prop_lilmoth_16_9",
+          "prop_lilmoth_16_10",
+          "prop_lilmoth_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_17_0",
+          "prop_lilmoth_17_1",
+          "prop_lilmoth_17_2",
+          "prop_lilmoth_17_3",
+          "prop_lilmoth_17_4",
+          "prop_lilmoth_17_5",
+          "prop_lilmoth_17_6",
+          "prop_lilmoth_17_7",
+          "prop_lilmoth_17_8",
+          "prop_lilmoth_17_9",
+          "prop_lilmoth_17_10",
+          "prop_lilmoth_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_18_0",
+          "prop_lilmoth_18_1",
+          "prop_lilmoth_18_2",
+          "prop_lilmoth_18_3",
+          "prop_lilmoth_18_4",
+          "prop_lilmoth_18_5",
+          "prop_lilmoth_18_6",
+          "prop_lilmoth_18_7",
+          "prop_lilmoth_18_8",
+          "prop_lilmoth_18_9",
+          "prop_lilmoth_18_10",
+          "prop_lilmoth_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_19_0",
+          "prop_lilmoth_19_1",
+          "prop_lilmoth_19_2",
+          "prop_lilmoth_19_3",
+          "prop_lilmoth_19_4",
+          "prop_lilmoth_19_5",
+          "prop_lilmoth_19_6",
+          "prop_lilmoth_19_7",
+          "prop_lilmoth_19_8",
+          "prop_lilmoth_19_9",
+          "prop_lilmoth_19_10",
+          "prop_lilmoth_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_20_0",
+          "prop_lilmoth_20_1",
+          "prop_lilmoth_20_2",
+          "prop_lilmoth_20_3",
+          "prop_lilmoth_20_4",
+          "prop_lilmoth_20_5",
+          "prop_lilmoth_20_6",
+          "prop_lilmoth_20_7",
+          "prop_lilmoth_20_8",
+          "prop_lilmoth_20_9",
+          "prop_lilmoth_20_10",
+          "prop_lilmoth_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:mangrove_planks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:mud_bricks",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mangrove_planks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_lilmoth_21_0",
+          "prop_lilmoth_21_1",
+          "prop_lilmoth_21_2",
+          "prop_lilmoth_21_3",
+          "prop_lilmoth_21_4",
+          "prop_lilmoth_21_5",
+          "prop_lilmoth_21_6",
+          "prop_lilmoth_21_7",
+          "prop_lilmoth_21_8",
+          "prop_lilmoth_21_9",
+          "prop_lilmoth_21_10",
+          "prop_lilmoth_21_11"
+        ]
+      }
+    }
   }
 }

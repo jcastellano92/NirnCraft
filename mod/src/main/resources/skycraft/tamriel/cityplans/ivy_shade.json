@@ -1,0 +1,99 @@
+{
+  "id": "ivy_shade",
+  "why": [
+    "west_weald.L4.vine_terrace",
+    "west_weald.L6.estate_hamlets"
+  ],
+  "sil": "pergola-vineyard-hamlet",
+  "base": "none",
+  "overlay": "west_weald",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "west_weald"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "west_weald",
+      "name": "ivy_shade_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "west_weald",
+      "name": "ivy_shade_b_2"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "west_weald",
+      "name": "ivy_shade_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "west_weald",
+      "name": "ivy_shade_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "orchard",
+      "theme": "ivy_shade_trellis",
+      "count": 2
+    },
+    {
+      "type": "fountain",
+      "theme": "wine_press_basin",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "ivy_shade_b_1": "Ivy Shade Pressing House",
+    "ivy_shade_b_2": "The Arbor Cup",
+    "ivy_shade_b_3": "Cask-Aging Cellar",
+    "ivy_shade_b_4": "Cooper's Workshop"
+  },
+  "innKey": "ivy_shade_b_2",
+  "names": {
+    "inn": "ivy_shade_b_2"
+  }
+}

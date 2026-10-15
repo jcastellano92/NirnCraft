@@ -1,0 +1,406 @@
+{
+  "region": "high_rock/rivenspire",
+  "title": "The Second Lamp of Shornhelm",
+  "summary": "Uncover a plot by coastal wreckers and a rogue vampire courtier to extinguish the cliff-beacons of Northpoint and plunge Rivenspire's three noble houses into blood-war.",
+  "why": [
+    "rivenspire.L7.three_houses",
+    "rivenspire.L8.second_lamp_custom",
+    "rivenspire.L9.house_rivalry",
+    "rivenspire.L9.lighthouse_sabotage",
+    "rivenspire.L10.doomcrag"
+  ],
+  "hook": {
+    "place": "shornhelm",
+    "places": [
+      "crestshade",
+      "crossminster_lair",
+      "duval_farm",
+      "fells_run",
+      "goldford_stones",
+      "goldholt_burrow",
+      "hildunes_secret_refuge",
+      "lincombe_encampment",
+      "pengate_ruins",
+      "shornhelm",
+      "stonebury_watchtower",
+      "the_merry_hound"
+    ],
+    "npc": "story_rs_justiciar_corinne",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_rs_justiciar_corinne",
+      "name": "Justiciar Corinne Dorell",
+      "role": "steward",
+      "place": "shornhelm",
+      "greet": "Look to the window-sills of Shornhelm, traveller—every household has lit the Second Lamp, for the dead and the night-drinkers are abroad in the crags.",
+      "talk": [
+        "Three grain-barques bound for Northpoint were lured onto the reefs by false beacons, and House Tamrith is accusing House Dorell of starving their port.",
+        "Count Verandis's steward at Ravenwatch Castle believes the wreckers are commanded by a rogue blood-scion hiding in the crag-barrows."
+      ]
+    },
+    {
+      "id": "story_rs_chamberlain_gaston",
+      "name": "Chamberlain Gaston",
+      "role": "scholar",
+      "place": "ravenwatch_castle",
+      "greet": "Welcome to Ravenwatch Castle. Here we keep the compact that separates civilized blood-kin from the feral fiends of the crags.",
+      "talk": [
+        "Viscountess Melisande, an exile of the Montclair line, has allied with the cliff-wreckers at Hoarfrost Downs to seize the Ayleid shards of Erokii Ruins.",
+        "Speak with Harbour-Master Ives in Northpoint; he barely escaped the last false-beacon wreck."
+      ]
+    },
+    {
+      "id": "story_rs_harbourmaster_ives",
+      "name": "Harbour-Master Ives",
+      "role": "citizen",
+      "place": "northpoint",
+      "greet": "Forty good sailors went down on the black teeth below Northpoint because someone doused the whale-oil cresset and lit a lantern on the shoals!",
+      "talk": [
+        "Wrecker-Captain Brulot and his cutthroats haul the salvaged cargo into Hildune's Secret Refuge while Viscountess Melisande delves into Erokii Ruins.",
+        "Put Brulot to the sword first so the Northpoint ships can sail again."
+      ]
+    },
+    {
+      "id": "story_rs_warden_bastiaan",
+      "name": "Warden Bastiaan",
+      "role": "knight",
+      "place": "crestshade",
+      "greet": "Stand fast! Crimson mist has been seeping up from the Ayleid vaults of Erokii Ruins since dusk.",
+      "talk": [
+        "Melisande is using the blood of shipwrecked sailors to awaken an Ayleid light-crystal inside Erokii Ruins.",
+        "Take the Shornhelm guard-sigil and strike her down in the vault!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_rs_captain_brulot": {
+      "name": "Wrecker-Captain Brulot",
+      "rank": "boss",
+      "place": "hildunes_secret_refuge",
+      "weapon": "steel_sword",
+      "helmet": "leather_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_rs_viscountess_melisande": {
+      "name": "Viscountess Melisande of the Crimson Crag",
+      "rank": "boss",
+      "place": "erokii_ruins",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_rs_northpoint_beacon": [
+      "Harbour-Master Ives: Look at the beacon-brazier—drenched in alchemical brine so it wouldn't catch, while a false cresset burned on the reef below!",
+      "Chamberlain Gaston: And see the bat-wing wax seal on this smugglers' manifest? Viscountess Melisande's private cipher.",
+      "Harbour-Master Ives: She's caching the plunder in Hildune's Secret Refuge!"
+    ],
+    "story_rs_hildune_den": [
+      "Wrecker-Captain Brulot: Every hull that splits on Northpoint's rocks fills my casks with brandy and Melisande's chalices with warm throats!",
+      "Harbour-Master Ives: For the forty men of the Sea-Swallow—cut him down!"
+    ],
+    "story_rs_erokii_crystal": [
+      "Viscountess Melisande: While Dorell and Tamrith bicker over lantern-oil, the red crystal of Erokii will crown a house that never ages!",
+      "Warden Bastiaan: Shornhelm's Three Houses stand together tonight, blood-leech! Draw!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_rivenspire_01_second_lamp",
+      "region": "high_rock/rivenspire",
+      "category": "main",
+      "title": "The False Beacon of Northpoint",
+      "giver": "story_rs_justiciar_corinne",
+      "start": "npc:story_rs_justiciar_corinne",
+      "requires": [],
+      "why": [
+        "rivenspire.L7.three_houses",
+        "rivenspire.L8.second_lamp_custom",
+        "rivenspire.L9.lighthouse_sabotage"
+      ],
+      "summary": "Consult Chamberlain Gaston at Ravenwatch Castle and inspect the sabotaged beacon in Northpoint with Harbour-Master Ives.",
+      "intro": [
+        "Sabotaged lighthouses on the northern cliffs have wrecked three grain ships, threatening to ignite a civil war between Shornhelm's noble houses.",
+        "Speak with Chamberlain Gaston at Ravenwatch Castle, then travel to Northpoint to examine the beacon with Harbour-Master Ives."
+      ],
+      "complete": [
+        "At Northpoint, you found Viscountess Melisande's cipher on a wrecker's manifest pointing toward Hildune's Secret Refuge."
+      ],
+      "journal": {
+        "start": "Justiciar Corinne in Shornhelm sent me to Ravenwatch Castle and Northpoint to investigate the lighthouse sabotage.",
+        "done": "We uncovered a compact between Wrecker-Captain Brulot and Viscountess Melisande."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "ravenwatch_castle",
+          "npc": "story_rs_chamberlain_gaston",
+          "text": "Consult Chamberlain Gaston at Ravenwatch Castle"
+        },
+        {
+          "type": "scene",
+          "place": "northpoint",
+          "target": "scene:story_rs_northpoint_beacon",
+          "text": "Inspect the sabotaged cresset in Northpoint"
+        },
+        {
+          "type": "talk",
+          "place": "northpoint",
+          "npc": "story_rs_harbourmaster_ives",
+          "text": "Speak with Harbour-Master Ives in Northpoint"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "ravenwatch_castle",
+        "northpoint"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "ravenwatch_castle",
+          "objective": "Consult Chamberlain Gaston at Ravenwatch Castle"
+        },
+        {
+          "id": 20,
+          "place": "northpoint",
+          "objective": "Inspect the sabotaged cresset in Northpoint"
+        },
+        {
+          "id": 30,
+          "place": "northpoint",
+          "objective": "Speak with Harbour-Master Ives in Northpoint"
+        }
+      ],
+      "consequence": "guard_banner:rivenspire_stage_1"
+    },
+    {
+      "id": "ms1_rivenspire_02_wreckers_cove",
+      "region": "high_rock/rivenspire",
+      "category": "main",
+      "title": "The Plunder of Hildune's Refuge",
+      "giver": "story_rs_harbourmaster_ives",
+      "start": "auto",
+      "requires": [
+        "ms1_rivenspire_01_second_lamp"
+      ],
+      "why": [
+        "rivenspire.L7.cliff_sailors",
+        "rivenspire.L10.wreckers_coves"
+      ],
+      "summary": "Storm Hildune's Secret Refuge and defeat Wrecker-Captain Brulot.",
+      "intro": [
+        "Wrecker-Captain Brulot uses Hildune's Secret Refuge to store plundered grain and hand over surviving sailors to Melisande's thralls.",
+        "Enter Hildune's Secret Refuge and slay Captain Brulot."
+      ],
+      "complete": [
+        "Wrecker-Captain Brulot fell, and his logbooks revealed that Melisande is awakening an Ayleid relic inside Erokii Ruins near Crestshade."
+      ],
+      "journal": {
+        "start": "I must enter Hildune's Secret Refuge and defeat Wrecker-Captain Brulot.",
+        "done": "I defeated Wrecker-Captain Brulot and learned Viscountess Melisande is inside Erokii Ruins."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "hildunes_secret_refuge",
+          "text": "Enter Hildune's Secret Refuge"
+        },
+        {
+          "type": "scene",
+          "place": "hildunes_secret_refuge",
+          "target": "scene:story_rs_hildune_den",
+          "text": "Confront Wrecker-Captain Brulot"
+        },
+        {
+          "type": "boss",
+          "place": "hildunes_secret_refuge",
+          "target": "story_rs_captain_brulot",
+          "text": "Defeat Wrecker-Captain Brulot"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "hildunes_secret_refuge"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hildunes_secret_refuge",
+          "objective": "Enter Hildune's Secret Refuge"
+        },
+        {
+          "id": 20,
+          "place": "hildunes_secret_refuge",
+          "objective": "Confront Wrecker-Captain Brulot"
+        },
+        {
+          "id": 30,
+          "place": "hildunes_secret_refuge",
+          "objective": "Defeat Wrecker-Captain Brulot"
+        }
+      ],
+      "consequence": "npc_schedule:rivenspire_stage_2"
+    },
+    {
+      "id": "ms1_rivenspire_03_shrouded_pass",
+      "region": "high_rock/rivenspire",
+      "category": "main",
+      "title": "Riders of Shrouded Pass",
+      "giver": "story_rs_chamberlain_gaston",
+      "start": "auto",
+      "requires": [
+        "ms1_rivenspire_02_wreckers_cove"
+      ],
+      "why": [
+        "rivenspire.L7.garrison_folk",
+        "rivenspire.L8.night_muster"
+      ],
+      "summary": "Carry the wrecker logbooks through Shrouded Pass and rally Warden Bastiaan in Crestshade.",
+      "intro": [
+        "To prevent House Tamrith and House Dorell from clashing at Shrouded Pass, carry the proof of Melisande's plot through the pass to Warden Bastiaan at Crestshade.",
+        "Cross Shrouded Pass and meet Warden Bastiaan in Crestshade."
+      ],
+      "complete": [
+        "Warden Bastiaan halted the noble houses' feud and marshaled his guards outside Erokii Ruins."
+      ],
+      "journal": {
+        "start": "I must carry the wrecker logbooks through Shrouded Pass to Warden Bastiaan in Crestshade.",
+        "done": "Warden Bastiaan united the house guards for the assault on Erokii Ruins."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "shrouded_pass",
+          "text": "Carry the logbooks through Shrouded Pass"
+        },
+        {
+          "type": "talk",
+          "place": "crestshade",
+          "npc": "story_rs_warden_bastiaan",
+          "text": "Rally Warden Bastiaan in Crestshade"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "shrouded_pass",
+        "crestshade"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shrouded_pass",
+          "objective": "Carry the logbooks through Shrouded Pass"
+        },
+        {
+          "id": 20,
+          "place": "crestshade",
+          "objective": "Rally Warden Bastiaan in Crestshade"
+        }
+      ],
+      "consequence": "shrine_state:rivenspire_stage_3"
+    },
+    {
+      "id": "ms1_rivenspire_04_crimson_crag",
+      "region": "high_rock/rivenspire",
+      "category": "main",
+      "title": "The Red Crystal of Erokii",
+      "giver": "story_rs_warden_bastiaan",
+      "start": "auto",
+      "requires": [
+        "ms1_rivenspire_03_shrouded_pass"
+      ],
+      "finale": true,
+      "why": [
+        "rivenspire.L9.house_rivalry",
+        "rivenspire.L10.crag_barrows",
+        "rivenspire.L10.doomcrag"
+      ],
+      "summary": "Enter Erokii Ruins, defeat Viscountess Melisande, and return to Justiciar Corinne in Shornhelm.",
+      "intro": [
+        "Inside the Ayleid halls of Erokii Ruins, Viscountess Melisande is charging a blood-corrupted light-crystal to enthrall the crags.",
+        "Breach Erokii Ruins, slay Viscountess Melisande, and report your victory to Justiciar Corinne in Shornhelm."
+      ],
+      "complete": [
+        "Viscountess Melisande has been destroyed, the Northpoint beacons burn clear once more, and Shornhelm's Three Houses have honored your service with the Shornhelm Blade."
+      ],
+      "journal": {
+        "start": "I must enter Erokii Ruins, defeat Viscountess Melisande, and report back to Justiciar Corinne in Shornhelm.",
+        "done": "I slew Viscountess Melisande in Erokii Ruins and received the Shornhelm Blade in Shornhelm."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "erokii_ruins",
+          "text": "Enter the Ayleid halls of Erokii Ruins"
+        },
+        {
+          "type": "scene",
+          "place": "erokii_ruins",
+          "target": "scene:story_rs_erokii_crystal",
+          "text": "Confront Viscountess Melisande at the red crystal"
+        },
+        {
+          "type": "boss",
+          "place": "erokii_ruins",
+          "target": "story_rs_viscountess_melisande",
+          "text": "Defeat Viscountess Melisande of the Crimson Crag"
+        },
+        {
+          "type": "talk",
+          "place": "shornhelm",
+          "npc": "story_rs_justiciar_corinne",
+          "text": "Report the victory to Justiciar Corinne in Shornhelm"
+        }
+      ],
+      "reward": {
+        "gold": 800,
+        "xp": 1200,
+        "unique": "shornhelm_blade"
+      },
+      "places": [
+        "erokii_ruins",
+        "shornhelm"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "erokii_ruins",
+          "objective": "Enter the Ayleid halls of Erokii Ruins"
+        },
+        {
+          "id": 20,
+          "place": "erokii_ruins",
+          "objective": "Confront Viscountess Melisande at the red crystal"
+        },
+        {
+          "id": 30,
+          "place": "erokii_ruins",
+          "objective": "Defeat Viscountess Melisande of the Crimson Crag"
+        },
+        {
+          "id": 40,
+          "place": "shornhelm",
+          "objective": "Report the victory to Justiciar Corinne in Shornhelm"
+        }
+      ],
+      "consequence": "settlement_prosperity:rivenspire_stage_4"
+    }
+  ]
+}

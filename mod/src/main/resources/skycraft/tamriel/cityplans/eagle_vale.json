@@ -1,0 +1,291 @@
+{
+  "id": "eagle_vale",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "valenwood-eagle-vale-plan",
+  "base": "none",
+  "overlay": "reapers_march",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "reapers_march",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "eagle_vale_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "eagle_vale_landmark",
+      "overlay": "reapers_march"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "eagle_vale_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "eagle_vale_great_tree",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "eagle_vale_garden",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "eagle_vale_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "eagle_vale_b_5",
+    "store": "eagle_vale_b_10",
+    "smithy": "eagle_vale_b_7"
+  },
+  "titles": {
+    "eagle_vale_b_1": "place.skycraft.eagle_vale Council & Seat Hall",
+    "eagle_vale_b_2": "place.skycraft.eagle_vale High Sanctuary",
+    "eagle_vale_b_3": "place.skycraft.eagle_vale Fighters & Wayfarers Hall",
+    "eagle_vale_b_4": "place.skycraft.eagle_vale Mages & Chroniclers Spire",
+    "eagle_vale_b_5": "place.skycraft.eagle_vale The Lantern & Hearth Inn",
+    "eagle_vale_b_6": "place.skycraft.eagle_vale The Traveler's Rest Tavern",
+    "eagle_vale_b_7": "place.skycraft.eagle_vale Master Forge & Armorer",
+    "eagle_vale_b_8": "place.skycraft.eagle_vale Botanicals & Remedies",
+    "eagle_vale_b_9": "place.skycraft.eagle_vale Scriptorium & Charts",
+    "eagle_vale_b_10": "place.skycraft.eagle_vale Grand Provisioner & Sundries",
+    "eagle_vale_b_11": "place.skycraft.eagle_vale Silk & Hide Clothier",
+    "eagle_vale_b_12": "place.skycraft.eagle_vale Lapidary & Signets",
+    "eagle_vale_b_13": "place.skycraft.eagle_vale Wayfarer Stables & Post",
+    "eagle_vale_b_14": "place.skycraft.eagle_vale Bonded Factor Warehouse",
+    "eagle_vale_landmark": "High Seat of place.skycraft.eagle_vale",
+    "eagle_vale_plaza": "place.skycraft.eagle_vale Central Plaza"
+  },
+  "innKey": "eagle_vale_b_5"
+}

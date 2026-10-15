@@ -1,0 +1,29 @@
+{
+  "id": "skingrad",
+  "why": [
+    "west_weald.L1.warm_limestone_slopes",
+    "west_weald.L5.wine_estates",
+    "west_weald.L6.skingrad_hill"
+  ],
+  "tint": {
+    "wall": "minecraft:stone_bricks",
+    "wall2": "minecraft:white_terracotta",
+    "low": "minecraft:deepslate_bricks",
+    "wood": "dark_oak",
+    "roof": "brick",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:deepslate_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:bricks",
+    "path": "minecraft:cobblestone"
+  },
+  "style": {
+    "forms": {
+      "towered": 10,
+      "gabled": 6
+    }
+  }
+}

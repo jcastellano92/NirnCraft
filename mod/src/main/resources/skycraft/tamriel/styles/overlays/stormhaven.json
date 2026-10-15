@@ -1,0 +1,19 @@
+{
+  "id": "stormhaven",
+  "tint": {
+    "wall": "minecraft:stone_bricks",
+    "wall2": "minecraft:smooth_stone",
+    "low": "minecraft:cobblestone",
+    "roof": "deepslate_brick",
+    "trim": "oak",
+    "wood": "oak",
+    "accent": "light_blue"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:smooth_stone",
+    "path": "minecraft:cobblestone"
+  }
+}

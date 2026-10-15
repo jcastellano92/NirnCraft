@@ -1,0 +1,5322 @@
+{
+  "province": "solstheim",
+  "truth": "Solstheim is a cold island off Skyrim's north-east coast that Red Mountain's ash has half buried. A mountain massif runs through its middle: south of it the ground is a low plain of ash under a falling grey sky, north of it spruce, glacier and sea ice. The Skaal hunters of the north-east keep a covenant with the All-Maker and six standing stones; the south belongs to Red Year Dunmer refugees who hold Raven Rock's failing ebony mine against ash storms and ash spawn. Between them rise a dragon-cult temple, Dwemer ruins, Nordic barrows and a Telvanni mushroom tower, while something in the central temple has begun to dream again.",
+  "layers": {
+    "L1": [
+      {
+        "id": "moesring_massif",
+        "text": "a central mountain block with one low pass, the island's spine and its only true peak",
+        "cites": []
+      },
+      {
+        "id": "north_cliffs",
+        "text": "a ring of sea cliffs, scree and ice-scoured shore along the north and north-west",
+        "cites": []
+      },
+      {
+        "id": "glacier_nw",
+        "text": "a glacier tongue and ice sheet in the north-west",
+        "cites": []
+      },
+      {
+        "id": "ash_plain",
+        "text": "the south and south-east are a low plain buried in ash fall",
+        "cites": []
+      },
+      {
+        "id": "ebony_seam",
+        "text": "an ebony vein under the south-west coast, nearly worked out",
+        "cites": []
+      },
+      {
+        "id": "old_ash_hollows",
+        "text": "voids in the south-west rock filled with an older ash bed",
+        "cites": []
+      },
+      {
+        "id": "stalhrim_basins",
+        "text": "shallow basins at the glacier's foot where a spring freezes over a vein of humming ice",
+        "cites": []
+      },
+      {
+        "id": "dwemer_roots",
+        "text": "Dwemer works under the massif's flanks and on the east shore, one city sunk in the ice, one observatory on a ridge",
+        "cites": []
+      },
+      {
+        "id": "barrow_ridges",
+        "text": "ridges crowned by barrows, and the dragon cult's temple under the massif's south face",
+        "cites": []
+      },
+      {
+        "id": "all_maker_stones",
+        "text": "six standing stones of sun, wind, water, earth, beast and tree set round the island",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "ash_fall",
+        "text": "ash carried from Red Mountain on the south-east wind falls most days on the south, with a heavy storm several times a season",
+        "cites": [
+          "solstheim.L1.ash_plain"
+        ]
+      },
+      {
+        "id": "polar_north",
+        "text": "blizzards, ice fog and a snowline at sea level in the north",
+        "cites": [
+          "solstheim.L1.north_cliffs"
+        ]
+      },
+      {
+        "id": "ash_snow_seam",
+        "text": "the massif keeps the two weathers apart; at its southern foot ash and snow meet as grey sleet",
+        "cites": [
+          "solstheim.L1.moesring_massif",
+          "solstheim.L2.ash_fall",
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "long_dark",
+        "text": "short winter days and auroras over the ice",
+        "cites": [
+          "solstheim.L1.north_cliffs",
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "wind_funnel",
+        "text": "the pass draws the north wind down onto the plain in gusts",
+        "cites": [
+          "solstheim.L1.moesring_massif"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "harstrad_river",
+        "text": "rises on the massif's north face and runs to the north-east shore, the island's one real river",
+        "cites": [
+          "solstheim.L1.moesring_massif"
+        ]
+      },
+      {
+        "id": "lake_fjalding",
+        "text": "a lake between Thirsk and the Skaal, frozen half the year",
+        "cites": [
+          "solstheim.L1.moesring_massif",
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "frozen_north_sea",
+        "text": "winter closes the north coast to ships and opens it to sledges",
+        "cites": [
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "raven_rock_bay",
+        "text": "the south-west bay, the one sheltered harbour",
+        "cites": [
+          "solstheim.L1.north_cliffs"
+        ]
+      },
+      {
+        "id": "ash_fouled_wells",
+        "text": "wells in the south silt with ash; whoever keeps the cistern keeps the town",
+        "cites": [
+          "solstheim.L2.ash_fall"
+        ]
+      },
+      {
+        "id": "grove_spring",
+        "text": "a clean spring under one stand of trees that ash does not foul",
+        "cites": [
+          "solstheim.L1.ash_plain"
+        ]
+      },
+      {
+        "id": "skaal_meltwater",
+        "text": "meltwater channels in the north-east that the Skaal hold as sacred",
+        "cites": [
+          "solstheim.L1.glacier_nw"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "ash_waste",
+        "text": "ash grass, charred stumps, drifts; cliff racers, netch overhead, ash spawn after dark",
+        "cites": [
+          "solstheim.L2.ash_fall"
+        ]
+      },
+      {
+        "id": "pine_north",
+        "text": "spruce and pine with snow on the boughs; elk, bears, wolves",
+        "cites": [
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "ice_waste",
+        "text": "frost spiders, trolls, ice wraiths",
+        "cites": [
+          "solstheim.L1.glacier_nw"
+        ]
+      },
+      {
+        "id": "riekling_country",
+        "text": "rieklings and their boars in the northern caves and shore camps in numbers found nowhere else",
+        "cites": [
+          "solstheim.L1.north_cliffs",
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "spore_garden",
+        "text": "fungi on ash-and-loam, cultivated round one tower",
+        "cites": [
+          "solstheim.L1.ash_plain",
+          "solstheim.L3.grove_spring"
+        ]
+      },
+      {
+        "id": "ash_grove",
+        "text": "living ash-trees green in the fall",
+        "cites": [
+          "solstheim.L3.grove_spring"
+        ]
+      },
+      {
+        "id": "sea_herds",
+        "text": "horker herds on the north and east shingle",
+        "cites": [
+          "solstheim.L3.frozen_north_sea"
+        ]
+      },
+      {
+        "id": "old_wood_hollows",
+        "text": "stunted wet wood at the seam where sleet feeds the roots",
+        "cites": [
+          "solstheim.L2.ash_snow_seam"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "ebony_mining",
+        "text": "the colony's only export, failing",
+        "cites": [
+          "solstheim.L1.ebony_seam"
+        ]
+      },
+      {
+        "id": "stalhrim_craft",
+        "text": "harvested and worked only by the Skaal",
+        "cites": [
+          "solstheim.L1.stalhrim_basins"
+        ]
+      },
+      {
+        "id": "hunting_and_hide",
+        "text": "pelts, bone, horker oil and meat",
+        "cites": [
+          "solstheim.L4.pine_north",
+          "solstheim.L4.sea_herds"
+        ]
+      },
+      {
+        "id": "ash_farming",
+        "text": "thin crops on ash, seed stock from the grove",
+        "cites": [
+          "solstheim.L4.ash_waste",
+          "solstheim.L3.grove_spring"
+        ]
+      },
+      {
+        "id": "spore_trade",
+        "text": "fungi, reagents and potions from the tower",
+        "cites": [
+          "solstheim.L4.spore_garden"
+        ]
+      },
+      {
+        "id": "ferry_and_salvage",
+        "text": "the ferry landing, wreck salvage on the shoals",
+        "cites": [
+          "solstheim.L3.raven_rock_bay",
+          "solstheim.L3.frozen_north_sea"
+        ]
+      },
+      {
+        "id": "dwemer_scrap",
+        "text": "brass and gears hauled out of the ruins for the Telvanni",
+        "cites": [
+          "solstheim.L1.dwemer_roots"
+        ]
+      },
+      {
+        "id": "ale_and_trophy",
+        "text": "a hall that brews and keeps tally of kills",
+        "cites": [
+          "solstheim.L4.pine_north",
+          "solstheim.L5.hunting_and_hide"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "raven_rock_bulwark",
+        "text": "a mine town and harbour behind a wall",
+        "cites": [
+          "solstheim.L5.ebony_mining",
+          "solstheim.L3.raven_rock_bay",
+          "solstheim.L2.ash_fall"
+        ]
+      },
+      {
+        "id": "skaal_ring",
+        "text": "the Skaal's ring of hide houses on the east coast",
+        "cites": [
+          "solstheim.L5.hunting_and_hide",
+          "solstheim.L5.stalhrim_craft",
+          "solstheim.L3.lake_fjalding"
+        ]
+      },
+      {
+        "id": "thirsk_hall",
+        "text": "one great hall under the north-east heights, a whole settlement in one building",
+        "cites": [
+          "solstheim.L5.ale_and_trophy",
+          "solstheim.L4.pine_north"
+        ]
+      },
+      {
+        "id": "tel_mithryn_tower",
+        "text": "a lone tower on the south-east ash flat",
+        "cites": [
+          "solstheim.L5.spore_trade",
+          "solstheim.L4.spore_garden"
+        ]
+      },
+      {
+        "id": "frostmoth_post",
+        "text": "a fort on the south shore watching the sea road",
+        "cites": [
+          "solstheim.L3.frozen_north_sea",
+          "solstheim.L5.ferry_and_salvage"
+        ]
+      },
+      {
+        "id": "attius_farm",
+        "text": "one farm in the ash",
+        "cites": [
+          "solstheim.L5.ash_farming"
+        ]
+      },
+      {
+        "id": "island_roads",
+        "text": "a ring road on the plain and one trail over the pass",
+        "cites": [
+          "solstheim.L1.moesring_massif",
+          "solstheim.L1.ash_plain"
+        ]
+      },
+      {
+        "id": "busy_and_failing",
+        "text": "the bay and the mine are the busy centre; the mine, the fort and the hall are what is failing",
+        "cites": [
+          "solstheim.L5.ebony_mining",
+          "solstheim.L3.raven_rock_bay"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "refugee_colony",
+        "text": "families who fled the Red Year, ranked by who brought whom, living in lean-tos along the wall",
+        "cites": [
+          "solstheim.L6.raven_rock_bulwark"
+        ]
+      },
+      {
+        "id": "redoran_duty",
+        "text": "a council and a guard captain who ration, assign watches and judge",
+        "cites": [
+          "solstheim.L6.raven_rock_bulwark",
+          "solstheim.L7.refugee_colony"
+        ]
+      },
+      {
+        "id": "mine_and_wall",
+        "text": "miners and guards share bunkhouses and the same debts",
+        "cites": [
+          "solstheim.L5.ebony_mining"
+        ]
+      },
+      {
+        "id": "skaal_commons",
+        "text": "no chief, no coin; an elder, a wind-listener and a smith; knowledge lives in the telling",
+        "cites": [
+          "solstheim.L6.skaal_ring"
+        ]
+      },
+      {
+        "id": "hall_ranks",
+        "text": "rank is the count of trophies at the long table",
+        "cites": [
+          "solstheim.L6.thirsk_hall"
+        ]
+      },
+      {
+        "id": "tower_and_servants",
+        "text": "a master, apprentices and servants",
+        "cites": [
+          "solstheim.L6.tel_mithryn_tower"
+        ]
+      },
+      {
+        "id": "outsider_gate",
+        "text": "the Skaal and the Ashlander traders do business at the gate, never inside",
+        "cites": [
+          "solstheim.L6.raven_rock_bulwark"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "all_maker",
+        "text": "the Skaal's faith in a maker whose six stones hold the island's order; the Telling keeps the verse",
+        "cites": [
+          "solstheim.L6.skaal_ring",
+          "solstheim.L1.all_maker_stones"
+        ]
+      },
+      {
+        "id": "ash_graves",
+        "text": "the refugees bury in the ash because the family tombs lie across the water",
+        "cites": [
+          "solstheim.L7.refugee_colony",
+          "solstheim.L2.ash_fall"
+        ]
+      },
+      {
+        "id": "temple_hall",
+        "text": "a hall of the Temple, the old Tribunal chapel shrunk to one room",
+        "cites": [
+          "solstheim.L6.raven_rock_bulwark"
+        ]
+      },
+      {
+        "id": "stalhrim_law",
+        "text": "unwrought stalhrim is the All-Maker's memory; to sell it is to sell the dead",
+        "cites": [
+          "solstheim.L5.stalhrim_craft"
+        ]
+      },
+      {
+        "id": "red_moon_hunt",
+        "text": "an old hunting cult and a fear of a red moon",
+        "cites": [
+          "solstheim.L4.pine_north"
+        ]
+      },
+      {
+        "id": "ink_dread",
+        "text": "people sleep badly near stones and will not read from a black cover",
+        "cites": [
+          "solstheim.L1.all_maker_stones",
+          "solstheim.L1.barrow_ridges"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "colony_and_skaal",
+        "text": "a failing mine wants timber, game and a new vein; the Skaal want the stones left alone",
+        "cites": [
+          "solstheim.L5.ebony_mining",
+          "solstheim.L5.stalhrim_craft",
+          "solstheim.L7.redoran_duty",
+          "solstheim.L7.skaal_commons"
+        ]
+      },
+      {
+        "id": "company_claim",
+        "text": "the Company's lapsed concession over the stalhrim basin is paper nobody has burned",
+        "cites": [
+          "solstheim.L5.stalhrim_craft",
+          "solstheim.L6.raven_rock_bulwark"
+        ]
+      },
+      {
+        "id": "two_houses",
+        "text": "Redoran duty and Telvanni appetite share a small island",
+        "cites": [
+          "solstheim.L6.tel_mithryn_tower",
+          "solstheim.L7.redoran_duty"
+        ]
+      },
+      {
+        "id": "legion_remnant",
+        "text": "an Imperial outpost cut off by a war across the sea",
+        "cites": [
+          "solstheim.L6.frostmoth_post"
+        ]
+      },
+      {
+        "id": "first_dragonborn_returns",
+        "text": "the temple's master is awake",
+        "cites": [
+          "solstheim.L1.barrow_ridges",
+          "solstheim.L8.ink_dread"
+        ]
+      },
+      {
+        "id": "riekling_war",
+        "text": "the northern tribes are united under one chief",
+        "cites": [
+          "solstheim.L4.riekling_country",
+          "solstheim.L6.thirsk_hall"
+        ]
+      },
+      {
+        "id": "reaver_menace",
+        "text": "pirate crews hold a lodge on the east shore",
+        "cites": [
+          "solstheim.L5.ferry_and_salvage"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "temple_cult",
+        "text": "masked servants and a sunken sanctum under the temple; its walls move",
+        "cites": [
+          "solstheim.L1.barrow_ridges",
+          "solstheim.L9.first_dragonborn_returns"
+        ]
+      },
+      {
+        "id": "ash_spawn",
+        "text": "the ash given will and a march",
+        "cites": [
+          "solstheim.L1.ash_plain",
+          "solstheim.L9.first_dragonborn_returns"
+        ]
+      },
+      {
+        "id": "black_book_altars",
+        "text": "three altars of a Daedric prince of forbidden knowledge",
+        "cites": [
+          "solstheim.L1.moesring_massif",
+          "solstheim.L8.ink_dread",
+          "solstheim.L9.first_dragonborn_returns"
+        ]
+      },
+      {
+        "id": "frozen_dwemer",
+        "text": "works held in the ice, an observatory on a ridge, a spire that hums",
+        "cites": [
+          "solstheim.L1.dwemer_roots",
+          "solstheim.L2.polar_north"
+        ]
+      },
+      {
+        "id": "riekling_dens",
+        "text": "caves and a mine claim",
+        "cites": [
+          "solstheim.L4.riekling_country",
+          "solstheim.L9.riekling_war"
+        ]
+      },
+      {
+        "id": "reavers",
+        "text": "a crew in a lodge, another at a shoal",
+        "cites": [
+          "solstheim.L9.reaver_menace",
+          "solstheim.L5.ferry_and_salvage"
+        ]
+      },
+      {
+        "id": "moon_hunt_dens",
+        "text": "a crag where the pack gathers",
+        "cites": [
+          "solstheim.L4.pine_north",
+          "solstheim.L8.red_moon_hunt"
+        ]
+      },
+      {
+        "id": "thane_dead",
+        "text": "the barrow kings",
+        "cites": [
+          "solstheim.L1.barrow_ridges",
+          "solstheim.L8.all_maker"
+        ]
+      },
+      {
+        "id": "karstaag_hall",
+        "text": "a giant's frozen castle",
+        "cites": [
+          "solstheim.L1.glacier_nw",
+          "solstheim.L4.ice_waste"
+        ]
+      },
+      {
+        "id": "deep_gallery_sleepers",
+        "text": "what the miners woke",
+        "cites": [
+          "solstheim.L1.old_ash_hollows",
+          "solstheim.L5.ebony_mining"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "dwemer_age",
+        "text": "the Dwemer sank works here before they vanished; Nchardak, Kagrumez and the spire remain",
+        "cites": [
+          "solstheim.L1.dwemer_roots",
+          "solstheim.L10.frozen_dwemer"
+        ]
+      },
+      {
+        "id": "dragon_cult_age",
+        "text": "the dragon cult raised a temple under the massif; its first Dragonborn took a Daedric prince's book and was cast out",
+        "cites": [
+          "solstheim.L1.barrow_ridges",
+          "solstheim.L10.temple_cult"
+        ]
+      },
+      {
+        "id": "giant_age",
+        "text": "a frost giant king held the north from a castle of ice",
+        "cites": [
+          "solstheim.L1.glacier_nw",
+          "solstheim.L10.karstaag_hall"
+        ]
+      },
+      {
+        "id": "thane_kings",
+        "text": "Nord thanes settled the south and were buried on the ridges",
+        "cites": [
+          "solstheim.L1.barrow_ridges",
+          "solstheim.L10.thane_dead"
+        ]
+      },
+      {
+        "id": "skaal_pact",
+        "text": "the Skaal made their covenant and took the east",
+        "cites": [
+          "solstheim.L1.all_maker_stones",
+          "solstheim.L8.all_maker"
+        ]
+      },
+      {
+        "id": "bloodmoon_hunt",
+        "text": "in 3E 427, a red moon, the Hunt and a werewolf plague; Fort Frostmoth garrisoned",
+        "cites": [
+          "solstheim.L4.pine_north",
+          "solstheim.L8.red_moon_hunt"
+        ]
+      },
+      {
+        "id": "company_charter",
+        "text": "the East Empire Company opened the ebony mine and the stalhrim concession under an Imperial charter",
+        "cites": [
+          "solstheim.L1.ebony_seam",
+          "solstheim.L5.ebony_mining"
+        ]
+      },
+      {
+        "id": "red_year",
+        "text": "in 4E 5, Red Mountain erupted; the Company left, the refugees came, the Bulwark was raised",
+        "cites": [
+          "solstheim.L1.ash_plain",
+          "solstheim.L2.ash_fall"
+        ]
+      },
+      {
+        "id": "black_book_return",
+        "text": "in 4E 201, the first Dragonborn's books surface again",
+        "cites": [
+          "solstheim.L9.first_dragonborn_returns",
+          "solstheim.L10.black_book_altars"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "skaal": {
+      "truth": "The north-east and east of the island belong to the Skaal, hunters and tellers who keep an old covenant with the All-Maker: they take what the land lends, work stalhrim and bone and read the six stones as a living calendar. Their village is a ring of hide-and-bone houses round a fire and a stone circle, with no streets and no coin. Beside them Nord hunting bands keep Thirsk's single great hall against riekling raids, and reavers have taken a lodge on the shore. The Skaal are losing: the stones sicken, the young leave for Raven Rock's wages, and the colony wants their timber.",
+      "layers": {
+        "L1": [
+          {
+            "id": "east_shore",
+            "text": "a low rock shore with shingle coves and a horker island",
+            "cites": []
+          },
+          {
+            "id": "forest_uplands",
+            "text": "wooded slopes that shelter the village from the north wind",
+            "cites": []
+          },
+          {
+            "id": "king_ridge",
+            "text": "a ridge with a thane's barrow and a seer's tomb",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "snow_forest",
+            "text": "deep snow under the pines most of the year",
+            "cites": [
+              "solstheim.L2.polar_north",
+              "skaal.L1.forest_uplands"
+            ]
+          },
+          {
+            "id": "lake_ice",
+            "text": "the lake and the shore freeze from the first frost",
+            "cites": [
+              "solstheim.L2.polar_north",
+              "skaal.L1.east_shore"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "lake_fjalding_shore",
+            "text": "the lake between the hall and the village",
+            "cites": [
+              "solstheim.L3.lake_fjalding",
+              "skaal.L2.lake_ice"
+            ]
+          },
+          {
+            "id": "skaal_springs",
+            "text": "meltwater channels held as sacred",
+            "cites": [
+              "solstheim.L3.skaal_meltwater",
+              "skaal.L1.forest_uplands"
+            ]
+          },
+          {
+            "id": "ice_shingle",
+            "text": "a shore the winter turns into a road",
+            "cites": [
+              "solstheim.L3.frozen_north_sea",
+              "skaal.L1.east_shore"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "skaal_pine",
+            "text": "spruce and pine, elk and bears, wolves at the edge",
+            "cites": [
+              "solstheim.L4.pine_north",
+              "skaal.L2.snow_forest"
+            ]
+          },
+          {
+            "id": "horker_shingle",
+            "text": "horkers on the shingle",
+            "cites": [
+              "solstheim.L4.sea_herds",
+              "skaal.L1.east_shore"
+            ]
+          },
+          {
+            "id": "riekling_edge",
+            "text": "riekling raiders coming from the north",
+            "cites": [
+              "solstheim.L4.riekling_country",
+              "skaal.L2.snow_forest"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "hide_and_bone",
+            "text": "racks, bone-craft, horker oil",
+            "cites": [
+              "solstheim.L5.hunting_and_hide",
+              "skaal.L4.skaal_pine"
+            ]
+          },
+          {
+            "id": "stalhrim_hands",
+            "text": "the smith's work is the village's only trade good",
+            "cites": [
+              "solstheim.L5.stalhrim_craft",
+              "skaal.L3.skaal_springs"
+            ]
+          },
+          {
+            "id": "hall_brewing",
+            "text": "Thirsk brews and sells to anyone",
+            "cites": [
+              "solstheim.L5.ale_and_trophy",
+              "skaal.L3.lake_fjalding_shore"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "skaal_village",
+            "text": "a ring on the east shore by the springs",
+            "cites": [
+              "solstheim.L6.skaal_ring",
+              "skaal.L3.skaal_springs"
+            ]
+          },
+          {
+            "id": "thirsk_mead_hall",
+            "text": "the hall under the heights",
+            "cites": [
+              "solstheim.L6.thirsk_hall",
+              "skaal.L3.lake_fjalding_shore"
+            ]
+          },
+          {
+            "id": "reaver_lodge",
+            "text": "a lodge on the shore",
+            "cites": [
+              "solstheim.L5.ferry_and_salvage",
+              "skaal.L1.east_shore"
+            ]
+          },
+          {
+            "id": "stone_walk",
+            "text": "the beast and wind stones along the village's paths",
+            "cites": [
+              "solstheim.L1.all_maker_stones",
+              "skaal.L1.forest_uplands"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "elder_and_listener",
+            "text": "the elder keeps the stories, the listener reads the wind",
+            "cites": [
+              "solstheim.L7.skaal_commons",
+              "skaal.L6.skaal_village"
+            ]
+          },
+          {
+            "id": "leaving_young",
+            "text": "the young go south for wages",
+            "cites": [
+              "solstheim.L7.skaal_commons",
+              "solstheim.L6.raven_rock_bulwark"
+            ]
+          },
+          {
+            "id": "hall_tally",
+            "text": "the table's order",
+            "cites": [
+              "solstheim.L7.hall_ranks",
+              "skaal.L6.thirsk_mead_hall"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "telling_at_the_fire",
+            "text": "a verse is told at the fire or it is lost",
+            "cites": [
+              "solstheim.L8.all_maker",
+              "skaal.L7.elder_and_listener"
+            ]
+          },
+          {
+            "id": "stone_calendar",
+            "text": "each stone marks a duty",
+            "cites": [
+              "solstheim.L1.all_maker_stones",
+              "skaal.L6.stone_walk"
+            ]
+          },
+          {
+            "id": "trophy_oath",
+            "text": "the hall swears on its kills",
+            "cites": [
+              "solstheim.L8.red_moon_hunt",
+              "skaal.L7.hall_tally"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "stones_poisoned",
+            "text": "the temple's master is bending the stones",
+            "cites": [
+              "solstheim.L9.first_dragonborn_returns",
+              "solstheim.L1.all_maker_stones"
+            ]
+          },
+          {
+            "id": "timber_demand",
+            "text": "Raven Rock's council wants a felling ground",
+            "cites": [
+              "solstheim.L9.colony_and_skaal",
+              "skaal.L4.skaal_pine"
+            ]
+          },
+          {
+            "id": "riekling_raids",
+            "text": "spears at Thirsk's gate",
+            "cites": [
+              "solstheim.L9.riekling_war",
+              "skaal.L4.riekling_edge"
+            ]
+          },
+          {
+            "id": "reaver_toll",
+            "text": "sledges taken on the shore",
+            "cites": [
+              "solstheim.L9.reaver_menace",
+              "skaal.L6.reaver_lodge"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "king_barrow",
+            "text": "a king's feast-barrow",
+            "cites": [
+              "solstheim.L10.thane_dead",
+              "skaal.L1.king_ridge"
+            ]
+          },
+          {
+            "id": "seer_tomb",
+            "text": "a seer's tomb with a ritual of proof",
+            "cites": [
+              "solstheim.L10.thane_dead",
+              "skaal.L1.king_ridge"
+            ]
+          },
+          {
+            "id": "riekling_den",
+            "text": "a den at the north edge",
+            "cites": [
+              "solstheim.L10.riekling_dens",
+              "skaal.L4.riekling_edge"
+            ]
+          },
+          {
+            "id": "stone_blight",
+            "text": "sleepers in the stone circles",
+            "cites": [
+              "solstheim.L10.temple_cult",
+              "solstheim.L1.all_maker_stones"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "skaal_pact",
+            "text": "the ancient covenant with the land",
+            "cites": [
+              "solstheim.L11.skaal_pact",
+              "skaal.L8.telling_at_the_fire"
+            ]
+          },
+          {
+            "id": "old_king_feast",
+            "text": "the sealed hall of the barrow-king",
+            "cites": [
+              "solstheim.L11.thane_kings",
+              "skaal.L10.king_barrow"
+            ]
+          },
+          {
+            "id": "hunt_wars",
+            "text": "the Skaal's wars against the Hunt",
+            "cites": [
+              "solstheim.L11.bloodmoon_hunt",
+              "skaal.L8.trophy_oath"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "skaal.L1.east_shore",
+            "skaal.L1.forest_uplands"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "skaal.L4.skaal_pine"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "skaal.L4.skaal_pine"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "skaal.L5.hide_and_bone",
+            "skaal.L3.lake_fjalding_shore",
+            "skaal.L4.horker_shingle"
+          ]
+        },
+        "hunter": {
+          "weight": 4,
+          "why": [
+            "skaal.L5.hide_and_bone",
+            "skaal.L4.skaal_pine",
+            "skaal.L4.horker_shingle"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "skaal.L4.skaal_pine"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "skaal.L5.stalhrim_hands",
+            "skaal.L6.skaal_village",
+            "skaal.L6.thirsk_mead_hall"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "skaal.L6.thirsk_mead_hall"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "skaal.L6.thirsk_mead_hall"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "skaal.L8.telling_at_the_fire"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "skaal.L6.skaal_village"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "skaal.L6.skaal_village"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "skaal.L8.telling_at_the_fire"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "skaal.L9.stones_poisoned"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "skaal.L10.king_barrow"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "skaal.L6.skaal_village",
+            "skaal.L6.stone_walk",
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "skaal.L8.telling_at_the_fire",
+            "skaal.L11.old_king_feast"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "skaal.L5.stalhrim_hands"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "skaal.L7.elder_and_listener"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "skaal.L5.hide_and_bone"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "skaal.L9.stones_poisoned"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "skaal.L10.king_barrow",
+          "skaal.L10.seer_tomb",
+          "skaal.L11.old_king_feast"
+        ],
+        "ruin": [
+          "skaal.L10.king_barrow",
+          "skaal.L10.seer_tomb",
+          "skaal.L11.old_king_feast"
+        ],
+        "dwemer": [
+          "skaal.L10.king_barrow"
+        ],
+        "falmer": [
+          "skaal.L10.king_barrow"
+        ],
+        "bandit": [
+          "skaal.L10.king_barrow"
+        ],
+        "fort": [
+          "skaal.L9.stones_poisoned"
+        ],
+        "military": [
+          "skaal.L9.stones_poisoned"
+        ],
+        "mage": [
+          "skaal.L10.king_barrow"
+        ],
+        "vampire": [
+          "skaal.L10.king_barrow"
+        ],
+        "necromancer": [
+          "skaal.L10.king_barrow"
+        ],
+        "hagraven": [
+          "skaal.L10.king_barrow"
+        ],
+        "forsworn": [
+          "skaal.L10.king_barrow"
+        ],
+        "beast": [
+          "skaal.L4.skaal_pine",
+          "skaal.L10.riekling_den"
+        ],
+        "ice": [
+          "skaal.L2.lake_ice"
+        ],
+        "mine": [
+          "skaal.L1.east_shore",
+          "skaal.L1.forest_uplands"
+        ],
+        "grove": [
+          "skaal.L4.skaal_pine"
+        ],
+        "smuggler": [
+          "skaal.L10.king_barrow"
+        ],
+        "cave": [
+          "skaal.L4.skaal_pine"
+        ],
+        "giant": [
+          "skaal.L10.king_barrow"
+        ],
+        "dragon": [
+          "skaal.L10.king_barrow"
+        ],
+        "tower": [
+          "skaal.L10.king_barrow"
+        ],
+        "cabin": [
+          "skaal.L6.skaal_village"
+        ],
+        "wreck": [
+          "skaal.L5.hide_and_bone"
+        ]
+      }
+    },
+    "raven_rock": {
+      "truth": "Raven Rock is a refugee town behind a bulwark. Dunmer who fled Red Mountain's eruption took over the East Empire Company's failing ebony mine on the south-west bay and walled it against ash storms and the ash spawn that walk out of them. A Redoran council and a guard captain ration the grain, the shaft is nearly worked out, a hall of the Temple keeps the faith, and the dead go into the ash because the family tombs are across the sea. The harbour is the island's only ferry landing and the colony's only link to the world.",
+      "layers": {
+        "L1": [
+          {
+            "id": "bay_headland",
+            "text": "a rock headland that shelters the bay",
+            "cites": []
+          },
+          {
+            "id": "mine_shaft",
+            "text": "a headframe over a shaft whose deep gallery meets old ash",
+            "cites": []
+          },
+          {
+            "id": "ash_shelf",
+            "text": "the ground east of the wall is a low ash shelf",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "windward_wall",
+            "text": "the wall's east face takes the ash and is swept at dawn",
+            "cites": [
+              "solstheim.L2.ash_fall",
+              "raven_rock.L1.ash_shelf"
+            ]
+          },
+          {
+            "id": "storm_shutters",
+            "text": "shutters and sealed doors in the storm season",
+            "cites": [
+              "solstheim.L2.ash_fall",
+              "raven_rock.L1.bay_headland"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "bay_harbour",
+            "text": "the wharf and the ferry",
+            "cites": [
+              "solstheim.L3.raven_rock_bay",
+              "raven_rock.L1.bay_headland"
+            ]
+          },
+          {
+            "id": "cistern",
+            "text": "the one covered cistern under the council's seal",
+            "cites": [
+              "solstheim.L3.ash_fouled_wells",
+              "raven_rock.L2.windward_wall"
+            ]
+          },
+          {
+            "id": "wharf_dues",
+            "text": "the council charges the landing",
+            "cites": [
+              "raven_rock.L1.bay_headland",
+              "raven_rock.L3.bay_harbour"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "spoil_barrens",
+            "text": "spoil heaps where nothing grows",
+            "cites": [
+              "solstheim.L4.ash_waste",
+              "raven_rock.L1.mine_shaft"
+            ]
+          },
+          {
+            "id": "ash_shingle",
+            "text": "a black shore",
+            "cites": [
+              "solstheim.L4.ash_waste",
+              "raven_rock.L3.bay_harbour"
+            ]
+          },
+          {
+            "id": "farm_ash",
+            "text": "fields with seed stock from the grove",
+            "cites": [
+              "solstheim.L4.ash_waste",
+              "solstheim.L3.grove_spring"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "ebony_shaft",
+            "text": "the mine, the sorting shed and the pay line",
+            "cites": [
+              "solstheim.L5.ebony_mining",
+              "raven_rock.L1.mine_shaft"
+            ]
+          },
+          {
+            "id": "wharf_trade",
+            "text": "the ferry, customs and the only market",
+            "cites": [
+              "solstheim.L5.ferry_and_salvage",
+              "raven_rock.L3.bay_harbour"
+            ]
+          },
+          {
+            "id": "attius_farm",
+            "text": "a farm of ash-fed fields",
+            "cites": [
+              "solstheim.L5.ash_farming",
+              "raven_rock.L4.farm_ash"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "raven_rock_town",
+            "text": "the walled town and its wharf",
+            "cites": [
+              "solstheim.L6.raven_rock_bulwark",
+              "raven_rock.L5.ebony_shaft",
+              "raven_rock.L3.bay_harbour"
+            ]
+          },
+          {
+            "id": "earth_stone_hill",
+            "text": "the earth stone a short walk to the north-west",
+            "cites": [
+              "solstheim.L1.all_maker_stones",
+              "raven_rock.L1.bay_headland"
+            ]
+          },
+          {
+            "id": "kolbjorn_ridge",
+            "text": "a barrow the miners dig for stone",
+            "cites": [
+              "solstheim.L1.barrow_ridges",
+              "raven_rock.L1.ash_shelf"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "council_and_captain",
+            "text": "rations, watches, judgement",
+            "cites": [
+              "solstheim.L7.redoran_duty",
+              "raven_rock.L6.raven_rock_town"
+            ]
+          },
+          {
+            "id": "lean_to_row",
+            "text": "the newest arrivals under the wall",
+            "cites": [
+              "solstheim.L7.refugee_colony",
+              "raven_rock.L6.raven_rock_town"
+            ]
+          },
+          {
+            "id": "miners_debt",
+            "text": "wages in ration chits",
+            "cites": [
+              "solstheim.L7.mine_and_wall",
+              "raven_rock.L5.ebony_shaft"
+            ]
+          },
+          {
+            "id": "gate_trade",
+            "text": "the Skaal and an Ashlander trader at the gate",
+            "cites": [
+              "solstheim.L7.outsider_gate",
+              "raven_rock.L6.raven_rock_town"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "temple_hall",
+            "text": "a single room of the Temple",
+            "cites": [
+              "solstheim.L8.temple_hall",
+              "raven_rock.L6.raven_rock_town"
+            ]
+          },
+          {
+            "id": "ash_graves",
+            "text": "rows of cairns on the shelf",
+            "cites": [
+              "solstheim.L8.ash_graves",
+              "raven_rock.L7.lean_to_row"
+            ]
+          },
+          {
+            "id": "ancestor_shrines",
+            "text": "a shrine in every house",
+            "cites": [
+              "solstheim.L8.ash_graves",
+              "raven_rock.L7.council_and_captain"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "mine_or_farm",
+            "text": "seal the failing shaft or dig on",
+            "cites": [
+              "solstheim.L9.colony_and_skaal",
+              "raven_rock.L5.ebony_shaft"
+            ]
+          },
+          {
+            "id": "company_ledger",
+            "text": "the Company's last clerk and its papers",
+            "cites": [
+              "solstheim.L9.company_claim",
+              "raven_rock.L5.wharf_trade"
+            ]
+          },
+          {
+            "id": "ash_siege",
+            "text": "nightly marches on the wall",
+            "cites": [
+              "solstheim.L9.first_dragonborn_returns",
+              "raven_rock.L2.windward_wall"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "deep_gallery",
+            "text": "the gallery that broke into old ash",
+            "cites": [
+              "solstheim.L10.deep_gallery_sleepers",
+              "raven_rock.L1.mine_shaft"
+            ]
+          },
+          {
+            "id": "ash_spawn_wall",
+            "text": "the march on the windward face",
+            "cites": [
+              "solstheim.L10.ash_spawn",
+              "raven_rock.L1.ash_shelf",
+              "raven_rock.L9.ash_siege"
+            ]
+          },
+          {
+            "id": "sleepwalkers",
+            "text": "townsfolk walking to the earth stone in the night",
+            "cites": [
+              "solstheim.L10.temple_cult",
+              "solstheim.L1.all_maker_stones",
+              "raven_rock.L6.earth_stone_hill"
+            ]
+          },
+          {
+            "id": "smuggled_ebony",
+            "text": "ore sold north",
+            "cites": [
+              "raven_rock.L1.mine_shaft",
+              "solstheim.L5.ebony_mining",
+              "solstheim.L5.ferry_and_salvage"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "company_mine",
+            "text": "the charter mine before the eruption",
+            "cites": [
+              "solstheim.L11.company_charter",
+              "raven_rock.L5.ebony_shaft"
+            ]
+          },
+          {
+            "id": "red_year_landing",
+            "text": "the first boats and the wall raised that winter",
+            "cites": [
+              "solstheim.L11.red_year",
+              "raven_rock.L6.raven_rock_town"
+            ]
+          },
+          {
+            "id": "colony_graves",
+            "text": "the first winter's cairns",
+            "cites": [
+              "solstheim.L11.red_year",
+              "raven_rock.L8.ash_graves"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L5.ebony_shaft",
+            "raven_rock.L1.mine_shaft"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "jeweler": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L5.ebony_shaft",
+            "raven_rock.L5.wharf_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.attius_farm"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.attius_farm"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.attius_farm"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L3.bay_harbour",
+            "raven_rock.L3.cistern"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "butcher": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L5.attius_farm",
+            "raven_rock.L4.farm_ash"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.wharf_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.wharf_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L5.wharf_trade",
+            "raven_rock.L7.gate_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L5.wharf_trade",
+            "raven_rock.L8.temple_hall"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.attius_farm"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L5.ebony_shaft"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L8.temple_hall",
+            "raven_rock.L8.ancestor_shrines"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L6.raven_rock_town"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L7.council_and_captain"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L7.council_and_captain"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L7.council_and_captain"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L8.temple_hall"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L9.ash_siege"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L10.smuggled_ebony"
+          ]
+        },
+        "prisoner": {
+          "weight": 3,
+          "why": [
+            "raven_rock.L7.miners_debt",
+            "raven_rock.L9.mine_or_farm"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L7.council_and_captain"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L6.raven_rock_town"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L6.raven_rock_town"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L6.raven_rock_town"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L8.ancestor_shrines"
+          ]
+        },
+        "labourer": {
+          "weight": 4,
+          "why": [
+            "raven_rock.L5.ebony_shaft",
+            "raven_rock.L5.attius_farm",
+            "raven_rock.L7.miners_debt"
+          ]
+        },
+        "worker": {
+          "weight": 4,
+          "why": [
+            "raven_rock.L5.ebony_shaft",
+            "raven_rock.L5.attius_farm",
+            "raven_rock.L7.miners_debt"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L7.council_and_captain"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L7.council_and_captain"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "raven_rock.L5.wharf_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "raven_rock.L9.mine_or_farm"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "ruin": [
+          "raven_rock.L8.ancestor_shrines"
+        ],
+        "dwemer": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "falmer": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "bandit": [
+          "raven_rock.L10.smuggled_ebony"
+        ],
+        "fort": [
+          "raven_rock.L9.ash_siege"
+        ],
+        "military": [
+          "raven_rock.L9.ash_siege"
+        ],
+        "mage": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "vampire": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "necromancer": [
+          "raven_rock.L8.ash_graves"
+        ],
+        "hagraven": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "forsworn": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "beast": [
+          "raven_rock.L4.spoil_barrens"
+        ],
+        "ice": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "mine": [
+          "raven_rock.L5.ebony_shaft",
+          "raven_rock.L1.mine_shaft",
+          "raven_rock.L10.smuggled_ebony"
+        ],
+        "grove": [
+          "raven_rock.L4.farm_ash"
+        ],
+        "smuggler": [
+          "raven_rock.L10.smuggled_ebony"
+        ],
+        "cave": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "giant": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "dragon": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "tower": [
+          "raven_rock.L10.deep_gallery"
+        ],
+        "cabin": [
+          "raven_rock.L5.attius_farm"
+        ],
+        "wreck": [
+          "raven_rock.L5.ebony_shaft"
+        ]
+      }
+    },
+    "moesring": {
+      "truth": "The Moesring massif is the island's spine and its dividing line: ash falls on its southern foot, snow on its north, and a belt of grey sleet marks where they meet. It carries the island's oldest layers: a dragon-cult temple whose stair climbs from an altar of the old kings to a sunken sanctum, barrows of thane-kings, Dwemer works and an observatory on a ridge. Its pass is the only low way between north and south, and everything the colony and the Skaal want from each other must cross it.",
+      "layers": {
+        "L1": [
+          {
+            "id": "moesring_crown",
+            "text": "the island's one true peak",
+            "cites": []
+          },
+          {
+            "id": "pass_notch",
+            "text": "the low pass, the only through way",
+            "cites": []
+          },
+          {
+            "id": "temple_face",
+            "text": "the south face where the temple is cut",
+            "cites": []
+          },
+          {
+            "id": "star_ridge",
+            "text": "an observatory ridge in the east of the massif",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "crown_blizzard",
+            "text": "whiteout above the snowline",
+            "cites": [
+              "solstheim.L2.polar_north",
+              "moesring.L1.moesring_crown"
+            ]
+          },
+          {
+            "id": "seam_sleet",
+            "text": "grey sleet on the south foot",
+            "cites": [
+              "solstheim.L2.ash_snow_seam",
+              "moesring.L1.temple_face"
+            ]
+          },
+          {
+            "id": "pass_gale",
+            "text": "the pass blows hard",
+            "cites": [
+              "solstheim.L2.wind_funnel",
+              "moesring.L1.pass_notch"
+            ]
+          },
+          {
+            "id": "clear_night",
+            "text": "the ridge's sky is the clearest on the island",
+            "cites": [
+              "solstheim.L2.long_dark",
+              "moesring.L1.star_ridge"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "harstrad_head",
+            "text": "the river's source at the north face",
+            "cites": [
+              "solstheim.L3.harstrad_river",
+              "moesring.L1.moesring_crown"
+            ]
+          },
+          {
+            "id": "snow_melt_burns",
+            "text": "brown meltwater with ash in it",
+            "cites": [
+              "solstheim.L2.ash_snow_seam",
+              "moesring.L1.temple_face"
+            ]
+          },
+          {
+            "id": "lake_source",
+            "text": "the lake's feeder streams",
+            "cites": [
+              "solstheim.L3.lake_fjalding",
+              "moesring.L2.crown_blizzard"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "snowfield",
+            "text": "bears, wolves, frost spiders",
+            "cites": [
+              "solstheim.L4.ice_waste",
+              "moesring.L2.crown_blizzard"
+            ]
+          },
+          {
+            "id": "pass_scree",
+            "text": "bare rock",
+            "cites": [
+              "moesring.L1.pass_notch",
+              "moesring.L2.pass_gale"
+            ]
+          },
+          {
+            "id": "temple_moss",
+            "text": "dark moss on the temple's black stone",
+            "cites": [
+              "solstheim.L4.old_wood_hollows",
+              "moesring.L2.seam_sleet"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "quarry_and_slab",
+            "text": "stone for walls dug from barrow ridges",
+            "cites": [
+              "solstheim.L1.barrow_ridges",
+              "solstheim.L5.ebony_mining"
+            ]
+          },
+          {
+            "id": "scrap_runs",
+            "text": "brass hauled to the Telvanni",
+            "cites": [
+              "solstheim.L5.dwemer_scrap",
+              "moesring.L1.star_ridge"
+            ]
+          },
+          {
+            "id": "pilgrim_trade",
+            "text": "a few Skaal and colony pilgrims cross at the altar",
+            "cites": [
+              "moesring.L1.pass_notch",
+              "solstheim.L5.hunting_and_hide"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "pass_road",
+            "text": "the one trail and the only lodge",
+            "cites": [
+              "solstheim.L6.island_roads",
+              "moesring.L1.pass_notch"
+            ]
+          },
+          {
+            "id": "trader_shack",
+            "text": "a shack at the pass",
+            "cites": [
+              "moesring.L5.scrap_runs",
+              "moesring.L1.pass_notch"
+            ]
+          },
+          {
+            "id": "altar_of_the_kings",
+            "text": "a ring of carved posts at the foot of the temple's stair",
+            "cites": [
+              "solstheim.L1.barrow_ridges",
+              "moesring.L1.temple_face"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "pass_toll_custom",
+            "text": "whoever holds the pass taxes it",
+            "cites": [
+              "solstheim.L7.outsider_gate",
+              "moesring.L6.pass_road"
+            ]
+          },
+          {
+            "id": "trader_who_knows",
+            "text": "a shack-keeper who sells news",
+            "cites": [
+              "moesring.L6.trader_shack"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "king_altar_dawn",
+            "text": "dawn through the posts marks the day",
+            "cites": [
+              "moesring.L6.altar_of_the_kings",
+              "solstheim.L1.barrow_ridges"
+            ]
+          },
+          {
+            "id": "fear_of_the_stair",
+            "text": "the stair is not climbed at night",
+            "cites": [
+              "solstheim.L8.ink_dread",
+              "moesring.L6.altar_of_the_kings"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "who_holds_the_pass",
+            "text": "control of the island's only pass",
+            "cites": [
+              "solstheim.L9.colony_and_skaal",
+              "moesring.L6.pass_road"
+            ]
+          },
+          {
+            "id": "temple_awake",
+            "text": "sleepers climbing the stair",
+            "cites": [
+              "solstheim.L9.first_dragonborn_returns",
+              "moesring.L8.fear_of_the_stair"
+            ]
+          },
+          {
+            "id": "scholar_race",
+            "text": "Telvanni diggers and the colony's guard",
+            "cites": [
+              "solstheim.L9.two_houses",
+              "moesring.L5.scrap_runs"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "temple_of_miraak",
+            "text": "the sunken sanctum, walls like ink",
+            "cites": [
+              "solstheim.L10.temple_cult",
+              "moesring.L1.temple_face",
+              "moesring.L9.temple_awake"
+            ]
+          },
+          {
+            "id": "black_stone_ribs",
+            "text": "the grand chambers",
+            "cites": [
+              "solstheim.L10.temple_cult",
+              "moesring.L1.temple_face"
+            ]
+          },
+          {
+            "id": "observatory",
+            "text": "star-maps and a long gantry",
+            "cites": [
+              "solstheim.L10.frozen_dwemer",
+              "moesring.L1.star_ridge"
+            ]
+          },
+          {
+            "id": "hrothmund_barrow",
+            "text": "a barrow with a key",
+            "cites": [
+              "solstheim.L10.thane_dead",
+              "moesring.L1.pass_notch"
+            ]
+          },
+          {
+            "id": "den_of_the_pack",
+            "text": "a crag where the pack gathers on Loredas",
+            "cites": [
+              "solstheim.L10.moon_hunt_dens",
+              "moesring.L4.snowfield"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "dragon_cult_age",
+            "text": "the temple's first age",
+            "cites": [
+              "solstheim.L11.dragon_cult_age",
+              "moesring.L10.temple_of_miraak"
+            ]
+          },
+          {
+            "id": "first_dragonborn",
+            "text": "the return of the priest-king",
+            "cites": [
+              "solstheim.L11.black_book_return",
+              "moesring.L9.temple_awake"
+            ]
+          },
+          {
+            "id": "thane_hrothmund",
+            "text": "the axe in the stone",
+            "cites": [
+              "solstheim.L11.thane_kings",
+              "moesring.L10.hrothmund_barrow"
+            ]
+          },
+          {
+            "id": "star_makers",
+            "text": "the Dwemer star-engineers",
+            "cites": [
+              "solstheim.L11.dwemer_age",
+              "moesring.L10.observatory"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "moesring.L3.lake_source"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "moesring.L4.snowfield"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "moesring.L4.temple_moss"
+          ]
+        },
+        "merchant": {
+          "weight": 4,
+          "why": [
+            "moesring.L5.pilgrim_trade",
+            "moesring.L6.pass_road",
+            "moesring.L6.trader_shack"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "moesring.L5.pilgrim_trade",
+            "moesring.L7.trader_who_knows"
+          ]
+        },
+        "bookseller": {
+          "weight": 4,
+          "why": [
+            "moesring.L5.pilgrim_trade",
+            "moesring.L6.trader_shack",
+            "moesring.L6.altar_of_the_kings"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "moesring.L6.pass_road"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "moesring.L6.pass_road"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "moesring.L8.king_altar_dawn"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "moesring.L6.pass_road"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "moesring.L6.pass_road"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "moesring.L8.king_altar_dawn"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "moesring.L9.who_holds_the_pass"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "moesring.L10.temple_of_miraak"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "moesring.L6.pass_road"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "moesring.L7.pass_toll_custom"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "moesring.L5.quarry_and_slab"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "moesring.L9.who_holds_the_pass"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "moesring.L10.hrothmund_barrow"
+        ],
+        "ruin": [
+          "moesring.L10.hrothmund_barrow"
+        ],
+        "dwemer": [
+          "moesring.L11.star_makers"
+        ],
+        "falmer": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "bandit": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "fort": [
+          "moesring.L9.who_holds_the_pass"
+        ],
+        "military": [
+          "moesring.L9.who_holds_the_pass"
+        ],
+        "mage": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "vampire": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "necromancer": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "hagraven": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "forsworn": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "beast": [
+          "moesring.L4.snowfield",
+          "moesring.L10.den_of_the_pack"
+        ],
+        "ice": [
+          "moesring.L4.snowfield"
+        ],
+        "mine": [
+          "moesring.L10.den_of_the_pack"
+        ],
+        "grove": [
+          "moesring.L4.snowfield"
+        ],
+        "smuggler": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "cave": [
+          "moesring.L4.snowfield"
+        ],
+        "giant": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "dragon": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "tower": [
+          "moesring.L10.temple_of_miraak"
+        ],
+        "cabin": [
+          "moesring.L6.pass_road"
+        ],
+        "wreck": [
+          "moesring.L5.quarry_and_slab"
+        ]
+      }
+    },
+    "isinfier": {
+      "truth": "South and east of the mountain lies a plain of ash: drifts, charred stumps, cliff racers and netch overhead and ash spawn after dark. A Telvanni master keeps a lone mushroom tower and a spore garden on its south-east point; an Imperial fort and a ruined mage-citadel watch the sea road; a Dwemer city half sunk in ice lies on the east shore and a trader's shack sells to anyone. The farms that survive here are measured in fields, and grow in ash that nothing should grow in.",
+      "layers": {
+        "L1": [
+          {
+            "id": "ash_shelf_plain",
+            "text": "flat ash",
+            "cites": []
+          },
+          {
+            "id": "dune_ridges",
+            "text": "wind-built ash ridges",
+            "cites": []
+          },
+          {
+            "id": "east_shore_heights",
+            "text": "the heights over the frozen city",
+            "cites": []
+          },
+          {
+            "id": "sea_shore",
+            "text": "a low south shore with a wrecked strand",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "ash_storms",
+            "text": "the heaviest falls on the island",
+            "cites": [
+              "solstheim.L2.ash_fall",
+              "isinfier.L1.ash_shelf_plain"
+            ]
+          },
+          {
+            "id": "dry_clear",
+            "text": "ash-days are dry and bright between storms",
+            "cites": [
+              "solstheim.L2.ash_fall",
+              "isinfier.L1.dune_ridges"
+            ]
+          },
+          {
+            "id": "east_fog",
+            "text": "ice fog on the east shore",
+            "cites": [
+              "isinfier.L1.east_shore_heights",
+              "solstheim.L2.polar_north"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "plain_wells",
+            "text": "wells silted by ash",
+            "cites": [
+              "solstheim.L3.ash_fouled_wells",
+              "isinfier.L2.ash_storms"
+            ]
+          },
+          {
+            "id": "cistern_at_the_tower",
+            "text": "a tower drinks from deep cisterns",
+            "cites": [
+              "solstheim.L3.ash_fouled_wells",
+              "isinfier.L1.ash_shelf_plain"
+            ]
+          },
+          {
+            "id": "spire_cistern",
+            "text": "the spire's old pipes carry clean water to a vent",
+            "cites": [
+              "solstheim.L1.dwemer_roots",
+              "isinfier.L1.east_shore_heights"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "ash_dune_scrub",
+            "text": "scathecraw-like scrub and ash grass",
+            "cites": [
+              "solstheim.L4.ash_waste",
+              "isinfier.L1.dune_ridges"
+            ]
+          },
+          {
+            "id": "spore_flat",
+            "text": "the tower's garden",
+            "cites": [
+              "solstheim.L4.spore_garden",
+              "isinfier.L3.cistern_at_the_tower"
+            ]
+          },
+          {
+            "id": "racer_hollows",
+            "text": "cliff racers nest in the hollows",
+            "cites": [
+              "solstheim.L4.ash_waste",
+              "isinfier.L2.ash_storms"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "telvanni_garden",
+            "text": "fungal cultivation and alchemy",
+            "cites": [
+              "solstheim.L5.spore_trade",
+              "isinfier.L4.spore_flat"
+            ]
+          },
+          {
+            "id": "scrap_hauling",
+            "text": "Dwemer salvage expeditions",
+            "cites": [
+              "solstheim.L5.dwemer_scrap",
+              "isinfier.L1.east_shore_heights"
+            ]
+          },
+          {
+            "id": "ash_farms",
+            "text": "ash yam plots",
+            "cites": [
+              "solstheim.L5.ash_farming",
+              "isinfier.L4.ash_dune_scrub"
+            ]
+          },
+          {
+            "id": "trader_post",
+            "text": "a shack where roads cross",
+            "cites": [
+              "solstheim.L5.ferry_and_salvage",
+              "isinfier.L1.sea_shore"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "tel_mithryn",
+            "text": "the tower on the south-east point",
+            "cites": [
+              "solstheim.L6.tel_mithryn_tower",
+              "isinfier.L5.telvanni_garden"
+            ]
+          },
+          {
+            "id": "fort_frostmoth",
+            "text": "a fort on the south shore",
+            "cites": [
+              "solstheim.L6.frostmoth_post",
+              "isinfier.L1.sea_shore"
+            ]
+          },
+          {
+            "id": "ashfallow_citadel",
+            "text": "a ruined mage-fort on the plain",
+            "cites": [
+              "solstheim.L1.ash_plain",
+              "isinfier.L1.ash_shelf_plain"
+            ]
+          },
+          {
+            "id": "aidanat_camp",
+            "text": "a trader camp that moves with the season",
+            "cites": [
+              "isinfier.L5.trader_post",
+              "isinfier.L1.ash_shelf_plain"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "tower_house",
+            "text": "a master, his apprentices, his servants",
+            "cites": [
+              "solstheim.L7.tower_and_servants",
+              "isinfier.L6.tel_mithryn"
+            ]
+          },
+          {
+            "id": "garrison",
+            "text": "too few soldiers for the wall",
+            "cites": [
+              "solstheim.L7.mine_and_wall",
+              "isinfier.L6.fort_frostmoth"
+            ]
+          },
+          {
+            "id": "farm_family",
+            "text": "a refugee family on a farm with a strange field",
+            "cites": [
+              "solstheim.L7.refugee_colony",
+              "isinfier.L5.ash_farms"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "ward_ring",
+            "text": "the citadel's ward-ring still hums",
+            "cites": [
+              "solstheim.L8.temple_hall",
+              "isinfier.L6.ashfallow_citadel"
+            ]
+          },
+          {
+            "id": "unquiet_garrison",
+            "text": "the grave of a tribune",
+            "cites": [
+              "solstheim.L8.red_moon_hunt",
+              "isinfier.L6.fort_frostmoth"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "telvanni_appetite",
+            "text": "Master Neloth's research demands",
+            "cites": [
+              "solstheim.L9.two_houses",
+              "isinfier.L6.tel_mithryn"
+            ]
+          },
+          {
+            "id": "cut_off_fort",
+            "text": "winter ice closes the supply road",
+            "cites": [
+              "solstheim.L9.legion_remnant",
+              "isinfier.L6.fort_frostmoth"
+            ]
+          },
+          {
+            "id": "deserters",
+            "text": "men leaving the citadel's watch",
+            "cites": [
+              "solstheim.L9.legion_remnant",
+              "isinfier.L7.garrison"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "nchardak_ice_city",
+            "text": "a Dwemer city half in the ice",
+            "cites": [
+              "solstheim.L10.frozen_dwemer",
+              "isinfier.L1.east_shore_heights"
+            ]
+          },
+          {
+            "id": "spire_that_hums",
+            "text": "a resonance spire south of the tower",
+            "cites": [
+              "solstheim.L10.frozen_dwemer",
+              "isinfier.L1.east_shore_heights",
+              "isinfier.L3.spire_cistern"
+            ]
+          },
+          {
+            "id": "ash_spawn_march",
+            "text": "ash spawn rising from Fort Frostmoth",
+            "cites": [
+              "solstheim.L10.ash_spawn",
+              "isinfier.L1.ash_shelf_plain",
+              "isinfier.L2.ash_storms"
+            ]
+          },
+          {
+            "id": "black_book_east",
+            "text": "an altar on the east heights",
+            "cites": [
+              "solstheim.L10.black_book_altars",
+              "isinfier.L1.east_shore_heights"
+            ]
+          },
+          {
+            "id": "scarecrow_field",
+            "text": "a field that moves",
+            "cites": [
+              "solstheim.L10.ash_spawn",
+              "isinfier.L4.ash_dune_scrub",
+              "isinfier.L5.ash_farms"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "company_fort",
+            "text": "the fort's garrison years",
+            "cites": [
+              "solstheim.L11.company_charter",
+              "isinfier.L6.fort_frostmoth"
+            ]
+          },
+          {
+            "id": "mage_citadel_age",
+            "text": "the citadel was an Imperial mage-fort of the charter years",
+            "cites": [
+              "solstheim.L11.company_charter",
+              "isinfier.L6.ashfallow_citadel"
+            ]
+          },
+          {
+            "id": "frozen_city",
+            "text": "the sinking of Nchardak",
+            "cites": [
+              "solstheim.L11.dwemer_age",
+              "isinfier.L10.nchardak_ice_city"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "isinfier.L1.east_shore_heights",
+            "isinfier.L1.sea_shore"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.ash_farms"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.ash_farms"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.ash_farms"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.ash_farms"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "isinfier.L5.trader_post",
+            "isinfier.L6.aidanat_camp"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.trader_post"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "isinfier.L5.trader_post",
+            "isinfier.L6.aidanat_camp"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.trader_post"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.ash_farms"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "isinfier.L5.trader_post"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "isinfier.L8.ward_ring"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "isinfier.L6.tel_mithryn"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "isinfier.L6.tel_mithryn"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "isinfier.L7.tower_house"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "isinfier.L6.ashfallow_citadel"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "isinfier.L6.ashfallow_citadel"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "isinfier.L9.deserters"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "isinfier.L10.nchardak_ice_city"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "isinfier.L7.tower_house"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "isinfier.L7.tower_house"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "isinfier.L6.tel_mithryn"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "isinfier.L7.farm_family"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "isinfier.L7.farm_family"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "isinfier.L7.garrison"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "isinfier.L5.ash_farms",
+            "isinfier.L7.farm_family"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "isinfier.L5.ash_farms",
+            "isinfier.L7.farm_family"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "isinfier.L7.tower_house"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "isinfier.L7.tower_house"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "isinfier.L5.telvanni_garden"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "isinfier.L9.telvanni_appetite"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "ruin": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "dwemer": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "falmer": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "bandit": [
+          "isinfier.L5.trader_post"
+        ],
+        "fort": [
+          "isinfier.L9.cut_off_fort",
+          "isinfier.L10.ash_spawn_march",
+          "isinfier.L6.fort_frostmoth"
+        ],
+        "military": [
+          "isinfier.L9.telvanni_appetite"
+        ],
+        "mage": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "vampire": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "necromancer": [
+          "isinfier.L8.unquiet_garrison"
+        ],
+        "hagraven": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "forsworn": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "beast": [
+          "isinfier.L4.spore_flat"
+        ],
+        "ice": [
+          "isinfier.L10.nchardak_ice_city",
+          "isinfier.L2.east_fog"
+        ],
+        "mine": [
+          "isinfier.L1.east_shore_heights",
+          "isinfier.L1.sea_shore"
+        ],
+        "grove": [
+          "isinfier.L4.ash_dune_scrub"
+        ],
+        "smuggler": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "cave": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "giant": [
+          "isinfier.L10.nchardak_ice_city"
+        ],
+        "dragon": [
+          "isinfier.L10.black_book_east"
+        ],
+        "tower": [
+          "isinfier.L10.spire_that_hums",
+          "isinfier.L3.cistern_at_the_tower"
+        ],
+        "cabin": [
+          "isinfier.L6.aidanat_camp",
+          "isinfier.L5.ash_farms"
+        ],
+        "wreck": [
+          "isinfier.L5.scrap_hauling",
+          "isinfier.L1.sea_shore"
+        ]
+      }
+    },
+    "felsaad": {
+      "truth": "The north and north-west coast is cliffs, ice fog and a glacier tongue, the cold end of the island. Rieklings hold its caves and shore camps in numbers found nowhere else, riding boars and throwing spears, and a mine is theirs by raid. Stalhrim forms at the glacier's foot where a spring freezes over its vein, and a giant's frozen castle stands above the sea. Ships rarely land and the winter closes the coast entirely; the only landing is a half-wrecked jetty.",
+      "layers": {
+        "L1": [
+          {
+            "id": "mortrag_glacier",
+            "text": "the north-west ice",
+            "cites": []
+          },
+          {
+            "id": "cliff_wall",
+            "text": "sea cliffs with caves at the foot",
+            "cites": []
+          },
+          {
+            "id": "stalhrim_basin",
+            "text": "the humming basin",
+            "cites": []
+          },
+          {
+            "id": "karstaag_stack",
+            "text": "a rock stack carved into a castle",
+            "cites": []
+          },
+          {
+            "id": "north_peaks",
+            "text": "two high shoulders above the coast",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "ice_fog",
+            "text": "dense freezing sea fog",
+            "cites": [
+              "solstheim.L2.polar_north",
+              "felsaad.L1.cliff_wall"
+            ]
+          },
+          {
+            "id": "blizzard_coast",
+            "text": "polar gales along the cliffs",
+            "cites": [
+              "solstheim.L2.polar_north",
+              "felsaad.L1.mortrag_glacier"
+            ]
+          },
+          {
+            "id": "aurora_ice",
+            "text": "auroras over the glacier",
+            "cites": [
+              "solstheim.L2.long_dark",
+              "felsaad.L1.mortrag_glacier"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "harstrad_mouth",
+            "text": "the river reaches the coast here",
+            "cites": [
+              "solstheim.L3.harstrad_river",
+              "felsaad.L1.cliff_wall"
+            ]
+          },
+          {
+            "id": "frozen_landing",
+            "text": "winter closes the jetty",
+            "cites": [
+              "solstheim.L3.frozen_north_sea",
+              "felsaad.L1.cliff_wall"
+            ]
+          },
+          {
+            "id": "glacier_melt",
+            "text": "subglacial streams",
+            "cites": [
+              "felsaad.L1.mortrag_glacier",
+              "solstheim.L3.skaal_meltwater"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "ice_field",
+            "text": "crevasses and blue ice",
+            "cites": [
+              "solstheim.L4.ice_waste",
+              "felsaad.L1.mortrag_glacier"
+            ]
+          },
+          {
+            "id": "shore_cave_range",
+            "text": "caves at the cliff foot",
+            "cites": [
+              "solstheim.L4.riekling_country",
+              "felsaad.L1.cliff_wall"
+            ]
+          },
+          {
+            "id": "sea_cliff_birds",
+            "text": "rookeries on the ledges",
+            "cites": [
+              "felsaad.L1.cliff_wall",
+              "felsaad.L2.ice_fog"
+            ]
+          },
+          {
+            "id": "horker_shore",
+            "text": "haul-outs on the pack ice",
+            "cites": [
+              "solstheim.L4.sea_herds",
+              "felsaad.L3.frozen_landing"
+            ]
+          },
+          {
+            "id": "mortrag_snow_wood",
+            "text": "wind-bent pines",
+            "cites": [
+              "solstheim.L4.pine_north",
+              "felsaad.L2.blizzard_coast"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "stalhrim_harvest",
+            "text": "the Skaal's, and only theirs",
+            "cites": [
+              "solstheim.L5.stalhrim_craft",
+              "felsaad.L1.stalhrim_basin"
+            ]
+          },
+          {
+            "id": "riekling_claim",
+            "text": "a mine they took by raid",
+            "cites": [
+              "felsaad.L1.cliff_wall",
+              "felsaad.L4.shore_cave_range"
+            ]
+          },
+          {
+            "id": "landing_trade",
+            "text": "reavers and smugglers",
+            "cites": [
+              "solstheim.L5.ferry_and_salvage",
+              "felsaad.L3.frozen_landing"
+            ]
+          },
+          {
+            "id": "horker_oil",
+            "text": "rendered blubber and ivory",
+            "cites": [
+              "solstheim.L5.hunting_and_hide",
+              "felsaad.L4.horker_shore"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "northshore_landing",
+            "text": "a jetty and one hut",
+            "cites": [
+              "solstheim.L5.ferry_and_salvage",
+              "felsaad.L3.frozen_landing"
+            ]
+          },
+          {
+            "id": "harstrad_ford",
+            "text": "the ford on the shore trail",
+            "cites": [
+              "solstheim.L3.harstrad_river",
+              "felsaad.L3.harstrad_mouth"
+            ]
+          },
+          {
+            "id": "karstaag_castle",
+            "text": "the giant's castle",
+            "cites": [
+              "felsaad.L1.karstaag_stack",
+              "felsaad.L4.ice_field"
+            ]
+          },
+          {
+            "id": "watcher_rock",
+            "text": "a rock where a dragon perches",
+            "cites": [
+              "solstheim.L1.north_cliffs",
+              "felsaad.L2.ice_fog"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "landing_outlaws",
+            "text": "nobody's law",
+            "cites": [
+              "solstheim.L7.outsider_gate",
+              "felsaad.L6.northshore_landing"
+            ]
+          },
+          {
+            "id": "riekling_tribes",
+            "text": "bands under chiefs",
+            "cites": [
+              "solstheim.L4.riekling_country",
+              "felsaad.L5.riekling_claim"
+            ]
+          },
+          {
+            "id": "prospectors",
+            "text": "lone men who come for the ice",
+            "cites": [
+              "solstheim.L5.stalhrim_craft",
+              "felsaad.L6.northshore_landing"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "stalhrim_shrine",
+            "text": "the basin is a shrine",
+            "cites": [
+              "solstheim.L8.stalhrim_law",
+              "felsaad.L1.stalhrim_basin"
+            ]
+          },
+          {
+            "id": "giant_dead",
+            "text": "the king's feast-hall under ice",
+            "cites": [
+              "felsaad.L1.karstaag_stack",
+              "felsaad.L6.karstaag_castle"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "stalhrim_claim",
+            "text": "contested burial ice",
+            "cites": [
+              "solstheim.L9.company_claim",
+              "solstheim.L9.colony_and_skaal",
+              "felsaad.L5.stalhrim_harvest"
+            ]
+          },
+          {
+            "id": "riekling_chief",
+            "text": "the boar-mounted warlord",
+            "cites": [
+              "solstheim.L9.riekling_war",
+              "felsaad.L7.riekling_tribes"
+            ]
+          },
+          {
+            "id": "reaver_landings",
+            "text": "pirate skiffs at the jetty",
+            "cites": [
+              "solstheim.L9.reaver_menace",
+              "felsaad.L6.northshore_landing"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "karstaag_hall",
+            "text": "frozen warriors and a throne of ice",
+            "cites": [
+              "solstheim.L10.karstaag_hall",
+              "felsaad.L1.karstaag_stack"
+            ]
+          },
+          {
+            "id": "glacier_cave",
+            "text": "a cave of trolls and a prospector's last camp",
+            "cites": [
+              "felsaad.L1.mortrag_glacier",
+              "felsaad.L4.ice_field"
+            ]
+          },
+          {
+            "id": "dragon_watch",
+            "text": "a dragon's perch and a word",
+            "cites": [
+              "felsaad.L1.north_peaks",
+              "felsaad.L6.watcher_rock",
+              "solstheim.L10.thane_dead"
+            ]
+          },
+          {
+            "id": "barrow_in_the_ice",
+            "text": "a barrow with a word wall",
+            "cites": [
+              "solstheim.L10.thane_dead",
+              "felsaad.L1.north_peaks"
+            ]
+          },
+          {
+            "id": "hunt_totems",
+            "text": "a totem hung upside down",
+            "cites": [
+              "solstheim.L8.red_moon_hunt",
+              "felsaad.L4.mortrag_snow_wood"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "giant_age",
+            "text": "Karstaag's ancient court",
+            "cites": [
+              "solstheim.L11.giant_age",
+              "felsaad.L10.karstaag_hall"
+            ]
+          },
+          {
+            "id": "company_stalhrim_survey",
+            "text": "the East Empire's failed ice digs",
+            "cites": [
+              "solstheim.L11.company_charter",
+              "felsaad.L9.stalhrim_claim"
+            ]
+          },
+          {
+            "id": "red_moon_hunts",
+            "text": "Hircine's hounds on the glacier",
+            "cites": [
+              "solstheim.L11.bloodmoon_hunt",
+              "felsaad.L10.hunt_totems"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.riekling_claim"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.riekling_claim"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.riekling_claim"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "felsaad.L4.mortrag_snow_wood"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "felsaad.L4.mortrag_snow_wood"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "felsaad.L5.horker_oil",
+            "felsaad.L3.harstrad_mouth",
+            "felsaad.L4.sea_cliff_birds"
+          ]
+        },
+        "hunter": {
+          "weight": 3,
+          "why": [
+            "felsaad.L5.horker_oil",
+            "felsaad.L4.horker_shore"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "felsaad.L4.mortrag_snow_wood"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.landing_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.landing_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.landing_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "felsaad.L8.stalhrim_shrine",
+            "felsaad.L8.giant_dead"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "felsaad.L6.northshore_landing"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "felsaad.L6.northshore_landing"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "felsaad.L8.stalhrim_shrine"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "felsaad.L6.watcher_rock"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.landing_trade"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "felsaad.L6.northshore_landing"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.riekling_claim"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "felsaad.L5.riekling_claim"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "felsaad.L7.landing_outlaws"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "felsaad.L5.stalhrim_harvest"
+          ]
+        },
+        "survivor": {
+          "weight": 2,
+          "why": [
+            "felsaad.L6.watcher_rock"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "felsaad.L10.barrow_in_the_ice"
+        ],
+        "ruin": [
+          "felsaad.L10.barrow_in_the_ice",
+          "felsaad.L8.stalhrim_shrine"
+        ],
+        "dwemer": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "falmer": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "bandit": [
+          "felsaad.L5.landing_trade"
+        ],
+        "fort": [
+          "felsaad.L9.stalhrim_claim"
+        ],
+        "military": [
+          "felsaad.L9.stalhrim_claim"
+        ],
+        "mage": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "vampire": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "necromancer": [
+          "felsaad.L8.giant_dead"
+        ],
+        "hagraven": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "forsworn": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "beast": [
+          "felsaad.L4.shore_cave_range",
+          "felsaad.L10.glacier_cave"
+        ],
+        "ice": [
+          "felsaad.L10.karstaag_hall",
+          "felsaad.L10.glacier_cave",
+          "felsaad.L10.barrow_in_the_ice"
+        ],
+        "mine": [
+          "felsaad.L5.riekling_claim"
+        ],
+        "grove": [
+          "felsaad.L4.mortrag_snow_wood"
+        ],
+        "smuggler": [
+          "felsaad.L5.landing_trade"
+        ],
+        "cave": [
+          "felsaad.L10.karstaag_hall",
+          "felsaad.L10.glacier_cave",
+          "felsaad.L1.cliff_wall"
+        ],
+        "giant": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "dragon": [
+          "felsaad.L10.dragon_watch"
+        ],
+        "tower": [
+          "felsaad.L10.karstaag_hall"
+        ],
+        "cabin": [
+          "felsaad.L6.northshore_landing"
+        ],
+        "wreck": [
+          "felsaad.L5.stalhrim_harvest"
+        ]
+      }
+    },
+    "brodir": {
+      "truth": "On the ash plain's western edge a ring of ash-trees stands green while the ground round it is grey: a spring beneath them the fall does not foul. It is the island's last stand of living broadleaf, the source of the seed stock the colony's farms depend on, and a place the Dunmer refugees hold as ground where the dead rest. A keeper who answers every question with a question tends it; a mage's tower on the ridge above watches without help.",
+      "layers": {
+        "L1": [
+          {
+            "id": "spring_hollow",
+            "text": "a shallow hollow over a spring",
+            "cites": []
+          },
+          {
+            "id": "watch_ridge",
+            "text": "a ridge above the hollow",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sheltered_hollow",
+            "text": "the hollow keeps the fall off",
+            "cites": [
+              "solstheim.L2.ash_fall",
+              "brodir.L1.spring_hollow"
+            ]
+          },
+          {
+            "id": "still_air",
+            "text": "calm microclimate inside the tree ring",
+            "cites": [
+              "brodir.L1.spring_hollow"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "grove_spring",
+            "text": "the clean spring",
+            "cites": [
+              "solstheim.L3.grove_spring",
+              "brodir.L1.spring_hollow"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "ash_trees_green",
+            "text": "living broadleaf, moss",
+            "cites": [
+              "solstheim.L4.ash_grove",
+              "brodir.L3.grove_spring"
+            ]
+          },
+          {
+            "id": "seed_beds",
+            "text": "beds of grain and herb",
+            "cites": [
+              "solstheim.L4.ash_grove",
+              "brodir.L3.grove_spring"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "seed_stock",
+            "text": "the island's seed bank",
+            "cites": [
+              "solstheim.L5.ash_farming",
+              "brodir.L4.seed_beds"
+            ]
+          },
+          {
+            "id": "shade_herbs",
+            "text": "reagents the colony cannot grow",
+            "cites": [
+              "brodir.L4.ash_trees_green"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "keeper_hut",
+            "text": "one hut",
+            "cites": [
+              "brodir.L5.seed_stock"
+            ]
+          },
+          {
+            "id": "colony_path",
+            "text": "a path from the Raven Rock road",
+            "cites": [
+              "solstheim.L6.island_roads",
+              "brodir.L1.spring_hollow"
+            ]
+          },
+          {
+            "id": "highpoint_tower",
+            "text": "a tower above",
+            "cites": [
+              "brodir.L1.watch_ridge"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "keeper",
+            "text": "answers in questions",
+            "cites": [
+              "brodir.L6.keeper_hut"
+            ]
+          },
+          {
+            "id": "seed_rights",
+            "text": "the council claims the stock",
+            "cites": [
+              "solstheim.L7.redoran_duty",
+              "brodir.L5.seed_stock"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "resting_ground",
+            "text": "the dead are said to lie easier here",
+            "cites": [
+              "solstheim.L8.ash_graves",
+              "brodir.L4.ash_trees_green"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "who_owns_the_seed",
+            "text": "Raven Rock's ration claim over the beds",
+            "cites": [
+              "solstheim.L9.colony_and_skaal",
+              "brodir.L5.seed_stock"
+            ]
+          },
+          {
+            "id": "tower_interest",
+            "text": "Telvanni curiosity over the unblighted spring",
+            "cites": [
+              "solstheim.L9.two_houses",
+              "brodir.L6.highpoint_tower"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "tower_experiments",
+            "text": "a mage who tried to make the ash grow and lost the argument",
+            "cites": [
+              "brodir.L1.watch_ridge",
+              "brodir.L6.highpoint_tower",
+              "solstheim.L10.ash_spawn"
+            ]
+          },
+          {
+            "id": "seed_theft",
+            "text": "the grove's one hidden thing is a locked bed of seed",
+            "cites": [
+              "brodir.L4.seed_beds",
+              "brodir.L5.seed_stock",
+              "brodir.L9.who_owns_the_seed"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "first_planting",
+            "text": "the refugees planted it the first spring",
+            "cites": [
+              "solstheim.L11.red_year",
+              "brodir.L4.seed_beds"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "alchemist": {
+          "weight": 4,
+          "why": [
+            "brodir.L5.shade_herbs",
+            "brodir.L4.ash_trees_green",
+            "brodir.L4.seed_beds"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "brodir.L6.colony_path"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "brodir.L6.colony_path"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "brodir.L6.colony_path"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "brodir.L8.resting_ground"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "brodir.L6.keeper_hut"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "brodir.L7.seed_rights"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "brodir.L8.resting_ground"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "brodir.L9.who_owns_the_seed"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "brodir.L10.tower_experiments"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "brodir.L6.keeper_hut"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "brodir.L7.keeper"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "brodir.L5.seed_stock"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "brodir.L9.who_owns_the_seed"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "brodir.L10.tower_experiments"
+        ],
+        "ruin": [
+          "brodir.L10.tower_experiments"
+        ],
+        "dwemer": [
+          "brodir.L10.tower_experiments"
+        ],
+        "falmer": [
+          "brodir.L10.tower_experiments"
+        ],
+        "bandit": [
+          "brodir.L10.tower_experiments"
+        ],
+        "fort": [
+          "brodir.L9.who_owns_the_seed"
+        ],
+        "military": [
+          "brodir.L9.who_owns_the_seed"
+        ],
+        "mage": [
+          "brodir.L10.tower_experiments"
+        ],
+        "vampire": [
+          "brodir.L10.tower_experiments"
+        ],
+        "necromancer": [
+          "brodir.L8.resting_ground"
+        ],
+        "hagraven": [
+          "brodir.L10.tower_experiments"
+        ],
+        "forsworn": [
+          "brodir.L10.tower_experiments"
+        ],
+        "beast": [
+          "brodir.L10.seed_theft"
+        ],
+        "ice": [
+          "brodir.L10.tower_experiments"
+        ],
+        "mine": [
+          "brodir.L5.seed_stock"
+        ],
+        "grove": [
+          "brodir.L4.ash_trees_green"
+        ],
+        "smuggler": [
+          "brodir.L10.tower_experiments"
+        ],
+        "cave": [
+          "brodir.L10.tower_experiments"
+        ],
+        "giant": [
+          "brodir.L10.tower_experiments"
+        ],
+        "dragon": [
+          "brodir.L10.tower_experiments"
+        ],
+        "tower": [
+          "brodir.L10.tower_experiments",
+          "brodir.L9.tower_interest"
+        ],
+        "cabin": [
+          "brodir.L6.keeper_hut"
+        ],
+        "wreck": [
+          "brodir.L5.seed_stock"
+        ]
+      }
+    },
+    "bloodskal": {
+      "truth": "The western ridge between the colony and the mountain is barrow country: Bloodskal Barrow, the grave of a hero whose blade is the island's best-known relic, a hunter's lodge where footprints go in and none come out, a flooded and ash-choked mine, and a peak with a bear that does not belong. It is where the colony's quarrymen go to dig and where the old Nord settlers lie. Everything here is a question of who owns a grave: the colony wants the barrow's stone, the Skaal want the dead undisturbed, and the dead have views of their own.",
+      "layers": {
+        "L1": [
+          {
+            "id": "barrow_ridge",
+            "text": "the ridge",
+            "cites": []
+          },
+          {
+            "id": "hvitkald_cone",
+            "text": "a snow-crowned peak",
+            "cites": []
+          },
+          {
+            "id": "old_mine_cut",
+            "text": "a mine cut into the west flank",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "seam_edge",
+            "text": "the sleet belt crosses the ridge",
+            "cites": [
+              "solstheim.L2.ash_snow_seam",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          },
+          {
+            "id": "peak_storms",
+            "text": "freezing gales on the cone",
+            "cites": [
+              "solstheim.L2.polar_north",
+              "bloodskal.L1.hvitkald_cone"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "west_runoff",
+            "text": "the barrow floods in thaw",
+            "cites": [
+              "solstheim.L3.ash_fouled_wells",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          },
+          {
+            "id": "mine_sump",
+            "text": "a flooded gallery",
+            "cites": [
+              "bloodskal.L1.old_mine_cut"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "cairn_heath",
+            "text": "heath and cairns",
+            "cites": [
+              "solstheim.L4.old_wood_hollows",
+              "bloodskal.L2.seam_edge"
+            ]
+          },
+          {
+            "id": "peak_snow",
+            "text": "alpine snowpack",
+            "cites": [
+              "solstheim.L4.ice_waste",
+              "bloodskal.L1.hvitkald_cone"
+            ]
+          },
+          {
+            "id": "white_bear_range",
+            "text": "snow-bear territory",
+            "cites": [
+              "solstheim.L4.pine_north",
+              "bloodskal.L2.peak_storms"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "quarry_claim",
+            "text": "barrow stone for the wall",
+            "cites": [
+              "solstheim.L5.ebony_mining",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          },
+          {
+            "id": "mine_remnant",
+            "text": "a played-out cut",
+            "cites": [
+              "bloodskal.L1.old_mine_cut"
+            ]
+          },
+          {
+            "id": "lodge_hunting",
+            "text": "pelt trapping on the ridge",
+            "cites": [
+              "solstheim.L5.hunting_and_hide",
+              "bloodskal.L4.cairn_heath"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "bloodskal_barrow",
+            "text": "the great barrow by the mine",
+            "cites": [
+              "solstheim.L1.barrow_ridges",
+              "bloodskal.L5.quarry_claim"
+            ]
+          },
+          {
+            "id": "abandoned_lodge",
+            "text": "a hunter's lodge",
+            "cites": [
+              "bloodskal.L5.lodge_hunting"
+            ]
+          },
+          {
+            "id": "damphall_mine",
+            "text": "the flooded shaft",
+            "cites": [
+              "bloodskal.L1.old_mine_cut"
+            ]
+          },
+          {
+            "id": "west_water_stone",
+            "text": "the water stone's low hill",
+            "cites": [
+              "solstheim.L1.all_maker_stones",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "quarrymen",
+            "text": "Dunmer stonecutters under Redoran guard",
+            "cites": [
+              "solstheim.L7.mine_and_wall",
+              "bloodskal.L5.quarry_claim"
+            ]
+          },
+          {
+            "id": "hunters_who_vanish",
+            "text": "trappers missing from the ridge",
+            "cites": [
+              "bloodskal.L6.abandoned_lodge"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "hero_grave",
+            "text": "the champion's blade",
+            "cites": [
+              "bloodskal.L1.barrow_ridge",
+              "bloodskal.L6.bloodskal_barrow"
+            ]
+          },
+          {
+            "id": "ash_urns",
+            "text": "urns carried from Raven Rock",
+            "cites": [
+              "solstheim.L8.ash_graves",
+              "bloodskal.L5.quarry_claim"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "dig_or_leave",
+            "text": "quarrying the Nord dead",
+            "cites": [
+              "solstheim.L9.colony_and_skaal",
+              "bloodskal.L5.quarry_claim"
+            ]
+          },
+          {
+            "id": "blade_claim",
+            "text": "a relic with three claimants",
+            "cites": [
+              "solstheim.L9.company_claim",
+              "bloodskal.L8.hero_grave"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "barrow_dead",
+            "text": "draugr and the ribbon-door guardian",
+            "cites": [
+              "solstheim.L10.thane_dead",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          },
+          {
+            "id": "ash_in_the_mine",
+            "text": "reavers and drowned tunnels",
+            "cites": [
+              "solstheim.L10.deep_gallery_sleepers",
+              "bloodskal.L1.old_mine_cut"
+            ]
+          },
+          {
+            "id": "black_book_filament",
+            "text": "the waking book in the barrow depths",
+            "cites": [
+              "solstheim.L10.black_book_altars",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          },
+          {
+            "id": "white_bear",
+            "text": "a bear that walks in snow",
+            "cites": [
+              "bloodskal.L4.white_bear_range",
+              "bloodskal.L1.hvitkald_cone"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "bloodskal_hero",
+            "text": "the clan-hero of the red blade",
+            "cites": [
+              "solstheim.L11.thane_kings",
+              "bloodskal.L8.hero_grave"
+            ]
+          },
+          {
+            "id": "old_settlers",
+            "text": "the first Nords on the south",
+            "cites": [
+              "solstheim.L11.thane_kings",
+              "bloodskal.L1.barrow_ridge"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 4,
+          "why": [
+            "bloodskal.L5.quarry_claim",
+            "bloodskal.L5.mine_remnant",
+            "bloodskal.L1.old_mine_cut"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L5.mine_remnant"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L5.mine_remnant"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L4.peak_snow"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L4.peak_snow"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "hunter": {
+          "weight": 3,
+          "why": [
+            "bloodskal.L5.lodge_hunting",
+            "bloodskal.L4.white_bear_range"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L5.lodge_hunting"
+          ]
+        },
+        "fletcher": {
+          "weight": 3,
+          "why": [
+            "bloodskal.L5.lodge_hunting",
+            "bloodskal.L4.peak_snow"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L8.hero_grave"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L6.bloodskal_barrow"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L6.bloodskal_barrow"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L8.hero_grave"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L9.dig_or_leave"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L10.barrow_dead"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L10.ash_in_the_mine"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L6.bloodskal_barrow"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "bloodskal.L11.bloodskal_hero",
+            "bloodskal.L11.old_settlers"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L5.mine_remnant"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "bloodskal.L5.mine_remnant"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L7.quarrymen"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L5.quarry_claim"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "bloodskal.L9.dig_or_leave"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "bloodskal.L10.barrow_dead",
+          "bloodskal.L10.black_book_filament"
+        ],
+        "ruin": [
+          "bloodskal.L10.barrow_dead",
+          "bloodskal.L10.black_book_filament"
+        ],
+        "dwemer": [
+          "bloodskal.L10.black_book_filament"
+        ],
+        "falmer": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "bandit": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "fort": [
+          "bloodskal.L9.dig_or_leave"
+        ],
+        "military": [
+          "bloodskal.L9.dig_or_leave"
+        ],
+        "mage": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "vampire": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "necromancer": [
+          "bloodskal.L10.barrow_dead",
+          "bloodskal.L8.hero_grave"
+        ],
+        "hagraven": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "forsworn": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "beast": [
+          "bloodskal.L4.white_bear_range",
+          "bloodskal.L10.white_bear"
+        ],
+        "ice": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "mine": [
+          "bloodskal.L5.mine_remnant",
+          "bloodskal.L1.old_mine_cut",
+          "bloodskal.L10.ash_in_the_mine"
+        ],
+        "grove": [
+          "bloodskal.L4.peak_snow"
+        ],
+        "smuggler": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "cave": [
+          "bloodskal.L10.white_bear",
+          "bloodskal.L4.white_bear_range"
+        ],
+        "giant": [
+          "bloodskal.L4.cairn_heath"
+        ],
+        "dragon": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "tower": [
+          "bloodskal.L10.barrow_dead"
+        ],
+        "cabin": [
+          "bloodskal.L6.abandoned_lodge"
+        ],
+        "wreck": [
+          "bloodskal.L5.quarry_claim"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "ash_yam_beds",
+      "b": "felsaad.L4.ice_field",
+      "reason": "Mortrag's glacial ice fields in the polar north cannot grow southern ash yams"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "commercial_stalhrim_smelter",
+      "b": "solstheim.L8.stalhrim_law",
+      "reason": "Stalhrim is sacred burial ice worked only by Skaal smith-law, never smelted in industrial furnaces"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "tribunal_temple_shrine",
+      "b": "skaal.L8.telling_at_the_fire",
+      "reason": "Skaal Village keeps the All-Maker oral tradition and has no Dunmer Tribunal shrines"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "ash_spawn_host",
+      "b": "skaal.L4.skaal_pine",
+      "reason": "Ash spawn rise from southern Red Year ash beds and Tel Mithryn experiments, not the northern Skaal pines"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.ebony_mining",
+        "solstheim.L5.spore_trade",
+        "solstheim.L1.north_cliffs"
+      ]
+    },
+    "smith": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.ebony_mining",
+        "solstheim.L5.spore_trade"
+      ]
+    },
+    "jeweler": {
+      "weight": 1,
+      "why": [
+        "solstheim.L5.ebony_mining"
+      ]
+    },
+    "farmer": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.stalhrim_craft",
+        "solstheim.L5.ash_farming"
+      ]
+    },
+    "farmhand": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.stalhrim_craft",
+        "solstheim.L5.ash_farming"
+      ]
+    },
+    "lumberjack": {
+      "weight": 3,
+      "why": [
+        "solstheim.L4.pine_north",
+        "solstheim.L4.old_wood_hollows"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "solstheim.L5.ash_farming"
+      ]
+    },
+    "mill_hand": {
+      "weight": 1,
+      "why": [
+        "solstheim.L5.ebony_mining"
+      ]
+    },
+    "woodcutter": {
+      "weight": 2,
+      "why": [
+        "solstheim.L4.pine_north"
+      ]
+    },
+    "fisher": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.hunting_and_hide",
+        "solstheim.L3.lake_fjalding",
+        "solstheim.L3.frozen_north_sea"
+      ]
+    },
+    "hunter": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.hunting_and_hide",
+        "solstheim.L4.pine_north",
+        "solstheim.L4.sea_herds"
+      ]
+    },
+    "butcher": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.hunting_and_hide",
+        "solstheim.L5.ash_farming",
+        "solstheim.L4.sea_herds"
+      ]
+    },
+    "fletcher": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.hunting_and_hide",
+        "solstheim.L4.pine_north"
+      ]
+    },
+    "alchemist": {
+      "weight": 1,
+      "why": [
+        "solstheim.L5.ebony_mining"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.spore_trade",
+        "solstheim.L6.raven_rock_bulwark",
+        "solstheim.L6.frostmoth_post"
+      ]
+    },
+    "tailor": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.spore_trade",
+        "solstheim.L7.outsider_gate"
+      ]
+    },
+    "bookseller": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.spore_trade",
+        "solstheim.L8.temple_hall"
+      ]
+    },
+    "innkeeper": {
+      "weight": 4,
+      "why": [
+        "solstheim.L6.raven_rock_bulwark",
+        "solstheim.L6.frostmoth_post",
+        "solstheim.L6.island_roads"
+      ]
+    },
+    "cook": {
+      "weight": 3,
+      "why": [
+        "solstheim.L5.ash_farming",
+        "solstheim.L6.attius_farm"
+      ]
+    },
+    "server": {
+      "weight": 3,
+      "why": [
+        "solstheim.L6.frostmoth_post",
+        "solstheim.L6.island_roads"
+      ]
+    },
+    "bard": {
+      "weight": 1,
+      "why": [
+        "solstheim.L5.ebony_mining"
+      ]
+    },
+    "priest": {
+      "weight": 3,
+      "why": [
+        "solstheim.L8.temple_hall",
+        "solstheim.L8.stalhrim_law"
+      ]
+    },
+    "jarl": {
+      "weight": 1,
+      "why": [
+        "solstheim.L6.raven_rock_bulwark"
+      ]
+    },
+    "steward": {
+      "weight": 2,
+      "why": [
+        "solstheim.L7.redoran_duty"
+      ]
+    },
+    "housecarl": {
+      "weight": 1,
+      "why": [
+        "solstheim.L7.refugee_colony"
+      ]
+    },
+    "court_wizard": {
+      "weight": 1,
+      "why": [
+        "solstheim.L7.refugee_colony"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "solstheim.L8.all_maker"
+      ]
+    },
+    "guard": {
+      "weight": 3,
+      "why": [
+        "solstheim.L9.legion_remnant",
+        "solstheim.L6.frostmoth_post"
+      ]
+    },
+    "fence": {
+      "weight": 1,
+      "why": [
+        "solstheim.L10.temple_cult"
+      ]
+    },
+    "prisoner": {
+      "weight": 4,
+      "why": [
+        "solstheim.L7.mine_and_wall",
+        "solstheim.L9.colony_and_skaal",
+        "solstheim.L10.riekling_dens"
+      ]
+    },
+    "beggar": {
+      "weight": 2,
+      "why": [
+        "solstheim.L6.busy_and_failing"
+      ]
+    },
+    "citizen": {
+      "weight": 2,
+      "why": [
+        "solstheim.L6.raven_rock_bulwark"
+      ]
+    },
+    "housekeeper": {
+      "weight": 2,
+      "why": [
+        "solstheim.L6.raven_rock_bulwark"
+      ]
+    },
+    "child": {
+      "weight": 2,
+      "why": [
+        "solstheim.L6.raven_rock_bulwark"
+      ]
+    },
+    "elder": {
+      "weight": 4,
+      "why": [
+        "solstheim.L8.all_maker",
+        "solstheim.L8.temple_hall",
+        "solstheim.L8.red_moon_hunt"
+      ]
+    },
+    "labourer": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.stalhrim_craft",
+        "solstheim.L5.ash_farming",
+        "solstheim.L7.mine_and_wall"
+      ]
+    },
+    "worker": {
+      "weight": 4,
+      "why": [
+        "solstheim.L5.stalhrim_craft",
+        "solstheim.L5.ash_farming",
+        "solstheim.L7.mine_and_wall"
+      ]
+    },
+    "guild_leader": {
+      "weight": 1,
+      "why": [
+        "solstheim.L7.refugee_colony"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 1,
+      "why": [
+        "solstheim.L7.refugee_colony"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 1,
+      "why": [
+        "solstheim.L5.ebony_mining"
+      ]
+    },
+    "survivor": {
+      "weight": 4,
+      "why": [
+        "solstheim.L9.company_claim",
+        "solstheim.L9.legion_remnant",
+        "solstheim.L9.first_dragonborn_returns"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "solstheim.L10.thane_dead",
+      "solstheim.L8.ash_graves"
+    ],
+    "ruin": [
+      "solstheim.L10.thane_dead",
+      "solstheim.L8.ash_graves"
+    ],
+    "dwemer": [
+      "solstheim.L10.frozen_dwemer",
+      "solstheim.L1.dwemer_roots",
+      "solstheim.L11.dwemer_age"
+    ],
+    "falmer": [
+      "solstheim.L10.temple_cult"
+    ],
+    "bandit": [
+      "solstheim.L10.temple_cult"
+    ],
+    "fort": [
+      "solstheim.L6.frostmoth_post",
+      "solstheim.L6.busy_and_failing"
+    ],
+    "military": [
+      "solstheim.L9.legion_remnant"
+    ],
+    "mage": [
+      "solstheim.L10.temple_cult"
+    ],
+    "vampire": [
+      "solstheim.L10.temple_cult"
+    ],
+    "necromancer": [
+      "solstheim.L10.thane_dead",
+      "solstheim.L8.ash_graves",
+      "solstheim.L8.stalhrim_law"
+    ],
+    "hagraven": [
+      "solstheim.L10.temple_cult"
+    ],
+    "forsworn": [
+      "solstheim.L10.temple_cult"
+    ],
+    "beast": [
+      "solstheim.L4.pine_north",
+      "solstheim.L4.ice_waste",
+      "solstheim.L4.riekling_country"
+    ],
+    "ice": [
+      "solstheim.L10.frozen_dwemer",
+      "solstheim.L4.ice_waste",
+      "solstheim.L2.polar_north"
+    ],
+    "mine": [
+      "solstheim.L5.ebony_mining",
+      "solstheim.L5.spore_trade",
+      "solstheim.L1.north_cliffs"
+    ],
+    "grove": [
+      "solstheim.L4.pine_north",
+      "solstheim.L4.ash_grove"
+    ],
+    "smuggler": [
+      "solstheim.L10.temple_cult"
+    ],
+    "cave": [
+      "solstheim.L10.riekling_dens",
+      "solstheim.L10.karstaag_hall",
+      "solstheim.L4.pine_north"
+    ],
+    "giant": [
+      "solstheim.L10.karstaag_hall"
+    ],
+    "dragon": [
+      "solstheim.L9.first_dragonborn_returns"
+    ],
+    "tower": [
+      "solstheim.L10.temple_cult"
+    ],
+    "cabin": [
+      "solstheim.L6.attius_farm",
+      "solstheim.L5.ash_farming"
+    ],
+    "wreck": [
+      "solstheim.L5.ferry_and_salvage"
+    ]
+  }
+}

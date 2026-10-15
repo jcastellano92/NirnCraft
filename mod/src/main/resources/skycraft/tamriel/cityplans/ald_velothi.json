@@ -1,0 +1,95 @@
+{
+  "id": "ald_velothi",
+  "why": [
+    "west_gash.L1.gash_ridges",
+    "vvardenfell_ashlands.L1.velothi_strongholds"
+  ],
+  "sil": "redoran-cliff-outpost-dock",
+  "base": "none",
+  "overlay": "west_gash",
+  "radius": 26,
+  "reach": 38,
+  "gates": [
+    [
+      0,
+      24
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        26
+      ],
+      "overlay": "west_gash"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "ald_velothi_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        0,
+        18
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "ald_velothi_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        -9,
+        0
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "ald_velothi_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        0,
+        -18
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "ald_velothi_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "ald_velothi_outpost",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "cliff_dock_cresset",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "ald_velothi_b_1": "Ald Velothi Outpost",
+    "ald_velothi_b_2": "Lledsea Relas's Shack",
+    "ald_velothi_b_3": "Vireveri Darethi's Hut",
+    "ald_velothi_b_4": "Banden Indarys Pier"
+  }
+}

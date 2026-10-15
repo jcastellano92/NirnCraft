@@ -60,6 +60,294 @@
     {
       "id": "skycraft:hawk_feather",
       "required": false
+    },
+    {
+      "id": "skycraft:salt_pile",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_mirriam",
+      "required": false
+    },
+    {
+      "id": "skycraft:bear_claws",
+      "required": false
+    },
+    {
+      "id": "skycraft:creep_cluster",
+      "required": false
+    },
+    {
+      "id": "skycraft:elves_ear",
+      "required": false
+    },
+    {
+      "id": "skycraft:namiras_rot",
+      "required": false
+    },
+    {
+      "id": "skycraft:glowing_mushroom",
+      "required": false
+    },
+    {
+      "id": "skycraft:hanging_moss",
+      "required": false
+    },
+    {
+      "id": "skycraft:swamp_fungal_pod",
+      "required": false
+    },
+    {
+      "id": "skycraft:thistle_branch",
+      "required": false
+    },
+    {
+      "id": "skycraft:giant_lichen",
+      "required": false
+    },
+    {
+      "id": "skycraft:mora_tapinella",
+      "required": false
+    },
+    {
+      "id": "skycraft:poison_bloom",
+      "required": false
+    },
+    {
+      "id": "skycraft:rock_warbler_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:pine_thrush_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawks_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:hawk_beak",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_antlers",
+      "required": false
+    },
+    {
+      "id": "skycraft:large_antlers",
+      "required": false
+    },
+    {
+      "id": "skycraft:sabre_cat_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:eye_of_sabre_cat",
+      "required": false
+    },
+    {
+      "id": "skycraft:mudcrab_chitin",
+      "required": false
+    },
+    {
+      "id": "skycraft:slaughterfish_scales",
+      "required": false
+    },
+    {
+      "id": "skycraft:troll_fat",
+      "required": false
+    },
+    {
+      "id": "skycraft:giants_toe",
+      "required": false
+    },
+    {
+      "id": "skycraft:skeever_tail",
+      "required": false
+    },
+    {
+      "id": "skycraft:spider_egg",
+      "required": false
+    },
+    {
+      "id": "skycraft:chaurus_eggs",
+      "required": false
+    },
+    {
+      "id": "skycraft:falmer_ear",
+      "required": false
+    },
+    {
+      "id": "skycraft:briar_heart",
+      "required": false
+    },
+    {
+      "id": "skycraft:ice_wraith_teeth",
+      "required": false
+    },
+    {
+      "id": "skycraft:powdered_mammoth_tusk",
+      "required": false
+    },
+    {
+      "id": "skycraft:pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:small_pearl",
+      "required": false
+    },
+    {
+      "id": "skycraft:nordic_barnacle",
+      "required": false
+    },
+    {
+      "id": "skycraft:jazbay_grapes",
+      "required": false
+    },
+    {
+      "id": "skycraft:wisp_wrappings",
+      "required": false
+    },
+    {
+      "id": "skycraft:torchbug_thorax",
+      "required": false
+    },
+    {
+      "id": "skycraft:luna_moth_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:monarch_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:blue_butterfly_wing",
+      "required": false
+    },
+    {
+      "id": "skycraft:blue_dartwing",
+      "required": false
+    },
+    {
+      "id": "skycraft:garlic",
+      "required": false
+    },
+    {
+      "id": "skycraft:vampire_dust",
+      "required": false
+    },
+    {
+      "id": "skycraft:fire_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:frost_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:void_salts",
+      "required": false
+    },
+    {
+      "id": "skycraft:glow_dust",
+      "required": false
+    },
+    {
+      "id": "skycraft:ectoplasm",
+      "required": false
+    },
+    {
+      "id": "skycraft:bone_meal_draugr",
+      "required": false
+    },
+    {
+      "id": "skycraft:chaurus_hunter_antennae",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_oil",
+      "required": false
+    },
+    {
+      "id": "skycraft:frostbite_venom",
+      "required": false
+    },
+    {
+      "id": "skycraft:kamal_horn",
+      "required": false
+    },
+    {
+      "id": "skycraft:tsaesci_scale",
+      "required": false
+    },
+    {
+      "id": "minecraft:pink_tulip",
+      "required": false
+    },
+    {
+      "id": "minecraft:white_tulip",
+      "required": false
+    },
+    {
+      "id": "skycraft:hist_sap",
+      "required": false
+    },
+    {
+      "id": "skycraft:wamasu_scale",
+      "required": false
+    },
+    {
+      "id": "skycraft:leviathan_tooth",
+      "required": false
+    },
+    {
+      "id": "skycraft:bittergreen_petals",
+      "required": false
+    },
+    {
+      "id": "skycraft:hypha_facia",
+      "required": false
+    },
+    {
+      "id": "skycraft:marshmerrow",
+      "required": false
+    },
+    {
+      "id": "minecraft:blue_orchid",
+      "required": false
+    },
+    {
+      "id": "skycraft:minotaur_horn",
+      "required": false
+    },
+    {
+      "id": "skycraft:dreugh_wax",
+      "required": false
+    },
+    {
+      "id": "skycraft:scamp_skin",
+      "required": false
+    },
+    {
+      "id": "minecraft:lilac",
+      "required": false
+    },
+    {
+      "id": "minecraft:red_tulip",
+      "required": false
+    },
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "minecraft:sugar",
+      "required": false
+    },
+    {
+      "id": "minecraft:cocoa_beans",
+      "required": false
     }
   ]
 }

@@ -1,16 +1,840 @@
 {
   "id": "raven_rock",
+  "why": [
+    "raven_rock.L1.bay_headland",
+    "raven_rock.L1.mine_shaft"
+  ],
   "tint": {
-    "wall": "minecraft:cobbled_deepslate",
-    "wall2": "minecraft:deepslate_bricks",
+    "wall": "minecraft:terracotta",
+    "wall2": "minecraft:packed_mud",
+    "low": "minecraft:polished_andesite",
     "wood": "dark_oak",
-    "accent": "green"
+    "roof": "mud_brick",
+    "accent": "orange"
   },
   "palette": {
-    "cityWall": "deepslate_bricks",
-    "cityWall2": "minecraft:cracked_deepslate_bricks",
-    "plaza": "minecraft:polished_deepslate",
-    "plaza2": "minecraft:deepslate_tiles",
+    "cityWall": "mud_bricks",
+    "cityWall2": "minecraft:packed_mud",
+    "plaza": "minecraft:polished_andesite",
+    "plaza2": "minecraft:polished_andesite",
     "path": "minecraft:gravel"
+  },
+  "style": {
+    "houseStyle": "redoran",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:terracotta",
+        "minecraft:packed_mud",
+        "minecraft:polished_andesite",
+        "minecraft:gravel",
+        "mud_bricks",
+        "minecraft:polished_andesite"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_1_0",
+          "prop_raven_rock_1_1",
+          "prop_raven_rock_1_2",
+          "prop_raven_rock_1_3",
+          "prop_raven_rock_1_4",
+          "prop_raven_rock_1_5",
+          "prop_raven_rock_1_6",
+          "prop_raven_rock_1_7",
+          "prop_raven_rock_1_8",
+          "prop_raven_rock_1_9",
+          "prop_raven_rock_1_10",
+          "prop_raven_rock_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_2_0",
+          "prop_raven_rock_2_1",
+          "prop_raven_rock_2_2",
+          "prop_raven_rock_2_3",
+          "prop_raven_rock_2_4",
+          "prop_raven_rock_2_5",
+          "prop_raven_rock_2_6",
+          "prop_raven_rock_2_7",
+          "prop_raven_rock_2_8",
+          "prop_raven_rock_2_9",
+          "prop_raven_rock_2_10",
+          "prop_raven_rock_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_3_0",
+          "prop_raven_rock_3_1",
+          "prop_raven_rock_3_2",
+          "prop_raven_rock_3_3",
+          "prop_raven_rock_3_4",
+          "prop_raven_rock_3_5",
+          "prop_raven_rock_3_6",
+          "prop_raven_rock_3_7",
+          "prop_raven_rock_3_8",
+          "prop_raven_rock_3_9",
+          "prop_raven_rock_3_10",
+          "prop_raven_rock_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_4_0",
+          "prop_raven_rock_4_1",
+          "prop_raven_rock_4_2",
+          "prop_raven_rock_4_3",
+          "prop_raven_rock_4_4",
+          "prop_raven_rock_4_5",
+          "prop_raven_rock_4_6",
+          "prop_raven_rock_4_7",
+          "prop_raven_rock_4_8",
+          "prop_raven_rock_4_9",
+          "prop_raven_rock_4_10",
+          "prop_raven_rock_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_5_0",
+          "prop_raven_rock_5_1",
+          "prop_raven_rock_5_2",
+          "prop_raven_rock_5_3",
+          "prop_raven_rock_5_4",
+          "prop_raven_rock_5_5",
+          "prop_raven_rock_5_6",
+          "prop_raven_rock_5_7",
+          "prop_raven_rock_5_8",
+          "prop_raven_rock_5_9",
+          "prop_raven_rock_5_10",
+          "prop_raven_rock_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_6_0",
+          "prop_raven_rock_6_1",
+          "prop_raven_rock_6_2",
+          "prop_raven_rock_6_3",
+          "prop_raven_rock_6_4",
+          "prop_raven_rock_6_5",
+          "prop_raven_rock_6_6",
+          "prop_raven_rock_6_7",
+          "prop_raven_rock_6_8",
+          "prop_raven_rock_6_9",
+          "prop_raven_rock_6_10",
+          "prop_raven_rock_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_7_0",
+          "prop_raven_rock_7_1",
+          "prop_raven_rock_7_2",
+          "prop_raven_rock_7_3",
+          "prop_raven_rock_7_4",
+          "prop_raven_rock_7_5",
+          "prop_raven_rock_7_6",
+          "prop_raven_rock_7_7",
+          "prop_raven_rock_7_8",
+          "prop_raven_rock_7_9",
+          "prop_raven_rock_7_10",
+          "prop_raven_rock_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_8_0",
+          "prop_raven_rock_8_1",
+          "prop_raven_rock_8_2",
+          "prop_raven_rock_8_3",
+          "prop_raven_rock_8_4",
+          "prop_raven_rock_8_5",
+          "prop_raven_rock_8_6",
+          "prop_raven_rock_8_7",
+          "prop_raven_rock_8_8",
+          "prop_raven_rock_8_9",
+          "prop_raven_rock_8_10",
+          "prop_raven_rock_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_9_0",
+          "prop_raven_rock_9_1",
+          "prop_raven_rock_9_2",
+          "prop_raven_rock_9_3",
+          "prop_raven_rock_9_4",
+          "prop_raven_rock_9_5",
+          "prop_raven_rock_9_6",
+          "prop_raven_rock_9_7",
+          "prop_raven_rock_9_8",
+          "prop_raven_rock_9_9",
+          "prop_raven_rock_9_10",
+          "prop_raven_rock_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_10_0",
+          "prop_raven_rock_10_1",
+          "prop_raven_rock_10_2",
+          "prop_raven_rock_10_3",
+          "prop_raven_rock_10_4",
+          "prop_raven_rock_10_5",
+          "prop_raven_rock_10_6",
+          "prop_raven_rock_10_7",
+          "prop_raven_rock_10_8",
+          "prop_raven_rock_10_9",
+          "prop_raven_rock_10_10",
+          "prop_raven_rock_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_11_0",
+          "prop_raven_rock_11_1",
+          "prop_raven_rock_11_2",
+          "prop_raven_rock_11_3",
+          "prop_raven_rock_11_4",
+          "prop_raven_rock_11_5",
+          "prop_raven_rock_11_6",
+          "prop_raven_rock_11_7",
+          "prop_raven_rock_11_8",
+          "prop_raven_rock_11_9",
+          "prop_raven_rock_11_10",
+          "prop_raven_rock_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_12_0",
+          "prop_raven_rock_12_1",
+          "prop_raven_rock_12_2",
+          "prop_raven_rock_12_3",
+          "prop_raven_rock_12_4",
+          "prop_raven_rock_12_5",
+          "prop_raven_rock_12_6",
+          "prop_raven_rock_12_7",
+          "prop_raven_rock_12_8",
+          "prop_raven_rock_12_9",
+          "prop_raven_rock_12_10",
+          "prop_raven_rock_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_13_0",
+          "prop_raven_rock_13_1",
+          "prop_raven_rock_13_2",
+          "prop_raven_rock_13_3",
+          "prop_raven_rock_13_4",
+          "prop_raven_rock_13_5",
+          "prop_raven_rock_13_6",
+          "prop_raven_rock_13_7",
+          "prop_raven_rock_13_8",
+          "prop_raven_rock_13_9",
+          "prop_raven_rock_13_10",
+          "prop_raven_rock_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_14_0",
+          "prop_raven_rock_14_1",
+          "prop_raven_rock_14_2",
+          "prop_raven_rock_14_3",
+          "prop_raven_rock_14_4",
+          "prop_raven_rock_14_5",
+          "prop_raven_rock_14_6",
+          "prop_raven_rock_14_7",
+          "prop_raven_rock_14_8",
+          "prop_raven_rock_14_9",
+          "prop_raven_rock_14_10",
+          "prop_raven_rock_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_15_0",
+          "prop_raven_rock_15_1",
+          "prop_raven_rock_15_2",
+          "prop_raven_rock_15_3",
+          "prop_raven_rock_15_4",
+          "prop_raven_rock_15_5",
+          "prop_raven_rock_15_6",
+          "prop_raven_rock_15_7",
+          "prop_raven_rock_15_8",
+          "prop_raven_rock_15_9",
+          "prop_raven_rock_15_10",
+          "prop_raven_rock_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_16_0",
+          "prop_raven_rock_16_1",
+          "prop_raven_rock_16_2",
+          "prop_raven_rock_16_3",
+          "prop_raven_rock_16_4",
+          "prop_raven_rock_16_5",
+          "prop_raven_rock_16_6",
+          "prop_raven_rock_16_7",
+          "prop_raven_rock_16_8",
+          "prop_raven_rock_16_9",
+          "prop_raven_rock_16_10",
+          "prop_raven_rock_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_17_0",
+          "prop_raven_rock_17_1",
+          "prop_raven_rock_17_2",
+          "prop_raven_rock_17_3",
+          "prop_raven_rock_17_4",
+          "prop_raven_rock_17_5",
+          "prop_raven_rock_17_6",
+          "prop_raven_rock_17_7",
+          "prop_raven_rock_17_8",
+          "prop_raven_rock_17_9",
+          "prop_raven_rock_17_10",
+          "prop_raven_rock_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_18_0",
+          "prop_raven_rock_18_1",
+          "prop_raven_rock_18_2",
+          "prop_raven_rock_18_3",
+          "prop_raven_rock_18_4",
+          "prop_raven_rock_18_5",
+          "prop_raven_rock_18_6",
+          "prop_raven_rock_18_7",
+          "prop_raven_rock_18_8",
+          "prop_raven_rock_18_9",
+          "prop_raven_rock_18_10",
+          "prop_raven_rock_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_19_0",
+          "prop_raven_rock_19_1",
+          "prop_raven_rock_19_2",
+          "prop_raven_rock_19_3",
+          "prop_raven_rock_19_4",
+          "prop_raven_rock_19_5",
+          "prop_raven_rock_19_6",
+          "prop_raven_rock_19_7",
+          "prop_raven_rock_19_8",
+          "prop_raven_rock_19_9",
+          "prop_raven_rock_19_10",
+          "prop_raven_rock_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_20_0",
+          "prop_raven_rock_20_1",
+          "prop_raven_rock_20_2",
+          "prop_raven_rock_20_3",
+          "prop_raven_rock_20_4",
+          "prop_raven_rock_20_5",
+          "prop_raven_rock_20_6",
+          "prop_raven_rock_20_7",
+          "prop_raven_rock_20_8",
+          "prop_raven_rock_20_9",
+          "prop_raven_rock_20_10",
+          "prop_raven_rock_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:gravel",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:gravel"
+        ],
+        "props": [
+          "prop_raven_rock_21_0",
+          "prop_raven_rock_21_1",
+          "prop_raven_rock_21_2",
+          "prop_raven_rock_21_3",
+          "prop_raven_rock_21_4",
+          "prop_raven_rock_21_5",
+          "prop_raven_rock_21_6",
+          "prop_raven_rock_21_7",
+          "prop_raven_rock_21_8",
+          "prop_raven_rock_21_9",
+          "prop_raven_rock_21_10",
+          "prop_raven_rock_21_11"
+        ]
+      }
+    }
   }
 }

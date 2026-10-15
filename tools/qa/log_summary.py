@@ -15,6 +15,8 @@ NOISE = re.compile(r"netty|Reflective setAccessible|mixin/\]: Error cleaning|For
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     path = sys.argv[1]
     crash_dir = sys.argv[2] if len(sys.argv) > 2 else None
     if not os.path.exists(path):

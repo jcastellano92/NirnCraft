@@ -1,0 +1,444 @@
+{
+  "id": "mournhold",
+  "why": [
+    "deshaan.L1.fungal_plains",
+    "deshaan.L3.mournhold_aqueducts",
+    "deshaan.L5.temple_economy"
+  ],
+  "sil": "dome-citadel-plaza",
+  "base": "none",
+  "overlay": "mournhold",
+  "radius": 140,
+  "reach": 164,
+  "innKey": "mh_winged_guar",
+  "names": {
+    "inn": "mh_winged_guar",
+    "store": "mh_great_bazaar",
+    "smithy": "mh_bazaar_armorer"
+  },
+  "gates": [
+    [
+      0,
+      -132
+    ],
+    [
+      132,
+      0
+    ],
+    [
+      0,
+      132
+    ],
+    [
+      -132,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "mournhold_high_chapel",
+      "overlay": "mournhold"
+    },
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        -68
+      ],
+      "face": "south",
+      "name": "mournhold_royal_palace",
+      "overlay": "mournhold"
+    },
+    {
+      "id": "orrery",
+      "at": [
+        48,
+        22
+      ],
+      "face": "south",
+      "name": "mournhold_imperial_shrine",
+      "overlay": "mournhold"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        140
+      ],
+      "overlay": "mournhold"
+    },
+    {
+      "ring": [
+        70,
+        140
+      ],
+      "overlay": "deshaan"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_temple_chancery"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        66,
+        17
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_hall_of_ministry"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        13
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_throne_hall"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        50,
+        47
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_royal_guard_barracks"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        15,
+        24
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_ordinator_garrison"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        21,
+        65
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_winged_guar"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        2,
+        28
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_great_bazaar"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -13,
+        67
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_bazaar_armorer"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -12,
+        25
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_golden_flower_apothecary"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -43,
+        52
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_canon_scriptorium"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -23,
+        16
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_godsreach_clothiers"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -63,
+        25
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_lapidary"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -28,
+        4
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_craftsmens_hall"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -67,
+        -9
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_museum_of_artifacts"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_velas_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -55,
+        -40
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_sadri_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -18,
+        -22
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_andoren_estate"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -29,
+        -62
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_llethan_townhouse"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -5,
+        -28
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_indoril_magistracy"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        4,
+        -68
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_hlaalu_embassy"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        9,
+        -27
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_geon_auline_house"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        36,
+        -57
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_flaccus_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -19
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_braven_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        60,
+        -33
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_bazaar_tenement"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        27,
+        -7
+      ],
+      "face": "south",
+      "overlay": "mournhold",
+      "name": "mh_aqueduct_store"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "almalexia_plaza",
+      "count": 4
+    },
+    {
+      "type": "statue",
+      "theme": "tribunal:almalexia",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "palace_courtyard",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "house_indoril",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "mournhold_brazier",
+      "count": 4
+    }
+  ],
+  "titles": {
+    "mournhold_high_chapel": "High Chapel of Almalexia",
+    "mournhold_royal_palace": "Royal Palace of King Helseth",
+    "mournhold_imperial_shrine": "Mournhold Clockwork Shrine",
+    "mh_temple_chancery": "Temple Courtyard Chancery",
+    "mh_hall_of_ministry": "Hall of Ministry & Mercy",
+    "mh_throne_hall": "Royal Throne Hall",
+    "mh_royal_guard_barracks": "Royal Guard Barracks",
+    "mh_ordinator_garrison": "High Ordinator Garrison",
+    "mh_winged_guar": "The Winged Guar",
+    "mh_great_bazaar": "Great Bazaar Pavilion",
+    "mh_bazaar_armorer": "Bazaar Armorer's Hall",
+    "mh_golden_flower_apothecary": "Golden Flower Apothecary",
+    "mh_canon_scriptorium": "Temple Canon Scriptorium",
+    "mh_godsreach_clothiers": "Godsreach Silk Clothiers",
+    "mh_lapidary": "Mournhold Lapidary & Gold",
+    "mh_craftsmens_hall": "Mournhold Craftsmen's Hall",
+    "mh_museum_of_artifacts": "Museum of Artifacts",
+    "mh_velas_manor": "Velas Manor",
+    "mh_sadri_manor": "Sadri Manor",
+    "mh_andoren_estate": "Andoren Estate",
+    "mh_llethan_townhouse": "Llethan Townhouse",
+    "mh_indoril_magistracy": "Indoril Magistracy Hall",
+    "mh_hlaalu_embassy": "Hlaalu Embassy Manor",
+    "mh_geon_auline_house": "Geon Auline's House",
+    "mh_flaccus_house": "Ignatius Flaccus's House",
+    "mh_braven_house": "Tervur Braven's House",
+    "mh_bazaar_tenement": "Suns-In-Shadow Tenement",
+    "mh_aqueduct_store": "Aqueduct Cistern Store"
+  }
+}

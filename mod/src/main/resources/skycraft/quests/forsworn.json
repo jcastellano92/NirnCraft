@@ -3,37 +3,123 @@
   "category": "faction",
   "faction": "forsworn",
   "region": "skyrim/the_reach",
-  "speakers": {"narrator": "Narrator", "markarth_guard": "Markarth Guard"},
+  "speakers": {
+    "narrator": "Narrator",
+    "markarth_guard": "Markarth Guard"
+  },
   "npcs": [
-    {"id": "eltrys", "name": "Eltrys", "role": "citizen", "place": "markarth", "offset": [10, 8],
-     "greet": "Not here. Not in the open. Markarth has ears in the stones, and most of them are paid for."},
-    {"id": "thonar_silver_blood", "name": "Thonar Silver-Blood", "role": "merchant", "place": "markarth", "offset": [6, -12],
-     "greet": "My family owns the mine, the inn, the smelter and a good number of the guards. Keep that in mind while you speak."},
-    {"id": "madanach", "name": "Madanach", "role": "forsworn", "place": "markarth", "offset": [-18, -14],
-     "greet": "So the Silver-Bloods have sent me another one. Sit. The mine has nothing but time, and I have spent a great deal of it waiting for someone useful."},
-    {"id": "kaie_briar_mother", "name": "Kaie the Briar-Mother", "role": "forsworn", "place": "druadach_redoubt", "offset": [3, 3], "female": true,
-     "greet": "The Reach remembers who it belongs to. The stone remembers. The roots remember. Do you?"},
-    {"id": "faleen", "name": "Faleen", "role": "housecarl", "place": "markarth", "offset": [2, -22], "female": true,
-     "greet": "The Jarl has no time for you. I'll decide whether he makes some."}
+    {
+      "id": "eltrys",
+      "name": "Eltrys",
+      "role": "citizen",
+      "place": "markarth",
+      "offset": [
+        10,
+        8
+      ],
+      "greet": "Not here. Not in the open. Markarth has ears in the stones, and most of them are paid for."
+    },
+    {
+      "id": "thonar_silver_blood",
+      "name": "Thonar Silver-Blood",
+      "role": "merchant",
+      "place": "markarth",
+      "offset": [
+        6,
+        -12
+      ],
+      "greet": "My family owns the mine, the inn, the smelter and a good number of the guards. Keep that in mind while you speak."
+    },
+    {
+      "id": "madanach",
+      "name": "Madanach",
+      "role": "forsworn",
+      "place": "markarth",
+      "offset": [
+        -18,
+        -14
+      ],
+      "greet": "So the Silver-Bloods have sent me another one. Sit. The mine has nothing but time, and I have spent a great deal of it waiting for someone useful."
+    },
+    {
+      "id": "kaie_briar_mother",
+      "name": "Kaie the Briar-Mother",
+      "role": "forsworn",
+      "place": "druadach_redoubt",
+      "offset": [
+        3,
+        3
+      ],
+      "female": true,
+      "greet": "The Reach remembers who it belongs to. The stone remembers. The roots remember. Do you?"
+    },
+    {
+      "id": "faleen",
+      "name": "Faleen",
+      "role": "housecarl",
+      "place": "markarth",
+      "offset": [
+        2,
+        -22
+      ],
+      "female": true,
+      "greet": "The Jarl has no time for you. I'll decide whether he makes some."
+    }
   ],
   "relics": [
-    {"id": "fs_warrens_note", "name": "Note from the Warrens", "desc": "'The woman asks too many questions. In the market, in daylight, so the others learn. N.' Found in a killer's cot in the Warrens.", "icon": 11},
-    {"id": "fs_silver_blood_ledger", "name": "Silver-Blood Ledger", "desc": "Twenty years of payments from the Silver-Blood family to 'the mine'. No ore is listed. No names, either.", "icon": 7},
-    {"id": "fs_heart_of_hollow_eye", "name": "Heart of Hollow-Eye", "desc": "The heart of the great bear of Purewater Run, wrapped in moss. The Reachfolk say a bear's heart remembers how to be brave.", "icon": 15}
+    {
+      "id": "fs_warrens_note",
+      "name": "Note from the Warrens",
+      "desc": "'The woman asks too many questions. In the market, in daylight, so the others learn. N.' Found in a killer's cot in the Warrens.",
+      "icon": 11
+    },
+    {
+      "id": "fs_silver_blood_ledger",
+      "name": "Silver-Blood Ledger",
+      "desc": "Twenty years of payments from the Silver-Blood family to 'the mine'. No ore is listed. No names, either.",
+      "icon": 7
+    },
+    {
+      "id": "fs_heart_of_hollow_eye",
+      "name": "Heart of Hollow-Eye",
+      "desc": "The heart of the great bear of Purewater Run, wrapped in moss. The Reachfolk say a bear's heart remembers how to be brave.",
+      "icon": 15
+    }
   ],
   "scenes": {
     "fs_framed": [
-      ["narrator", "Eltrys lies at the foot of the old shrine with a guardsman's knife between his ribs. Three guards step out of the shadows behind you."],
-      ["markarth_guard", "Found standing over the body, weren't you? Thonar Silver-Blood said you'd come. You're going to Cidhna Mine, and you're going to stay there."]
+      [
+        "narrator",
+        "Eltrys lies at the foot of the old shrine with a guardsman's knife between his ribs. Three guards step out of the shadows behind you."
+      ],
+      [
+        "markarth_guard",
+        "Found standing over the body, weren't you? Thonar Silver-Blood said you'd come. You're going to Cidhna Mine, and you're going to stay there."
+      ]
     ],
     "fs_king_in_rags": [
-      ["madanach", "For twenty years the Silver-Bloods have paid me to sit in this hole and give my orders from it. They think they own the King in Rags. They own a cage."],
-      ["madanach", "Every death in Markarth's streets was mine, and every one of them was paid for in Silver-Blood coin. Now I am done waiting. Are you coming with me?"]
+      [
+        "madanach",
+        "For twenty years the Silver-Bloods have paid me to sit in this hole and give my orders from it. They think they own the King in Rags. They own a cage."
+      ],
+      [
+        "madanach",
+        "Every death in Markarth's streets was mine, and every one of them was paid for in Silver-Blood coin. Now I am done waiting. Are you coming with me?"
+      ]
     ],
     "fs_briarheart": [
-      ["narrator", "In the heart of Druadach Redoubt, Kaie draws a briar-root through the bear's heart and holds it over the fire until it smokes. The Forsworn beat their shields."],
-      ["kaie_briar_mother", "Brave heart, old heart, give your courage to the root. Root, take the warrior who brought it, and never let them run."],
-      ["madanach", "From tonight you carry the briar. The Reach is yours to guard, Briarheart. Do not make me regret trusting a stranger twice."]
+      [
+        "narrator",
+        "In the heart of Druadach Redoubt, Kaie draws a briar-root through the bear's heart and holds it over the fire until it smokes. The Forsworn beat their shields."
+      ],
+      [
+        "kaie_briar_mother",
+        "Brave heart, old heart, give your courage to the root. Root, take the warrior who brought it, and never let them run."
+      ],
+      [
+        "madanach",
+        "From tonight you carry the briar. The Reach is yours to guard, Briarheart. Do not make me regret trusting a stranger twice."
+      ]
     ]
   },
   "quests": [
@@ -41,163 +127,505 @@
       "id": "fs_blood_in_the_market",
       "title": "Blood in the Market",
       "start": "auto",
-      "requires": ["region:skyrim/the_reach", "level:4", "!faction:forsworn"],
+      "requires": [
+        "region:skyrim/the_reach",
+        "level:4",
+        "!faction:forsworn"
+      ],
       "desc": "As I came into Markarth, a man drew a knife in the crowded market and went for a woman at a fruit stall.",
       "objectives": [
-        {"type": "go", "place": "markarth", "radius": 40, "text": "Enter Markarth"},
-        {"type": "kill", "place": "markarth", "offset": [8, 14], "text": "Stop the knife-man in the market",
-         "spawn": [{"type": "npc:forsworn", "name": "Weylin", "target": true, "hostile": true, "hp": 1.5}],
-         "journal": "I was too late for the woman. The killer screamed something about the Reach as he died, and the crowd scattered as if they had seen it all before."},
-        {"type": "talk", "npc": "eltrys", "text": "Speak with the man who slipped you a note",
-         "topic": "You wanted to talk to me?",
-         "reply": "Quietly. That woman, Margret, was asking questions about the Forsworn killings, like me. These murders happen every month in Markarth, and every time, someone makes sure nobody looks too closely. The killer lived in the Warrens. Search his cot before the guards 'tidy' it."},
-        {"type": "retrieve", "place": "markarth", "offset": [-28, 20], "relic": "fs_warrens_note", "radius": 6, "text": "Search Weylin's cot in the Warrens"},
-        {"type": "deliver", "npc": "eltrys", "relic": "fs_warrens_note", "text": "Bring the note to Eltrys",
-         "topic": "The killer was following orders. This was in his cot.",
-         "reply": "Signed 'N'. Then someone gave him that order, and someone else gave them theirs. Keep digging, and keep your head down. I've already lost one friend to this city."}
+        {
+          "type": "go",
+          "place": "markarth",
+          "radius": 40,
+          "text": "Enter Markarth"
+        },
+        {
+          "type": "kill",
+          "place": "markarth",
+          "offset": [
+            8,
+            14
+          ],
+          "text": "Stop the knife-man in the market",
+          "spawn": [
+            {
+              "type": "npc:forsworn",
+              "name": "Weylin",
+              "target": true,
+              "hostile": true,
+              "hp": 1.5
+            }
+          ],
+          "journal": "I was too late for the woman. The killer screamed something about the Reach as he died, and the crowd scattered as if they had seen it all before."
+        },
+        {
+          "type": "talk",
+          "npc": "eltrys",
+          "text": "Speak with the man who slipped you a note",
+          "topic": "You wanted to talk to me?",
+          "reply": "Quietly. That woman, Margret, was asking questions about the Forsworn killings, like me. These murders happen every month in Markarth, and every time, someone makes sure nobody looks too closely. The killer lived in the Warrens. Search his cot before the guards 'tidy' it."
+        },
+        {
+          "type": "retrieve",
+          "place": "markarth",
+          "offset": [
+            -28,
+            20
+          ],
+          "relic": "fs_warrens_note",
+          "radius": 6,
+          "text": "Search Weylin's cot in the Warrens"
+        },
+        {
+          "type": "deliver",
+          "npc": "eltrys",
+          "relic": "fs_warrens_note",
+          "text": "Bring the note to Eltrys",
+          "topic": "The killer was following orders. This was in his cot.",
+          "reply": "Signed 'N'. Then someone gave him that order, and someone else gave them theirs. Keep digging, and keep your head down. I've already lost one friend to this city."
+        }
       ],
       "outro": "A Forsworn agent murdered a woman in Markarth's market. Eltrys, who has been looking into the killings, showed me that the murderer was following orders from someone higher up.",
-      "rewards": {"gold": 200, "faction_points": 1}
+      "rewards": {
+        "gold": 200,
+        "faction_points": 1
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "fs_the_silver_blood_secret",
       "title": "The Silver-Blood Secret",
       "start": "auto",
-      "requires": ["quest:fs_blood_in_the_market"],
+      "requires": [
+        "quest:fs_blood_in_the_market"
+      ],
       "desc": "Eltrys believes the Forsworn killings in Markarth are ordered from inside Cidhna Mine and paid for by the Silver-Blood family. I agreed to find proof.",
       "objectives": [
-        {"type": "talk", "npc": "eltrys", "text": "Speak with Eltrys",
-         "topic": "Who is 'N'?",
-         "reply": "A servant of the Silver-Bloods, I think. But every trail goes past him, down into Cidhna Mine, to the man the Silver-Bloods keep there. Thonar Silver-Blood will know. Be careful how you ask."},
-        {"type": "talk", "npc": "thonar_silver_blood", "text": "Question Thonar Silver-Blood",
-         "topic": "Your family's name keeps turning up next to dead people.",
-         "reply": "Then you have been reading the wrong names. Leave Markarth today. I will not say it twice."},
-        {"type": "retrieve", "place": "markarth", "offset": [-30, -20], "relic": "fs_silver_blood_ledger", "radius": 6, "text": "Search the Silver-Blood treasury house"},
-        {"type": "go", "place": "markarth", "offset": [24, 30], "radius": 6, "text": "Meet Eltrys at the shrine below the city",
-         "actions": "scene:fs_framed;retire:eltrys;take:fs_silver_blood_ledger;imprison:markarth",
-         "journal": "Eltrys was dead before I arrived. The guards were waiting beside him, and they had my name before I could say it."}
+        {
+          "type": "talk",
+          "npc": "eltrys",
+          "text": "Speak with Eltrys",
+          "topic": "Who is 'N'?",
+          "reply": "A servant of the Silver-Bloods, I think. But every trail goes past him, down into Cidhna Mine, to the man the Silver-Bloods keep there. Thonar Silver-Blood will know. Be careful how you ask."
+        },
+        {
+          "type": "talk",
+          "npc": "thonar_silver_blood",
+          "text": "Question Thonar Silver-Blood",
+          "topic": "Your family's name keeps turning up next to dead people.",
+          "reply": "Then you have been reading the wrong names. Leave Markarth today. I will not say it twice."
+        },
+        {
+          "type": "retrieve",
+          "place": "markarth",
+          "offset": [
+            -30,
+            -20
+          ],
+          "relic": "fs_silver_blood_ledger",
+          "radius": 6,
+          "text": "Search the Silver-Blood treasury house"
+        },
+        {
+          "type": "go",
+          "place": "markarth",
+          "offset": [
+            24,
+            30
+          ],
+          "radius": 6,
+          "text": "Meet Eltrys at the shrine below the city",
+          "actions": "scene:fs_framed;retire:eltrys;take:fs_silver_blood_ledger;imprison:markarth",
+          "journal": "Eltrys was dead before I arrived. The guards were waiting beside him, and they had my name before I could say it."
+        }
       ],
       "outro": "Eltrys was murdered and I was framed for it. The guards took the Silver-Blood ledger and threw me into Cidhna Mine, the prison the Silver-Bloods own.",
-      "rewards": {"faction_points": 1}
+      "rewards": {
+        "faction_points": 1
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "fs_no_one_escapes",
       "title": "No One Escapes Cidhna Mine",
       "start": "auto",
-      "requires": ["quest:fs_the_silver_blood_secret"],
+      "requires": [
+        "quest:fs_the_silver_blood_secret"
+      ],
       "desc": "I am a prisoner in Cidhna Mine. The man behind the killings, Madanach, the King in Rags, is held here too, and the other prisoners say he wants to see me.",
       "on_start": "summon:madanach",
       "objectives": [
-        {"type": "talk", "npc": "madanach", "text": "Speak with Madanach, the King in Rags",
-         "topic": "They say you run this mine.",
-         "reply": "I run more than the mine. Sit down, and listen to a story about silver.",
-         "actions": "scene:fs_king_in_rags"},
-        {"type": "talk", "npc": "madanach", "text": "Give Madanach your answer",
-         "choices": [
-           {"label": "The Silver-Bloods framed me. I'll stand with the Forsworn.", "reply": "Good. Then we leave tonight, and we leave loudly. Meet me at Druadach Redoubt when you are out. The Reach will remember you.", "actions": "join:forsworn;flag:fs_sided_madanach;relocate:madanach:druadach_redoubt"},
-           {"label": "You ordered those killings. I'll find my own way out.", "reply": "Then find it, and rot on the way. When you are back among your Nord masters, remember that you chose them.", "actions": "flag:fs_refused_madanach"}
-         ]},
-        {"type": "flag", "flag": "escaped_markarth", "text": "Escape Cidhna Mine"}
+        {
+          "type": "talk",
+          "npc": "madanach",
+          "text": "Speak with Madanach, the King in Rags",
+          "topic": "They say you run this mine.",
+          "reply": "I run more than the mine. Sit down, and listen to a story about silver.",
+          "actions": "scene:fs_king_in_rags"
+        },
+        {
+          "type": "talk",
+          "npc": "madanach",
+          "text": "Give Madanach your answer",
+          "choices": [
+            {
+              "label": "The Silver-Bloods framed me. I'll stand with the Forsworn.",
+              "reply": "Good. Then we leave tonight, and we leave loudly. Meet me at Druadach Redoubt when you are out. The Reach will remember you.",
+              "actions": "join:forsworn;flag:fs_sided_madanach;relocate:madanach:druadach_redoubt"
+            },
+            {
+              "label": "You ordered those killings. I'll find my own way out.",
+              "reply": "Then find it, and rot on the way. When you are back among your Nord masters, remember that you chose them.",
+              "actions": "flag:fs_refused_madanach"
+            }
+          ]
+        },
+        {
+          "type": "flag",
+          "flag": "escaped_markarth",
+          "text": "Escape Cidhna Mine"
+        }
       ],
       "outro": "I escaped from Cidhna Mine. Inside, Madanach, the King in Rags, told me the truth about the Silver-Bloods and offered me a place among the Forsworn.",
-      "rewards": {"gold": 100, "faction_points": 2}
+      "rewards": {
+        "gold": 100,
+        "faction_points": 2
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "fs_silver_and_blood",
       "title": "Silver and Blood",
       "start": "auto",
-      "requires": ["quest:fs_no_one_escapes", "flag:fs_sided_madanach"],
+      "requires": [
+        "quest:fs_no_one_escapes",
+        "flag:fs_sided_madanach"
+      ],
       "desc": "Madanach has reached Druadach Redoubt. His first order to me: hit the Silver-Bloods where they keep their wealth, at Kolskeggr Mine, and make Thonar feel it.",
       "objectives": [
-        {"type": "talk", "npc": "madanach", "text": "Meet Madanach at Druadach Redoubt",
-         "topic": "I'm out. What now?",
-         "reply": "Now the Silver-Bloods learn that their cage is empty. Their mercenaries guard the gold at Kolskeggr Mine. Kill them, take the gold, and leave the mine-head burning where Markarth can see the smoke."},
-        {"type": "go", "place": "kolskeggr_mine", "text": "Travel to Kolskeggr Mine"},
-        {"type": "clear", "place": "kolskeggr_mine", "text": "Kill the Silver-Blood mercenaries guarding the mine",
-         "spawn": [{"type": "npc:thug", "count": 4, "name": "Silver-Blood Mercenary", "hostile": true, "armor": "#9a9aa8"}]},
-        {"type": "kill", "place": "kolskeggr_mine", "text": "Kill the mine's overseer, Skjold Iron-Purse",
-         "spawn": [{"type": "npc:thug", "name": "Skjold Iron-Purse", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4, "hostile": true, "armor": "#9a9aa8", "weapon": "skycraft:steel_war_axe"}],
-         "actions": "give:minecraft:gold_ingot*6",
-         "journal": "The overseer died with his keys in his hand. The mine's gold went into Forsworn sacks, and the smoke went up over the hills."},
-        {"type": "talk", "npc": "madanach", "text": "Report to Madanach",
-         "topic": "Kolskeggr is burning.",
-         "reply": "I can see it from here. Thonar will spend tonight counting what he has left, and tomorrow wondering who will come next. Good. Rest. Kaie has something to ask of you."}
+        {
+          "type": "talk",
+          "npc": "madanach",
+          "text": "Meet Madanach at Druadach Redoubt",
+          "topic": "I'm out. What now?",
+          "reply": "Now the Silver-Bloods learn that their cage is empty. Their mercenaries guard the gold at Kolskeggr Mine. Kill them, take the gold, and leave the mine-head burning where Markarth can see the smoke."
+        },
+        {
+          "type": "go",
+          "place": "kolskeggr_mine",
+          "text": "Travel to Kolskeggr Mine"
+        },
+        {
+          "type": "clear",
+          "place": "kolskeggr_mine",
+          "text": "Kill the Silver-Blood mercenaries guarding the mine",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Silver-Blood Mercenary",
+              "hostile": true,
+              "armor": "#9a9aa8"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "kolskeggr_mine",
+          "text": "Kill the mine's overseer, Skjold Iron-Purse",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Skjold Iron-Purse",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true,
+              "armor": "#9a9aa8",
+              "weapon": "skycraft:steel_war_axe"
+            }
+          ],
+          "actions": "give:minecraft:gold_ingot*6",
+          "journal": "The overseer died with his keys in his hand. The mine's gold went into Forsworn sacks, and the smoke went up over the hills."
+        },
+        {
+          "type": "talk",
+          "npc": "madanach",
+          "text": "Report to Madanach",
+          "topic": "Kolskeggr is burning.",
+          "reply": "I can see it from here. Thonar will spend tonight counting what he has left, and tomorrow wondering who will come next. Good. Rest. Kaie has something to ask of you."
+        }
       ],
       "outro": "I raided the Silver-Bloods' holdings at Kolskeggr Mine for Madanach and left the mine-head burning where all of Markarth could see it.",
-      "rewards": {"gold": 400, "faction_points": 4, "items": ["skycraft:forsworn_chestplate", "skycraft:forsworn_helmet"]}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 4,
+        "items": [
+          "skycraft:forsworn_chestplate",
+          "skycraft:forsworn_helmet"
+        ]
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "fs_the_briar_and_the_heart",
       "title": "The Briar and the Heart",
       "start": "auto",
-      "requires": ["quest:fs_silver_and_blood", "flag:fs_sided_madanach"],
+      "requires": [
+        "quest:fs_silver_and_blood",
+        "flag:fs_sided_madanach"
+      ],
       "desc": "Kaie the Briar-Mother wants to make me a Briarheart, as the Forsworn make their greatest warriors. For the rite she needs the heart of Hollow-Eye, the great bear of Purewater Run.",
       "objectives": [
-        {"type": "talk", "npc": "kaie_briar_mother", "text": "Speak with Kaie the Briar-Mother",
-         "topic": "Madanach says you have a task for me.",
-         "reply": "Not a task. A rite. A Briarheart carries a root where the heart should be, and the root must be fed with courage. Hollow-Eye, the old bear of Purewater Run, has more courage than any Nord. Bring me its heart."},
-        {"type": "kill", "place": "purewater_run", "text": "Hunt Hollow-Eye at Purewater Run",
-         "spawn": [{"type": "skycraft:bear", "name": "Hollow-Eye", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5}],
-         "journal": "Hollow-Eye was blind on one side and missed nothing on the other. It fought me across the stream and back again."},
-        {"type": "retrieve", "place": "purewater_run", "relic": "fs_heart_of_hollow_eye", "radius": 12, "text": "Take the bear's heart"},
-        {"type": "deliver", "npc": "kaie_briar_mother", "relic": "fs_heart_of_hollow_eye", "text": "Bring the heart to Kaie at Druadach Redoubt",
-         "topic": "Hollow-Eye's heart.",
-         "reply": "Still warm, still brave. Stand by the fire, and do not flinch. The briar does not like those who flinch.",
-         "actions": "scene:fs_briarheart"}
+        {
+          "type": "talk",
+          "npc": "kaie_briar_mother",
+          "text": "Speak with Kaie the Briar-Mother",
+          "topic": "Madanach says you have a task for me.",
+          "reply": "Not a task. A rite. A Briarheart carries a root where the heart should be, and the root must be fed with courage. Hollow-Eye, the old bear of Purewater Run, has more courage than any Nord. Bring me its heart."
+        },
+        {
+          "type": "kill",
+          "place": "purewater_run",
+          "text": "Hunt Hollow-Eye at Purewater Run",
+          "spawn": [
+            {
+              "type": "skycraft:bear",
+              "name": "Hollow-Eye",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5
+            }
+          ],
+          "journal": "Hollow-Eye was blind on one side and missed nothing on the other. It fought me across the stream and back again."
+        },
+        {
+          "type": "retrieve",
+          "place": "purewater_run",
+          "relic": "fs_heart_of_hollow_eye",
+          "radius": 12,
+          "text": "Take the bear's heart"
+        },
+        {
+          "type": "deliver",
+          "npc": "kaie_briar_mother",
+          "relic": "fs_heart_of_hollow_eye",
+          "text": "Bring the heart to Kaie at Druadach Redoubt",
+          "topic": "Hollow-Eye's heart.",
+          "reply": "Still warm, still brave. Stand by the fire, and do not flinch. The briar does not like those who flinch.",
+          "actions": "scene:fs_briarheart"
+        }
       ],
       "outro": "I hunted Hollow-Eye of Purewater Run and brought its heart to Kaie. Before Madanach and the Forsworn of Druadach Redoubt, I was made a Briarheart of the Reach.",
-      "rewards": {"gold": 900, "faction_points": 6, "perks": 1, "flags": ["fs_briarheart"],
-                  "items": [{"item": "skycraft:forsworn_chestplate", "name": "Briar-Bound Hide", "enchant": {"protection": 3, "thorns": 2}},
-                            {"item": "skycraft:orcish_war_axe", "name": "Madanach's Tithe", "enchant": {"sharpness": 4, "unbreaking": 3}}]}
+      "rewards": {
+        "gold": 900,
+        "faction_points": 6,
+        "perks": 1,
+        "flags": [
+          "fs_briarheart"
+        ],
+        "items": [
+          {
+            "item": "skycraft:forsworn_chestplate",
+            "name": "Briar-Bound Hide",
+            "enchant": {
+              "protection": 3,
+              "thorns": 2
+            }
+          },
+          {
+            "item": "skycraft:orcish_war_axe",
+            "name": "Madanach's Tithe",
+            "enchant": {
+              "sharpness": 4,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "fs_the_jarls_justice",
       "title": "The Jarl's Justice",
       "faction": "",
       "start": "auto",
-      "requires": ["quest:fs_no_one_escapes", "flag:fs_refused_madanach"],
+      "requires": [
+        "quest:fs_no_one_escapes",
+        "flag:fs_refused_madanach"
+      ],
       "desc": "I escaped Cidhna Mine without Madanach. The Jarl's housecarl, Faleen, has sent word that the Jarl will hear my side of things, if I can prove I am no friend of the Forsworn.",
       "objectives": [
-        {"type": "talk", "npc": "faleen", "text": "Speak with Faleen in Markarth",
-         "topic": "I hear the Jarl will listen to me.",
-         "reply": "The Jarl will listen to someone who has done the Reach some good. The Forsworn hold Red Eagle Redoubt and raid the road from it every week. Clear it, and you'll find the Jarl very attentive."},
-        {"type": "go", "place": "red_eagle_redoubt", "text": "Travel to Red Eagle Redoubt"},
-        {"type": "clear", "place": "red_eagle_redoubt", "placement": "structure", "text": "Clear the Forsworn from Red Eagle Redoubt",
-         "spawn": [{"type": "skycraft:forsworn", "count": 4, "name": "Forsworn Raider"}]},
-        {"type": "kill", "place": "red_eagle_redoubt", "placement": "structure", "text": "Kill the Briarheart chieftain of the redoubt",
-         "spawn": [{"type": "skycraft:forsworn", "name": "Briarheart of Red Eagle", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4}]},
-        {"type": "talk", "npc": "faleen", "text": "Report to Faleen",
-         "topic": "Red Eagle Redoubt is empty.",
-         "reply": "So I've heard. The Jarl has decided you were never in Cidhna Mine, and the guards who say otherwise will be reminded of that. One more thing, though. Madanach's witch still holds Druadach."}
+        {
+          "type": "talk",
+          "npc": "faleen",
+          "text": "Speak with Faleen in Markarth",
+          "topic": "I hear the Jarl will listen to me.",
+          "reply": "The Jarl will listen to someone who has done the Reach some good. The Forsworn hold Red Eagle Redoubt and raid the road from it every week. Clear it, and you'll find the Jarl very attentive."
+        },
+        {
+          "type": "go",
+          "place": "red_eagle_redoubt",
+          "text": "Travel to Red Eagle Redoubt"
+        },
+        {
+          "type": "clear",
+          "place": "red_eagle_redoubt",
+          "placement": "structure",
+          "text": "Clear the Forsworn from Red Eagle Redoubt",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 4,
+              "name": "Forsworn Raider"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "red_eagle_redoubt",
+          "placement": "structure",
+          "text": "Kill the Briarheart chieftain of the redoubt",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "name": "Briarheart of Red Eagle",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "faleen",
+          "text": "Report to Faleen",
+          "topic": "Red Eagle Redoubt is empty.",
+          "reply": "So I've heard. The Jarl has decided you were never in Cidhna Mine, and the guards who say otherwise will be reminded of that. One more thing, though. Madanach's witch still holds Druadach."
+        }
       ],
       "outro": "I cleared the Forsworn from Red Eagle Redoubt. In return, the Jarl of Markarth quietly struck my name from Cidhna Mine's records.",
-      "rewards": {"gold": 500}
+      "rewards": {
+        "gold": 500
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "fs_the_briar_mother",
       "title": "The Briar-Mother",
       "faction": "",
       "start": "auto",
-      "requires": ["quest:fs_the_jarls_justice", "flag:fs_refused_madanach"],
+      "requires": [
+        "quest:fs_the_jarls_justice",
+        "flag:fs_refused_madanach"
+      ],
       "desc": "Kaie the Briar-Mother, the Forsworn witch who makes their Briarhearts, holds Druadach Redoubt with Madanach's hagravens. Faleen wants her dead before she can make more.",
       "objectives": [
-        {"type": "go", "place": "druadach_redoubt", "text": "Travel to Druadach Redoubt"},
-        {"type": "clear", "place": "druadach_redoubt", "placement": "structure", "text": "Fight through the Forsworn in Druadach Redoubt",
-         "spawn": [{"type": "skycraft:forsworn", "count": 4, "name": "Druadach Warrior"},
-                   {"type": "skycraft:hagraven", "name": "Hagraven of the Redoubt"},
-                   {"type": "skycraft:forsworn", "name": "Briarheart Guardian", "hp": 2.0}]},
-        {"type": "kill", "place": "druadach_redoubt", "placement": "structure", "text": "Kill Kaie the Briar-Mother",
-         "spawn": [{"type": "npc:forsworn", "name": "Kaie the Briar-Mother", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true}],
-         "actions": "retire:kaie_briar_mother",
-         "journal": "Kaie cursed me in a tongue older than the Nords. Her briar-roots were still beating in jars along the walls when she fell."},
-        {"type": "talk", "npc": "faleen", "text": "Report to Faleen in Markarth",
-         "topic": "The Briar-Mother is dead.",
-         "reply": "Then there will be fewer Briarhearts in the hills this year, and fewer funerals in the city. The Jarl sends his thanks, and this. He says you have earned a weapon worthy of Markarth's stone."}
+        {
+          "type": "go",
+          "place": "druadach_redoubt",
+          "text": "Travel to Druadach Redoubt"
+        },
+        {
+          "type": "clear",
+          "place": "druadach_redoubt",
+          "placement": "structure",
+          "text": "Fight through the Forsworn in Druadach Redoubt",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 4,
+              "name": "Druadach Warrior"
+            },
+            {
+              "type": "skycraft:hagraven",
+              "name": "Hagraven of the Redoubt"
+            },
+            {
+              "type": "skycraft:forsworn",
+              "name": "Briarheart Guardian",
+              "hp": 2.0
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "druadach_redoubt",
+          "placement": "structure",
+          "text": "Kill Kaie the Briar-Mother",
+          "spawn": [
+            {
+              "type": "npc:forsworn",
+              "name": "Kaie the Briar-Mother",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true
+            }
+          ],
+          "actions": "retire:kaie_briar_mother",
+          "journal": "Kaie cursed me in a tongue older than the Nords. Her briar-roots were still beating in jars along the walls when she fell."
+        },
+        {
+          "type": "talk",
+          "npc": "faleen",
+          "text": "Report to Faleen in Markarth",
+          "topic": "The Briar-Mother is dead.",
+          "reply": "Then there will be fewer Briarhearts in the hills this year, and fewer funerals in the city. The Jarl sends his thanks, and this. He says you have earned a weapon worthy of Markarth's stone."
+        }
       ],
       "outro": "I killed Kaie the Briar-Mother at Druadach Redoubt. Without her, the Forsworn can make no new Briarhearts, and the Jarl of Markarth has named me a friend of the Reach.",
-      "rewards": {"gold": 1200, "perks": 1, "flags": ["fs_friend_of_the_reach"],
-                  "items": [{"item": "skycraft:dwarven_warhammer", "name": "Stonewarden's Maul", "enchant": {"sharpness": 4, "unbreaking": 3}},
-                            {"item": "skycraft:dwarven_chestplate", "name": "Markarth Guard-Captain's Plate", "enchant": {"protection": 3}}]}
+      "rewards": {
+        "gold": 1200,
+        "perks": 1,
+        "flags": [
+          "fs_friend_of_the_reach"
+        ],
+        "items": [
+          {
+            "item": "skycraft:dwarven_warhammer",
+            "name": "Stonewarden's Maul",
+            "enchant": {
+              "sharpness": 4,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:dwarven_chestplate",
+            "name": "Markarth Guard-Captain's Plate",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     }
   ]
 }

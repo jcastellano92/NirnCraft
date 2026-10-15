@@ -242,8 +242,15 @@ public final class RoadPlan {
      */
     public boolean at(double x, double z, Hit out) {
         out.clear();
-        int k = bucketOf.get(key((int) Math.floor(x) >> BUCKET_SHIFT, (int) Math.floor(z) >> BUCKET_SHIFT));
-        if (k < 0) return false;
+        int ix = (int) Math.floor(x), iz = (int) Math.floor(z);
+        int k = bucketOf.get(key(ix >> BUCKET_SHIFT, iz >> BUCKET_SHIFT));
+        if (k < 0) {
+            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+                RoadPlan tp = com.skycraft.worldplan.tile.TilePlanner.roadPlanAt(ix, iz);
+                if (tp != null && tp != this) return tp.at(x, z, out);
+            }
+            return false;
+        }
         float px = (float) x, pz = (float) z;
         float best = REACH * REACH;
         int bestEdge = -1;
@@ -263,7 +270,13 @@ public final class RoadPlan {
                 bestT = t;
             }
         }
-        if (bestEdge < 0) return false;
+        if (bestEdge < 0) {
+            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+                RoadPlan tp = com.skycraft.worldplan.tile.TilePlanner.roadPlanAt(ix, iz);
+                if (tp != null && tp != this) return tp.at(x, z, out);
+            }
+            return false;
+        }
         int i = bestEdge, s = vseg[i];
         out.segment = s;
         out.link = segLink[s];
@@ -342,7 +355,12 @@ public final class RoadPlan {
      * thread-safe. Richer lookups (spans, tunnel mouths, pads): {@link PlanGround}.
      */
     public static double bedHeight(double x, double z) {
-        return PlanGround.bedHeight(get(), (int) Math.floor(x), (int) Math.floor(z));
+        int ix = (int) Math.floor(x), iz = (int) Math.floor(z);
+        double d = PlanGround.bedHeight(get(), ix, iz);
+        if (Double.isNaN(d) && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+            return com.skycraft.worldplan.tile.TilePlanner.bedHeightAt(x, z);
+        }
+        return d;
     }
 
     /** Span index of segment {@code s} containing global vertex {@code v}, or -1. */

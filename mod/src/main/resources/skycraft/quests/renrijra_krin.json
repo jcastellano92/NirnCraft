@@ -3,35 +3,115 @@
   "category": "faction",
   "faction": "renrijra_krin",
   "region": "elsweyr/rimmen",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "rimmen_stockade": {"x": 1550, "z": 10150, "r": 30, "name": "Dominion Stockade"},
-    "ri_vasha_estate": {"x": 850, "z": 10250, "r": 34, "name": "Ri'Vasha Estate"}
+    "rimmen_stockade": {
+      "x": 1550,
+      "z": 10150,
+      "r": 30,
+      "name": "Dominion Stockade"
+    },
+    "ri_vasha_estate": {
+      "x": 850,
+      "z": 10250,
+      "r": 34,
+      "name": "Ri'Vasha Estate"
+    }
   },
   "npcs": [
-    {"id": "shazrah", "name": "Warlord Shazrah", "role": "thug", "place": "rimmen", "offset": [6, 8], "female": true, "hall": "renrijra_krin",
-     "greet": "Welcome to the camp of the Laughing Blades, walker. We laugh because the nobles have taken everything else. Why are you here?"},
-    {"id": "rawan_dar", "name": "Rawan-dar the Caravaneer", "role": "caravan_trader", "place": "rimmen", "offset": [18, -14],
-     "greet": "Rawan-dar sells spice, silk, and absolutely no opinions about politics. None. Would you like some silk?"},
-    {"id": "ra_khaj", "name": "Ra'khaj", "role": "citizen", "place": "rimmen_stockade", "offset": [0, 0],
-     "greet": "If you are here to question this one again, he still knows nothing. If you are here for something else, please be quick."},
-    {"id": "dar_jazad", "name": "Dar'jazad", "role": "thief", "place": "senchal", "offset": [9, -7],
-     "greet": "Senchal has a hundred smugglers and only one Dar'jazad. The others will cheat you. This one will cheat you honestly."}
+    {
+      "id": "shazrah",
+      "name": "Warlord Shazrah",
+      "role": "thug",
+      "place": "rimmen",
+      "offset": [
+        6,
+        8
+      ],
+      "female": true,
+      "hall": "renrijra_krin",
+      "greet": "Welcome to the camp of the Laughing Blades, walker. We laugh because the nobles have taken everything else. Why are you here?"
+    },
+    {
+      "id": "rawan_dar",
+      "name": "Rawan-dar the Caravaneer",
+      "role": "caravan_trader",
+      "place": "rimmen",
+      "offset": [
+        18,
+        -14
+      ],
+      "greet": "Rawan-dar sells spice, silk, and absolutely no opinions about politics. None. Would you like some silk?"
+    },
+    {
+      "id": "ra_khaj",
+      "name": "Ra'khaj",
+      "role": "citizen",
+      "place": "rimmen_stockade",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "If you are here to question this one again, he still knows nothing. If you are here for something else, please be quick."
+    },
+    {
+      "id": "dar_jazad",
+      "name": "Dar'jazad",
+      "role": "thief",
+      "place": "senchal",
+      "offset": [
+        9,
+        -7
+      ],
+      "greet": "Senchal has a hundred smugglers and only one Dar'jazad. The others will cheat you. This one will cheat you honestly."
+    }
   ],
   "relics": [
-    {"id": "rk_tax_chest", "name": "Noble's Tax Chest", "desc": "A locked box of coin squeezed out of the farmers of Anequina. The lock is very good. The hinges are not.", "icon": 26},
-    {"id": "rk_sugar_tithe", "name": "Sugar Tithe", "desc": "The year's moon sugar, owed to a lord who has never cut a cane in his life.", "icon": 15},
-    {"id": "rk_smuggled_steel", "name": "Crate of Smuggled Steel", "desc": "Blades from a Senchal forge, wrapped in oilcloth and stamped as 'pickled fish'.", "icon": 26}
+    {
+      "id": "rk_tax_chest",
+      "name": "Noble's Tax Chest",
+      "desc": "A locked box of coin squeezed out of the farmers of Anequina. The lock is very good. The hinges are not.",
+      "icon": 26
+    },
+    {
+      "id": "rk_sugar_tithe",
+      "name": "Sugar Tithe",
+      "desc": "The year's moon sugar, owed to a lord who has never cut a cane in his life.",
+      "icon": 15
+    },
+    {
+      "id": "rk_smuggled_steel",
+      "name": "Crate of Smuggled Steel",
+      "desc": "Blades from a Senchal forge, wrapped in oilcloth and stamped as 'pickled fish'.",
+      "icon": 26
+    }
   ],
   "scenes": {
     "rk_freed": [
-      ["ra_khaj", "Three months in that pen. They said this one was a rebel. This one was a farmer. Now, perhaps, he will be a rebel after all."],
-      ["shazrah", "Everyone says that, the first night. Eat, sleep. If you still mean it in the morning, we will find you a blade."]
+      [
+        "ra_khaj",
+        "Three months in that pen. They said this one was a rebel. This one was a farmer. Now, perhaps, he will be a rebel after all."
+      ],
+      [
+        "shazrah",
+        "Everyone says that, the first night. Eat, sleep. If you still mean it in the morning, we will find you a blade."
+      ]
     ],
     "rk_laughing_blade": [
-      ["narrator", "The camp is loud tonight. Somebody is playing a drum badly, and nobody minds."],
-      ["shazrah", "Ri'Vasha sold our grain to the Thalmor and our sons to the Thalmor's prisons. Tonight he sells nothing."],
-      ["shazrah", "The Mane's priests will call us bandits. The nobles will call us beasts. Let them. Tonight, you are a Laughing Blade, and we laugh last."]
+      [
+        "narrator",
+        "The camp is loud tonight. Somebody is playing a drum badly, and nobody minds."
+      ],
+      [
+        "shazrah",
+        "Ri'Vasha sold our grain to the Thalmor and our sons to the Thalmor's prisons. Tonight he sells nothing."
+      ],
+      [
+        "shazrah",
+        "The Mane's priests will call us bandits. The nobles will call us beasts. Let them. Tonight, you are a Laughing Blade, and we laugh last."
+      ]
     ]
   },
   "quests": [
@@ -39,138 +119,516 @@
       "id": "rk_laughter_in_the_dunes",
       "title": "Laughter in the Dunes",
       "start": "npc:shazrah",
-      "requires": ["!faction:renrijra_krin", "!faction:moon_priests"],
+      "requires": [
+        "!faction:renrijra_krin",
+        "!faction:moon_priests"
+      ],
       "offer": "I want to fight beside the Renrijra Krin.",
       "pitch": "Everyone wants to fight beside us until they see how we eat. A noble's tax-collector rides east of Rimmen today with a chest of farmers' coin. Take it. Leave the collector alive if you like; he is only a clerk. Bring the chest here.",
       "desc": "Warlord Shazrah, who leads the Renrijra Krin from a hidden camp outside Rimmen, wants me to rob an Anequinan noble's tax-collector before she will trust me.",
       "objectives": [
-        {"type": "go", "place": "rimmen", "offset": [200, -100], "text": "Intercept the tax-collector east of Rimmen"},
-        {"type": "clear", "place": "rimmen", "offset": [200, -100], "text": "Deal with the tax-collector's escort",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Anequinan House Guard", "hostile": true, "armor": "#c0a040"}],
-         "journal": "The collector dropped his reins and ran as soon as the first guard fell. He was, as Shazrah said, only a clerk."},
-        {"type": "retrieve", "place": "rimmen", "offset": [200, -100], "relic": "rk_tax_chest", "radius": 10, "text": "Take the tax chest"},
-        {"type": "deliver", "npc": "shazrah", "relic": "rk_tax_chest", "text": "Bring the chest to Shazrah",
-         "topic": "One chest of farmers' coin.",
-         "reply": "Good. Half goes back to the villages it came from, quietly, at night. Half buys arrows. That is the whole philosophy of the Renrijra Krin. Welcome, Recruit."}
+        {
+          "type": "go",
+          "place": "rimmen",
+          "offset": [
+            200,
+            -100
+          ],
+          "text": "Intercept the tax-collector east of Rimmen"
+        },
+        {
+          "type": "clear",
+          "place": "rimmen",
+          "offset": [
+            200,
+            -100
+          ],
+          "text": "Deal with the tax-collector's escort",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Anequinan House Guard",
+              "hostile": true,
+              "armor": "#c0a040"
+            }
+          ],
+          "journal": "The collector dropped his reins and ran as soon as the first guard fell. He was, as Shazrah said, only a clerk."
+        },
+        {
+          "type": "retrieve",
+          "place": "rimmen",
+          "offset": [
+            200,
+            -100
+          ],
+          "relic": "rk_tax_chest",
+          "radius": 10,
+          "text": "Take the tax chest"
+        },
+        {
+          "type": "deliver",
+          "npc": "shazrah",
+          "relic": "rk_tax_chest",
+          "text": "Bring the chest to Shazrah",
+          "topic": "One chest of farmers' coin.",
+          "reply": "Good. Half goes back to the villages it came from, quietly, at night. Half buys arrows. That is the whole philosophy of the Renrijra Krin. Welcome, Recruit.",
+          "place": "rimmen"
+        }
       ],
       "outro": "I robbed an Anequinan tax-collector for Warlord Shazrah. Half of the coin goes back to the farmers, half to the fight. I am a Recruit of the Renrijra Krin.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:steel_dagger", "skycraft:khajiit_chestplate"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:steel_dagger",
+          "skycraft:khajiit_chestplate"
+        ]
+      },
+      "region": "elsweyr/rimmen",
+      "why": [
+        "rimmen.L7.master_artisans",
+        "rimmen.L7.quarry_labourers"
+      ],
+      "consequence": {
+        "world_state": "rk_laughter_in_the_dunes_resolved",
+        "flag": "conseq_rk_laughter_in_the_dunes",
+        "summary": "I robbed an Anequinan tax-collector for Warlord Shazrah. Half of the coin goes back to the farmers, half to the fight. I am a Recruit of the Renrijra Krin."
+      }
     },
     {
       "id": "rk_the_spice_road",
       "title": "The Spice Road",
       "start": "npc:shazrah",
-      "requires": ["quest:rk_laughter_in_the_dunes|faction:renrijra_krin"],
+      "requires": [
+        "quest:rk_laughter_in_the_dunes|faction:renrijra_krin"
+      ],
       "offer": "What's next?",
       "pitch": "A caravan carries Lord Ri'Vasha's sugar tithe south of the city. The guards are his. The traders are not; they are hired, and poor, and frightened. What you do with them is your business. The sugar is mine.",
       "desc": "Shazrah sent me to take Lord Ri'Vasha's sugar tithe from a caravan on the road outside Rimmen. The guards serve the noble; the traders only drive his wagons.",
       "on_start": "relocate:rawan_dar:rimmen:220:-140",
       "objectives": [
-        {"type": "go", "place": "rimmen", "offset": [220, -140], "text": "Find the caravan on the road outside Rimmen"},
-        {"type": "clear", "place": "rimmen", "offset": [220, -140], "text": "Defeat the caravan's noble guards",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Ri'Vasha Caravan Guard", "hostile": true, "armor": "#c0a040"},
-                   {"type": "skycraft:senche_tiger", "name": "Guard's Senche"}]},
-        {"type": "talk", "npc": "rawan_dar", "text": "Confront the caravan master",
-         "topic": "The guards are dead. That leaves you.",
-         "reply": "Rawan-dar has a wife in Rimmen and two kits who think he sells silk. Please. Take the sugar. Take the silk, too. Only let us go."},
-        {"type": "talk", "npc": "rawan_dar", "text": "Decide the traders' fate",
-         "choices": [
-           {"label": "Take the sugar. Go home to your kits.", "reply": "The moons see you. Rawan-dar will tell no one which way you went. He will not even tell himself.", "actions": "flag:rk_spared_traders;relocate:rawan_dar:rimmen:18:-14"},
-           {"label": "No witnesses. Shazrah's rule, not mine.", "reply": "Rawan-dar understands. He does not forgive, but he understands.", "actions": "flag:rk_no_witnesses;retire:rawan_dar"}
-         ]},
-        {"type": "retrieve", "place": "rimmen", "offset": [220, -140], "relic": "rk_sugar_tithe", "radius": 10, "text": "Take Ri'Vasha's sugar tithe"},
-        {"type": "deliver", "npc": "shazrah", "relic": "rk_sugar_tithe", "text": "Bring the sugar to Shazrah",
-         "topic": "Ri'Vasha's sugar.",
-         "reply": "Good. Whatever you did on that road, you did it, not me. That is how it works here. Each of us carries our own weight."}
+        {
+          "type": "go",
+          "place": "rimmen",
+          "offset": [
+            220,
+            -140
+          ],
+          "text": "Find the caravan on the road outside Rimmen"
+        },
+        {
+          "type": "clear",
+          "place": "rimmen",
+          "offset": [
+            220,
+            -140
+          ],
+          "text": "Defeat the caravan's noble guards",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Ri'Vasha Caravan Guard",
+              "hostile": true,
+              "armor": "#c0a040"
+            },
+            {
+              "type": "skycraft:senche_tiger",
+              "name": "Guard's Senche"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "rawan_dar",
+          "text": "Confront the caravan master",
+          "topic": "The guards are dead. That leaves you.",
+          "reply": "Rawan-dar has a wife in Rimmen and two kits who think he sells silk. Please. Take the sugar. Take the silk, too. Only let us go.",
+          "place": "rimmen"
+        },
+        {
+          "type": "talk",
+          "npc": "rawan_dar",
+          "text": "Decide the traders' fate",
+          "choices": [
+            {
+              "label": "Take the sugar. Go home to your kits.",
+              "reply": "The moons see you. Rawan-dar will tell no one which way you went. He will not even tell himself.",
+              "actions": "flag:rk_spared_traders;relocate:rawan_dar:rimmen:18:-14"
+            },
+            {
+              "label": "No witnesses. Shazrah's rule, not mine.",
+              "reply": "Rawan-dar understands. He does not forgive, but he understands.",
+              "actions": "flag:rk_no_witnesses;retire:rawan_dar"
+            }
+          ],
+          "place": "rimmen"
+        },
+        {
+          "type": "retrieve",
+          "place": "rimmen",
+          "offset": [
+            220,
+            -140
+          ],
+          "relic": "rk_sugar_tithe",
+          "radius": 10,
+          "text": "Take Ri'Vasha's sugar tithe"
+        },
+        {
+          "type": "deliver",
+          "npc": "shazrah",
+          "relic": "rk_sugar_tithe",
+          "text": "Bring the sugar to Shazrah",
+          "topic": "Ri'Vasha's sugar.",
+          "reply": "Good. Whatever you did on that road, you did it, not me. That is how it works here. Each of us carries our own weight.",
+          "place": "rimmen"
+        }
       ],
       "outro": "I took Lord Ri'Vasha's sugar tithe from his caravan. What became of the traders was my own choice, and Shazrah made sure I knew it.",
-      "rewards": {"gold": 300, "faction_points": 3}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 3
+      },
+      "region": "elsweyr/anequina",
+      "why": [
+        "anequina.L7.caravan_masters_rich",
+        "anequina.L7.herders_poor"
+      ],
+      "consequence": {
+        "world_state": "rk_the_spice_road_resolved",
+        "flag": "conseq_rk_the_spice_road",
+        "summary": "I took Lord Ri'Vasha's sugar tithe from his caravan. What became of the traders was my own choice, and Shazrah made sure I knew it."
+      }
     },
     {
       "id": "rk_breaking_the_stockade",
       "title": "Breaking the Stockade",
       "start": "auto",
-      "requires": ["quest:rk_the_spice_road"],
+      "requires": [
+        "quest:rk_the_spice_road"
+      ],
       "desc": "The Thalmor keep a stockade outside Rimmen where they hold Khajiit accused of rebellion. Most were never rebels. Shazrah wants them freed, starting with a farmer named Ra'khaj.",
       "objectives": [
-        {"type": "talk", "npc": "shazrah", "text": "Speak with Shazrah",
-         "topic": "You said you had something bigger.",
-         "reply": "The Dominion stockade. Elves in gold armour keeping Khajiit in pens on Khajiit land, with Ri'Vasha's blessing. There is a farmer there, Ra'khaj. His village asked for him. Bring him home, and break as many locks as you can on the way."},
-        {"type": "go", "place": "rimmen_stockade", "text": "Travel to the Dominion stockade"},
-        {"type": "clear", "place": "rimmen_stockade", "placement": "structure", "text": "Overpower the Thalmor guards",
-         "spawn": [{"type": "npc:thalmor", "count": 4, "name": "Thalmor Warden", "hostile": true}]},
-        {"type": "kill", "place": "rimmen_stockade", "placement": "structure", "text": "Kill the Justiciar who runs the stockade",
-         "spawn": [{"type": "npc:thalmor", "name": "Justiciar Lorenwe", "target": true, "boss": true, "hp": 3.0, "dmg": 1.6, "hostile": true, "weapon": "skycraft:elven_sword"}],
-         "journal": "Lorenwe had a list of every prisoner and the crime he had invented for each. I kept it. Shazrah will want to read it aloud."},
-        {"type": "talk", "npc": "ra_khaj", "text": "Free Ra'khaj",
-         "topic": "Your village sent for you. Can you walk?",
-         "reply": "This one can run, if you let him. Every other pen is open now. Listen to them go."},
-        {"type": "escort", "npc": "ra_khaj", "place": "rimmen", "text": "Bring Ra'khaj to the hidden camp"},
-        {"type": "talk", "npc": "shazrah", "text": "Report to Shazrah",
-         "topic": "The stockade is empty. Ra'khaj is here.",
-         "reply": "Then tonight a dozen villages have their sons back, and the Thalmor have one less Justiciar. Sit, farmer.",
-         "actions": "scene:rk_freed;relocate:ra_khaj:rimmen:-12:10"}
+        {
+          "type": "talk",
+          "npc": "shazrah",
+          "text": "Speak with Shazrah",
+          "topic": "You said you had something bigger.",
+          "reply": "The Dominion stockade. Elves in gold armour keeping Khajiit in pens on Khajiit land, with Ri'Vasha's blessing. There is a farmer there, Ra'khaj. His village asked for him. Bring him home, and break as many locks as you can on the way.",
+          "place": "rimmen"
+        },
+        {
+          "type": "go",
+          "place": "rimmen_stockade",
+          "text": "Travel to the Dominion stockade"
+        },
+        {
+          "type": "clear",
+          "place": "rimmen_stockade",
+          "placement": "structure",
+          "text": "Overpower the Thalmor guards",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 4,
+              "name": "Thalmor Warden",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "rimmen_stockade",
+          "placement": "structure",
+          "text": "Kill the Justiciar who runs the stockade",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "name": "Justiciar Lorenwe",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.6,
+              "hostile": true,
+              "weapon": "skycraft:elven_sword"
+            }
+          ],
+          "journal": "Lorenwe had a list of every prisoner and the crime he had invented for each. I kept it. Shazrah will want to read it aloud."
+        },
+        {
+          "type": "talk",
+          "npc": "ra_khaj",
+          "text": "Free Ra'khaj",
+          "topic": "Your village sent for you. Can you walk?",
+          "reply": "This one can run, if you let him. Every other pen is open now. Listen to them go."
+        },
+        {
+          "type": "escort",
+          "npc": "ra_khaj",
+          "place": "rimmen",
+          "text": "Bring Ra'khaj to the hidden camp"
+        },
+        {
+          "type": "talk",
+          "npc": "shazrah",
+          "text": "Report to Shazrah",
+          "topic": "The stockade is empty. Ra'khaj is here.",
+          "reply": "Then tonight a dozen villages have their sons back, and the Thalmor have one less Justiciar. Sit, farmer.",
+          "actions": "scene:rk_freed;relocate:ra_khaj:rimmen:-12:10",
+          "place": "rimmen"
+        }
       ],
       "outro": "I broke open the Dominion stockade outside Rimmen, killed its Justiciar, and brought the farmer Ra'khaj back to the Renrijra camp. Every pen in the stockade stands empty.",
-      "rewards": {"gold": 450, "faction_points": 3, "items": ["skycraft:elven_war_axe"]}
+      "rewards": {
+        "gold": 450,
+        "faction_points": 3,
+        "items": [
+          "skycraft:elven_war_axe"
+        ]
+      },
+      "region": "elsweyr/rimmen",
+      "why": [
+        "rimmen.L7.baandari_camp",
+        "rimmen.L8.mask_makers"
+      ],
+      "consequence": {
+        "world_state": "rk_breaking_the_stockade_resolved",
+        "flag": "conseq_rk_breaking_the_stockade",
+        "summary": "I broke open the Dominion stockade outside Rimmen, killed its Justiciar, and brought the farmer Ra'khaj back to the Renrijra camp. Every pen in the stockade stands empty."
+      }
     },
     {
       "id": "rk_sugar_and_steel",
       "title": "Sugar and Steel",
       "start": "auto",
-      "requires": ["quest:rk_breaking_the_stockade"],
+      "requires": [
+        "quest:rk_breaking_the_stockade"
+      ],
       "desc": "The Renrijra Krin need weapons, and the smugglers of Senchal have them. Shazrah has sent me to make an arrangement with a smuggler named Dar'jazad.",
       "objectives": [
-        {"type": "go", "place": "senchal", "text": "Travel to Senchal"},
-        {"type": "talk", "npc": "dar_jazad", "text": "Find Dar'jazad",
-         "topic": "Shazrah sent me. She needs steel.",
-         "reply": "Steel is easy. Getting it past the Thalmor customs post outside the city is hard. Dar'jazad will sell you the steel. You will get it past the customs post. And then we talk about what else Dar'jazad might ship for the Krin."},
-        {"type": "talk", "npc": "dar_jazad", "text": "Settle the terms of the alliance",
-         "choices": [
-           {"label": "Steel only. The Krin don't move skooma.", "reply": "Hmph. Principles. Expensive, principles. Fine. Steel only, at a higher price.", "actions": "flag:rk_no_skooma"},
-           {"label": "Ship what you like through our country. We'll take a cut.", "reply": "Now that is a partnership. The skooma will flow, the coin will flow, and nobody will ask where the Krin's arrows came from.", "actions": "flag:rk_skooma_deal"}
-         ]},
-        {"type": "clear", "place": "senchal", "offset": [-200, -150], "text": "Clear the Thalmor customs post",
-         "spawn": [{"type": "npc:thalmor", "count": 3, "name": "Thalmor Customs Agent", "hostile": true},
-                   {"type": "npc:thug", "count": 2, "name": "Customs Enforcer", "hostile": true}]},
-        {"type": "retrieve", "place": "senchal", "offset": [-200, -150], "relic": "rk_smuggled_steel", "radius": 10, "text": "Collect the crate of smuggled steel"},
-        {"type": "deliver", "npc": "shazrah", "relic": "rk_smuggled_steel", "text": "Bring the steel to Shazrah",
-         "topic": "Senchal steel, and an arrangement with Dar'jazad.",
-         "reply": "Pickled fish. Ha. Good. I will not ask what you promised him. One day the bill will come, and we will pay it then."}
+        {
+          "type": "go",
+          "place": "senchal",
+          "text": "Travel to Senchal"
+        },
+        {
+          "type": "talk",
+          "npc": "dar_jazad",
+          "text": "Find Dar'jazad",
+          "topic": "Shazrah sent me. She needs steel.",
+          "reply": "Steel is easy. Getting it past the Thalmor customs post outside the city is hard. Dar'jazad will sell you the steel. You will get it past the customs post. And then we talk about what else Dar'jazad might ship for the Krin.",
+          "place": "senchal"
+        },
+        {
+          "type": "talk",
+          "npc": "dar_jazad",
+          "text": "Settle the terms of the alliance",
+          "choices": [
+            {
+              "label": "Steel only. The Krin don't move skooma.",
+              "reply": "Hmph. Principles. Expensive, principles. Fine. Steel only, at a higher price.",
+              "actions": "flag:rk_no_skooma"
+            },
+            {
+              "label": "Ship what you like through our country. We'll take a cut.",
+              "reply": "Now that is a partnership. The skooma will flow, the coin will flow, and nobody will ask where the Krin's arrows came from.",
+              "actions": "flag:rk_skooma_deal"
+            }
+          ],
+          "place": "senchal"
+        },
+        {
+          "type": "clear",
+          "place": "senchal",
+          "offset": [
+            -200,
+            -150
+          ],
+          "text": "Clear the Thalmor customs post",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 3,
+              "name": "Thalmor Customs Agent",
+              "hostile": true
+            },
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Customs Enforcer",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "senchal",
+          "offset": [
+            -200,
+            -150
+          ],
+          "relic": "rk_smuggled_steel",
+          "radius": 10,
+          "text": "Collect the crate of smuggled steel"
+        },
+        {
+          "type": "deliver",
+          "npc": "shazrah",
+          "relic": "rk_smuggled_steel",
+          "text": "Bring the steel to Shazrah",
+          "topic": "Senchal steel, and an arrangement with Dar'jazad.",
+          "reply": "Pickled fish. Ha. Good. I will not ask what you promised him. One day the bill will come, and we will pay it then.",
+          "place": "rimmen"
+        }
       ],
       "outro": "I struck a bargain with the Senchal smuggler Dar'jazad and brought a crate of steel back past the Thalmor customs post. The Renrijra Krin are armed, and indebted.",
-      "rewards": {"gold": 450, "faction_points": 3, "items": ["skycraft:khajiit_leggings"]}
+      "rewards": {
+        "gold": 450,
+        "faction_points": 3,
+        "items": [
+          "skycraft:khajiit_leggings"
+        ]
+      },
+      "region": "elsweyr/senchal",
+      "why": [
+        "senchal.L8.khenarthi_winds",
+        "senchal.L9.skooma_lords"
+      ],
+      "consequence": {
+        "world_state": "rk_sugar_and_steel_resolved",
+        "flag": "conseq_rk_sugar_and_steel",
+        "summary": "I struck a bargain with the Senchal smuggler Dar'jazad and brought a crate of steel back past the Thalmor customs post. The Renrijra Krin are armed, and indebted."
+      }
     },
     {
       "id": "rk_the_last_laugh",
       "title": "The Last Laugh",
       "start": "auto",
-      "requires": ["quest:rk_sugar_and_steel"],
+      "requires": [
+        "quest:rk_sugar_and_steel"
+      ],
       "desc": "Lord Ri'Vasha, the Anequinan noble who sells his own people's grain and sons to the Thalmor, has a Thalmor guard at his estate west of Rimmen. Shazrah means to end him, and she wants me at the head of the attack.",
       "objectives": [
-        {"type": "talk", "npc": "shazrah", "text": "Speak with Shazrah",
-         "topic": "We're armed. Where do we strike?",
-         "reply": "Ri'Vasha's estate. He has Thalmor at his gate and Thalmor gold in his vault. Go in first. When he falls, the rest of his house will fall with him."},
-        {"type": "go", "place": "ri_vasha_estate", "text": "Lead the attack on Ri'Vasha's estate"},
-        {"type": "clear", "place": "ri_vasha_estate", "placement": "structure", "text": "Break the estate's Thalmor guard",
-         "spawn": [{"type": "npc:thalmor", "count": 3, "name": "Thalmor Gate-Guard", "hostile": true},
-                   {"type": "npc:thug", "count": 2, "name": "Ri'Vasha Household Guard", "hostile": true, "armor": "#c0a040"}]},
-        {"type": "kill", "place": "ri_vasha_estate", "placement": "structure", "text": "Kill Lord Ri'Vasha",
-         "spawn": [{"type": "npc:adventurer", "name": "Lord Ri'Vasha", "target": true, "boss": true, "hp": 3.5, "dmg": 1.6, "hostile": true, "armor": "#e0c060", "weapon": "skycraft:glass_sword"}],
-         "journal": "Ri'Vasha told me the Renrijra were thieves who would starve Anequina within a year. He may even have believed it. He died in a room full of grain."},
-        {"type": "talk", "npc": "shazrah", "text": "Report to Shazrah",
-         "topic": "Ri'Vasha is dead. What of his household?",
-         "reply": "Servants, cooks, a steward, a few cousins. Some fed the Thalmor. Most only fed Ri'Vasha. The band is waiting on your word."},
-        {"type": "talk", "npc": "shazrah", "text": "Give the band your word",
-         "choices": [
-           {"label": "Open the granary to the villages. Let the servants go.", "reply": "A Laughing Blade who feeds people. The priests will not know what to say about you.", "actions": "flag:rk_fed_the_villages;scene:rk_laughing_blade"},
-           {"label": "Burn it. Let every noble in Anequina smell the smoke.", "reply": "Fear is a weapon too. They will smell it in Riverhold. They may not forgive us for it.", "actions": "flag:rk_burned_the_estate;scene:rk_laughing_blade"}
-         ]}
+        {
+          "type": "talk",
+          "npc": "shazrah",
+          "text": "Speak with Shazrah",
+          "topic": "We're armed. Where do we strike?",
+          "reply": "Ri'Vasha's estate. He has Thalmor at his gate and Thalmor gold in his vault. Go in first. When he falls, the rest of his house will fall with him.",
+          "place": "rimmen"
+        },
+        {
+          "type": "go",
+          "place": "ri_vasha_estate",
+          "text": "Lead the attack on Ri'Vasha's estate"
+        },
+        {
+          "type": "clear",
+          "place": "ri_vasha_estate",
+          "placement": "structure",
+          "text": "Break the estate's Thalmor guard",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 3,
+              "name": "Thalmor Gate-Guard",
+              "hostile": true
+            },
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Ri'Vasha Household Guard",
+              "hostile": true,
+              "armor": "#c0a040"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "ri_vasha_estate",
+          "placement": "structure",
+          "text": "Kill Lord Ri'Vasha",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Lord Ri'Vasha",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.6,
+              "hostile": true,
+              "armor": "#e0c060",
+              "weapon": "skycraft:glass_sword"
+            }
+          ],
+          "journal": "Ri'Vasha told me the Renrijra were thieves who would starve Anequina within a year. He may even have believed it. He died in a room full of grain."
+        },
+        {
+          "type": "talk",
+          "npc": "shazrah",
+          "text": "Report to Shazrah",
+          "topic": "Ri'Vasha is dead. What of his household?",
+          "reply": "Servants, cooks, a steward, a few cousins. Some fed the Thalmor. Most only fed Ri'Vasha. The band is waiting on your word.",
+          "place": "rimmen"
+        },
+        {
+          "type": "talk",
+          "npc": "shazrah",
+          "text": "Give the band your word",
+          "choices": [
+            {
+              "label": "Open the granary to the villages. Let the servants go.",
+              "reply": "A Laughing Blade who feeds people. The priests will not know what to say about you.",
+              "actions": "flag:rk_fed_the_villages;scene:rk_laughing_blade"
+            },
+            {
+              "label": "Burn it. Let every noble in Anequina smell the smoke.",
+              "reply": "Fear is a weapon too. They will smell it in Riverhold. They may not forgive us for it.",
+              "actions": "flag:rk_burned_the_estate;scene:rk_laughing_blade"
+            }
+          ],
+          "place": "rimmen"
+        }
       ],
       "outro": "I led the Renrijra Krin against Lord Ri'Vasha's estate and killed him among his Thalmor guards. Warlord Shazrah named me a Laughing Blade.",
-      "rewards": {"gold": 1200, "faction_points": 5, "perks": 1, "flags": ["rk_laughing_blade"],
-                  "items": [{"item": "skycraft:glass_dagger", "name": "The Last Laugh", "enchant": {"sharpness": 5, "looting": 3, "unbreaking": 3}},
-                            {"item": "skycraft:khajiit_helmet", "name": "Warlord's Grinning Mask", "enchant": {"protection": 3}}]}
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 5,
+        "perks": 1,
+        "flags": [
+          "rk_laughing_blade"
+        ],
+        "items": [
+          {
+            "item": "skycraft:glass_dagger",
+            "name": "The Last Laugh",
+            "enchant": {
+              "sharpness": 5,
+              "looting": 3,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:khajiit_helmet",
+            "name": "Warlord's Grinning Mask",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "elsweyr/rimmen",
+      "why": [
+        "rimmen.L8.imperial_grudge",
+        "rimmen.L9.customs_war"
+      ],
+      "consequence": {
+        "world_state": "rk_the_last_laugh_resolved",
+        "flag": "conseq_rk_the_last_laugh",
+        "summary": "I led the Renrijra Krin against Lord Ri'Vasha's estate and killed him among his Thalmor guards. Warlord Shazrah named me a Laughing Blade."
+      }
     }
   ]
 }

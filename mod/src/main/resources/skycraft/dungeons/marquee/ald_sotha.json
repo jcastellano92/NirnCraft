@@ -1091,5 +1091,10 @@
    "a": "pass_3",
    "b": "lower_cloister"
   }
+ ],
+ "why": [
+  "ascadian_isles.L1.fertile_lowland",
+  "ascadian_isles.L3.ascadian_lakes",
+  "morrowind.L8.tribunal_temple"
  ]
 }

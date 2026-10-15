@@ -1,3 +1,12 @@
 [
-  "uniques_skyrim.json"
+  "uniques_black_marsh.json",
+  "uniques_cyrodiil.json",
+  "uniques_elsweyr.json",
+  "uniques_foreign.json",
+  "uniques_hammerfell.json",
+  "uniques_high_rock.json",
+  "uniques_morrowind.json",
+  "uniques_skyrim.json",
+  "uniques_summerset.json",
+  "uniques_valenwood.json"
 ]

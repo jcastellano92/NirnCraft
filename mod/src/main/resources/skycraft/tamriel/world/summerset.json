@@ -1,0 +1,2673 @@
+{
+  "province": "summerset",
+  "truth": "Summerset is the Altmer homeland and the Thalmor's heart: two bright islands of white cliffs, crystal-strewn coasts, terraced vineyards and ordered gardens, with Artaeum, the Psijics' island, half in the mist. Lineage decides a life here: kinlord houses rule cities, Sapiarchs keep learning at the Crystal Tower, the Thalmor govern from Alinor and their justiciars watch everyone, and outsiders work in harbour quarters on permits. The Altmer honour their ancestors in crystal vaults and deny that any man became a god. The sea is the danger: Maormer raid Auridon, the Sload's vents breach the coast, and hidden Daedric cults grow inside the perfect cities while Imperial-era names survive only on old maps.",
+  "layers": {
+    "L1": [
+      {
+        "id": "white_cliffs",
+        "text": "pale limestone cliffs round both islands, 40-80 blocks, broken by harbour coves",
+        "cites": []
+      },
+      {
+        "id": "central_upland",
+        "text": "a granite upland in the middle of Summerset Isle, to 120, where the Crystal Tower stands",
+        "cites": []
+      },
+      {
+        "id": "auridon_ridge",
+        "text": "Auridon's spine, 60-120",
+        "cites": []
+      },
+      {
+        "id": "crystal_seams",
+        "text": "quartz and crystal veins that weather out onto the beaches",
+        "cites": []
+      },
+      {
+        "id": "terrace_loams",
+        "text": "well-drained loams on the cliff-top downs",
+        "cites": []
+      },
+      {
+        "id": "sea_trench",
+        "text": "deep water close to the south and west shores",
+        "cites": []
+      },
+      {
+        "id": "coral_shelf",
+        "text": "reefs on the warmer southern shore",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "mild_maritime",
+        "text": "mild, sunny and even all year",
+        "cites": [
+          "summerset.L1.white_cliffs"
+        ]
+      },
+      {
+        "id": "bright_air",
+        "text": "clear air and strong light that sets the crystal glittering",
+        "cites": [
+          "summerset.L1.crystal_seams",
+          "summerset.L2.mild_maritime"
+        ]
+      },
+      {
+        "id": "west_fogs",
+        "text": "sea fogs off the western ocean",
+        "cites": [
+          "summerset.L1.sea_trench"
+        ]
+      },
+      {
+        "id": "south_gales",
+        "text": "storms arrive from the south over deep water",
+        "cites": [
+          "summerset.L1.sea_trench"
+        ]
+      },
+      {
+        "id": "warmer_auridon",
+        "text": "Auridon is warmer and wetter, almost tropical",
+        "cites": [
+          "summerset.L1.auridon_ridge"
+        ]
+      },
+      {
+        "id": "artaeum_mist",
+        "text": "a standing mist round Artaeum that does not follow the weather",
+        "cites": [
+          "summerset.L1.sea_trench",
+          "summerset.L2.west_fogs"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "short_streams",
+        "text": "short clear streams off the upland, falling over the cliffs",
+        "cites": [
+          "summerset.L1.central_upland",
+          "summerset.L2.mild_maritime"
+        ]
+      },
+      {
+        "id": "cisterns_and_fountains",
+        "text": "cities draw from engineered cisterns and enchanted fountains",
+        "cites": [
+          "summerset.L1.central_upland",
+          "summerset.L3.short_streams"
+        ]
+      },
+      {
+        "id": "water_wardens",
+        "text": "each city's water is held by its kinlord house and released to public fountains on a schedule; inland estates hold their own springs",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L3.cisterns_and_fountains"
+        ]
+      },
+      {
+        "id": "tidal_causeway",
+        "text": "Firsthold reached at low tide",
+        "cites": [
+          "summerset.L1.white_cliffs"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "garden_island",
+        "text": "a managed landscape of hedged gardens, orchards and vineyards; true wild land survives only on the upland, the cliffs and the wastes",
+        "cites": [
+          "summerset.L1.terrace_loams",
+          "summerset.L2.mild_maritime"
+        ]
+      },
+      {
+        "id": "vine_terraces",
+        "text": "south-facing vineyard slopes",
+        "cites": [
+          "summerset.L1.terrace_loams",
+          "summerset.L2.bright_air"
+        ]
+      },
+      {
+        "id": "cliff_gryphons",
+        "text": "gryphons nest on the high cliffs",
+        "cites": [
+          "summerset.L1.white_cliffs"
+        ]
+      },
+      {
+        "id": "indrik_downs",
+        "text": "indriks and deer on the meadow downs",
+        "cites": [
+          "summerset.L1.terrace_loams",
+          "summerset.L4.garden_island"
+        ]
+      },
+      {
+        "id": "crystal_shores",
+        "text": "sea birds, crabs and glittering sands",
+        "cites": [
+          "summerset.L1.crystal_seams"
+        ]
+      },
+      {
+        "id": "silk_spiders",
+        "text": "giant spiders in old upland caves, their silk prized",
+        "cites": [
+          "summerset.L1.central_upland"
+        ]
+      },
+      {
+        "id": "salt_wastes",
+        "text": "the Corgrad Wastes, a scoured salt-and-rock tableland where nothing is planted",
+        "cites": [
+          "summerset.L1.central_upland",
+          "summerset.L2.south_gales"
+        ]
+      },
+      {
+        "id": "reef_life",
+        "text": "warm southern coral reefs",
+        "cites": [
+          "summerset.L1.coral_shelf"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "wine",
+        "text": "the isles' famous wine",
+        "cites": [
+          "summerset.L4.vine_terraces"
+        ]
+      },
+      {
+        "id": "crystal_and_lenses",
+        "text": "crystal cut for lenses, focus stones and glass",
+        "cites": [
+          "summerset.L1.crystal_seams"
+        ]
+      },
+      {
+        "id": "learning",
+        "text": "books, enchantment and instruction, exported and guarded",
+        "cites": [
+          "summerset.L1.central_upland",
+          "summerset.L5.crystal_and_lenses"
+        ]
+      },
+      {
+        "id": "silk",
+        "text": "spider-silk weaving",
+        "cites": [
+          "summerset.L4.silk_spiders"
+        ]
+      },
+      {
+        "id": "ships",
+        "text": "eagle-prowed ships from cove yards",
+        "cites": [
+          "summerset.L1.white_cliffs"
+        ]
+      },
+      {
+        "id": "pearls_and_fish",
+        "text": "coastal fisheries and pearl diving",
+        "cites": [
+          "summerset.L4.reef_life"
+        ]
+      },
+      {
+        "id": "gryphon_eggs",
+        "text": "taken under licence, tithed to the houses",
+        "cites": [
+          "summerset.L4.cliff_gryphons"
+        ]
+      },
+      {
+        "id": "restricted_imports",
+        "text": "grain, labour and raw goods come through two open ports only",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L5.ships"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "harbour_cities",
+        "text": "cities stand at the breaks in the cliffs where streams reach the sea",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L3.short_streams"
+        ]
+      },
+      {
+        "id": "upland_colleges",
+        "text": "the Crystal Tower and the colleges on the upland",
+        "cites": [
+          "summerset.L1.central_upland",
+          "summerset.L5.learning"
+        ]
+      },
+      {
+        "id": "vineyard_villas",
+        "text": "estates and villages on the downs",
+        "cites": [
+          "summerset.L4.vine_terraces",
+          "summerset.L5.wine"
+        ]
+      },
+      {
+        "id": "auridon_frontline",
+        "text": "Auridon's towns face the sea lanes and Valenwood; foreign ships land there first",
+        "cites": [
+          "summerset.L1.auridon_ridge",
+          "summerset.L5.restricted_imports"
+        ]
+      },
+      {
+        "id": "busy_centres",
+        "text": "Alinor (capital, Thalmor seat), Shimmerene (the open port), Lillandril (scholars), Vulkhel Guard (Auridon's open port), Skywatch (Auridon's court)",
+        "cites": [
+          "summerset.L5.learning",
+          "summerset.L5.restricted_imports",
+          "summerset.L6.harbour_cities"
+        ]
+      },
+      {
+        "id": "failing_places",
+        "text": "estates of fallen lines, villages at the Corgrad edge, fishing hamlets after Maormer raids",
+        "cites": [
+          "summerset.L4.salt_wastes"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "lineage_registry",
+        "text": "rank by recorded lineage; marriages arranged and registered",
+        "cites": [
+          "summerset.L6.harbour_cities"
+        ]
+      },
+      {
+        "id": "kinlord_houses",
+        "text": "old houses rule cities and hold the water",
+        "cites": [
+          "summerset.L3.water_wardens",
+          "summerset.L6.harbour_cities"
+        ]
+      },
+      {
+        "id": "sapiarchs",
+        "text": "scholar-priests of the Crystal Tower",
+        "cites": [
+          "summerset.L6.upland_colleges"
+        ]
+      },
+      {
+        "id": "thalmor_order",
+        "text": "Thalmor officials and justiciars over all",
+        "cites": [
+          "summerset.L6.harbour_cities",
+          "summerset.L7.kinlord_houses"
+        ]
+      },
+      {
+        "id": "lesser_lines",
+        "text": "Altmer of doubted lineage as servants, sailors and labourers",
+        "cites": [
+          "summerset.L6.vineyard_villas",
+          "summerset.L7.lineage_registry"
+        ]
+      },
+      {
+        "id": "permit_outsiders",
+        "text": "Bosmer, Khajiit and other Dominion subjects on work permits in harbour quarters, barred from the interior without a pass",
+        "cites": [
+          "summerset.L5.restricted_imports",
+          "summerset.L6.harbour_cities"
+        ]
+      },
+      {
+        "id": "dissidents",
+        "text": "Altmer who reject the Thalmor, watched or vanished",
+        "cites": [
+          "summerset.L6.upland_colleges",
+          "summerset.L7.thalmor_order"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "ancestor_faith",
+        "text": "the Aldmeri gods as ancestors (Auri-El, Magnus, Syrabane, Phynaster, Xarxes, Mara and others); family vaults and ancestor shrines",
+        "cites": [
+          "summerset.L7.lineage_registry"
+        ]
+      },
+      {
+        "id": "no_man_god",
+        "text": "the denial that any man became a god; Talos worship hunted",
+        "cites": [
+          "summerset.L7.thalmor_order",
+          "summerset.L8.ancestor_faith"
+        ]
+      },
+      {
+        "id": "propriety",
+        "text": "etiquette, beauty and order as virtues; a college teaches them",
+        "cites": [
+          "summerset.L7.lineage_registry"
+        ]
+      },
+      {
+        "id": "old_ways",
+        "text": "the Psijics' older philosophy, outside the Thalmor's faith",
+        "cites": [
+          "summerset.L2.artaeum_mist",
+          "summerset.L7.sapiarchs"
+        ]
+      },
+      {
+        "id": "outsiders_lesser",
+        "text": "other peoples are tolerated, not equal",
+        "cites": [
+          "summerset.L7.permit_outsiders"
+        ]
+      },
+      {
+        "id": "magic_heritage",
+        "text": "magic as birthright and duty",
+        "cites": [
+          "summerset.L5.learning",
+          "summerset.L7.sapiarchs"
+        ]
+      },
+      {
+        "id": "lamplit_dead",
+        "text": "the dead keep their lamps in the family vault",
+        "cites": [
+          "summerset.L7.lineage_registry",
+          "summerset.L8.ancestor_faith"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "thalmor_rule",
+        "text": "the Thalmor govern the isles and the Dominion from Alinor",
+        "cites": [
+          "summerset.L7.thalmor_order",
+          "summerset.L8.no_man_god"
+        ]
+      },
+      {
+        "id": "kinlord_resentment",
+        "text": "old houses resent the Thalmor's grip",
+        "cites": [
+          "summerset.L7.kinlord_houses",
+          "summerset.L8.propriety"
+        ]
+      },
+      {
+        "id": "psijic_apart",
+        "text": "Artaeum answers to no one; the Thalmor want its relics",
+        "cites": [
+          "summerset.L8.old_ways"
+        ]
+      },
+      {
+        "id": "maormer_war",
+        "text": "Pyandonea raids Auridon and the south coast",
+        "cites": [
+          "summerset.L2.south_gales",
+          "summerset.L6.auridon_frontline"
+        ]
+      },
+      {
+        "id": "sload_shadow",
+        "text": "Sload agents and their vents in the southern sea",
+        "cites": [
+          "summerset.L1.sea_trench"
+        ]
+      },
+      {
+        "id": "dominion_clients",
+        "text": "Valenwood and Elsweyr governed through envoys",
+        "cites": [
+          "summerset.L7.permit_outsiders",
+          "summerset.L9.thalmor_rule"
+        ]
+      },
+      {
+        "id": "ancestors_vigil",
+        "text": "midwinter festival when every house lights its vault and the Crystal Tower turns its beam to the sea",
+        "cites": [
+          "summerset.L6.upland_colleges",
+          "summerset.L8.lamplit_dead"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "crystal_vaults",
+        "text": "ancestral vaults of crystal and lamps under family estates",
+        "cites": [
+          "summerset.L1.crystal_seams",
+          "summerset.L8.lamplit_dead"
+        ]
+      },
+      {
+        "id": "direnni_ruins",
+        "text": "ruins of the clan that left for High Rock",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L6.harbour_cities"
+        ]
+      },
+      {
+        "id": "daedric_cults",
+        "text": "hidden cults inside the perfect cities, for those the order crushes",
+        "cites": [
+          "summerset.L7.dissidents",
+          "summerset.L8.propriety",
+          "summerset.L9.thalmor_rule"
+        ]
+      },
+      {
+        "id": "abyssal_vents",
+        "text": "Sload-made geysers that open from the deep and spill sea creatures",
+        "cites": [
+          "summerset.L1.sea_trench",
+          "summerset.L9.sload_shadow"
+        ]
+      },
+      {
+        "id": "maormer_beachheads",
+        "text": "hidden sea-elf landing coves",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L9.maormer_war"
+        ]
+      },
+      {
+        "id": "justiciar_cells",
+        "text": "secret prisons for dissidents",
+        "cites": [
+          "summerset.L9.thalmor_rule"
+        ]
+      },
+      {
+        "id": "spider_cathedral",
+        "text": "webbed caverns in the upland rock",
+        "cites": [
+          "summerset.L4.silk_spiders"
+        ]
+      },
+      {
+        "id": "smuggler_coves",
+        "text": "outsider smugglers in sea caves",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L7.permit_outsiders"
+        ]
+      },
+      {
+        "id": "psijic_eddies",
+        "text": "places where time does not run straight",
+        "cites": [
+          "summerset.L1.crystal_seams",
+          "summerset.L8.old_ways",
+          "summerset.L9.psijic_apart"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "aldmeri_landing",
+        "text": "the Aldmer settle the isles in the Merethic Era and raise the Crystal Tower",
+        "cites": [
+          "summerset.L1.white_cliffs",
+          "summerset.L6.upland_colleges"
+        ]
+      },
+      {
+        "id": "direnni_departure",
+        "text": "the Direnni clan leaves for High Rock",
+        "cites": [
+          "summerset.L10.direnni_ruins"
+        ]
+      },
+      {
+        "id": "sload_plague",
+        "text": "the Sload's plague in the First Era and the allied fleet that sank Thras",
+        "cites": [
+          "summerset.L9.sload_shadow",
+          "summerset.L10.abyssal_vents"
+        ]
+      },
+      {
+        "id": "first_dominion",
+        "text": "the Second Era alliance of Altmer, Bosmer and Khajiit",
+        "cites": [
+          "summerset.L9.dominion_clients"
+        ]
+      },
+      {
+        "id": "thalmor_coup",
+        "text": "early in the Fourth Era the Thalmor take power and rename the isles Alinor, erasing foreign names",
+        "cites": [
+          "summerset.L9.thalmor_rule"
+        ]
+      },
+      {
+        "id": "great_war",
+        "text": "the war on the Empire and the Concordat",
+        "cites": [
+          "summerset.L8.no_man_god",
+          "summerset.L9.thalmor_rule"
+        ]
+      },
+      {
+        "id": "old_maps",
+        "text": "Imperial-era maps still carry the erased names",
+        "cites": [
+          "summerset.L6.harbour_cities",
+          "summerset.L9.thalmor_rule"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "summerset_isle": {
+      "truth": "The larger island is the most ordered land in Tamriel. Alinor's sixteen avenues radiate from the Crystal Tower's sight-line; Shimmerene is the one port where outsiders crowd into a permit quarter; Lillandril's libraries stand open to the sky; Cloudrest hangs over the sea on its mountain eyrie. Vineyards climb the downs, gryphons nest on the cliffs and the Corgrad Wastes lie salt-white inland. Under the order, kinlord houses fight the Thalmor by etiquette, Sload vents breach the south shore and a cult of the Mad God remembers a temple Arena knew.",
+      "layers": {
+        "L1": [
+          {
+            "id": "tower_upland",
+            "text": "the central granite upland around the Crystal Tower",
+            "cites": []
+          },
+          {
+            "id": "south_shelf",
+            "text": "warm southern coral shelf",
+            "cites": []
+          },
+          {
+            "id": "corgrad_tableland",
+            "text": "scoured salt-and-rock tableland",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "prism_noon",
+            "text": "noon light refracting off crystal spires",
+            "cites": [
+              "summerset.L2.bright_air",
+              "summerset_isle.L1.tower_upland"
+            ]
+          },
+          {
+            "id": "west_fog_coast",
+            "text": "sea fogs around Lillandril and Cloudrest",
+            "cites": [
+              "summerset.L2.west_fogs",
+              "summerset_isle.L1.tower_upland"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "alinor_aqueduct",
+            "text": "white-stone aqueducts feeding the capital",
+            "cites": [
+              "summerset.L3.short_streams",
+              "summerset_isle.L1.tower_upland"
+            ]
+          },
+          {
+            "id": "upland_springs",
+            "text": "the clear springs of Norlor, Calinaan and Faaril",
+            "cites": [
+              "summerset.L3.short_streams",
+              "summerset_isle.L1.tower_upland"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "crystal_coast",
+            "text": "glittering white beaches",
+            "cites": [
+              "summerset.L4.crystal_shores",
+              "summerset_isle.L2.prism_noon"
+            ]
+          },
+          {
+            "id": "vine_terraces",
+            "text": "terraced hills of grape and olive",
+            "cites": [
+              "summerset.L4.vine_terraces",
+              "summerset_isle.L2.prism_noon"
+            ]
+          },
+          {
+            "id": "meadow_downs",
+            "text": "hedged flower downs",
+            "cites": [
+              "summerset.L4.indrik_downs",
+              "summerset_isle.L3.upland_springs"
+            ]
+          },
+          {
+            "id": "gryphon_cliffs",
+            "text": "high coastal eyries",
+            "cites": [
+              "summerset.L4.cliff_gryphons",
+              "summerset_isle.L1.tower_upland"
+            ]
+          },
+          {
+            "id": "salt_waste",
+            "text": "the barren Corgrad flats",
+            "cites": [
+              "summerset.L4.salt_wastes",
+              "summerset_isle.L1.corgrad_tableland"
+            ]
+          },
+          {
+            "id": "coral_forest",
+            "text": "southern reef shallows",
+            "cites": [
+              "summerset.L4.reef_life",
+              "summerset_isle.L1.south_shelf"
+            ]
+          },
+          {
+            "id": "ornamental_ring",
+            "text": "clipped city gardens",
+            "cites": [
+              "summerset.L4.garden_island",
+              "summerset_isle.L3.alinor_aqueduct"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "alinor_court_economy",
+            "text": "glass, crystal lenses and court patronage",
+            "cites": [
+              "summerset.L5.learning",
+              "summerset_isle.L3.alinor_aqueduct"
+            ]
+          },
+          {
+            "id": "shimmerene_open_port",
+            "text": "the southern open customs port",
+            "cites": [
+              "summerset.L5.restricted_imports",
+              "summerset_isle.L1.south_shelf"
+            ]
+          },
+          {
+            "id": "lillandril_books",
+            "text": "scholarly presses and enchantment",
+            "cites": [
+              "summerset.L5.learning",
+              "summerset_isle.L2.west_fog_coast"
+            ]
+          },
+          {
+            "id": "wineries",
+            "text": "the estates of Oleander Coast, Queiisen, Torancar, Valiel and Calandil",
+            "cites": [
+              "summerset.L5.wine",
+              "summerset_isle.L4.vine_terraces"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "alinor_capital",
+            "text": "the sixteen-avenue capital",
+            "cites": [
+              "summerset.L6.harbour_cities",
+              "summerset_isle.L3.alinor_aqueduct"
+            ]
+          },
+          {
+            "id": "east_half",
+            "text": "Shimmerene, Dusk and Sunhold",
+            "cites": [
+              "summerset.L6.harbour_cities",
+              "summerset_isle.L5.shimmerene_open_port"
+            ]
+          },
+          {
+            "id": "west_half",
+            "text": "Lillandril, Cloudrest and West Guard",
+            "cites": [
+              "summerset_isle.L2.west_fog_coast",
+              "summerset_isle.L5.lillandril_books"
+            ]
+          },
+          {
+            "id": "colleges",
+            "text": "the College of Sapiarchs and Illumination Academy",
+            "cites": [
+              "summerset.L6.upland_colleges",
+              "summerset_isle.L1.tower_upland"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "alinor_houses",
+            "text": "ancient noble lineages of the capital",
+            "cites": [
+              "summerset.L7.kinlord_houses",
+              "summerset_isle.L6.alinor_capital"
+            ]
+          },
+          {
+            "id": "shimmerene_permit_quarter",
+            "text": "walled dock quarter for foreign factors",
+            "cites": [
+              "summerset.L7.permit_outsiders",
+              "summerset_isle.L5.shimmerene_open_port"
+            ]
+          },
+          {
+            "id": "vineyard_labour",
+            "text": "estate vintners and stewards",
+            "cites": [
+              "summerset.L7.lesser_lines",
+              "summerset_isle.L5.wineries"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "tower_faith",
+            "text": "Sapiarch ancestor liturgy at the Crystal Tower",
+            "cites": [
+              "summerset.L8.ancestor_faith",
+              "summerset_isle.L6.colleges"
+            ]
+          },
+          {
+            "id": "sacred_numbers",
+            "text": "gardens of geometry as devotion",
+            "cites": [
+              "summerset.L8.propriety",
+              "summerset_isle.L4.ornamental_ring"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "house_vs_thalmor",
+            "text": "quiet lineage resistance to Justiciar oversight",
+            "cites": [
+              "summerset.L9.kinlord_resentment",
+              "summerset_isle.L7.alinor_houses"
+            ]
+          },
+          {
+            "id": "geyser_alarm",
+            "text": "coastal panic over rising abyssal vents",
+            "cites": [
+              "summerset.L9.sload_shadow",
+              "summerset_isle.L1.south_shelf"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "abyssal_geysers",
+            "text": "the Corgrad, Direnni, Rellenthil, Sil-Var-Woad, Sunhold and Welenkin vents",
+            "cites": [
+              "summerset.L10.abyssal_vents",
+              "summerset_isle.L1.south_shelf",
+              "summerset_isle.L9.geyser_alarm"
+            ]
+          },
+          {
+            "id": "cathedral_of_webs",
+            "text": "upland spider-cult caverns",
+            "cites": [
+              "summerset.L10.spider_cathedral",
+              "summerset_isle.L1.tower_upland"
+            ]
+          },
+          {
+            "id": "tower_undervaults",
+            "text": "ancestral crystal crypts",
+            "cites": [
+              "summerset.L10.crystal_vaults",
+              "summerset_isle.L1.tower_upland"
+            ]
+          },
+          {
+            "id": "temple_of_the_mad_god",
+            "text": "Arena's starting dungeon hidden in the wastes",
+            "cites": [
+              "summerset.L10.daedric_cults",
+              "summerset_isle.L1.corgrad_tableland",
+              "summerset_isle.L9.house_vs_thalmor"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "direnni_acropolis",
+            "text": "the empty white acropolis of the departed clan",
+            "cites": [
+              "summerset.L11.direnni_departure",
+              "summerset_isle.L1.tower_upland"
+            ]
+          },
+          {
+            "id": "erased_names",
+            "text": "villages whose Imperial-era names survive only on contraband charts",
+            "cites": [
+              "summerset.L11.old_maps",
+              "summerset_isle.L9.house_vs_thalmor"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L4.coral_forest"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L4.coral_forest"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "summerset_isle.L5.wineries",
+            "summerset_isle.L4.crystal_coast",
+            "summerset_isle.L4.gryphon_cliffs"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L4.coral_forest"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L4.meadow_downs"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy",
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L5.lillandril_books",
+            "summerset_isle.L6.colleges"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L8.tower_faith"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L6.alinor_capital",
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L6.alinor_capital",
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L6.colleges"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L6.colleges"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L9.house_vs_thalmor"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L10.abyssal_geysers"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L7.shimmerene_permit_quarter"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L7.shimmerene_permit_quarter"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L7.alinor_houses"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L8.tower_faith",
+            "summerset_isle.L11.direnni_acropolis"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L7.shimmerene_permit_quarter",
+            "summerset_isle.L7.vineyard_labour"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "summerset_isle.L7.shimmerene_permit_quarter",
+            "summerset_isle.L7.vineyard_labour"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L6.colleges"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "summerset_isle.L6.colleges"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L5.alinor_court_economy"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "summerset_isle.L9.house_vs_thalmor"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "ruin": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "dwemer": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "falmer": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "bandit": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "fort": [
+          "summerset_isle.L9.house_vs_thalmor"
+        ],
+        "military": [
+          "summerset_isle.L9.house_vs_thalmor"
+        ],
+        "mage": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "vampire": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "necromancer": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "hagraven": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "forsworn": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "beast": [
+          "summerset_isle.L4.ornamental_ring",
+          "summerset_isle.L10.cathedral_of_webs",
+          "summerset_isle.L10.temple_of_the_mad_god"
+        ],
+        "ice": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "mine": [
+          "summerset_isle.L5.alinor_court_economy"
+        ],
+        "grove": [
+          "summerset_isle.L4.crystal_coast"
+        ],
+        "smuggler": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "cave": [
+          "summerset_isle.L10.cathedral_of_webs"
+        ],
+        "giant": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "dragon": [
+          "summerset_isle.L10.abyssal_geysers"
+        ],
+        "tower": [
+          "summerset_isle.L10.tower_undervaults"
+        ],
+        "cabin": [
+          "summerset_isle.L6.alinor_capital"
+        ],
+        "wreck": [
+          "summerset_isle.L5.alinor_court_economy"
+        ]
+      }
+    },
+    "auridon": {
+      "truth": "Auridon is the warmer northern island, Summerset's front door and its military front line facing the continent. Foreign ships must land at Vulkhel Guard's open quays; Firsthold sits on a tidal rock reached by a low causeway, and Skywatch crowns its hill under a great brass orrery. Maormer raiders strike the coves in every southern gale, and the Dominion marines answer from Hightide Keep. In the Banished Cells and Mehrunes' Spite, Daedric cults that the Thalmor officially deny exist are growing among disgraced scions. Auridon's people are prouder of their island's ancient guard duty than of its quiet.",
+      "layers": {
+        "L1": [
+          {
+            "id": "ridge",
+            "text": "Auridon's central limestone and granite spine",
+            "cites": []
+          },
+          {
+            "id": "tide_rock",
+            "text": "Firsthold's tidal headland and causeway shelf",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "warm_wet_auridon",
+            "text": "warm, humid breezes off the Abecean",
+            "cites": [
+              "summerset.L2.warmer_auridon",
+              "auridon.L1.ridge"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "ridge_falls",
+            "text": "Beacon Falls and coastal cascades",
+            "cites": [
+              "summerset.L3.short_streams",
+              "auridon.L1.ridge"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "palm_groves",
+            "text": "coastal palms and flowering broadleaf",
+            "cites": [
+              "auridon.L2.warm_wet_auridon",
+              "auridon.L3.ridge_falls"
+            ]
+          },
+          {
+            "id": "ridge_pines",
+            "text": "umbrella pines along the high spine",
+            "cites": [
+              "auridon.L1.ridge",
+              "auridon.L2.warm_wet_auridon"
+            ]
+          },
+          {
+            "id": "crystal_coast",
+            "text": "quartz-sand coves",
+            "cites": [
+              "summerset.L4.crystal_shores",
+              "auridon.L1.tide_rock"
+            ]
+          },
+          {
+            "id": "tidal_flats",
+            "text": "mudflats and pools around Firsthold",
+            "cites": [
+              "summerset.L3.tidal_causeway",
+              "auridon.L1.tide_rock"
+            ]
+          },
+          {
+            "id": "raid_scar",
+            "text": "burned landing beaches",
+            "cites": [
+              "summerset.L2.south_gales",
+              "auridon.L1.tide_rock"
+            ]
+          },
+          {
+            "id": "dolmen_heath",
+            "text": "turf and standing stones",
+            "cites": [
+              "summerset.L4.garden_island",
+              "auridon.L1.ridge"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "vulkhel_open_port",
+            "text": "customs, ship repair and foreign factor trade",
+            "cites": [
+              "summerset.L5.restricted_imports",
+              "auridon.L1.tide_rock"
+            ]
+          },
+          {
+            "id": "fisheries",
+            "text": "coastal fishing fleets",
+            "cites": [
+              "summerset.L5.pearls_and_fish",
+              "auridon.L4.tidal_flats"
+            ]
+          },
+          {
+            "id": "skywatch_learning",
+            "text": "the high orrery and naval academy",
+            "cites": [
+              "summerset.L5.learning",
+              "auridon.L1.ridge"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "firsthold_seat",
+            "text": "the northern court city on its tidal rock",
+            "cites": [
+              "auridon.L1.tide_rock",
+              "summerset.L3.tidal_causeway"
+            ]
+          },
+          {
+            "id": "skywatch",
+            "text": "the stepped hill-city under the orrery",
+            "cites": [
+              "auridon.L1.ridge",
+              "auridon.L5.skywatch_learning"
+            ]
+          },
+          {
+            "id": "vulkhel_guard",
+            "text": "the southern port town",
+            "cites": [
+              "auridon.L5.vulkhel_open_port"
+            ]
+          },
+          {
+            "id": "mathiisen",
+            "text": "inland smithing and vineyard town",
+            "cites": [
+              "summerset.L6.vineyard_villas",
+              "auridon.L3.ridge_falls"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "marines",
+            "text": "Dominion naval officers and coastal watches",
+            "cites": [
+              "summerset.L7.thalmor_order",
+              "auridon.L6.vulkhel_guard"
+            ]
+          },
+          {
+            "id": "vulkhel_outsiders",
+            "text": "foreign traders and sailors under harbour curfew",
+            "cites": [
+              "summerset.L7.permit_outsiders",
+              "auridon.L5.vulkhel_open_port"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "propriety_college",
+            "text": "the College of Aldmeri Propriety where suspect scions are re-educated",
+            "cites": [
+              "summerset.L8.propriety",
+              "auridon.L6.skywatch"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "maormer_front",
+            "text": "sea-elf raids and Hightide Keep counter-strikes",
+            "cites": [
+              "summerset.L9.maormer_war",
+              "auridon.L7.marines"
+            ]
+          },
+          {
+            "id": "cult_denial",
+            "text": "Veiled Heritance and Daedric cells suppressed by Justiciars",
+            "cites": [
+              "summerset.L9.thalmor_rule",
+              "auridon.L8.propriety_college"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "maormer_beachheads_auridon",
+            "text": "sea-elf invasion camps, sea caves and wrecks",
+            "cites": [
+              "summerset.L10.maormer_beachheads",
+              "auridon.L4.raid_scar",
+              "auridon.L9.maormer_front"
+            ]
+          },
+          {
+            "id": "banished_cells",
+            "text": "the high-security prison vault",
+            "cites": [
+              "summerset.L10.daedric_cults",
+              "auridon.L1.ridge",
+              "auridon.L9.cult_denial"
+            ]
+          },
+          {
+            "id": "mehrunes_spite",
+            "text": "sunken Dagonite shrine",
+            "cites": [
+              "summerset.L10.daedric_cults",
+              "auridon.L1.ridge",
+              "auridon.L9.cult_denial"
+            ]
+          },
+          {
+            "id": "heritance_proving_ground",
+            "text": "rebel training crypts",
+            "cites": [
+              "summerset.L10.crystal_vaults",
+              "auridon.L1.ridge",
+              "auridon.L9.cult_denial"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "first_landing_lore",
+            "text": "Firsthold's claim to be the oldest Aldmeri landing in the isles",
+            "cites": [
+              "summerset.L11.aldmeri_landing",
+              "auridon.L6.firsthold_seat"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "auridon.L4.ridge_pines"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "auridon.L4.ridge_pines"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "auridon.L5.fisheries",
+            "auridon.L3.ridge_falls",
+            "auridon.L4.palm_groves"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "auridon.L5.fisheries"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "auridon.L4.ridge_pines"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "auridon.L4.palm_groves"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "auridon.L5.vulkhel_open_port",
+            "auridon.L7.vulkhel_outsiders"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "auridon.L5.vulkhel_open_port",
+            "auridon.L8.propriety_college"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "auridon.L6.firsthold_seat"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "auridon.L5.fisheries"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "auridon.L6.firsthold_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "auridon.L8.propriety_college"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "auridon.L6.firsthold_seat"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "auridon.L6.firsthold_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "auridon.L7.marines"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "auridon.L8.propriety_college",
+            "auridon.L6.firsthold_seat"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "auridon.L8.propriety_college"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "auridon.L6.firsthold_seat",
+            "auridon.L6.skywatch"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "auridon.L10.maormer_beachheads_auridon"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "auridon.L10.banished_cells"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "auridon.L7.marines"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "auridon.L6.firsthold_seat",
+            "auridon.L6.vulkhel_guard",
+            "auridon.L6.mathiisen"
+          ]
+        },
+        "housekeeper": {
+          "weight": 4,
+          "why": [
+            "auridon.L6.firsthold_seat",
+            "auridon.L6.vulkhel_guard",
+            "auridon.L6.mathiisen"
+          ]
+        },
+        "child": {
+          "weight": 4,
+          "why": [
+            "auridon.L6.firsthold_seat",
+            "auridon.L6.vulkhel_guard",
+            "auridon.L6.mathiisen"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "auridon.L11.first_landing_lore"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "auridon.L7.marines"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "auridon.L7.marines"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "auridon.L5.vulkhel_open_port"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "auridon.L9.maormer_front"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "ruin": [
+          "auridon.L10.mehrunes_spite"
+        ],
+        "dwemer": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "falmer": [
+          "auridon.L10.mehrunes_spite"
+        ],
+        "bandit": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "fort": [
+          "auridon.L9.maormer_front"
+        ],
+        "military": [
+          "auridon.L9.maormer_front"
+        ],
+        "mage": [
+          "auridon.L8.propriety_college"
+        ],
+        "vampire": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "necromancer": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "hagraven": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "forsworn": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "beast": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "ice": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "mine": [
+          "auridon.L5.vulkhel_open_port"
+        ],
+        "grove": [
+          "auridon.L4.palm_groves",
+          "auridon.L4.ridge_pines"
+        ],
+        "smuggler": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "cave": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "giant": [
+          "auridon.L4.dolmen_heath"
+        ],
+        "dragon": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "tower": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ],
+        "cabin": [
+          "auridon.L5.fisheries"
+        ],
+        "wreck": [
+          "auridon.L10.maormer_beachheads_auridon"
+        ]
+      }
+    },
+    "artaeum": {
+      "truth": "Artaeum is the Psijic Order's island off Summerset, there in the mist and sometimes not in the mortal world at all. Ceporah Tower, the Grand Psijic Villa and a ruined older college stand among quiet lotus pools under the Statue of Syrabane. The Order keeps the Old Ways and dangerous relics no one else may touch; time runs strangely in its under-vaults and in the Dreaming Cave. The Thalmor covet those relics and resent an Altmer authority they cannot command. A silent boat comes for those the Ritemaster invites, and only through the standing mist.",
+      "layers": {
+        "L1": [
+          {
+            "id": "isle_rock",
+            "text": "white limestone cliffs and pre-Aldmeri crystal outcrops rising from the western sea",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "standing_mist",
+            "text": "a timeless silver mist volume that hides the island from uninvited ships",
+            "cites": [
+              "summerset.L2.artaeum_mist",
+              "artaeum.L1.isle_rock"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "lotus_pools",
+            "text": "stepped meditation pools and clear springs",
+            "cites": [
+              "summerset.L3.short_streams",
+              "artaeum.L1.isle_rock"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "mist_forest",
+            "text": "pale broadleaf trees, moss and wisps",
+            "cites": [
+              "artaeum.L1.isle_rock",
+              "artaeum.L2.standing_mist"
+            ]
+          },
+          {
+            "id": "lotus_meadow",
+            "text": "quiet flowering meadows",
+            "cites": [
+              "artaeum.L3.lotus_pools"
+            ]
+          },
+          {
+            "id": "crystal_spires",
+            "text": "humming natural crystal pillars",
+            "cites": [
+              "summerset.L1.crystal_seams",
+              "artaeum.L1.isle_rock"
+            ]
+          },
+          {
+            "id": "shore_of_stones",
+            "text": "grey pebble beaches and carved markers",
+            "cites": [
+              "artaeum.L1.isle_rock"
+            ]
+          },
+          {
+            "id": "eddy_glade",
+            "text": "glades where falling leaves hang suspended in air",
+            "cites": [
+              "artaeum.L1.isle_rock",
+              "artaeum.L2.standing_mist"
+            ]
+          },
+          {
+            "id": "syrabane_heath",
+            "text": "high flowered turf round the monument",
+            "cites": [
+              "artaeum.L1.isle_rock",
+              "artaeum.L3.lotus_pools"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "relic_keeping",
+            "text": "containment and study of dangerous magical artifacts",
+            "cites": [
+              "summerset.L5.learning",
+              "artaeum.L1.isle_rock"
+            ]
+          },
+          {
+            "id": "craftworks",
+            "text": "focus-lenses and scrying spheres",
+            "cites": [
+              "summerset.L5.crystal_and_lenses",
+              "artaeum.L4.crystal_spires"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "psijic_villa",
+            "text": "the Grand Psijic Villa and lecture terraces",
+            "cites": [
+              "artaeum.L3.lotus_pools",
+              "artaeum.L5.relic_keeping"
+            ]
+          },
+          {
+            "id": "ceporah_tower",
+            "text": "the pre-Aldmeri tower older than the Crystal Tower",
+            "cites": [
+              "artaeum.L1.isle_rock",
+              "artaeum.L5.relic_keeping"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "order_ranks",
+            "text": "monks, initiates, loremasters and the Ritemaster chosen by merit, not lineage",
+            "cites": [
+              "summerset.L7.sapiarchs",
+              "artaeum.L6.psijic_villa"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "syrabane_statue",
+            "text": "monument to the Warlock's Ring and the Ancestor-Mage",
+            "cites": [
+              "summerset.L8.ancestor_faith",
+              "artaeum.L4.syrabane_heath"
+            ]
+          },
+          {
+            "id": "old_ways_rite",
+            "text": "veneration of the Eleven Forces and ancestral spirits without Thalmor dogma",
+            "cites": [
+              "summerset.L8.old_ways",
+              "artaeum.L7.order_ranks"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "thalmor_want_relics",
+            "text": "Justiciar agents seeking entry to seize the Order's sealed vaults",
+            "cites": [
+              "summerset.L9.psijic_apart",
+              "artaeum.L5.relic_keeping"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "psijic_time_vaults",
+            "text": "the Psijic Relic Vaults, the Traitor's Vault and the Dreaming Cave",
+            "cites": [
+              "summerset.L10.psijic_eddies",
+              "artaeum.L1.isle_rock",
+              "artaeum.L9.thalmor_want_relics"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "vanishing_isle",
+            "text": "the centuries when Artaeum left the mortal sea and returned",
+            "cites": [
+              "summerset.L11.aldmeri_landing",
+              "artaeum.L2.standing_mist",
+              "artaeum.L6.ceporah_tower"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "artaeum.L4.mist_forest"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "artaeum.L4.mist_forest"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "artaeum.L4.mist_forest"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "alchemist": {
+          "weight": 4,
+          "why": [
+            "artaeum.L4.mist_forest",
+            "artaeum.L4.lotus_meadow",
+            "artaeum.L4.syrabane_heath"
+          ]
+        },
+        "merchant": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "artaeum.L8.syrabane_statue"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "artaeum.L6.psijic_villa"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "artaeum.L6.psijic_villa"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "artaeum.L8.syrabane_statue"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "artaeum.L8.syrabane_statue"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "artaeum.L9.thalmor_want_relics"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "artaeum.L10.psijic_time_vaults"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "artaeum.L6.psijic_villa"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "artaeum.L8.syrabane_statue",
+            "artaeum.L8.old_ways_rite"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "artaeum.L5.craftworks"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "artaeum.L5.craftworks"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "artaeum.L7.order_ranks"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "artaeum.L5.relic_keeping"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "artaeum.L9.thalmor_want_relics"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "ruin": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "dwemer": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "falmer": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "bandit": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "fort": [
+          "artaeum.L9.thalmor_want_relics"
+        ],
+        "military": [
+          "artaeum.L9.thalmor_want_relics"
+        ],
+        "mage": [
+          "artaeum.L8.syrabane_statue"
+        ],
+        "vampire": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "necromancer": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "hagraven": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "forsworn": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "beast": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "ice": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "mine": [
+          "artaeum.L5.relic_keeping"
+        ],
+        "grove": [
+          "artaeum.L4.eddy_glade"
+        ],
+        "smuggler": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "cave": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "giant": [
+          "artaeum.L4.syrabane_heath"
+        ],
+        "dragon": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "tower": [
+          "artaeum.L10.psijic_time_vaults"
+        ],
+        "cabin": [
+          "artaeum.L6.psijic_villa"
+        ],
+        "wreck": [
+          "artaeum.L5.relic_keeping"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "vineyard_terraces",
+      "b": "summerset_isle.L1.corgrad_tableland",
+      "reason": "The scoured salt-and-rock Corgrad Wastes cannot sustain terraced vineyards"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "unlicensed_foreign_market",
+      "b": "summerset.L5.restricted_imports",
+      "reason": "Foreign trade is restricted to open permit quarters in Shimmerene and Vulkhel Guard, never inland cities"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "open_talos_shrine",
+      "b": "summerset.L8.no_man_god",
+      "reason": "Summerset's Aldmeri orthodoxy strictly denies that any mortal man became a god"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "falmer_betrayed",
+      "b": "summerset.L10.crystal_vaults",
+      "reason": "Summerset's underground holds ancestral crystal vaults and Sload abyssal vents, not Skyrim's Falmer"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 3,
+      "why": [
+        "summerset.L1.sea_trench",
+        "summerset.L1.coral_shelf"
+      ]
+    },
+    "smith": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "jeweler": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "farmer": {
+      "weight": 2,
+      "why": [
+        "summerset.L5.restricted_imports"
+      ]
+    },
+    "farmhand": {
+      "weight": 2,
+      "why": [
+        "summerset.L5.restricted_imports"
+      ]
+    },
+    "lumberjack": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "summerset.L5.restricted_imports"
+      ]
+    },
+    "mill_hand": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "woodcutter": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "fisher": {
+      "weight": 4,
+      "why": [
+        "summerset.L5.ships",
+        "summerset.L5.pearls_and_fish",
+        "summerset.L4.crystal_shores"
+      ]
+    },
+    "hunter": {
+      "weight": 2,
+      "why": [
+        "summerset.L4.indrik_downs"
+      ]
+    },
+    "butcher": {
+      "weight": 2,
+      "why": [
+        "summerset.L5.pearls_and_fish"
+      ]
+    },
+    "fletcher": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "alchemist": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "summerset.L5.ships",
+        "summerset.L6.harbour_cities",
+        "summerset.L6.auridon_frontline"
+      ]
+    },
+    "tailor": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "bookseller": {
+      "weight": 4,
+      "why": [
+        "summerset.L6.upland_colleges",
+        "summerset.L6.busy_centres",
+        "summerset.L8.propriety"
+      ]
+    },
+    "innkeeper": {
+      "weight": 4,
+      "why": [
+        "summerset.L6.harbour_cities",
+        "summerset.L6.vineyard_villas",
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "cook": {
+      "weight": 3,
+      "why": [
+        "summerset.L5.pearls_and_fish",
+        "summerset.L6.failing_places"
+      ]
+    },
+    "server": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "bard": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "priest": {
+      "weight": 4,
+      "why": [
+        "summerset.L8.ancestor_faith",
+        "summerset.L8.no_man_god",
+        "summerset.L8.lamplit_dead"
+      ]
+    },
+    "jarl": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "steward": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "housecarl": {
+      "weight": 1,
+      "why": [
+        "summerset.L7.lineage_registry"
+      ]
+    },
+    "court_wizard": {
+      "weight": 4,
+      "why": [
+        "summerset.L8.propriety",
+        "summerset.L6.upland_colleges",
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "mage": {
+      "weight": 4,
+      "why": [
+        "summerset.L8.propriety",
+        "summerset.L8.magic_heritage",
+        "summerset.L7.sapiarchs"
+      ]
+    },
+    "guard": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "fence": {
+      "weight": 2,
+      "why": [
+        "summerset.L10.smuggler_coves"
+      ]
+    },
+    "prisoner": {
+      "weight": 2,
+      "why": [
+        "summerset.L10.justiciar_cells"
+      ]
+    },
+    "beggar": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.failing_places"
+      ]
+    },
+    "citizen": {
+      "weight": 4,
+      "why": [
+        "summerset.L6.vineyard_villas",
+        "summerset.L6.auridon_frontline",
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "housekeeper": {
+      "weight": 4,
+      "why": [
+        "summerset.L7.permit_outsiders",
+        "summerset.L6.auridon_frontline",
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "child": {
+      "weight": 3,
+      "why": [
+        "summerset.L6.auridon_frontline",
+        "summerset.L6.busy_centres"
+      ]
+    },
+    "elder": {
+      "weight": 4,
+      "why": [
+        "summerset.L7.kinlord_houses",
+        "summerset.L8.ancestor_faith",
+        "summerset.L8.old_ways"
+      ]
+    },
+    "labourer": {
+      "weight": 4,
+      "why": [
+        "summerset.L5.restricted_imports",
+        "summerset.L7.lesser_lines",
+        "summerset.L7.permit_outsiders"
+      ]
+    },
+    "worker": {
+      "weight": 4,
+      "why": [
+        "summerset.L5.restricted_imports",
+        "summerset.L7.lesser_lines",
+        "summerset.L7.permit_outsiders"
+      ]
+    },
+    "guild_leader": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.upland_colleges"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 2,
+      "why": [
+        "summerset.L6.upland_colleges"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 1,
+      "why": [
+        "summerset.L5.wine"
+      ]
+    },
+    "survivor": {
+      "weight": 1,
+      "why": [
+        "summerset.L9.thalmor_rule"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "ruin": [
+      "summerset.L10.direnni_ruins",
+      "summerset.L8.ancestor_faith"
+    ],
+    "dwemer": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "falmer": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "bandit": [
+      "summerset.L10.smuggler_coves"
+    ],
+    "fort": [
+      "summerset.L9.thalmor_rule"
+    ],
+    "military": [
+      "summerset.L9.thalmor_rule"
+    ],
+    "mage": [
+      "summerset.L8.propriety",
+      "summerset.L8.magic_heritage"
+    ],
+    "vampire": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "necromancer": [
+      "summerset.L8.lamplit_dead"
+    ],
+    "hagraven": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "forsworn": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "beast": [
+      "summerset.L4.garden_island",
+      "summerset.L4.silk_spiders",
+      "summerset.L10.daedric_cults"
+    ],
+    "ice": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "mine": [
+      "summerset.L1.sea_trench",
+      "summerset.L1.coral_shelf"
+    ],
+    "grove": [
+      "summerset.L4.garden_island"
+    ],
+    "smuggler": [
+      "summerset.L10.maormer_beachheads",
+      "summerset.L10.smuggler_coves",
+      "summerset.L5.ships"
+    ],
+    "cave": [
+      "summerset.L10.spider_cathedral",
+      "summerset.L10.smuggler_coves",
+      "summerset.L4.silk_spiders"
+    ],
+    "giant": [
+      "summerset.L4.silk_spiders"
+    ],
+    "dragon": [
+      "summerset.L10.crystal_vaults"
+    ],
+    "tower": [
+      "summerset.L9.ancestors_vigil"
+    ],
+    "cabin": [
+      "summerset.L6.failing_places"
+    ],
+    "wreck": [
+      "summerset.L5.wine"
+    ]
+  }
+}

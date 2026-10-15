@@ -1,0 +1,385 @@
+{
+  "region": "hammerfell/stros_mkai",
+  "title": "The Treaty-Anchor of Port Hunding",
+  "summary": "Foil a plot by Thalmor-backed privateers and undead necromancers from N'Gasta's Isle to steal the brass Dwemer harbor-engine of Bthzark and sabotage the Stros M'Kai Treaty Commemoration.",
+  "why": [
+    "stros_mkai.L7.harbour_lord_and_merchants",
+    "stros_mkai.L8.hunding_memory",
+    "stros_mkai.L8.treaty_pride",
+    "stros_mkai.L9.smuggling_ring",
+    "stros_mkai.L10.bthzark"
+  ],
+  "hook": {
+    "place": "stros_mkai",
+    "places": [
+      "saintsport",
+      "stros_mkai",
+      "tavorra_cove"
+    ],
+    "npc": "story_sm_harbour_lord_cyrus_ward",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_sm_harbour_lord_cyrus_ward",
+      "name": "Harbour-Warden Zahid",
+      "role": "steward",
+      "place": "stros_mkai",
+      "greet": "Welcome to Stros M'Kai, friend! Every ship in Port Hunding is dressing its masts for the Treaty Commemoration—yet someone is cutting throats in the drydocks.",
+      "talk": [
+        "On this island our grandfathers forced the Empire to sign the Second Treaty of Stros M'Kai and drove the Aldmeri Dominion into the sea.",
+        "Last night smugglers broke into the customs house at Port Hunding and stole the Dwemer pressure-key to Bthzark, alongside the brass Treaty-Anchor. Speak with Bosun Latifa at the Draggin' Tale Inn."
+      ]
+    },
+    {
+      "id": "story_sm_bosun_latifa",
+      "name": "Bosun Latifa",
+      "role": "citizen",
+      "place": "draggin_tale_inn",
+      "greet": "If you're looking for honest smugglers, we're drinking rum in the light! None of our crews touched the Treaty-Anchor!",
+      "talk": [
+        "Corsair-Captain Vane and a pale necromancer from the western islet paid off a rogue customs clerk and carried the Dwemer key into Berud Tombs.",
+        "They're robbing the ancient navigator crypts in Berud Tombs to find the chart into Bthzark's lower sea-gate!"
+      ]
+    },
+    {
+      "id": "story_sm_scholar_farooq",
+      "name": "Antiquarian Farooq",
+      "role": "scholar",
+      "place": "port_hunding",
+      "greet": "By Hunding's compass, if Vane opens the lower sea-gate of Bthzark, the Dwemer steam-mines will flood Port Hunding's harbour with boiling oil!",
+      "talk": [
+        "Stop Necromancer Sulon inside Berud Tombs first to recover the navigator's chart, then pursue Captain Vane into the brass halls of Bthzark."
+      ]
+    },
+    {
+      "id": "story_sm_marine_captain_tariq",
+      "name": "Marine-Captain Tariq",
+      "role": "guard",
+      "place": "bthzark",
+      "greet": "Hold hard! My marines have secured the upper lift of Bthzark, but Vane's corsairs have rigged the Dwemer oil-conduits below.",
+      "talk": [
+        "Cut Vane down at the central flywheel before he releases the boiling pitch into Port Hunding!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_sm_necromancer_sulon": {
+      "name": "Sulon of the Western Islet",
+      "rank": "boss",
+      "place": "berud_tombs",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_sm_corsair_captain_vane": {
+      "name": "Corsair-Captain Vane",
+      "rank": "boss",
+      "place": "bthzark",
+      "weapon": "ebony_sword",
+      "helmet": "chainmail_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_sm_port_hunding_vault": [
+      "Antiquarian Farooq: Look at the empty pedestal in Port Hunding's customs vault—both the Treaty-Anchor and the Dwemer key of Bthzark are gone.",
+      "Bosun Latifa: And look at the green corpse-wax dripped on the flagstones. Only grave-robbers from the western islet burn candles like that.",
+      "Antiquarian Farooq: Hurry to Berud Tombs before they force the navigator's sarcophagus!"
+    ],
+    "story_sm_berud_crypt": [
+      "Sulon of the Western Islet: Even in death, Hunding's navigators know the secret channels beneath Stros M'Kai! Give me the brass chart, spectre!",
+      "Bosun Latifa: Put your blade through that grave-defiler before he binds the pilot's ghost!"
+    ],
+    "story_sm_bthzark_flywheel": [
+      "Corsair-Captain Vane: My Thalmor patrons paid ten thousand golden eagles to see Port Hunding's Treaty fleet burn at anchor!",
+      "Marine-Captain Tariq: Stros M'Kai broke the Dominion once, traitor, and we'll break you today!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_stros_mkai_01_customs_theft",
+      "region": "hammerfell/stros_mkai",
+      "category": "main",
+      "title": "The Stolen Key of Bthzark",
+      "giver": "story_sm_harbour_lord_cyrus_ward",
+      "start": "npc:story_sm_harbour_lord_cyrus_ward",
+      "requires": [],
+      "why": [
+        "stros_mkai.L7.harbour_lord_and_merchants",
+        "stros_mkai.L8.treaty_pride",
+        "stros_mkai.L9.smuggling_ring"
+      ],
+      "summary": "Inspect the robbed customs vault at Port Hunding and question Bosun Latifa at the Draggin' Tale Inn.",
+      "intro": [
+        "On the eve of the Second Treaty commemoration, thieves broke into Port Hunding's customs house and stole the Treaty-Anchor and the Dwemer key to Bthzark.",
+        "Inspect the customs vault at Port Hunding with Antiquarian Farooq and speak with Bosun Latifa at the Draggin' Tale Inn."
+      ],
+      "complete": [
+        "Bosun Latifa identified the thieves as Corsair-Captain Vane and a necromancer from the western islet heading toward Berud Tombs."
+      ],
+      "journal": {
+        "start": "Harbour-Warden Zahid in Stros M'Kai sent me to Port Hunding and the Draggin' Tale Inn to trace the stolen key of Bthzark.",
+        "done": "Bosun Latifa directed me to Berud Tombs where the thieves are seeking a Dwemer sea-chart."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "port_hunding",
+          "npc": "story_sm_scholar_farooq",
+          "text": "Consult Antiquarian Farooq at Port Hunding"
+        },
+        {
+          "type": "scene",
+          "place": "port_hunding",
+          "target": "scene:story_sm_port_hunding_vault",
+          "text": "Inspect the robbed pedestal at Port Hunding"
+        },
+        {
+          "type": "talk",
+          "place": "draggin_tale_inn",
+          "npc": "story_sm_bosun_latifa",
+          "text": "Question Bosun Latifa at the Draggin' Tale Inn"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "port_hunding",
+        "draggin_tale_inn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "port_hunding",
+          "objective": "Consult Antiquarian Farooq at Port Hunding"
+        },
+        {
+          "id": 20,
+          "place": "port_hunding",
+          "objective": "Inspect the robbed pedestal at Port Hunding"
+        },
+        {
+          "id": 30,
+          "place": "draggin_tale_inn",
+          "objective": "Question Bosun Latifa at the Draggin' Tale Inn"
+        }
+      ],
+      "consequence": "guard_banner:stros_mkai_stage_1"
+    },
+    {
+      "id": "ms1_stros_mkai_02_berud_chart",
+      "region": "hammerfell/stros_mkai",
+      "category": "main",
+      "title": "The Navigator's Tomb",
+      "giver": "story_sm_bosun_latifa",
+      "start": "auto",
+      "requires": [
+        "ms1_stros_mkai_01_customs_theft"
+      ],
+      "why": [
+        "stros_mkai.L8.fear_of_the_islet",
+        "stros_mkai.L10.catacombs",
+        "stros_mkai.L10.ngastas_isle"
+      ],
+      "summary": "Enter Berud Tombs and defeat Sulon of the Western Islet before he seizes the Dwemer sea-chart.",
+      "intro": [
+        "Sulon of the Western Islet has broken into Berud Tombs to interrogate the spirits of ancient Redguard navigators.",
+        "Enter Berud Tombs and slay Sulon."
+      ],
+      "complete": [
+        "Sulon fell in Berud Tombs, revealing that Corsair-Captain Vane has already unlocked the upper doors of Bthzark."
+      ],
+      "journal": {
+        "start": "I must enter Berud Tombs and defeat Sulon of the Western Islet.",
+        "done": "I defeated Sulon in Berud Tombs and learned Vane is preparing to flood Port Hunding with boiling pitch from Bthzark."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "berud_tombs",
+          "text": "Enter Berud Tombs"
+        },
+        {
+          "type": "scene",
+          "place": "berud_tombs",
+          "target": "scene:story_sm_berud_crypt",
+          "text": "Interrupt Sulon's necromantic rite in Berud Tombs"
+        },
+        {
+          "type": "boss",
+          "place": "berud_tombs",
+          "target": "story_sm_necromancer_sulon",
+          "text": "Defeat Sulon of the Western Islet"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "berud_tombs"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "berud_tombs",
+          "objective": "Enter Berud Tombs"
+        },
+        {
+          "id": 20,
+          "place": "berud_tombs",
+          "objective": "Interrupt Sulon's necromantic rite in Berud Tombs"
+        },
+        {
+          "id": 30,
+          "place": "berud_tombs",
+          "objective": "Defeat Sulon of the Western Islet"
+        }
+      ],
+      "consequence": "npc_schedule:stros_mkai_stage_2"
+    },
+    {
+      "id": "ms1_stros_mkai_03_sulush_lookout",
+      "region": "hammerfell/stros_mkai",
+      "category": "main",
+      "title": "Signal-Fires at Sulush Ruins",
+      "giver": "story_sm_scholar_farooq",
+      "start": "auto",
+      "requires": [
+        "ms1_stros_mkai_02_berud_chart"
+      ],
+      "why": [
+        "stros_mkai.L7.sailors_and_smugglers",
+        "stros_mkai.L9.treaty_ground"
+      ],
+      "summary": "Extinguish the corsair signal-beacon at Sulush Ruins and join Marine-Captain Tariq at Bthzark.",
+      "intro": [
+        "Vane's lookouts at Sulush Ruins have lit a signal-brazier to guide an Aldmeri privateer brig into the cove.",
+        "Douse the signal at Sulush Ruins and meet Marine-Captain Tariq at the entrance to Bthzark."
+      ],
+      "complete": [
+        "With the signal at Sulush Ruins doused, Marine-Captain Tariq breached the outer lift of Bthzark."
+      ],
+      "journal": {
+        "start": "I must clear the corsair lookout at Sulush Ruins and meet Marine-Captain Tariq at Bthzark.",
+        "done": "I doused the corsair signal at Sulush Ruins and joined Marine-Captain Tariq at Bthzark."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "sulush_ruins",
+          "text": "Douse the corsair signal-brazier at Sulush Ruins"
+        },
+        {
+          "type": "talk",
+          "place": "bthzark",
+          "npc": "story_sm_marine_captain_tariq",
+          "text": "Meet Marine-Captain Tariq at Bthzark"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "sulush_ruins",
+        "bthzark"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sulush_ruins",
+          "objective": "Douse the corsair signal-brazier at Sulush Ruins"
+        },
+        {
+          "id": 20,
+          "place": "bthzark",
+          "objective": "Meet Marine-Captain Tariq at Bthzark"
+        }
+      ],
+      "consequence": "shrine_state:stros_mkai_stage_3"
+    },
+    {
+      "id": "ms1_stros_mkai_04_bthzark_engine",
+      "region": "hammerfell/stros_mkai",
+      "category": "main",
+      "title": "The Brass Flywheel of Bthzark",
+      "giver": "story_sm_marine_captain_tariq",
+      "start": "auto",
+      "requires": [
+        "ms1_stros_mkai_03_sulush_lookout"
+      ],
+      "finale": true,
+      "why": [
+        "stros_mkai.L8.hunding_memory",
+        "stros_mkai.L9.treaty_ground",
+        "stros_mkai.L10.bthzark"
+      ],
+      "summary": "Descend into the Dwemer engine-halls of Bthzark, defeat Corsair-Captain Vane, and return the Treaty-Anchor to Harbour-Warden Zahid in Stros M'Kai.",
+      "intro": [
+        "Deep inside Bthzark, Corsair-Captain Vane is turning the Dwemer pitch-valves to burn the ships gathered in Port Hunding.",
+        "Defeat Captain Vane in Bthzark and return the Treaty-Anchor to Harbour-Warden Zahid in Stros M'Kai."
+      ],
+      "complete": [
+        "Corsair-Captain Vane is dead, the Dwemer pitch-valves of Bthzark are locked fast, and the Treaty bells ring across Port Hunding."
+      ],
+      "journal": {
+        "start": "I must defeat Corsair-Captain Vane in Bthzark and return the Treaty-Anchor to Harbour-Warden Zahid in Stros M'Kai.",
+        "done": "I defeated Corsair-Captain Vane in Bthzark and saved the Port Hunding fleet."
+      },
+      "objectives": [
+        {
+          "type": "scene",
+          "place": "bthzark",
+          "target": "scene:story_sm_bthzark_flywheel",
+          "text": "Confront Corsair-Captain Vane at the Bthzark flywheel"
+        },
+        {
+          "type": "boss",
+          "place": "bthzark",
+          "target": "story_sm_corsair_captain_vane",
+          "text": "Defeat Corsair-Captain Vane"
+        },
+        {
+          "type": "talk",
+          "place": "stros_mkai",
+          "npc": "story_sm_harbour_lord_cyrus_ward",
+          "text": "Return the Treaty-Anchor to Harbour-Warden Zahid in Stros M'Kai"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "bthzark",
+        "stros_mkai"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bthzark",
+          "objective": "Confront Corsair-Captain Vane at the Bthzark flywheel"
+        },
+        {
+          "id": 20,
+          "place": "bthzark",
+          "objective": "Defeat Corsair-Captain Vane"
+        },
+        {
+          "id": 30,
+          "place": "stros_mkai",
+          "objective": "Return the Treaty-Anchor to Harbour-Warden Zahid in Stros M'Kai"
+        }
+      ],
+      "consequence": "settlement_prosperity:stros_mkai_stage_4"
+    }
+  ]
+}

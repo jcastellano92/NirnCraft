@@ -30,8 +30,12 @@
   "region.skycraft.hammerfell.craglorn": "Craglorn",
   "region.skycraft.hammerfell.dragontail": "Dragontail Mountains",
   "region.skycraft.hammerfell.hews_bane": "Hew's Bane",
+  "region.skycraft.hammerfell.sentinel": "Sentinel",
   "region.skycraft.hammerfell.stros_mkai": "Stros M'Kai",
+  "region.skycraft.high_rock.anticlere": "Anticlere",
   "region.skycraft.high_rock.bjoulsae": "Bjoulsae River",
+  "region.skycraft.high_rock.daggerfall": "Daggerfall",
+  "region.skycraft.high_rock.dwynnen": "Dwynnen",
   "region.skycraft.high_rock.glenumbra": "Glenumbra",
   "region.skycraft.high_rock.rivenspire": "Rivenspire",
   "region.skycraft.high_rock.stormhaven": "Stormhaven",
@@ -78,5 +82,12 @@
   "region.skycraft.valenwood.malabal_tor": "Malabal Tor",
   "region.skycraft.valenwood.reapers_march": "Reaper's March",
   "region.skycraft.yokuda.sunken_isles": "Sunken Isles of Yokuda",
-  "region.skycraft.yokuda.yokudan_desert": "Yokudan Desert"
+  "region.skycraft.yokuda.yokudan_desert": "Yokudan Desert",
+  "river.skycraft.anticlere_river": "Maran Water",
+  "river.skycraft.bjoulsae_river": "Bjoulsae River",
+  "river.skycraft.daggerfall_river": "Ilessan Water",
+  "river.skycraft.dwynnen_river": "Karstbeck",
+  "river.skycraft.lainlyn_river": "Lainlyn Run",
+  "river.skycraft.sentinel_wadi": "Wadi Tigonus",
+  "river.skycraft.totambu_river": "Totambu River"
 }

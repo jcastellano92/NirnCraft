@@ -130,8 +130,10 @@ public final class StaffEnchanting {
         } else {
             gem.shrink(1);
         }
+        ItemStack rawStaff = inv.getItem(staffSlot).copy();
         inv.getItem(staffSlot).shrink(1);
         ItemStack staff = new ItemStack(ArsenalItems.ENCHANTED_STAFF.get());
+        com.skycraft.loot.affix.ItemAffixes.copyAffixes(rawStaff, staff);
         EnchantedStaffItem.bind(staff, spell, chargesFor(player, soul));
         com.skycraft.inventory.Pack.giveOrDrop(player, staff);
         inv.setChanged();

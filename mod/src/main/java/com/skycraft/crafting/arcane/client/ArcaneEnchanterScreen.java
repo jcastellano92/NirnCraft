@@ -300,8 +300,10 @@ public class ArcaneEnchanterScreen extends Screen {
         Component result;
         if (item != null && ench != null && soul > 0) {
             ItemStack s = com.skycraft.inventory.Pack.stackAt(p, item);
-            result = Component.translatable("screen.skycraft.enchanter.result", s.getHoverName(),
-                    ench.getFullname(Enchanting.resultLevel(p, ench, soul)));
+            int resLvl = Enchanting.resultLevel(p, ench, soul);
+            result = Component.translatable("screen.skycraft.enchanter.result",
+                    com.skycraft.loot.affix.ItemAffixes.previewEnchantedName(s, ench, resLvl),
+                    ench.getFullname(resLvl));
         } else {
             result = Component.translatable("screen.skycraft.enchanter.choose_all");
         }

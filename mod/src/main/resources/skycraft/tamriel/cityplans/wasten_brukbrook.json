@@ -1,0 +1,291 @@
+{
+  "id": "wasten_brukbrook",
+  "why": [
+    "reapers_march.L1.knolls",
+    "reapers_march.L5.grain_road",
+    "reapers_march.L6.arenthia_seat"
+  ],
+  "sil": "valenwood-wasten-brukbrook-plan",
+  "base": "none",
+  "overlay": "reapers_march",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "reapers_march",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "reapers_march",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "wasten_brukbrook_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "wasten_brukbrook_landmark",
+      "overlay": "reapers_march"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "reapers_march",
+      "name": "wasten_brukbrook_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "wasten_brukbrook_great_tree",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "wasten_brukbrook_garden",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "wasten_brukbrook_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "wasten_brukbrook_b_5",
+    "store": "wasten_brukbrook_b_10",
+    "smithy": "wasten_brukbrook_b_7"
+  },
+  "titles": {
+    "wasten_brukbrook_b_1": "place.skycraft.wasten_brukbrook Council & Seat Hall",
+    "wasten_brukbrook_b_2": "place.skycraft.wasten_brukbrook High Sanctuary",
+    "wasten_brukbrook_b_3": "place.skycraft.wasten_brukbrook Fighters & Wayfarers Hall",
+    "wasten_brukbrook_b_4": "place.skycraft.wasten_brukbrook Mages & Chroniclers Spire",
+    "wasten_brukbrook_b_5": "place.skycraft.wasten_brukbrook The Lantern & Hearth Inn",
+    "wasten_brukbrook_b_6": "place.skycraft.wasten_brukbrook The Traveler's Rest Tavern",
+    "wasten_brukbrook_b_7": "place.skycraft.wasten_brukbrook Master Forge & Armorer",
+    "wasten_brukbrook_b_8": "place.skycraft.wasten_brukbrook Botanicals & Remedies",
+    "wasten_brukbrook_b_9": "place.skycraft.wasten_brukbrook Scriptorium & Charts",
+    "wasten_brukbrook_b_10": "place.skycraft.wasten_brukbrook Grand Provisioner & Sundries",
+    "wasten_brukbrook_b_11": "place.skycraft.wasten_brukbrook Silk & Hide Clothier",
+    "wasten_brukbrook_b_12": "place.skycraft.wasten_brukbrook Lapidary & Signets",
+    "wasten_brukbrook_b_13": "place.skycraft.wasten_brukbrook Wayfarer Stables & Post",
+    "wasten_brukbrook_b_14": "place.skycraft.wasten_brukbrook Bonded Factor Warehouse",
+    "wasten_brukbrook_landmark": "High Seat of place.skycraft.wasten_brukbrook",
+    "wasten_brukbrook_plaza": "place.skycraft.wasten_brukbrook Central Plaza"
+  },
+  "innKey": "wasten_brukbrook_b_5"
+}

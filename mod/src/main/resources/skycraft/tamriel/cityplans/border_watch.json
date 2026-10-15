@@ -1,0 +1,99 @@
+{
+  "id": "border_watch",
+  "why": [
+    "blackwood.L6.border_villages",
+    "blackwood.L7.khajiit_border_village"
+  ],
+  "sil": "khajiit-totem-terrace",
+  "base": "none",
+  "overlay": "blackwood",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "blackwood"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "border_watch_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "border_watch_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "border_watch_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "border_watch_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "khajiit_moons",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "elsweyr_border",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "border_watch_b_1": "Border Watch Inn",
+    "border_watch_b_2": "Ri'Bassa's Shrine Hut",
+    "border_watch_b_3": "Bhisha's Cheese Shed",
+    "border_watch_b_4": "Tsrava's Weaving Hut"
+  },
+  "innKey": "border_watch_b_1",
+  "names": {
+    "inn": "border_watch_b_1"
+  }
+}

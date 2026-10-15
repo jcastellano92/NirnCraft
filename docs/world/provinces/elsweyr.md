@@ -33,140 +33,140 @@ against 11.7 and 46.9; dungeon identity 9%). The plan therefore adds depth, not 
 ## 1. World model sheet
 
 Data target: `tamriel/world/elsweyr.json` (MS22): a province block plus five region blocks. Field ids below are the
-data ids; cites in brackets. `P.` is the province block. The lint (`worldsheet_lint.py`) must pass on every field.
+data ids; cites in parentheses. `ew.` is the province block. The lint (`worldsheet_lint.py`) must pass on every field.
 
-### 1.1 Province world truth
+### 1.1 Province sheet (`elsweyr`)
 
-Elsweyr is two old kingdoms sewn together under two moons and pulled apart again. The north, Anequina, is a high
-plateau of red mesas, badland gullies and dry steppe, where clans live by wells, herds and caravans. The south,
-Pellitine, is river valley, sugar-cane floodplain and the Tenmar jungle, rich from plantations and the port trade of
-Senchal. The Mane at Torval keeps the faith of the moons' path; two kings keep the halves. Since the moons vanished
-for two years and came back, the Thalmor claim the credit and sit in both courts. Moon-sugar makes the south rich,
-feeds the skooma that shames the Khajiit abroad, and pays the rebels of the Renrijra Krin. Under the land lie
-moon-temples, a necropolis city, dragon scours and one Dwemer hall.
+**World truth.** Elsweyr is two old kingdoms sewn together under two moons and pulled apart again. Northern Anequina is
+a high plateau of red mesas, badland gullies and dry steppe, where clans live by wells, herds and caravans. Southern
+Pellitine is river valley, sugar-cane floodplain and the Tenmar jungle, rich from plantations and the port trade of
+Senchal. The Mane at Torval keeps the faith of the moons' path while two kings rule the halves. Since the Void Nights,
+the Thalmor claim credit for the moons' return and sit in both courts. Moon-sugar enriches the south, feeds the skooma
+trade, and funds the Renrijra Krin above ancient moon-temples, dragon scours and a necropolis city.
 
-### 1.2 Province sheet (P)
-
-| Layer | Fields `id`: meaning [cites] |
+| Layer | Fields `id` (cites): meaning |
 | --- | --- |
-| L1 Geology | `anequina_plateau`: a red sandstone and mudstone tableland cut into mesas, buttes and badland gullies. `central_escarpment`: a scarp of 60 to 120 blocks between the plateau and the southern lowland (our amplification of Arena's dry-north, wet-south split). `pellitine_alluvium`: deep river silts on the southern plain. `tenmar_karst`: limestone under the Tenmar forest with sinkholes and caves. `topal_coast`: a low coast of coves and bluffs on Topal Bay. `moonstone_seams`: moonstone in the quartz seams of the plateau. `dwemer_seam`: one deep Dwemer delve in the escarpment rock |
-| L2 Climate | `rain_shadow_north`: the escarpment strips the bay wind of rain, so Anequina is arid [central_escarpment]. `bay_monsoon`: wet summer winds off Topal Bay soak Pellitine and flood its rivers [topal_coast]. `dust_season`: spring dust storms on the plateau [anequina_plateau, rain_shadow_north]. `clear_nights`: dry air and few clouds make the two moons the brightest thing in the sky [rain_shadow_north]. `lunar_lattice`: the moons' phases mark the calendar, the tides on the bay and, in Khajiit belief, the form a child is born into [clear_nights] |
-| L3 Water | `plateau_wells`: Anequina drinks from deep wells, oases and cisterns at mesa feet [anequina_plateau, rain_shadow_north]. `scarp_springs`: a line of springs where the plateau's water seeps out of the escarpment [central_escarpment]. `pellitine_rivers`: braided rivers that flood each summer across the sugar plain to the bay [bay_monsoon, pellitine_alluvium]. `old_aqueduct`: an arched aqueduct carries spring water across a gorge toward Torval [scarp_springs]. `water_power`: in the north whoever holds a well holds a clan; in the south planters own the river frontage and the floodgates [plateau_wells, pellitine_rivers] |
-| L4 Ecology | `steppe_grazers`: nix-oxen, goats and wild herds on the dry grass [rain_shadow_north]. `canyon_hunters`: big cats, scorpions and carrion birds in the gullies [anequina_plateau]. `jungle_life`: serpents, giant wasps, apes and jungle cats in the Tenmar [bay_monsoon, tenmar_karst]. `cane_plain`: sugar cane needs the flood silts, so it grows only on the southern plain [pellitine_alluvium, pellitine_rivers]. `moon_sugar_bloom`: on the richest cane silts a glowing variety ripens only under full moons [cane_plain, lunar_lattice]. Micro-biome mosaic: section 2 |
-| L5 Economy | `moon_sugar`: cane grown, boiled and crystallised in the south, sold as sweetener and sacrament [cane_plain, moon_sugar_bloom]. `skooma`: the refined drug, illegal abroad and taxed or hidden at home [moon_sugar]. `caravans`: Anequina's wealth is carrying goods from well to well [plateau_wells, steppe_grazers]. `herding_hides`: hides, wool and milk from the steppe [steppe_grazers]. `moonstone`: mined and cut on the plateau [moonstone_seams]. `senchal_port`: sugar out, grain, timber and iron in [topal_coast, moon_sugar]. `rimmen_crafts`: carpets, glass and jewellery of Rimmen's artisans for the Cyrodiil trade [caravans, moonstone] |
-| L6 Settlement | `towns_on_wells`: northern towns stand on wells, oases and mesa cisterns, never on rivers [plateau_wells]. `towns_on_rivers`: southern towns stand on river terraces, fords and the coast [pellitine_rivers, topal_coast]. `torval_seat`: the Mane's city sits where the aqueduct water meets the sugar plain [old_aqueduct, moon_sugar]. `busy_centres`: Senchal (the sugar port), Dune (the caravan wheel), Torval (court and pilgrims), Rimmen (the Cyrodiil border market) [senchal_port, caravans, rimmen_crafts]. `failing_places`: plateau hamlets whose wells fail, cane villages sunk in debt, Knahaten-emptied villages left as ruins [plateau_wells, moon_sugar] |
-| L7 Society | `clan_mothers`: kin-groups led by Clan Mothers who settle disputes and hold wells [water_power]. `furstock_roles`: the many Khajiit forms take different work (small quick forms as messengers and thieves, large forms as warriors and porters, near-elven forms as merchants and envoys) [lunar_lattice]. `planters_and_cutters`: plantation families own the land; cane-cutters and boilers work off debts [moon_sugar, water_power]. `baandari`: wandering peddler families, welcome as traders, suspected as thieves [caravans]. `skooma_poor`: addicts and dealers in the port slums [skooma, senchal_port]. `imperial_descendants`: families of Septim-era planters and garrison men, still in the plantation towns [busy_centres] |
-| L8 Culture | `moons_path`: the faith of the Riddle'Thar, the order the moons dance in, kept by the Mane and the moon priests [lunar_lattice]. `khajiit_gods`: Alkosh, Khenarthi, Jone and Jode, Azurah, S'rendarr, Rajhin and the other aspects; shrines at wells and crossroads [moons_path, plateau_wells]. `dark_spirits`: Namiira's darkness and the dro-m'Athra, souls fallen from the path, feared in ruins and on moonless nights [moons_path]. `sugar_sacred`: moon-sugar is the moons' gift in rite and a sin in excess [moon_sugar, moons_path]. `night_life`: markets, rites and departures happen at moonrise [clear_nights, moons_path]. `masked_dead`: honoured dead are laid in necropolis cities wearing burial masks [moons_path]. `outsiders`: polite to buyers, wary of Imperials over Rimmen, bitter at the Thalmor's claim on the moons [rimmen_crafts, moons_path] |
-| L9 Politics | `two_crowns`: Anequina and Pellitine are separate client kingdoms of the Aldmeri Dominion [towns_on_wells, towns_on_rivers, clan_mothers]. `thalmor_in_court`: Thalmor advisers in both courts, credited with bringing back the moons [moons_path, two_crowns]. `renrijra_krin`: outlaw bands who fight the Thalmor and the crowns that bow to them, paid by smuggled sugar [thalmor_in_court, skooma]. `sugar_tax`: the crowns, the Mane and the Thalmor all want a share of the sugar [moon_sugar, two_crowns]. `rimmen_border`: Rimmen faces Cyrodiil's Nibenay; old claims and new smuggling [rimmen_crafts, busy_centres]. Festival (MS16): **the Two-Moons Procession** at the first double full moon of the year, from Torval to the moon-temples [moons_path, night_life] |
-| L10 Hidden | `moon_temples`: ruined and living temples on outcrops and ridges, aligned to moonrise [moons_path, anequina_plateau]. `necropolis_cities`: whole cities of the masked dead under Rimmen and in the escarpment [masked_dead, central_escarpment]. `dragon_scours`: bone fields and lairs on mesa tops [anequina_plateau]. `renrijra_camps`: camps in canyons and caves along the caravan roads, which is why those roads are dangerous [renrijra_krin, caravans]. `skooma_dens`: hidden boil-rooms and dens in caves near plantations and under Senchal [skooma, cane_plain]. `smuggler_coves` and `wrecks` on the bay [topal_coast, skooma]. `dro_mathra_haunts`: fallen spirits in abandoned temples [dark_spirits, moon_temples]. `colossus_hall`: the Dwemer delve and its unfinished giant [dwemer_seam]. `daedric_cults`: a few hidden cults of the darker Daedra, not the Khajiit aspects [dark_spirits] |
-| L11 History | `old_kingdoms`: Anequina and Pellitine as rival realms with a plateau city older than both (Ne Quin-al). `union_by_marriage`: the two crowns joined by a royal marriage in the Second Era to make Elsweyr. `knahaten_flu`: a Second Era plague that emptied villages. `dragon_war`: dragons loosed over Elsweyr late in the Second Era, leaving the scours. `septim_plantations`: Imperial planters and garrisons settled the south and the Rimmen road. `void_nights`: in the early Fourth Era the moons vanished for two years; the Thalmor claim they brought them back; Elsweyr split into two client kingdoms afterwards |
+| L1 Geology | `anequina_plateau`: a red sandstone and mudstone tableland cut into mesas, buttes and badland gullies. `central_escarpment`: a scarp of 60 to 120 blocks between the plateau and the southern lowland. `pellitine_alluvium`: deep river silts on the southern plain. `tenmar_karst`: limestone under the Tenmar forest with sinkholes and caves. `topal_coast`: a low coast of coves and bluffs on Topal Bay. `moonstone_seams`: moonstone in the quartz seams of the plateau. `dwemer_seam`: one deep Dwemer delve in the escarpment rock |
+| L2 Climate | `rain_shadow_north` (L1.central_escarpment): the escarpment strips the bay wind of rain, so Anequina is arid. `bay_monsoon` (L1.topal_coast): wet summer winds off Topal Bay soak Pellitine and flood its rivers. `dust_season` (L1.anequina_plateau, L2.rain_shadow_north): spring dust storms on the plateau. `clear_nights` (L1.anequina_plateau, L2.rain_shadow_north): dry air and few clouds make the two moons the brightest thing in the sky. `lunar_lattice` (L1.anequina_plateau, L2.clear_nights): the moons' phases mark the calendar, the tides on the bay and, in Khajiit belief, the form a child is born into |
+| L3 Water | `plateau_wells` (L1.anequina_plateau, L2.rain_shadow_north): Anequina drinks from deep wells, oases and cisterns at mesa feet. `scarp_springs` (L1.central_escarpment): a line of springs where the plateau's water seeps out of the escarpment. `pellitine_rivers` (L1.pellitine_alluvium, L2.bay_monsoon): braided rivers that flood each summer across the sugar plain to the bay. `old_aqueduct` (L1.central_escarpment, L3.scarp_springs): an arched aqueduct carries spring water across a gorge toward Torval. `water_power` (L1.anequina_plateau, L3.plateau_wells, L3.pellitine_rivers): in the north whoever holds a well holds a clan; in the south planters own the river frontage and the floodgates |
+| L4 Ecology | `steppe_grazers` (L2.rain_shadow_north): nix-oxen, goats and wild herds on the dry grass. `canyon_hunters` (L1.anequina_plateau): big cats, scorpions and carrion birds in the gullies. `jungle_life` (L1.tenmar_karst, L2.bay_monsoon): serpents, giant wasps, apes and jungle cats in the Tenmar. `cane_plain` (L1.pellitine_alluvium, L3.pellitine_rivers): sugar cane needs the flood silts, so it grows only on the southern plain. `moon_sugar_bloom` (L2.lunar_lattice, L4.cane_plain): on the richest cane silts a glowing variety ripens only under full moons |
+| L5 Economy | `moon_sugar` (L4.cane_plain, L4.moon_sugar_bloom): cane grown, boiled and crystallised in the south, sold as sweetener and sacrament. `skooma` (L4.cane_plain, L5.moon_sugar): the refined drug, illegal abroad and taxed or hidden at home. `caravans` (L3.plateau_wells, L4.steppe_grazers): Anequina's wealth is carrying goods from well to well. `herding_hides` (L4.steppe_grazers): hides, wool and milk from the steppe. `moonstone` (L1.moonstone_seams): mined and cut on the plateau. `senchal_port` (L1.topal_coast, L5.moon_sugar): sugar out, grain, timber and iron in. `rimmen_crafts` (L1.moonstone_seams, L5.caravans, L5.moonstone): carpets, glass and jewellery of Rimmen's artisans for the Cyrodiil trade |
+| L6 Settlement | `towns_on_wells` (L3.plateau_wells): northern towns stand on wells, oases and mesa cisterns, never on rivers. `towns_on_rivers` (L1.topal_coast, L3.pellitine_rivers): southern towns stand on river terraces, fords and the coast. `torval_seat` (L3.old_aqueduct, L5.moon_sugar): the Mane's city sits where the aqueduct water meets the sugar plain. `busy_centres` (L5.senchal_port, L5.caravans, L5.rimmen_crafts): Senchal (the sugar port), Dune (the caravan wheel), Torval (court and pilgrims), Rimmen (the Cyrodiil border market). `failing_places` (L3.plateau_wells, L5.moon_sugar): plateau hamlets whose wells fail, cane villages sunk in debt, Knahaten-emptied villages left as ruins |
+| L7 Society | `clan_mothers` (L3.water_power): kin-groups led by Clan Mothers who settle disputes and hold wells. `furstock_roles` (L2.lunar_lattice): the many Khajiit forms take different work, from small quick messengers to large warriors and near-elven envoys. `planters_and_cutters` (L3.water_power, L5.moon_sugar): plantation families own the land; cane-cutters and boilers work off debts. `baandari` (L5.caravans): wandering peddler families, welcome as traders, suspected as thieves. `skooma_poor` (L5.skooma, L5.senchal_port): addicts and dealers in the port slums. `imperial_descendants` (L6.busy_centres): families of Septim-era planters and garrison men, still in the plantation towns |
+| L8 Culture | `moons_path` (L2.lunar_lattice): the faith of the Riddle'Thar, the order the moons dance in, kept by the Mane and the moon priests. `khajiit_gods` (L3.plateau_wells, L8.moons_path): Alkosh, Khenarthi, Jone and Jode, Azurah, S'rendarr, Rajhin and the other aspects; shrines at wells and crossroads. `dark_spirits` (L2.lunar_lattice, L8.moons_path): Namiira's darkness and the dro-m'Athra, souls fallen from the path, feared in ruins and on moonless nights. `sugar_sacred` (L5.moon_sugar, L8.moons_path): moon-sugar is the moons' gift in rite and a sin in excess. `night_life` (L2.clear_nights, L8.moons_path): markets, rites and departures happen at moonrise. `masked_dead` (L1.central_escarpment, L8.moons_path): honoured dead are laid in necropolis cities wearing burial masks. `outsiders` (L5.rimmen_crafts, L8.moons_path): polite to buyers, wary of Imperials over Rimmen, bitter at the Thalmor's claim on the moons |
+| L9 Politics | `two_crowns` (L6.towns_on_wells, L6.towns_on_rivers, L7.clan_mothers): Anequina and Pellitine are separate client kingdoms of the Aldmeri Dominion. `thalmor_in_court` (L8.moons_path, L9.two_crowns): Thalmor advisers in both courts, credited with bringing back the moons. `renrijra_krin` (L5.skooma, L9.thalmor_in_court): outlaw bands who fight the Thalmor and the crowns that bow to them, paid by smuggled sugar. `sugar_tax` (L5.moon_sugar, L9.two_crowns): the crowns, the Mane and the Thalmor all want a share of the sugar. `rimmen_border` (L5.rimmen_crafts, L6.busy_centres): Rimmen faces Cyrodiil's Nibenay; old claims and new smuggling. `two_moons_procession` (L8.moons_path, L8.night_life): annual festival at the first double full moon from Torval to the moon-temples |
+| L10 Hidden | `moon_temples` (L1.anequina_plateau, L8.moons_path): ruined and living temples on outcrops and ridges, aligned to moonrise. `necropolis_cities` (L1.central_escarpment, L8.masked_dead): whole cities of the masked dead under Rimmen and in the escarpment. `dragon_scours` (L1.anequina_plateau): bone fields and lairs on mesa tops. `renrijra_camps` (L1.anequina_plateau, L5.caravans, L9.renrijra_krin): camps in canyons and caves along the caravan roads. `skooma_dens` (L4.cane_plain, L5.skooma): hidden boil-rooms and dens in caves near plantations and under Senchal. `smuggler_coves` (L1.topal_coast, L5.skooma): hidden coves and wrecks on the bay. `dro_mathra_haunts` (L1.anequina_plateau, L8.dark_spirits, L10.moon_temples): fallen spirits in abandoned temples. `colossus_hall` (L1.dwemer_seam): the Dwemer delve and its unfinished giant. `daedric_cults` (L1.tenmar_karst, L8.dark_spirits): hidden cults of the darker Daedra |
+| L11 History | `old_kingdoms` (L1.anequina_plateau, L6.towns_on_wells): Anequina and Pellitine as rival realms with a plateau city older than both, Ne Quin-al. `union_by_marriage` (L9.two_crowns): the two crowns joined by a royal marriage in the Second Era to make Elsweyr. `knahaten_flu` (L6.failing_places): a Second Era plague that emptied villages. `dragon_war` (L10.dragon_scours): dragons loosed over Elsweyr late in the Second Era, leaving the scours. `septim_plantations` (L7.imperial_descendants): Imperial planters and garrisons settled the south and the Rimmen road. `void_nights` (L2.lunar_lattice, L9.thalmor_in_court): in the early Fourth Era the moons vanished for two years; the Thalmor claim they brought them back and Elsweyr split into two client kingdoms afterwards |
 
-### 1.3 Region sub-sheets
+### 1.2 Anequina (`elsweyr/anequina`, 5.58 km², seat Riverhold, levels 18-42)
 
-Each region block holds its own world truth and eleven layers. Fields cite the province block (`P.`) where they
-inherit.
+**World truth.** Anequina is the high plateau of the north: red sandstone mesas over dry steppe, cut by badland gullies
+where the Renrijra Krin hide. Clans gather at deep wells; Dune's market wheel turns on caravan traffic; Orcrest guards
+the high mesa road; Riverhold, at the head of the only steady stream, keeps the northern crown's court. Ancient
+moon-temples stand on the ridges, and the dragon war left a scour of bleached bones on Prowl's Edge. The Thalmor
+resident counts the wells for the crown's tax, and the rebels poison the ones he counts.
 
-**Anequina** (`elsweyr/anequina`, 5.58 km², seat Riverhold, levels 18-42).
-World truth: the high plateau of the north, red mesas over dry steppe, cut by gullies where the Renrijra Krin hide.
-Clans gather at wells; Dune's market wheel turns on caravan traffic; Orcrest guards the mesa road; Riverhold, at the
-head of the only steady stream, keeps the northern crown's court. Moon-temples stand on ridges, and the dragon war left
-a scour of bones on Prowl's Edge. The Thalmor resident counts the wells and the rebels poison the ones he counts.
-
-| Layer | Fields [cites] |
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `mesa_field` mesas and buttes up to 150 [P.anequina_plateau]. `badland_gullies` [P.anequina_plateau]. `small_erg` a small dune field in the far west [P.rain_shadow_north]. `moonstone_quarries` [P.moonstone_seams] |
-| L2 | `dust_storms` spring dust [P.dust_season]. `hot_days_cold_nights` [P.rain_shadow_north] |
-| L3 | `riverhold_stream` the one perennial stream, fed by escarpment seepage [P.scarp_springs]. `oasis_chain` Nevoe, Temar and Kojanar oases on the caravan line [P.plateau_wells]. `cisterns_of_orcrest` [P.plateau_wells] |
-| L4 | `steppe`, `mesa_top`, `gully_shade`, `oasis_ring`, `dune_edge` (section 2) [L1, L2, L3]. `scorpion_gullies` [badland_gullies] |
-| L5 | `caravan_trade` [P.caravans]. `herds` [P.steppe_grazers]. `moonstone_cutting` [moonstone_quarries]. `well_tolls` [oasis_chain] |
-| L6 | `riverhold_seat` on its stream [riverhold_stream]. `dune_wheel` where five caravan routes meet [caravan_trade]. `orcrest_mesa` on a defensible mesa with cisterns [cisterns_of_orcrest]. `seaplace` an old Imperial waystation town (name kept, see 3.4) [P.septim_plantations]. Villages on wells only [oasis_chain] |
-| L7 | `well_clans` [P.clan_mothers]. `caravan_masters_rich` [caravan_trade]. `herders_poor` [herds] |
-| L8 | `ridge_temples` [P.moons_path]. `scour_taboo` the bone fields are not to be walked at night [P.dark_spirits] |
-| L9 | `northern_crown` at Riverhold [P.two_crowns]. `well_counting` the Thalmor census of wells, resented [P.thalmor_in_court, well_tolls]. `canyon_rebels` [P.renrijra_krin, badland_gullies] |
-| L10 | `renrijra_canyons` (signature theme) [canyon_rebels]. `prowls_edge_scour` [P.dragon_scours, mesa_field]. `vault_of_the_heavenly_scourge` and `tomb_of_the_moon_singers` [ridge_temples]. `moonstone_mines` abandoned when seams thinned [moonstone_quarries] |
-| L11 | `ne_quin_al` the plateau city older than the kingdoms [P.old_kingdoms]. `hill_of_swords` a battlefield of the old wars where blades are still planted [P.old_kingdoms] |
+| L1 | `mesa_field`: mesas and buttes up to 150 blocks. `badland_gullies`: banded clay canyons. `small_erg`: a small dune field in the far west. `moonstone_quarries`: quartz and moonstone seams |
+| L2 | `dust_storms` (ew.L2.dust_season, L1.mesa_field): spring dust gales across the tableland. `hot_days_cold_nights` (ew.L2.rain_shadow_north, L1.mesa_field): sharp desert temperature swings |
+| L3 | `riverhold_stream` (ew.L3.scarp_springs, L1.mesa_field): the one perennial stream, fed by seepage. `oasis_chain` (ew.L3.plateau_wells, L1.mesa_field): Nevoe, Temar and Kojanar oases on the caravan line. `cisterns_of_orcrest` (ew.L3.plateau_wells, L1.mesa_field): rock-cut mesa reservoirs |
+| L4 | `steppe` (ew.L4.steppe_grazers, L2.hot_days_cold_nights): short gold grass and scattered acacia. `mesa_top` (L1.mesa_field, L2.dust_storms): bare red rock and lone thorn trees. `gully_shade` (L1.badland_gullies): dry brush in canyon bottoms. `oasis_ring` (L3.oasis_chain): palms and green turf round wells. `dune_edge` (L1.small_erg): rippled western sands. `scorpion_gullies` (ew.L4.canyon_hunters, L1.badland_gullies): scorpions and big cats in the ravines |
+| L5 | `caravan_trade` (ew.L5.caravans, L3.oasis_chain): well-to-well pack trains. `herds` (ew.L4.steppe_grazers, L4.steppe): nix-oxen and goat herding. `moonstone_cutting` (ew.L5.moonstone, L1.moonstone_quarries): plateau gem and ore quarries. `well_tolls` (L3.oasis_chain): water fees collected by clan holders |
+| L6 | `riverhold_seat` (L3.riverhold_stream): the northern seat on its stream. `dune_wheel` (L3.oasis_chain, L5.caravan_trade): market city where five caravan routes meet. `orcrest_mesa` (L1.mesa_field, L3.cisterns_of_orcrest): fortified city on a mesa with cisterns. `seaplace` (ew.L7.imperial_descendants, L3.oasis_chain): an old Imperial waystation town |
+| L7 | `well_clans` (ew.L7.clan_mothers, L5.well_tolls): northern kin-groups holding the oases. `caravan_masters_rich` (L5.caravan_trade): wealthy factors of Dune and Riverhold. `herders_poor` (L5.herds): steppe nomads |
+| L8 | `ridge_temples` (ew.L8.moons_path, L1.mesa_field): high moon-shrines watching the sky. `scour_taboo` (ew.L8.dark_spirits, L1.mesa_field): the dragon bone fields are not walked at night |
+| L9 | `northern_crown` (ew.L9.two_crowns, L6.riverhold_seat): the royal court at Riverhold. `well_counting` (ew.L9.thalmor_in_court, L5.well_tolls): the resented Thalmor census of wells. `canyon_rebels` (ew.L9.renrijra_krin, L1.badland_gullies): insurgents striking the tax roads |
+| L10 | `renrijra_canyons` (ew.L10.renrijra_camps, L1.badland_gullies, L9.canyon_rebels): hidden rebel redoubts. `prowls_edge_scour` (ew.L10.dragon_scours, L1.mesa_field): scorched dragon bone field. `vault_of_the_heavenly_scourge` (ew.L10.moon_temples, L1.mesa_field, L8.ridge_temples): sealed lunar sanctuary. `tomb_of_the_moon_singers` (ew.L10.moon_temples, L1.mesa_field, L8.ridge_temples): cliff-cut cantor crypts. `moonstone_mines` (L1.moonstone_quarries, L5.moonstone_cutting): shafts abandoned when seams thinned |
+| L11 | `ne_quin_al` (ew.L11.old_kingdoms, L1.mesa_field): the plateau city older than the kingdoms. `hill_of_swords` (ew.L11.old_kingdoms, L9.northern_crown): a battlefield of the old wars where blades still stand planted |
 
-**Rimmen** (`elsweyr/rimmen`, 4.28 km², seat Rimmen, levels 18-40).
-World truth: the eastern march facing Cyrodiil, where the plateau breaks into cliffs above the Nibenay border. Rimmen
-is a city of artisans built on a cliff over its own necropolis; Alabaster quarries the pale stone that dresses the
-southern temples. Border trade, Imperial grudges and Thalmor customs men make the market rich and nervous. The
-Baandari camp at the city's edge, Hakoshae keeps the masked tombs, and every caravan to Cyrodiil pays someone.
+### 1.3 Rimmen (`elsweyr/rimmen`, 4.28 km², seat Rimmen, levels 18-40)
 
-| Layer | Fields [cites] |
+**World truth.** Rimmen is the eastern march facing Cyrodiil, where the plateau breaks into sandstone cliffs above the
+Nibenay border. Rimmen is a city of artisans built on a cliff directly over its own necropolis; Alabaster quarries the
+pale gypsum stone that dresses the southern temples. Border trade, Imperial grudges and Thalmor customs men make the
+market rich and nervous. The Baandari peddlers camp at the city's edge, Hakoshae keeps the masked tombs of the old
+magnates, and every caravan crossing to Cyrodiil pays someone twice.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `rimmen_cliff` a sandstone cliff with tomb galleries cut in its base [P.central_escarpment]. `alabaster_beds` pale gypsum stone [P.anequina_plateau]. `eastern_canyons` [P.anequina_plateau] |
-| L2 | `border_winds` drier than Cyrodiil, wetter than Anequina [P.rain_shadow_north] |
-| L3 | `cliff_springs` under the city [P.scarp_springs]. `border_creek` a creek along the Nibenay line [P.scarp_springs] |
-| L4 | `savanna_edge`, `canyon_floor`, `quarry_scar`, `cliff_spring_garden`, `sugar_patch` (section 2) [L1, L3] |
-| L5 | `artisan_trade` [P.rimmen_crafts]. `alabaster_quarry` [alabaster_beds]. `border_market` [P.rimmen_border]. `customs` [P.thalmor_in_court] |
-| L6 | `rimmen_seat` on the cliff over springs and tombs [rimmen_cliff, cliff_springs]. `alabaster_town` at the quarry [alabaster_quarry]. `hakoshae_tombs` village of tomb-keepers [P.masked_dead]. `meir_lynmount` border waystation town [border_market] |
-| L7 | `master_artisans` guild families [artisan_trade]. `quarry_labourers` [alabaster_quarry]. `baandari_camp` [P.baandari] |
-| L8 | `mask_makers` carve burial masks [P.masked_dead]. `imperial_grudge` [P.outsiders] |
-| L9 | `customs_war` Thalmor customs against Imperial and Baandari smugglers [customs, border_market]. `rimmen_claim` old Cyrodiil claims [P.rimmen_border] |
-| L10 | `rimmen_necropolis` under the city (marquee; move it here, see 3.3) [rimmen_cliff, mask_makers]. `mask_thieves` grave robbers selling masks abroad (lore-web els_2) [mask_makers, customs_war]. `quarry_undercuts` [alabaster_quarry] |
-| L11 | `rimmen_traded_hands` the city passed between crowns, Empire and usurpers [P.septim_plantations, P.old_kingdoms] |
+| L1 | `rimmen_cliff`: a sandstone cliff with tomb galleries cut in its base. `alabaster_beds`: pale gypsum stone beds. `eastern_canyons`: red border canyons |
+| L2 | `border_winds` (ew.L2.rain_shadow_north, L1.rimmen_cliff): drier than Cyrodiil, wetter than central Anequina |
+| L3 | `cliff_springs` (ew.L3.scarp_springs, L1.rimmen_cliff): perennial springs under the city cliff. `border_creek` (ew.L3.scarp_springs, L1.eastern_canyons): a creek along the Nibenay line |
+| L4 | `savanna_edge` (L2.border_winds): tall grass and acacia. `canyon_floor` (L1.eastern_canyons, L3.border_creek): cottonwood and red sand. `quarry_scar` (L1.alabaster_beds): white stone dust and bare terraces. `cliff_spring_garden` (L1.rimmen_cliff, L3.cliff_springs): hanging vines and palms. `sugar_patch` (L3.border_creek): small wet-pocket cane plots |
+| L5 | `artisan_trade` (ew.L5.rimmen_crafts, L3.cliff_springs): carpets, glass and metalwork. `alabaster_quarry` (L1.alabaster_beds): dressed white stone for temples. `border_market` (ew.L5.caravans, L3.border_creek): Nibenay-Elsweyr caravan exchange. `customs` (ew.L5.rimmen_crafts, L2.border_winds): border tariffs and inspections |
+| L6 | `rimmen_seat` (L1.rimmen_cliff, L3.cliff_springs): the cliff city over springs and tombs. `alabaster_town` (L1.alabaster_beds, L5.alabaster_quarry): quarry town. `hakoshae_tombs` (ew.L8.masked_dead, L1.rimmen_cliff): village of tomb-keepers. `meir_lynmount` (L5.border_market): border waystation town |
+| L7 | `master_artisans` (L5.artisan_trade, L6.rimmen_seat): hereditary guild families. `quarry_labourers` (L5.alabaster_quarry): stonecutters of Alabaster. `baandari_camp` (ew.L7.baandari, L5.border_market): peddler tents outside the gate |
+| L8 | `mask_makers` (ew.L8.masked_dead, L7.master_artisans): carvers of funerary masks for the necropolis. `imperial_grudge` (ew.L8.outsiders, L6.rimmen_seat): long memory of Septim and potentate garrisons |
+| L9 | `customs_war` (ew.L9.thalmor_in_court, L5.customs, L5.border_market): Thalmor customs officers against Imperial and Baandari smugglers. `rimmen_claim` (ew.L9.rimmen_border, L6.rimmen_seat): old Cyrodiil border claims |
+| L10 | `rimmen_necropolis` (ew.L10.necropolis_cities, L1.rimmen_cliff, L8.mask_makers): the vast city of the masked dead beneath Rimmen. `mask_thieves` (L1.rimmen_cliff, L8.mask_makers, L9.customs_war): grave robbers selling ancestral masks abroad. `quarry_undercuts` (L1.alabaster_beds, L5.alabaster_quarry): collapsed galleries under Alabaster |
+| L11 | `rimmen_traded_hands` (ew.L11.old_kingdoms, ew.L11.septim_plantations, L6.rimmen_seat): the city passed between crowns, Empire and potentates |
 
-**Torval** (`elsweyr/torval`, 4.11 km², capital, levels 22-44).
-World truth: the heart of the faith, where aqueduct water from the escarpment springs meets the first cane fields.
-Torval is the Mane's city of rings and twin domes, where pilgrims climb the processional road at moonrise. Temples of
-the moons stand all round it, the oldest abandoned to dro-m'Athra. The southern crown courts the Mane, the Thalmor
-court both, and the sugar duty keeps the city fed. It is the place every Khajiit means when they say "home".
+### 1.4 Torval (`elsweyr/torval`, 4.11 km², capital, levels 22-44)
 
-| Layer | Fields [cites] |
+**World truth.** Torval is the heart of the Khajiit faith, where arched aqueduct water from the escarpment springs
+meets the first cane fields of the south. Torval is the Mane's city of concentric rings and twin golden domes, where
+pilgrims climb the processional road at moonrise. Temples of the moons stand on every sandstone knoll around it, the
+oldest abandoned to dro-m'Athra spirits. The southern crown courts the Mane, the Thalmor court both, and the sugar
+exchange duty keeps the city fed. It is the place every Khajiit means when they say home.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `scarp_foot` the escarpment's southern foot [P.central_escarpment]. `temple_outcrops` sandstone knolls [P.central_escarpment] |
-| L2 | `moon_sky` [P.clear_nights]. `wet_season_edge` [P.bay_monsoon] |
-| L3 | `aqueduct_water` [P.old_aqueduct]. `torval_cisterns` [aqueduct_water] |
-| L4 | `aqueduct_green`, `temple_knoll`, `first_cane`, `palm_court_gardens`, `savanna_park` (section 2) |
-| L5 | `pilgrim_trade` [P.moons_path]. `sugar_exchange` the round exchange that fixes prices [P.moon_sugar]. `temple_crafts` lamps, masks, incense [P.masked_dead] |
-| L6 | `torval_capital` [P.torval_seat]. `pilgrim_villages` on the processional road [pilgrim_trade] |
-| L7 | `priestly_quarter` [P.moons_path]. `court_ohmes` near-elven courtiers [P.furstock_roles]. `pilgrim_poor` [pilgrim_trade] |
-| L8 | `mane_seat` [P.moons_path]. `two_moons_procession` (festival) [P.night_life] |
-| L9 | `mane_succession` an ageing Mane, rival claimants [mane_seat]. `southern_crown_pressure` [P.two_crowns]. `thalmor_moon_claim` [P.thalmor_in_court] |
-| L10 | `old_temples` [P.moon_temples]. `dro_mathra_in_old_temples` (signature theme for the region) [P.dro_mathra_haunts, old_temples]. `sugar_slingers` dealers under the exchange [sugar_exchange, P.skooma] |
-| L11 | `void_nights_memory` the two years without moons, temple bells still rung at the hour they vanished [P.void_nights] |
+| L1 | `scarp_foot`: the central escarpment's southern foot. `temple_outcrops`: sandstone knolls rising out of the plain |
+| L2 | `moon_sky` (ew.L2.clear_nights, L1.temple_outcrops): crystalline night skies over the knolls. `wet_season_edge` (ew.L2.bay_monsoon, L1.scarp_foot): the northern reach of the summer rains |
+| L3 | `aqueduct_water` (ew.L3.old_aqueduct, L1.scarp_foot): spring water carried on stone arches. `torval_cisterns` (L1.scarp_foot, L3.aqueduct_water): the palace and temple fountains |
+| L4 | `aqueduct_green` (L3.aqueduct_water): green strip of palms and grass under the arches. `temple_knoll` (L1.temple_outcrops, L2.moon_sky): incense trees and stone terraces. `first_cane` (ew.L4.cane_plain, L2.wet_season_edge): northernmost moon-sugar rows. `palm_court_gardens` (L3.torval_cisterns): ornamental pools inside the city ring. `savanna_park` (L1.scarp_foot, L2.wet_season_edge): open lowland grass |
+| L5 | `pilgrim_trade` (L3.torval_cisterns, L4.temple_knoll): hostels, offerings and guides. `sugar_exchange` (ew.L5.moon_sugar, L4.first_cane): the round exchange that fixes province sugar prices. `temple_crafts` (L4.temple_knoll): brass lamps, masks and incense |
+| L6 | `torval_capital` (ew.L6.torval_seat, L3.torval_cisterns): the Mane's city of rings. `pilgrim_villages` (L4.aqueduct_green, L5.pilgrim_trade): waystations along the processional road |
+| L7 | `priestly_quarter` (ew.L8.moons_path, L6.torval_capital): moon-priests and clan speakers. `court_ohmes` (ew.L7.furstock_roles, L6.torval_capital): near-elven courtiers and scribes. `pilgrim_poor` (L5.pilgrim_trade): supplicants camped by the outer arches |
+| L8 | `mane_seat` (ew.L8.moons_path, L6.torval_capital): the spiritual centre of the Lunar Lattice. `two_moons_procession` (L2.moon_sky, ew.L8.night_life, L8.mane_seat): the double-full-moon pilgrimage |
+| L9 | `mane_succession` (L8.mane_seat): an ageing Mane and rival claimants. `southern_crown_pressure` (ew.L9.two_crowns, L5.sugar_exchange): royal leverage over the exchange. `thalmor_moon_claim` (ew.L9.thalmor_in_court, L8.mane_seat): envoys claiming credit for ending the Void Nights |
+| L10 | `old_temples` (ew.L10.moon_temples, L1.temple_outcrops): ancient lunar sanctuaries on the knolls. `dro_mathra_in_old_temples` (ew.L10.dro_mathra_haunts, L1.temple_outcrops, L9.mane_succession): bent spirits haunting the sealed shrines. `sugar_slingers` (ew.L5.skooma, L4.first_cane, L5.sugar_exchange): illicit dealers beneath the exchange |
+| L11 | `void_nights_memory` (ew.L11.void_nights, L8.mane_seat): the two years without moons, when temple bells were rung at the hour they vanished |
 
-**Pellitine** (`elsweyr/pellitine`, 8.19 km², seat Corinthe, levels 22-45; a large region, planned as two halves).
-World truth: the wet south-west, river terraces and floodplain cane fields running to the Tenmar jungle and the
-Valenwood gate. Corinthe is the garden city of canals; the plantation towns with Imperial names are Septim-era
-foundations where Khajiit cutters work for old families. The Tenmar's karst hides temples, the Halls of Colossus and
-the Temple of Agamanus. Floods bring wealth and fever. Smugglers take the sugar downriver, and the Green Pact border
-means Bosmer buy grain and wood here.
+### 1.5 Pellitine (`elsweyr/pellitine`, 8.19 km², seat Corinthe, levels 22-45)
 
-| Layer | Fields [cites] |
+**World truth.** Pellitine is the wet south-west: river terraces and floodplain cane fields running into the Tenmar
+jungle and the Valenwood gate. Corinthe is the garden city of canals; the plantation towns with Imperial names are
+Septim-era foundations where Khajiit cutters work for old families. The Tenmar's limestone karst hides moon-temples, the
+Halls of Colossus and the Temple of Agamanus. Summer floods bring wealth and marsh fever. Smugglers take the sugar
+downriver by night, and the Green Pact border means Bosmer buy their grain and timber here.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `river_terraces` [P.pellitine_alluvium]. `tenmar_sinkholes` [P.tenmar_karst]. `colossus_scarp` the Dwemer delve's rock [P.dwemer_seam] |
-| L2 | `flood_summers` [P.bay_monsoon]. `jungle_fog` mornings [P.bay_monsoon] |
-| L3 | `three_rivers` (named in data) [P.pellitine_rivers]. `canal_city_water` Corinthe's canals [three_rivers]. `cenotes` [tenmar_sinkholes] |
-| L4 | `cane_floodplain`, `gallery_forest`, `tenmar_canopy`, `cenote_glade`, `terraced_gardens`, `moon_sugar_meadow` (section 2) |
-| L5 | `plantations` [P.moon_sugar]. `boil_houses` [plantations]. `pact_trade` grain and timber sold to Valenwood across the border [P.senchal_port]. `river_fishing` [three_rivers] |
-| L6 | West half: `corinthe_seat` [canal_city_water]; Ein Meirvale, Greenhall and Portneu View as plantation towns [plantations]. East half: Tenmar Forest town and Darvulk Haven as jungle-edge towns [P.tenmar_karst]; The Stitches and Brukreich Bridge on the river crossings [three_rivers]. Docks villages on the river mouths [river_fishing] |
-| L7 | `planter_houses` [P.planters_and_cutters, P.imperial_descendants]. `cutter_debt` [boil_houses]. `pact_merchants` [pact_trade] |
-| L8 | `garden_priests` Corinthe's garden temple [P.khajiit_gods]. `fever_shrines` to S'rendarr [flood_summers] |
-| L9 | `planter_vs_crown` planters resist the southern crown's sugar duty [P.sugar_tax]. `cutter_unrest` [cutter_debt]. `valenwood_gate` border fort and the Pact trade [pact_trade] |
-| L10 | `halls_of_colossus` [P.colossus_hall]. `temple_of_agamanus` [P.moon_temples]. `plantation_dens` [P.skooma_dens]. `river_wrecks` [three_rivers] |
-| L11 | `septim_towns` [P.septim_plantations]. `flu_villages` [P.knahaten_flu] |
+| L1 | `river_terraces`: deep alluvial silts along the southern rivers. `tenmar_sinkholes`: limestone karst and caves under the jungle. `colossus_scarp`: the Dwemer delve's rock face |
+| L2 | `flood_summers` (ew.L2.bay_monsoon, L1.river_terraces): monsoon deluges that swell the rivers. `jungle_fog` (ew.L2.bay_monsoon, L1.tenmar_sinkholes): steaming morning mists under the canopy |
+| L3 | `three_rivers` (ew.L3.pellitine_rivers, L1.river_terraces): the braided sugar rivers. `canal_city_water` (L1.river_terraces, L3.three_rivers): Corinthe's stepped canals. `cenotes` (L1.tenmar_sinkholes): deep limestone sinkhole pools |
+| L4 | `cane_floodplain` (ew.L4.cane_plain, L3.three_rivers): rich silt cane fields. `gallery_forest` (L3.three_rivers): riverside trees. `tenmar_canopy` (ew.L4.jungle_life, L2.jungle_fog): dense jungle of apes, wasps and serpents. `cenote_glade` (L3.cenotes): fern-ringed sinkholes. `terraced_gardens` (L3.canal_city_water): Corinthe's flower and spice terraces. `moon_sugar_meadow` (L3.three_rivers, ew.L4.moon_sugar_bloom, L4.cane_floodplain): glowing full-moon cane beds |
+| L5 | `plantations` (ew.L5.moon_sugar, L4.cane_floodplain): great sugar estates. `boil_houses` (L4.cane_floodplain, L5.plantations): cane-crushing and crystallising mills. `pact_trade` (ew.L5.senchal_port, L4.gallery_forest): grain and timber sold to Valenwood across the border. `river_fishing` (L3.three_rivers): barge and net fisheries |
+| L6 | `corinthe_seat` (L3.canal_city_water, L5.plantations): the southern garden-and-canal seat; Ein Meirvale, Greenhall and Portneu View as plantation towns; Tenmar Forest and Darvulk Haven at the jungle edge |
+| L7 | `planter_houses` (ew.L7.planters_and_cutters, ew.L7.imperial_descendants, L5.plantations): old estate dynasties. `cutter_debt` (L5.boil_houses): cane-cutters bound by seasonal tallies. `pact_merchants` (L5.pact_trade): border factors trading with Bosmer |
+| L8 | `garden_priests` (ew.L8.khajiit_gods, L6.corinthe_seat): Corinthe's garden temple liturgy. `fever_shrines` (ew.L8.khajiit_gods, L2.flood_summers): riverside shrines to S'rendarr against summer marsh fever |
+| L9 | `planter_vs_crown` (ew.L9.sugar_tax, L7.planter_houses): planters resisting the southern crown's sugar duty. `cutter_unrest` (L7.cutter_debt): strikes and cane-burnings in the boil-houses. `valenwood_gate` (L5.pact_trade): border fort and customs tension |
+| L10 | `halls_of_colossus` (ew.L10.colossus_hall, L1.colossus_scarp): the Dwemer delve and its giant frame. `temple_of_agamanus` (ew.L10.moon_temples, L1.tenmar_sinkholes): jungle-swallowed lunar temple. `plantation_dens` (ew.L10.skooma_dens, L4.cane_floodplain, L9.cutter_unrest): hidden skooma boil-caves. `river_wrecks` (L1.river_terraces, L3.three_rivers): sunken sugar barges |
+| L11 | `septim_towns` (ew.L11.septim_plantations, L6.corinthe_seat): Imperial-named plantation foundations. `flu_villages` (ew.L11.knahaten_flu, L1.tenmar_sinkholes): overgrown Second Era villages emptied by plague |
 
-**Senchal** (`elsweyr/senchal`, 3.55 km², seat Senchal, levels 24-45).
-World truth: the sugar coast on Topal Bay. Senchal is a loud, sweet-smelling port stepping down from a hill palace
-through warehouses to a quay where everything Elsweyr grows leaves and everything it lacks arrives. Customs men,
-boilers, sailors, skooma lords and Thalmor envoys share the same streets. Coves along the coast hide smugglers and
-wrecks; dragonscours on the headlands recall the dragon war. It is rich, crowded and the least trusted city in
-Elsweyr.
+### 1.6 Senchal (`elsweyr/senchal`, 3.55 km², seat Senchal, levels 24-45)
 
-| Layer | Fields [cites] |
+**World truth.** Senchal is the sugar coast on Topal Bay: a loud, sweet-smelling port stepping down from a hill palace
+through tiered warehouses to a wide stone quay where everything Elsweyr grows leaves by ship and everything it lacks
+arrives. Customs men, sugar boilers, sailors, skooma lords and Thalmor envoys share the same crowded streets. Coves
+along the headlands hide smugglers and wrecks; dragonscours on the bluffs recall the Second Era dragon war. It is rich,
+crowded and the least trusted city in Elsweyr.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `harbour_bay` a deepened bay south of Torval (see 3.2) [P.topal_coast]. `headlands` [P.topal_coast] |
-| L2 | `sea_breeze`, `storm_season` [P.bay_monsoon] |
-| L3 | `harbour_wells` brackish wells and rain cisterns [harbour_bay]. `river_mouth` [P.pellitine_rivers] |
-| L4 | `cove_beach`, `headland_scrub`, `coastal_cane`, `mangrove_mouth`, `reef_shallows` (section 2) |
-| L5 | `sugar_export` [P.senchal_port]. `customs_house` [P.sugar_tax]. `shipwrights` [harbour_bay] |
-| L6 | `senchal_seat` [harbour_bay, sugar_export]. `cove_villages` [headlands]. `potentates_retreat` the old governor's estate [P.septim_plantations] |
-| L7 | `palace_hill` vs `lower_sweet` slum [sugar_export, P.skooma_poor]. `sailors_and_boilers` [shipwrights] |
-| L8 | `khenarthi_winds` sailors' shrines to the wind goddess [P.khajiit_gods, sea_breeze] |
-| L9 | `skooma_lords` running the docks [P.skooma]. `thalmor_embassy` [P.thalmor_in_court]. `customs_corruption` [customs_house] |
-| L10 | `the_tangle` the undercity of old sugar tunnels (marquee) [skooma_lords, harbour_bay]. `smuggler_coves` [P.smuggler_coves]. `twin_scours` north and south dragonscours [P.dragon_scours, headlands] |
-| L11 | `south_guard` a ruined Imperial coastal fort (Arena's missing village, kept as a ruin) [P.septim_plantations] |
+| L1 | `harbour_bay`: a deep sheltered bay on Topal Bay south of Torval. `headlands`: limestone and sandstone coastal bluffs |
+| L2 | `sea_breeze` (ew.L2.bay_monsoon, L1.harbour_bay): warm salt winds into the port. `storm_season` (ew.L2.bay_monsoon, L1.headlands): late-summer bay typhoons |
+| L3 | `harbour_wells` (L1.harbour_bay): brackish lower wells and palace rain cisterns. `river_mouth` (ew.L3.pellitine_rivers, L1.harbour_bay): the sugar river estuary |
+| L4 | `cove_beach` (L1.harbour_bay): sandy smuggler coves. `headland_scrub` (L1.headlands, L2.sea_breeze): wind-bent coastal brush. `coastal_cane` (ew.L4.cane_plain, L3.river_mouth): estuary cane flats. `mangrove_mouth` (L3.river_mouth): brackish mangrove shallows. `reef_shallows` (L1.harbour_bay): warm bay reefs |
+| L5 | `sugar_export` (ew.L5.senchal_port, L4.coastal_cane): the great sugar warehouses and quays. `customs_house` (L1.harbour_bay, L5.sugar_export): harbour tariffs. `shipwrights` (L1.harbour_bay): cove shipyards and ropewalks |
+| L6 | `senchal_seat` (L1.harbour_bay, L5.sugar_export): the tiered port capital. `cove_villages` (L1.headlands, L4.cove_beach): fishing and landing villages. `potentates_retreat` (ew.L7.imperial_descendants, L1.headlands): the old governor's cliffside estate |
+| L7 | `palace_hill` (L5.sugar_export, L6.senchal_seat): merchant princes and court factors on the upper terraces. `lower_sweet` (ew.L7.skooma_poor, L5.sugar_export): the boil-district slum by the docks. `sailors_and_boilers` (L5.shipwrights, L6.senchal_seat): dock guilds and stokers |
+| L8 | `khenarthi_winds` (ew.L8.khajiit_gods, L2.sea_breeze): sailors' cliff shrines to the wind goddess |
+| L9 | `skooma_lords` (ew.L5.skooma, L7.lower_sweet): syndicate bosses running the night docks. `thalmor_embassy` (ew.L9.thalmor_in_court, L7.palace_hill): Dominion naval inspectors. `customs_corruption` (ew.L9.sugar_tax, L5.customs_house): bribed manifests and night lighters |
+| L10 | `the_tangle` (L1.harbour_bay, L9.skooma_lords): the undercity of old sugar tunnels beneath Senchal. `smuggler_coves` (ew.L10.smuggler_coves, L1.headlands, L9.customs_corruption): sea-caves and wrecks along the bluffs. `twin_scours` (ew.L10.dragon_scours, L1.headlands): north and south headland dragon bone-fields |
+| L11 | `south_guard` (ew.L11.septim_plantations, L1.headlands): a ruined Imperial coastal fort overlooking the bay |
 
 ---
 

@@ -1,19 +1,841 @@
 {
   "id": "alinor",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
   "tint": {
     "wall": "minecraft:smooth_quartz",
-    "wall2": "minecraft:quartz_bricks",
-    "low": "minecraft:calcite",
-    "roof": "prismarine_brick",
-    "trim": "waxed_cut_copper",
-    "accent": "pink"
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:quartz_bricks",
+    "wood": "birch",
+    "roof": "smooth_quartz",
+    "accent": "yellow"
   },
   "palette": {
-    "cityWall": "smooth_quartz",
-    "cityWall2": "minecraft:quartz_bricks",
+    "cityWall": "quartz",
+    "cityWall2": "minecraft:calcite",
     "plaza": "minecraft:smooth_quartz",
-    "plaza2": "minecraft:prismarine_bricks",
-    "glass": "minecraft:pink_stained_glass",
-    "path": "minecraft:smooth_quartz"
+    "plaza2": "minecraft:quartz_bricks",
+    "path": "minecraft:calcite"
+  },
+  "style": {
+    "houseStyle": "altmer",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:smooth_quartz",
+        "minecraft:calcite",
+        "minecraft:quartz_bricks",
+        "minecraft:calcite",
+        "quartz",
+        "minecraft:smooth_quartz"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_1_0",
+          "prop_alinor_1_1",
+          "prop_alinor_1_2",
+          "prop_alinor_1_3",
+          "prop_alinor_1_4",
+          "prop_alinor_1_5",
+          "prop_alinor_1_6",
+          "prop_alinor_1_7",
+          "prop_alinor_1_8",
+          "prop_alinor_1_9",
+          "prop_alinor_1_10",
+          "prop_alinor_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_2_0",
+          "prop_alinor_2_1",
+          "prop_alinor_2_2",
+          "prop_alinor_2_3",
+          "prop_alinor_2_4",
+          "prop_alinor_2_5",
+          "prop_alinor_2_6",
+          "prop_alinor_2_7",
+          "prop_alinor_2_8",
+          "prop_alinor_2_9",
+          "prop_alinor_2_10",
+          "prop_alinor_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_3_0",
+          "prop_alinor_3_1",
+          "prop_alinor_3_2",
+          "prop_alinor_3_3",
+          "prop_alinor_3_4",
+          "prop_alinor_3_5",
+          "prop_alinor_3_6",
+          "prop_alinor_3_7",
+          "prop_alinor_3_8",
+          "prop_alinor_3_9",
+          "prop_alinor_3_10",
+          "prop_alinor_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_4_0",
+          "prop_alinor_4_1",
+          "prop_alinor_4_2",
+          "prop_alinor_4_3",
+          "prop_alinor_4_4",
+          "prop_alinor_4_5",
+          "prop_alinor_4_6",
+          "prop_alinor_4_7",
+          "prop_alinor_4_8",
+          "prop_alinor_4_9",
+          "prop_alinor_4_10",
+          "prop_alinor_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_5_0",
+          "prop_alinor_5_1",
+          "prop_alinor_5_2",
+          "prop_alinor_5_3",
+          "prop_alinor_5_4",
+          "prop_alinor_5_5",
+          "prop_alinor_5_6",
+          "prop_alinor_5_7",
+          "prop_alinor_5_8",
+          "prop_alinor_5_9",
+          "prop_alinor_5_10",
+          "prop_alinor_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_6_0",
+          "prop_alinor_6_1",
+          "prop_alinor_6_2",
+          "prop_alinor_6_3",
+          "prop_alinor_6_4",
+          "prop_alinor_6_5",
+          "prop_alinor_6_6",
+          "prop_alinor_6_7",
+          "prop_alinor_6_8",
+          "prop_alinor_6_9",
+          "prop_alinor_6_10",
+          "prop_alinor_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_7_0",
+          "prop_alinor_7_1",
+          "prop_alinor_7_2",
+          "prop_alinor_7_3",
+          "prop_alinor_7_4",
+          "prop_alinor_7_5",
+          "prop_alinor_7_6",
+          "prop_alinor_7_7",
+          "prop_alinor_7_8",
+          "prop_alinor_7_9",
+          "prop_alinor_7_10",
+          "prop_alinor_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_8_0",
+          "prop_alinor_8_1",
+          "prop_alinor_8_2",
+          "prop_alinor_8_3",
+          "prop_alinor_8_4",
+          "prop_alinor_8_5",
+          "prop_alinor_8_6",
+          "prop_alinor_8_7",
+          "prop_alinor_8_8",
+          "prop_alinor_8_9",
+          "prop_alinor_8_10",
+          "prop_alinor_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_9_0",
+          "prop_alinor_9_1",
+          "prop_alinor_9_2",
+          "prop_alinor_9_3",
+          "prop_alinor_9_4",
+          "prop_alinor_9_5",
+          "prop_alinor_9_6",
+          "prop_alinor_9_7",
+          "prop_alinor_9_8",
+          "prop_alinor_9_9",
+          "prop_alinor_9_10",
+          "prop_alinor_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_10_0",
+          "prop_alinor_10_1",
+          "prop_alinor_10_2",
+          "prop_alinor_10_3",
+          "prop_alinor_10_4",
+          "prop_alinor_10_5",
+          "prop_alinor_10_6",
+          "prop_alinor_10_7",
+          "prop_alinor_10_8",
+          "prop_alinor_10_9",
+          "prop_alinor_10_10",
+          "prop_alinor_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_11_0",
+          "prop_alinor_11_1",
+          "prop_alinor_11_2",
+          "prop_alinor_11_3",
+          "prop_alinor_11_4",
+          "prop_alinor_11_5",
+          "prop_alinor_11_6",
+          "prop_alinor_11_7",
+          "prop_alinor_11_8",
+          "prop_alinor_11_9",
+          "prop_alinor_11_10",
+          "prop_alinor_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_12_0",
+          "prop_alinor_12_1",
+          "prop_alinor_12_2",
+          "prop_alinor_12_3",
+          "prop_alinor_12_4",
+          "prop_alinor_12_5",
+          "prop_alinor_12_6",
+          "prop_alinor_12_7",
+          "prop_alinor_12_8",
+          "prop_alinor_12_9",
+          "prop_alinor_12_10",
+          "prop_alinor_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_13_0",
+          "prop_alinor_13_1",
+          "prop_alinor_13_2",
+          "prop_alinor_13_3",
+          "prop_alinor_13_4",
+          "prop_alinor_13_5",
+          "prop_alinor_13_6",
+          "prop_alinor_13_7",
+          "prop_alinor_13_8",
+          "prop_alinor_13_9",
+          "prop_alinor_13_10",
+          "prop_alinor_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_14_0",
+          "prop_alinor_14_1",
+          "prop_alinor_14_2",
+          "prop_alinor_14_3",
+          "prop_alinor_14_4",
+          "prop_alinor_14_5",
+          "prop_alinor_14_6",
+          "prop_alinor_14_7",
+          "prop_alinor_14_8",
+          "prop_alinor_14_9",
+          "prop_alinor_14_10",
+          "prop_alinor_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_15_0",
+          "prop_alinor_15_1",
+          "prop_alinor_15_2",
+          "prop_alinor_15_3",
+          "prop_alinor_15_4",
+          "prop_alinor_15_5",
+          "prop_alinor_15_6",
+          "prop_alinor_15_7",
+          "prop_alinor_15_8",
+          "prop_alinor_15_9",
+          "prop_alinor_15_10",
+          "prop_alinor_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_16_0",
+          "prop_alinor_16_1",
+          "prop_alinor_16_2",
+          "prop_alinor_16_3",
+          "prop_alinor_16_4",
+          "prop_alinor_16_5",
+          "prop_alinor_16_6",
+          "prop_alinor_16_7",
+          "prop_alinor_16_8",
+          "prop_alinor_16_9",
+          "prop_alinor_16_10",
+          "prop_alinor_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_17_0",
+          "prop_alinor_17_1",
+          "prop_alinor_17_2",
+          "prop_alinor_17_3",
+          "prop_alinor_17_4",
+          "prop_alinor_17_5",
+          "prop_alinor_17_6",
+          "prop_alinor_17_7",
+          "prop_alinor_17_8",
+          "prop_alinor_17_9",
+          "prop_alinor_17_10",
+          "prop_alinor_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_18_0",
+          "prop_alinor_18_1",
+          "prop_alinor_18_2",
+          "prop_alinor_18_3",
+          "prop_alinor_18_4",
+          "prop_alinor_18_5",
+          "prop_alinor_18_6",
+          "prop_alinor_18_7",
+          "prop_alinor_18_8",
+          "prop_alinor_18_9",
+          "prop_alinor_18_10",
+          "prop_alinor_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_19_0",
+          "prop_alinor_19_1",
+          "prop_alinor_19_2",
+          "prop_alinor_19_3",
+          "prop_alinor_19_4",
+          "prop_alinor_19_5",
+          "prop_alinor_19_6",
+          "prop_alinor_19_7",
+          "prop_alinor_19_8",
+          "prop_alinor_19_9",
+          "prop_alinor_19_10",
+          "prop_alinor_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_20_0",
+          "prop_alinor_20_1",
+          "prop_alinor_20_2",
+          "prop_alinor_20_3",
+          "prop_alinor_20_4",
+          "prop_alinor_20_5",
+          "prop_alinor_20_6",
+          "prop_alinor_20_7",
+          "prop_alinor_20_8",
+          "prop_alinor_20_9",
+          "prop_alinor_20_10",
+          "prop_alinor_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:smooth_quartz",
+        "wall_secondary": "minecraft:calcite",
+        "plinth": "minecraft:quartz_bricks",
+        "carpentry": "birch",
+        "roofing": "smooth_quartz",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_quartz",
+          "minecraft:calcite",
+          "minecraft:quartz_bricks",
+          "quartz",
+          "minecraft:smooth_quartz",
+          "minecraft:calcite"
+        ],
+        "props": [
+          "prop_alinor_21_0",
+          "prop_alinor_21_1",
+          "prop_alinor_21_2",
+          "prop_alinor_21_3",
+          "prop_alinor_21_4",
+          "prop_alinor_21_5",
+          "prop_alinor_21_6",
+          "prop_alinor_21_7",
+          "prop_alinor_21_8",
+          "prop_alinor_21_9",
+          "prop_alinor_21_10",
+          "prop_alinor_21_11"
+        ]
+      }
+    }
   }
 }

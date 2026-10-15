@@ -1,0 +1,454 @@
+{
+  "id": "northpoint",
+  "sil": "cliff-port-moor",
+  "base": "none",
+  "overlay": "rivenspire",
+  "radius": 96,
+  "reach": 104,
+  "fill_gap": 2,
+  "inn_key": "northpoint_gale_and_lantern",
+  "names": {
+    "inn": "northpoint_gale_and_lantern",
+    "store": "northpoint_salt_chandler",
+    "smithy": "northpoint_harpoon_forge"
+  },
+  "titles": {
+    "northpoint_landmark": "Northpoint Beacon & Cliff-Keep",
+    "northpoint_dorell_keep": "Castle Northpoint Sea-Keep",
+    "northpoint_gale_and_lantern": "The Gale and Lantern Inn",
+    "northpoint_whalers_dram": "The Whaler's Dram",
+    "northpoint_salt_chandler": "North Sea Ship-Chandler",
+    "northpoint_harpoon_forge": "Harpoon & Grapnel Ironworks",
+    "northpoint_sea_wrack_still": "Sea-Wrack & Peat-Smoke Still",
+    "northpoint_oilskin_loft": "Oilskin & Sail-Canvas Loft",
+    "northpoint_navigators_hall": "Northern Navigators' Guildhall",
+    "northpoint_fighters_watch": "Cliff-Watch Mercenary Hall",
+    "northpoint_moor_chapel": "Half-Roofed Moor Chapel of Kynareth",
+    "northpoint_drowned_cairn": "Cairn of the Lost Fleets",
+    "northpoint_dorell_manor": "Baron Dorell's Cliffside Manor",
+    "northpoint_fishers_smokehouse": "Herring & Cod Smokehouse",
+    "northpoint_blubber_works": "Whale-Oil & Timber Bonded Shed",
+    "northpoint_fog_horn_watch": "Lighthouse Watch & Fog-Horn House",
+    "northpoint_peat_pony_pens": "Moorland Pack-Pony Stables",
+    "northpoint_market_plaza": "Northpoint Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 92,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -40
+      ],
+      "face": "south",
+      "name": "northpoint_landmark",
+      "overlay": "rivenspire"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        -35
+      ],
+      "face": "south",
+      "name": "northpoint_dorell_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        55,
+        -39
+      ],
+      "face": "west",
+      "name": "northpoint_gale_and_lantern"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        41,
+        -12
+      ],
+      "face": "west",
+      "name": "northpoint_whalers_dram"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        67,
+        2
+      ],
+      "face": "west",
+      "name": "northpoint_salt_chandler"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        40,
+        15
+      ],
+      "face": "west",
+      "name": "northpoint_harpoon_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        52,
+        42
+      ],
+      "face": "west",
+      "name": "northpoint_sea_wrack_still"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        23,
+        36
+      ],
+      "face": "north",
+      "name": "northpoint_oilskin_loft"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        16,
+        65
+      ],
+      "face": "north",
+      "name": "northpoint_navigators_hall"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        43
+      ],
+      "face": "north",
+      "name": "northpoint_fighters_watch"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -26,
+        62
+      ],
+      "face": "north",
+      "name": "northpoint_moor_chapel"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -29,
+        32
+      ],
+      "face": "north",
+      "name": "northpoint_drowned_cairn"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -58,
+        33
+      ],
+      "face": "east",
+      "name": "northpoint_dorell_manor"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -42,
+        8
+      ],
+      "face": "east",
+      "name": "northpoint_fishers_smokehouse"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -66,
+        -9
+      ],
+      "face": "east",
+      "name": "northpoint_blubber_works"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -39,
+        -19
+      ],
+      "face": "east",
+      "name": "northpoint_fog_horn_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -48,
+        -47
+      ],
+      "face": "east",
+      "name": "northpoint_peat_pony_pens"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -80
+      ],
+      "to": [
+        0,
+        80
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -80,
+        0
+      ],
+      "to": [
+        80,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -49,
+        -49
+      ],
+      "to": [
+        49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        -49
+      ],
+      "to": [
+        49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        49
+      ],
+      "to": [
+        -49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -49,
+        49
+      ],
+      "to": [
+        -49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        63
+      ],
+      "to": [
+        8,
+        63
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "northpoint_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        48
+      ],
+      "overlay": "rivenspire"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "rivenspire"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "count": 3
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:kynareth",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

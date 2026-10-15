@@ -1,0 +1,446 @@
+{
+  "id": "jehanna",
+  "sil": "fjord-timber-cliff-keep",
+  "base": "none",
+  "overlay": "wrothgar",
+  "radius": 96,
+  "reach": 104,
+  "fill_gap": 2,
+  "inn_key": "jehanna_carved_prow",
+  "names": {
+    "inn": "jehanna_carved_prow",
+    "store": "jehanna_fjord_traders",
+    "smithy": "jehanna_sky_iron_smithy"
+  },
+  "titles": {
+    "jehanna_landmark": "Jehanna Fjord-Crown Hall",
+    "jehanna_high_hall": "Jehanna Fjord-Crown Keep",
+    "jehanna_carved_prow": "The Carved Prow Inn",
+    "jehanna_hearth_and_horn": "The Hearth and Horn",
+    "jehanna_fjord_traders": "Solitude-Road Fur & Amber Traders",
+    "jehanna_sky_iron_smithy": "Fjord-Iron Smithy & Foundry",
+    "jehanna_snowberry_brew": "Snowberry & Lichen Herbalist",
+    "jehanna_mammoth_wool_looms": "Highland Wool & Fur-Cloak Looms",
+    "jehanna_ash_spear_wright": "Ash-Spear & Harpoon Wright",
+    "jehanna_border_wardens": "Druadach Pass Wardens' Hall",
+    "jehanna_kynareth_wind_fane": "Wind-Fane of Kynareth & Kyne",
+    "jehanna_cliff_ossuary": "Rock-Cut Fjord Ossuary",
+    "jehanna_treaty_thane_hall": "Treaty-Thane's Timber Manor",
+    "jehanna_salmon_weir": "Fjord Salmon & Seal-Oil Stages",
+    "jehanna_east_pass_gate": "Snow-Pass Toll & Watch Gate",
+    "jehanna_shaggy_garron_mews": "Highland Garron Stables",
+    "jehanna_market_plaza": "Jehanna Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 92,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "cliff",
+      "at": [
+        0,
+        -40
+      ],
+      "face": "south",
+      "name": "jehanna_landmark",
+      "overlay": "wrothgar"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        -35
+      ],
+      "face": "south",
+      "name": "jehanna_high_hall"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        55,
+        -38
+      ],
+      "face": "west",
+      "name": "jehanna_carved_prow"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        42,
+        -11
+      ],
+      "face": "west",
+      "name": "jehanna_hearth_and_horn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        67,
+        6
+      ],
+      "face": "west",
+      "name": "jehanna_fjord_traders"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        39,
+        18
+      ],
+      "face": "west",
+      "name": "jehanna_sky_iron_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        47,
+        47
+      ],
+      "face": "north",
+      "name": "jehanna_snowberry_brew"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        18,
+        39
+      ],
+      "face": "north",
+      "name": "jehanna_mammoth_wool_looms"
+    },
+    {
+      "kind": "store",
+      "use": "fletcher",
+      "wealth": "common",
+      "at": [
+        6,
+        67
+      ],
+      "face": "north",
+      "name": "jehanna_ash_spear_wright"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -11,
+        42
+      ],
+      "face": "north",
+      "name": "jehanna_border_wardens"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -38,
+        55
+      ],
+      "face": "north",
+      "name": "jehanna_kynareth_wind_fane"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -35,
+        25
+      ],
+      "face": "east",
+      "name": "jehanna_cliff_ossuary"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -64,
+        19
+      ],
+      "face": "east",
+      "name": "jehanna_treaty_thane_hall"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -43,
+        -3
+      ],
+      "face": "east",
+      "name": "jehanna_salmon_weir"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -61,
+        -27
+      ],
+      "face": "east",
+      "name": "jehanna_east_pass_gate"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -29
+      ],
+      "face": "east",
+      "name": "jehanna_shaggy_garron_mews"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -80
+      ],
+      "to": [
+        0,
+        80
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -80,
+        0
+      ],
+      "to": [
+        80,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -49,
+        -49
+      ],
+      "to": [
+        49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        -49
+      ],
+      "to": [
+        49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        49
+      ],
+      "to": [
+        -49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -49,
+        49
+      ],
+      "to": [
+        -49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        63
+      ],
+      "to": [
+        8,
+        63
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "jehanna_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        48
+      ],
+      "overlay": "wrothgar"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "wrothgar"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:stendarr",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "willow",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    }
+  ]
+}

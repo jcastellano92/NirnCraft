@@ -1,0 +1,19 @@
+{
+  "id": "stros_mkai",
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:cut_sandstone",
+    "low": "minecraft:mud_bricks",
+    "roof": "prismarine",
+    "trim": "acacia",
+    "wood": "acacia",
+    "accent": "light_blue"
+  },
+  "palette": {
+    "cityWall": "cut_sandstone",
+    "cityWall2": "minecraft:mud_bricks",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:mud_bricks",
+    "path": "minecraft:sandstone"
+  }
+}

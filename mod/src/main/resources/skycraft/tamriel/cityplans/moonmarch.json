@@ -1,0 +1,291 @@
+{
+  "id": "moonmarch",
+  "why": [
+    "lilmoth.L1.topal_silt_delta",
+    "lilmoth.L5.smuggler_and_spice_quays",
+    "lilmoth.L6.lilmoth_harbour"
+  ],
+  "sil": "black-marsh-moonmarch-plan",
+  "base": "none",
+  "overlay": "lilmoth",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "lilmoth",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "lilmoth",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "moonmarch_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "moonmarch_landmark",
+      "overlay": "lilmoth"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "lilmoth",
+      "name": "moonmarch_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "moonmarch_pond",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "moonmarch_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "moonmarch_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "moonmarch_b_5",
+    "store": "moonmarch_b_10",
+    "smithy": "moonmarch_b_7"
+  },
+  "titles": {
+    "moonmarch_b_1": "place.skycraft.moonmarch Council & Seat Hall",
+    "moonmarch_b_2": "place.skycraft.moonmarch High Sanctuary",
+    "moonmarch_b_3": "place.skycraft.moonmarch Fighters & Wayfarers Hall",
+    "moonmarch_b_4": "place.skycraft.moonmarch Mages & Chroniclers Spire",
+    "moonmarch_b_5": "place.skycraft.moonmarch The Lantern & Hearth Inn",
+    "moonmarch_b_6": "place.skycraft.moonmarch The Traveler's Rest Tavern",
+    "moonmarch_b_7": "place.skycraft.moonmarch Master Forge & Armorer",
+    "moonmarch_b_8": "place.skycraft.moonmarch Botanicals & Remedies",
+    "moonmarch_b_9": "place.skycraft.moonmarch Scriptorium & Charts",
+    "moonmarch_b_10": "place.skycraft.moonmarch Grand Provisioner & Sundries",
+    "moonmarch_b_11": "place.skycraft.moonmarch Silk & Hide Clothier",
+    "moonmarch_b_12": "place.skycraft.moonmarch Lapidary & Signets",
+    "moonmarch_b_13": "place.skycraft.moonmarch Wayfarer Stables & Post",
+    "moonmarch_b_14": "place.skycraft.moonmarch Bonded Factor Warehouse",
+    "moonmarch_landmark": "High Seat of place.skycraft.moonmarch",
+    "moonmarch_plaza": "place.skycraft.moonmarch Central Plaza"
+  },
+  "innKey": "moonmarch_b_5"
+}

@@ -1,0 +1,186 @@
+{
+  "id": "tasha",
+  "why": [
+    "torval.L1.scarp_foot",
+    "torval.L5.pilgrim_trade",
+    "torval.L6.torval_capital"
+  ],
+  "sil": "elsweyr-tasha-plan",
+  "base": "none",
+  "overlay": "torval",
+  "radius": 26,
+  "reach": 38,
+  "gates": [
+    [
+      0,
+      24
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "torval",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        12,
+        26
+      ],
+      "overlay": "torval",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "tasha_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        0,
+        -7
+      ],
+      "name": "tasha_landmark",
+      "overlay": "torval"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 5,
+      "r1": 22,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "tasha_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        12,
+        15
+      ],
+      "face": "north",
+      "overlay": "torval",
+      "name": "tasha_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        9
+      ],
+      "face": "north",
+      "overlay": "torval",
+      "name": "tasha_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -17,
+        8
+      ],
+      "face": "north",
+      "overlay": "torval",
+      "name": "tasha_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "tasha_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -18
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "tasha_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        6,
+        -7
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "tasha_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "tasha_market",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "tasha_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "tasha_b_5",
+    "smithy": "tasha_b_7"
+  },
+  "titles": {
+    "tasha_b_1": "place.skycraft.tasha Council & Seat Hall",
+    "tasha_b_2": "place.skycraft.tasha High Sanctuary",
+    "tasha_b_3": "place.skycraft.tasha Fighters & Wayfarers Hall",
+    "tasha_b_4": "place.skycraft.tasha Mages & Chroniclers Spire",
+    "tasha_b_5": "place.skycraft.tasha The Lantern & Hearth Inn",
+    "tasha_b_6": "place.skycraft.tasha The Traveler's Rest Tavern",
+    "tasha_b_7": "place.skycraft.tasha Master Forge & Armorer",
+    "tasha_landmark": "High Seat of place.skycraft.tasha",
+    "tasha_plaza": "place.skycraft.tasha Central Plaza"
+  },
+  "innKey": "tasha_b_5"
+}

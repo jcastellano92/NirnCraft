@@ -1,0 +1,186 @@
+{
+  "id": "longhaven",
+  "why": [
+    "greenshade.L1.drowned_coast",
+    "greenshade.L5.bridge_port",
+    "greenshade.L6.woodhearth_seat"
+  ],
+  "sil": "valenwood-longhaven-plan",
+  "base": "none",
+  "overlay": "greenshade",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "greenshade",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "greenshade",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "longhaven_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "longhaven_landmark",
+      "overlay": "greenshade"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "longhaven_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "longhaven_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "longhaven_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "greenshade",
+      "name": "longhaven_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "longhaven_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "longhaven_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "greenshade",
+      "name": "longhaven_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "longhaven_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "longhaven_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "longhaven_b_5",
+    "smithy": "longhaven_b_7"
+  },
+  "titles": {
+    "longhaven_b_1": "place.skycraft.longhaven Council & Seat Hall",
+    "longhaven_b_2": "place.skycraft.longhaven High Sanctuary",
+    "longhaven_b_3": "place.skycraft.longhaven Fighters & Wayfarers Hall",
+    "longhaven_b_4": "place.skycraft.longhaven Mages & Chroniclers Spire",
+    "longhaven_b_5": "place.skycraft.longhaven The Lantern & Hearth Inn",
+    "longhaven_b_6": "place.skycraft.longhaven The Traveler's Rest Tavern",
+    "longhaven_b_7": "place.skycraft.longhaven Master Forge & Armorer",
+    "longhaven_landmark": "High Seat of place.skycraft.longhaven",
+    "longhaven_plaza": "place.skycraft.longhaven Central Plaza"
+  },
+  "innKey": "longhaven_b_5"
+}

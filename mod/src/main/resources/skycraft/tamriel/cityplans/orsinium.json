@@ -5,68 +5,712 @@
   "reach": 125,
   "radius": 125,
   "overlay": "orsinium",
-  "names": {"inn": "orsinium_bone_and_ember", "store": "orsinium_tradestone", "smithy": "orsinium_great_forge"},
+  "names": {
+    "inn": "orsinium_bone_and_ember",
+    "store": "orsinium_tradestone",
+    "smithy": "orsinium_great_forge"
+  },
   "innKey": "orsinium_bone_and_ember",
-  "gates": [[0, 120]],
+  "gates": [
+    [
+      0,
+      120
+    ]
+  ],
   "terraces": [
-    {"rect": [-62, -62, 62, 62], "level": 4, "parapet": 1},
-    {"rect": [-38, -38, 38, 38], "level": 8, "parapet": 1}
+    {
+      "rect": [
+        -62,
+        -62,
+        62,
+        62
+      ],
+      "level": 4,
+      "parapet": 1
+    },
+    {
+      "rect": [
+        -38,
+        -38,
+        38,
+        38
+      ],
+      "level": 8,
+      "parapet": 1
+    }
   ],
   "walls": [
-    {"r": 108, "sides": 12, "h": 9, "gates": [0], "flags": ["palisade", "major"]},
-    {"r": 76, "sides": 12, "h": 9, "gates": [0], "flags": ["major"], "raise": 4},
-    {"r": 46, "sides": 10, "h": 9, "gates": [0], "flags": ["major"], "raise": 8}
+    {
+      "r": 108,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0
+      ],
+      "flags": [
+        "palisade",
+        "major"
+      ]
+    },
+    {
+      "r": 76,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0
+      ],
+      "flags": [
+        "major"
+      ],
+      "raise": 4
+    },
+    {
+      "r": 46,
+      "sides": 10,
+      "h": 9,
+      "gates": [
+        0
+      ],
+      "flags": [
+        "major"
+      ],
+      "raise": 8
+    }
   ],
   "landmarks": [
-    {"id": "gate_hammer", "at": [0, 119], "size": [23, 11], "h": 32, "face": "S"},
-    {"id": "castle", "at": [0, -18], "size": [29, 25], "h": 30, "margin": 4, "raise": 8}
+    {
+      "id": "gate_hammer",
+      "at": [
+        0,
+        119
+      ],
+      "size": [
+        23,
+        11
+      ],
+      "h": 32,
+      "face": "S"
+    },
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -18
+      ],
+      "size": [
+        29,
+        25
+      ],
+      "h": 30,
+      "margin": 4,
+      "raise": 8
+    }
   ],
   "buildings": [
-    {"kind": "longhouse", "at": [-26, 24], "size": [13, 25], "face": "E", "name": "orsinium_trophy_hall", "flags": ["seat", "upper"], "raise": 8},
-    {"kind": "smithy", "at": [26, 24], "size": [13, 11], "face": "W", "name": "orsinium_great_forge", "raise": 8},
-    {"kind": "temple", "at": [-42, 54], "size": [11, 15], "face": "E", "name": "orsinium_shrine_of_malacath", "raise": 4},
-    {"kind": "barracks", "at": [42, 54], "size": [9, 15], "face": "W", "raise": 4}
+    {
+      "kind": "longhouse",
+      "at": [
+        -26,
+        24
+      ],
+      "size": [
+        13,
+        25
+      ],
+      "face": "E",
+      "name": "orsinium_trophy_hall",
+      "flags": [
+        "seat",
+        "upper"
+      ],
+      "raise": 8
+    },
+    {
+      "kind": "smithy",
+      "at": [
+        26,
+        24
+      ],
+      "size": [
+        13,
+        11
+      ],
+      "face": "W",
+      "name": "orsinium_great_forge",
+      "raise": 8
+    },
+    {
+      "kind": "temple",
+      "at": [
+        -42,
+        54
+      ],
+      "size": [
+        11,
+        15
+      ],
+      "face": "E",
+      "name": "orsinium_shrine_of_malacath",
+      "raise": 4
+    },
+    {
+      "kind": "barracks",
+      "at": [
+        42,
+        54
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "W",
+      "raise": 4,
+      "name": "orsinium_barracks_4"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        0,
+        -58
+      ],
+      "face": "south",
+      "name": "orsinium_gortwog_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -22,
+        16
+      ],
+      "face": "east",
+      "name": "orsinium_bone_and_ember"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        22,
+        16
+      ],
+      "face": "west",
+      "name": "orsinium_tradestone"
+    },
+    {
+      "kind": "smithy",
+      "use": "smelter",
+      "wealth": "wealthy",
+      "at": [
+        -42,
+        -16
+      ],
+      "face": "east",
+      "name": "orsinium_forge_pit"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "wealthy",
+      "at": [
+        42,
+        -16
+      ],
+      "face": "west",
+      "name": "orsinium_orichalc_anvil"
+    },
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "wealthy",
+      "at": [
+        -44,
+        -44
+      ],
+      "face": "south",
+      "name": "orsinium_bagrakh_hall"
+    },
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "wealthy",
+      "at": [
+        44,
+        -44
+      ],
+      "face": "south",
+      "name": "orsinium_morkul_hall"
+    },
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        -56,
+        8
+      ],
+      "face": "east",
+      "name": "orsinium_shatul_hall"
+    },
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        56,
+        8
+      ],
+      "face": "west",
+      "name": "orsinium_fharun_hall"
+    },
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        -38,
+        42
+      ],
+      "face": "north",
+      "name": "orsinium_tumnosh_hall"
+    },
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        38,
+        42
+      ],
+      "face": "north",
+      "name": "orsinium_igrun_hall"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "name": "orsinium_trinimac_chancery"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -28,
+        -18
+      ],
+      "face": "east",
+      "name": "orsinium_hearth_wife_herbs"
+    },
+    {
+      "kind": "store",
+      "use": "butcher",
+      "wealth": "common",
+      "at": [
+        28,
+        -18
+      ],
+      "face": "west",
+      "name": "orsinium_echelitt_smoke"
+    },
+    {
+      "kind": "store",
+      "use": "tannery",
+      "wealth": "common",
+      "at": [
+        -48,
+        28
+      ],
+      "face": "east",
+      "name": "orsinium_hide_yard"
+    },
+    {
+      "kind": "store",
+      "use": "fletcher",
+      "wealth": "common",
+      "at": [
+        48,
+        28
+      ],
+      "face": "west",
+      "name": "orsinium_horn_bowyer"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -20,
+        56
+      ],
+      "face": "north",
+      "name": "orsinium_granite_magazine"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        20,
+        56
+      ],
+      "face": "north",
+      "name": "orsinium_hammer_gate_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        0,
+        74
+      ],
+      "face": "north",
+      "name": "orsinium_echatere_pens"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -64,
+        -22
+      ],
+      "face": "east",
+      "name": "orsinium_ash_cairn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        24,
+        38
+      ],
+      "face": "west",
+      "name": "orsinium_frost_tusk_tavern"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 118], [-8, 108], [6, 94], [0, 80]], "width": 5, "major": true, "tag": "outer"},
-    {"type": "loop", "at": [0, 0], "rx": 92, "rz": 90, "wobble": 8, "lobes": 5, "phase": 0.3, "width": 3, "rank": 1, "tag": "outer"},
-    {"type": "path", "via": [[0, 80], [10, 68], [-6, 56], [0, 50]], "width": 5, "major": true, "tag": "mid", "raise": 4},
-    {"type": "loop", "at": [0, 0], "rx": 62, "rz": 60, "wobble": 6, "lobes": 4, "phase": 1.0, "width": 3, "rank": 1, "tag": "mid", "raise": 4},
-    {"type": "path", "via": [[0, 50], [-6, 34], [6, 20], [0, 6]], "width": 5, "major": true, "tag": "inner", "raise": 8},
-    {"type": "loop", "at": [0, -2], "rx": 34, "rz": 30, "wobble": 4, "lobes": 3, "phase": 0.2, "width": 3, "rank": 1, "tag": "inner", "raise": 8},
-    {"type": "path", "via": [[-100, 46], [-82, 70], [-54, 92]], "width": 3, "tag": "outer"},
-    {"type": "path", "via": [[100, 46], [82, 70], [54, 92]], "width": 3, "tag": "outer"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          118
+        ],
+        [
+          -8,
+          108
+        ],
+        [
+          6,
+          94
+        ],
+        [
+          0,
+          80
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "outer"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 92,
+      "rz": 90,
+      "wobble": 8,
+      "lobes": 5,
+      "phase": 0.3,
+      "width": 3,
+      "rank": 1,
+      "tag": "outer"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          80
+        ],
+        [
+          10,
+          68
+        ],
+        [
+          -6,
+          56
+        ],
+        [
+          0,
+          50
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "mid",
+      "raise": 4
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 62,
+      "rz": 60,
+      "wobble": 6,
+      "lobes": 4,
+      "phase": 1.0,
+      "width": 3,
+      "rank": 1,
+      "tag": "mid",
+      "raise": 4
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          50
+        ],
+        [
+          -6,
+          34
+        ],
+        [
+          6,
+          20
+        ],
+        [
+          0,
+          6
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "inner",
+      "raise": 8
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 34,
+      "rz": 30,
+      "wobble": 4,
+      "lobes": 3,
+      "phase": 0.2,
+      "width": 3,
+      "rank": 1,
+      "tag": "inner",
+      "raise": 8
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -100,
+          46
+        ],
+        [
+          -82,
+          70
+        ],
+        [
+          -54,
+          92
+        ]
+      ],
+      "width": 3,
+      "tag": "outer"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          100,
+          46
+        ],
+        [
+          82,
+          70
+        ],
+        [
+          54,
+          92
+        ]
+      ],
+      "width": 3,
+      "tag": "outer"
+    }
   ],
   "plazas": [
-    {"at": [0, 26], "size": 15, "variant": 3, "raise": 8, "name": "orsinium_forge_pit"},
-    {"at": [34, 100], "size": 11, "stalls": 3}
+    {
+      "at": [
+        0,
+        26
+      ],
+      "size": 15,
+      "variant": 3,
+      "raise": 8,
+      "name": "orsinium_forge_pit"
+    },
+    {
+      "at": [
+        34,
+        100
+      ],
+      "size": 11,
+      "stalls": 3
+    }
   ],
   "zones": [
-    {"at": [0, 4], "r": 34, "zone": "noble"},
-    {"at": [0, 66], "r": 24, "zone": "centre"},
-    {"at": [66, 20], "r": 30, "zone": "craft"},
-    {"at": [-76, -30], "r": 30, "zone": "poor"}
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        66
+      ],
+      "r": 24,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        66,
+        20
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -76,
+        -30
+      ],
+      "r": 30,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 112, "target": 0.5},
+  "fabric": {
+    "radius": 112,
+    "target": 0.5
+  },
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "orsinium_bone_and_ember", "on": "outer"},
-    {"kind": "store", "count": 2, "name": "orsinium_tradestone", "on": "outer"}
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "orsinium_bone_and_ember",
+      "on": "outer"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "name": "orsinium_tradestone",
+      "on": "outer"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "daedric:malacath", "at": [0, 100]},
-    {"type": "statue", "theme": "daedric:malacath", "at": [0, 38]},
-    {"type": "memorial", "count": 2, "where": "free"},
-    {"type": "great_tree", "theme": "dark_oak", "count": 2, "where": "free"},
-    {"type": "banners", "count": 4, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "mid"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "market", "where": "free"},
-    {"type": "gatehouse", "where": "gate"},
-    {"type": "shrine", "theme": "divine:stendarr", "where": "free"},
-    {"type": "bench", "where": "square"},
-    {"type": "pond", "where": "edge"},
-    {"type": "orchard", "where": "edge"},
-    {"type": "waterwheel", "where": "edge"}
+    {
+      "type": "statue",
+      "theme": "daedric:malacath",
+      "at": [
+        0,
+        100
+      ]
+    },
+    {
+      "type": "statue",
+      "theme": "daedric:malacath",
+      "at": [
+        0,
+        38
+      ]
+    },
+    {
+      "type": "memorial",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "dark_oak",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 4,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "mid"
+    },
+    {
+      "type": "well",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "gatehouse",
+      "where": "gate"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "where": "free"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    },
+    {
+      "type": "pond",
+      "where": "edge"
+    },
+    {
+      "type": "orchard",
+      "where": "edge"
+    },
+    {
+      "type": "waterwheel",
+      "where": "edge"
+    }
   ],
   "titles": {
     "orsinium_bone_and_ember": "The Bone and Ember",
@@ -74,6 +718,25 @@
     "orsinium_great_forge": "The Great Forge",
     "orsinium_trophy_hall": "Trophy Hall",
     "orsinium_shrine_of_malacath": "Shrine of Malacath",
-    "orsinium_forge_pit": "The Forge Pit"
+    "orsinium_forge_pit": "The Blood-Iron Smelter Pit",
+    "orsinium_gortwog_citadel": "Gortwog's Iron Citadel",
+    "orsinium_orichalc_anvil": "Orichalc Anvil Armoury",
+    "orsinium_bagrakh_hall": "Clan Bagrakh Longhouse",
+    "orsinium_morkul_hall": "Clan Morkul Hearth-Hall",
+    "orsinium_shatul_hall": "Clan Shatul Herd-Lodge",
+    "orsinium_fharun_hall": "Clan Fharun Watch-Hall",
+    "orsinium_tumnosh_hall": "Clan Tumnosh Stone-Lodge",
+    "orsinium_igrun_hall": "Clan Igrun Mason-Hall",
+    "orsinium_trinimac_chancery": "Reforged Hall of Trinimac",
+    "orsinium_hearth_wife_herbs": "Hearth-Wife's Crucible",
+    "orsinium_echelitt_smoke": "Echatere Smokehouse & Salt-Vats",
+    "orsinium_hide_yard": "Wrothgar Bear-Hide Tannery",
+    "orsinium_horn_bowyer": "Horn-and-Sinew Bowyer",
+    "orsinium_granite_magazine": "Siege-Timber & Ore Magazine",
+    "orsinium_hammer_gate_watch": "Gate-Hammer Bastion Watch",
+    "orsinium_echatere_pens": "High Pass Echatere Pens",
+    "orsinium_ash_cairn": "Hall of the Grudge-Urns",
+    "orsinium_frost_tusk_tavern": "The Frost-Tusk Tavern",
+    "orsinium_barracks_4": "Orsinium Barracks 4"
   }
 }

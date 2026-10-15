@@ -1,0 +1,289 @@
+{
+  "id": "ebonheart",
+  "why": [
+    "stonefalls.L3.inner_sea_shore",
+    "morrowind.L6.great_house_seats",
+    "morrowind.L9.imperial_occupation"
+  ],
+  "sil": "star-fort-bridge",
+  "base": "none",
+  "overlay": "ebonheart",
+  "radius": 96,
+  "reach": 114,
+  "innKey": "eb_six_fishes",
+  "names": {
+    "inn": "eb_six_fishes",
+    "store": "eb_customs_house",
+    "smithy": "eb_legion_forge"
+  },
+  "gates": [
+    [
+      0,
+      -90
+    ],
+    [
+      90,
+      0
+    ],
+    [
+      -90,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "ebonheart_grand_council",
+      "overlay": "ebonheart"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "ebonheart"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_imperial_chapel"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        63,
+        26
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_skyrim_mission"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_argonian_mission"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        26,
+        63
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_hawkmoth_garrison"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_six_fishes"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -26,
+        63
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_eec_warehouse"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_legion_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -63,
+        26
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_cult_apothecary"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_customs_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -63,
+        -26
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_duke_dren_residence"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_high_rock_consulate"
+    },
+    {
+      "kind": "barracks",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -26,
+        -63
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_bridge_bastion"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_courier_stables"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -63
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_factors_quarters"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_shipwright_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        63,
+        -26
+      ],
+      "face": "south",
+      "overlay": "ebonheart",
+      "name": "eb_clerk_quarters"
+    }
+  ],
+  "features": [
+    {
+      "type": "statue",
+      "theme": "imperial_dragon",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "imperial_legion",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "bastion_iron_lantern",
+      "count": 4
+    },
+    {
+      "type": "fountain",
+      "theme": "castle_courtyard",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "ebonheart_grand_council": "Grand Council Chambers of Castle Ebonheart",
+    "eb_imperial_chapel": "Imperial Commission Chapel",
+    "eb_skyrim_mission": "Skyrim Mission Hall",
+    "eb_argonian_mission": "Argonian Mission Hall",
+    "eb_hawkmoth_garrison": "Hawkmoth Legion Garrison",
+    "eb_six_fishes": "Six Fishes",
+    "eb_eec_warehouse": "East Empire Company Warehouse",
+    "eb_legion_forge": "Legion Quartermaster Forge",
+    "eb_cult_apothecary": "Imperial Cult Apothecary",
+    "eb_customs_house": "Inner Sea Customs House",
+    "eb_duke_dren_residence": "Duke Vedam Dren's Residence",
+    "eb_high_rock_consulate": "Consulate of High Rock",
+    "eb_bridge_bastion": "Bridgehead Gate Bastion",
+    "eb_courier_stables": "Courier Post Stables",
+    "eb_factors_quarters": "Factor's Harbour Quarters",
+    "eb_shipwright_house": "Shipwright's Stone House",
+    "eb_clerk_quarters": "Chancery Clerk's Quarters"
+  }
+}

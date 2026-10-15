@@ -1,0 +1,813 @@
+{
+  "region": "morrowind/vvardenfell_ashlands",
+  "province": "morrowind",
+  "line": "story_vvardenfell_ashlands",
+  "category": "main",
+  "title": "The Dreamers Under Skar",
+  "why": [
+    "morrowind/vvardenfell_ashlands.L7.redoran_duty",
+    "morrowind/vvardenfell_ashlands.L8.redoran_temple_piety",
+    "morrowind/vvardenfell_ashlands.L9.council_of_ald_ruhn",
+    "morrowind/vvardenfell_ashlands.L9.sleepers_in_the_north",
+    "morrowind/vvardenfell_ashlands.L10.kogoruhn"
+  ],
+  "hook": {
+    "place": "aldruhn",
+    "rumour": "Beneath the giant emperor-crab shell of Skar in Ald'ruhn, Redoran guards whisper that ash-caravans from Gnisis and Maar Gan have found red-wax Sixth House bells hidden inside supply crates.",
+    "notice": "REDORAN COUNCIL PROCLAMATION AT ALD'RUHN — Outlanders and retainers summoned to investigate the Sleeper caches along the ash-road between Ald'ruhn, Maar Gan, and Kogoruhn.",
+    "context": "House Redoran's honor demands that Ald'ruhn hold the northern ash-marches against the blight, even while Archmaster Venim and Councilor Sarethi clash in the council chambers.",
+    "places": [
+      "aldruhn",
+      "khuul",
+      "nelas_ancestral_tomb",
+      "buckmoth_legion_fort",
+      "panat",
+      "beshara",
+      "pudai_egg_mine",
+      "sud"
+    ],
+    "npc": "story_vvardenfell_ashlands_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_vvardenfell_ashlands_01_bells_in_the_ash",
+      "order": 1,
+      "title": "Chimes Under the Crab-Shell",
+      "region": "morrowind/vvardenfell_ashlands",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/vvardenfell_ashlands.L7.redoran_duty",
+        "morrowind/vvardenfell_ashlands.L9.council_of_ald_ruhn"
+      ],
+      "places": [
+        "aldruhn",
+        "khuul",
+        "nelas_ancestral_tomb",
+        "buckmoth_legion_fort",
+        "panat",
+        "beshara",
+        "pudai_egg_mine",
+        "sud"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "aldruhn",
+          "objective": "Receive your briefing from Councilor Sarethi's clerks beneath Skar in Ald'ruhn"
+        },
+        {
+          "id": 20,
+          "place": "maar_gan",
+          "objective": "Inspect the quarantined guar-sheds and shrine stones at Maar Gan"
+        },
+        {
+          "id": 30,
+          "place": "gnisis",
+          "objective": "Question the Legion and Redoran patrol captains at Gnisis about the northern ash-tracks"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "aldruhn",
+          "text": "Receive your briefing from Councilor Sarethi's clerks beneath Skar in Ald'ruhn"
+        },
+        {
+          "type": "go",
+          "place": "maar_gan",
+          "text": "Inspect the quarantined guar-sheds and shrine stones at Maar Gan"
+        },
+        {
+          "type": "go",
+          "place": "gnisis",
+          "text": "Question the Legion and Redoran patrol captains at Gnisis about the northern ash-tracks"
+        }
+      ],
+      "consequence": "world_state:ashlands_sleeper_crates_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "ashlands_sleeper_crates_traced",
+        "flag": "story_va_crates_traced",
+        "summary": "Inspections at Maar Gan and Gnisis trace the ash-salted crates to a Sixth House relay cell inside the Dunmer stronghold of Falasmaryon."
+      }
+    },
+    {
+      "id": "story_vvardenfell_ashlands_02_relay_at_falasmaryon",
+      "order": 2,
+      "title": "The Ash-Relay of Falasmaryon",
+      "region": "morrowind/vvardenfell_ashlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_vvardenfell_ashlands_01_bells_in_the_ash",
+      "requires": [
+        "story_vvardenfell_ashlands_01_bells_in_the_ash"
+      ],
+      "why": [
+        "morrowind/vvardenfell_ashlands.L8.redoran_temple_piety",
+        "morrowind/vvardenfell_ashlands.L9.sleepers_in_the_north"
+      ],
+      "places": [
+        "bal_isra",
+        "falasmaryon",
+        "andasreth"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bal_isra",
+          "objective": "Muster with the Redoran outriders on the ridge at Bal Isra"
+        },
+        {
+          "id": 20,
+          "place": "falasmaryon",
+          "objective": "Clear the Sleeper cell inside Falasmaryon and shatter their red-wax chime rack"
+        },
+        {
+          "id": 30,
+          "place": "andasreth",
+          "objective": "Check the ancient propylon chamber at Andasreth for the cult's retreat route"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bal_isra",
+          "text": "Muster with the Redoran outriders on the ridge at Bal Isra"
+        },
+        {
+          "type": "clear",
+          "place": "falasmaryon",
+          "text": "Clear the Sleeper cell inside Falasmaryon and shatter their red-wax chime rack"
+        },
+        {
+          "type": "go",
+          "place": "andasreth",
+          "text": "Check the ancient propylon chamber at Andasreth for the cult's retreat route"
+        }
+      ],
+      "consequence": "world_state:falasmaryon_chime_rack_shattered",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "falasmaryon_chime_rack_shattered",
+        "flag": "story_va_falasmaryon_cleared",
+        "summary": "The chime rack at Falasmaryon is shattered, and tracks at Andasreth confirm an Ash-Priest is waking a blight-choir inside Kogoruhn."
+      }
+    },
+    {
+      "id": "story_vvardenfell_ashlands_03_hall_of_kogoruhn",
+      "order": 3,
+      "title": "The Bleeding Heart of Kogoruhn",
+      "region": "morrowind/vvardenfell_ashlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_vvardenfell_ashlands_02_relay_at_falasmaryon",
+      "requires": [
+        "story_vvardenfell_ashlands_02_relay_at_falasmaryon"
+      ],
+      "why": [
+        "morrowind/vvardenfell_ashlands.L8.urshilaku_prophecy",
+        "morrowind/vvardenfell_ashlands.L10.kogoruhn"
+      ],
+      "places": [
+        "maar_gan",
+        "kogoruhn",
+        "buckmoth_legion_fort"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "maar_gan",
+          "objective": "Receive the pilgrim's ash-blessing at the Maar Gan shrine before crossing into the blight-wind"
+        },
+        {
+          "id": 20,
+          "place": "kogoruhn",
+          "objective": "Enter the Sixth House citadel of Kogoruhn and slay the Ash-Priest of the Northern Choir"
+        },
+        {
+          "id": 30,
+          "place": "buckmoth_legion_fort",
+          "objective": "Deliver the captured Sixth House battle-plan to the garrison at Buckmoth Legion Fort"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "maar_gan",
+          "text": "Receive the pilgrim's ash-blessing at the Maar Gan shrine before crossing into the blight-wind"
+        },
+        {
+          "type": "clear",
+          "place": "kogoruhn",
+          "text": "Enter the Sixth House citadel of Kogoruhn and slay the Ash-Priest of the Northern Choir"
+        },
+        {
+          "type": "go",
+          "place": "buckmoth_legion_fort",
+          "text": "Deliver the captured Sixth House battle-plan to the garrison at Buckmoth Legion Fort"
+        }
+      ],
+      "consequence": "world_state:kogoruhn_northern_choir_silenced",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "kogoruhn_northern_choir_silenced",
+        "flag": "story_va_kogoruhn_cleared",
+        "summary": "The Ash-Priest in Kogoruhn is slain and the dream-transmissions plaguing Ald'ruhn and Maar Gan cease."
+      }
+    },
+    {
+      "id": "story_vvardenfell_ashlands_04_oath_under_skar",
+      "order": 4,
+      "title": "The Redoran Oath Under Skar",
+      "region": "morrowind/vvardenfell_ashlands",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_vvardenfell_ashlands_03_hall_of_kogoruhn",
+      "requires": [
+        "story_vvardenfell_ashlands_03_hall_of_kogoruhn"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/vvardenfell_ashlands.L7.ashlander_traders_at_the_gate",
+        "morrowind/vvardenfell_ashlands.L9.council_of_ald_ruhn"
+      ],
+      "places": [
+        "skar",
+        "aldruhn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "skar",
+          "objective": "Lay the shattered Ash-Priest bell before the Redoran Council Hall inside Skar"
+        },
+        {
+          "id": 20,
+          "place": "aldruhn",
+          "objective": "Witness the Ashlander caravan-truce renewed at the western gate of Ald'ruhn"
+        },
+        {
+          "id": 30,
+          "place": "aldruhn",
+          "objective": "Receive the Helm-Salute of the Redoran Council in Ald'ruhn"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "skar",
+          "text": "Lay the shattered Ash-Priest bell before the Redoran Council Hall inside Skar"
+        },
+        {
+          "type": "go",
+          "place": "aldruhn",
+          "text": "Witness the Ashlander caravan-truce renewed at the western gate of Ald'ruhn"
+        },
+        {
+          "type": "go",
+          "place": "aldruhn",
+          "text": "Receive the Helm-Salute of the Redoran Council in Ald'ruhn"
+        }
+      ],
+      "consequence": "world_state:aldruhn_skar_council_united",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Shield-Brother of Skar",
+        "unique_item": "skycraft:ebony_warhammer"
+      },
+      "consequence_detail": {
+        "world_state": "aldruhn_skar_council_united",
+        "flag": "story_va_finale_complete",
+        "summary": "With Kogoruhn's northern choir silenced, Ald'ruhn's council unites behind the ash-road defense and reopens the Ashlander trade gate."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_vvardenfell_ashlands_hook_npc",
+      "name": "Warden of Ald'ruhn",
+      "role": "guard",
+      "place": "aldruhn",
+      "greet": "Beneath the giant emperor-crab shell of Skar in Ald'ruhn, Redoran guards whisper that ash-caravans from Gnisis and Maar Gan have found red-wax Sixth House bells hidden inside supply crates."
+    }
+  ],
+  "scenes": {
+    "story_vvardenfell_ashlands_scene_01": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (1).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_02": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (2).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_03": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (3).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_04": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (4).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_05": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (5).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_06": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (6).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_07": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (7).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_08": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (8).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_09": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (9).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_10": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (10).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_11": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (11).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_12": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (12).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_13": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (13).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_14": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (14).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_15": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (15).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_16": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (16).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_17": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (17).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_18": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (18).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_19": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (19).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_20": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (20).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_21": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (21).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_22": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (22).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_23": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (23).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_24": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (24).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_25": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (25).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_26": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (26).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_27": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (27).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_28": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (28).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_29": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (29).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_30": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (30).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_31": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (31).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_32": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (32).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_33": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (33).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_34": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (34).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_35": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (35).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_36": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (36).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_37": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (37).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_38": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (38).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_39": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (39).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_40": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (40).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_41": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (41).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_42": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (42).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_43": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (43).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_44": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (44).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_45": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (45).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_46": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (46).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_47": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (47).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_48": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (48).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_49": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (49).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_50": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (50).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_51": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (51).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_52": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (52).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_53": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (53).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_54": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (54).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_55": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (55).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_56": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (56).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_57": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (57).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_58": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (58).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_59": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (59).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_60": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (60).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_61": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (61).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_62": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (62).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_63": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (63).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_64": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (64).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_65": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (65).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_66": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (66).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_67": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (67).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_68": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (68).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_69": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (69).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_70": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (70).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_71": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (71).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_72": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (72).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_73": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (73).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_74": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (74).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_75": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (75).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_76": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (76).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_77": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Panat (77).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Panat at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Panat and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_78": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Beshara (78).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Beshara at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Beshara and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_79": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Pudai Egg Mine (79).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Pudai Egg Mine at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Pudai Egg Mine and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_80": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Sud (80).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Sud at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Sud and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_81": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Aldruhn (81).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Aldruhn at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Aldruhn and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_82": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Khuul (82).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Khuul at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Khuul and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_83": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Nelas Ancestral Tomb (83).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Nelas Ancestral Tomb at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Nelas Ancestral Tomb and report back to the seat."
+    ],
+    "story_vvardenfell_ashlands_scene_84": [
+      "Warden of Ald'ruhn: Examine the ash-wax seals recovered near Buckmoth Legion Fort (84).",
+      "Watch-Captain of Vvardenfell Ashlands: The ledger entries match the dispatches troubling Vvardenfell Ashlands.",
+      "Watch-Captain of Vvardenfell Ashlands: Our scouts tracked the courier column past Buckmoth Legion Fort at dusk.",
+      "Watch-Captain of Vvardenfell Ashlands: Secure the approaches around Buckmoth Legion Fort and report back to the seat."
+    ]
+  }
+}

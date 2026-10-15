@@ -1,0 +1,199 @@
+{
+  "id": "sunken_temple_of_the_yokudan_kings",
+  "why": [
+    "sunken_isles.L1.submerged_city_shelves",
+    "sunken_isles.L5.memory_stone_salvage",
+    "sunken_isles.L6.riven_shoal_anchorage"
+  ],
+  "sil": "yokuda-sunken-temple-of-the-yokudan-kings-plan",
+  "base": "none",
+  "overlay": "sunken_isles",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "sunken_isles",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "sunken_isles",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "sunken_temple_of_the_yokudan_kings_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "sunken_temple_of_the_yokudan_kings_landmark",
+      "overlay": "sunken_isles"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 18,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "sunken_isles",
+      "name": "sunken_temple_of_the_yokudan_kings_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "statue",
+      "theme": "sunken_temple_of_the_yokudan_kings_statue",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "sunken_temple_of_the_yokudan_kings_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "sunken_temple_of_the_yokudan_kings_b_5",
+    "smithy": "sunken_temple_of_the_yokudan_kings_b_7"
+  },
+  "titles": {
+    "sunken_temple_of_the_yokudan_kings_b_1": "place.skycraft.sunken_temple_of_the_yokudan_kings Council & Seat Hall",
+    "sunken_temple_of_the_yokudan_kings_b_2": "place.skycraft.sunken_temple_of_the_yokudan_kings High Sanctuary",
+    "sunken_temple_of_the_yokudan_kings_b_3": "place.skycraft.sunken_temple_of_the_yokudan_kings Fighters & Wayfarers Hall",
+    "sunken_temple_of_the_yokudan_kings_b_4": "place.skycraft.sunken_temple_of_the_yokudan_kings Mages & Chroniclers Spire",
+    "sunken_temple_of_the_yokudan_kings_b_5": "place.skycraft.sunken_temple_of_the_yokudan_kings The Lantern & Hearth Inn",
+    "sunken_temple_of_the_yokudan_kings_b_6": "place.skycraft.sunken_temple_of_the_yokudan_kings The Traveler's Rest Tavern",
+    "sunken_temple_of_the_yokudan_kings_b_7": "place.skycraft.sunken_temple_of_the_yokudan_kings Master Forge & Armorer",
+    "sunken_temple_of_the_yokudan_kings_b_8": "place.skycraft.sunken_temple_of_the_yokudan_kings Botanicals & Remedies",
+    "sunken_temple_of_the_yokudan_kings_landmark": "High Seat of place.skycraft.sunken_temple_of_the_yokudan_kings",
+    "sunken_temple_of_the_yokudan_kings_plaza": "place.skycraft.sunken_temple_of_the_yokudan_kings Central Plaza"
+  },
+  "innKey": "sunken_temple_of_the_yokudan_kings_b_5"
+}

@@ -1,0 +1,356 @@
+{
+  "id": "gavaudon",
+  "sil": "crag-shelf-border-bastion",
+  "base": "none",
+  "overlay": "wrothgar",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "gavaudon_iron_gauntlet_inn",
+  "names": {
+    "inn": "gavaudon_iron_gauntlet_inn",
+    "store": "gavaudon_march_sutler",
+    "smithy": "gavaudon_quarry_wedge_forge"
+  },
+  "titles": {
+    "gavaudon_landmark": "Gavaudon Crag-Bastion",
+    "gavaudon_marcher_keep": "Gavaudon Crag-Shelf Keep",
+    "gavaudon_iron_gauntlet_inn": "The Iron Gauntlet Inn",
+    "gavaudon_march_sutler": "Wrothgar-March Sutler's Store",
+    "gavaudon_quarry_wedge_forge": "Heavy-Bill & Armour Smithy",
+    "gavaudon_mountain_pitch_shop": "Mountain-Pitch & Salve Shop",
+    "gavaudon_stendarr_garrison_chapel": "Garrison Chapel of Stendarr",
+    "gavaudon_marcher_barracks": "Marcher Crossbowmen Barracks",
+    "gavaudon_warden_hall": "March-Warden's Stone Hall",
+    "gavaudon_orc_gate_watch": "High-Trail Watchtower",
+    "gavaudon_pack_garron_yard": "Crag-Garron Stables",
+    "gavaudon_market_plaza": "Gavaudon Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "gavaudon_landmark",
+      "overlay": "wrothgar"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "gavaudon_marcher_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "gavaudon_iron_gauntlet_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "gavaudon_march_sutler"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "gavaudon_quarry_wedge_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "gavaudon_mountain_pitch_shop"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "gavaudon_stendarr_garrison_chapel"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "gavaudon_marcher_barracks"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "gavaudon_warden_hall"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "gavaudon_orc_gate_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "gavaudon_pack_garron_yard"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "gavaudon_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "wrothgar"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "wrothgar"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "willow",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    }
+  ]
+}

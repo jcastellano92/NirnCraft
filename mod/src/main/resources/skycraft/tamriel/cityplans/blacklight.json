@@ -1,0 +1,289 @@
+{
+  "id": "blacklight",
+  "why": [
+    "stonefalls.L1.velothi_foothills",
+    "morrowind.L6.great_house_seats",
+    "morrowind.L7.five_great_houses"
+  ],
+  "sil": "redoran-fjord-shell-wall",
+  "base": "none",
+  "overlay": "blacklight",
+  "radius": 84,
+  "reach": 102,
+  "innKey": "bl_velothi_pass_inn",
+  "names": {
+    "inn": "bl_velothi_pass_inn",
+    "store": "bl_fjord_outfitter",
+    "smithy": "bl_dunmeth_armorer"
+  },
+  "gates": [
+    [
+      -78,
+      0
+    ],
+    [
+      0,
+      78
+    ],
+    [
+      78,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "shell",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "name": "blacklight_redoran_seat",
+      "overlay": "blacklight"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        84
+      ],
+      "overlay": "blacklight"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_grand_council"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        61,
+        25
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_cathedral_st_meris"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        25,
+        61
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_velothi_pass_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -25,
+        61
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_chitin_helm_club"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_dunmeth_armorer"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -61,
+        25
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_fjord_outfitter"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_ash_root_remedies"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -61,
+        -25
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_bolvyn_hall"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_sarethi_mainland"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -25,
+        -61
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_border_barracks"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_salt_store"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        25,
+        -61
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_warden_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_harpooner_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        61,
+        -25
+      ],
+      "face": "south",
+      "overlay": "blacklight",
+      "name": "bl_mason_house"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "blacklight_redoran",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "fjord_beacon_brazier",
+      "count": 4
+    },
+    {
+      "type": "statue",
+      "theme": "saint_reddoth",
+      "count": 1
+    },
+    {
+      "type": "well",
+      "theme": "snowmelt_cistern",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "blacklight_redoran_seat": "Archcanon's Spire & Redoran High Seat",
+    "bl_grand_council": "Grand Council of Blacklight",
+    "bl_cathedral_st_meris": "Cathedral of St. Meris",
+    "bl_fighters_guild": "Blacklight Fighters Guild",
+    "bl_mages_guild": "Blacklight Mages Guild",
+    "bl_velothi_pass_inn": "The Velothi Pass Inn",
+    "bl_chitin_helm_club": "The Chitin Helm Cornerclub",
+    "bl_dunmeth_armorer": "Dunmeth Pass Armorer",
+    "bl_fjord_outfitter": "Fjord-Wharf Outfitter",
+    "bl_ash_root_remedies": "Ash-Root Remedies",
+    "bl_bolvyn_hall": "Archmaster Bolvyn's Ancestral Hall",
+    "bl_sarethi_mainland": "Sarethi Mainland Manor",
+    "bl_border_barracks": "Redoran Border-Watch Citadel",
+    "bl_salt_store": "Sea of Ghosts Salt-Store",
+    "bl_warden_house": "Pass-Warden's Shell House",
+    "bl_harpooner_house": "Harpooner's Stone House",
+    "bl_mason_house": "Mason's Terrace House"
+  }
+}

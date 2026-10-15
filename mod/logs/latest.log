@@ -1,0 +1,15 @@
+[15Oct2026 13:35:04.716] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded sceneplan (852 KB)
+[15Oct2026 13:35:04.732] [Test worker/INFO] [com.skycraft.Skycraft/]: [sceneplan] loaded the baked scene plan: 5213 scenes, 11046 props (430 ms)
+[15Oct2026 13:35:04.794] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded roadplan (6101 KB)
+[15Oct2026 13:35:05.031] [Test worker/INFO] [com.skycraft.Skycraft/]: [roadplan] loaded the baked road plan: 7174 links, 7984 segments, 478495 vertices, 50762 buckets (265 ms)
+[15Oct2026 13:35:05.232] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 7546 places of Tamriel
+[15Oct2026 13:35:05.686] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded the Tamriel map (880x672 cells) in 441 ms
+[15Oct2026 13:35:05.696] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded the Tamriel hydrology: 511 waterfalls, 540 river sites, 1356 springs
+[15Oct2026 13:35:05.729] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 83 regions of Nirn
+[15Oct2026 13:35:07.157] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded testbake (4 KB)
+[15Oct2026 13:35:07.161] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] stale_test is stale (inputs changed); computing live
+[15Oct2026 13:35:07.579] [Test worker/INFO] [com.skycraft.tamriel.world.WorldSheets/]: Loaded 11 world model sheet(s): 99 blocks, 3019 fields
+[15Oct2026 13:35:07.924] [Test worker/INFO] [com.skycraft.Skycraft/]: Skycraft roads: 1179 routing corridors (25942 cells)
+[15Oct2026 13:35:08.060] [Test worker/INFO] [com.skycraft.Skycraft/]: [roadplan] terrain index: 135864 road buckets, 2579777 edge entries, 4376 pad buckets (126 ms)
+[15Oct2026 13:35:08.359] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded streetplan (7972 KB)
+[15Oct2026 13:35:08.515] [Test worker/INFO] [com.skycraft.Skycraft/]: [streetplan] loaded the baked street plan: 1338 settlements, 63117 nodes, 59053 edges, 13503 doors, 52070 plots (176 ms)

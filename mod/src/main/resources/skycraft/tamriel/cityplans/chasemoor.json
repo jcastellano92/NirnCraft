@@ -1,0 +1,186 @@
+{
+  "id": "chasemoor",
+  "why": [
+    "rimmen.L1.rimmen_cliff",
+    "rimmen.L5.artisan_trade",
+    "rimmen.L6.rimmen_seat"
+  ],
+  "sil": "elsweyr-chasemoor-plan",
+  "base": "none",
+  "overlay": "rimmen",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "rimmen",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "rimmen",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "chasemoor_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "chasemoor_landmark",
+      "overlay": "rimmen"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "chasemoor_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "chasemoor_market",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "chasemoor_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "chasemoor_b_5",
+    "smithy": "chasemoor_b_7"
+  },
+  "titles": {
+    "chasemoor_b_1": "place.skycraft.chasemoor Council & Seat Hall",
+    "chasemoor_b_2": "place.skycraft.chasemoor High Sanctuary",
+    "chasemoor_b_3": "place.skycraft.chasemoor Fighters & Wayfarers Hall",
+    "chasemoor_b_4": "place.skycraft.chasemoor Mages & Chroniclers Spire",
+    "chasemoor_b_5": "place.skycraft.chasemoor The Lantern & Hearth Inn",
+    "chasemoor_b_6": "place.skycraft.chasemoor The Traveler's Rest Tavern",
+    "chasemoor_b_7": "place.skycraft.chasemoor Master Forge & Armorer",
+    "chasemoor_landmark": "High Seat of place.skycraft.chasemoor",
+    "chasemoor_plaza": "place.skycraft.chasemoor Central Plaza"
+  },
+  "innKey": "chasemoor_b_5"
+}

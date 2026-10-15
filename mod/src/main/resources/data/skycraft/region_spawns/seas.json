@@ -19,6 +19,10 @@
           3
         ]
       }
+    ],
+    "why": [
+      "skyrim.L1.northern_coast",
+      "skyrim.L5.sea_trade"
     ]
   }
 ]

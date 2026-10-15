@@ -1,0 +1,291 @@
+{
+  "id": "firsthold",
+  "why": [
+    "auridon.L1.ridge",
+    "auridon.L5.vulkhel_open_port",
+    "auridon.L6.firsthold_seat"
+  ],
+  "sil": "tidal-island-causeway",
+  "base": "none",
+  "overlay": "firsthold",
+  "radius": 88,
+  "reach": 100,
+  "gates": [
+    [
+      0,
+      86
+    ],
+    [
+      -86,
+      0
+    ],
+    [
+      86,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        42
+      ],
+      "overlay": "firsthold",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        42,
+        88
+      ],
+      "overlay": "auridon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "firsthold_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "firsthold_landmark",
+      "overlay": "firsthold"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 84,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        32,
+        0
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        57,
+        27
+      ],
+      "face": "north",
+      "overlay": "firsthold",
+      "name": "firsthold_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        20,
+        25
+      ],
+      "face": "north",
+      "overlay": "firsthold",
+      "name": "firsthold_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        14,
+        62
+      ],
+      "face": "north",
+      "overlay": "firsthold",
+      "name": "firsthold_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -7,
+        31
+      ],
+      "face": "north",
+      "overlay": "firsthold",
+      "name": "firsthold_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -40,
+        50
+      ],
+      "face": "north",
+      "overlay": "firsthold",
+      "name": "firsthold_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -29,
+        14
+      ],
+      "face": "north",
+      "overlay": "firsthold",
+      "name": "firsthold_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -63,
+        0
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -29,
+        -14
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -40,
+        -50
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -7,
+        -31
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        14,
+        -62
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        20,
+        -25
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        57,
+        -27
+      ],
+      "face": "south",
+      "overlay": "firsthold",
+      "name": "firsthold_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "firsthold_fountain",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "firsthold_statue",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "firsthold_garden",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "firsthold_b_5",
+    "store": "firsthold_b_10",
+    "smithy": "firsthold_b_7"
+  },
+  "titles": {
+    "firsthold_b_1": "place.skycraft.firsthold Council & Seat Hall",
+    "firsthold_b_2": "place.skycraft.firsthold High Sanctuary",
+    "firsthold_b_3": "place.skycraft.firsthold Fighters & Wayfarers Hall",
+    "firsthold_b_4": "place.skycraft.firsthold Mages & Chroniclers Spire",
+    "firsthold_b_5": "place.skycraft.firsthold The Lantern & Hearth Inn",
+    "firsthold_b_6": "place.skycraft.firsthold The Traveler's Rest Tavern",
+    "firsthold_b_7": "place.skycraft.firsthold Master Forge & Armorer",
+    "firsthold_b_8": "place.skycraft.firsthold Botanicals & Remedies",
+    "firsthold_b_9": "place.skycraft.firsthold Scriptorium & Charts",
+    "firsthold_b_10": "place.skycraft.firsthold Grand Provisioner & Sundries",
+    "firsthold_b_11": "place.skycraft.firsthold Silk & Hide Clothier",
+    "firsthold_b_12": "place.skycraft.firsthold Lapidary & Signets",
+    "firsthold_b_13": "place.skycraft.firsthold Wayfarer Stables & Post",
+    "firsthold_b_14": "place.skycraft.firsthold Bonded Factor Warehouse",
+    "firsthold_landmark": "High Seat of place.skycraft.firsthold",
+    "firsthold_plaza": "place.skycraft.firsthold Central Plaza"
+  },
+  "innKey": "firsthold_b_5"
+}

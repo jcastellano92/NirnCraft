@@ -6,7 +6,11 @@
    "imperial_city",
    "imperial_bridge_inn"
   ],
-  "bridge": 720
+  "bridge": 720,
+  "why": [
+   "heartlands.L6.imperial_city",
+   "cyrodiil.L6.imperial_highways"
+  ]
  },
  {
   "id": "red_ring_road",
@@ -18,6 +22,10 @@
    "pells_gate",
    "roxey_inn",
    "imperial_bridge_inn"
+  ],
+  "why": [
+   "heartlands.L6.imperial_city",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -31,6 +39,11 @@
    "kvatch",
    "gottshaw_inn",
    "anvil"
+  ],
+  "why": [
+   "west_weald.L6.skingrad_seat",
+   "gold_coast.L6.anvil_and_kvatch",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -39,6 +52,10 @@
   "route": [
    "weye",
    "chorrol"
+  ],
+  "why": [
+   "colovian_highlands.L6.chorrol_seat",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -47,6 +64,10 @@
   "route": [
    "aleswell",
    "bleakers_way"
+  ],
+  "why": [
+   "jerall_mountains.L6.bruma_seat",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -55,6 +76,10 @@
   "route": [
    "bleakers_way",
    "bruma"
+  ],
+  "why": [
+   "jerall_mountains.L6.bruma_seat",
+   "colovian_highlands.L6.chorrol_seat"
   ]
  },
  {
@@ -63,6 +88,10 @@
   "route": [
    "pells_gate",
    "cheydinhal"
+  ],
+  "why": [
+   "nibenay_basin.L6.cheydinhal_seat",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -72,6 +101,10 @@
    "roxey_inn",
    "faregyl_inn",
    "bravil"
+  ],
+  "why": [
+   "nibenay_valley.L6.bravil_seat",
+   "cyrodiil.L6.imperial_highways"
   ]
  },
  {
@@ -81,6 +114,10 @@
    "bravil",
    "drunken_dragon_inn",
    "leyawiin"
+  ],
+  "why": [
+   "blackwood.L6.leyawiin_seat",
+   "nibenay_valley.L6.bravil_seat"
   ]
  },
  {
@@ -103,6 +140,10 @@
   "route": [
    "helgen",
    "bruma"
+  ],
+  "why": [
+   "jerall_mountains.L6.bruma_seat",
+   "jerall_mountains.L1.granite_wall_and_passes"
   ]
  },
  {
@@ -458,13 +499,15 @@
   "name": "road.skycraft.druadach_highway",
   "why": [
    "the_reach.L5.border_trade",
-   "the_reach.L1.granite_gorges",
-   "skyrim.L5.road_hub"
+   "bjoulsae.L1.druadach_march",
+   "wrothgar.L1.high_passes"
   ],
   "route": [
    "markarth",
-   "deep_folk_crossing",
-   "jehanna"
+   "karthwasten",
+   "jehanna",
+   "farrun",
+   "evermor"
   ],
   "class": "highway"
  },
@@ -497,5 +540,1059 @@
    "bruma"
   ],
   "class": "highway"
+ },
+ {
+  "id": "north_shore_road",
+  "name": "road.skycraft.north_shore_road",
+  "why": [
+   "high_rock.L5.tolls",
+   "daggerfall.L5.river_toll",
+   "dwynnen.L5.bridge_toll",
+   "wayrest.L6.harbour_capital"
+  ],
+  "route": [
+   "daggerfall",
+   "tulune",
+   "alcaire",
+   "koeglin_village",
+   "dwynnen",
+   "kambria",
+   "wayrest"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "glenumbra_road",
+  "name": "road.skycraft.glenumbra_road",
+  "why": [
+   "glenumbra.L5.wool_and_cloth",
+   "glenumbra.L6.camlorn_city",
+   "daggerfall.L5.hides_and_wool"
+  ],
+  "route": [
+   "daggerfall",
+   "ilessan_hills",
+   "crosswych",
+   "camlorn",
+   "eagles_brook",
+   "northmoor"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "high_rock_northern_backbone",
+  "name": "road.skycraft.high_rock_northern_backbone",
+  "why": [
+   "rivenspire.L6.shornhelm_city",
+   "rivenspire.L5.northpoint_shipping",
+   "bjoulsae.L6.druadach_border_fort"
+  ],
+  "route": [
+   "camlorn",
+   "ykalon",
+   "shornhelm",
+   "northpoint",
+   "farrun",
+   "jehanna"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "wrothgar_pass_road",
+  "name": "road.skycraft.wrothgar_pass_road",
+  "why": [
+   "wrothgar.L1.high_passes",
+   "wrothgar.L6.pass_inns",
+   "bjoulsae.L6.evermor_city",
+   "wayrest.L6.border_keep"
+  ],
+  "route": [
+   "wayrest",
+   "gavaudon",
+   "bhoriane",
+   "evermor",
+   "orsinium",
+   "farrun"
+  ],
+  "class": "road"
+ },
+ {
+  "id": "daggerfall_bluff_lane",
+  "name": "road.skycraft.daggerfall_bluff_lane",
+  "why": [
+   "daggerfall.L1.glenpoint_headland",
+   "daggerfall.L6.glenpoint_watch",
+   "daggerfall.L5.salt_pans"
+  ],
+  "route": [
+   "daggerfall",
+   "yarhurst",
+   "deleyns_mill",
+   "aldcroft",
+   "westtry",
+   "glenpoint"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "glenumbra_moor_lane",
+  "name": "road.skycraft.glenumbra_moor_lane",
+  "why": [
+   "glenumbra.L1.western_moors",
+   "glenumbra.L5.peat_cutting",
+   "glenumbra.L6.moor_steadings"
+  ],
+  "route": [
+   "aldcroft",
+   "lowpoint",
+   "glenumbra_moors",
+   "millcliff_mill",
+   "daenia",
+   "northmoor"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "anticlere_meadow_lane",
+  "name": "road.skycraft.anticlere_meadow_lane",
+  "why": [
+   "anticlere.L3.mill_chain",
+   "anticlere.L5.grain_and_mills",
+   "stormhaven.L6.weeping_giant"
+  ],
+  "route": [
+   "alcaire",
+   "weeping_giant",
+   "shalgora",
+   "urvaius",
+   "anticlere",
+   "ykalon"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "dwynnen_gorge_lane",
+  "name": "road.skycraft.dwynnen_gorge_lane",
+  "why": [
+   "dwynnen.L1.dwynnen_gorge",
+   "dwynnen.L5.bhoriane_mines",
+   "wayrest.L1.bjoulsae_mouth"
+  ],
+  "route": [
+   "dwynnen",
+   "balmarsh",
+   "bhoriane",
+   "thorncombe",
+   "greythorpe_mill",
+   "menevia",
+   "wayrest"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "rivenspire_crag_lane",
+  "name": "road.skycraft.rivenspire_crag_lane",
+  "why": [
+   "rivenspire.L1.dark_crags",
+   "rivenspire.L5.quarry_and_iron",
+   "rivenspire.L6.crag_watch_keeps"
+  ],
+  "route": [
+   "northmoor",
+   "crestshade",
+   "hoarfrost_downs",
+   "northpoint",
+   "glenwych_mill",
+   "shornhelm",
+   "moiras_hope",
+   "fells_run",
+   "camlorn"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "stormhaven_pilgrim_lane",
+  "name": "road.skycraft.stormhaven_pilgrim_lane",
+  "why": [
+   "stormhaven.L5.pilgrim_hospitality",
+   "stormhaven.L11.old_pilgrim_way",
+   "wayrest.L6.harbour_capital"
+  ],
+  "route": [
+   "koeglin_village",
+   "dreughside",
+   "kambria",
+   "wyngate",
+   "torwych",
+   "marcliff",
+   "aldhaven_harbor",
+   "wayrest"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "bjoulsae_towpath_lane",
+  "name": "road.skycraft.bjoulsae_towpath_lane",
+  "why": [
+   "bjoulsae.L3.upper_bjoulsae",
+   "bjoulsae.L5.barge_trade",
+   "bjoulsae.L6.barge_landings"
+  ],
+  "route": [
+   "wayrest",
+   "bordul",
+   "menevia",
+   "balthorpe",
+   "evermor",
+   "the_crooked_tortoise",
+   "phrygias",
+   "farrun"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "wrothgar_stronghold_lane",
+  "name": "road.skycraft.wrothgar_stronghold_lane",
+  "why": [
+   "wrothgar.L5.stronghold_mines",
+   "wrothgar.L6.stronghold_per_mine",
+   "wrothgar.L6.orsinium_city"
+  ],
+  "route": [
+   "gavaudon",
+   "shulzog",
+   "fharun_stronghold",
+   "orsinium",
+   "morkul_stronghold_high_rock",
+   "gulbul",
+   "thukur",
+   "jehanna"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "wrothgar_east_lane",
+  "name": "road.skycraft.wrothgar_east_lane",
+  "why": [
+   "wrothgar.L1.ore_veins",
+   "wrothgar.L5.orichalcum_forges",
+   "wrothgar.L6.stronghold_per_mine"
+  ],
+  "route": [
+   "orsinium",
+   "khazuk",
+   "tumnosh_stronghold"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "south_shore_road",
+  "name": "road.skycraft.south_shore_road",
+  "why": [
+   "hammerfell.L1.south_shore",
+   "sentinel.L5.caravan_terminus",
+   "bangkorai.L5.river_trade",
+   "craglorn.L6.elinhir_city"
+  ],
+  "route": [
+   "sentinel",
+   "kozanset",
+   "ephesus",
+   "lainlyn",
+   "ayasofya",
+   "mournoth",
+   "elinhir"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "alikr_caravan_road",
+  "name": "road.skycraft.alikr_caravan_road",
+  "why": [
+   "alikr_desert.L3.owned_wells",
+   "alikr_desert.L5.caravan_tolls",
+   "alikr_desert.L6.caravanserai_city",
+   "dragontail.L6.pass_to_kvatch"
+  ],
+  "route": [
+   "sentinel",
+   "kairou",
+   "skaven",
+   "tigonus",
+   "rihad"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "abibon_coast_road",
+  "name": "road.skycraft.abibon_coast_road",
+  "why": [
+   "sentinel.L1.abibon_coast",
+   "alikr_desert.L6.south_coast_cities",
+   "hammerfell.L5.dyes_and_spice"
+  ],
+  "route": [
+   "sentinel",
+   "antiphyllos",
+   "myrkwasa",
+   "cybiades",
+   "gilane",
+   "abibon_gora",
+   "totambu",
+   "hegathe"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "abecean_coast_road",
+  "name": "road.skycraft.abecean_coast_road",
+  "why": [
+   "hammerfell.L1.abecean_coast",
+   "hews_bane.L6.taneth_city",
+   "hews_bane.L6.abahs_landing",
+   "dragontail.L6.pass_to_kvatch"
+  ],
+  "route": [
+   "hegathe",
+   "bergama",
+   "satakalaam",
+   "taneth",
+   "abahs_landing",
+   "dakfron",
+   "rihad"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "jungle_river_road",
+  "name": "road.skycraft.jungle_river_road",
+  "why": [
+   "bangkorai.L3.lainlyn_river",
+   "bangkorai.L5.bridge_traffic",
+   "bangkorai.L6.ford_towns"
+  ],
+  "route": [
+   "lainlyn",
+   "ayasofya",
+   "hallins_stand",
+   "skaven"
+  ],
+  "class": "road"
+ },
+ {
+  "id": "dragontail_pass_road",
+  "name": "road.skycraft.dragontail_pass_road",
+  "why": [
+   "dragontail.L1.black_ridges",
+   "dragontail.L5.mines",
+   "craglorn.L6.dragonstar_city"
+  ],
+  "route": [
+   "skaven",
+   "pothago",
+   "elinhir",
+   "dragonstar"
+  ],
+  "class": "road"
+ },
+ {
+  "id": "craglorn_road",
+  "name": "road.skycraft.craglorn_road",
+  "why": [
+   "craglorn.L1.craglorn_badlands",
+   "craglorn.L5.pass_trade",
+   "craglorn.L6.elinhir_city"
+  ],
+  "route": [
+   "mournoth",
+   "haddocks_market",
+   "belkarth",
+   "elinhir",
+   "dragonstar"
+  ],
+  "class": "road"
+ },
+ {
+  "id": "falkreath_elinhir_road",
+  "name": "road.skycraft.falkreath_elinhir_road",
+  "why": [
+   "craglorn.L5.pass_trade",
+   "craglorn.L6.dragonstar_city",
+   "falkreath.L5.border_trade"
+  ],
+  "route": [
+   "falkreath",
+   "dragonstar",
+   "elinhir"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "kvatch_rihad_road",
+  "name": "road.skycraft.kvatch_rihad_road",
+  "why": [
+   "dragontail.L6.pass_to_kvatch",
+   "hammerfell.L5.caravans_and_salt",
+   "hews_bane.L5.abecean_shipping"
+  ],
+  "route": [
+   "rihad",
+   "dakfron",
+   "kvatch",
+   "anvil"
+  ],
+  "class": "highway"
+ },
+ {
+  "id": "sentinel_terrace_lane",
+  "name": "road.skycraft.sentinel_terrace_lane",
+  "why": [
+   "sentinel.L1.garden_terraces",
+   "sentinel.L5.dye_works",
+   "sentinel.L6.coast_fief_keeps"
+  ],
+  "route": [
+   "sentinel",
+   "gaakir_docks",
+   "morwhas_bounty",
+   "cybiades",
+   "faaleb",
+   "berud",
+   "gilane"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "alikr_oasis_lane",
+  "name": "road.skycraft.alikr_oasis_lane",
+  "why": [
+   "alikr_desert.L3.qanat_lines",
+   "alikr_desert.L5.oasis_dates",
+   "alikr_desert.L6.well_towns"
+  ],
+  "route": [
+   "sentinel",
+   "the_thirsty_barrel",
+   "zauun_docks",
+   "kozanset",
+   "kairou",
+   "the_winking_goat",
+   "the_drowsy_guar",
+   "bergama",
+   "satakalaam",
+   "skaven"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "bangkorai_garrison_lane",
+  "name": "road.skycraft.bangkorai_garrison_lane",
+  "why": [
+   "bangkorai.L1.bangkorai_pass",
+   "bangkorai.L6.garrison_pass",
+   "craglorn.L5.pass_trade"
+  ],
+  "route": [
+   "ephesus",
+   "lainlyn",
+   "qaana",
+   "elinhir",
+   "zoahim",
+   "belkarth"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "dragontail_mine_lane",
+  "name": "road.skycraft.dragontail_mine_lane",
+  "why": [
+   "dragontail.L1.ore_seams",
+   "dragontail.L5.obsidian_and_sulphur",
+   "dragontail.L6.mine_villages"
+  ],
+  "route": [
+   "skaven",
+   "the_drowsy_boar",
+   "pothago",
+   "the_silver_pilgrim",
+   "the_prancing_wheel",
+   "tigonus",
+   "baira",
+   "rihad"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "hews_bane_smuggler_lane",
+  "name": "road.skycraft.hews_bane_smuggler_lane",
+  "why": [
+   "hews_bane.L1.abecean_headlands",
+   "hews_bane.L5.smuggled_cargo",
+   "hews_bane.L6.abahs_landing"
+  ],
+  "route": [
+   "hegathe",
+   "tavalaam_docks",
+   "thrall_cove",
+   "the_prancing_goat",
+   "qaezir",
+   "taneth",
+   "abahs_landing"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "stros_mkai_island_lane",
+  "name": "road.skycraft.stros_mkai_island_lane",
+  "why": [
+   "stros_mkai.L1.two_lobes",
+   "stros_mkai.L5.harbour_trade",
+   "stros_mkai.L6.port_hunding"
+  ],
+  "route": [
+   "stros_mkai",
+   "saintsport",
+   "tavorra_cove"
+  ],
+  "class": "lane"
+ },
+ {
+  "id": "velothi_blacklight_road",
+  "name": "road.skycraft.velothi_blacklight_road",
+  "class": "highway",
+  "route": [
+   "blacklight",
+   "silgrad_tower",
+   "ebonheart",
+   "davons_watch",
+   "kragenmoor",
+   "narsis",
+   "tear"
+  ],
+  "why": [
+   "stonefalls.L1.lava_shields",
+   "stonefalls.L1.velothi_foothills",
+   "stonefalls.L2.snow_on_the_foothills"
+  ]
+ },
+ {
+  "id": "telvanni_east_road",
+  "name": "road.skycraft.telvanni_east_road",
+  "class": "highway",
+  "route": [
+   "ebonheart",
+   "necrom",
+   "gorne",
+   "sadrith_mora",
+   "port_telvannis",
+   "firewatch"
+  ],
+  "why": [
+   "telvannis.L2.ash_shadow",
+   "telvannis.L4.coastal_mushroom_forest",
+   "telvannis.L5.sea_trade"
+  ]
+ },
+ {
+  "id": "vvardenfell_south_road",
+  "name": "road.skycraft.vvardenfell_south_road",
+  "class": "highway",
+  "route": [
+   "seyda_neen",
+   "pelagiad",
+   "vivec",
+   "suran",
+   "molag_mar"
+  ],
+  "why": [
+   "ascadian_isles.L4.parasol_grove",
+   "ascadian_isles.L5.pilgrim_economy",
+   "ascadian_isles.L6.pelagiad_garrison"
+  ]
+ },
+ {
+  "id": "odai_gash_road",
+  "name": "road.skycraft.odai_gash_road",
+  "class": "highway",
+  "route": [
+   "seyda_neen",
+   "hla_oad",
+   "balmora",
+   "caldera",
+   "aldruhn",
+   "maar_gan",
+   "gnisis",
+   "ald_velothi",
+   "khuul"
+  ],
+  "why": [
+   "west_gash.L4.mine_spoil",
+   "west_gash.L5.ebony",
+   "west_gash.L6.balmora_on_the_odai"
+  ]
+ },
+ {
+  "id": "foyada_mamaea_road",
+  "name": "road.skycraft.foyada_mamaea_road",
+  "class": "road",
+  "route": [
+   "balmora",
+   "pelagiad",
+   "aldruhn",
+   "maar_gan"
+  ],
+  "why": [
+   "morrowind.L1.velothi_wall",
+   "morrowind.L1.inner_sea",
+   "morrowind.L1.fungal_soils"
+  ]
+ },
+ {
+  "id": "grazelands_caravan_road",
+  "name": "road.skycraft.grazelands_caravan_road",
+  "class": "road",
+  "route": [
+   "maar_gan",
+   "urshilaku_camp",
+   "sobitbael_camp",
+   "elanius_camp",
+   "ahemmusa_camp",
+   "vos",
+   "tel_vos",
+   "tel_mora"
+  ],
+  "why": [
+   "morrowind.L1.inner_sea",
+   "morrowind.L1.fungal_soils",
+   "morrowind.L1.kwama_hills"
+  ]
+ },
+ {
+  "id": "azuras_coast_lane",
+  "name": "road.skycraft.azuras_coast_lane",
+  "class": "lane",
+  "route": [
+   "molag_mar",
+   "erabenimsun_camp",
+   "tel_branora",
+   "tel_fyr",
+   "sadrith_mora",
+   "tel_aruhn"
+  ],
+  "why": [
+   "morrowind.L1.inner_sea",
+   "morrowind.L1.fungal_soils",
+   "morrowind.L1.kwama_hills"
+  ]
+ },
+ {
+  "id": "bitter_coast_smuggler_lane",
+  "name": "road.skycraft.bitter_coast_smuggler_lane",
+  "class": "lane",
+  "route": [
+   "seyda_neen",
+   "hla_oad",
+   "gnaar_mok",
+   "ald_velothi",
+   "khuul",
+   "dagon_fel"
+  ],
+  "why": [
+   "morrowind.L2.blight_storms",
+   "morrowind.L2.cold_north",
+   "morrowind.L3.odai_and_rivers"
+  ]
+ },
+ {
+  "id": "deshaan_mournhold_road",
+  "name": "road.skycraft.deshaan_mournhold_road",
+  "class": "highway",
+  "route": [
+   "ebonheart",
+   "kragenmoor",
+   "narsis",
+   "mournhold",
+   "tear"
+  ],
+  "why": [
+   "morrowind.L2.ash_storms",
+   "morrowind.L2.wet_south",
+   "morrowind.L2.fumarole_heat"
+  ]
+ },
+ {
+  "id": "solstheim_skaal_trail",
+  "name": "road.skycraft.solstheim_skaal_trail",
+  "class": "trail",
+  "route": [
+   "raven_rock",
+   "tel_mithryn",
+   "thirsk_mead_hall",
+   "skaal_village"
+  ],
+  "why": [
+   "solstheim.L1.moesring_massif",
+   "solstheim.L1.glacier_nw",
+   "solstheim.L1.ebony_seam"
+  ]
+ },
+ {
+  "id": "shadowfen_border_road",
+  "name": "road.skycraft.shadowfen_border_road",
+  "class": "highway",
+  "route": [
+   "stormhold",
+   "tenmar_wall",
+   "arnesia",
+   "chasecreek",
+   "thorn",
+   "riverwalk",
+   "branchmont"
+  ],
+  "why": [
+   "shadowfen.L1.border_karst",
+   "shadowfen.L2.ash_tinged_mist",
+   "shadowfen.L3.percolating_springs"
+  ]
+ },
+ {
+  "id": "helstrom_root_way",
+  "name": "road.skycraft.helstrom_root_way",
+  "class": "road",
+  "route": [
+   "stormhold",
+   "stillrise_village",
+   "mud_tree_village",
+   "hatching_pools",
+   "alten_corimont",
+   "helstrom",
+   "greenspring",
+   "seaspring",
+   "archon"
+  ],
+  "why": [
+   "helstrom.L3.labyrinth_channels",
+   "helstrom.L5.sacred_sap_and_east_port_trade",
+   "black_marsh.L1.alluvial_basin"
+  ]
+ },
+ {
+  "id": "gideon_causeway_road",
+  "name": "road.skycraft.gideon_causeway_road",
+  "class": "highway",
+  "route": [
+   "leyawiin",
+   "gideon",
+   "soulrest",
+   "rockgrove",
+   "glenbridge",
+   "hutan_tzel",
+   "hissmir",
+   "murkwater"
+  ],
+  "why": [
+   "gideon.L6.gideon_walled_seat",
+   "black_marsh.L1.nw_border_uplands",
+   "black_marsh.L1.xanmeer_foundations"
+  ]
+ },
+ {
+  "id": "lilmoth_coast_road",
+  "name": "road.skycraft.lilmoth_coast_road",
+  "class": "road",
+  "route": [
+   "soulrest",
+   "alten_meerhleel",
+   "lilmoth",
+   "rockpark",
+   "moonmarch",
+   "blackrose",
+   "noota_nara",
+   "archon"
+  ],
+  "why": [
+   "black_marsh.L1.xanmeer_foundations",
+   "black_marsh.L1.lilmoth_delta",
+   "black_marsh.L2.spore_and_marsh_haze"
+  ]
+ },
+ {
+  "id": "murkmire_hist_lane",
+  "name": "road.skycraft.murkmire_hist_lane",
+  "class": "lane",
+  "route": [
+   "lilmoth",
+   "murkmire",
+   "bright_throat_village",
+   "root_whisper_village",
+   "chasepoint",
+   "dead_water_village"
+  ],
+  "why": [
+   "black_marsh.L2.monsoon_humidity",
+   "black_marsh.L2.padomaic_squalls",
+   "black_marsh.L3.braided_channels"
+  ]
+ },
+ {
+  "id": "anequina_caravan_highway",
+  "name": "road.skycraft.anequina_caravan_highway",
+  "class": "highway",
+  "route": [
+   "arenthia",
+   "dune",
+   "seaplace",
+   "riverhold",
+   "orcrest",
+   "the_stitches",
+   "rimmen",
+   "alabaster"
+  ],
+  "why": [
+   "anequina.L1.mesa_field",
+   "anequina.L1.small_erg",
+   "anequina.L2.dust_storms"
+  ]
+ },
+ {
+  "id": "tenmar_corinthe_road",
+  "name": "road.skycraft.tenmar_corinthe_road",
+  "class": "highway",
+  "route": [
+   "dune",
+   "verkarth_hills",
+   "tardorn_wood",
+   "greenhall",
+   "corinthe",
+   "torval",
+   "tenmar_forest",
+   "senchal"
+  ],
+  "why": [
+   "torval.L2.wet_season_edge",
+   "torval.L3.torval_cisterns",
+   "torval.L4.temple_knoll"
+  ]
+ },
+ {
+  "id": "rimmen_topal_road",
+  "name": "road.skycraft.rimmen_topal_road",
+  "class": "road",
+  "route": [
+   "rimmen",
+   "chasemoor",
+   "meir_lynmount",
+   "river_keep",
+   "hakoshae",
+   "alabaster",
+   "leyawiin"
+  ],
+  "why": [
+   "rimmen.L4.savanna_edge",
+   "rimmen.L4.quarry_scar",
+   "rimmen.L4.sugar_patch"
+  ]
+ },
+ {
+  "id": "pellitine_sugar_lane",
+  "name": "road.skycraft.pellitine_sugar_lane",
+  "class": "lane",
+  "route": [
+   "corinthe",
+   "brukreich_bridge",
+   "valley_guard",
+   "duncori_walk",
+   "pridehome",
+   "black_heights",
+   "senchal"
+  ],
+  "why": [
+   "pellitine.L4.gallery_forest",
+   "pellitine.L4.cenote_glade",
+   "pellitine.L4.moon_sugar_meadow"
+  ]
+ },
+ {
+  "id": "quinrawl_coast_lane",
+  "name": "road.skycraft.quinrawl_coast_lane",
+  "class": "lane",
+  "route": [
+   "portneu_view",
+   "markgran_brook",
+   "mari_docks",
+   "rinsmar_docks",
+   "nezahset_landing",
+   "darvulk_haven",
+   "senchal",
+   "thaae_cove"
+  ],
+  "why": [
+   "senchal.L5.customs_house",
+   "senchal.L6.senchal_seat",
+   "senchal.L6.potentates_retreat"
+  ]
+ },
+ {
+  "id": "valenwood_green_road",
+  "name": "road.skycraft.valenwood_green_road",
+  "class": "highway",
+  "route": [
+   "elden_root",
+   "cormount",
+   "arenthia",
+   "rawlkha"
+  ],
+  "why": [
+   "grahtwood.L1.elden_grove_soil",
+   "grahtwood.L1.south_deltas",
+   "grahtwood.L2.coastal_wet"
+  ]
+ },
+ {
+  "id": "silvenar_falinesti_road",
+  "name": "road.skycraft.silvenar_falinesti_road",
+  "class": "highway",
+  "route": [
+   "arenthia",
+   "baandari_trading_post",
+   "silvenar",
+   "vulkwasten",
+   "falinesti",
+   "velyn_harbor"
+  ],
+  "why": [
+   "malabal_tor.L3.xylo_basin",
+   "malabal_tor.L4.jungle_understorey",
+   "malabal_tor.L4.hoarvor_hollow"
+  ]
+ },
+ {
+  "id": "greenshade_coast_road",
+  "name": "road.skycraft.greenshade_coast_road",
+  "class": "highway",
+  "route": [
+   "velyn_harbor",
+   "deepwoods",
+   "woodhearth",
+   "marbruk",
+   "greenheart",
+   "southpoint",
+   "haven"
+  ],
+  "why": [
+   "greenshade.L4.mire_fen",
+   "greenshade.L4.bridge_canopy",
+   "greenshade.L4.spriggan_grove"
+  ]
+ },
+ {
+  "id": "grahtwood_bough_lane",
+  "name": "road.skycraft.grahtwood_bough_lane",
+  "class": "lane",
+  "route": [
+   "elden_root",
+   "redfur_trading_post",
+   "marbruk",
+   "southpoint",
+   "haven"
+  ],
+  "why": [
+   "grahtwood.L4.mammoth_glade",
+   "grahtwood.L4.mangrove_delta",
+   "grahtwood.L5.sap_tappers"
+  ]
+ },
+ {
+  "id": "reapers_march_lane",
+  "name": "road.skycraft.reapers_march_lane",
+  "class": "lane",
+  "route": [
+   "arenthia",
+   "emperors_run",
+   "eagle_vale",
+   "wasten_brukbrook",
+   "longvale",
+   "rawlkha"
+  ],
+  "why": [
+   "reapers_march.L5.khajiit_farming",
+   "reapers_march.L6.arenthia_seat",
+   "reapers_march.L6.border_cluster"
+  ]
+ },
+ {
+  "id": "alinor_royal_highway",
+  "name": "road.skycraft.alinor_royal_highway",
+  "class": "highway",
+  "route": [
+   "alinor",
+   "shimmerene",
+   "sunhold",
+   "dusk"
+  ],
+  "why": [
+   "summerset_isle.L1.tower_upland",
+   "summerset_isle.L1.corgrad_tableland",
+   "summerset_isle.L2.west_fog_coast"
+  ]
+ },
+ {
+  "id": "eton_nir_crystal_road",
+  "name": "road.skycraft.eton_nir_crystal_road",
+  "class": "highway",
+  "route": [
+   "alinor",
+   "rellenthil",
+   "cloudrest",
+   "kings_haven",
+   "lillandril",
+   "archen_grangrove",
+   "west_guard"
+  ],
+  "why": [
+   "summerset_isle.L2.prism_noon",
+   "summerset_isle.L3.alinor_aqueduct",
+   "summerset_isle.L4.crystal_coast"
+  ]
+ },
+ {
+  "id": "auridon_high_road",
+  "name": "road.skycraft.auridon_high_road",
+  "class": "highway",
+  "route": [
+   "vulkhel_guard",
+   "silsailen",
+   "phaer",
+   "mathiisen",
+   "skywatch",
+   "shattered_grove",
+   "dawnbreak",
+   "firsthold",
+   "greenwater_cove"
+  ],
+  "why": [
+   "auridon.L4.crystal_coast",
+   "auridon.L4.raid_scar",
+   "auridon.L5.vulkhel_open_port"
+  ]
+ },
+ {
+  "id": "summerset_orchard_lane",
+  "name": "road.skycraft.summerset_orchard_lane",
+  "class": "lane",
+  "route": [
+   "shimmerene",
+   "riverfield",
+   "belport_run",
+   "holly_falls",
+   "graddun_spring",
+   "glenview",
+   "sunhold"
+  ],
+  "why": [
+   "summerset_isle.L4.meadow_downs",
+   "summerset_isle.L4.salt_waste",
+   "summerset_isle.L4.ornamental_ring"
+  ]
  }
 ]

@@ -1,140 +1,173 @@
 {
- "places": {
-  "sentinel_docks": {
-   "hook": "The long quays of Sentinel, where the Yokudan tide-flags of every Hammerfell clan fly above the cargo of a continent.",
-   "rumour": "Every ship at Sentinel is stamped three times. The first stamp is lawful. The second is for the guards. The third nobody admits to, and it is the only one that matters.",
-   "notes": [
-    {
-     "id": "dock_chalk_tally",
-     "kind": "ledger",
-     "title": "Chalk Tally of the Night Gang",
-     "author": "Dockhand Yusuf",
-     "at": "chest",
-     "pages": [
-      "^NIGHT GANG TALLY, CHALKED BEHIND THE FOURTH BOLLARD\n^Barrels in: sixteen. Barrels out: nineteen. I counted three times and the third time there were twenty-two.\n^If you read this, the numbers are wrong because the gang is wrong. I will say no more. I have a daughter.",
-      "^Under the tally, in blue chalk, a single word: COBALT. And beneath it, smaller: \"Do not ask Zareen. She knows, and it will not do her any good.\""
-     ]
+  "places": {
+    "sentinel_docks": {
+      "hook": "The long quays of Sentinel, where the Yokudan tide-flags of every Hammerfell clan fly above the cargo of a continent.",
+      "rumour": "Every ship at Sentinel is stamped three times. The first stamp is lawful. The second is for the guards. The third nobody admits to, and it is the only one that matters.",
+      "notes": [
+        {
+          "id": "dock_chalk_tally",
+          "kind": "ledger",
+          "title": "Chalk Tally of the Night Gang",
+          "author": "Dockhand Yusuf",
+          "at": "chest",
+          "pages": [
+            "^NIGHT GANG TALLY, CHALKED BEHIND THE FOURTH BOLLARD\n^Barrels in: sixteen. Barrels out: nineteen. I counted three times and the third time there were twenty-two.\n^If you read this, the numbers are wrong because the gang is wrong. I will say no more. I have a daughter.",
+            "^Under the tally, in blue chalk, a single word: COBALT. And beneath it, smaller: \"Do not ask Zareen. She knows, and it will not do her any good.\""
+          ]
+        }
+      ],
+      "why": [
+        "sentinel.L9.betony_lever",
+        "sentinel.L8.marsh_witch_fear"
+      ]
+    },
+    "baira": {
+      "hook": "A small caravan-village south of Rihad, famed for its well, its goats and a cheese that a Rihad merchant once said was worth the trip.",
+      "rumour": "Baira is where the caravans from Rihad rest the night before the desert. It has one well, one inn, and one cheese, and each is better than it has any right to be.",
+      "notes": [
+        {
+          "id": "baira_traveller_note",
+          "kind": "letter",
+          "title": "A Traveller's Note to the Spice-Master",
+          "author": "Khadija the Drover",
+          "at": "chest",
+          "pages": [
+            "#Baira, the night before the long road.\nRasul, I will not say what is in the bag, but I will say that the watch at the Spice Gate has doubled. They stopped three of my camels and asked about a leather bag with red stitching. I said I knew nothing. I know nothing. I carried nothing.",
+            "If your man comes through Baira, tell him the well is dry on the east side and the goats are in a mood. Tell him the way is open, and the shade returns at the third hour. He will know what I mean. If not, I have sent him a camel."
+          ]
+        }
+      ],
+      "why": [
+        "dragontail.L4.volcanic_scree",
+        "dragontail.L7.ore_lords"
+      ]
+    },
+    "halset_rest": {
+      "hook": "A lonely headland shrine north of Taneth, where fishermen leave small shells and sailors say the sea comes close to listen.",
+      "rumour": "At Halset Rest the tide comes in and goes out without wetting the steps. Pilgrims call it a courtesy. The old Pearl-Diver says it is just the way the water is.",
+      "notes": [
+        {
+          "id": "halset_shell_note",
+          "kind": "prayer",
+          "title": "Shell-Prayer Left at the Rest",
+          "author": "A Fisherman of Taneth",
+          "at": "site",
+          "pages": [
+            "^A prayer scratched on a shell and left at the foot of the shrine:\n\"Let the sea be kind to my boat, and let the boat be kind to my back. Let the water bring what it takes, in the end, and let it take only what I would not miss.\"",
+            "\"If this shell is found by a stranger, take it. If you hear in it the sea saying something, that is a gift, and you should say thank you aloud. It is a very old custom. It will not hurt you. It might do something else.\""
+          ]
+        }
+      ],
+      "why": [
+        "hews_bane.L10.ahaleb_necropolis",
+        "hews_bane.L8.forebear_temples"
+      ]
+    },
+    "skyreach_temple": {
+      "hook": "A wind-scoured temple at the edge of the Elinhir cliffs, its columns pitted by sand and its altar kept swept by a hermit nobody has seen.",
+      "rumour": "Every dawn the Skyreach Temple altar is found clean, though no one comes. The Elinhir priests say a sword-singer keeps it. The sword-singer, if he exists, has never once been thanked.",
+      "notes": [
+        {
+          "id": "skyreach_swept_floor",
+          "kind": "poem",
+          "title": "Verse Scratched on the Altar Step",
+          "author": "The Sweeper",
+          "at": "site",
+          "pages": [
+            "^I sweep the temple that nobody visits\nFor a god who does not ask to be swept.\nThe sand returns each night, a patient pilgrim,\nAnd each dawn I send it on its way.",
+            "^If you find this, do not wait for me.\nThe broom is by the door. The water is in the jar.\nIf you stay long enough, you will begin to sweep.\nIt is not a punishment. It is the only prayer that I know."
+          ]
+        }
+      ],
+      "why": [
+        "bangkorai.L9.grove_push",
+        "bangkorai.L8.giant_taboo"
+      ]
+    },
+    "dragonstar": {
+      "hook": "A crossroads of fighters and gamblers under the arena's great stone star, where everyone is a bettor and nobody is ever sure what they have bet on.",
+      "rumour": "In Dragonstar a man will take any bet. Ask him the odds on a stranger and he will give you three. He will have a fourth for himself.",
+      "notes": [
+        {
+          "id": "arena_odds_card",
+          "kind": "list",
+          "title": "An Odds Card of the Seven Fights",
+          "author": "Bookmaker Rim",
+          "at": "chest",
+          "pages": [
+            "^ODDS OF THE SEVEN, THIS SEASON\n^Pit, first bout: even.\n^Pit, second: seven to five on the bandits.\n^Pit, third: three to one against the bears.\n^Ring, first: Brakka, two to one.\n^Ring, second: Zenda, even; do not bet on Zenda.\n^Star, first: the Unbeaten, ten to one against.",
+            "^The seventh bout has no odds. It is not listed. It is not spoken of. If you are told to bet on it, bet nothing, and leave the arena by the south gate. It is a very old rule of the house."
+          ]
+        }
+      ],
+      "why": [
+        "craglorn.L6.dragonstar_city",
+        "craglorn.L6.elinhir_city"
+      ]
+    },
+    "abahs_landing": {
+      "hook": "A salt-white harbour town on the Hew's Bane coast, ringed by net-lofts and watched by a lighthouse whose lamp has been seen to drift on foggy nights.",
+      "rumour": "At the Landing they say a pier moves in the fog, and that the harbour has two kinds of captain: those who have tied up to it, and those who are lying about it.",
+      "notes": [
+        {
+          "id": "landing_notice",
+          "kind": "notes",
+          "title": "Notice to Masters and Mates",
+          "author": "Captain Hadiya Marr",
+          "at": "site",
+          "pages": [
+            "^NOTICE TO ALL MASTERS AND MATES\n^All vessels are to moor at the Landing quay or the harbour mole only. No vessel is to moor to any light, pier, cask or float that is not on the harbour chart. Vessels that do so are not the harbour's responsibility, nor, in all honesty, its friend.",
+            "^The Net-Loft Guild reminds masters that old Karim knows the sound of every mooring in the bay and will gladly tell you if yours is wrong. He will not tell you twice. He is, after all, a very old man, and the fog is in no hurry."
+          ]
+        }
+      ],
+      "why": [
+        "hews_bane.L6.abahs_landing",
+        "hews_bane.L6.taneth_city"
+      ]
+    },
+    "roadside_bright_scimitar": {
+      "hook": "A white-washed roadhouse beneath a painted scimitar, where caravan men and pirates drink on opposite sides of the same long table and pretend not to see each other.",
+      "rumour": "The Bright Scimitar has one rule posted over the bar: no quarrels at the table. Outside, the road is long, and the sand is deep, and they have been known to settle things there.",
+      "notes": [
+        {
+          "id": "scimitar_house_rule",
+          "kind": "notes",
+          "title": "House Rule of the Bright Scimitar",
+          "author": "Innkeeper Rashida",
+          "at": "site",
+          "pages": [
+            "^HOUSE RULES\n^One: no quarrels at the table.\n^Two: no quarrels at the bar.\n^Three: no quarrels in the yard before sundown.\n^Four: if you must quarrel, the road is wide, and the dunes are patient.",
+            "^A note in a different hand: \"I have been the innkeeper for nineteen years and have buried eleven of the road's quarrels. The twelfth is waiting. If you are the twelfth, do not drink the red. If you are the thirteenth, I am sorry.\""
+          ]
+        }
+      ],
+      "why": [
+        "hews_bane.L9.collaborator_hunt",
+        "hews_bane.L8.forebear_temples"
+      ]
+    },
+    "port_hunding": {
+      "hook": "The old customs quay of Stros M'Kai, where a Redguard captain once broke an Imperial blockade and was hanged for it, and now has a statue.",
+      "rumour": "Port Hunding is said to have a ghost. The ghost is a customs clerk. He asks for papers. If you do not have them, he stamps you anyway, and the stamp does not wash off.",
+      "notes": [
+        {
+          "id": "hunding_clerk_stamp",
+          "kind": "notes",
+          "title": "The Clerk's Stamp Sheet",
+          "author": "The Customs Clerk of Port Hunding",
+          "at": "chest",
+          "pages": [
+            "^STAMPED THIS DAY: seventy-one ships, none of them real. Forty-three sailors, of whom I can account for four. I have stamped the sky, and I have stamped the sea. I have stamped my own hand and found it did not wash.",
+            "^If you are reading this, you have been stamped. It will not hurt. It may itch. You will find that doors open for you in Stros M'Kai that were not open before, and that some doors you had used for years are now, quite simply, gone."
+          ]
+        }
+      ],
+      "why": [
+        "stros_mkai.L6.port_hunding",
+        "stros_mkai.L6.lighthouse_point",
+        "stros_mkai.L4.island_palm_coast"
+      ]
     }
-   ]
-  },
-  "baira": {
-   "hook": "A small caravan-village south of Rihad, famed for its well, its goats and a cheese that a Rihad merchant once said was worth the trip.",
-   "rumour": "Baira is where the caravans from Rihad rest the night before the desert. It has one well, one inn, and one cheese, and each is better than it has any right to be.",
-   "notes": [
-    {
-     "id": "baira_traveller_note",
-     "kind": "letter",
-     "title": "A Traveller's Note to the Spice-Master",
-     "author": "Khadija the Drover",
-     "at": "chest",
-     "pages": [
-      "#Baira, the night before the long road.\nRasul, I will not say what is in the bag, but I will say that the watch at the Spice Gate has doubled. They stopped three of my camels and asked about a leather bag with red stitching. I said I knew nothing. I know nothing. I carried nothing.",
-      "If your man comes through Baira, tell him the well is dry on the east side and the goats are in a mood. Tell him the way is open, and the shade returns at the third hour. He will know what I mean. If not, I have sent him a camel."
-     ]
-    }
-   ]
-  },
-  "halset_rest": {
-   "hook": "A lonely headland shrine north of Taneth, where fishermen leave small shells and sailors say the sea comes close to listen.",
-   "rumour": "At Halset Rest the tide comes in and goes out without wetting the steps. Pilgrims call it a courtesy. The old Pearl-Diver says it is just the way the water is.",
-   "notes": [
-    {
-     "id": "halset_shell_note",
-     "kind": "prayer",
-     "title": "Shell-Prayer Left at the Rest",
-     "author": "A Fisherman of Taneth",
-     "at": "site",
-     "pages": [
-      "^A prayer scratched on a shell and left at the foot of the shrine:\n\"Let the sea be kind to my boat, and let the boat be kind to my back. Let the water bring what it takes, in the end, and let it take only what I would not miss.\"",
-      "\"If this shell is found by a stranger, take it. If you hear in it the sea saying something, that is a gift, and you should say thank you aloud. It is a very old custom. It will not hurt you. It might do something else.\""
-     ]
-    }
-   ]
-  },
-  "skyreach_temple": {
-   "hook": "A wind-scoured temple at the edge of the Elinhir cliffs, its columns pitted by sand and its altar kept swept by a hermit nobody has seen.",
-   "rumour": "Every dawn the Skyreach Temple altar is found clean, though no one comes. The Elinhir priests say a sword-singer keeps it. The sword-singer, if he exists, has never once been thanked.",
-   "notes": [
-    {
-     "id": "skyreach_swept_floor",
-     "kind": "poem",
-     "title": "Verse Scratched on the Altar Step",
-     "author": "The Sweeper",
-     "at": "site",
-     "pages": [
-      "^I sweep the temple that nobody visits\nFor a god who does not ask to be swept.\nThe sand returns each night, a patient pilgrim,\nAnd each dawn I send it on its way.",
-      "^If you find this, do not wait for me.\nThe broom is by the door. The water is in the jar.\nIf you stay long enough, you will begin to sweep.\nIt is not a punishment. It is the only prayer that I know."
-     ]
-    }
-   ]
-  },
-  "dragonstar": {
-   "hook": "A crossroads of fighters and gamblers under the arena's great stone star, where everyone is a bettor and nobody is ever sure what they have bet on.",
-   "rumour": "In Dragonstar a man will take any bet. Ask him the odds on a stranger and he will give you three. He will have a fourth for himself.",
-   "notes": [
-    {
-     "id": "arena_odds_card",
-     "kind": "list",
-     "title": "An Odds Card of the Seven Fights",
-     "author": "Bookmaker Rim",
-     "at": "chest",
-     "pages": [
-      "^ODDS OF THE SEVEN, THIS SEASON\n^Pit, first bout: even.\n^Pit, second: seven to five on the bandits.\n^Pit, third: three to one against the bears.\n^Ring, first: Brakka, two to one.\n^Ring, second: Zenda, even; do not bet on Zenda.\n^Star, first: the Unbeaten, ten to one against.",
-      "^The seventh bout has no odds. It is not listed. It is not spoken of. If you are told to bet on it, bet nothing, and leave the arena by the south gate. It is a very old rule of the house."
-     ]
-    }
-   ]
-  },
-  "abahs_landing": {
-   "hook": "A salt-white harbour town on the Hew's Bane coast, ringed by net-lofts and watched by a lighthouse whose lamp has been seen to drift on foggy nights.",
-   "rumour": "At the Landing they say a pier moves in the fog, and that the harbour has two kinds of captain: those who have tied up to it, and those who are lying about it.",
-   "notes": [
-    {
-     "id": "landing_notice",
-     "kind": "notes",
-     "title": "Notice to Masters and Mates",
-     "author": "Captain Hadiya Marr",
-     "at": "site",
-     "pages": [
-      "^NOTICE TO ALL MASTERS AND MATES\n^All vessels are to moor at the Landing quay or the harbour mole only. No vessel is to moor to any light, pier, cask or float that is not on the harbour chart. Vessels that do so are not the harbour's responsibility, nor, in all honesty, its friend.",
-      "^The Net-Loft Guild reminds masters that old Karim knows the sound of every mooring in the bay and will gladly tell you if yours is wrong. He will not tell you twice. He is, after all, a very old man, and the fog is in no hurry."
-     ]
-    }
-   ]
-  },
-  "roadside_bright_scimitar": {
-   "hook": "A white-washed roadhouse beneath a painted scimitar, where caravan men and pirates drink on opposite sides of the same long table and pretend not to see each other.",
-   "rumour": "The Bright Scimitar has one rule posted over the bar: no quarrels at the table. Outside, the road is long, and the sand is deep, and they have been known to settle things there.",
-   "notes": [
-    {
-     "id": "scimitar_house_rule",
-     "kind": "notes",
-     "title": "House Rule of the Bright Scimitar",
-     "author": "Innkeeper Rashida",
-     "at": "site",
-     "pages": [
-      "^HOUSE RULES\n^One: no quarrels at the table.\n^Two: no quarrels at the bar.\n^Three: no quarrels in the yard before sundown.\n^Four: if you must quarrel, the road is wide, and the dunes are patient.",
-      "^A note in a different hand: \"I have been the innkeeper for nineteen years and have buried eleven of the road's quarrels. The twelfth is waiting. If you are the twelfth, do not drink the red. If you are the thirteenth, I am sorry.\""
-     ]
-    }
-   ]
-  },
-  "port_hunding": {
-   "hook": "The old customs quay of Stros M'Kai, where a Redguard captain once broke an Imperial blockade and was hanged for it, and now has a statue.",
-   "rumour": "Port Hunding is said to have a ghost. The ghost is a customs clerk. He asks for papers. If you do not have them, he stamps you anyway, and the stamp does not wash off.",
-   "notes": [
-    {
-     "id": "hunding_clerk_stamp",
-     "kind": "notes",
-     "title": "The Clerk's Stamp Sheet",
-     "author": "The Customs Clerk of Port Hunding",
-     "at": "chest",
-     "pages": [
-      "^STAMPED THIS DAY: seventy-one ships, none of them real. Forty-three sailors, of whom I can account for four. I have stamped the sky, and I have stamped the sea. I have stamped my own hand and found it did not wash.",
-      "^If you are reading this, you have been stamped. It will not hurt. It may itch. You will find that doors open for you in Stros M'Kai that were not open before, and that some doors you had used for years are now, quite simply, gone."
-     ]
-    }
-   ]
   }
- }
 }

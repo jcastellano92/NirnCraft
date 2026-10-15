@@ -1,71 +1,374 @@
 {
   "id": "alinor",
-  "base": "none",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
   "sil": "crystal-spire-radial-garden",
-  "reach": 110,
-  "radius": 110,
+  "base": "none",
   "overlay": "alinor",
-  "names": {"inn": "alinor_prism_court_inn", "store": "alinor_gilded_stalls", "smithy": "alinor_starsteel_forge"},
-  "innKey": "alinor_prism_court_inn",
-  "gates": [[0, 105], [105, 0], [-105, 0]],
-  "walls": [{"r": 105, "sides": 16, "h": 10, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
-  "landmarks": [
-    {"id": "crystal_tower", "at": [0, 0], "size": [19, 19], "h": 110, "margin": 2},
-    {"id": "dome_palace", "at": [0, -74], "size": [29, 29], "h": 34, "margin": 2},
-    {"id": "orrery", "at": [-62, 40], "size": [19, 19], "h": 22},
-    {"id": "glass_dome", "at": [62, -36], "size": [25, 25], "h": 20}
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
   ],
-  "buildings": [
-    {"kind": "temple", "at": [60, 40], "size": [13, 19], "face": "W", "name": "alinor_hall_of_aldmeri_law", "variant": 0}
-  ],
-  "nets": [
-    {"type": "radial", "at": [0, 0], "spokes": 8, "r0": 24, "r1": 104, "wobble": 3, "offset": 0, "skip": [4], "width": 5, "tag": "spoke", "ring_tag": "ring",
-     "rings": [32, 58, 82], "ring_wobble": 2, "ring_width": 4},
-    {"type": "path", "via": [[0, -24], [-6, -40], [0, -58]], "width": 5, "major": true, "tag": "spoke"},
-    {"type": "loop", "at": [0, 0], "rx": 96, "rz": 94, "wobble": 3, "lobes": 5, "phase": 0.2, "width": 3, "rank": 1, "tag": "ring"}
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "alinor",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "common"
+    }
   ],
   "plazas": [
-    {"at": [0, 52], "size": 17, "variant": 2, "stalls": 6, "name": "alinor_royal_garden"}
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "alinor_plaza"
+    }
   ],
-  "zones": [
-    {"at": [0, -60], "r": 34, "zone": "noble"},
-    {"at": [0, 0], "r": 36, "zone": "centre"},
-    {"at": [66, 66], "r": 26, "zone": "craft"},
-    {"at": [-70, -50], "r": 22, "zone": "common"}
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "alinor_landmark",
+      "overlay": "alinor"
+    }
   ],
-  "fabric": {"radius": 100, "target": 0.55},
-  "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "alinor_prism_court_inn", "on": "ring"},
-    {"kind": "smithy", "size": [11, 9], "name": "alinor_starsteel_forge", "on": "ring"},
-    {"kind": "store", "count": 3, "name": "alinor_gilded_stalls", "on": "ring"},
-    {"kind": "alchemist", "count": 2, "on": "ring"},
-    {"kind": "manor", "count": 6, "flags": ["upper", "rich"], "on": "spoke"}
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 92,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        66,
+        21
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        28,
+        20
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        41,
+        56
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        11,
+        33
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        69
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -11,
+        33
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -41,
+        56
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -28,
+        20
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -66,
+        21
+      ],
+      "face": "north",
+      "overlay": "alinor",
+      "name": "alinor_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -35,
+        0
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -66,
+        -21
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -28,
+        -20
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -41,
+        -56
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -11,
+        -33
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        0,
+        -69
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        11,
+        -33
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_17"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        41,
+        -56
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_18"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        28,
+        -20
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_19"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        66,
+        -21
+      ],
+      "face": "south",
+      "overlay": "alinor",
+      "name": "alinor_b_20"
+    }
   ],
   "features": [
-    {"type": "pool", "at": [0, -44]},
-    {"type": "pool", "where": "square"},
-    {"type": "fountain", "count": 2, "where": "square"},
-    {"type": "great_tree", "theme": "cherry", "count": 2, "where": "free"},
-    {"type": "great_tree", "theme": "azalea", "where": "edge"},
-    {"type": "statue", "theme": "divine:julianos", "at": [0, 22]},
-    {"type": "statue", "theme": "divine:dibella", "where": "square"},
-    {"type": "shrine", "theme": "divine:mara", "count": 2, "where": "street", "tag": "ring"},
-    {"type": "memorial", "where": "free"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "spoke"},
-    {"type": "garden", "count": 2, "where": "free"},
-    {"type": "pond", "where": "edge"},
-    {"type": "market", "where": "free"},
-    {"type": "tree_row", "count": 2, "where": "street", "tag": "spoke"},
-    {"type": "orchard", "where": "edge"},
-    {"type": "flowers", "count": 2, "where": "street", "tag": "ring"},
-    {"type": "bench", "count": 2, "where": "square"}
+    {
+      "type": "fountain",
+      "theme": "alinor_fountain",
+      "count": 4
+    },
+    {
+      "type": "statue",
+      "theme": "alinor_statue",
+      "count": 4
+    },
+    {
+      "type": "garden",
+      "theme": "alinor_garden",
+      "count": 6
+    },
+    {
+      "type": "lamps",
+      "theme": "alinor_lamps",
+      "count": 4
+    }
   ],
+  "names": {
+    "inn": "alinor_b_5",
+    "store": "alinor_b_10",
+    "smithy": "alinor_b_7"
+  },
   "titles": {
-    "alinor_prism_court_inn": "The Prism Court Inn",
-    "alinor_gilded_stalls": "Gilded Stalls",
-    "alinor_starsteel_forge": "The Starsteel Forge",
-    "alinor_hall_of_aldmeri_law": "Hall of Aldmeri Law",
-    "alinor_royal_garden": "Royal Garden"
-  }
+    "alinor_b_1": "place.skycraft.alinor Council & Seat Hall",
+    "alinor_b_2": "place.skycraft.alinor High Sanctuary",
+    "alinor_b_3": "place.skycraft.alinor Fighters & Wayfarers Hall",
+    "alinor_b_4": "place.skycraft.alinor Mages & Chroniclers Spire",
+    "alinor_b_5": "place.skycraft.alinor The Lantern & Hearth Inn",
+    "alinor_b_6": "place.skycraft.alinor The Traveler's Rest Tavern",
+    "alinor_b_7": "place.skycraft.alinor Master Forge & Armorer",
+    "alinor_b_8": "place.skycraft.alinor Botanicals & Remedies",
+    "alinor_b_9": "place.skycraft.alinor Scriptorium & Charts",
+    "alinor_b_10": "place.skycraft.alinor Grand Provisioner & Sundries",
+    "alinor_b_11": "place.skycraft.alinor Silk & Hide Clothier",
+    "alinor_b_12": "place.skycraft.alinor Lapidary & Signets",
+    "alinor_b_13": "place.skycraft.alinor Wayfarer Stables & Post",
+    "alinor_b_14": "place.skycraft.alinor Bonded Factor Warehouse",
+    "alinor_b_15": "place.skycraft.alinor Watch Garrison Barracks",
+    "alinor_b_16": "place.skycraft.alinor High Steward's Manor",
+    "alinor_b_17": "place.skycraft.alinor Merchant-Factor's Villa",
+    "alinor_b_18": "place.skycraft.alinor Artisan's Terrace House",
+    "alinor_b_19": "place.skycraft.alinor Weaver's Courtyard House",
+    "alinor_b_20": "place.skycraft.alinor River-Gate Cottage",
+    "alinor_landmark": "High Seat of place.skycraft.alinor",
+    "alinor_plaza": "place.skycraft.alinor Central Plaza"
+  },
+  "innKey": "alinor_b_5"
 }

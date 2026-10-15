@@ -1,0 +1,186 @@
+{
+  "id": "roadside_sleeping_sand_cat",
+  "why": [
+    "torval.L1.scarp_foot",
+    "torval.L5.pilgrim_trade",
+    "torval.L6.torval_capital"
+  ],
+  "sil": "elsweyr-roadside-sleeping-sand-cat-plan",
+  "base": "none",
+  "overlay": "torval",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "torval",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "torval",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "roadside_sleeping_sand_cat_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "roadside_sleeping_sand_cat_landmark",
+      "overlay": "torval"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 20,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        14
+      ],
+      "face": "north",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        8
+      ],
+      "face": "north",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -16,
+        7
+      ],
+      "face": "north",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -17
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        5,
+        -7
+      ],
+      "face": "south",
+      "overlay": "torval",
+      "name": "roadside_sleeping_sand_cat_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "roadside_sleeping_sand_cat_market",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "roadside_sleeping_sand_cat_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "roadside_sleeping_sand_cat_b_5",
+    "smithy": "roadside_sleeping_sand_cat_b_7"
+  },
+  "titles": {
+    "roadside_sleeping_sand_cat_b_1": "place.skycraft.roadside_sleeping_sand_cat Council & Seat Hall",
+    "roadside_sleeping_sand_cat_b_2": "place.skycraft.roadside_sleeping_sand_cat High Sanctuary",
+    "roadside_sleeping_sand_cat_b_3": "place.skycraft.roadside_sleeping_sand_cat Fighters & Wayfarers Hall",
+    "roadside_sleeping_sand_cat_b_4": "place.skycraft.roadside_sleeping_sand_cat Mages & Chroniclers Spire",
+    "roadside_sleeping_sand_cat_b_5": "place.skycraft.roadside_sleeping_sand_cat The Lantern & Hearth Inn",
+    "roadside_sleeping_sand_cat_b_6": "place.skycraft.roadside_sleeping_sand_cat The Traveler's Rest Tavern",
+    "roadside_sleeping_sand_cat_b_7": "place.skycraft.roadside_sleeping_sand_cat Master Forge & Armorer",
+    "roadside_sleeping_sand_cat_landmark": "High Seat of place.skycraft.roadside_sleeping_sand_cat",
+    "roadside_sleeping_sand_cat_plaza": "place.skycraft.roadside_sleeping_sand_cat Central Plaza"
+  },
+  "innKey": "roadside_sleeping_sand_cat_b_5"
+}

@@ -156,7 +156,20 @@ public final class ScenePlan {
             long dx = x[s] - bx, dz = z[s] - bz, r = radius[s] + margin;
             if (dx * dx + dz * dz <= r * r) return true;
         }
+        if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(bx, bz)) {
+            ScenePlan tp = com.skycraft.worldplan.tile.TilePlanner.scenePlanAt(bx, bz);
+            if (tp != null && tp != this) return tp.covers(bx, bz, margin);
+        }
         return false;
+    }
+
+    /** Returns the active {@link ScenePlan} for block {@code (bx, bz)} (baked inside Tamriel, tile plan outside). */
+    public static ScenePlan planFor(int bx, int bz) {
+        if (!com.skycraft.tamriel.TamrielMap.inTamriel(bx, bz)) {
+            ScenePlan tp = com.skycraft.worldplan.tile.TilePlanner.scenePlanAt(bx, bz);
+            if (tp != null) return tp;
+        }
+        return get();
     }
 
     // ------------------------------------------------------------------ serialisation

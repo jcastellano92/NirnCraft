@@ -1,0 +1,29 @@
+{
+  "id": "leyawiin",
+  "why": [
+    "blackwood.L1.mangrove_mud",
+    "blackwood.L3.niben_mouth",
+    "blackwood.L6.leyawiin_at_the_mouth"
+  ],
+  "tint": {
+    "wall": "minecraft:yellow_terracotta",
+    "wall2": "minecraft:lime_terracotta",
+    "low": "minecraft:mossy_stone_bricks",
+    "wood": "mangrove",
+    "roof": "mud_brick",
+    "accent": "lime"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mud_bricks",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:mossy_stone_bricks",
+    "path": "minecraft:packed_mud"
+  },
+  "style": {
+    "forms": {
+      "gabled": 9,
+      "courtyard": 5
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "id": "davons_watch",
+  "why": [
+    "stonefalls.L1.lava_shields",
+    "stonefalls.L3.inner_sea_shore"
+  ],
+  "sil": "volcanic-bluff-sea-gate",
+  "base": "none",
+  "overlay": "stonefalls",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "davons_watch_landmark",
+      "overlay": "stonefalls"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "stonefalls"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_1"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_3"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_4"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_5"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_6"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "stonefalls",
+      "name": "davons_watch_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "davons_watch_indoril",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "volcanic_bluff_cresset",
+      "count": 3
+    }
+  ],
+  "titles": {
+    "davons_watch_landmark": "Davon's Watch Citadel",
+    "davons_watch_b_1": "Davon's Watch Tribunal Shrine",
+    "davons_watch_b_2": "Davon's Watch Mages Guild",
+    "davons_watch_b_3": "Davon's Watch Fighters Guild",
+    "davons_watch_b_4": "The Watchman's Flagon",
+    "davons_watch_b_5": "Basalt-Anvil Forge",
+    "davons_watch_b_6": "Inner Sea Quay Market",
+    "davons_watch_b_7": "House Indoril Harbour Manor"
+  },
+  "innKey": "davons_watch_b_4",
+  "names": {
+    "inn": "davons_watch_b_4",
+    "store": "davons_watch_b_6",
+    "smithy": "davons_watch_b_5"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "id": "caldera",
+  "why": [
+    "west_gash.L1.ebony_seam",
+    "west_gash.L1.gash_ridges"
+  ],
+  "sil": "imperial-tudor-mining-keep",
+  "base": "none",
+  "overlay": "west_gash",
+  "radius": 46,
+  "reach": 62,
+  "gates": [
+    [
+      0,
+      42
+    ],
+    [
+      42,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "caldera_landmark",
+      "overlay": "west_gash"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "west_gash"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        22,
+        28
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_2"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -32,
+        16
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_4"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_5"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -8,
+        -35
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_6"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "caldera_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "caldera_charter",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "caldera_iron_lamp",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "caldera_square_well",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "caldera_landmark": "Governor's Hall",
+    "caldera_b_1": "Caldera Mages Guild",
+    "caldera_b_2": "Shenk's Shovel",
+    "caldera_b_3": "Ghorak Manor",
+    "caldera_b_4": "Hodlismod's Armory",
+    "caldera_b_5": "Verick Gemain's Trader",
+    "caldera_b_6": "Falanaamo's Clothier",
+    "caldera_b_7": "Caldera Mining Guardhouse"
+  },
+  "innKey": "caldera_b_2",
+  "names": {
+    "inn": "caldera_b_2",
+    "store": "caldera_b_5",
+    "smithy": "caldera_b_4"
+  }
+}

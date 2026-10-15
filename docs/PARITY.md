@@ -69,96 +69,100 @@ Columns: **SET** Settlements, **NPC** NPCs + dialogue, **QST** Quests, **DUN** D
 
 | province | km2 | SET | NPC | QST | DUN | CRE | FLO | STY | LND | LOR | MUS | ITM | mean |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| **skyrim** | 26.5 | ▤ 53 | ■ 100 | ▣ 93 | ■ 100 | ■ 100 | ■ 100 | ■ 100 | ■ 100 | ■ 100 | ■ 100 | ■ 100 | ▣ 95 |
-| **cyrodiil** | 61.2 | ▥ 37 | ▥ 43 | ▥ 38 | ▤ 59 | ▤ 67 | ▣ 81 | ▥ 45 | ▤ 64 | □ 13 | ▤ 52 | ▥ 30 | ▥ 48 |
-| **morrowind** | 36.7 | ▥ 42 | ▥ 26 | ▥ 48 | ▤ 66 | ▤ 73 | ▣ 92 | ▤ 72 | ▤ 57 | □ 22 | ▤ 51 | ▥ 31 | ▤ 53 |
-| **high_rock** | 40.8 | ▥ 35 | □ 18 | ▥ 31 | ▤ 64 | ▤ 63 | ▣ 86 | ▥ 31 | ▤ 55 | □ 15 | ▥ 50 | □ 18 | ▥ 42 |
-| **hammerfell** | 25.3 | ▥ 40 | □ 16 | ▥ 28 | ▤ 60 | ▤ 67 | ▤ 78 | ▥ 28 | ▤ 69 | □ 17 | ▤ 52 | □ 17 | ▥ 43 |
-| **elsweyr** | 25.7 | ▥ 37 | □ 21 | ▥ 36 | ▤ 58 | ▤ 66 | ▣ 83 | ▥ 31 | ▤ 67 | □ 17 | ▤ 54 | □ 17 | ▥ 44 |
-| **valenwood** | 24.2 | ▥ 35 | □ 22 | ▥ 33 | ▤ 61 | ▤ 58 | ▣ 82 | ▥ 33 | ▤ 69 | □ 18 | ▤ 54 | □ 16 | ▥ 44 |
-| **summerset** | 13.6 | ▥ 43 | ▥ 26 | ▥ 38 | ▤ 62 | ▤ 57 | ▤ 77 | ▥ 30 | ▤ 67 | ▥ 27 | ▥ 48 | □ 18 | ▥ 45 |
-| **black_marsh** | 38.0 | ▥ 30 | □ 16 | ▥ 29 | ▤ 58 | ▤ 59 | ▤ 78 | ▥ 27 | ▤ 58 | □ 15 | ▤ 50 | □ 15 | ▥ 40 |
-| **atmora** | 0.0 | □ 0 | □ 13 | ▤ 51 | ▤ 62 | ▤ 61 | ▤ 63 | □ 17 | □ 22 | □ 0 | ▥ 48 | □ 13 | ▥ 32 |
-| **akavir** | 0.0 | □ 0 | □ 8 | ▥ 47 | ▤ 52 | ▤ 56 | ▣ 84 | □ 16 | □ 15 | □ 0 | ▤ 51 | □ 11 | ▥ 31 |
-| **yokuda** | 0.0 | □ 0 | □ 11 | ▤ 51 | ▤ 56 | ▥ 40 | ▤ 71 | □ 7 | □ 23 | □ 0 | ▤ 52 | □ 7 | ▥ 29 |
-| **pyandonea** | 0.0 | □ 1 | □ 21 | ▥ 42 | ▤ 54 | ▥ 47 | ▤ 78 | □ 24 | □ 15 | □ 0 | ▤ 51 | □ 6 | ▥ 31 |
-| **thras** | 0.0 | □ 0 | □ 3 | ▥ 29 | ▤ 52 | ▥ 47 | ▤ 69 | □ 0 | □ 20 | □ 0 | ▥ 48 | □ 0 | □ 24 |
+| **skyrim** | 26.5 | ■ 119 | ■ 143 | ■ 110 | ■ 100 | ■ 100 | ■ 100 | ■ 115 | ■ 100 | ■ 100 | ■ 100 | ■ 100 | ■ 108 |
+| **cyrodiil** | 60.9 | ■ 103 | ■ 132 | ■ 113 | ■ 120 | ■ 105 | ■ 129 | ■ 140 | ■ 120 | ■ 128 | ■ 115 | ■ 130 | ■ 121 |
+| **morrowind** | 36.7 | ■ 121 | ■ 150 | ■ 115 | ■ 124 | ■ 120 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 132 |
+| **high_rock** | 34.9 | ■ 118 | ■ 116 | ■ 106 | ■ 113 | ■ 106 | ▣ 98 | ■ 132 | ■ 122 | ■ 133 | ■ 103 | ■ 114 | ■ 115 |
+| **hammerfell** | 22.3 | ■ 122 | ■ 116 | ■ 109 | ■ 101 | ■ 107 | ▣ 95 | ■ 130 | ■ 118 | ■ 134 | ■ 108 | ■ 115 | ■ 114 |
+| **elsweyr** | 25.7 | ■ 123 | ■ 150 | ■ 114 | ■ 121 | ■ 115 | ■ 150 | ■ 150 | ■ 120 | ■ 146 | ■ 118 | ■ 117 | ■ 129 |
+| **valenwood** | 24.2 | ■ 122 | ■ 146 | ■ 115 | ■ 121 | ■ 113 | ■ 150 | ■ 150 | ■ 122 | ■ 143 | ■ 118 | ■ 117 | ■ 129 |
+| **summerset** | 13.6 | ■ 124 | ■ 134 | ■ 112 | ■ 122 | ■ 117 | ■ 150 | ■ 150 | ■ 120 | ■ 150 | ■ 118 | ■ 117 | ■ 129 |
+| **black_marsh** | 38.0 | ■ 119 | ■ 150 | ■ 115 | ■ 122 | ■ 115 | ■ 150 | ■ 150 | ■ 120 | ■ 142 | ■ 118 | ■ 116 | ■ 129 |
+| **atmora** | 0.0 | ■ 120 | ■ 139 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 122 |
+| **akavir** | 0.0 | ■ 120 | ■ 149 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 123 |
+| **yokuda** | 0.0 | ■ 120 | ■ 148 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 123 |
+| **pyandonea** | 0.0 | ■ 120 | ■ 150 | ■ 112 | ■ 121 | ■ 119 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 117 | ■ 123 |
+| **thras** | 0.0 | ■ 120 | ■ 148 | ■ 112 | ■ 121 | ■ 119 | ■ 106 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 124 |
 
 ### By sub-region
 
 | region | km2 | SET | NPC | QST | DUN | CRE | FLO | STY | LND | LOR | MUS | ITM | mean |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| skyrim/eastmarch | 2.9 | ▤ 63 | ▣ 83 | ▣ 96 | ▤ 53 | ▤ 51 | ■ 107 | ■ 114 | ▣ 89 | ■ 106 | ■ 102 | ■ 100 | ▣ 88 |
-| skyrim/falkreath | 4.6 | ▥ 40 | ▥ 46 | ▤ 72 | ▣ 90 | ▥ 44 | ▣ 96 | ▣ 91 | ▤ 76 | ▣ 83 | ▣ 98 | ■ 100 | ▤ 76 |
-| skyrim/haafingar | 1.7 | ▤ 62 | ■ 113 | ■ 106 | ▤ 51 | ▤ 50 | ▣ 96 | ■ 105 | ■ 107 | ■ 109 | ▣ 98 | ■ 100 | ▣ 91 |
-| skyrim/hjaalmarch | 1.4 | ▤ 57 | ▤ 57 | ▣ 97 | ▤ 69 | ▤ 53 | ▣ 93 | ▤ 71 | ■ 107 | ■ 107 | ▣ 98 | ■ 100 | ▣ 83 |
-| skyrim/the_pale | 1.7 | ▤ 61 | ▥ 46 | ▣ 89 | ▥ 46 | ■ 108 | ▣ 99 | ▤ 71 | ▣ 92 | ■ 106 | ▣ 98 | ■ 100 | ▣ 83 |
-| skyrim/the_reach | 4.6 | ▤ 55 | ■ 110 | ▣ 82 | ▣ 96 | ▣ 93 | ▣ 96 | ■ 115 | ▣ 85 | ▣ 86 | ▣ 98 | ■ 100 | ▣ 92 |
-| skyrim/the_rift | 4.2 | ▥ 50 | ▤ 75 | ▣ 82 | ■ 106 | ▥ 49 | ■ 107 | ■ 105 | ▣ 82 | ▣ 92 | ■ 102 | ■ 100 | ▣ 86 |
-| skyrim/whiterun | 3.0 | ▤ 54 | ■ 147 | ▣ 97 | ▤ 51 | ▤ 50 | ▣ 93 | ▣ 91 | ■ 112 | ■ 110 | ▣ 98 | ■ 100 | ▣ 91 |
-| skyrim/winterhold | 2.3 | ▥ 41 | ▤ 65 | ▣ 92 | ■ 110 | ▣ 98 | ▣ 98 | ▤ 71 | ▣ 88 | ▣ 94 | ▣ 98 | ■ 100 | ▣ 87 |
-| cyrodiil/blackwood | 4.5 | □ 23 | ▥ 26 | ▥ 38 | ▤ 57 | ▤ 68 | ▣ 95 | ▥ 49 | ▣ 86 | □ 15 | ▤ 53 | ▥ 30 | ▥ 49 |
-| cyrodiil/colovian_highlands | 9.3 | □ 23 | ▥ 39 | ▥ 45 | ▤ 55 | ▤ 66 | ▤ 79 | ▥ 34 | ▤ 73 | □ 13 | ▤ 51 | ▥ 30 | ▥ 46 |
-| cyrodiil/gold_coast | 5.6 | ▥ 27 | ▥ 46 | ▥ 46 | ▤ 56 | ▤ 69 | ▣ 87 | ▥ 34 | ▤ 53 | □ 16 | ▤ 51 | ▥ 30 | ▥ 47 |
-| cyrodiil/great_forest | 3.8 | □ 18 | □ 1 | □ 11 | ▥ 47 | ▤ 60 | ▤ 73 | ▥ 34 | ▥ 50 | □ 3 | ▤ 51 | ▥ 30 | ▥ 34 |
-| cyrodiil/heartlands | 7.7 | ▥ 44 | ▤ 64 | ▤ 59 | ▤ 55 | ▤ 66 | ▤ 73 | ▥ 49 | ▤ 73 | □ 13 | ▤ 51 | ▥ 30 | ▤ 52 |
-| cyrodiil/jerall_mountains | 9.5 | ▥ 47 | ▥ 49 | ▥ 35 | ▤ 68 | ▤ 66 | ▤ 80 | ▥ 49 | ▤ 59 | □ 15 | ▤ 51 | ▥ 30 | ▥ 50 |
-| cyrodiil/nibenay_basin | 8.5 | □ 23 | ▥ 32 | ▥ 29 | ▤ 55 | ▤ 61 | ▤ 78 | ▥ 49 | ▤ 55 | □ 12 | ▤ 53 | ▥ 30 | ▥ 43 |
-| cyrodiil/nibenay_valley | 8.2 | ▥ 49 | ▥ 30 | ▥ 41 | ▤ 55 | ▤ 68 | ▣ 83 | ▥ 49 | ▤ 56 | □ 15 | ▤ 53 | ▥ 30 | ▥ 48 |
-| cyrodiil/west_weald | 4.1 | □ 21 | □ 23 | ▥ 28 | ▤ 63 | ▤ 70 | ▣ 81 | ▥ 34 | ▣ 91 | □ 18 | ▤ 51 | ▥ 30 | ▥ 46 |
-| morrowind/ascadian_isles | 1.7 | ▥ 50 | ▥ 29 | ▤ 67 | ▤ 74 | ▣ 82 | ▣ 90 | ▤ 80 | ▥ 43 | ▥ 33 | ▤ 50 | ▥ 31 | ▤ 57 |
-| morrowind/azuras_coast | 1.3 | ▥ 33 | ▥ 29 | ▥ 49 | ▤ 60 | ▣ 81 | ▣ 94 | ▤ 80 | ▥ 38 | □ 10 | ▤ 53 | ▥ 31 | ▤ 51 |
-| morrowind/bitter_coast | 0.5 | □ 17 | □ 0 | □ 8 | ▤ 54 | ▤ 75 | ▣ 90 | ▥ 40 | □ 18 | □ 10 | ▤ 50 | ▥ 31 | ▥ 36 |
-| morrowind/deshaan | 5.5 | ▥ 35 | □ 16 | ▥ 34 | ▤ 50 | ▤ 70 | ▣ 94 | ▣ 89 | ▥ 41 | □ 15 | ▤ 53 | ▥ 31 | ▥ 48 |
-| morrowind/grazelands | 2.0 | □ 22 | □ 7 | □ 6 | ▤ 56 | ▤ 60 | ▣ 84 | ▤ 80 | □ 18 | □ 1 | ▤ 50 | ▥ 31 | ▥ 38 |
-| morrowind/molag_amur | 4.8 | □ 16 | □ 22 | ▥ 30 | ▤ 54 | ▤ 72 | ▣ 89 | ▤ 71 | ▥ 34 | □ 13 | ▤ 50 | ▥ 31 | ▥ 44 |
-| morrowind/red_mountain | 1.6 | □ 0 | □ 0 | ▥ 46 | ▤ 59 | ▣ 81 | ▣ 84 | □ 19 | ▥ 44 | □ 20 | ▤ 50 | ▥ 31 | ▥ 39 |
-| morrowind/sheogorad | 0.6 | □ 22 | □ 7 | ▤ 71 | ▤ 54 | ▤ 75 | ▣ 99 | ▤ 60 | ▥ 31 | □ 8 | ▤ 50 | ▥ 31 | ▥ 46 |
-| morrowind/solstheim | 1.0 | ■ 103 | ▤ 80 | ■ 102 | ▣ 86 | ▤ 69 | ■ 104 | ▤ 71 | ■ 125 | ■ 127 | ▤ 50 | ▥ 27 | ▣ 86 |
-| morrowind/stonefalls | 5.2 | ▥ 35 | □ 12 | ▥ 29 | ▥ 48 | ▤ 52 | ▣ 94 | ▤ 80 | ▥ 40 | □ 11 | ▤ 50 | ▥ 31 | ▥ 44 |
-| morrowind/telvannis | 8.7 | □ 25 | □ 15 | ▥ 31 | ▥ 50 | ▤ 53 | ▣ 95 | ▤ 80 | ▥ 49 | □ 10 | ▤ 53 | ▥ 31 | ▥ 45 |
-| morrowind/vvardenfell_ashlands | 2.5 | ▤ 53 | ▥ 25 | ▤ 52 | ▤ 73 | ▤ 78 | ▣ 89 | ▤ 80 | ▤ 74 | □ 22 | ▤ 50 | ▥ 31 | ▤ 57 |
-| morrowind/west_gash | 1.2 | ▤ 54 | ▥ 40 | ▤ 74 | ▤ 62 | ▣ 82 | ▣ 84 | ▤ 60 | ▣ 82 | ▥ 36 | ▤ 50 | ▥ 31 | ▤ 60 |
-| high_rock/bjoulsae | 5.1 | ▥ 36 | □ 17 | □ 14 | ▤ 58 | ▤ 54 | ▣ 84 | ▥ 27 | □ 24 | □ 11 | ▥ 48 | □ 19 | ▥ 36 |
-| high_rock/glenumbra | 12.4 | ▥ 32 | ▥ 26 | ▥ 36 | ▤ 62 | ▤ 64 | ▣ 84 | ▥ 27 | ▤ 58 | □ 16 | ▥ 48 | □ 19 | ▥ 43 |
-| high_rock/rivenspire | 4.8 | ▥ 30 | □ 21 | ▥ 31 | ▤ 62 | ▤ 66 | ▣ 88 | ▥ 27 | ▣ 88 | □ 17 | ▤ 51 | □ 19 | ▥ 46 |
-| high_rock/stormhaven | 6.2 | ▥ 36 | □ 4 | □ 20 | ▤ 61 | ▤ 61 | ▣ 84 | ▥ 27 | ▥ 38 | □ 14 | ▥ 48 | □ 19 | ▥ 37 |
-| high_rock/wayrest | 1.5 | ▤ 63 | ▥ 39 | ▤ 80 | ▤ 56 | ▤ 74 | ▣ 89 | ▥ 35 | ▥ 48 | ▥ 32 | ▥ 48 | □ 19 | ▤ 53 |
-| high_rock/wrothgar | 10.8 | □ 23 | □ 19 | ▥ 32 | ▤ 72 | ▤ 62 | ▣ 87 | ▥ 42 | ▤ 67 | □ 14 | ▤ 58 | □ 15 | ▥ 45 |
-| hammerfell/alikr_desert | 10.2 | ▥ 39 | □ 21 | □ 21 | ▤ 68 | ▤ 64 | ▤ 71 | ▥ 34 | ▤ 73 | □ 18 | ▤ 52 | □ 17 | ▥ 43 |
-| hammerfell/bangkorai | 2.4 | ▥ 25 | □ 1 | □ 8 | ▤ 52 | ▤ 62 | ▣ 85 | ▥ 26 | ▣ 90 | □ 13 | ▤ 52 | □ 17 | ▥ 39 |
-| hammerfell/craglorn | 2.3 | ▥ 30 | □ 21 | ▥ 38 | ▤ 56 | ▤ 75 | ▤ 77 | ▥ 26 | ▣ 90 | □ 24 | ▤ 52 | □ 17 | ▥ 46 |
-| hammerfell/dragontail | 5.7 | ▥ 38 | □ 17 | ▥ 33 | ▤ 56 | ▤ 65 | ▤ 73 | ▥ 34 | ▤ 50 | □ 14 | ▤ 52 | □ 17 | ▥ 41 |
-| hammerfell/hews_bane | 3.9 | ▥ 28 | ▥ 30 | ▥ 45 | ▤ 58 | ▤ 69 | ▤ 74 | ▥ 26 | ▤ 50 | □ 19 | ▤ 52 | □ 17 | ▥ 43 |
-| hammerfell/stros_mkai | 0.7 | ▥ 38 | □ 17 | ▤ 52 | ▤ 58 | ▤ 75 | ▣ 87 | ▥ 26 | ▥ 43 | ▥ 33 | ▤ 55 | □ 17 | ▥ 45 |
-| elsweyr/anequina | 5.6 | ▥ 32 | ▥ 25 | ▥ 42 | ▤ 52 | ▤ 70 | ▤ 75 | ▥ 28 | ▣ 84 | □ 20 | ▤ 52 | □ 17 | ▥ 45 |
-| elsweyr/pellitine | 8.2 | ▥ 35 | □ 12 | ▥ 25 | ▤ 56 | ▤ 59 | ▣ 85 | ▥ 28 | ▤ 73 | □ 13 | ▤ 55 | □ 17 | ▥ 42 |
-| elsweyr/rimmen | 4.3 | ▥ 46 | ▥ 27 | ▥ 42 | ▤ 54 | ▤ 66 | ▣ 83 | ▥ 36 | ▤ 51 | □ 19 | ▤ 52 | □ 17 | ▥ 45 |
-| elsweyr/senchal | 3.5 | □ 25 | □ 22 | ▥ 38 | ▤ 52 | ▤ 70 | ▣ 85 | ▥ 28 | ▤ 56 | □ 18 | ▤ 55 | □ 17 | ▥ 42 |
-| elsweyr/torval | 4.1 | ▤ 57 | ▥ 47 | ▥ 44 | ▤ 68 | ▤ 68 | ▣ 84 | ▥ 36 | ▤ 55 | □ 19 | ▤ 55 | □ 17 | ▤ 50 |
-| valenwood/grahtwood | 10.1 | ▥ 34 | □ 20 | ▥ 31 | ▤ 57 | ▤ 54 | ▤ 78 | ▥ 39 | ▤ 73 | □ 17 | ▤ 54 | □ 16 | ▥ 43 |
-| valenwood/greenshade | 4.5 | ▥ 28 | ▥ 27 | ▥ 36 | ▤ 69 | ▤ 64 | ▤ 80 | ▥ 31 | ▤ 60 | □ 19 | ▤ 54 | □ 16 | ▥ 44 |
-| valenwood/malabal_tor | 3.6 | ▥ 37 | □ 23 | ▥ 34 | ▤ 54 | ▤ 63 | ▤ 78 | ▥ 31 | ▤ 51 | □ 21 | ▤ 54 | □ 16 | ▥ 42 |
-| valenwood/reapers_march | 6.0 | ▥ 36 | □ 20 | ▥ 34 | ▤ 55 | ▤ 59 | ▣ 93 | ▥ 31 | ▤ 80 | □ 17 | ▤ 54 | □ 16 | ▥ 45 |
-| summerset/artaeum | 0.4 | □ 22 | □ 18 | ▤ 76 | ▣ 87 | ▤ 57 | ▤ 78 | □ 8 | ▥ 43 | ▤ 68 | ▥ 48 | □ 18 | ▥ 48 |
-| summerset/auridon | 2.8 | ▥ 37 | ▥ 27 | ▥ 45 | ▤ 57 | ▤ 57 | ▤ 76 | ▥ 27 | ■ 113 | ▥ 34 | ▥ 48 | □ 18 | ▥ 49 |
-| summerset/summerset_isle | 10.4 | ▥ 44 | ▥ 27 | ▥ 35 | ▤ 54 | ▤ 54 | ▤ 76 | ▥ 44 | ▤ 59 | □ 25 | ▥ 48 | □ 18 | ▥ 44 |
-| black_marsh/gideon | 6.9 | ▥ 27 | □ 21 | ▥ 32 | ▤ 55 | ▤ 54 | ▤ 77 | ▥ 25 | ▥ 47 | □ 16 | ▤ 50 | □ 15 | ▥ 38 |
-| black_marsh/helstrom | 7.2 | ▥ 31 | □ 11 | □ 23 | ▤ 52 | ▥ 50 | ▤ 79 | ▥ 25 | ▥ 42 | □ 11 | ▤ 50 | □ 15 | ▥ 35 |
-| black_marsh/lilmoth | 4.6 | ▥ 41 | □ 15 | ▥ 28 | ▤ 51 | ▤ 57 | ▤ 77 | ▥ 34 | ▥ 45 | □ 13 | ▤ 50 | □ 15 | ▥ 39 |
-| black_marsh/murkmire | 7.0 | □ 18 | □ 13 | ▥ 30 | ▥ 49 | ▥ 47 | ▤ 77 | ▥ 25 | ▤ 69 | □ 12 | ▤ 50 | □ 15 | ▥ 37 |
-| black_marsh/shadowfen | 7.2 | ▥ 26 | □ 15 | ▥ 26 | ▤ 66 | ▤ 69 | ▣ 80 | ▥ 25 | ▣ 82 | □ 17 | ▤ 50 | □ 15 | ▥ 43 |
-| black_marsh/stormhold | 5.0 | ▥ 27 | □ 24 | ▥ 37 | ▤ 58 | ▤ 62 | ▤ 77 | ▥ 25 | ▥ 49 | □ 23 | ▤ 50 | □ 15 | ▥ 41 |
-| atmora/frozen_forest | 0.0 | □ 0 | □ 18 | ▤ 63 | ▤ 65 | ▤ 61 | ▤ 63 | □ 24 | □ 24 | □ 0 | ▥ 48 | □ 13 | ▥ 34 |
-| atmora/ice_waste | 0.0 | □ 0 | □ 3 | □ 8 | ▤ 53 | ▤ 61 | ▤ 63 | □ 6 | □ 15 | □ 0 | ▥ 48 | □ 13 | □ 25 |
-| akavir/ka_po_tun | 0.0 | □ 0 | □ 14 | ▤ 50 | ▤ 54 | ▤ 56 | ▣ 81 | □ 23 | □ 15 | □ 0 | ▤ 51 | □ 11 | ▥ 32 |
-| akavir/kamal | 0.0 | □ 0 | □ 2 | □ 8 | ▤ 52 | ▤ 57 | ▣ 87 | □ 6 | □ 14 | □ 0 | ▤ 51 | □ 11 | ▥ 26 |
-| akavir/tang_mo | 0.0 | □ 0 | □ 12 | ▤ 68 | ▤ 53 | ▤ 56 | ▣ 81 | □ 23 | □ 17 | □ 0 | ▤ 51 | □ 11 | ▥ 34 |
-| akavir/tsaesci | 0.0 | □ 0 | □ 2 | □ 8 | ▥ 49 | ▤ 56 | ▤ 79 | □ 6 | □ 15 | □ 0 | ▤ 51 | □ 11 | ▥ 25 |
-| yokuda/sunken_isles | 0.0 | □ 0 | □ 3 | □ 8 | ▥ 46 | ▥ 40 | ▤ 71 | □ 7 | □ 20 | □ 0 | ▤ 52 | □ 7 | □ 23 |
-| yokuda/yokudan_desert | 0.0 | □ 0 | □ 15 | ▤ 63 | ▤ 58 | ▥ 40 | ▤ 70 | □ 7 | ▥ 25 | □ 0 | ▤ 52 | □ 7 | ▥ 31 |
-| pyandonea/maormer_isles | 0.0 | □ 1 | □ 21 | ▥ 42 | ▤ 54 | ▥ 47 | ▤ 78 | □ 24 | □ 15 | □ 0 | ▤ 51 | □ 6 | ▥ 31 |
-| thras/coral_kingdom | 0.0 | □ 0 | □ 3 | ▥ 29 | ▤ 52 | ▥ 47 | ▤ 69 | □ 0 | □ 20 | □ 0 | ▥ 48 | □ 0 | □ 24 |
+| skyrim/eastmarch | 2.9 | ■ 121 | ■ 129 | ■ 108 | ▣ 92 | ■ 100 | ■ 106 | ■ 115 | ■ 107 | ▣ 98 | ■ 102 | ■ 100 | ■ 107 |
+| skyrim/falkreath | 4.6 | ■ 103 | ■ 132 | ■ 110 | ▣ 94 | ▣ 91 | ■ 113 | ■ 109 | ▣ 92 | ▣ 97 | ■ 101 | ■ 100 | ■ 104 |
+| skyrim/haafingar | 1.7 | ■ 121 | ■ 122 | ■ 105 | ▣ 92 | ■ 105 | ▣ 91 | ■ 109 | ■ 107 | ▣ 99 | ▣ 96 | ■ 100 | ■ 104 |
+| skyrim/hjaalmarch | 1.4 | ■ 121 | ■ 132 | ■ 110 | ▣ 95 | ■ 106 | ▣ 89 | ■ 103 | ▣ 91 | ▣ 99 | ▣ 96 | ■ 100 | ■ 104 |
+| skyrim/the_pale | 1.7 | ■ 115 | ■ 132 | ■ 110 | ▣ 95 | ■ 106 | ▣ 89 | ■ 103 | ▣ 97 | ■ 100 | ▣ 96 | ■ 100 | ■ 104 |
+| skyrim/the_reach | 4.6 | ■ 103 | ■ 150 | ■ 109 | ▣ 91 | ▣ 90 | ■ 108 | ■ 115 | ▣ 90 | ▣ 96 | ■ 101 | ■ 100 | ■ 105 |
+| skyrim/the_rift | 4.2 | ■ 120 | ■ 145 | ■ 107 | ▣ 92 | ▣ 90 | ■ 109 | ■ 115 | ▣ 89 | ▣ 94 | ■ 102 | ■ 100 | ■ 106 |
+| skyrim/whiterun | 3.0 | ■ 120 | ■ 150 | ■ 108 | ▣ 90 | ▣ 97 | ▣ 90 | ■ 115 | ■ 101 | ▣ 97 | ▣ 96 | ■ 100 | ■ 106 |
+| skyrim/winterhold | 2.3 | ■ 120 | ■ 141 | ■ 110 | ▣ 92 | ▣ 99 | ▣ 87 | ■ 103 | ▣ 96 | ▣ 96 | ▣ 96 | ■ 100 | ■ 104 |
+| cyrodiil/blackwood | 4.5 | ■ 117 | ■ 131 | ■ 109 | ■ 122 | ■ 115 | ■ 137 | ■ 140 | ■ 120 | ■ 149 | ■ 117 | ■ 130 | ■ 126 |
+| cyrodiil/colovian_highlands | 9.2 | ▣ 90 | ■ 132 | ■ 113 | ■ 119 | ■ 103 | ■ 128 | ■ 140 | ■ 120 | ■ 120 | ■ 115 | ■ 130 | ■ 119 |
+| cyrodiil/gold_coast | 5.5 | ■ 117 | ■ 132 | ■ 115 | ■ 120 | ■ 106 | ■ 132 | ■ 140 | ■ 120 | ■ 131 | ■ 115 | ■ 130 | ■ 123 |
+| cyrodiil/great_forest | 3.8 | ▣ 97 | ■ 129 | ■ 112 | ■ 118 | ■ 104 | ■ 125 | ■ 140 | ■ 120 | ■ 129 | ■ 115 | ■ 130 | ■ 120 |
+| cyrodiil/heartlands | 7.7 | ■ 102 | ■ 132 | ■ 115 | ■ 120 | ■ 104 | ■ 125 | ■ 140 | ■ 120 | ■ 116 | ■ 115 | ■ 130 | ■ 120 |
+| cyrodiil/jerall_mountains | 9.5 | ▣ 92 | ■ 132 | ■ 112 | ■ 119 | ■ 104 | ■ 132 | ■ 140 | ■ 120 | ■ 117 | ■ 115 | ■ 130 | ■ 119 |
+| cyrodiil/nibenay_basin | 8.5 | ■ 106 | ■ 132 | ■ 112 | ■ 120 | ■ 103 | ■ 127 | ■ 140 | ■ 120 | ■ 126 | ■ 117 | ■ 130 | ■ 121 |
+| cyrodiil/nibenay_valley | 8.2 | ▣ 96 | ■ 132 | ■ 112 | ■ 120 | ■ 104 | ■ 128 | ■ 140 | ■ 120 | ■ 130 | ■ 117 | ■ 130 | ■ 121 |
+| cyrodiil/west_weald | 4.0 | ■ 107 | ■ 132 | ■ 113 | ■ 119 | ■ 107 | ■ 128 | ■ 140 | ■ 120 | ■ 147 | ■ 115 | ■ 130 | ■ 123 |
+| morrowind/ascadian_isles | 1.7 | ■ 124 | ■ 150 | ■ 113 | ■ 124 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 132 |
+| morrowind/azuras_coast | 1.3 | ■ 122 | ■ 150 | ■ 112 | ■ 124 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 132 |
+| morrowind/bitter_coast | 0.5 | ▣ 99 | ■ 130 | ▣ 97 | ■ 122 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 126 |
+| morrowind/deshaan | 5.5 | ■ 117 | ■ 150 | ■ 110 | ■ 109 | ▣ 97 | ■ 150 | ■ 150 | ■ 125 | ■ 125 | ■ 118 | ■ 128 | ■ 125 |
+| morrowind/grazelands | 2.0 | ■ 123 | ■ 150 | ▣ 94 | ■ 124 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 130 |
+| morrowind/molag_amur | 4.8 | ▣ 86 | ■ 150 | ■ 111 | ■ 115 | ■ 102 | ■ 150 | ■ 150 | ■ 125 | ■ 125 | ■ 118 | ■ 128 | ■ 124 |
+| morrowind/red_mountain | 1.6 | ■ 116 | ■ 150 | ■ 110 | ■ 123 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 131 |
+| morrowind/sheogorad | 0.6 | ■ 119 | ■ 150 | ▣ 100 | ■ 121 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 130 |
+| morrowind/solstheim | 1.0 | ■ 124 | ■ 150 | ■ 116 | ■ 124 | ■ 123 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 127 | ■ 133 |
+| morrowind/stonefalls | 5.2 | ■ 124 | ■ 150 | ■ 111 | ■ 110 | ▣ 95 | ■ 150 | ■ 150 | ■ 125 | ■ 127 | ■ 118 | ■ 128 | ■ 126 |
+| morrowind/telvannis | 8.7 | ■ 109 | ■ 150 | ■ 111 | ■ 111 | ▣ 95 | ■ 150 | ■ 150 | ■ 125 | ■ 111 | ■ 118 | ■ 128 | ■ 123 |
+| morrowind/vvardenfell_ashlands | 2.5 | ■ 123 | ■ 150 | ■ 108 | ■ 124 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 131 |
+| morrowind/west_gash | 1.2 | ■ 124 | ■ 150 | ■ 109 | ■ 124 | ■ 119 | ■ 150 | ■ 150 | ■ 125 | ■ 150 | ■ 118 | ■ 128 | ■ 132 |
+| high_rock/anticlere | 1.7 | ■ 118 | ■ 118 | ■ 103 | ■ 101 | ■ 109 | ▣ 87 | ■ 132 | ■ 113 | ■ 150 | ▣ 98 | ■ 114 | ■ 113 |
+| high_rock/bjoulsae | 4.0 | ■ 111 | ■ 115 | ■ 100 | ■ 103 | ■ 101 | ▣ 92 | ■ 132 | ■ 118 | ■ 119 | ▣ 95 | ■ 114 | ■ 109 |
+| high_rock/daggerfall | 1.6 | ■ 124 | ■ 117 | ■ 105 | ■ 102 | ■ 111 | ▣ 95 | ■ 132 | ■ 119 | ■ 150 | ■ 102 | ■ 114 | ■ 116 |
+| high_rock/dwynnen | 1.0 | ■ 124 | ■ 128 | ■ 107 | ▣ 93 | ■ 112 | ▣ 84 | ■ 132 | ■ 116 | ■ 150 | ▣ 97 | ■ 114 | ■ 114 |
+| high_rock/glenumbra | 5.6 | ■ 113 | ■ 114 | ▣ 98 | ■ 104 | ■ 103 | ■ 106 | ■ 132 | ■ 123 | ■ 123 | ■ 108 | ■ 114 | ■ 113 |
+| high_rock/rivenspire | 4.8 | ■ 118 | ■ 114 | ▣ 96 | ■ 105 | ■ 104 | ▣ 98 | ■ 132 | ■ 125 | ■ 124 | ■ 104 | ■ 114 | ■ 112 |
+| high_rock/stormhaven | 2.8 | ▣ 91 | ▣ 88 | ■ 106 | ■ 105 | ■ 109 | ▣ 87 | ■ 132 | ■ 124 | ■ 142 | ▣ 98 | ■ 114 | ■ 109 |
+| high_rock/wayrest | 1.0 | ■ 124 | ■ 115 | ■ 104 | ■ 101 | ■ 112 | ▣ 86 | ■ 132 | ■ 120 | ■ 150 | ▣ 91 | ■ 114 | ■ 113 |
+| high_rock/wrothgar | 12.3 | ▣ 89 | ■ 112 | ■ 103 | ■ 118 | ▣ 99 | ■ 142 | ■ 133 | ■ 122 | ■ 113 | ■ 116 | ■ 113 | ■ 115 |
+| hammerfell/alikr_desert | 5.8 | ■ 115 | ■ 114 | ▣ 99 | ■ 103 | ■ 100 | ■ 102 | ■ 130 | ■ 122 | ■ 126 | ■ 110 | ■ 115 | ■ 113 |
+| hammerfell/bangkorai | 1.3 | ■ 124 | ■ 110 | ■ 105 | ▣ 90 | ■ 111 | ▣ 100 | ■ 130 | ■ 115 | ■ 150 | ■ 110 | ■ 115 | ■ 115 |
+| hammerfell/craglorn | 1.7 | ■ 124 | ■ 115 | ■ 103 | ▣ 99 | ■ 111 | ▣ 81 | ■ 130 | ■ 115 | ■ 142 | ■ 100 | ■ 115 | ■ 112 |
+| hammerfell/dragontail | 8.2 | ▣ 100 | ■ 119 | ■ 103 | ■ 102 | ▣ 95 | ■ 118 | ■ 130 | ■ 122 | ■ 114 | ■ 112 | ■ 115 | ■ 112 |
+| hammerfell/hews_bane | 3.9 | ■ 115 | ■ 115 | ■ 100 | ■ 103 | ■ 106 | ▣ 83 | ■ 130 | ■ 122 | ■ 126 | ■ 102 | ■ 115 | ■ 111 |
+| hammerfell/sentinel | 1.1 | ■ 124 | ■ 116 | ■ 103 | ▣ 93 | ■ 112 | ▣ 88 | ■ 130 | ■ 112 | ■ 150 | ■ 106 | ■ 115 | ■ 114 |
+| hammerfell/stros_mkai | 0.5 | ■ 124 | ■ 118 | ■ 116 | ▣ 90 | ■ 112 | ▣ 83 | ■ 130 | ■ 108 | ■ 150 | ■ 106 | ■ 115 | ■ 114 |
+| elsweyr/anequina | 5.6 | ■ 122 | ■ 150 | ■ 114 | ■ 116 | ■ 112 | ■ 150 | ■ 150 | ■ 120 | ■ 143 | ■ 118 | ■ 117 | ■ 128 |
+| elsweyr/pellitine | 8.2 | ■ 124 | ■ 108 | ■ 111 | ■ 117 | ■ 104 | ■ 150 | ■ 150 | ■ 120 | ■ 132 | ■ 118 | ■ 117 | ■ 123 |
+| elsweyr/rimmen | 4.3 | ■ 124 | ■ 150 | ■ 114 | ■ 123 | ■ 117 | ■ 150 | ■ 150 | ■ 120 | ■ 150 | ■ 118 | ■ 117 | ■ 130 |
+| elsweyr/senchal | 3.5 | ■ 118 | ■ 150 | ■ 115 | ■ 123 | ■ 118 | ■ 150 | ■ 150 | ■ 120 | ■ 150 | ■ 118 | ■ 117 | ■ 130 |
+| elsweyr/torval | 4.1 | ■ 112 | ■ 150 | ■ 115 | ■ 122 | ■ 116 | ■ 150 | ■ 150 | ■ 120 | ■ 148 | ■ 118 | ■ 117 | ■ 129 |
+| valenwood/grahtwood | 10.1 | ■ 113 | ■ 142 | ■ 113 | ■ 115 | ■ 102 | ■ 150 | ■ 150 | ■ 122 | ■ 127 | ■ 118 | ■ 117 | ■ 124 |
+| valenwood/greenshade | 4.5 | ■ 120 | ■ 150 | ■ 116 | ■ 122 | ■ 116 | ■ 150 | ■ 150 | ■ 122 | ■ 150 | ■ 118 | ■ 117 | ■ 130 |
+| valenwood/malabal_tor | 3.6 | ■ 124 | ■ 150 | ■ 113 | ■ 122 | ■ 117 | ■ 150 | ■ 150 | ■ 122 | ■ 150 | ■ 118 | ■ 117 | ■ 130 |
+| valenwood/reapers_march | 6.0 | ■ 124 | ■ 122 | ■ 113 | ■ 121 | ■ 114 | ■ 150 | ■ 150 | ■ 122 | ■ 143 | ■ 118 | ■ 117 | ■ 127 |
+| summerset/artaeum | 0.4 | ■ 124 | ■ 150 | ■ 114 | ■ 122 | ■ 119 | ■ 150 | ■ 150 | ■ 120 | ■ 150 | ■ 118 | ■ 117 | ■ 130 |
+| summerset/auridon | 2.8 | ■ 124 | ■ 138 | ■ 114 | ■ 124 | ■ 119 | ■ 150 | ■ 150 | ■ 120 | ■ 150 | ■ 118 | ■ 117 | ■ 129 |
+| summerset/summerset_isle | 10.4 | ■ 124 | ■ 108 | ■ 112 | ■ 110 | ■ 103 | ■ 150 | ■ 150 | ■ 120 | ■ 127 | ■ 118 | ■ 117 | ■ 122 |
+| black_marsh/gideon | 6.9 | ■ 107 | ■ 150 | ■ 113 | ■ 121 | ■ 108 | ■ 150 | ■ 150 | ■ 120 | ■ 133 | ■ 118 | ■ 116 | ■ 126 |
+| black_marsh/helstrom | 7.2 | ■ 124 | ■ 124 | ■ 110 | ■ 122 | ■ 111 | ■ 150 | ■ 150 | ■ 120 | ■ 135 | ■ 118 | ■ 116 | ■ 125 |
+| black_marsh/lilmoth | 4.6 | ■ 124 | ■ 132 | ■ 113 | ■ 122 | ■ 115 | ■ 150 | ■ 150 | ■ 120 | ■ 147 | ■ 118 | ■ 116 | ■ 128 |
+| black_marsh/murkmire | 7.0 | ■ 102 | ■ 150 | ■ 112 | ■ 122 | ■ 114 | ■ 150 | ■ 150 | ■ 120 | ■ 139 | ■ 118 | ■ 116 | ■ 127 |
+| black_marsh/shadowfen | 7.2 | ■ 105 | ■ 150 | ■ 113 | ■ 123 | ■ 117 | ■ 150 | ■ 150 | ■ 120 | ■ 148 | ■ 118 | ■ 116 | ■ 128 |
+| black_marsh/stormhold | 5.0 | ■ 104 | ■ 150 | ■ 113 | ■ 124 | ■ 117 | ■ 150 | ■ 150 | ■ 120 | ■ 150 | ■ 118 | ■ 116 | ■ 128 |
+| atmora/frozen_forest | 0.0 | ■ 120 | ■ 145 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 122 |
+| atmora/ice_waste | 0.0 | ■ 120 | ■ 133 | ■ 111 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 121 |
+| akavir/ka_po_tun | 0.0 | ■ 120 | ■ 150 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 123 |
+| akavir/kamal | 0.0 | ■ 120 | ■ 145 | ■ 111 | ■ 121 | ■ 116 | ▣ 99 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 122 |
+| akavir/tang_mo | 0.0 | ■ 120 | ■ 150 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 123 |
+| akavir/tsaesci | 0.0 | ■ 120 | ■ 148 | ■ 111 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 123 |
+| yokuda/sunken_isles | 0.0 | ■ 120 | ■ 142 | ■ 111 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 122 |
+| yokuda/yokudan_desert | 0.0 | ■ 120 | ■ 150 | ■ 112 | ■ 121 | ■ 116 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 123 |
+| pyandonea/maormer_isles | 0.0 | ■ 120 | ■ 150 | ■ 112 | ■ 121 | ■ 119 | ▣ 97 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 117 | ■ 123 |
+| thras/coral_kingdom | 0.0 | ■ 120 | ■ 148 | ■ 112 | ■ 121 | ■ 119 | ■ 106 | ■ 150 | ■ 111 | ■ 150 | ■ 108 | ■ 116 | ■ 124 |
 
 ### Raw numbers
 
@@ -168,140 +172,140 @@ Province-level raw numbers (density metrics are per km2 of land; unit metrics pe
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| named towns /km2 | 0.68 | 0.15 | 0.57 | 0.71 | 1.11 | 0.70 | 0.74 | 1.18 | 0.53 | 0 | 0 | 0 | - | 0 |
-| villages+farms /km2 | 1.40 | 2.17 | 2.20 | 2.77 | 2.06 | 3.66 | 2.77 | 3.16 | 2.13 | - | - | - | - | 0 |
-| bespoke share of named towns | 0.83 | 0.33 | 0.29 | 0.07 | 0.07 | 0.11 | 0.06 | 0.12 | 0.05 | 0 | 0 | 0 | 0 | 0 |
-| named buildings per named town | 5.33 | 1.89 | 1.76 | 0.59 | 0.54 | 0.94 | 0.56 | 0.94 | 0.30 | 0 | 0 | 0 | 0 | 0 |
-| named NPCs per named town | 10 | 11 | 7.52 | 2.62 | 2.43 | 3.28 | 3.17 | 3.94 | 2.90 | - | - | - | 3 | - |
+| named towns /km2 | 0.68 | 0.43 | 0.71 | 0.55 | 0.72 | 0.78 | 0.74 | 1.25 | 0.58 | - | - | - | - | - |
+| villages+farms /km2 | 1.89 | 3.18 | 4.98 | 4.02 | 3.76 | 5.02 | 3.97 | 4.71 | 3.29 | - | - | - | - | - |
+| bespoke share of named towns | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| named buildings per named town | 32 | 15 | 23 | 40 | 42 | 35 | 34 | 32 | 34 | 44 | 40 | 38 | 56 | 38 |
+| named NPCs per named town | 95 | 67 | 111 | 80 | 86 | 85 | 86 | 80 | 86 | 124 | 113 | 106 | 158 | 105 |
 
 **NPC: NPCs + dialogue**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| dialogue + scene lines per named town | 24 | 25 | 12 | 4.76 | 4.07 | 6.28 | 6.22 | 7.75 | 4.45 | - | - | - | 11 | - |
-| NPC scenes per named town | 6.06 | 6.11 | 2.62 | 1.10 | 0.79 | 1.39 | 1.39 | 1.81 | 0.75 | - | - | - | 4 | - |
-| distinct NPC roles among named NPCs | 11 | 7.67 | 7.15 | 7.50 | 7.33 | 8.60 | 8.50 | 9.33 | 7 | 2 | 1.75 | 1.50 | 3 | 1 |
-| region-keyed chat/say lines | 4.78 | 0.11 | 0.15 | 0.17 | 0.17 | 0.20 | 0.25 | 0.33 | 0.17 | 0.50 | 0.25 | 0.50 | 0 | 0 |
+| dialogue + scene lines per named town | 123 | 147 | 453 | 112 | 116 | 262 | 260 | 239 | 268 | 499 | 472 | 456 | 598 | 453 |
+| NPC scenes per named town | 14 | 13 | 44 | 8.58 | 8.50 | 12 | 11 | 9.65 | 13 | 48 | 46 | 48 | 49 | 48 |
+| distinct NPC roles among named NPCs | 116 | 54 | 61 | 37 | 38 | 62 | 62 | 62 | 62 | 44 | 50 | 49 | 53 | 49 |
+| region-keyed chat/say lines | 25 | 21 | 27 | 21 | 21 | 27 | 27 | 27 | 27 | 28 | 27 | 28 | 27 | 27 |
 
 **QST: Quests**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| quests /km2 | 13 | 2.06 | 4.76 | 2.03 | 2.77 | 2.76 | 2.44 | 4.85 | 1.45 | - | - | - | - | - |
-| quests per named town | 19 | 14 | 8.33 | 2.86 | 2.50 | 3.94 | 3.28 | 4.12 | 2.75 | - | - | - | 6 | - |
-| quest kinds (main/side/faction/hidden/radiant) | 3.89 | 2.44 | 2.62 | 2.33 | 2.50 | 2.80 | 2.50 | 2.67 | 2.33 | 1.50 | 1.25 | 1.50 | 2 | 1 |
-| share of quests on registered places | 0.94 | 0.66 | 0.83 | 0.73 | 0.56 | 0.76 | 0.78 | 0.74 | 0.75 | 0.75 | 0.75 | 0.75 | 0.67 | 0.33 |
+| quests /km2 | 19 | 18 | 20 | 14 | 18 | 22 | 21 | 31 | 19 | - | - | - | - | - |
+| quests per named town | 27 | 41 | 29 | 26 | 25 | 28 | 29 | 25 | 33 | 32 | 30 | 32 | 42 | 31 |
+| quest kinds (main/side/faction/hidden/radiant) | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| share of quests on registered places | 0.89 | 0.99 | 0.99 | 0.98 | 0.96 | 1.00 | 1.00 | 1 | 1.00 | 1 | 1 | 1 | 1 | 1 |
 
 **DUN: Dungeons**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| dungeons+forts /km2 | 9.93 | 9.44 | 13 | 11 | 9.81 | 8.09 | 8.39 | 7.06 | 11 | - | - | - | - | - |
-| distinct dungeon themes | 12 | 11 | 12 | 15 | 12 | 12 | 12 | 12 | 11 | 15 | 12 | 12 | 11 | 11 |
-| distinct carved looks (theme x kit palette) | 4.11 | 4.11 | 4.38 | 5.17 | 4 | 4 | 4.50 | 4 | 4 | 5 | 4.25 | 4 | 4 | 4 |
-| distinct inhabitant rosters in carved dungeons | 5.67 | 13 | 11 | 14 | 12 | 12 | 14 | 11 | 12 | 10 | 9.25 | 9 | 9 | 9 |
-| distinct built-dungeon looks | 3.89 | 7.22 | 7.69 | 6.50 | 5.83 | 4.40 | 6.25 | 6 | 5.33 | 5 | 3.75 | 3.50 | 3 | 3 |
-| room templates reachable | 46 | 43 | 49 | 49 | 49 | 44 | 43 | 43 | 43 | 49 | 43 | 43 | 43 | 43 |
-| hand-authored dungeons | 0.78 | 0.22 | 0.23 | 0.17 | 0.17 | 0.20 | 0.25 | 0.33 | 0.17 | 0 | 0 | 0 | 0 | 0 |
-| named quest bosses | 1.78 | 3.67 | 3.23 | 4.83 | 4.67 | 6.40 | 6.75 | 10 | 3.17 | 2.50 | 1.25 | 3 | 5 | 4 |
-| share of dungeons with a lore hook, quest or unique | 1 | 0.04 | 0.10 | 0.03 | 0.03 | 0.09 | 0.05 | 0.11 | 0.03 | 0.60 | 0.77 | 0.67 | 0.67 | 0.33 |
+| dungeons+forts /km2 | 12 | 13 | 23 | 14 | 12 | 13 | 12 | 14 | 14 | - | - | - | - | - |
+| distinct dungeon themes | 14 | 19 | 22 | 15 | 14 | 22 | 22 | 23 | 21 | 22 | 22 | 22 | 22 | 22 |
+| distinct carved looks (theme x kit palette) | 5.11 | 7 | 8 | 6 | 5.86 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| distinct inhabitant rosters in carved dungeons | 7.44 | 15 | 17 | 14 | 14 | 17 | 18 | 18 | 17 | 17 | 17 | 17 | 17 | 17 |
+| distinct built-dungeon looks | 4.44 | 11 | 14 | 8.78 | 7.43 | 12 | 15 | 14 | 13 | 13 | 12 | 12 | 12 | 12 |
+| room templates reachable | 53 | 59 | 59 | 54 | 53 | 59 | 59 | 59 | 59 | 59 | 59 | 59 | 59 | 59 |
+| hand-authored dungeons | 1.22 | 4.33 | 4 | 1.22 | 1 | 4.20 | 4.25 | 4.33 | 4.17 | 4 | 3.50 | 3.50 | 4 | 3 |
+| named quest bosses | 40 | 90 | 67 | 60 | 48 | 80 | 88 | 81 | 102 | 47 | 46 | 48 | 49 | 49 |
+| share of dungeons with a lore hook, quest or unique | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
 
 **CRE: Creatures**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| hostile kinds per biome family | 1 | 11 | 6.78 | 8.73 | 5.63 | 4.53 | 5.25 | 4.50 | 5.14 | 5.83 | 2.75 | 3.50 | 2.57 | 2.50 |
-| wildlife kinds per biome family | 0.12 | 1.69 | 2.46 | 1.17 | 1 | 1.88 | 2.75 | 2.17 | 2.29 | 2.67 | 1.14 | 0.12 | 1 | 1 |
-| cave creature kinds | 19 | 8 | 8.62 | 6 | 6 | 5 | 3 | 0 | 5 | 4 | 3 | 0 | 0 | 0 |
-| distinct creature kinds in region | 42 | 19 | 18 | 14 | 15 | 13 | 13 | 10 | 13 | 13 | 7.25 | 5 | 5 | 5 |
-| bosses+dragons+shrines /km2 | 2.04 | 0.80 | 1.66 | 1.10 | 1.74 | 2.06 | 1.78 | 3.38 | 0.92 | - | - | - | - | - |
+| hostile kinds per biome family | 23 | 26 | 26 | 25 | 25 | 26 | 26 | 26 | 26 | 26 | 26 | 26 | 29 | 29 |
+| wildlife kinds per biome family | 13 | 17 | 17 | 16 | 16 | 17 | 17 | 17 | 17 | 17 | 17 | 17 | 17 | 17 |
+| cave creature kinds | 17 | 18 | 18 | 17 | 17 | 18 | 18 | 18 | 18 | 18 | 18 | 18 | 18 | 18 |
+| distinct creature kinds in region | 40 | 56 | 56 | 47 | 49 | 56 | 56 | 56 | 56 | 56 | 56 | 56 | 59 | 59 |
+| bosses+dragons+shrines /km2 | 15 | 14 | 26 | 16 | 16 | 17 | 16 | 20 | 17 | - | - | - | - | - |
 
 **FLO: Flora + biomes**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| biomes in palette | 26 | 17 | 23 | 22 | 24 | 24 | 20 | 19 | 21 | 19 | 21 | 21 | 19 | 18 |
-| tree species | 29 | 32 | 26 | 26 | 21 | 22 | 26 | 20 | 21 | 16 | 24 | 18 | 23 | 16 |
-| flora species | 26 | 25 | 29 | 25 | 22 | 24 | 23 | 27 | 24 | 21 | 25 | 23 | 25 | 30 |
+| biomes in palette | 35 | 40 | 66 | 32 | 33 | 71 | 70 | 69 | 69 | 57 | 59 | 59 | 58 | 58 |
+| tree species | 56 | 107 | 138 | 60 | 52 | 131 | 132 | 131 | 135 | 59 | 62 | 59 | 62 | 60 |
+| flora species | 61 | 121 | 149 | 66 | 62 | 144 | 140 | 142 | 146 | 46 | 46 | 46 | 45 | 55 |
 
 **STY: Building styles**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| distinct settlement looks | 3.44 | 1.56 | 3.08 | 1.50 | 1.33 | 1.40 | 2.25 | 1.33 | 1.17 | 0.50 | 0.50 | 0 | 1 | 0 |
-| style-sheet richness | 541 | 241 | 349 | 135 | 130 | 147 | 102 | 140 | 129 | 116 | 111 | 120 | 119 | 0 |
+| distinct settlement looks | 6.89 | 17 | 14 | 9.22 | 9.14 | 18 | 19 | 18 | 17 | 10 | 10 | 10 | 11 | 10 |
+| style-sheet richness | 541 | 737 | 995 | 672 | 657 | 1342 | 1297 | 1335 | 1324 | 1311 | 1306 | 1315 | 1314 | 1270 |
 
 **LND: Landmarks + sites**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| landmarks+shrines+stones /km2 | 2.27 | 5.05 | 2.45 | 2.26 | 3.84 | 4.36 | 4.92 | 5.22 | 3.32 | - | 0 | - | 0 | - |
-| distinct landmark kinds | 13 | 15 | 6.69 | 11 | 10 | 15 | 16 | 16 | 11 | 2 | 1 | 2.50 | 1 | 1 |
+| landmarks+shrines+stones /km2 | 3.51 | 9.52 | 13 | 6.14 | 8.15 | 9.22 | 9.76 | 11 | 8.19 | - | - | - | - | - |
+| distinct landmark kinds | 16 | 30 | 34 | 20 | 19 | 35 | 37 | 39 | 34 | 33 | 34 | 35 | 33 | 35 |
 | minor-site kinds available [P] | 19 | 18 | 20 | 20 | 19 | 18 | 19 | 18 | 18 | 18 | 18 | 18 | 18 | 18 |
-| explore uniques /km2 | 0.34 | 0.07 | 0.11 | 0.07 | 0.12 | 0.08 | 0.08 | 0.07 | 0.05 | 0 | 0 | 0 | 0 | 0 |
+| explore uniques /km2 | 1.36 | 3.87 | 4.30 | 3.01 | 3.22 | 2.72 | 2.60 | 3.02 | 2.53 | - | - | - | - | - |
 
 **LOR: Lore**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| places with lore /km2 | 14 | 0.80 | 2.97 | 1.15 | 1.82 | 1.79 | 1.90 | 3.46 | 1.34 | - | - | - | - | - |
-| readables+books /km2 | 56 | 2.11 | 9.75 | 3.06 | 4.67 | 4.47 | 4.75 | 8.16 | 3.48 | - | - | - | - | - |
-| rumours+legends+songs | 12 | 6.00 | 4.38 | 6.33 | 6 | 6.20 | 6.25 | 8 | 5.83 | 0 | 0 | 0 | 0 | 0 |
+| places with lore /km2 | 17 | 20 | 37 | 21 | 22 | 25 | 24 | 28 | 24 | - | - | - | - | - |
+| readables+books /km2 | 90 | 131 | 412 | 142 | 141 | 257 | 248 | 287 | 252 | - | - | - | - | - |
+| rumours+legends+songs | 16 | 37 | 209 | 31 | 32 | 31 | 31 | 33 | 31 | 25 | 25 | 25 | 25 | 25 |
 
 **MUS: Music + ambience**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| exploration tracks [P] | 5 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 |
-| town tracks [P] | 2 | 1 | 1 | 1.17 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
-| ambience beds | 24 | 21 | 20 | 17 | 22 | 23 | 24 | 16 | 19 | 16 | 20 | 21 | 20 | 16 |
+| exploration tracks [P] | 5 | 7 | 7 | 7 | 7 | 7 | 7 | 7 | 7 | 7 | 7 | 7 | 7 | 7 |
+| town tracks [P] | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 |
+| ambience beds | 32 | 44 | 60 | 29 | 33 | 60 | 60 | 60 | 60 | 32 | 32 | 32 | 32 | 32 |
 
 **ITM: Items + loot**
 
 | metric | skyrim | cyrodiil | morrowind | high_rock | hammerfell | elsweyr | valenwood | summerset | black_marsh | atmora | akavir | yokuda | pyandonea | thras |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| regional gear list size [P] | 302 | 51 | 72 | 33 | 16 | 10 | 23 | 34 | 9 | 27 | 17 | 10 | 9 | 0 |
-| signature gear families (non-universal sets) [P] | 22 | 4 | 4.23 | 1 | 3 | 1 | 1 | 1 | 1 | 2 | 2 | 2 | 1 | 0 |
-| regional ingredients [P] | 65 | 23 | 24 | 14 | 11 | 12 | 14 | 12 | 15 | 8 | 9 | 8 | 8 | 0 |
-| regional trinkets [P] | 6 | 5 | 3.92 | 3.83 | 3 | 4 | 3 | 4 | 3 | 2 | 2 | 2 | 2 | 0 |
-| legendary uniques [P] | 8 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 1 | 1 | 0 | 0 | 0 |
+| regional gear list size [P] | 302 | 357 | 379 | 340 | 346 | 363 | 367 | 357 | 357 | 357 | 357 | 357 | 366 | 357 |
+| signature gear families (non-universal sets) [P] | 22 | 29 | 33 | 26 | 28 | 29 | 30 | 29 | 29 | 29 | 29 | 29 | 30 | 29 |
+| regional ingredients [P] | 65 | 89 | 107 | 87 | 89 | 90 | 89 | 92 | 89 | 89 | 89 | 89 | 89 | 89 |
+| regional trinkets [P] | 6 | 11 | 11 | 11 | 10 | 12 | 12 | 13 | 12 | 11 | 13 | 11 | 12 | 11 |
+| legendary uniques [P] | 8 | 12 | 9 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
 
 
 ### Lowest 25 cells (sub-regions of 5 km2 or more, Skyrim holds excluded)
 
 | score | region | category |
 |---:|---|---|
-| 0 | morrowind/red_mountain | Settlements |
-| 0 | morrowind/red_mountain | NPCs + dialogue |
-| 1 | cyrodiil/great_forest | NPCs + dialogue |
-| 1 | morrowind/grazelands | Lore |
-| 1 | hammerfell/bangkorai | NPCs + dialogue |
-| 3 | cyrodiil/great_forest | Lore |
-| 4 | high_rock/stormhaven | NPCs + dialogue |
-| 6 | morrowind/grazelands | Quests |
-| 7 | morrowind/grazelands | NPCs + dialogue |
-| 8 | hammerfell/bangkorai | Quests |
-| 10 | morrowind/azuras_coast | Lore |
-| 10 | morrowind/telvannis | Lore |
-| 11 | high_rock/bjoulsae | Lore |
-| 11 | cyrodiil/great_forest | Quests |
-| 11 | black_marsh/helstrom | Lore |
-| 11 | black_marsh/helstrom | NPCs + dialogue |
-| 11 | morrowind/stonefalls | Lore |
-| 12 | elsweyr/pellitine | NPCs + dialogue |
-| 12 | morrowind/stonefalls | NPCs + dialogue |
-| 12 | black_marsh/murkmire | Lore |
-| 12 | cyrodiil/nibenay_basin | Lore |
-| 13 | cyrodiil/heartlands | Lore |
-| 13 | black_marsh/lilmoth | Lore |
-| 13 | cyrodiil/colovian_highlands | Lore |
-| 13 | hammerfell/bangkorai | Lore |
+| 81 | hammerfell/craglorn | Flora + biomes |
+| 83 | hammerfell/hews_bane | Flora + biomes |
+| 86 | morrowind/molag_amur | Settlements |
+| 87 | high_rock/anticlere | Flora + biomes |
+| 87 | high_rock/stormhaven | Flora + biomes |
+| 88 | hammerfell/sentinel | Flora + biomes |
+| 88 | high_rock/stormhaven | NPCs + dialogue |
+| 89 | high_rock/wrothgar | Settlements |
+| 90 | hammerfell/bangkorai | Dungeons |
+| 90 | cyrodiil/colovian_highlands | Settlements |
+| 91 | high_rock/stormhaven | Settlements |
+| 92 | high_rock/bjoulsae | Flora + biomes |
+| 92 | cyrodiil/jerall_mountains | Settlements |
+| 93 | hammerfell/sentinel | Dungeons |
+| 94 | morrowind/grazelands | Quests |
+| 95 | high_rock/daggerfall | Flora + biomes |
+| 95 | high_rock/bjoulsae | Music + ambience |
+| 95 | morrowind/telvannis | Creatures |
+| 95 | hammerfell/dragontail | Creatures |
+| 95 | morrowind/stonefalls | Creatures |
+| 96 | cyrodiil/nibenay_valley | Settlements |
+| 96 | high_rock/rivenspire | Quests |
+| 97 | cyrodiil/great_forest | Settlements |
+| 97 | morrowind/deshaan | Creatures |
+| 98 | high_rock/rivenspire | Flora + biomes |
 
 ### Global (not per region)
 
-* NPC roles in the engine: 32; radiant templates: 33; creature kinds in spawn tables: 91; recipes: 96.
-* Room templates in code (distinct `feature("room:*"|"setpiece:*")` names): 55; cave variant kinds: 10.
-* Places: 4914. Bespoke settlement layouts (plan file or Java case): 40. Quests counted: 1072.
+* NPC roles in the engine: 33; radiant templates: 33; creature kinds in spawn tables: 98; recipes: 105.
+* Room templates in code (distinct `feature("room:*"|"setpiece:*")` names): 59; cave variant kinds: 10.
+* Places: 7546. Bespoke settlement layouts (plan file or Java case): 360. Quests counted: 5739.
 
 <!-- PARITY:END -->
 

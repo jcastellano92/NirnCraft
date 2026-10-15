@@ -1,0 +1,23 @@
+{
+  "id": "west_weald",
+  "why": [
+    "west_weald.L1.warm_limestone_slopes",
+    "west_weald.L4.vine_terrace",
+    "west_weald.L6.estate_hamlets"
+  ],
+  "tint": {
+    "wall": "minecraft:white_terracotta",
+    "wall2": "minecraft:stone_bricks",
+    "low": "minecraft:stone_bricks",
+    "wood": "dark_oak",
+    "roof": "brick",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:bricks",
+    "path": "minecraft:gravel"
+  }
+}

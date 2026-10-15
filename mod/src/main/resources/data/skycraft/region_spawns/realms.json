@@ -3,6 +3,10 @@
     "regions": [
       "minecraft:the_nether"
     ],
+    "why": [
+      "cyrodiil.L11.oblivion_crisis",
+      "gold_coast.L10.gate_remnant_under_kvatch"
+    ],
     "groups": [
       {
         "kind": "hostile",
@@ -130,6 +134,10 @@
       "skycraft:deadlands_harrada_thicket",
       "skycraft:deadlands_blood_fields"
     ],
+    "why": [
+      "cyrodiil.L11.oblivion_crisis",
+      "cyrodiil.L8.daedric_shrines"
+    ],
     "groups": [
       {
         "kind": "hostile",
@@ -166,6 +174,10 @@
   {
     "regions": [
       "minecraft:the_end"
+    ],
+    "why": [
+      "whiterun.L8.honour_and_sovngarde",
+      "skyrim.L8.ancestor_barrows"
     ],
     "groups": [
       {
@@ -207,6 +219,10 @@
     "biomes": [
       "skycraft:shivering_isles_dementia_swamp",
       "skycraft:shivering_isles_dementia_forest"
+    ],
+    "why": [
+      "cyrodiil.L8.daedric_shrines",
+      "nibenay_basin.L10.arrius_cult_cells"
     ],
     "groups": [
       {
@@ -311,6 +327,10 @@
       "skycraft:shivering_isles_mania_crystal_grove",
       "skycraft:shivering_isles_fringe"
     ],
+    "why": [
+      "cyrodiil.L8.daedric_shrines",
+      "cyrodiil.L10.cult_remnants"
+    ],
     "groups": [
       {
         "kind": "hostile",
@@ -378,6 +398,10 @@
     "regions": [
       "skycraft:apocrypha"
     ],
+    "why": [
+      "solstheim.L10.black_book_altars",
+      "solstheim.L11.black_book_return"
+    ],
     "groups": [
       {
         "kind": "hostile",
@@ -429,6 +453,10 @@
   {
     "regions": [
       "skycraft:soul_cairn"
+    ],
+    "why": [
+      "haafingar.L10.soul_cairn_gate",
+      "skyrim.L10.volkihar"
     ],
     "groups": [
       {
@@ -511,6 +539,10 @@
   {
     "regions": [
       "skycraft:coldharbour"
+    ],
+    "why": [
+      "cyrodiil.L11.three_banner_war",
+      "cyrodiil.L10.cult_remnants"
     ],
     "groups": [
       {

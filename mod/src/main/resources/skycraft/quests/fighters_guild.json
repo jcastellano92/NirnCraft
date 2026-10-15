@@ -3,49 +3,185 @@
   "category": "faction",
   "faction": "fighters_guild",
   "region": "cyrodiil/colovian_highlands",
-  "speakers": {"narrator": "Narrator", "rizakar": "Ri'Zakar"},
+  "speakers": {
+    "narrator": "Narrator",
+    "rizakar": "Ri'Zakar"
+  },
   "places": {
-    "rockmilk_cave": {"x": -1660, "z": 4130, "r": 30, "name": "Rockmilk Cave"},
-    "fort_ash": {"x": -1760, "z": 4680, "r": 36, "name": "Fort Ash"},
-    "waters_edge": {"x": 3290, "z": 9690, "r": 40, "name": "Water's Edge"},
-    "blackwood_company_hall": {"x": 3720, "z": 9760, "r": 26, "name": "Blackwood Company Hall"}
+    "rockmilk_cave": {
+      "x": -1660,
+      "z": 4130,
+      "r": 30,
+      "name": "Rockmilk Cave"
+    },
+    "fort_ash": {
+      "x": -1760,
+      "z": 4680,
+      "r": 36,
+      "name": "Fort Ash"
+    },
+    "waters_edge": {
+      "x": 3290,
+      "z": 9690,
+      "r": 40,
+      "name": "Water's Edge"
+    },
+    "blackwood_company_hall": {
+      "x": 3720,
+      "z": 9760,
+      "r": 26,
+      "name": "Blackwood Company Hall"
+    }
   },
   "npcs": [
-    {"id": "vilena_donton", "name": "Vilena Donton", "role": "adventurer", "place": "chorrol", "offset": [4, -3], "female": true, "hall": "fighters_guild",
-     "greet": "The Guild takes honest coin for honest steel. If you want the other kind, the Blackwood Company is hiring, and I'll thank you not to come back."},
-    {"id": "modryn_oreyn", "name": "Modryn Oreyn", "role": "adventurer", "place": "chorrol", "offset": [7, -1], "hall": "fighters_guild",
-     "greet": "I've buried more contracts than most men have signed. Ask your question and I'll tell you whether it'll get you killed."},
-    {"id": "burz_gro_khash", "name": "Burz gro-Khash", "role": "blacksmith", "place": "chorrol", "offset": [2, -6], "hall": "fighters_guild",
-     "greet": "Edge on that blade's gone soft. Leave it on the bench, I'll fix it, and you'll listen to me complain while I do."},
-    {"id": "viranus_donton", "name": "Viranus Donton", "role": "adventurer", "place": "chorrol", "offset": [-3, 5], "hall": "fighters_guild",
-     "greet": "Mother thinks I'm still twelve. I'm not. I can hold a shield as well as anyone in this hall."},
-    {"id": "dulcia_marcanus", "name": "Dulcia Marcanus", "role": "farmer", "place": "chorrol", "offset": [14, 10], "female": true,
-     "greet": "Three goats gone this month and a cart burned. If the Guild doesn't help, I'll have nothing left to pay it with."},
-    {"id": "arelle_vantis", "name": "Arelle Vantis", "role": "adventurer", "place": "leyawiin", "offset": [5, -4], "female": true, "hall": "fighters_guild",
-     "greet": "Welcome to the Leyawiin hall. Don't mind the empty benches. The Blackwood Company took the contracts, and the members followed the coin."},
-    {"id": "wades_in_reeds", "name": "Wades-in-Reeds", "role": "priest", "place": "leyawiin", "offset": [-9, 8],
-     "greet": "The marsh remembers everything, dry-skin. Even the things the city would rather forget."}
+    {
+      "id": "vilena_donton",
+      "name": "Vilena Donton",
+      "role": "adventurer",
+      "place": "chorrol",
+      "offset": [
+        4,
+        -3
+      ],
+      "female": true,
+      "hall": "fighters_guild",
+      "greet": "The Guild takes honest coin for honest steel. If you want the other kind, the Blackwood Company is hiring, and I'll thank you not to come back."
+    },
+    {
+      "id": "modryn_oreyn",
+      "name": "Modryn Oreyn",
+      "role": "adventurer",
+      "place": "chorrol",
+      "offset": [
+        7,
+        -1
+      ],
+      "hall": "fighters_guild",
+      "greet": "I've buried more contracts than most men have signed. Ask your question and I'll tell you whether it'll get you killed."
+    },
+    {
+      "id": "burz_gro_khash",
+      "name": "Burz gro-Khash",
+      "role": "blacksmith",
+      "place": "chorrol",
+      "offset": [
+        2,
+        -6
+      ],
+      "hall": "fighters_guild",
+      "greet": "Edge on that blade's gone soft. Leave it on the bench, I'll fix it, and you'll listen to me complain while I do."
+    },
+    {
+      "id": "viranus_donton",
+      "name": "Viranus Donton",
+      "role": "adventurer",
+      "place": "chorrol",
+      "offset": [
+        -3,
+        5
+      ],
+      "hall": "fighters_guild",
+      "greet": "Mother thinks I'm still twelve. I'm not. I can hold a shield as well as anyone in this hall."
+    },
+    {
+      "id": "dulcia_marcanus",
+      "name": "Dulcia Marcanus",
+      "role": "farmer",
+      "place": "chorrol",
+      "offset": [
+        14,
+        10
+      ],
+      "female": true,
+      "greet": "Three goats gone this month and a cart burned. If the Guild doesn't help, I'll have nothing left to pay it with."
+    },
+    {
+      "id": "arelle_vantis",
+      "name": "Arelle Vantis",
+      "role": "adventurer",
+      "place": "leyawiin",
+      "offset": [
+        5,
+        -4
+      ],
+      "female": true,
+      "hall": "fighters_guild",
+      "greet": "Welcome to the Leyawiin hall. Don't mind the empty benches. The Blackwood Company took the contracts, and the members followed the coin."
+    },
+    {
+      "id": "wades_in_reeds",
+      "name": "Wades-in-Reeds",
+      "role": "priest",
+      "place": "leyawiin",
+      "offset": [
+        -9,
+        8
+      ],
+      "greet": "The marsh remembers everything, dry-skin. Even the things the city would rather forget."
+    }
   ],
   "relics": [
-    {"id": "dulcias_ledger", "name": "Dulcia's Tally Stick", "desc": "Notches for every goat the goblins took. She wants proof the debt is settled.", "icon": 11},
-    {"id": "hist_sap_vial", "name": "Vial of Amber Sap", "desc": "Thick, faintly warm, and sweet-smelling. Taken from a Blackwood mercenary who would not stop fighting.", "icon": 15},
-    {"id": "blackwood_ledger", "name": "Blackwood Supply Ledger", "desc": "Shipments of 'tonic' paid for in Company gold and logged by an Argonian hand.", "icon": 7}
+    {
+      "id": "dulcias_ledger",
+      "name": "Dulcia's Tally Stick",
+      "desc": "Notches for every goat the goblins took. She wants proof the debt is settled.",
+      "icon": 11
+    },
+    {
+      "id": "hist_sap_vial",
+      "name": "Vial of Amber Sap",
+      "desc": "Thick, faintly warm, and sweet-smelling. Taken from a Blackwood mercenary who would not stop fighting.",
+      "icon": 15
+    },
+    {
+      "id": "blackwood_ledger",
+      "name": "Blackwood Supply Ledger",
+      "desc": "Shipments of 'tonic' paid for in Company gold and logged by an Argonian hand.",
+      "icon": 7
+    }
   ],
   "scenes": {
     "fg_sap_revealed": [
-      ["wades_in_reeds", "This is no tonic. It is the sap of a Hist, the trees that remember my people before they had names."],
-      ["wades_in_reeds", "Among the Saxhleel it is taken in rite and in reverence. Drunk by the cup by dry-skins, it would make them strong, and fearless, and then mad."],
-      ["modryn_oreyn", "That explains the Blackwood men who keep fighting with a sword through the lung. The Company is brewing its own soldiers."]
+      [
+        "wades_in_reeds",
+        "This is no tonic. It is the sap of a Hist, the trees that remember my people before they had names."
+      ],
+      [
+        "wades_in_reeds",
+        "Among the Saxhleel it is taken in rite and in reverence. Drunk by the cup by dry-skins, it would make them strong, and fearless, and then mad."
+      ],
+      [
+        "modryn_oreyn",
+        "That explains the Blackwood men who keep fighting with a sword through the lung. The Company is brewing its own soldiers."
+      ]
     ],
     "fg_blackwood_falls": [
-      ["narrator", "In the cellar of the Blackwood hall, a sickly young tree grows from a trough of black-marsh mud, its bark scored with tapping cuts."],
-      ["rizakar", "You think we are thieves of contracts. We are the future of your trade. Steel that does not tire, does not fear, does not ask questions."],
-      ["modryn_oreyn", "Steel that goes mad and kills the client. No. The Guild ends this tonight."]
+      [
+        "narrator",
+        "In the cellar of the Blackwood hall, a sickly young tree grows from a trough of black-marsh mud, its bark scored with tapping cuts."
+      ],
+      [
+        "rizakar",
+        "You think we are thieves of contracts. We are the future of your trade. Steel that does not tire, does not fear, does not ask questions."
+      ],
+      [
+        "modryn_oreyn",
+        "Steel that goes mad and kills the client. No. The Guild ends this tonight."
+      ]
     ],
     "fg_master": [
-      ["vilena_donton", "I've led this Guild through lean years and worse ones. My son is alive because of you, and the Guild still has a name because of you."],
-      ["vilena_donton", "I am tired, and I am done. The hall needs a Master who can still swing a blade. Modryn agrees. So do I."],
-      ["narrator", "Vilena unbuckles the Guildmaster's sword and lays it across your hands. Around the hall, the members raise their cups."]
+      [
+        "vilena_donton",
+        "I've led this Guild through lean years and worse ones. My son is alive because of you, and the Guild still has a name because of you."
+      ],
+      [
+        "vilena_donton",
+        "I am tired, and I am done. The hall needs a Master who can still swing a blade. Modryn agrees. So do I."
+      ],
+      [
+        "narrator",
+        "Vilena unbuckles the Guildmaster's sword and lays it across your hands. Around the hall, the members raise their cups."
+      ]
     ]
   },
   "quests": [
@@ -53,151 +189,519 @@
       "id": "fg_sword_for_hire",
       "title": "A Sword for Hire",
       "start": "npc:vilena_donton",
-      "requires": ["!faction:fighters_guild"],
+      "requires": [
+        "!faction:fighters_guild"
+      ],
       "offer": "I'm looking for paid work with the Guild.",
       "pitch": "Then you'll start where everyone starts, with somebody else's problem. A farmer outside town is losing livestock to goblins out of Rockmilk Cave. Clear them out, keep her happy, and you'll have a place here.",
       "desc": "Vilena Donton, Guildmaster of the Fighters Guild in Chorrol, offered me a first contract: goblins from Rockmilk Cave have been raiding Dulcia Marcanus's farm.",
       "objectives": [
-        {"type": "talk", "npc": "dulcia_marcanus", "text": "Speak with Dulcia Marcanus in Chorrol",
-         "topic": "The Fighters Guild sent me about your goblins.",
-         "reply": "Finally. They come up from Rockmilk Cave, west of the town, after dark. Take my tally stick. When you're done, bring it back and I'll break it over the fire.",
-         "actions": "relic:dulcias_ledger"},
-        {"type": "go", "place": "rockmilk_cave", "text": "Find Rockmilk Cave"},
-        {"type": "clear", "place": "rockmilk_cave", "placement": "structure", "text": "Clear the goblins out of Rockmilk Cave",
-         "spawn": [{"type": "skycraft:riekling", "count": 4, "name": "Goblin Skulker"},
-                   {"type": "skycraft:riekling", "name": "Goblin Totem-Shaman", "boss": true, "hp": 2.5, "dmg": 1.3}],
-         "journal": "The goblins had dragged half of Dulcia's fence into the cave and built themselves a shrine from it. The shaman went down last."},
-        {"type": "deliver", "npc": "dulcia_marcanus", "relic": "dulcias_ledger", "text": "Return Dulcia's tally stick",
-         "topic": "The cave is clear. No more goblins.",
-         "reply": "Then that's the end of it. Here, the Guild's fee, and a bit extra for you. Tell Vilena her people earn their pay."},
-        {"type": "talk", "npc": "vilena_donton", "text": "Report to Vilena Donton",
-         "topic": "The contract is done. Dulcia paid in full.",
-         "reply": "Good. A satisfied client is worth more than a dead goblin. Welcome to the Fighters Guild, Associate. Burz will see to your kit."}
+        {
+          "type": "talk",
+          "npc": "dulcia_marcanus",
+          "text": "Speak with Dulcia Marcanus in Chorrol",
+          "topic": "The Fighters Guild sent me about your goblins.",
+          "reply": "Finally. They come up from Rockmilk Cave, west of the town, after dark. Take my tally stick. When you're done, bring it back and I'll break it over the fire.",
+          "actions": "relic:dulcias_ledger",
+          "place": "chorrol"
+        },
+        {
+          "type": "go",
+          "place": "rockmilk_cave",
+          "text": "Find Rockmilk Cave"
+        },
+        {
+          "type": "clear",
+          "place": "rockmilk_cave",
+          "placement": "structure",
+          "text": "Clear the goblins out of Rockmilk Cave",
+          "spawn": [
+            {
+              "type": "skycraft:riekling",
+              "count": 4,
+              "name": "Goblin Skulker"
+            },
+            {
+              "type": "skycraft:riekling",
+              "name": "Goblin Totem-Shaman",
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.3
+            }
+          ],
+          "journal": "The goblins had dragged half of Dulcia's fence into the cave and built themselves a shrine from it. The shaman went down last."
+        },
+        {
+          "type": "deliver",
+          "npc": "dulcia_marcanus",
+          "relic": "dulcias_ledger",
+          "text": "Return Dulcia's tally stick",
+          "topic": "The cave is clear. No more goblins.",
+          "reply": "Then that's the end of it. Here, the Guild's fee, and a bit extra for you. Tell Vilena her people earn their pay.",
+          "place": "chorrol"
+        },
+        {
+          "type": "talk",
+          "npc": "vilena_donton",
+          "text": "Report to Vilena Donton",
+          "topic": "The contract is done. Dulcia paid in full.",
+          "reply": "Good. A satisfied client is worth more than a dead goblin. Welcome to the Fighters Guild, Associate. Burz will see to your kit.",
+          "place": "chorrol"
+        }
       ],
       "outro": "I joined the Fighters Guild in Chorrol. The work is plain and the pay is fair, and Vilena Donton runs a tight hall.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:steel_sword", "skycraft:iron_chestplate"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:steel_sword",
+          "skycraft:iron_chestplate"
+        ]
+      },
+      "region": "cyrodiil/colovian_highlands",
+      "why": [
+        "cyrodiil/colovian_highlands.L7.colovian_pride",
+        "cyrodiil/colovian_highlands.L8.stendarr_chapel"
+      ],
+      "consequence": {
+        "world_state": "fg_sword_for_hire_resolved",
+        "flag": "conseq_fg_sword_for_hire",
+        "summary": "I joined the Fighters Guild in Chorrol. The work is plain and the pay is fair, and Vilena Donton runs a tight hall."
+      }
     },
     {
       "id": "fg_undercut",
       "title": "Undercut",
       "start": "npc:modryn_oreyn",
-      "requires": ["quest:fg_sword_for_hire|faction:fighters_guild"],
+      "requires": [
+        "quest:fg_sword_for_hire|faction:fighters_guild"
+      ],
       "offer": "Vilena says you need someone in Leyawiin.",
       "pitch": "The Leyawiin hall hasn't sent a contract north in two months. The Blackwood Company sells the same work for half the price and twice the noise. Go down there, see Arelle Vantis, and find out how they're doing it.",
       "desc": "Modryn Oreyn sent me south to Leyawiin. The Blackwood Company, a rival mercenary outfit, has been stealing the Guild's contracts there, and nobody knows how they can afford their prices.",
       "objectives": [
-        {"type": "go", "place": "leyawiin", "text": "Travel to Leyawiin"},
-        {"type": "talk", "npc": "arelle_vantis", "text": "Speak with Arelle Vantis at the Leyawiin guild hall",
-         "topic": "Modryn sent me. What is the Blackwood Company doing down here?",
-         "reply": "Winning. Water's Edge asked us to deal with trolls in the reeds. By the time I'd written the contract, the Blackwood men had already ridden out. Go and see what kind of job they did."},
-        {"type": "go", "place": "waters_edge", "text": "Go to the village of Water's Edge"},
-        {"type": "clear", "place": "waters_edge", "text": "Kill the trolls the Blackwood Company left alive",
-         "spawn": [{"type": "skycraft:troll", "count": 2, "name": "Marsh Troll"}],
-         "journal": "The Blackwood men had taken the village's money, set half the reed huts burning, and left two trolls wounded and furious. I finished their work."},
-        {"type": "talk", "npc": "arelle_vantis", "text": "Report back to Arelle Vantis",
-         "choices": [
-           {"label": "Their recruits fight like madmen. Something's wrong with them.", "reply": "You noticed that too. The villagers said one of them laughed while a troll was chewing on his arm. Tell Modryn. I'll keep my ear to the ground here.", "actions": "flag:fg_noticed_madness"},
-           {"label": "They're cheap and careless. The Guild can outwork them.", "reply": "I'd like to believe that. But cheap and careless doesn't explain how they win every fight. Tell Modryn what you saw."}
-         ]}
+        {
+          "type": "go",
+          "place": "leyawiin",
+          "text": "Travel to Leyawiin"
+        },
+        {
+          "type": "talk",
+          "npc": "arelle_vantis",
+          "text": "Speak with Arelle Vantis at the Leyawiin guild hall",
+          "topic": "Modryn sent me. What is the Blackwood Company doing down here?",
+          "reply": "Winning. Water's Edge asked us to deal with trolls in the reeds. By the time I'd written the contract, the Blackwood men had already ridden out. Go and see what kind of job they did.",
+          "place": "leyawiin"
+        },
+        {
+          "type": "go",
+          "place": "waters_edge",
+          "text": "Go to the village of Water's Edge"
+        },
+        {
+          "type": "clear",
+          "place": "waters_edge",
+          "text": "Kill the trolls the Blackwood Company left alive",
+          "spawn": [
+            {
+              "type": "skycraft:troll",
+              "count": 2,
+              "name": "Marsh Troll"
+            }
+          ],
+          "journal": "The Blackwood men had taken the village's money, set half the reed huts burning, and left two trolls wounded and furious. I finished their work."
+        },
+        {
+          "type": "talk",
+          "npc": "arelle_vantis",
+          "text": "Report back to Arelle Vantis",
+          "choices": [
+            {
+              "label": "Their recruits fight like madmen. Something's wrong with them.",
+              "reply": "You noticed that too. The villagers said one of them laughed while a troll was chewing on his arm. Tell Modryn. I'll keep my ear to the ground here.",
+              "actions": "flag:fg_noticed_madness"
+            },
+            {
+              "label": "They're cheap and careless. The Guild can outwork them.",
+              "reply": "I'd like to believe that. But cheap and careless doesn't explain how they win every fight. Tell Modryn what you saw."
+            }
+          ],
+          "place": "leyawiin"
+        }
       ],
       "outro": "The Blackwood Company is careless with its clients and reckless with its own men, and still it wins. Arelle Vantis and I both think there's more to it.",
-      "rewards": {"gold": 250, "faction_points": 3}
+      "rewards": {
+        "gold": 250,
+        "faction_points": 3
+      },
+      "region": "cyrodiil/colovian_highlands",
+      "why": [
+        "cyrodiil/colovian_highlands.L7.guild_town",
+        "cyrodiil/colovian_highlands.L8.oak_reverence"
+      ],
+      "consequence": {
+        "world_state": "fg_undercut_resolved",
+        "flag": "conseq_fg_undercut",
+        "summary": "The Blackwood Company is careless with its clients and reckless with its own men, and still it wins. Arelle Vantis and I both think there's more to it."
+      }
     },
     {
       "id": "fg_lost_son",
       "title": "The Guildmaster's Son",
       "start": "npc:modryn_oreyn",
-      "requires": ["quest:fg_undercut"],
+      "requires": [
+        "quest:fg_undercut"
+      ],
       "offer": "You look like you've been waiting for me.",
       "pitch": "Viranus Donton took a contract on his own and walked straight into a bandit nest at Fort Ash. They've sent his mother a ransom note. Vilena won't beg, and she won't let the Guild pay. So you're going to go and get him, quietly, before she does something foolish.",
       "desc": "Vilena Donton's son, Viranus, is being held for ransom by bandits at Fort Ash, west of Chorrol. Modryn Oreyn asked me to bring him home before his mother rides out herself.",
       "on_start": "relocate:viranus_donton:fort_ash",
       "objectives": [
-        {"type": "go", "place": "fort_ash", "text": "Travel to Fort Ash"},
-        {"type": "clear", "place": "fort_ash", "placement": "structure", "text": "Fight through the bandits holding Fort Ash",
-         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Ash Bandit"}]},
-        {"type": "kill", "place": "fort_ash", "placement": "structure", "text": "Defeat the bandit chief, Hollis the Coin",
-         "spawn": [{"type": "skycraft:bandit_chief", "name": "Hollis the Coin", "target": true, "boss": true, "hp": 2.5, "dmg": 1.3}],
-         "journal": "Hollis the Coin had a chest of ransom letters, half of them addressed to families in Chorrol. He won't be writing more."},
-        {"type": "talk", "npc": "viranus_donton", "text": "Free Viranus Donton",
-         "topic": "Your mother sent me. Can you walk?",
-         "reply": "Walk, yes. Look her in the eye, not yet. I thought I could take them alone. Let's go before I think too hard about that."},
-        {"type": "escort", "npc": "viranus_donton", "place": "chorrol", "text": "Bring Viranus home to Chorrol"},
-        {"type": "talk", "npc": "vilena_donton", "text": "Speak with Vilena Donton",
-         "topic": "Viranus is home. He's bruised, but he's whole.",
-         "reply": "I told Modryn not to send anyone. I'm glad he didn't listen. You have my thanks, and more than that, you have my trust.",
-         "actions": "relocate:viranus_donton:chorrol:-3:5"}
+        {
+          "type": "go",
+          "place": "fort_ash",
+          "text": "Travel to Fort Ash"
+        },
+        {
+          "type": "clear",
+          "place": "fort_ash",
+          "placement": "structure",
+          "text": "Fight through the bandits holding Fort Ash",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4,
+              "name": "Ash Bandit"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fort_ash",
+          "placement": "structure",
+          "text": "Defeat the bandit chief, Hollis the Coin",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Hollis the Coin",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.3
+            }
+          ],
+          "journal": "Hollis the Coin had a chest of ransom letters, half of them addressed to families in Chorrol. He won't be writing more."
+        },
+        {
+          "type": "talk",
+          "npc": "viranus_donton",
+          "text": "Free Viranus Donton",
+          "topic": "Your mother sent me. Can you walk?",
+          "reply": "Walk, yes. Look her in the eye, not yet. I thought I could take them alone. Let's go before I think too hard about that.",
+          "place": "chorrol"
+        },
+        {
+          "type": "escort",
+          "npc": "viranus_donton",
+          "place": "chorrol",
+          "text": "Bring Viranus home to Chorrol"
+        },
+        {
+          "type": "talk",
+          "npc": "vilena_donton",
+          "text": "Speak with Vilena Donton",
+          "topic": "Viranus is home. He's bruised, but he's whole.",
+          "reply": "I told Modryn not to send anyone. I'm glad he didn't listen. You have my thanks, and more than that, you have my trust.",
+          "actions": "relocate:viranus_donton:chorrol:-3:5",
+          "place": "chorrol"
+        }
       ],
       "outro": "I brought Viranus Donton home from Fort Ash. Vilena did not weep, and did not scold him, but she kept her hand on his shoulder for a long time.",
-      "rewards": {"gold": 400, "faction_points": 5, "items": [{"item": "minecraft:shield", "name": "Donton Family Shield", "enchant": {"unbreaking": 2}}]}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 5,
+        "items": [
+          {
+            "item": "minecraft:shield",
+            "name": "Donton Family Shield",
+            "enchant": {
+              "unbreaking": 2
+            }
+          }
+        ]
+      },
+      "region": "cyrodiil/colovian_highlands",
+      "why": [
+        "cyrodiil/colovian_highlands.L8.stendarr_chapel",
+        "cyrodiil/colovian_highlands.L9.guild_rivalry"
+      ],
+      "consequence": {
+        "world_state": "fg_lost_son_resolved",
+        "flag": "conseq_fg_lost_son",
+        "summary": "I brought Viranus Donton home from Fort Ash. Vilena did not weep, and did not scold him, but she kept her hand on his shoulder for a long time."
+      }
     },
     {
       "id": "fg_bitter_sap",
       "title": "Bitter Sap",
       "start": "auto",
-      "requires": ["quest:fg_lost_son"],
+      "requires": [
+        "quest:fg_lost_son"
+      ],
       "desc": "Arelle Vantis sent word from Leyawiin: a Blackwood mercenary went berserk near Water's Edge and is still fighting off anyone who comes close. Modryn wants to know what makes a man fight like that.",
       "objectives": [
-        {"type": "go", "place": "waters_edge", "offset": [60, -40], "text": "Find the crazed Blackwood mercenary near Water's Edge"},
-        {"type": "kill", "place": "waters_edge", "offset": [60, -40], "text": "Put down the crazed mercenary",
-         "spawn": [{"type": "npc:thug", "name": "Raving Blackwood Mercenary", "target": true, "boss": true, "hp": 2.5, "dmg": 1.5, "hostile": true, "armor": "#3b2a1a"}],
-         "journal": "He kept fighting long after he should have fallen. When it was over, his eyes were yellow at the edges and his breath smelled of something sweet."},
-        {"type": "retrieve", "place": "waters_edge", "offset": [60, -40], "relic": "hist_sap_vial", "radius": 10, "text": "Search the mercenary's belongings"},
-        {"type": "deliver", "npc": "modryn_oreyn", "relic": "hist_sap_vial", "text": "Bring the vial to Modryn Oreyn in Chorrol",
-         "topic": "The mercenary carried this. He fought like nothing could hurt him.",
-         "reply": "Never seen the like. It isn't a potion an alchemist would brew. Leyawiin sits on the edge of the marsh; someone there will know what this is. Take it back south and ask."}
+        {
+          "type": "go",
+          "place": "waters_edge",
+          "offset": [
+            60,
+            -40
+          ],
+          "text": "Find the crazed Blackwood mercenary near Water's Edge"
+        },
+        {
+          "type": "kill",
+          "place": "waters_edge",
+          "offset": [
+            60,
+            -40
+          ],
+          "text": "Put down the crazed mercenary",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Raving Blackwood Mercenary",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#3b2a1a"
+            }
+          ],
+          "journal": "He kept fighting long after he should have fallen. When it was over, his eyes were yellow at the edges and his breath smelled of something sweet."
+        },
+        {
+          "type": "retrieve",
+          "place": "waters_edge",
+          "offset": [
+            60,
+            -40
+          ],
+          "relic": "hist_sap_vial",
+          "radius": 10,
+          "text": "Search the mercenary's belongings"
+        },
+        {
+          "type": "deliver",
+          "npc": "modryn_oreyn",
+          "relic": "hist_sap_vial",
+          "text": "Bring the vial to Modryn Oreyn in Chorrol",
+          "topic": "The mercenary carried this. He fought like nothing could hurt him.",
+          "reply": "Never seen the like. It isn't a potion an alchemist would brew. Leyawiin sits on the edge of the marsh; someone there will know what this is. Take it back south and ask.",
+          "place": "chorrol"
+        }
       ],
       "outro": "The Blackwood Company's mercenaries are drinking something that makes them fearless and strong. Modryn doesn't know what it is, but he means to find out.",
-      "rewards": {"gold": 300, "faction_points": 6}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 6
+      },
+      "region": "cyrodiil/colovian_highlands",
+      "why": [
+        "cyrodiil/colovian_highlands.L8.oak_reverence",
+        "cyrodiil/colovian_highlands.L9.herder_logger_feud"
+      ],
+      "consequence": {
+        "world_state": "fg_bitter_sap_resolved",
+        "flag": "conseq_fg_bitter_sap",
+        "summary": "The Blackwood Company's mercenaries are drinking something that makes them fearless and strong. Modryn doesn't know what it is, but he means to find out."
+      }
     },
     {
       "id": "fg_what_the_marsh_remembers",
       "title": "What the Marsh Remembers",
       "start": "auto",
-      "requires": ["quest:fg_bitter_sap"],
+      "requires": [
+        "quest:fg_bitter_sap"
+      ],
       "desc": "The amber sap from the Blackwood mercenary needs a name. Leyawiin's Argonians may know it, and the Company's own supply records might tell me where it comes from.",
       "objectives": [
-        {"type": "talk", "npc": "wades_in_reeds", "text": "Ask Wades-in-Reeds in Leyawiin about the sap",
-         "topic": "Do you know what this is?",
-         "reply": "I know it. Every Saxhleel would know it. Where did a dry-skin get this? No, do not tell me yet. Find where it is kept, and then we will speak of what it is."},
-        {"type": "clear", "place": "waters_edge", "offset": [-70, 50], "text": "Raid the Blackwood supply camp outside Water's Edge",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Blackwood Guard", "hostile": true, "armor": "#3b2a1a"}]},
-        {"type": "retrieve", "place": "waters_edge", "offset": [-70, 50], "relic": "blackwood_ledger", "radius": 10, "text": "Take the Company's supply ledger"},
-        {"type": "talk", "npc": "wades_in_reeds", "text": "Show Wades-in-Reeds what you found",
-         "topic": "The Company ships this sap from its hall in Leyawiin. It's all in here.",
-         "reply": "Then it is worse than I feared. They have a tree. A young one, stolen from the root-lands. Go to your Guild. I will not stand in the way of what you do next.",
-         "actions": "scene:fg_sap_revealed"},
-        {"type": "deliver", "npc": "vilena_donton", "relic": "blackwood_ledger", "text": "Bring the ledger to Vilena Donton",
-         "topic": "The Blackwood Company is feeding its mercenaries Hist sap. Here's the proof.",
-         "reply": "Poisoning their own men to win contracts. I won't let the trade sink to that. Modryn will lead the assault on their hall, and you'll be beside him."}
+        {
+          "type": "talk",
+          "npc": "wades_in_reeds",
+          "text": "Ask Wades-in-Reeds in Leyawiin about the sap",
+          "topic": "Do you know what this is?",
+          "reply": "I know it. Every Saxhleel would know it. Where did a dry-skin get this? No, do not tell me yet. Find where it is kept, and then we will speak of what it is.",
+          "place": "leyawiin"
+        },
+        {
+          "type": "clear",
+          "place": "waters_edge",
+          "offset": [
+            -70,
+            50
+          ],
+          "text": "Raid the Blackwood supply camp outside Water's Edge",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Blackwood Guard",
+              "hostile": true,
+              "armor": "#3b2a1a"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "waters_edge",
+          "offset": [
+            -70,
+            50
+          ],
+          "relic": "blackwood_ledger",
+          "radius": 10,
+          "text": "Take the Company's supply ledger"
+        },
+        {
+          "type": "talk",
+          "npc": "wades_in_reeds",
+          "text": "Show Wades-in-Reeds what you found",
+          "topic": "The Company ships this sap from its hall in Leyawiin. It's all in here.",
+          "reply": "Then it is worse than I feared. They have a tree. A young one, stolen from the root-lands. Go to your Guild. I will not stand in the way of what you do next.",
+          "actions": "scene:fg_sap_revealed",
+          "place": "leyawiin"
+        },
+        {
+          "type": "deliver",
+          "npc": "vilena_donton",
+          "relic": "blackwood_ledger",
+          "text": "Bring the ledger to Vilena Donton",
+          "topic": "The Blackwood Company is feeding its mercenaries Hist sap. Here's the proof.",
+          "reply": "Poisoning their own men to win contracts. I won't let the trade sink to that. Modryn will lead the assault on their hall, and you'll be beside him.",
+          "place": "chorrol"
+        }
       ],
       "outro": "The Blackwood Company has a stolen Hist sapling hidden in its Leyawiin hall and has been drinking its sap to fight like monsters. Vilena has ordered the Guild to end it.",
-      "rewards": {"gold": 400, "faction_points": 8}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 8
+      },
+      "region": "cyrodiil/colovian_highlands",
+      "why": [
+        "cyrodiil/colovian_highlands.L9.guild_rivalry",
+        "cyrodiil/colovian_highlands.L10.goblin_wars"
+      ],
+      "consequence": {
+        "world_state": "fg_what_the_marsh_remembers_resolved",
+        "flag": "conseq_fg_what_the_marsh_remembers",
+        "summary": "The Blackwood Company has a stolen Hist sapling hidden in its Leyawiin hall and has been drinking its sap to fight like monsters. Vilena has ordered the Guild to end it."
+      }
     },
     {
       "id": "fg_blackwood_falls",
       "title": "The Fall of the Blackwood",
       "start": "auto",
-      "requires": ["quest:fg_what_the_marsh_remembers"],
+      "requires": [
+        "quest:fg_what_the_marsh_remembers"
+      ],
       "desc": "Vilena Donton has sent Modryn Oreyn and me to Leyawiin to break the Blackwood Company in its own hall, destroy the stolen Hist, and bring down its leader, Ri'Zakar.",
       "objectives": [
-        {"type": "go", "place": "blackwood_company_hall", "text": "Meet Modryn outside the Blackwood Company hall", "actions": "summon:modryn_oreyn"},
-        {"type": "clear", "place": "blackwood_company_hall", "placement": "structure", "text": "Fight through the sap-maddened Blackwood mercenaries",
-         "spawn": [{"type": "npc:thug", "count": 4, "name": "Blackwood Mercenary", "hostile": true, "hp": 1.5, "armor": "#3b2a1a"},
-                   {"type": "skycraft:wamasu", "name": "Company Wamasu", "hp": 1.5}]},
-        {"type": "kill", "place": "blackwood_company_hall", "placement": "structure", "text": "Defeat Ri'Zakar, master of the Blackwood Company",
-         "spawn": [{"type": "npc:adventurer", "name": "Ri'Zakar", "target": true, "boss": true, "hp": 3.5, "dmg": 1.6, "hostile": true, "armor": "#2f3b1f", "weapon": "skycraft:ebony_war_axe"}],
-         "actions": "scene:fg_blackwood_falls",
-         "journal": "Ri'Zakar fought with the sap in his blood and the Hist sapling behind him. When he fell, Modryn put the torch to the tree."},
-        {"type": "talk", "npc": "vilena_donton", "text": "Return to Vilena Donton in Chorrol",
-         "topic": "The Blackwood Company is finished. Their hall is ashes.",
-         "reply": "Then the Guild still means something. Stand there a moment. I have something to say to the whole hall.",
-         "actions": "scene:fg_master"}
+        {
+          "type": "go",
+          "place": "blackwood_company_hall",
+          "text": "Meet Modryn outside the Blackwood Company hall",
+          "actions": "summon:modryn_oreyn"
+        },
+        {
+          "type": "clear",
+          "place": "blackwood_company_hall",
+          "placement": "structure",
+          "text": "Fight through the sap-maddened Blackwood mercenaries",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 4,
+              "name": "Blackwood Mercenary",
+              "hostile": true,
+              "hp": 1.5,
+              "armor": "#3b2a1a"
+            },
+            {
+              "type": "skycraft:wamasu",
+              "name": "Company Wamasu",
+              "hp": 1.5
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "blackwood_company_hall",
+          "placement": "structure",
+          "text": "Defeat Ri'Zakar, master of the Blackwood Company",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Ri'Zakar",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.6,
+              "hostile": true,
+              "armor": "#2f3b1f",
+              "weapon": "skycraft:ebony_war_axe"
+            }
+          ],
+          "actions": "scene:fg_blackwood_falls",
+          "journal": "Ri'Zakar fought with the sap in his blood and the Hist sapling behind him. When he fell, Modryn put the torch to the tree."
+        },
+        {
+          "type": "talk",
+          "npc": "vilena_donton",
+          "text": "Return to Vilena Donton in Chorrol",
+          "topic": "The Blackwood Company is finished. Their hall is ashes.",
+          "reply": "Then the Guild still means something. Stand there a moment. I have something to say to the whole hall.",
+          "actions": "scene:fg_master",
+          "place": "chorrol"
+        }
       ],
       "outro": "The Blackwood Company is broken and its stolen Hist burned. Vilena Donton stepped down and named me Master of the Fighters Guild, with Modryn Oreyn at my side.",
-      "rewards": {"gold": 1500, "faction_points": 50, "flags": ["fg_master"], "perks": 1,
-                  "items": [{"item": "skycraft:ebony_greatsword", "name": "Donton's Oath", "enchant": {"sharpness": 4, "unbreaking": 3}},
-                            {"item": "skycraft:steel_plate_chestplate", "name": "Guildmaster's Cuirass", "enchant": {"protection": 3}}]}
+      "rewards": {
+        "gold": 1500,
+        "faction_points": 50,
+        "flags": [
+          "fg_master"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "skycraft:ebony_greatsword",
+            "name": "Donton's Oath",
+            "enchant": {
+              "sharpness": 4,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:steel_plate_chestplate",
+            "name": "Guildmaster's Cuirass",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "cyrodiil/colovian_highlands",
+      "why": [
+        "cyrodiil/colovian_highlands.L9.herder_logger_feud",
+        "cyrodiil/colovian_highlands.L10.deep_ones_below"
+      ],
+      "consequence": {
+        "world_state": "fg_blackwood_falls_resolved",
+        "flag": "conseq_fg_blackwood_falls",
+        "summary": "The Blackwood Company is broken and its stolen Hist burned. Vilena Donton stepped down and named me Master of the Fighters Guild, with Modryn Oreyn at my side."
+      }
     }
   ]
 }

@@ -3,40 +3,145 @@
   "category": "faction",
   "faction": "crowns",
   "region": "hammerfell/alikr_desert",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "tomb_of_anahbi": {"x": -7700, "z": 5400, "r": 36, "name": "Tomb of Anahbi"},
-    "shrine_of_the_ansei": {"x": -8650, "z": 5350, "r": 30, "name": "Shrine of the Ansei"},
-    "well_of_the_long_road": {"x": -7600, "z": 5500, "r": 30, "name": "Well of the Long Road"},
-    "sandfang_camp": {"x": -7400, "z": 5150, "r": 32, "name": "Sandfang Raider Camp"}
+    "tomb_of_anahbi": {
+      "x": -7700,
+      "z": 5400,
+      "r": 36,
+      "name": "Tomb of Anahbi"
+    },
+    "shrine_of_the_ansei": {
+      "x": -8650,
+      "z": 5350,
+      "r": 30,
+      "name": "Shrine of the Ansei"
+    },
+    "well_of_the_long_road": {
+      "x": -7600,
+      "z": 5500,
+      "r": 30,
+      "name": "Well of the Long Road"
+    },
+    "sandfang_camp": {
+      "x": -7400,
+      "z": 5150,
+      "r": 32,
+      "name": "Sandfang Raider Camp"
+    }
   },
   "npcs": [
-    {"id": "hamaad_at_hel_ra", "name": "Lord Hamaad at-Hel Ra", "role": "jarl", "place": "sentinel", "offset": [5, -4], "hall": "crowns",
-     "greet": "My grandfather's grandfather crossed the sea with a sword and the songs of Yokuda. I still have the songs. Have you come to learn them, or to sell me something?"},
-    {"id": "ansei_zahreh", "name": "Ansei Zahreh", "role": "adventurer", "place": "sentinel", "offset": [8, 2], "female": true, "hall": "crowns",
-     "greet": "The Shehai is not a blade you carry. It is a blade you become. Most who ask me about it are disappointed by that answer."},
-    {"id": "lady_yasreen", "name": "Lady Yasreen at-Hel Ra", "role": "steward", "place": "sentinel", "offset": [3, 6], "female": true, "hall": "crowns",
-     "greet": "My father believes the old ways will keep us. I believe they will, if someone is willing to bleed for them."},
-    {"id": "farouz_the_drover", "name": "Farouz the Drover", "role": "caravan_trader", "place": "sentinel", "offset": [16, 12],
-     "greet": "Salt, dyes and Yokudan steel. Everything in these crates is older than the Empire's roads and worth more than its coin."},
-    {"id": "ahzid_at_hel_ra", "name": "Ahzid at-Hel Ra", "role": "merchant", "place": "sentinel", "offset": [-12, 9],
-     "greet": "Cousin Hamaad thinks the past is a fortress. I think it is a tomb. Lovely weather, isn't it?"}
+    {
+      "id": "hamaad_at_hel_ra",
+      "name": "Lord Hamaad at-Hel Ra",
+      "role": "jarl",
+      "place": "sentinel",
+      "offset": [
+        5,
+        -4
+      ],
+      "hall": "crowns",
+      "greet": "My grandfather's grandfather crossed the sea with a sword and the songs of Yokuda. I still have the songs. Have you come to learn them, or to sell me something?"
+    },
+    {
+      "id": "ansei_zahreh",
+      "name": "Ansei Zahreh",
+      "role": "adventurer",
+      "place": "sentinel",
+      "offset": [
+        8,
+        2
+      ],
+      "female": true,
+      "hall": "crowns",
+      "greet": "The Shehai is not a blade you carry. It is a blade you become. Most who ask me about it are disappointed by that answer."
+    },
+    {
+      "id": "lady_yasreen",
+      "name": "Lady Yasreen at-Hel Ra",
+      "role": "steward",
+      "place": "sentinel",
+      "offset": [
+        3,
+        6
+      ],
+      "female": true,
+      "hall": "crowns",
+      "greet": "My father believes the old ways will keep us. I believe they will, if someone is willing to bleed for them."
+    },
+    {
+      "id": "farouz_the_drover",
+      "name": "Farouz the Drover",
+      "role": "caravan_trader",
+      "place": "sentinel",
+      "offset": [
+        16,
+        12
+      ],
+      "greet": "Salt, dyes and Yokudan steel. Everything in these crates is older than the Empire's roads and worth more than its coin."
+    },
+    {
+      "id": "ahzid_at_hel_ra",
+      "name": "Ahzid at-Hel Ra",
+      "role": "merchant",
+      "place": "sentinel",
+      "offset": [
+        -12,
+        9
+      ],
+      "greet": "Cousin Hamaad thinks the past is a fortress. I think it is a tomb. Lovely weather, isn't it?"
+    }
   ],
   "relics": [
-    {"id": "cr_anahbi_mask", "name": "Funeral Mask of Anahbi", "desc": "Beaten gold over a face that died four hundred years ago. Dented where the robbers pried at it.", "icon": 26},
-    {"id": "cr_tribute_casket", "name": "Tribute Casket of the High King", "desc": "A sealed casket of salt-silver bound for the High King's court. The raiders had not yet broken the wax.", "icon": 17},
-    {"id": "cr_ahzid_letter", "name": "Ahzid's Letter", "desc": "Promises of Forebear gold and Imperial favour to whoever holds Lord Hamaad's seat after him. Signed in Ahzid's own hand.", "icon": 11}
+    {
+      "id": "cr_anahbi_mask",
+      "name": "Funeral Mask of Anahbi",
+      "desc": "Beaten gold over a face that died four hundred years ago. Dented where the robbers pried at it.",
+      "icon": 26
+    },
+    {
+      "id": "cr_tribute_casket",
+      "name": "Tribute Casket of the High King",
+      "desc": "A sealed casket of salt-silver bound for the High King's court. The raiders had not yet broken the wax.",
+      "icon": 17
+    },
+    {
+      "id": "cr_ahzid_letter",
+      "name": "Ahzid's Letter",
+      "desc": "Promises of Forebear gold and Imperial favour to whoever holds Lord Hamaad's seat after him. Signed in Ahzid's own hand.",
+      "icon": 11
+    }
   ],
   "scenes": {
     "cr_investiture": [
-      ["narrator", "Torches ring the mouth of Anahbi's tomb. Crown lords in white and gold stand silent while an old singer chants the names of the dead, one after another, back to the drowning of Yokuda."],
-      ["hamaad_at_hel_ra", "My daughter kneels where I knelt, and where my father knelt before me. If any here deny her right, let them say so before the ancestors."],
-      ["narrator", "From the dunes behind the gathering comes the scrape of drawn steel."]
+      [
+        "narrator",
+        "Torches ring the mouth of Anahbi's tomb. Crown lords in white and gold stand silent while an old singer chants the names of the dead, one after another, back to the drowning of Yokuda."
+      ],
+      [
+        "hamaad_at_hel_ra",
+        "My daughter kneels where I knelt, and where my father knelt before me. If any here deny her right, let them say so before the ancestors."
+      ],
+      [
+        "narrator",
+        "From the dunes behind the gathering comes the scrape of drawn steel."
+      ]
     ],
     "cr_lord_of_the_crown": [
-      ["hamaad_at_hel_ra", "In Yokuda, a sword-singer who saved a lord's line became part of that line. We have forgotten much since the crossing. Not that."],
-      ["lady_yasreen", "Anahbi carried this blade when the Ra Gada came ashore. It has waited long enough in the dark."],
-      ["narrator", "The lords touch their brows and then their hilts, the old salute, and speak your name as one of their own."]
+      [
+        "hamaad_at_hel_ra",
+        "In Yokuda, a sword-singer who saved a lord's line became part of that line. We have forgotten much since the crossing. Not that."
+      ],
+      [
+        "lady_yasreen",
+        "Anahbi carried this blade when the Ra Gada came ashore. It has waited long enough in the dark."
+      ],
+      [
+        "narrator",
+        "The lords touch their brows and then their hilts, the old salute, and speak your name as one of their own."
+      ]
     ]
   },
   "quests": [
@@ -44,136 +149,445 @@
       "id": "cr_dust_of_the_ancestors",
       "title": "Dust of the Ancestors",
       "start": "npc:hamaad_at_hel_ra",
-      "requires": ["!faction:crowns", "!faction:forebears"],
+      "requires": [
+        "!faction:crowns",
+        "!faction:forebears"
+      ],
       "offer": "I'm told the Crowns still keep to the old ways. I'd like to serve.",
       "pitch": "Serve? Outlanders say that word easily. East of the city lies the tomb of Anahbi, a Ra Gada warlord of my blood, and grave-robbers have broken its seals. Drive them out and bring back what they took, and I will believe you mean it.",
       "desc": "Lord Hamaad at-Hel Ra, a lord of the Crowns in Sentinel, asked me to drive grave-robbers from the tomb of his ancestor Anahbi and recover what they stole.",
       "objectives": [
-        {"type": "go", "place": "tomb_of_anahbi", "text": "Travel to the tomb of Anahbi"},
-        {"type": "clear", "place": "tomb_of_anahbi", "placement": "structure", "text": "Drive the robbers from the tomb",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Tomb Robber", "hostile": true, "armor": "#8a7050"},
-                   {"type": "minecraft:husk", "count": 2, "name": "Wakened Ra Gada"}],
-         "journal": "The robbers had broken three burial niches and woken what slept inside. The dead fought them as hard as they fought me."},
-        {"type": "retrieve", "place": "tomb_of_anahbi", "placement": "structure", "relic": "cr_anahbi_mask", "radius": 10, "text": "Recover the funeral mask of Anahbi"},
-        {"type": "deliver", "npc": "hamaad_at_hel_ra", "relic": "cr_anahbi_mask", "text": "Return the mask to Lord Hamaad in Sentinel",
-         "topic": "The robbers are dead, and Anahbi's mask is back in the family. Almost.",
-         "reply": "Almost is honest. I will carry it back myself at dawn, with the proper songs. You have done a Crown's work. From today you stand among us as a Supplicant. It is the first step, and the longest."}
+        {
+          "type": "go",
+          "place": "tomb_of_anahbi",
+          "text": "Travel to the tomb of Anahbi"
+        },
+        {
+          "type": "clear",
+          "place": "tomb_of_anahbi",
+          "placement": "structure",
+          "text": "Drive the robbers from the tomb",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Tomb Robber",
+              "hostile": true,
+              "armor": "#8a7050"
+            },
+            {
+              "type": "minecraft:husk",
+              "count": 2,
+              "name": "Wakened Ra Gada"
+            }
+          ],
+          "journal": "The robbers had broken three burial niches and woken what slept inside. The dead fought them as hard as they fought me."
+        },
+        {
+          "type": "retrieve",
+          "place": "tomb_of_anahbi",
+          "placement": "structure",
+          "relic": "cr_anahbi_mask",
+          "radius": 10,
+          "text": "Recover the funeral mask of Anahbi"
+        },
+        {
+          "type": "deliver",
+          "npc": "hamaad_at_hel_ra",
+          "relic": "cr_anahbi_mask",
+          "text": "Return the mask to Lord Hamaad in Sentinel",
+          "topic": "The robbers are dead, and Anahbi's mask is back in the family. Almost.",
+          "reply": "Almost is honest. I will carry it back myself at dawn, with the proper songs. You have done a Crown's work. From today you stand among us as a Supplicant. It is the first step, and the longest."
+        }
       ],
       "outro": "I recovered the funeral mask of Anahbi from grave-robbers. Lord Hamaad accepted me among the Crowns, the old Redguard nobility who keep faith with Yokuda and the High King.",
-      "rewards": {"gold": 200, "join": true, "items": ["skycraft:ra_gada_boots", "skycraft:steel_sword"]}
+      "rewards": {
+        "gold": 200,
+        "join": true,
+        "items": [
+          "skycraft:ra_gada_boots",
+          "skycraft:steel_sword"
+        ]
+      },
+      "why": [
+        "alikr_desert.L9.well_feud",
+        "alikr_desert.L8.yokudan_gods"
+      ]
     },
     {
       "id": "cr_the_singing_blade",
       "title": "The Singing Blade",
       "start": "npc:ansei_zahreh",
-      "requires": ["quest:cr_dust_of_the_ancestors|faction:crowns"],
+      "requires": [
+        "quest:cr_dust_of_the_ancestors|faction:crowns"
+      ],
       "offer": "Lord Hamaad says you train sword-singers.",
       "pitch": "I train people who wish to be sword-singers. Few become them. Go to the Shrine of the Ansei on the western cliffs, sit with the old blades until the wind stops arguing with you, and then show me whether there is a song in your hands.",
       "desc": "Ansei Zahreh agreed to test me in the way of the sword-singers. At the Shrine of the Ansei I must meditate, and then face whatever answers.",
       "on_start": "relocate:ansei_zahreh:shrine_of_the_ansei:4:3",
       "objectives": [
-        {"type": "go", "place": "shrine_of_the_ansei", "text": "Climb to the Shrine of the Ansei"},
-        {"type": "wait", "hours": 2, "place": "shrine_of_the_ansei", "text": "Meditate among the old blades",
-         "journal": "I sat until my legs ached and the wind dropped. When I stood, I could feel my own pulse in the hilt of my sword."},
-        {"type": "talk", "npc": "ansei_zahreh", "text": "Speak with Ansei Zahreh",
-         "topic": "The wind has gone quiet.",
-         "reply": "Then you are listening. The Shehai is the blade of the spirit, a sword made of nothing but will. Before I show you how it sings, tell me what you would use it for."},
-        {"type": "talk", "npc": "ansei_zahreh", "text": "Answer Zahreh's question",
-         "choices": [
-           {"label": "To shield those who can't shield themselves.", "reply": "A good answer, and an old one. The first Ansei said the same and died young. Be wiser than he was.", "actions": "flag:cr_shehai_shield"},
-           {"label": "To win. Nothing more.", "reply": "Honest. Hunding would have laughed at you and then taught you anyway. Winning is a beginning.", "actions": "flag:cr_shehai_victory"},
-           {"label": "To honour the ones who carried it before me.", "reply": "Then you understand more than most of my students already. Good.", "actions": "flag:cr_shehai_honor"}
-         ]},
-        {"type": "kill", "place": "shrine_of_the_ansei", "offset": [12, -8], "text": "Face the echo of a fallen sword-singer",
-         "spawn": [{"type": "npc:adventurer", "name": "Echo of the Ansei", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4, "hostile": true, "armor": "#d8c8a0", "weapon": "skycraft:steel_sword"}],
-         "journal": "The figure that rose from the shrine moved the way Zahreh moved, without a wasted step. When my blade finally found it, it bowed and was gone."},
-        {"type": "talk", "npc": "ansei_zahreh", "text": "Return to Ansei Zahreh",
-         "topic": "It bowed before it vanished.",
-         "reply": "They always do, to those who earn it. You have taken the first step on the Walking Way. Wear these; a sword-singer should not look like a street guard.",
-         "actions": "relocate:ansei_zahreh:sentinel:8:2"}
+        {
+          "type": "go",
+          "place": "shrine_of_the_ansei",
+          "text": "Climb to the Shrine of the Ansei"
+        },
+        {
+          "type": "wait",
+          "hours": 2,
+          "place": "shrine_of_the_ansei",
+          "text": "Meditate among the old blades",
+          "journal": "I sat until my legs ached and the wind dropped. When I stood, I could feel my own pulse in the hilt of my sword."
+        },
+        {
+          "type": "talk",
+          "npc": "ansei_zahreh",
+          "text": "Speak with Ansei Zahreh",
+          "topic": "The wind has gone quiet.",
+          "reply": "Then you are listening. The Shehai is the blade of the spirit, a sword made of nothing but will. Before I show you how it sings, tell me what you would use it for."
+        },
+        {
+          "type": "talk",
+          "npc": "ansei_zahreh",
+          "text": "Answer Zahreh's question",
+          "choices": [
+            {
+              "label": "To shield those who can't shield themselves.",
+              "reply": "A good answer, and an old one. The first Ansei said the same and died young. Be wiser than he was.",
+              "actions": "flag:cr_shehai_shield"
+            },
+            {
+              "label": "To win. Nothing more.",
+              "reply": "Honest. Hunding would have laughed at you and then taught you anyway. Winning is a beginning.",
+              "actions": "flag:cr_shehai_victory"
+            },
+            {
+              "label": "To honour the ones who carried it before me.",
+              "reply": "Then you understand more than most of my students already. Good.",
+              "actions": "flag:cr_shehai_honor"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "shrine_of_the_ansei",
+          "offset": [
+            12,
+            -8
+          ],
+          "text": "Face the echo of a fallen sword-singer",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Echo of the Ansei",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true,
+              "armor": "#d8c8a0",
+              "weapon": "skycraft:steel_sword"
+            }
+          ],
+          "journal": "The figure that rose from the shrine moved the way Zahreh moved, without a wasted step. When my blade finally found it, it bowed and was gone."
+        },
+        {
+          "type": "talk",
+          "npc": "ansei_zahreh",
+          "text": "Return to Ansei Zahreh",
+          "topic": "It bowed before it vanished.",
+          "reply": "They always do, to those who earn it. You have taken the first step on the Walking Way. Wear these; a sword-singer should not look like a street guard.",
+          "actions": "relocate:ansei_zahreh:sentinel:8:2"
+        }
       ],
       "outro": "I meditated at the Shrine of the Ansei and bested the echo of a sword-singer who died long ago. Ansei Zahreh says I have begun to walk the way of the Shehai.",
-      "rewards": {"gold": 300, "faction_points": 3, "items": ["skycraft:ra_gada_helmet"]}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 3,
+        "items": [
+          "skycraft:ra_gada_helmet"
+        ]
+      },
+      "why": [
+        "alikr_desert.L9.well_feud",
+        "alikr_desert.L8.yokudan_gods"
+      ]
     },
     {
       "id": "cr_the_salt_road",
       "title": "The Salt Road",
       "start": "npc:farouz_the_drover",
-      "requires": ["quest:cr_the_singing_blade"],
+      "requires": [
+        "quest:cr_the_singing_blade"
+      ],
       "offer": "Lord Hamaad says your caravan needs a sword.",
       "pitch": "It needs ten swords and a miracle, but I will take you. Raiders out of the deep Alik'r have bled every caravan on the eastern road this season, and this one carries the Crowns' tribute to the High King. If it is late, my lord is shamed. If it is lost, so am I, permanently.",
       "desc": "Farouz the Drover is carrying the Crowns' tribute to the High King along the caravan road east of Sentinel. Alik'r raiders have struck every caravan this season, and Lord Hamaad wants this one protected.",
       "objectives": [
-        {"type": "escort", "npc": "farouz_the_drover", "place": "well_of_the_long_road", "text": "Escort Farouz to the Well of the Long Road"},
-        {"type": "clear", "place": "well_of_the_long_road", "text": "Kill the sand serpents nesting at the well",
-         "spawn": [{"type": "skycraft:sand_serpent", "count": 2, "name": "Dune Serpent"}],
-         "journal": "The serpents had come up out of the sand to drink. Farouz watched from the top of a crate and offered advice."},
-        {"type": "talk", "npc": "farouz_the_drover", "text": "Speak with Farouz",
-         "topic": "The well is clear. Is everyone whole?",
-         "reply": "Everyone but my lord's honour. The raiders struck the rear wagon while you fought the serpents and rode off with the tribute casket, the clever dogs. Their camp is in the rocks to the south. Bring it back."},
-        {"type": "kill", "place": "sandfang_camp", "text": "Kill Qasim Sandfang, chief of the raiders",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Sandfang Raider", "hostile": true, "armor": "#b08850"},
-                   {"type": "skycraft:bandit_chief", "name": "Qasim Sandfang", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4}],
-         "journal": "Qasim Sandfang wore three Crown signet rings on a cord around his neck, taken from three caravans. He will not take a fourth."},
-        {"type": "retrieve", "place": "sandfang_camp", "relic": "cr_tribute_casket", "radius": 12, "text": "Recover the High King's tribute"},
-        {"type": "deliver", "npc": "hamaad_at_hel_ra", "relic": "cr_tribute_casket", "text": "Bring the tribute back to Lord Hamaad",
-         "topic": "The tribute is safe. The raiders are not.",
-         "reply": "Farouz sent a rider ahead with the tale. He says you fought like a whirlwind. He also says he fought beside you, so I will believe half. The casket goes to the High King with my thanks, and with your name in the letter."}
+        {
+          "type": "escort",
+          "npc": "farouz_the_drover",
+          "place": "well_of_the_long_road",
+          "text": "Escort Farouz to the Well of the Long Road"
+        },
+        {
+          "type": "clear",
+          "place": "well_of_the_long_road",
+          "text": "Kill the sand serpents nesting at the well",
+          "spawn": [
+            {
+              "type": "skycraft:sand_serpent",
+              "count": 2,
+              "name": "Dune Serpent"
+            }
+          ],
+          "journal": "The serpents had come up out of the sand to drink. Farouz watched from the top of a crate and offered advice."
+        },
+        {
+          "type": "talk",
+          "npc": "farouz_the_drover",
+          "text": "Speak with Farouz",
+          "topic": "The well is clear. Is everyone whole?",
+          "reply": "Everyone but my lord's honour. The raiders struck the rear wagon while you fought the serpents and rode off with the tribute casket, the clever dogs. Their camp is in the rocks to the south. Bring it back."
+        },
+        {
+          "type": "kill",
+          "place": "sandfang_camp",
+          "text": "Kill Qasim Sandfang, chief of the raiders",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Sandfang Raider",
+              "hostile": true,
+              "armor": "#b08850"
+            },
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Qasim Sandfang",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4
+            }
+          ],
+          "journal": "Qasim Sandfang wore three Crown signet rings on a cord around his neck, taken from three caravans. He will not take a fourth."
+        },
+        {
+          "type": "retrieve",
+          "place": "sandfang_camp",
+          "relic": "cr_tribute_casket",
+          "radius": 12,
+          "text": "Recover the High King's tribute"
+        },
+        {
+          "type": "deliver",
+          "npc": "hamaad_at_hel_ra",
+          "relic": "cr_tribute_casket",
+          "text": "Bring the tribute back to Lord Hamaad",
+          "topic": "The tribute is safe. The raiders are not.",
+          "reply": "Farouz sent a rider ahead with the tale. He says you fought like a whirlwind. He also says he fought beside you, so I will believe half. The casket goes to the High King with my thanks, and with your name in the letter."
+        }
       ],
       "outro": "Alik'r raiders stole the Crowns' tribute to the High King on the caravan road. I took it back from their camp, and Lord Hamaad sent it on with my name attached.",
-      "rewards": {"gold": 400, "faction_points": 4, "items": ["skycraft:ra_gada_leggings"]}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 4,
+        "items": [
+          "skycraft:ra_gada_leggings"
+        ]
+      },
+      "why": [
+        "alikr_desert.L9.well_feud",
+        "alikr_desert.L8.yokudan_gods"
+      ]
     },
     {
       "id": "cr_the_empty_chair",
       "title": "The Empty Chair",
       "start": "auto",
-      "requires": ["quest:cr_the_salt_road"],
+      "requires": [
+        "quest:cr_the_salt_road"
+      ],
       "desc": "Lord Hamaad is failing. He has named his daughter Yasreen his heir, but his nephew Ahzid has been dining with Forebear merchants and Imperial factors. Lady Yasreen asked me to learn what her cousin is planning.",
       "objectives": [
-        {"type": "talk", "npc": "lady_yasreen", "text": "Speak with Lady Yasreen in Sentinel",
-         "topic": "I heard your father is ill.",
-         "reply": "My father is dying, slowly and with great dignity, and my cousin cannot wait. Ahzid keeps rooms by the harbour where the Forebear traders lodge. Find out who he writes to."},
-        {"type": "retrieve", "place": "sentinel", "offset": [-40, 30], "relic": "cr_ahzid_letter", "radius": 6, "text": "Search Ahzid's rooms by the harbour"},
-        {"type": "clear", "place": "sentinel", "offset": [-40, 30], "text": "Deal with the hired blades who followed you out",
-         "spawn": [{"type": "npc:thug", "count": 2, "name": "Ahzid's Hired Blade", "hostile": true, "armor": "#3a7a9a"}],
-         "journal": "Two sellswords were waiting in the alley behind Ahzid's rooms. They had Forebear coin in their purses and very little sense."},
-        {"type": "talk", "npc": "lady_yasreen", "text": "Show Lady Yasreen the letter",
-         "topic": "Ahzid has promised your father's seat to the Forebears in exchange for their gold.",
-         "reply": "Then he has sold something that was never his to sell. What do we do with it? I would hear your counsel before I hear my own temper."},
-        {"type": "talk", "npc": "lady_yasreen", "text": "Advise Lady Yasreen",
-         "choices": [
-           {"label": "Read it before the whole court. Let Sentinel see what he is.", "reply": "Openly, then, as the old lords did. He will have no friends left by nightfall, and very little left to lose. Watch your back.", "actions": "flag:cr_exposed_openly"},
-           {"label": "Keep it quiet. Let him think he's safe, and watch who comes to his door.", "reply": "Patience. My father would approve. We will see which Forebear houses are fool enough to show their faces.", "actions": "flag:cr_kept_secret"}
-         ]}
+        {
+          "type": "talk",
+          "npc": "lady_yasreen",
+          "text": "Speak with Lady Yasreen in Sentinel",
+          "topic": "I heard your father is ill.",
+          "reply": "My father is dying, slowly and with great dignity, and my cousin cannot wait. Ahzid keeps rooms by the harbour where the Forebear traders lodge. Find out who he writes to."
+        },
+        {
+          "type": "retrieve",
+          "place": "sentinel",
+          "offset": [
+            -40,
+            30
+          ],
+          "relic": "cr_ahzid_letter",
+          "radius": 6,
+          "text": "Search Ahzid's rooms by the harbour"
+        },
+        {
+          "type": "clear",
+          "place": "sentinel",
+          "offset": [
+            -40,
+            30
+          ],
+          "text": "Deal with the hired blades who followed you out",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Ahzid's Hired Blade",
+              "hostile": true,
+              "armor": "#3a7a9a"
+            }
+          ],
+          "journal": "Two sellswords were waiting in the alley behind Ahzid's rooms. They had Forebear coin in their purses and very little sense."
+        },
+        {
+          "type": "talk",
+          "npc": "lady_yasreen",
+          "text": "Show Lady Yasreen the letter",
+          "topic": "Ahzid has promised your father's seat to the Forebears in exchange for their gold.",
+          "reply": "Then he has sold something that was never his to sell. What do we do with it? I would hear your counsel before I hear my own temper."
+        },
+        {
+          "type": "talk",
+          "npc": "lady_yasreen",
+          "text": "Advise Lady Yasreen",
+          "choices": [
+            {
+              "label": "Read it before the whole court. Let Sentinel see what he is.",
+              "reply": "Openly, then, as the old lords did. He will have no friends left by nightfall, and very little left to lose. Watch your back.",
+              "actions": "flag:cr_exposed_openly"
+            },
+            {
+              "label": "Keep it quiet. Let him think he's safe, and watch who comes to his door.",
+              "reply": "Patience. My father would approve. We will see which Forebear houses are fool enough to show their faces.",
+              "actions": "flag:cr_kept_secret"
+            }
+          ]
+        }
       ],
       "outro": "Ahzid at-Hel Ra has been trading promises of his uncle's seat for Forebear gold. Lady Yasreen holds his letter now, and the succession will be settled at the tomb of Anahbi.",
-      "rewards": {"gold": 400, "faction_points": 4}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 4
+      },
+      "why": [
+        "alikr_desert.L9.well_feud",
+        "alikr_desert.L8.yokudan_gods"
+      ]
     },
     {
       "id": "cr_lord_of_the_crown",
       "title": "Lord of the Crown",
       "start": "auto",
-      "requires": ["quest:cr_the_empty_chair"],
+      "requires": [
+        "quest:cr_the_empty_chair"
+      ],
       "desc": "Lady Yasreen will be confirmed as her father's heir before the tomb of Anahbi, as Crown heirs have been for centuries. Ahzid will not let it happen quietly.",
       "on_start": "relocate:lady_yasreen:tomb_of_anahbi:4:4;relocate:hamaad_at_hel_ra:tomb_of_anahbi:7:2",
       "objectives": [
-        {"type": "go", "place": "tomb_of_anahbi", "text": "Attend the investiture at the tomb of Anahbi", "actions": "scene:cr_investiture"},
-        {"type": "clear", "place": "tomb_of_anahbi", "offset": [20, 14], "text": "Defend the rite from Ahzid's sellswords",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Forebear Sellsword", "hostile": true, "armor": "#3a7a9a"},
-                   {"type": "npc:thug", "count": 2, "name": "Ahzid's Loyal Blade", "hostile": true, "armor": "#3a7a9a", "if": "!flag:cr_exposed_openly"}]},
-        {"type": "kill", "place": "tomb_of_anahbi", "offset": [20, 14], "text": "Defeat Ahzid at-Hel Ra",
-         "spawn": [{"type": "npc:adventurer", "name": "Ahzid at-Hel Ra", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true, "armor": "#2a5a7a", "weapon": "skycraft:elven_sword"}],
-         "actions": "retire:ahzid_at_hel_ra",
-         "journal": "Ahzid fought well for a man who swore the old ways were dead. At the end he called on Anahbi's name. The tomb did not answer him."},
-        {"type": "talk", "npc": "hamaad_at_hel_ra", "text": "Speak with Lord Hamaad",
-         "topic": "It's over. Ahzid is dead.",
-         "reply": "Then my nephew chose the sword over the song, and the sword answered him. Stand before the tomb, friend. There is one more rite today, and it is yours.",
-         "actions": "scene:cr_lord_of_the_crown;relocate:lady_yasreen:sentinel:3:6;relocate:hamaad_at_hel_ra:sentinel:5:-4"}
+        {
+          "type": "go",
+          "place": "tomb_of_anahbi",
+          "text": "Attend the investiture at the tomb of Anahbi",
+          "actions": "scene:cr_investiture"
+        },
+        {
+          "type": "clear",
+          "place": "tomb_of_anahbi",
+          "offset": [
+            20,
+            14
+          ],
+          "text": "Defend the rite from Ahzid's sellswords",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Forebear Sellsword",
+              "hostile": true,
+              "armor": "#3a7a9a"
+            },
+            {
+              "type": "npc:thug",
+              "count": 2,
+              "name": "Ahzid's Loyal Blade",
+              "hostile": true,
+              "armor": "#3a7a9a",
+              "if": "!flag:cr_exposed_openly"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "tomb_of_anahbi",
+          "offset": [
+            20,
+            14
+          ],
+          "text": "Defeat Ahzid at-Hel Ra",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Ahzid at-Hel Ra",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#2a5a7a",
+              "weapon": "skycraft:elven_sword"
+            }
+          ],
+          "actions": "retire:ahzid_at_hel_ra",
+          "journal": "Ahzid fought well for a man who swore the old ways were dead. At the end he called on Anahbi's name. The tomb did not answer him."
+        },
+        {
+          "type": "talk",
+          "npc": "hamaad_at_hel_ra",
+          "text": "Speak with Lord Hamaad",
+          "topic": "It's over. Ahzid is dead.",
+          "reply": "Then my nephew chose the sword over the song, and the sword answered him. Stand before the tomb, friend. There is one more rite today, and it is yours.",
+          "actions": "scene:cr_lord_of_the_crown;relocate:lady_yasreen:sentinel:3:6;relocate:hamaad_at_hel_ra:sentinel:5:-4"
+        }
       ],
       "outro": "Lady Yasreen was confirmed as heir before the tomb of Anahbi, and Ahzid paid for his bargain with his life. Lord Hamaad named me a Lord of the Crown and gave me the blade his ancestor carried ashore.",
-      "rewards": {"gold": 1200, "faction_points": 9, "perks": 1, "flags": ["cr_lord_of_the_crown"],
-                  "items": [{"item": "skycraft:ebony_sword", "name": "Anahbi's Crescent", "enchant": {"sharpness": 4, "unbreaking": 3}},
-                            {"item": "skycraft:ra_gada_chestplate", "name": "Cuirass of the Ansei-Lords", "enchant": {"protection": 3, "fire_protection": 2}}]}
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 9,
+        "perks": 1,
+        "flags": [
+          "cr_lord_of_the_crown"
+        ],
+        "items": [
+          {
+            "item": "skycraft:ebony_sword",
+            "name": "Anahbi's Crescent",
+            "enchant": {
+              "sharpness": 4,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:ra_gada_chestplate",
+            "name": "Cuirass of the Ansei-Lords",
+            "enchant": {
+              "protection": 3,
+              "fire_protection": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "alikr_desert.L9.well_feud",
+        "alikr_desert.L8.yokudan_gods"
+      ]
     }
   ]
 }

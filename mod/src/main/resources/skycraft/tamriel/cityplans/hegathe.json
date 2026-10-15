@@ -1,0 +1,442 @@
+{
+  "id": "hegathe",
+  "sil": "cliff-citadel-first-landfall",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 96,
+  "reach": 104,
+  "fill_gap": 2,
+  "inn_key": "hegathe_first_anchor_inn",
+  "names": {
+    "inn": "hegathe_first_anchor_inn",
+    "store": "hegathe_pilgrim_provisioner",
+    "smithy": "hegathe_ra_gada_blade_forge"
+  },
+  "titles": {
+    "hegathe_landmark": "Great Sanctuary of the Ra Gada Landfall",
+    "hegathe_ancestral_citadel": "Ancestral Citadel of Hegathe",
+    "hegathe_first_anchor_inn": "The First Anchor Inn",
+    "hegathe_bronze_shield_rest": "The Bronze Shield Rest",
+    "hegathe_pilgrim_provisioner": "Landfall Pilgrim Provisioners",
+    "hegathe_ra_gada_blade_forge": "First-Wave Shehai-Steel Smithy",
+    "hegathe_myrrh_and_frankincense": "Sacred Incense & Natron Apothecary",
+    "hegathe_yokudan_chronicle_hall": "Hall of the Yokudan Roll-Keepers",
+    "hegathe_votive_gold_smiths": "Votive Lamp & Gold-Leaf Smiths",
+    "hegathe_crown_jurists_hall": "High College of Crown Na-Totambu",
+    "hegathe_ruptga_great_fane": "Cliff-Crowning Fane of Ruptga & Morwha",
+    "hegathe_kings_necropolis": "Cliff-Cut Necropolis of the First Kings",
+    "hegathe_high_elder_house": "Crown High-Elder's Stone Courtyard",
+    "hegathe_cliff_steps_landing": "Sea-Steps Galley Landing",
+    "hegathe_landfall_bastion": "Landfall Sea-Wall Watchtower",
+    "hegathe_desert_post_yard": "Alik'r Edge Camel & Horse Yard",
+    "hegathe_market_plaza": "Great Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 92,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        -40
+      ],
+      "face": "south",
+      "name": "hegathe_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        -35
+      ],
+      "face": "south",
+      "name": "hegathe_ancestral_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        55,
+        -38
+      ],
+      "face": "west",
+      "name": "hegathe_first_anchor_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        42,
+        -11
+      ],
+      "face": "west",
+      "name": "hegathe_bronze_shield_rest"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        67,
+        6
+      ],
+      "face": "west",
+      "name": "hegathe_pilgrim_provisioner"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        39,
+        18
+      ],
+      "face": "west",
+      "name": "hegathe_ra_gada_blade_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        47,
+        47
+      ],
+      "face": "north",
+      "name": "hegathe_myrrh_and_frankincense"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        18,
+        39
+      ],
+      "face": "north",
+      "name": "hegathe_yokudan_chronicle_hall"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        6,
+        67
+      ],
+      "face": "north",
+      "name": "hegathe_votive_gold_smiths"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -11,
+        42
+      ],
+      "face": "north",
+      "name": "hegathe_crown_jurists_hall"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -38,
+        55
+      ],
+      "face": "north",
+      "name": "hegathe_ruptga_great_fane"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -35,
+        25
+      ],
+      "face": "east",
+      "name": "hegathe_kings_necropolis"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -64,
+        19
+      ],
+      "face": "east",
+      "name": "hegathe_high_elder_house"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -43,
+        -3
+      ],
+      "face": "east",
+      "name": "hegathe_cliff_steps_landing"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -61,
+        -27
+      ],
+      "face": "east",
+      "name": "hegathe_landfall_bastion"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -29
+      ],
+      "face": "east",
+      "name": "hegathe_desert_post_yard"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -80
+      ],
+      "to": [
+        0,
+        80
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -80,
+        0
+      ],
+      "to": [
+        80,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -49,
+        -49
+      ],
+      "to": [
+        49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        -49
+      ],
+      "to": [
+        49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        49
+      ],
+      "to": [
+        -49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -49,
+        49
+      ],
+      "to": [
+        -49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        63
+      ],
+      "to": [
+        8,
+        63
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "hegathe_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        48
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "count": 3
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:akatosh",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "birch",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

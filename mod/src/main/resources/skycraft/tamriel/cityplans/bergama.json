@@ -1,0 +1,356 @@
+{
+  "id": "bergama",
+  "sil": "oasis-palm-ring-walled-town",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "bergama_shaded_palm_serai",
+  "names": {
+    "inn": "bergama_shaded_palm_serai",
+    "store": "bergama_waterskin_provisioner",
+    "smithy": "bergama_well_chain_forge"
+  },
+  "titles": {
+    "bergama_landmark": "Bergama Oasis Sanctuary",
+    "bergama_oasis_kasbah": "Kasbah of Bergama Oasis",
+    "bergama_shaded_palm_serai": "The Shaded Date-Palm Serai",
+    "bergama_waterskin_provisioner": "Waterskin & Dried-Fig Provisioners",
+    "bergama_well_chain_forge": "Well-Chain & Stirrup Smithy",
+    "bergama_tamarind_still": "Tamarind & Rosewater Apothecary",
+    "bergama_morwha_fountain_fane": "Fountain-Sanctuary of Morwha",
+    "bergama_qanat_keepers_hall": "Hall of the Sworn Well-Keepers",
+    "bergama_white_linen_looms": "Oasis-Flax & Headscarf Looms",
+    "bergama_dune_gate_watch": "Sand-Wall Gate Watchhouse",
+    "bergama_watering_lines": "Caravan Watering-Trough Stables",
+    "bergama_market_plaza": "Bergama Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "bergama_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "bergama_oasis_kasbah"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "bergama_shaded_palm_serai"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "bergama_waterskin_provisioner"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "bergama_well_chain_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "bergama_tamarind_still"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "bergama_morwha_fountain_fane"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "bergama_qanat_keepers_hall"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "bergama_white_linen_looms"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "bergama_dune_gate_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "bergama_watering_lines"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "bergama_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 5,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 4,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

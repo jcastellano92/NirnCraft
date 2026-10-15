@@ -2,36 +2,976 @@
   "_doc": "Redguard style sheet: flat-roofed sandstone houses with outside stairs, domed halls, shaded alleys round a bazaar.",
   "windows": "fence",
   "hearth": false,
-  "faith": ["arkay", "akatosh", "zenithar", "mara", "kynareth"],
-  "crops": ["wheat", "orchard", "carrots"],
-  "animals": ["camel", "goat", "chicken", "horse"],
-  "colors": ["red", "cyan", "yellow", "orange"],
-  "forms": {"cluster": 4, "crossroads": 2, "harbour": 2, "hilltop": 1},
-  "roofs": {"poor": {"flat": 1}, "common": {"flat": 4, "dome": 1}, "wealthy": {"flat": 2, "dome": 2}, "noble": {"dome": 3, "crenel": 1}},
-  "halls": {"dome": 2},
-  "footprints": {"poor": {"rect": 1}, "common": {"rect": 2, "l": 2}, "wealthy": {"l": 2, "u": 1}, "noble": {"u": 2, "t": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
-  "rules": {"timber": 0.0, "porch": 0.15, "balcony": 0.3, "outsideStairs": 0.6, "shutters": 0.0, "flowerBoxes": 0.1, "chimney": 0.0, "annex": 0.3, "banners": 0.7, "lanterns": 0.6, "awning": 0.8, "tower": 0.4},
-  "tiers": {
+  "faith": [
+    "arkay",
+    "akatosh",
+    "zenithar",
+    "mara",
+    "kynareth"
+  ],
+  "crops": [
+    "wheat",
+    "orchard",
+    "carrots"
+  ],
+  "animals": [
+    "camel",
+    "goat",
+    "chicken",
+    "horse"
+  ],
+  "colors": [
+    "red",
+    "cyan",
+    "yellow",
+    "orange"
+  ],
+  "forms": {
+    "cluster": 4,
+    "crossroads": 2,
+    "harbour": 2,
+    "hilltop": 1
+  },
+  "roofs": {
+    "poor": {
+      "flat": 1
+    },
+    "common": {
+      "flat": 4,
+      "dome": 1
+    },
+    "wealthy": {
+      "flat": 2,
+      "dome": 2
+    },
+    "noble": {
+      "dome": 3,
+      "crenel": 1
+    }
+  },
+  "halls": {
+    "dome": 2
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 2,
+      "l": 2
+    },
+    "wealthy": {
+      "l": 2,
+      "u": 1
+    },
+    "noble": {
+      "u": 2,
+      "t": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "sandstone", "low": "sandstone", "roof": "sandstone", "wood": "acacia", "accent": "red"},
-      {"wall": "packed_mud", "low": "sandstone", "roof": "mud_brick", "wood": "acacia", "accent": "orange"},
-      {"wall": "smooth_sandstone", "wall2": "sandstone", "low": "cobblestone", "roof": "sandstone", "wood": "spruce", "accent": "cyan"}
+      1,
+      1
     ],
     "common": [
-      {"wall": "smooth_sandstone", "low": "sandstone", "roof": "smooth_sandstone", "roofFull": "cyan_terracotta", "wood": "acacia", "accent": "red"},
-      {"wall": "sandstone", "wall2": "cut_sandstone", "low": "smooth_sandstone", "roof": "sandstone", "wood": "jungle", "accent": "cyan"},
-      {"wall": "white_terracotta", "low": "sandstone", "roof": "smooth_sandstone", "wood": "acacia", "accent": "yellow"}
+      1,
+      2
     ],
     "wealthy": [
-      {"wall": "smooth_sandstone", "wall2": "cut_sandstone", "low": "chiseled_sandstone", "roof": "smooth_sandstone", "roofFull": "cyan_terracotta", "wood": "acacia", "accent": "red"},
-      {"wall": "cut_sandstone", "low": "smooth_sandstone", "roof": "smooth_sandstone", "roofFull": "light_blue_terracotta", "wood": "dark_oak", "accent": "cyan"},
-      {"wall": "calcite", "low": "smooth_sandstone", "roof": "sandstone", "roofFull": "cyan_terracotta", "wood": "acacia", "accent": "orange"}
+      2,
+      2
     ],
     "noble": [
-      {"wall": "chiseled_sandstone", "wall2": "smooth_sandstone", "low": "cut_sandstone", "roof": "smooth_sandstone", "roofFull": "cyan_terracotta", "wood": "dark_oak", "column": "chiseled_sandstone", "accent": "red"},
-      {"wall": "smooth_sandstone", "low": "chiseled_sandstone", "roof": "smooth_sandstone", "roofFull": "gold_block", "wood": "acacia", "accent": "yellow"},
-      {"wall": "calcite", "wall2": "smooth_quartz", "low": "cut_sandstone", "roof": "smooth_quartz", "roofFull": "light_blue_terracotta", "wood": "acacia", "accent": "cyan"}
+      2,
+      3
     ]
+  },
+  "rules": {
+    "timber": 0.0,
+    "porch": 0.15,
+    "balcony": 0.3,
+    "outsideStairs": 0.6,
+    "shutters": 0.0,
+    "flowerBoxes": 0.1,
+    "chimney": 0.0,
+    "annex": 0.3,
+    "banners": 0.7,
+    "lanterns": 0.6,
+    "awning": 0.8,
+    "tower": 0.4
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "sandstone",
+        "low": "sandstone",
+        "roof": "sandstone",
+        "wood": "acacia",
+        "accent": "red"
+      },
+      {
+        "wall": "packed_mud",
+        "low": "sandstone",
+        "roof": "mud_brick",
+        "wood": "acacia",
+        "accent": "orange"
+      },
+      {
+        "wall": "smooth_sandstone",
+        "wall2": "sandstone",
+        "low": "cobblestone",
+        "roof": "sandstone",
+        "wood": "spruce",
+        "accent": "cyan"
+      }
+    ],
+    "common": [
+      {
+        "wall": "smooth_sandstone",
+        "low": "sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "cyan_terracotta",
+        "wood": "acacia",
+        "accent": "red"
+      },
+      {
+        "wall": "sandstone",
+        "wall2": "cut_sandstone",
+        "low": "smooth_sandstone",
+        "roof": "sandstone",
+        "wood": "jungle",
+        "accent": "cyan"
+      },
+      {
+        "wall": "white_terracotta",
+        "low": "sandstone",
+        "roof": "smooth_sandstone",
+        "wood": "acacia",
+        "accent": "yellow"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "smooth_sandstone",
+        "wall2": "cut_sandstone",
+        "low": "chiseled_sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "cyan_terracotta",
+        "wood": "acacia",
+        "accent": "red"
+      },
+      {
+        "wall": "cut_sandstone",
+        "low": "smooth_sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "light_blue_terracotta",
+        "wood": "dark_oak",
+        "accent": "cyan"
+      },
+      {
+        "wall": "calcite",
+        "low": "smooth_sandstone",
+        "roof": "sandstone",
+        "roofFull": "cyan_terracotta",
+        "wood": "acacia",
+        "accent": "orange"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "chiseled_sandstone",
+        "wall2": "smooth_sandstone",
+        "low": "cut_sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "cyan_terracotta",
+        "wood": "dark_oak",
+        "column": "chiseled_sandstone",
+        "accent": "red"
+      },
+      {
+        "wall": "smooth_sandstone",
+        "low": "chiseled_sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "gold_block",
+        "wood": "acacia",
+        "accent": "yellow"
+      },
+      {
+        "wall": "calcite",
+        "wall2": "smooth_quartz",
+        "low": "cut_sandstone",
+        "roof": "smooth_quartz",
+        "roofFull": "light_blue_terracotta",
+        "wood": "acacia",
+        "accent": "cyan"
+      }
+    ]
+  },
+  "styles": {
+    "sentinel": {
+      "forms": {
+        "harbour": 3,
+        "grid": 2,
+        "cluster": 2
+      },
+      "windows": "fence",
+      "rules": {
+        "timber": 0.0,
+        "porch": 0.2,
+        "balcony": 0.45,
+        "outsideStairs": 0.65,
+        "awning": 0.85,
+        "banners": 0.8,
+        "lanterns": 0.7,
+        "tower": 0.55
+      },
+      "roofs": {
+        "poor": {
+          "flat": 2
+        },
+        "common": {
+          "flat": 3,
+          "dome": 2
+        },
+        "wealthy": {
+          "dome": 3,
+          "flat": 2
+        },
+        "noble": {
+          "dome": 4,
+          "crenel": 1
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "salt-parapet adobe",
+            "wall": "sandstone",
+            "low": "sandstone",
+            "roof": "sandstone",
+            "wood": "acacia",
+            "accent": "cyan"
+          },
+          {
+            "name": "fish-quay flat-house",
+            "wall": "packed_mud",
+            "low": "sandstone",
+            "roof": "mud_brick",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "cistern-lane cell",
+            "wall": "smooth_sandstone",
+            "low": "cobblestone",
+            "roof": "sandstone",
+            "wood": "jungle",
+            "accent": "red"
+          }
+        ],
+        "common": [
+          {
+            "name": "blue-tile arcade house",
+            "wall": "smooth_sandstone",
+            "low": "sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "cyan"
+          },
+          {
+            "name": "bazaar-step residence",
+            "wall": "cut_sandstone",
+            "low": "smooth_sandstone",
+            "roof": "sandstone",
+            "wood": "jungle",
+            "accent": "yellow"
+          },
+          {
+            "name": "wind-scoop courtyard",
+            "wall": "white_terracotta",
+            "low": "sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "light_blue_terracotta",
+            "wood": "acacia",
+            "accent": "red"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "bay-factor's pavilion",
+            "wall": "smooth_sandstone",
+            "wall2": "cut_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "cyan"
+          },
+          {
+            "name": "mosaic-arch mansion",
+            "wall": "calcite",
+            "low": "smooth_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "light_blue_terracotta",
+            "wood": "dark_oak",
+            "accent": "yellow"
+          },
+          {
+            "name": "harbour-master hall",
+            "wall": "cut_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "red"
+          }
+        ],
+        "noble": [
+          {
+            "name": "forebear grand palace",
+            "wall": "chiseled_sandstone",
+            "wall2": "smooth_sandstone",
+            "low": "cut_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "dark_oak",
+            "column": "chiseled_sandstone",
+            "accent": "cyan"
+          },
+          {
+            "name": "gilded-dome seraglio",
+            "wall": "smooth_quartz",
+            "wall2": "calcite",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "gold_block",
+            "wood": "acacia",
+            "accent": "yellow"
+          },
+          {
+            "name": "admiralty citadel",
+            "wall": "cut_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "light_blue_terracotta",
+            "wood": "dark_oak",
+            "column": "quartz_pillar",
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "stros_mkai": {
+      "forms": {
+        "harbour": 4,
+        "cluster": 2,
+        "crossroads": 1
+      },
+      "windows": "fence",
+      "rules": {
+        "timber": 0.15,
+        "porch": 0.25,
+        "balcony": 0.4,
+        "outsideStairs": 0.55,
+        "awning": 0.9,
+        "banners": 0.75,
+        "lanterns": 0.75,
+        "tower": 0.5
+      },
+      "roofs": {
+        "poor": {
+          "flat": 2
+        },
+        "common": {
+          "flat": 3,
+          "dome": 1
+        },
+        "wealthy": {
+          "dome": 2,
+          "flat": 2
+        },
+        "noble": {
+          "dome": 3,
+          "crenel": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "careenage shack",
+            "wall": "sandstone",
+            "low": "cobblestone",
+            "roof": "sandstone",
+            "wood": "jungle",
+            "accent": "red"
+          },
+          {
+            "name": "coral-lime hovel",
+            "wall": "white_terracotta",
+            "low": "sandstone",
+            "roof": "mud_brick",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "rope-walk lean-to",
+            "wall": "packed_mud",
+            "low": "sandstone",
+            "roof": "sandstone",
+            "wood": "mangrove",
+            "accent": "yellow"
+          }
+        ],
+        "common": [
+          {
+            "name": "corsair counting-house",
+            "wall": "smooth_sandstone",
+            "low": "sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "red_terracotta",
+            "wood": "jungle",
+            "accent": "red"
+          },
+          {
+            "name": "brass-lantern tavern",
+            "wall": "white_terracotta",
+            "low": "cut_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "cyan"
+          },
+          {
+            "name": "sea-wall warehouse",
+            "wall": "cut_sandstone",
+            "low": "smooth_sandstone",
+            "roof": "sandstone",
+            "wood": "dark_oak",
+            "accent": "yellow"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "privateer captain's house",
+            "wall": "calcite",
+            "wall2": "smooth_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "dark_oak",
+            "accent": "red"
+          },
+          {
+            "name": "dwemer-brass lodge",
+            "wall": "cut_sandstone",
+            "low": "waxed_cut_copper",
+            "roof": "smooth_sandstone",
+            "roofFull": "waxed_cut_copper",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "spice-factor gallery",
+            "wall": "smooth_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "yellow_terracotta",
+            "wood": "jungle",
+            "accent": "yellow"
+          }
+        ],
+        "noble": [
+          {
+            "name": "governor's sea-palace",
+            "wall": "chiseled_sandstone",
+            "wall2": "calcite",
+            "low": "cut_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "gold_block",
+            "wood": "dark_oak",
+            "column": "chiseled_sandstone",
+            "accent": "red"
+          },
+          {
+            "name": "grand observatory hall",
+            "wall": "smooth_sandstone",
+            "low": "waxed_cut_copper",
+            "roof": "smooth_sandstone",
+            "roofFull": "waxed_weathered_cut_copper",
+            "wood": "dark_oak",
+            "accent": "cyan"
+          },
+          {
+            "name": "admiral's arcaded court",
+            "wall": "calcite",
+            "wall2": "smooth_quartz",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "yellow"
+          }
+        ]
+      }
+    },
+    "alikr_oasis": {
+      "forms": {
+        "cluster": 4,
+        "ring": 2,
+        "crossroads": 1
+      },
+      "windows": "fence",
+      "rules": {
+        "timber": 0.0,
+        "porch": 0.1,
+        "balcony": 0.2,
+        "outsideStairs": 0.7,
+        "awning": 0.9,
+        "banners": 0.65,
+        "lanterns": 0.6,
+        "tower": 0.35
+      },
+      "roofs": {
+        "poor": {
+          "flat": 3
+        },
+        "common": {
+          "flat": 4,
+          "dome": 1
+        },
+        "wealthy": {
+          "flat": 2,
+          "dome": 2
+        },
+        "noble": {
+          "dome": 3,
+          "flat": 1
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "mud-brick ksar cell",
+            "wall": "packed_mud",
+            "low": "mud_bricks",
+            "roof": "mud_brick",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "wadi-ledges shelter",
+            "wall": "sandstone",
+            "low": "sandstone",
+            "roof": "sandstone",
+            "wood": "acacia",
+            "accent": "yellow"
+          },
+          {
+            "name": "date-palm shade hut",
+            "wall": "mud_bricks",
+            "low": "sandstone",
+            "roof": "sandstone",
+            "wood": "jungle",
+            "accent": "red"
+          }
+        ],
+        "common": [
+          {
+            "name": "qanat-court house",
+            "wall": "smooth_sandstone",
+            "low": "mud_bricks",
+            "roof": "smooth_sandstone",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "caravanserai stall-house",
+            "wall": "sandstone",
+            "wall2": "cut_sandstone",
+            "low": "sandstone",
+            "roof": "sandstone",
+            "roofFull": "orange_terracotta",
+            "wood": "acacia",
+            "accent": "yellow"
+          },
+          {
+            "name": "gypsum-washed dwelling",
+            "wall": "white_terracotta",
+            "low": "smooth_sandstone",
+            "roof": "smooth_sandstone",
+            "wood": "jungle",
+            "accent": "cyan"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "oasis-well pavilion",
+            "wall": "cut_sandstone",
+            "wall2": "smooth_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "cyan"
+          },
+          {
+            "name": "salt-syndic compound",
+            "wall": "smooth_sandstone",
+            "low": "cut_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "yellow_terracotta",
+            "wood": "dark_oak",
+            "accent": "yellow"
+          },
+          {
+            "name": "shade-loggia house",
+            "wall": "calcite",
+            "low": "smooth_sandstone",
+            "roof": "sandstone",
+            "roofFull": "orange_terracotta",
+            "wood": "acacia",
+            "accent": "orange"
+          }
+        ],
+        "noble": [
+          {
+            "name": "crown necropolis lodge",
+            "wall": "chiseled_sandstone",
+            "wall2": "cut_sandstone",
+            "low": "smooth_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "gold_block",
+            "wood": "dark_oak",
+            "column": "chiseled_sandstone",
+            "accent": "yellow"
+          },
+          {
+            "name": "emir's fountain-court",
+            "wall": "calcite",
+            "wall2": "smooth_quartz",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "cyan_terracotta",
+            "wood": "acacia",
+            "accent": "cyan"
+          },
+          {
+            "name": "satakal-dome sanctuary",
+            "wall": "smooth_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "red_terracotta",
+            "wood": "dark_oak",
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "taneth_craglorn": {
+      "forms": {
+        "hilltop": 4,
+        "cluster": 2,
+        "crossroads": 1
+      },
+      "windows": "bars",
+      "rules": {
+        "timber": 0.0,
+        "porch": 0.1,
+        "balcony": 0.25,
+        "outsideStairs": 0.5,
+        "awning": 0.65,
+        "banners": 0.75,
+        "lanterns": 0.65,
+        "tower": 0.65
+      },
+      "roofs": {
+        "poor": {
+          "flat": 2
+        },
+        "common": {
+          "flat": 3,
+          "crenel": 1
+        },
+        "wealthy": {
+          "crenel": 2,
+          "dome": 2
+        },
+        "noble": {
+          "dome": 3,
+          "crenel": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "red-mesa rock house",
+            "wall": "red_sandstone",
+            "low": "red_sandstone",
+            "roof": "red_sandstone",
+            "wood": "acacia",
+            "accent": "red"
+          },
+          {
+            "name": "quarry-terrace hut",
+            "wall": "terracotta",
+            "low": "red_sandstone",
+            "roof": "mud_brick",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "canyon-stepped cell",
+            "wall": "smooth_red_sandstone",
+            "low": "cobblestone",
+            "roof": "red_sandstone",
+            "wood": "spruce",
+            "accent": "yellow"
+          }
+        ],
+        "common": [
+          {
+            "name": "ochre-bastion dwelling",
+            "wall": "smooth_red_sandstone",
+            "low": "red_sandstone",
+            "roof": "smooth_red_sandstone",
+            "roofFull": "orange_terracotta",
+            "wood": "acacia",
+            "accent": "orange"
+          },
+          {
+            "name": "cliff-cut townhouse",
+            "wall": "cut_red_sandstone",
+            "low": "smooth_red_sandstone",
+            "roof": "red_sandstone",
+            "wood": "dark_oak",
+            "accent": "red"
+          },
+          {
+            "name": "sun-baked brick house",
+            "wall": "orange_terracotta",
+            "low": "red_sandstone",
+            "roof": "smooth_sandstone",
+            "wood": "acacia",
+            "accent": "yellow"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "star-gazer terrace",
+            "wall": "cut_red_sandstone",
+            "wall2": "chiseled_red_sandstone",
+            "low": "smooth_red_sandstone",
+            "roof": "smooth_red_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "dark_oak",
+            "accent": "cyan"
+          },
+          {
+            "name": "crimson-arch hall",
+            "wall": "smooth_red_sandstone",
+            "low": "chiseled_red_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "yellow_terracotta",
+            "wood": "acacia",
+            "accent": "yellow"
+          },
+          {
+            "name": "iron-gate compound",
+            "wall": "polished_granite",
+            "low": "cut_red_sandstone",
+            "roof": "smooth_red_sandstone",
+            "wood": "dark_oak",
+            "accent": "red"
+          }
+        ],
+        "noble": [
+          {
+            "name": "crown cliff-citadel",
+            "wall": "chiseled_red_sandstone",
+            "wall2": "cut_red_sandstone",
+            "low": "polished_granite",
+            "roof": "smooth_red_sandstone",
+            "roofFull": "gold_block",
+            "wood": "dark_oak",
+            "column": "chiseled_red_sandstone",
+            "accent": "yellow"
+          },
+          {
+            "name": "yokudan star-vault",
+            "wall": "smooth_sandstone",
+            "wall2": "chiseled_sandstone",
+            "low": "cut_red_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "cyan_terracotta",
+            "wood": "dark_oak",
+            "accent": "cyan"
+          },
+          {
+            "name": "high-mesa kasbah",
+            "wall": "cut_red_sandstone",
+            "low": "chiseled_red_sandstone",
+            "roof": "smooth_red_sandstone",
+            "roofFull": "red_terracotta",
+            "wood": "acacia",
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "abahs_landing": {
+      "forms": {
+        "harbour": 3,
+        "canal": 2,
+        "cluster": 3
+      },
+      "windows": "fence",
+      "rules": {
+        "timber": 0.1,
+        "porch": 0.15,
+        "balcony": 0.5,
+        "outsideStairs": 0.75,
+        "awning": 0.85,
+        "banners": 0.8,
+        "lanterns": 0.75,
+        "tower": 0.45
+      },
+      "roofs": {
+        "poor": {
+          "flat": 2
+        },
+        "common": {
+          "flat": 3,
+          "dome": 2
+        },
+        "wealthy": {
+          "dome": 3,
+          "flat": 2
+        },
+        "noble": {
+          "dome": 4,
+          "crenel": 1
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "cutthroat-alley tenement",
+            "wall": "sandstone",
+            "low": "mossy_cobblestone",
+            "roof": "sandstone",
+            "wood": "jungle",
+            "accent": "orange"
+          },
+          {
+            "name": "sunken-cistern shack",
+            "wall": "packed_mud",
+            "low": "sandstone",
+            "roof": "mud_brick",
+            "wood": "mangrove",
+            "accent": "red"
+          },
+          {
+            "name": "bridge-span rookery",
+            "wall": "smooth_sandstone",
+            "low": "cobblestone",
+            "roof": "sandstone",
+            "wood": "acacia",
+            "accent": "yellow"
+          }
+        ],
+        "common": [
+          {
+            "name": "cantilevered souk-house",
+            "wall": "smooth_sandstone",
+            "low": "sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "jungle",
+            "accent": "cyan"
+          },
+          {
+            "name": "limestone quay-house",
+            "wall": "calcite",
+            "low": "smooth_sandstone",
+            "roof": "smooth_sandstone",
+            "wood": "acacia",
+            "accent": "yellow"
+          },
+          {
+            "name": "moneychanger's arcade",
+            "wall": "cut_sandstone",
+            "low": "sandstone",
+            "roof": "sandstone",
+            "roofFull": "orange_terracotta",
+            "wood": "dark_oak",
+            "accent": "orange"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "merchant-lord vault-house",
+            "wall": "calcite",
+            "wall2": "cut_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "dark_oak",
+            "accent": "cyan"
+          },
+          {
+            "name": "lantern-court villa",
+            "wall": "smooth_sandstone",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "light_blue_terracotta",
+            "wood": "jungle",
+            "accent": "red"
+          },
+          {
+            "name": "syndicate counting-palace",
+            "wall": "cut_sandstone",
+            "low": "polished_andesite",
+            "roof": "smooth_quartz",
+            "roofFull": "yellow_terracotta",
+            "wood": "acacia",
+            "accent": "yellow"
+          }
+        ],
+        "noble": [
+          {
+            "name": "grand bazaar seraglio",
+            "wall": "smooth_quartz",
+            "wall2": "calcite",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "gold_block",
+            "wood": "dark_oak",
+            "column": "quartz_pillar",
+            "accent": "yellow"
+          },
+          {
+            "name": "harbour-chain citadel",
+            "wall": "chiseled_sandstone",
+            "low": "cut_sandstone",
+            "roof": "smooth_sandstone",
+            "roofFull": "cyan_terracotta",
+            "wood": "dark_oak",
+            "column": "chiseled_sandstone",
+            "accent": "cyan"
+          },
+          {
+            "name": "prince-factor's pavilion",
+            "wall": "calcite",
+            "low": "chiseled_sandstone",
+            "roof": "smooth_quartz",
+            "roofFull": "light_blue_terracotta",
+            "wood": "acacia",
+            "accent": "red"
+          }
+        ]
+      }
+    }
   }
 }

@@ -251,8 +251,15 @@ public final class PlaceLore {
                 List<Song> songs = new ArrayList<>(prior == null ? List.of() : prior.songs());
                 int i = songs.size();
                 for (JsonElement s : arr(o, "songs")) {
-                    JsonObject so = s.getAsJsonObject();
                     String sk = k + ".song." + i++;
+                    if (s.isJsonPrimitive()) {
+                        String raw = s.getAsString().replaceFirst("^[~^#]\\s*", "");
+                        songs.add(new Song(new Txt(sk + ".title", "Ballad of " + e.getKey()),
+                                List.of(new Txt(sk + ".line.0", raw))));
+                        continue;
+                    }
+                    if (!s.isJsonObject()) continue;
+                    JsonObject so = s.getAsJsonObject();
                     // sung, not printed: no book markup at the start of a line
                     List<Txt> lines = new ArrayList<>();
                     for (Txt t : txts(arr(so, "lines"), sk + ".line.")) lines.add(new Txt(t.key(), t.text().replaceFirst("^[~^#]\\s*", "")));

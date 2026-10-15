@@ -501,7 +501,9 @@ def main():
     write(os.path.join(ROOT, "mod", "src", "main", "lang", SK, "realms.json"), lang(biomes, realms_content.BOOKS))
     # the Java side registers the books and names the sites from these tables
     write(os.path.join(RES, "skycraft", "realms", "books.json"),
-          [{"id": k, "category": v[0], "cover": v[1], "weight": v[2], "value": v[3]} for k, v in realms_content.BOOKS.items()])
+          [{"id": k, "category": v[0], "cover": v[1], "weight": v[2], "value": v[3],
+            **({"why": realms_content.BOOK_WHY[k]} if k in getattr(realms_content, "BOOK_WHY", {}) else {})}
+           for k, v in realms_content.BOOKS.items()])
     write(os.path.join(RES, "skycraft", "realms", "site_names.json"), realms_content.SITE_NAMES)
     print("realms: %d biomes, %d placed features, %d structures written" % (len(biomes), len(realms_features.PF),
                                                                           len(realms_content.STRUCTURES)))

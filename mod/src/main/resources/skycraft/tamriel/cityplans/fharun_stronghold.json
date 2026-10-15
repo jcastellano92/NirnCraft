@@ -1,0 +1,232 @@
+{
+  "id": "fharun_stronghold",
+  "sil": "orc-sea-cliff-palisade",
+  "base": "none",
+  "overlay": "orsinium",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "",
+  "names": {
+    "inn": "",
+    "store": "fharun_white_bear_tannery",
+    "smithy": "fharun_wind_bellows_forge"
+  },
+  "titles": {
+    "fharun_stronghold_landmark": "Fharun Cliff-Gate",
+    "fharun_iron_prow_hall": "Clan Fharun Cliff-Longhouse",
+    "fharun_wind_bellows_forge": "Sea-Wind Bellows Forge",
+    "fharun_white_bear_tannery": "Frost-Bear & Seal Tannery",
+    "fharun_wise_woman_hearth": "Wise-Woman's Bone-Ash Hearth",
+    "fharun_ravine_watch": "Ravine-Bridge Watchtower",
+    "fharun_grudge_pillar": "Pillar of the Sworn Grudge",
+    "fharun_stronghold_market_plaza": "Fharun Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [
+    {
+      "r": 30,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        3.14
+      ],
+      "towers": true,
+      "flags": [
+        "palisade"
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "gate_hammer",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "fharun_stronghold_landmark",
+      "overlay": "orsinium"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "fharun_iron_prow_hall"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "fharun_wind_bellows_forge"
+    },
+    {
+      "kind": "store",
+      "use": "tannery",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "fharun_white_bear_tannery"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "fharun_wise_woman_hearth"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "fharun_ravine_watch"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "fharun_grudge_pillar"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "fharun_stronghold_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "orsinium"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "orsinium"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    }
+  ]
+}

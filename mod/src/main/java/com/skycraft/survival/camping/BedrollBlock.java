@@ -32,11 +32,17 @@ public class BedrollBlock extends BedBlock {
     @Override
     @Nullable
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return null;
+        return new Entity(pos, state);
     }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         return SHAPE;
+    }
+
+    public static class Entity extends BlockEntity {
+        public Entity(BlockPos pos, BlockState state) {
+            super(com.skycraft.survival.SurvivalRegistry.BEDROLL_ENTITY.get(), pos, state);
+        }
     }
 }

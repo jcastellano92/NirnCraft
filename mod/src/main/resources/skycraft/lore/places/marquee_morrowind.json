@@ -1,271 +1,335 @@
 {
- "places": {
-  "eight_plates": {
-   "hook": "A Hlaalu stew-house on the river road, famous for exactly eight plates a night and the one guest who is never served.",
-   "rumour": "Eight Plates will not serve a ninth, no matter the coin. Folk say a grey-cloaked girl sits at the end of the bench each night, and the keeper leaves out a ninth plate she will not touch.",
-   "notes": [
-    {
-     "id": "plate_rule",
-     "kind": "notes",
-     "title": "The House Rule of Eight Plates",
-     "author": "Sirela Marvos",
-     "at": "site",
-     "pages": [
-      "#By order of the house\nEight plates a night. Never nine. The ninth guest is welcomed, seated and talked to, and told that the stew has run out. It is a policy, not a shortage. Anyone found sharing their bowl with the ninth guest will be thanked, quietly, and asked to speak of it to nobody.\n\nIf a girl in a grey cloak asks, she is a regular. She is to be served first, and charged nothing, and never asked her name."
-     ]
-    }
-   ]
-  },
-  "south_wall_cornerclub": {
-   "hook": "A cornerclub with rules for singing and rules for cheating, and a bard who keeps both books.",
-   "rumour": "The South Wall Cornerclub keeps two sets of rules: the ones on the wall, and the ones in Dathan Selvil's head. Only one set is ever enforced, and it is never the written one.",
-   "notes": [
-    {
-     "id": "rules",
-     "kind": "notes",
-     "title": "Cornerclub Rules, Revised Again",
-     "author": "Dathan Selvil",
-     "at": "site",
-     "pages": [
-      "#No singing before sundown\nNo cheating after. Everything between is a negotiation, and a negotiation may be settled by song, so long as it is sundown. If it is not sundown, the song is a bribe, and the bribe is a crime, and the crime is payable in beer.\n\nStrangers may be rude only once. After that they are regulars."
-     ]
-    }
-   ]
-  },
-  "hlaalu_council_manor": {
-   "hook": "The terraced manor of the Hlaalu council, all balconies and beeswax, where every ledger is a favour in a better coat.",
-   "rumour": "A steward at the Manor leaves a ledger unwatched in his study each Fredas, they say, and it is never the same ledger twice. Somebody wants it taken. Somebody else wants it found taken.",
-   "notes": [
-    {
-     "id": "steward_memo",
-     "kind": "notes",
-     "title": "The Steward's Memorandum",
-     "author": "Dathan the Under-Steward",
-     "at": "chest",
-     "pages": [
-      "#To whom it may concern\nThe study is to be left unlocked after the sixth bell on Fredas. The ledger on the desk is the dull one. The ledger under it is the one that matters, and is not to be touched, discussed, or noticed by anyone who wishes to remain on the staff.\n\nIf the dull ledger goes missing, report it at once to the Factor. If the second goes missing, report it to nobody."
-     ]
-    }
-   ]
-  },
-  "the_rat_in_the_pot": {
-   "hook": "An Ald'ruhn tavern famed for its sign: a rat, a pot, and an inspector who has never recovered.",
-   "rumour": "There is no rat in the Rat in the Pot. There was a rat once. There is a pot. The connection, say the regulars, is purely nominal, and the sign is rather fond of a very small crown.",
-   "notes": [
-    {
-     "id": "menu",
-     "kind": "notes",
-     "title": "The Menu, With Commentary",
-     "author": "Nerva Hlavis",
-     "at": "site",
-     "pages": [
-      "#Stews\nStew of the day: the one nobody orders.\nStew of the night: the one you will wish you had ordered earlier.\nHouse special: any stew you request, in a pot that has been recently scrubbed.\n\n#A note on the sign\nThe rat is a mascot. The pot is a fact. If the inspector from the Council returns, the stew is on the house, and so is the apology."
-     ]
-    }
-   ]
-  },
-  "skar": {
-   "hook": "The great shell-chamber of Ald'ruhn, rib-arched and banner-hung, where Redoran councillors count honour like grain.",
-   "rumour": "A Redoran duel at the gate of the Skar ends at the second bell, they say, and the witness must be someone who owes neither house a favour. Councilor Brara has been seen looking for one.",
-   "notes": [
-    {
-     "id": "duel_notice",
-     "kind": "notes",
-     "title": "Notice of a Formal Duel",
-     "author": "The Council Clerk",
-     "at": "site",
-     "pages": [
-      "#By leave of the Council\nA duel will be fought at the gate of the Skar at the second bell, between two of the Redoran blood, over a grievance named in the register. The witness shall be unaffiliated. The blades shall be of the House. No other weapon shall be introduced, and no substance shall be applied to any blade.\n\nThe Council notes with regret the necessity of the last clause."
-     ]
-    }
-   ]
-  },
-  "gateway_inn": {
-   "hook": "A Sadrith Mora inn whose windows show somewhere different each hour, which the Magisters call a resonance and the keeper calls a nuisance.",
-   "rumour": "Room nine's window showed a lagoon on Monday, the Ascadian Isles on Tuesday, and last night, a woman in a green shawl, waving at someone who never checked in.",
-   "notes": [
-    {
-     "id": "room_log",
-     "kind": "ledger",
-     "title": "The Room Log",
-     "author": "Dalyne Hlaren",
-     "at": "site",
-     "pages": [
-      "#Window observations, this month\nRoom 3: lagoon, lagoon, a fungal grove, a bored Magister waving.\nRoom 6: the same fungal grove, larger.\nRoom 9: lagoon, Isles, a field of white flowers, and a woman in a green shawl who points west and a little down.\n\nGuests are not to be charged for the view. Nor for the ghost."
-     ]
-    }
-   ]
-  },
-  "tel_naga": {
-   "hook": "The fourteen-floor tower of Magister Ulveni Rathra, reached by rope-bridges and bad temper, guarded by eleven guardians and one sulking teapot.",
-   "rumour": "A singing teapot on the fourteenth floor of Tel Naga hums three notes when lifted and sulks when set down. Magister Gaenor has wagered a stranger could lift it. Ulveni has wagered the stranger would not leave the third bridge.",
-   "notes": [
-    {
-     "id": "sign",
-     "kind": "warning",
-     "title": "Notice on the Fourth Bridge",
-     "author": "Magister Ulveni Rathra",
-     "at": "site",
-     "pages": [
-      "^TO ALL WHO CROSS\nThe bridge holds six. It has held eleven once. We do not speak of that. The gap beyond the fourth rope is a levitation gap. Do not attempt it without the proper preparation, or the proper embarrassment.\n\nIf a spell-guard asks you a question, answer it. If the teapot asks, do not."
-     ]
-    }
-   ]
-  },
-  "great_bazaar": {
-   "hook": "An arcaded covered street of forty stalls under the temple's shadow, where every purchase is the first sale after the theft.",
-   "rumour": "Mistress Hlaren's guild stall stamps contracts. One came through last week for forty crates of lamp-oil whose route runs, in the margin, beneath the bazaar itself.",
-   "notes": [
-    {
-     "id": "stall_list",
-     "kind": "list",
-     "title": "Stall Directory of the Great Bazaar",
-     "author": "Mistress Hlaren",
-     "at": "site",
-     "pages": [
-      "#By arcade\nFirst arcade: spice, tea, dried fish, honey-cake. Second arcade: lamp-oil, ink, rope, lenses. Third arcade: cloth, buttons, ribbon, cheerful lies. Fourth arcade: what the third arcade does not stock.\n\n#By rule\nNothing sold here is stolen. Everything sold here was stolen once. It is the first sale that matters. Report any theft of the second sort to the guild stall. It will be written down."
-     ]
-    }
-   ]
-  },
-  "old_mournhold": {
-   "hook": "The ruined twin of the city above: the same plan, dark and sunk and wrong-handed, where lamps burn for no one.",
-   "rumour": "A lantern goes down into Old Mournhold every Sundas in the hand of a half-blind sexton, and has never failed to come up again. The ghosts, he says, take it personally if you whistle.",
-   "notes": [
-    {
-     "id": "sexton_log",
-     "kind": "journal",
-     "title": "A Sexton's Lantern Log",
-     "author": "Old Sedyn",
-     "at": "site",
-     "pages": [
-      "#Sundas, Hearthfire\nThird lamp. The twin plaza fountain is running backwards again. I said nothing. Lit the fourth lamp. Heard the Warden's step on the stair. Did not look.\n\n#Sundas, a week later\nSomeone has taken the key from the fountain. They will wish they had not. The Warden will not be pleased. I shall take a spare lantern."
-     ]
-    }
-   ]
-  },
-  "east_empire_company_hall": {
-   "hook": "The ledger-house of the Company in Ebonheart, where silk, steel and sugar pass through the same polite door.",
-   "rumour": "A Company parrot in the customs yard has been repeating a sum for three days: four hundred and twelve, in a Hlaalu accent. Nobody knows if it is a price, a ransom or a lottery.",
-   "notes": [
-    {
-     "id": "parrot_note",
-     "kind": "notes",
-     "title": "Customs Yard Memorandum",
-     "author": "Felmin Rothal",
-     "at": "chest",
-     "pages": [
-      "#Re: the parrot\nThe bird repeats: 'Four hundred and twelve. Silk. Pay at dusk. Do not tell the Factor.' I have asked the clerks. They know nothing. The bird knows everything and is not forthcoming.\n\nPlease: no one is to teach it further phrases until we have identified its former owner."
-     ]
-    }
-   ]
-  },
-  "imperial_chapels": {
-   "hook": "The garrison chapels of Ebonheart, where confessions are short because nobody does anything wrong, and a quiet war is waged with candles.",
-   "rumour": "Three guards confessed the same sin this week in three different words: a night off the walls, a gate left open, a lamp left lit. The Chaplain says nothing, which is how you know.",
-   "notes": [
-    {
-     "id": "chaplain_note",
-     "kind": "notes",
-     "title": "Chaplain's Private Memorandum",
-     "author": "Chaplain Loris",
-     "at": "site",
-     "pages": [
-      "#A confession noted, not recorded\nThree guards left their posts at dusk, three days running, to tend a lamp for a fourth. The sin is very small. The punishment would be very large. I shall relight the lamp myself, quietly, at the proper hour. The walls will not notice. Neither will the Legate, if I am discreet."
-     ]
-    }
-   ]
-  },
-  "hawia_egg_mine": {
-   "hook": "A flooded kwama egg mine south of Vivec whose lower galleries meet the old canton foundations, which no one admits.",
-   "rumour": "The Hawia egg mine floods in a way no mine should: from below. The foremen say the sea is pushing; the canton wardens say the sea has had help.",
-   "notes": [
-    {
-     "id": "pump_log",
-     "kind": "ledger",
-     "title": "A Pump-Log, Last Page",
-     "author": "A sluice hand",
-     "at": "chest",
-     "pages": [
-      "#Pump tally\nTwelve cisterns drawn in the dry month, sold to the plantation. Three more drawn in the wet. The Clerk says it is for the tithe. The tithe does not need a saw-cut in the wall under the canton, or a brass wheel unbolted from the gate.\n\nI am leaving this book in the mine. Whoever finds it, please tell the Warden."
-     ]
-    }
-   ]
-  },
-  "lost_shipwreck": {
-   "hook": "A wreck on the Vivec shoals, ribs showing, full of crates and rumours and the occasional unwilling sailor.",
-   "rumour": "Bethal Aryon of Vivec has lost forty umbrellas to the Lost Shipwreck, she says, and wants them back. Odd, the customs men say, how heavy forty umbrellas can be.",
-   "notes": [
-    {
-     "id": "manifest",
-     "kind": "list",
-     "title": "Cargo Manifest, Partly Legible",
-     "author": "The supercargo",
-     "at": "chest",
-     "pages": [
-      "#Manifest\n40 crates oilskin umbrellas, waxed, furled.\n6 crates moon-sugar, ground fine, in oilskin.\n12 casks sujamma.\n\nNote in a second hand: the umbrella handles are hollow. Be careful on the gangway. Mind the weight at the handle end."
-     ]
-    }
-   ]
-  },
-  "molag_mar": {
-   "hook": "A cliff-cut town with a lava-lit grotto at its heart, red light and black stone from far off, where the cooling is charged by the cup.",
-   "rumour": "A heat-vent failed in the Underworks last night and the channel ran twenty degrees over. Warden Ilu says nobody died. The Lavacutter says nobody has, yet.",
-   "notes": [
-    {
-     "id": "gazetteer",
-     "kind": "list",
-     "title": "The Canton and Its People",
-     "author": "Sister Mavia",
-     "at": "site",
-     "pages": [
-      "#Who keeps the heat\nWarden Ilu Dren keeps the canton lift: three bells down, three bells up, no exceptions. Dren the Lavacutter has cut glass for twenty years and never looked at it straight. Sister Mavia collects the ashes the living leave behind and plants lilies with them. Kesha-Teb sells glass and obsidian, and not-recently-cursed jewellery.",
-      "#The Cinder Cup\nOrvyn Hlaalo's inn charges for the cooling; it is a joke his father made, and he inherited. A Redoran inspector wants it banned. A Hlaalu competitor wants it franchised. Both will be invited to soup."
-     ]
+  "places": {
+    "eight_plates": {
+      "hook": "A Hlaalu stew-house on the river road, famous for exactly eight plates a night and the one guest who is never served.",
+      "rumour": "Eight Plates will not serve a ninth, no matter the coin. Folk say a grey-cloaked girl sits at the end of the bench each night, and the keeper leaves out a ninth plate she will not touch.",
+      "notes": [
+        {
+          "id": "plate_rule",
+          "kind": "notes",
+          "title": "The House Rule of Eight Plates",
+          "author": "Sirela Marvos",
+          "at": "site",
+          "pages": [
+            "#By order of the house\nEight plates a night. Never nine. The ninth guest is welcomed, seated and talked to, and told that the stew has run out. It is a policy, not a shortage. Anyone found sharing their bowl with the ninth guest will be thanked, quietly, and asked to speak of it to nobody.\n\nIf a girl in a grey cloak asks, she is a regular. She is to be served first, and charged nothing, and never asked her name."
+          ]
+        }
+      ],
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
     },
-    {
-     "id": "vent_notice",
-     "kind": "warning",
-     "title": "Notice at the Lift",
-     "author": "Warden Ilu Dren",
-     "at": "site",
-     "pages": [
-      "^BY ORDER OF THE CANTON\nThe lower station closes at the third bell after any vent alarm. No exceptions for weather, kings or prayer. Do not touch the glass. Do not look at it straight. If you hear the pool hiss, climb."
-     ]
+    "south_wall_cornerclub": {
+      "hook": "A cornerclub with rules for singing and rules for cheating, and a bard who keeps both books.",
+      "rumour": "The South Wall Cornerclub keeps two sets of rules: the ones on the wall, and the ones in Dathan Selvil's head. Only one set is ever enforced, and it is never the written one.",
+      "notes": [
+        {
+          "id": "rules",
+          "kind": "notes",
+          "title": "Cornerclub Rules, Revised Again",
+          "author": "Dathan Selvil",
+          "at": "site",
+          "pages": [
+            "#No singing before sundown\nNo cheating after. Everything between is a negotiation, and a negotiation may be settled by song, so long as it is sundown. If it is not sundown, the song is a bribe, and the bribe is a crime, and the crime is payable in beer.\n\nStrangers may be rude only once. After that they are regulars."
+          ]
+        }
+      ],
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
+    },
+    "hlaalu_council_manor": {
+      "hook": "The terraced manor of the Hlaalu council, all balconies and beeswax, where every ledger is a favour in a better coat.",
+      "rumour": "A steward at the Manor leaves a ledger unwatched in his study each Fredas, they say, and it is never the same ledger twice. Somebody wants it taken. Somebody else wants it found taken.",
+      "notes": [
+        {
+          "id": "steward_memo",
+          "kind": "notes",
+          "title": "The Steward's Memorandum",
+          "author": "Dathan the Under-Steward",
+          "at": "chest",
+          "pages": [
+            "#To whom it may concern\nThe study is to be left unlocked after the sixth bell on Fredas. The ledger on the desk is the dull one. The ledger under it is the one that matters, and is not to be touched, discussed, or noticed by anyone who wishes to remain on the staff.\n\nIf the dull ledger goes missing, report it at once to the Factor. If the second goes missing, report it to nobody."
+          ]
+        }
+      ],
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
+    },
+    "the_rat_in_the_pot": {
+      "hook": "An Ald'ruhn tavern famed for its sign: a rat, a pot, and an inspector who has never recovered.",
+      "rumour": "There is no rat in the Rat in the Pot. There was a rat once. There is a pot. The connection, say the regulars, is purely nominal, and the sign is rather fond of a very small crown.",
+      "notes": [
+        {
+          "id": "menu",
+          "kind": "notes",
+          "title": "The Menu, With Commentary",
+          "author": "Nerva Hlavis",
+          "at": "site",
+          "pages": [
+            "#Stews\nStew of the day: the one nobody orders.\nStew of the night: the one you will wish you had ordered earlier.\nHouse special: any stew you request, in a pot that has been recently scrubbed.\n\n#A note on the sign\nThe rat is a mascot. The pot is a fact. If the inspector from the Council returns, the stew is on the house, and so is the apology."
+          ]
+        }
+      ],
+      "why": [
+        "vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "vvardenfell_ashlands.L8.redoran_temple_piety"
+      ]
+    },
+    "skar": {
+      "hook": "The great shell-chamber of Ald'ruhn, rib-arched and banner-hung, where Redoran councillors count honour like grain.",
+      "rumour": "A Redoran duel at the gate of the Skar ends at the second bell, they say, and the witness must be someone who owes neither house a favour. Councilor Brara has been seen looking for one.",
+      "notes": [
+        {
+          "id": "duel_notice",
+          "kind": "notes",
+          "title": "Notice of a Formal Duel",
+          "author": "The Council Clerk",
+          "at": "site",
+          "pages": [
+            "#By leave of the Council\nA duel will be fought at the gate of the Skar at the second bell, between two of the Redoran blood, over a grievance named in the register. The witness shall be unaffiliated. The blades shall be of the House. No other weapon shall be introduced, and no substance shall be applied to any blade.\n\nThe Council notes with regret the necessity of the last clause."
+          ]
+        }
+      ],
+      "why": [
+        "vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "vvardenfell_ashlands.L8.redoran_temple_piety"
+      ]
+    },
+    "gateway_inn": {
+      "hook": "A Sadrith Mora inn whose windows show somewhere different each hour, which the Magisters call a resonance and the keeper calls a nuisance.",
+      "rumour": "Room nine's window showed a lagoon on Monday, the Ascadian Isles on Tuesday, and last night, a woman in a green shawl, waving at someone who never checked in.",
+      "notes": [
+        {
+          "id": "room_log",
+          "kind": "ledger",
+          "title": "The Room Log",
+          "author": "Dalyne Hlaren",
+          "at": "site",
+          "pages": [
+            "#Window observations, this month\nRoom 3: lagoon, lagoon, a fungal grove, a bored Magister waving.\nRoom 6: the same fungal grove, larger.\nRoom 9: lagoon, Isles, a field of white flowers, and a woman in a green shawl who points west and a little down.\n\nGuests are not to be charged for the view. Nor for the ghost."
+          ]
+        }
+      ],
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
+    },
+    "tel_naga": {
+      "hook": "The fourteen-floor tower of Magister Ulveni Rathra, reached by rope-bridges and bad temper, guarded by eleven guardians and one sulking teapot.",
+      "rumour": "A singing teapot on the fourteenth floor of Tel Naga hums three notes when lifted and sulks when set down. Magister Gaenor has wagered a stranger could lift it. Ulveni has wagered the stranger would not leave the third bridge.",
+      "notes": [
+        {
+          "id": "sign",
+          "kind": "warning",
+          "title": "Notice on the Fourth Bridge",
+          "author": "Magister Ulveni Rathra",
+          "at": "site",
+          "pages": [
+            "^TO ALL WHO CROSS\nThe bridge holds six. It has held eleven once. We do not speak of that. The gap beyond the fourth rope is a levitation gap. Do not attempt it without the proper preparation, or the proper embarrassment.\n\nIf a spell-guard asks you a question, answer it. If the teapot asks, do not."
+          ]
+        }
+      ],
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
+    },
+    "great_bazaar": {
+      "hook": "An arcaded covered street of forty stalls under the temple's shadow, where every purchase is the first sale after the theft.",
+      "rumour": "Mistress Hlaren's guild stall stamps contracts. One came through last week for forty crates of lamp-oil whose route runs, in the margin, beneath the bazaar itself.",
+      "notes": [
+        {
+          "id": "stall_list",
+          "kind": "list",
+          "title": "Stall Directory of the Great Bazaar",
+          "author": "Mistress Hlaren",
+          "at": "site",
+          "pages": [
+            "#By arcade\nFirst arcade: spice, tea, dried fish, honey-cake. Second arcade: lamp-oil, ink, rope, lenses. Third arcade: cloth, buttons, ribbon, cheerful lies. Fourth arcade: what the third arcade does not stock.\n\n#By rule\nNothing sold here is stolen. Everything sold here was stolen once. It is the first sale that matters. Report any theft of the second sort to the guild stall. It will be written down."
+          ]
+        }
+      ],
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
+    },
+    "old_mournhold": {
+      "hook": "The ruined twin of the city above: the same plan, dark and sunk and wrong-handed, where lamps burn for no one.",
+      "rumour": "A lantern goes down into Old Mournhold every Sundas in the hand of a half-blind sexton, and has never failed to come up again. The ghosts, he says, take it personally if you whistle.",
+      "notes": [
+        {
+          "id": "sexton_log",
+          "kind": "journal",
+          "title": "A Sexton's Lantern Log",
+          "author": "Old Sedyn",
+          "at": "site",
+          "pages": [
+            "#Sundas, Hearthfire\nThird lamp. The twin plaza fountain is running backwards again. I said nothing. Lit the fourth lamp. Heard the Warden's step on the stair. Did not look.\n\n#Sundas, a week later\nSomeone has taken the key from the fountain. They will wish they had not. The Warden will not be pleased. I shall take a spare lantern."
+          ]
+        }
+      ],
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
+    },
+    "east_empire_company_hall": {
+      "hook": "The ledger-house of the Company in Ebonheart, where silk, steel and sugar pass through the same polite door.",
+      "rumour": "A Company parrot in the customs yard has been repeating a sum for three days: four hundred and twelve, in a Hlaalu accent. Nobody knows if it is a price, a ransom or a lottery.",
+      "notes": [
+        {
+          "id": "parrot_note",
+          "kind": "notes",
+          "title": "Customs Yard Memorandum",
+          "author": "Felmin Rothal",
+          "at": "chest",
+          "pages": [
+            "#Re: the parrot\nThe bird repeats: 'Four hundred and twelve. Silk. Pay at dusk. Do not tell the Factor.' I have asked the clerks. They know nothing. The bird knows everything and is not forthcoming.\n\nPlease: no one is to teach it further phrases until we have identified its former owner."
+          ]
+        }
+      ],
+      "why": [
+        "stonefalls.L9.grand_council",
+        "stonefalls.L8.imperial_chapels"
+      ]
+    },
+    "imperial_chapels": {
+      "hook": "The garrison chapels of Ebonheart, where confessions are short because nobody does anything wrong, and a quiet war is waged with candles.",
+      "rumour": "Three guards confessed the same sin this week in three different words: a night off the walls, a gate left open, a lamp left lit. The Chaplain says nothing, which is how you know.",
+      "notes": [
+        {
+          "id": "chaplain_note",
+          "kind": "notes",
+          "title": "Chaplain's Private Memorandum",
+          "author": "Chaplain Loris",
+          "at": "site",
+          "pages": [
+            "#A confession noted, not recorded\nThree guards left their posts at dusk, three days running, to tend a lamp for a fourth. The sin is very small. The punishment would be very large. I shall relight the lamp myself, quietly, at the proper hour. The walls will not notice. Neither will the Legate, if I am discreet."
+          ]
+        }
+      ],
+      "why": [
+        "stonefalls.L9.grand_council",
+        "stonefalls.L8.imperial_chapels"
+      ]
+    },
+    "hawia_egg_mine": {
+      "hook": "A flooded kwama egg mine south of Vivec whose lower galleries meet the old canton foundations, which no one admits.",
+      "rumour": "The Hawia egg mine floods in a way no mine should: from below. The foremen say the sea is pushing; the canton wardens say the sea has had help.",
+      "notes": [
+        {
+          "id": "pump_log",
+          "kind": "ledger",
+          "title": "A Pump-Log, Last Page",
+          "author": "A sluice hand",
+          "at": "chest",
+          "pages": [
+            "#Pump tally\nTwelve cisterns drawn in the dry month, sold to the plantation. Three more drawn in the wet. The Clerk says it is for the tithe. The tithe does not need a saw-cut in the wall under the canton, or a brass wheel unbolted from the gate.\n\nI am leaving this book in the mine. Whoever finds it, please tell the Warden."
+          ]
+        }
+      ],
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
+    },
+    "lost_shipwreck": {
+      "hook": "A wreck on the Vivec shoals, ribs showing, full of crates and rumours and the occasional unwilling sailor.",
+      "rumour": "Bethal Aryon of Vivec has lost forty umbrellas to the Lost Shipwreck, she says, and wants them back. Odd, the customs men say, how heavy forty umbrellas can be.",
+      "notes": [
+        {
+          "id": "manifest",
+          "kind": "list",
+          "title": "Cargo Manifest, Partly Legible",
+          "author": "The supercargo",
+          "at": "chest",
+          "pages": [
+            "#Manifest\n40 crates oilskin umbrellas, waxed, furled.\n6 crates moon-sugar, ground fine, in oilskin.\n12 casks sujamma.\n\nNote in a second hand: the umbrella handles are hollow. Be careful on the gangway. Mind the weight at the handle end."
+          ]
+        }
+      ],
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
+    },
+    "molag_mar": {
+      "hook": "A cliff-cut town with a lava-lit grotto at its heart, red light and black stone from far off, where the cooling is charged by the cup.",
+      "rumour": "A heat-vent failed in the Underworks last night and the channel ran twenty degrees over. Warden Ilu says nobody died. The Lavacutter says nobody has, yet.",
+      "notes": [
+        {
+          "id": "gazetteer",
+          "kind": "list",
+          "title": "The Canton and Its People",
+          "author": "Sister Mavia",
+          "at": "site",
+          "pages": [
+            "#Who keeps the heat\nWarden Ilu Dren keeps the canton lift: three bells down, three bells up, no exceptions. Dren the Lavacutter has cut glass for twenty years and never looked at it straight. Sister Mavia collects the ashes the living leave behind and plants lilies with them. Kesha-Teb sells glass and obsidian, and not-recently-cursed jewellery.",
+            "#The Cinder Cup\nOrvyn Hlaalo's inn charges for the cooling; it is a joke his father made, and he inherited. A Redoran inspector wants it banned. A Hlaalu competitor wants it franchised. Both will be invited to soup."
+          ]
+        },
+        {
+          "id": "vent_notice",
+          "kind": "warning",
+          "title": "Notice at the Lift",
+          "author": "Warden Ilu Dren",
+          "at": "site",
+          "pages": [
+            "^BY ORDER OF THE CANTON\nThe lower station closes at the third bell after any vent alarm. No exceptions for weather, kings or prayer. Do not touch the glass. Do not look at it straight. If you hear the pool hiss, climb."
+          ]
+        }
+      ],
+      "why": [
+        "azuras_coast.L9.telvanni_rivalries",
+        "azuras_coast.L8.azura_shrine"
+      ]
+    },
+    "aryon_plantation": {
+      "hook": "A weathered plantation on the road to Necrom, its saltrice fields slack and its manor house shuttered for forty years.",
+      "rumour": "A man sleeps in the barn at the old Aryon farm, they say, with a half-burned deed in one fist and a ring on his thumb he will not take off, not even to wash.",
+      "notes": [
+        {
+          "id": "barn_note",
+          "kind": "notes",
+          "title": "A Scrap Pinned to the Barn",
+          "author": "The sleeper",
+          "at": "site",
+          "pages": [
+            "#Whoever finds this\nI left on the night of the fire. My mother was in the house. I was twenty. I have been twenty ever since. The ring is hers. The deed is ours. If you are from the Row, tell the keeper I am sorry, and that I have not forgotten where she is."
+          ]
+        }
+      ],
+      "why": [
+        "molag_amur.L9.erabenimsun_raids",
+        "molag_amur.L8.holy_mountains"
+      ]
+    },
+    "iveran_ancestral_tomb": {
+      "hook": "A Sathil family tomb off the Necrom road, its door sealed from the inside and its lamps still lit after forty years.",
+      "rumour": "The Sathil tomb is sealed from the inside. Something in there waits. The gravedigger will not dig the grave that should have been dug for it.",
+      "notes": [
+        {
+          "id": "sathil_inscription",
+          "kind": "inscription",
+          "title": "Inscription Over the Sathil Door",
+          "author": "The Sathil family",
+          "at": "site",
+          "pages": [
+            "#Here are the Sathil\nWe came when called. We stayed until the last was home. If one of us is missing, the door is not to be opened until the grave is dug and the name is said. Only then shall we let you in, and only then shall we let ourselves out."
+          ]
+        }
+      ],
+      "why": [
+        "molag_amur.L9.erabenimsun_raids",
+        "molag_amur.L8.holy_mountains"
+      ]
     }
-   ]
-  },
-  "aryon_plantation": {
-   "hook": "A weathered plantation on the road to Necrom, its saltrice fields slack and its manor house shuttered for forty years.",
-   "rumour": "A man sleeps in the barn at the old Aryon farm, they say, with a half-burned deed in one fist and a ring on his thumb he will not take off, not even to wash.",
-   "notes": [
-    {
-     "id": "barn_note",
-     "kind": "notes",
-     "title": "A Scrap Pinned to the Barn",
-     "author": "The sleeper",
-     "at": "site",
-     "pages": [
-      "#Whoever finds this\nI left on the night of the fire. My mother was in the house. I was twenty. I have been twenty ever since. The ring is hers. The deed is ours. If you are from the Row, tell the keeper I am sorry, and that I have not forgotten where she is."
-     ]
-    }
-   ]
-  },
-  "iveran_ancestral_tomb": {
-   "hook": "A Sathil family tomb off the Necrom road, its door sealed from the inside and its lamps still lit after forty years.",
-   "rumour": "The Sathil tomb is sealed from the inside. Something in there waits. The gravedigger will not dig the grave that should have been dug for it.",
-   "notes": [
-    {
-     "id": "sathil_inscription",
-     "kind": "inscription",
-     "title": "Inscription Over the Sathil Door",
-     "author": "The Sathil family",
-     "at": "site",
-     "pages": [
-      "#Here are the Sathil\nWe came when called. We stayed until the last was home. If one of us is missing, the door is not to be opened until the grave is dug and the name is said. Only then shall we let you in, and only then shall we let ourselves out."
-     ]
-    }
-   ]
   }
- }
 }

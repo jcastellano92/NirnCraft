@@ -3,33 +3,116 @@
   "category": "faction",
   "faction": "dark_brotherhood",
   "region": "skyrim/falkreath",
-  "speakers": {"night_mother": "The Night Mother", "emperor": "Titus Mede II"},
+  "speakers": {
+    "night_mother": "The Night Mother",
+    "emperor": "Titus Mede II"
+  },
   "npcs": [
-    {"id": "aventus", "name": "Aventus Aretino", "role": "beggar", "place": "windhelm", "offset": [-12, 8], "greet": "Go away. Unless... unless you're the one. Are you the one the Night Mother sent?"},
-    {"id": "astrid", "name": "Astrid", "role": "assassin", "place": "dark_brotherhood_sanctuary", "offset": [0, 0], "female": true, "greet": "Every family has its rules. Ours are simple: obey, don't betray, and never kill a Brother or Sister."},
-    {"id": "nazir", "name": "Nazir", "role": "assassin", "place": "dark_brotherhood_sanctuary", "offset": [3, 2], "greet": "Contracts, coin and corpses. In that order, if we're lucky."},
-    {"id": "cicero", "name": "Cicero", "role": "assassin", "place": "dark_brotherhood_sanctuary", "offset": [-3, 2], "greet": "Hello, hello! Cicero tends the Mother. Cicero does not like to be interrupted. Unless it's for a joke!"},
-    {"id": "amaund", "name": "Amaund Motierre", "role": "adventurer", "place": "volunruud", "offset": [0, 0], "greet": "You are late. Never mind. What I am about to ask has not been asked in four hundred years."}
+    {
+      "id": "aventus",
+      "name": "Aventus Aretino",
+      "role": "beggar",
+      "place": "windhelm",
+      "offset": [
+        -12,
+        8
+      ],
+      "greet": "Go away. Unless... unless you're the one. Are you the one the Night Mother sent?"
+    },
+    {
+      "id": "astrid",
+      "name": "Astrid",
+      "role": "assassin",
+      "place": "dark_brotherhood_sanctuary",
+      "offset": [
+        0,
+        0
+      ],
+      "female": true,
+      "greet": "Every family has its rules. Ours are simple: obey, don't betray, and never kill a Brother or Sister."
+    },
+    {
+      "id": "nazir",
+      "name": "Nazir",
+      "role": "assassin",
+      "place": "dark_brotherhood_sanctuary",
+      "offset": [
+        3,
+        2
+      ],
+      "greet": "Contracts, coin and corpses. In that order, if we're lucky."
+    },
+    {
+      "id": "cicero",
+      "name": "Cicero",
+      "role": "assassin",
+      "place": "dark_brotherhood_sanctuary",
+      "offset": [
+        -3,
+        2
+      ],
+      "greet": "Hello, hello! Cicero tends the Mother. Cicero does not like to be interrupted. Unless it's for a joke!"
+    },
+    {
+      "id": "amaund",
+      "name": "Amaund Motierre",
+      "role": "adventurer",
+      "place": "volunruud",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "You are late. Never mind. What I am about to ask has not been asked in four hundred years."
+    }
   ],
   "relics": [
-    {"id": "amaund_writ", "name": "Amaund Motierre's Sealed Letter", "desc": "A writ of execution. The name on it is the Emperor's.", "icon": 11}
+    {
+      "id": "amaund_writ",
+      "name": "Amaund Motierre's Sealed Letter",
+      "desc": "A writ of execution. The name on it is the Emperor's.",
+      "icon": 11
+    }
   ],
   "scenes": {
     "abduction": [
-      ["narrator", "You fall asleep. You wake on the floor of a shack you've never seen, wrists free, door barred. Three hooded figures kneel, bound, along the wall."],
-      ["astrid", "Sleep well? You killed Grelod. A contract that was ours to take. Now you owe us a life. One of these three. Your choice."]
+      [
+        "narrator",
+        "You fall asleep. You wake on the floor of a shack you've never seen, wrists free, door barred. Three hooded figures kneel, bound, along the wall."
+      ],
+      [
+        "astrid",
+        "Sleep well? You killed Grelod. A contract that was ours to take. Now you owe us a life. One of these three. Your choice."
+      ]
     ],
     "night_mother": [
-      ["night_mother", "My child. You have been chosen. Go to the Emperor's man in Volunruud, and listen."],
-      ["cicero", "She spoke! She spoke to you! Oh, the Listener, the Listener has come!"]
+      [
+        "night_mother",
+        "My child. You have been chosen. Go to the Emperor's man in Volunruud, and listen."
+      ],
+      [
+        "cicero",
+        "She spoke! She spoke to you! Oh, the Listener, the Listener has come!"
+      ]
     ],
     "sanctuary_burns": [
-      ["narrator", "Smoke rises from the Sanctuary's door. The Penitus Oculatus found it. The Black Door hangs broken."],
-      ["nazir", "They came at dawn. Astrid sold us to them, and then they killed her too. We go to the old Sanctuary in Dawnstar. We finish this."]
+      [
+        "narrator",
+        "Smoke rises from the Sanctuary's door. The Penitus Oculatus found it. The Black Door hangs broken."
+      ],
+      [
+        "nazir",
+        "They came at dawn. Astrid sold us to them, and then they killed her too. We go to the old Sanctuary in Dawnstar. We finish this."
+      ]
     ],
     "emperor": [
-      ["emperor", "So. The Dark Brotherhood. I knew someone would come. Do me one favor: find the man who paid for this, and do to him what you are about to do to me."],
-      ["narrator", "The Emperor of Tamriel does not reach for a weapon."]
+      [
+        "emperor",
+        "So. The Dark Brotherhood. I knew someone would come. Do me one favor: find the man who paid for this, and do to him what you are about to do to me."
+      ],
+      [
+        "narrator",
+        "The Emperor of Tamriel does not reach for a weapon."
+      ]
     ]
   },
   "quests": [
@@ -42,104 +125,330 @@
       "pitch": "I've been doing the Black Sacrament. Grelod the Kind runs the Honorhall orphanage in Riften, and there's nothing kind about her. Please. Kill her. I'll give you everything I have.",
       "desc": "A boy in Windhelm, Aventus Aretino, has been performing the Black Sacrament to summon an assassin. He wants Grelod the Kind, who runs the orphanage in Riften, dead.",
       "objectives": [
-        {"type": "go", "place": "riften", "text": "Travel to Riften's orphanage"},
-        {"type": "kill", "place": "riften", "offset": [-20, 14], "text": "Kill Grelod the Kind",
-         "spawn": [{"type": "npc:beggar", "name": "Grelod the Kind", "target": true, "glow": true}]},
-        {"type": "talk", "npc": "aventus", "text": "Tell Aventus Aretino that Grelod is dead",
-         "topic": "Grelod is dead.",
-         "reply": "Really? She's really dead? Then the Night Mother heard me. Here, it's all I have. Thank you. Thank you!"}
+        {
+          "type": "go",
+          "place": "riften",
+          "text": "Travel to Riften's orphanage"
+        },
+        {
+          "type": "kill",
+          "place": "riften",
+          "offset": [
+            -20,
+            14
+          ],
+          "text": "Kill Grelod the Kind",
+          "spawn": [
+            {
+              "type": "npc:beggar",
+              "name": "Grelod the Kind",
+              "target": true,
+              "glow": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "aventus",
+          "text": "Tell Aventus Aretino that Grelod is dead",
+          "topic": "Grelod is dead.",
+          "reply": "Really? She's really dead? Then the Night Mother heard me. Here, it's all I have. Thank you. Thank you!"
+        }
       ],
-      "rewards": {"gold": 100, "flags": ["db_whisper"]}
+      "rewards": {
+        "gold": 100,
+        "flags": [
+          "db_whisper"
+        ]
+      },
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
     },
     {
       "id": "db_with_friends_like_these",
       "title": "With Friends Like These...",
       "start": "auto",
-      "requires": ["quest:db_innocence_lost", "!faction:dark_brotherhood"],
+      "requires": [
+        "quest:db_innocence_lost",
+        "!faction:dark_brotherhood"
+      ],
       "desc": "I took a contract that belonged to the Dark Brotherhood, and the Brotherhood noticed. I woke up in an abandoned shack with three bound prisoners and a woman named Astrid.",
       "objectives": [
-        {"type": "go", "place": "abandoned_shack", "text": "Wake in the abandoned shack", "actions": "scene:abduction"},
-        {"type": "kill", "place": "abandoned_shack", "text": "Kill one of the three hooded captives",
-         "spawn": [{"type": "npc:thug", "name": "Hooded Captive", "target": true}]},
-        {"type": "talk", "npc": "astrid", "text": "Speak with Astrid",
-         "topic": "It's done.",
-         "reply": "Not a moment's hesitation. Welcome to the family. Our Sanctuary is in the pine forest near Falkreath. The password is 'Silence, my brother.'"}
+        {
+          "type": "go",
+          "place": "abandoned_shack",
+          "text": "Wake in the abandoned shack",
+          "actions": "scene:abduction"
+        },
+        {
+          "type": "kill",
+          "place": "abandoned_shack",
+          "text": "Kill one of the three hooded captives",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Hooded Captive",
+              "target": true
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "astrid",
+          "text": "Speak with Astrid",
+          "topic": "It's done.",
+          "reply": "Not a moment's hesitation. Welcome to the family. Our Sanctuary is in the pine forest near Falkreath. The password is 'Silence, my brother.'"
+        }
       ],
-      "rewards": {"gold": 200, "join": true}
+      "rewards": {
+        "gold": 200,
+        "join": true
+      },
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
     },
     {
       "id": "db_whispers_in_the_dark",
       "title": "Whispers in the Dark",
       "start": "auto",
-      "requires": ["quest:db_with_friends_like_these|faction:dark_brotherhood"],
+      "requires": [
+        "quest:db_with_friends_like_these|faction:dark_brotherhood"
+      ],
       "desc": "Cicero, the Keeper of the Night Mother's coffin, has been listening to her for years and hearing nothing. Then she spoke, and she spoke to me.",
       "objectives": [
-        {"type": "go", "place": "dark_brotherhood_sanctuary", "text": "Enter the Dark Brotherhood Sanctuary"},
-        {"type": "talk", "npc": "cicero", "text": "Speak to Cicero beside the Night Mother", "topic": "Why are you staring at me?",
-         "reply": "Because she spoke to you! Listen, listen! She wants you to go!",
-         "actions": "scene:night_mother"},
-        {"type": "go", "place": "volunruud", "text": "Meet the client in Volunruud"},
-        {"type": "talk", "npc": "amaund", "text": "Speak with Amaund Motierre",
-         "topic": "The Night Mother sent me.",
-         "reply": "Then here is the contract, and it is not a small one. Titus Mede the Second. The Emperor. He arrives in Skyrim soon. Take the letter to your Sanctuary, and seal the deal.",
-         "actions": "relic:amaund_writ"},
-        {"type": "deliver", "npc": "astrid", "relic": "amaund_writ", "text": "Bring Amaund's letter to Astrid",
-         "topic": "The Emperor. We're to kill the Emperor.",
-         "reply": "The Emperor. The Brotherhood hasn't had a contract like this since the Mythic Dawn. Before we strike, we take care of the people close to him."}
+        {
+          "type": "go",
+          "place": "dark_brotherhood_sanctuary",
+          "text": "Enter the Dark Brotherhood Sanctuary"
+        },
+        {
+          "type": "talk",
+          "npc": "cicero",
+          "text": "Speak to Cicero beside the Night Mother",
+          "topic": "Why are you staring at me?",
+          "reply": "Because she spoke to you! Listen, listen! She wants you to go!",
+          "actions": "scene:night_mother"
+        },
+        {
+          "type": "go",
+          "place": "volunruud",
+          "text": "Meet the client in Volunruud"
+        },
+        {
+          "type": "talk",
+          "npc": "amaund",
+          "text": "Speak with Amaund Motierre",
+          "topic": "The Night Mother sent me.",
+          "reply": "Then here is the contract, and it is not a small one. Titus Mede the Second. The Emperor. He arrives in Skyrim soon. Take the letter to your Sanctuary, and seal the deal.",
+          "actions": "relic:amaund_writ"
+        },
+        {
+          "type": "deliver",
+          "npc": "astrid",
+          "relic": "amaund_writ",
+          "text": "Bring Amaund's letter to Astrid",
+          "topic": "The Emperor. We're to kill the Emperor.",
+          "reply": "The Emperor. The Brotherhood hasn't had a contract like this since the Mythic Dawn. Before we strike, we take care of the people close to him."
+        }
       ],
-      "rewards": {"gold": 500, "faction_points": 3, "title": "listener", "flags": ["listener"]}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3,
+        "title": "listener",
+        "flags": [
+          "listener"
+        ]
+      },
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
     },
     {
       "id": "db_bound_until_death",
       "title": "Bound Until Death",
       "start": "auto",
-      "requires": ["quest:db_whispers_in_the_dark"],
+      "requires": [
+        "quest:db_whispers_in_the_dark"
+      ],
       "desc": "The Emperor's cousin, Vittoria Vici, is to be married in Solitude. A wedding is a fine place for a funeral.",
       "objectives": [
-        {"type": "go", "place": "solitude", "text": "Travel to Solitude for the wedding"},
-        {"type": "kill", "place": "solitude", "offset": [20, -20], "text": "Kill Vittoria Vici during her wedding",
-         "spawn": [{"type": "npc:innkeeper", "name": "Vittoria Vici", "target": true, "glow": true}, {"type": "npc:imperial_soldier", "count": 2, "name": "Wedding Guard"}]},
-        {"type": "talk", "npc": "astrid", "text": "Report to Astrid", "topic": "Vittoria Vici is dead.",
-         "reply": "And the Empire will be crying into its wine for a week. Good. Next, the Emperor himself."}
+        {
+          "type": "go",
+          "place": "solitude",
+          "text": "Travel to Solitude for the wedding"
+        },
+        {
+          "type": "kill",
+          "place": "solitude",
+          "offset": [
+            20,
+            -20
+          ],
+          "text": "Kill Vittoria Vici during her wedding",
+          "spawn": [
+            {
+              "type": "npc:innkeeper",
+              "name": "Vittoria Vici",
+              "target": true,
+              "glow": true
+            },
+            {
+              "type": "npc:imperial_soldier",
+              "count": 2,
+              "name": "Wedding Guard"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "astrid",
+          "text": "Report to Astrid",
+          "topic": "Vittoria Vici is dead.",
+          "reply": "And the Empire will be crying into its wine for a week. Good. Next, the Emperor himself."
+        }
       ],
-      "rewards": {"gold": 1000, "faction_points": 3}
+      "rewards": {
+        "gold": 1000,
+        "faction_points": 3
+      },
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
     },
     {
       "id": "db_death_incarnate",
       "title": "Death Incarnate",
       "start": "auto",
-      "requires": ["quest:db_bound_until_death"],
+      "requires": [
+        "quest:db_bound_until_death"
+      ],
       "on_start": "relocate:nazir:dawnstar_sanctuary;retire:astrid",
       "desc": "The Penitus Oculatus, the Emperor's guards, found the Sanctuary. Astrid betrayed us to save herself, and they killed her anyway.",
       "objectives": [
-        {"type": "go", "place": "dark_brotherhood_sanctuary", "text": "Return to the Falkreath Sanctuary", "actions": "scene:sanctuary_burns"},
-        {"type": "clear", "place": "dark_brotherhood_sanctuary", "text": "Kill the Penitus Oculatus agents in the Sanctuary",
-         "spawn": [{"type": "npc:imperial_soldier", "count": 4, "name": "Penitus Oculatus Agent", "hostile": true}]},
-        {"type": "go", "place": "dawnstar_sanctuary", "text": "Regroup at the Dawnstar Sanctuary"},
-        {"type": "talk", "npc": "nazir", "text": "Speak with Nazir", "topic": "What now?",
-         "reply": "Now? Now we finish the contract. The Emperor's ship is docked at Solitude. We go in, we kill him, we disappear. Sithis is watching."}
+        {
+          "type": "go",
+          "place": "dark_brotherhood_sanctuary",
+          "text": "Return to the Falkreath Sanctuary",
+          "actions": "scene:sanctuary_burns"
+        },
+        {
+          "type": "clear",
+          "place": "dark_brotherhood_sanctuary",
+          "text": "Kill the Penitus Oculatus agents in the Sanctuary",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 4,
+              "name": "Penitus Oculatus Agent",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "dawnstar_sanctuary",
+          "text": "Regroup at the Dawnstar Sanctuary"
+        },
+        {
+          "type": "talk",
+          "npc": "nazir",
+          "text": "Speak with Nazir",
+          "topic": "What now?",
+          "reply": "Now? Now we finish the contract. The Emperor's ship is docked at Solitude. We go in, we kill him, we disappear. Sithis is watching."
+        }
       ],
-      "rewards": {"gold": 800, "faction_points": 4}
+      "rewards": {
+        "gold": 800,
+        "faction_points": 4
+      },
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
     },
     {
       "id": "db_hail_sithis",
       "title": "Hail Sithis!",
       "start": "auto",
-      "requires": ["quest:db_death_incarnate"],
+      "requires": [
+        "quest:db_death_incarnate"
+      ],
       "desc": "The Emperor's ship, the Katariah, lies at anchor off Solitude. It is time to fulfill the contract of the age.",
       "objectives": [
-        {"type": "go", "place": "solitude_docks", "text": "Board the Katariah at the Solitude Docks"},
-        {"type": "clear", "place": "solitude_docks", "text": "Kill the Emperor's guards",
-         "spawn": [{"type": "npc:imperial_soldier", "count": 3, "name": "Penitus Oculatus Guard", "hostile": true}]},
-        {"type": "kill", "place": "solitude_docks", "text": "Assassinate the Emperor",
-         "spawn": [{"type": "npc:jarl", "name": "Titus Mede II, Emperor of Tamriel", "target": true, "glow": true}],
-         "actions": "scene:emperor"},
-        {"type": "talk", "npc": "nazir", "text": "Return to the Dawnstar Sanctuary", "topic": "The Emperor is dead.",
-         "reply": "Hail Sithis! The Dark Brotherhood lives, and you, Listener, are its heart. Here's your share. It's a big share."}
+        {
+          "type": "go",
+          "place": "solitude_docks",
+          "text": "Board the Katariah at the Solitude Docks"
+        },
+        {
+          "type": "clear",
+          "place": "solitude_docks",
+          "text": "Kill the Emperor's guards",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 3,
+              "name": "Penitus Oculatus Guard",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "solitude_docks",
+          "text": "Assassinate the Emperor",
+          "spawn": [
+            {
+              "type": "npc:jarl",
+              "name": "Titus Mede II, Emperor of Tamriel",
+              "target": true,
+              "glow": true
+            }
+          ],
+          "actions": "scene:emperor"
+        },
+        {
+          "type": "talk",
+          "npc": "nazir",
+          "text": "Return to the Dawnstar Sanctuary",
+          "topic": "The Emperor is dead.",
+          "reply": "Hail Sithis! The Dark Brotherhood lives, and you, Listener, are its heart. Here's your share. It's a big share."
+        }
       ],
-      "rewards": {"gold": 5000, "faction_points": 20, "flags": ["db_emperor"],
-                  "items": [{"item": "skycraft:ebony_dagger", "name": "Blade of Woe", "enchant": {"sharpness": 4}},
-                            {"item": "minecraft:leather_chestplate", "name": "Shrouded Robes", "color": "2A0E0E", "enchant": {"protection": 3}}]}
+      "rewards": {
+        "gold": 5000,
+        "faction_points": 20,
+        "flags": [
+          "db_emperor"
+        ],
+        "items": [
+          {
+            "item": "skycraft:ebony_dagger",
+            "name": "Blade of Woe",
+            "enchant": {
+              "sharpness": 4
+            }
+          },
+          {
+            "item": "minecraft:leather_chestplate",
+            "name": "Shrouded Robes",
+            "color": "2A0E0E",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
     }
   ]
 }

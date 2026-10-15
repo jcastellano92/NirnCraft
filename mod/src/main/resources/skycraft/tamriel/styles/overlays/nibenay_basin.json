@@ -1,0 +1,23 @@
+{
+  "id": "nibenay_basin",
+  "why": [
+    "nibenay_basin.L1.valus_foothills",
+    "nibenay_basin.L4.orchard_plain",
+    "nibenay_basin.L6.blue_road_villages"
+  ],
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:light_blue_terracotta",
+    "low": "minecraft:stone_bricks",
+    "wood": "dark_oak",
+    "roof": "deepslate_tile",
+    "accent": "cyan"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:cobblestone",
+    "path": "minecraft:gravel"
+  }
+}

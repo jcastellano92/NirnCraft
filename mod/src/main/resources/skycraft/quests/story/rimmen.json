@@ -1,0 +1,688 @@
+{
+  "region": "elsweyr/rimmen",
+  "province": "elsweyr",
+  "line": "story_rimmen",
+  "category": "main",
+  "title": "Masks of the Old Potentate",
+  "summary": "In the aqueduct-fed basin of Rimmen, master mask-artisans, quarry labourers, and Baandari pedlars uncover an old Akaviri potentate cipher being used to extort the stone-cutters.",
+  "why": [
+    "rimmen.L7.master_artisans",
+    "rimmen.L7.quarry_labourers",
+    "rimmen.L7.baandari_camp"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "rimmen",
+    "places": [
+      "rimmen",
+      "ahbaae_pit",
+      "motemar_grotto",
+      "chasemoor",
+      "meir_lynmount",
+      "zhan_khaj_adeptorium",
+      "rajaae_hollow",
+      "baan_dars_litter",
+      "temar_outpost",
+      "baandari_caravan_stop",
+      "senekha_fort",
+      "sal_caverns",
+      "seri_undercroft",
+      "sandblown_dragonscour",
+      "alabaster",
+      "hakoshae",
+      "darkarn_place",
+      "river_keep",
+      "nera_cove",
+      "the_rusty_tankard",
+      "roadside_twin_moons"
+    ],
+    "npc": "story_rimmen_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Quarry workers under Rimmen's great aqueduct found a cache of lacquered Potentate masks in the limestone cut, and the city bailiffs immediately seized the whole gallery.",
+    "notice": "RIMMEN ARTISANS' QUARTER & BAANDARI POST: Discreet investigators sought to recover the stolen quarry tallies and decipher the Potentate mask-seals."
+  },
+  "npcs": [
+    {
+      "id": "story_rimmen_hook_npc",
+      "name": "Warden of Rimmen",
+      "role": "guard",
+      "place": "rimmen",
+      "greet": "Quarry workers under Rimmen's great aqueduct found a cache of lacquered Potentate masks in the limestone cut, and the city bailiffs immediately seized the whole gallery.",
+      "talk": [
+        "The trouble across Rimmen began when sealed dispatches started bypassing Rimmen.",
+        "If you mean to help the Aqueduct Court of Rimmen, start by checking the trail between Rimmen and Tonenaka Shrine."
+      ]
+    },
+    {
+      "id": "story_rimmen_envoy_npc",
+      "name": "Chronicler of Rimmen",
+      "role": "scholar",
+      "place": "tonenaka_shrine",
+      "greet": "Keep your voice low—everyone at Tonenaka Shrine is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from Tonenaka Shrine toward Rimmen Palace before they vanished into the brush.",
+        "Bring any ciphered tallies back to Rimmen so Potentate-Steward Zurin-Dar can see the proof."
+      ]
+    },
+    {
+      "id": "story_rimmen_scout_npc",
+      "name": "Outrider of Rimmen Palace",
+      "role": "scout",
+      "place": "rimmen_palace",
+      "greet": "You made good time from Tonenaka Shrine. The saboteurs have fortified the approaches near Hall of the Lunar Champion.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Hall of the Lunar Champion with a picked guard.",
+        "Once Hall of the Lunar Champion is cleared, return to Rimmen to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_rimmen_steward_npc",
+      "name": "Speaker of Rimmen",
+      "role": "steward",
+      "place": "rimmen",
+      "greet": "Potentate-Steward Zurin-Dar awaits word on whether the crisis in Rimmen has been contained.",
+      "talk": [
+        "The elders of Rimmen have prepared the concord table for your return.",
+        "All of Rimmen owes you a debt for standing between Rimmen and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_rimmen_boss_01": {
+      "name": "Usurper-Captain of Rimmen (1)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "rimmen",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_02": {
+      "name": "Usurper-Captain of Tonenaka Shrine (2)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "tonenaka_shrine",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_03": {
+      "name": "Usurper-Captain of Rimmen Palace (3)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "rimmen_palace",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_04": {
+      "name": "Usurper-Captain of Hall of the Lunar Champion (4)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "hall_of_the_lunar_champion",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_05": {
+      "name": "Usurper-Captain of Rimmen Artisans District (5)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "rimmen_artisans_district",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_06": {
+      "name": "Usurper-Captain of The Sugar Bowl (6)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "the_sugar_bowl",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_07": {
+      "name": "Usurper-Captain of Rimmen Masterworks (7)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "rimmen_masterworks",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_rimmen_boss_08": {
+      "name": "Usurper-Captain of Rimmen Stables (8)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "rimmen_stables",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_rimmen_scene_01": [
+      "Warden of Rimmen: Examine these marks recovered near Rimmen—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rimmen and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rimmen, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_02": [
+      "Warden of Rimmen: Examine these marks recovered near Tonenaka Shrine—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Tonenaka Shrine and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Tonenaka Shrine, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_03": [
+      "Warden of Rimmen: Examine these marks recovered near Rimmen Palace—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rimmen Palace and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rimmen Palace, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_04": [
+      "Warden of Rimmen: Examine these marks recovered near Hall of the Lunar Champion—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Hall of the Lunar Champion and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Hall of the Lunar Champion, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_05": [
+      "Warden of Rimmen: Examine these marks recovered near Rimmen Artisans District—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rimmen Artisans District and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rimmen Artisans District, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_06": [
+      "Warden of Rimmen: Examine these marks recovered near The Sugar Bowl—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between The Sugar Bowl and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at The Sugar Bowl, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_07": [
+      "Warden of Rimmen: Examine these marks recovered near Rimmen Masterworks—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rimmen Masterworks and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rimmen Masterworks, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_08": [
+      "Warden of Rimmen: Examine these marks recovered near Rimmen Stables—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rimmen Stables and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rimmen Stables, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_09": [
+      "Warden of Rimmen: Examine these marks recovered near Seae Fire—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Seae Fire and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Seae Fire, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_10": [
+      "Warden of Rimmen: Examine these marks recovered near Temple of the Full Moons—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Temple of the Full Moons and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Temple of the Full Moons, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_11": [
+      "Warden of Rimmen: Examine these marks recovered near Rinra Sugar Farm—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rinra Sugar Farm and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rinra Sugar Farm, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_12": [
+      "Warden of Rimmen: Examine these marks recovered near Rinset Mine—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rinset Mine and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rinset Mine, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_13": [
+      "Warden of Rimmen: Examine these marks recovered near Rajaae Hollow—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Rajaae Hollow and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Rajaae Hollow, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_14": [
+      "Warden of Rimmen: Examine these marks recovered near Shrine of the New Moon—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Shrine of the New Moon and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Shrine of the New Moon, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_15": [
+      "Warden of Rimmen: Examine these marks recovered near Hanikhi Outpost—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Hanikhi Outpost and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Hanikhi Outpost, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_16": [
+      "Warden of Rimmen: Examine these marks recovered near Scars Edge—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Scars Edge and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Scars Edge, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_17": [
+      "Warden of Rimmen: Examine these marks recovered near Kherinnar Delve—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Kherinnar Delve and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Kherinnar Delve, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_18": [
+      "Warden of Rimmen: Examine these marks recovered near Khara Burrow—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Khara Burrow and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Khara Burrow, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_19": [
+      "Warden of Rimmen: Examine these marks recovered near Moongrave Fane—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Moongrave Fane and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Moongrave Fane, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_20": [
+      "Warden of Rimmen: Examine these marks recovered near Riar Ruins—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Riar Ruins and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Riar Ruins, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_21": [
+      "Warden of Rimmen: Examine these marks recovered near Qasari Delve—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Qasari Delve and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Qasari Delve, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_22": [
+      "Warden of Rimmen: Examine these marks recovered near Shrine Hircine Elsweyr—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Shrine Hircine Elsweyr and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Shrine Hircine Elsweyr, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_23": [
+      "Warden of Rimmen: Examine these marks recovered near Chasemoor—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Chasemoor and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Chasemoor, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_24": [
+      "Warden of Rimmen: Examine these marks recovered near Thamokha Crypt—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Thamokha Crypt and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Thamokha Crypt, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_25": [
+      "Warden of Rimmen: Examine these marks recovered near Baan Dars Litter—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Baan Dars Litter and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Baan Dars Litter, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_26": [
+      "Warden of Rimmen: Examine these marks recovered near Greenleaf Farm—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Greenleaf Farm and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Greenleaf Farm, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_27": [
+      "Warden of Rimmen: Examine these marks recovered near Roadside Twin Moons—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Roadside Twin Moons and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Roadside Twin Moons, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_28": [
+      "Warden of Rimmen: Examine these marks recovered near Temple of the Hidden Moon—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Temple of the Hidden Moon and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Temple of the Hidden Moon, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_29": [
+      "Warden of Rimmen: Examine these marks recovered near Zahteal Ruins—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Zahteal Ruins and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Zahteal Ruins, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_30": [
+      "Warden of Rimmen: Examine these marks recovered near Meir Lynmount—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Meir Lynmount and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Meir Lynmount, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_31": [
+      "Warden of Rimmen: Examine these marks recovered near Droskhi Moon Temple—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Droskhi Moon Temple and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Droskhi Moon Temple, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_32": [
+      "Warden of Rimmen: Examine these marks recovered near Nakhakha Homestead—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Nakhakha Homestead and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Nakhakha Homestead, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_33": [
+      "Warden of Rimmen: Examine these marks recovered near Hadamnargos Farmhouse—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Hadamnargos Farmhouse and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Hadamnargos Farmhouse, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_34": [
+      "Warden of Rimmen: Examine these marks recovered near Teset Grotto—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Teset Grotto and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Teset Grotto, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_35": [
+      "Warden of Rimmen: Examine these marks recovered near Nekha Camp—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Nekha Camp and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Nekha Camp, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_36": [
+      "Warden of Rimmen: Examine these marks recovered near Komaar Hollow—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Komaar Hollow and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Komaar Hollow, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_37": [
+      "Warden of Rimmen: Examine these marks recovered near Shrine Meridia Elsweyr—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Shrine Meridia Elsweyr and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Shrine Meridia Elsweyr, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_38": [
+      "Warden of Rimmen: Examine these marks recovered near Seri Undercroft—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Seri Undercroft and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Seri Undercroft, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_39": [
+      "Warden of Rimmen: Examine these marks recovered near River Keep—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between River Keep and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at River Keep, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_40": [
+      "Warden of Rimmen: Examine these marks recovered near Darkarn Place—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Darkarn Place and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Darkarn Place, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_41": [
+      "Warden of Rimmen: Examine these marks recovered near Nadrora Sugar Farm—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Nadrora Sugar Farm and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Nadrora Sugar Farm, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_42": [
+      "Warden of Rimmen: Examine these marks recovered near Sezir Watch—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Sezir Watch and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Sezir Watch, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_43": [
+      "Warden of Rimmen: Examine these marks recovered near Nidroal Sugar Farm—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Nidroal Sugar Farm and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Nidroal Sugar Farm, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_44": [
+      "Warden of Rimmen: Examine these marks recovered near Baandari Caravan Stop—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Baandari Caravan Stop and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Baandari Caravan Stop, then bring the recovered charter back to Rimmen."
+    ],
+    "story_rimmen_scene_45": [
+      "Warden of Rimmen: Examine these marks recovered near Jonihai Vault—they match the cabal troubling Rimmen.",
+      "Chronicler of Rimmen: The seal impressions cite the old charters of the Aqueduct Court of Rimmen word for word.",
+      "Outrider of Rimmen Palace: Our scouts spotted lantern-signals flashing between Jonihai Vault and Hall of the Lunar Champion at dusk.",
+      "Speaker of Rimmen: Strike swiftly at Jonihai Vault, then bring the recovered charter back to Rimmen."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_rimmen_01_opening",
+      "order": 1,
+      "title": "Lacquer and Limestone",
+      "region": "elsweyr/rimmen",
+      "category": "main",
+      "giver": "story_rimmen_hook_npc",
+      "start": "npc:story_rimmen_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "rimmen.L7.master_artisans",
+        "rimmen.L7.quarry_labourers"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Rimmen and Tonenaka Shrine in Rimmen.",
+      "places": [
+        "rimmen",
+        "tonenaka_shrine"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "rimmen",
+          "objective": "Speak with the Warden at Rimmen and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "tonenaka_shrine",
+          "objective": "Examine the disturbed boundary markers at Tonenaka Shrine"
+        },
+        {
+          "id": 30,
+          "place": "rimmen",
+          "objective": "Return the recovered seal-impression to the Chronicler at Rimmen"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "rimmen",
+          "text": "Speak with the Warden at Rimmen and inspect the contested tallies",
+          "scene": "story_rimmen_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "tonenaka_shrine",
+          "text": "Examine the disturbed boundary markers at Tonenaka Shrine"
+        },
+        {
+          "type": "go",
+          "place": "rimmen",
+          "text": "Return the recovered seal-impression to the Chronicler at Rimmen"
+        }
+      ],
+      "consequence": "world_state:rimmen_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_rimmen_02_trail",
+      "order": 2,
+      "title": "The Baandari Cipher-Box",
+      "region": "elsweyr/rimmen",
+      "category": "main",
+      "giver": "story_rimmen_envoy_npc",
+      "start": "auto",
+      "prereq": "story_rimmen_01_opening",
+      "requires": [
+        "story_rimmen_01_opening"
+      ],
+      "why": [
+        "rimmen.L7.quarry_labourers",
+        "rimmen.L7.baandari_camp"
+      ],
+      "summary": "Follow the conspirators' supply route from Tonenaka Shrine to Rimmen Palace and seize their cipher-ledger.",
+      "places": [
+        "tonenaka_shrine",
+        "rimmen_palace"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tonenaka_shrine",
+          "objective": "Track the night-couriers departing Tonenaka Shrine"
+        },
+        {
+          "id": 20,
+          "place": "rimmen_palace",
+          "objective": "Drive off the cabal outriders at Rimmen Palace and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "tonenaka_shrine",
+          "objective": "Deliver the cipher-box to the expedition chronicler at Tonenaka Shrine"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "tonenaka_shrine",
+          "text": "Track the night-couriers departing Tonenaka Shrine",
+          "scene": "story_rimmen_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "rimmen_palace",
+          "text": "Drive off the cabal outriders at Rimmen Palace and seize their cipher-box",
+          "boss": "story_rimmen_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "tonenaka_shrine",
+          "text": "Deliver the cipher-box to the expedition chronicler at Tonenaka Shrine"
+        }
+      ],
+      "consequence": "world_state:rimmen_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_rimmen_03_sanctum",
+      "order": 3,
+      "title": "Vaults Beneath the Aqueduct",
+      "region": "elsweyr/rimmen",
+      "category": "main",
+      "giver": "story_rimmen_scout_npc",
+      "start": "auto",
+      "prereq": "story_rimmen_02_trail",
+      "requires": [
+        "story_rimmen_02_trail"
+      ],
+      "why": [
+        "rimmen.L7.baandari_camp",
+        "rimmen.L8.mask_makers"
+      ],
+      "summary": "Secure the outer wards between Rimmen Palace and Hall of the Lunar Champion to lay bare the cabal's stronghold.",
+      "places": [
+        "rimmen_palace",
+        "hall_of_the_lunar_champion"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "rimmen_palace",
+          "objective": "Meet the outrider scout at Rimmen Palace to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "hall_of_the_lunar_champion",
+          "objective": "Scout the fortified threshold at Hall of the Lunar Champion and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "rimmen",
+          "objective": "Carry the ward-key back to the council table at Rimmen"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "rimmen_palace",
+          "text": "Meet the outrider scout at Rimmen Palace to decode the sanctum approach",
+          "scene": "story_rimmen_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "hall_of_the_lunar_champion",
+          "text": "Scout the fortified threshold at Hall of the Lunar Champion and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "rimmen",
+          "text": "Carry the ward-key back to the council table at Rimmen"
+        }
+      ],
+      "consequence": "world_state:rimmen_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_rimmen_04_finale",
+      "order": 4,
+      "title": "The Unmasked Assize",
+      "region": "elsweyr/rimmen",
+      "category": "main",
+      "giver": "story_rimmen_steward_npc",
+      "start": "auto",
+      "prereq": "story_rimmen_03_sanctum",
+      "requires": [
+        "story_rimmen_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "rimmen.L7.master_artisans",
+        "rimmen.L8.mask_makers"
+      ],
+      "summary": "Storm the cabal stronghold at Hall of the Lunar Champion and witness Potentate-Steward Zurin-Dar seal the regional concord at Rimmen.",
+      "places": [
+        "hall_of_the_lunar_champion",
+        "rimmen"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "hall_of_the_lunar_champion",
+          "objective": "Storm the inner chamber at Hall of the Lunar Champion and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "hall_of_the_lunar_champion",
+          "objective": "Recover the stolen charter-seal of Rimmen from Hall of the Lunar Champion"
+        },
+        {
+          "id": 30,
+          "place": "rimmen",
+          "objective": "Present the charter-seal at Rimmen to restore peace across Rimmen"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "hall_of_the_lunar_champion",
+          "text": "Storm the inner chamber at Hall of the Lunar Champion and defeat the cabal ringleader",
+          "boss": "story_rimmen_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "hall_of_the_lunar_champion",
+          "text": "Recover the stolen charter-seal of Rimmen from Hall of the Lunar Champion"
+        },
+        {
+          "type": "go",
+          "place": "rimmen",
+          "text": "Present the charter-seal at Rimmen to restore peace across Rimmen",
+          "scene": "story_rimmen_scene_04"
+        }
+      ],
+      "consequence": "world_state:rimmen_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Rimmen"
+      }
+    }
+  ]
+}

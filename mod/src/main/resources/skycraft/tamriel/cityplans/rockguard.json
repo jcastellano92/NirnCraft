@@ -1,0 +1,186 @@
+{
+  "id": "rockguard",
+  "why": [
+    "stormhold.L1.stormhold_shelf",
+    "stormhold.L5.border_caravan_exchange",
+    "stormhold.L6.stormhold_ring_over_ruin"
+  ],
+  "sil": "black-marsh-rockguard-plan",
+  "base": "none",
+  "overlay": "stormhold",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "stormhold",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "stormhold",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "rockguard_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "rockguard_landmark",
+      "overlay": "stormhold"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "rockguard_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "rockguard_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "rockguard_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "rockguard_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "rockguard_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "rockguard_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "rockguard_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "rockguard_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "rockguard_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "rockguard_b_5",
+    "smithy": "rockguard_b_7"
+  },
+  "titles": {
+    "rockguard_b_1": "place.skycraft.rockguard Council & Seat Hall",
+    "rockguard_b_2": "place.skycraft.rockguard High Sanctuary",
+    "rockguard_b_3": "place.skycraft.rockguard Fighters & Wayfarers Hall",
+    "rockguard_b_4": "place.skycraft.rockguard Mages & Chroniclers Spire",
+    "rockguard_b_5": "place.skycraft.rockguard The Lantern & Hearth Inn",
+    "rockguard_b_6": "place.skycraft.rockguard The Traveler's Rest Tavern",
+    "rockguard_b_7": "place.skycraft.rockguard Master Forge & Armorer",
+    "rockguard_landmark": "High Seat of place.skycraft.rockguard",
+    "rockguard_plaza": "place.skycraft.rockguard Central Plaza"
+  },
+  "innKey": "rockguard_b_5"
+}

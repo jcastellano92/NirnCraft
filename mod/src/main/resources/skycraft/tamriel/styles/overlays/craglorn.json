@@ -1,0 +1,19 @@
+{
+  "id": "craglorn",
+  "tint": {
+    "wall": "minecraft:polished_andesite",
+    "wall2": "minecraft:smooth_sandstone",
+    "low": "minecraft:deepslate_bricks",
+    "roof": "deepslate_tile",
+    "trim": "spruce",
+    "wood": "spruce",
+    "accent": "purple"
+  },
+  "palette": {
+    "cityWall": "deepslate_bricks",
+    "cityWall2": "minecraft:stone_bricks",
+    "plaza": "minecraft:polished_andesite",
+    "plaza2": "minecraft:smooth_sandstone",
+    "path": "minecraft:cobbled_deepslate"
+  }
+}

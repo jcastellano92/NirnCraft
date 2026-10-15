@@ -1,0 +1,99 @@
+{
+  "id": "ember_hollow",
+  "why": [
+    "jerall_mountains.L4.hot_spring_hollow",
+    "jerall_mountains.L6.mine_hamlets"
+  ],
+  "sil": "steam-basin-smeltery",
+  "base": "none",
+  "overlay": "jerall_mountains",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "jerall_mountains"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "smithy",
+      "use": "smelter",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "ember_hollow_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "ember_hollow_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "ember_hollow_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "jerall_mountains",
+      "name": "ember_hollow_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "pool",
+      "theme": "geothermal_spring",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "smelter_cresset",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "ember_hollow_b_1": "Ember Hollow Smeltery",
+    "ember_hollow_b_2": "The Hot-Spring Flagon",
+    "ember_hollow_b_3": "Assay-Master's Cabin",
+    "ember_hollow_b_4": "Silver-Miner's Bunkhouse"
+  },
+  "innKey": "ember_hollow_b_2",
+  "names": {
+    "inn": "ember_hollow_b_2"
+  }
+}

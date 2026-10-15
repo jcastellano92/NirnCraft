@@ -1,0 +1,23 @@
+{
+  "id": "colovian_highlands",
+  "why": [
+    "colovian_highlands.L1.karst_valleys",
+    "colovian_highlands.L4.pine_ridges",
+    "colovian_highlands.L6.spring_hamlets"
+  ],
+  "tint": {
+    "wall": "minecraft:white_terracotta",
+    "wall2": "minecraft:stone_bricks",
+    "low": "minecraft:cobblestone",
+    "wood": "spruce",
+    "roof": "deepslate_tile",
+    "accent": "blue"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:cobblestone",
+    "plaza": "minecraft:cobblestone",
+    "plaza2": "minecraft:andesite",
+    "path": "minecraft:gravel"
+  }
+}

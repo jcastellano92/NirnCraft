@@ -1,0 +1,841 @@
+{
+  "id": "corinthe",
+  "why": [
+    "pellitine.L1.river_terraces",
+    "pellitine.L5.plantations",
+    "pellitine.L6.corinthe_seat"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:orange_terracotta",
+    "low": "minecraft:cut_sandstone",
+    "wood": "jungle",
+    "roof": "smooth_sandstone",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:orange_terracotta",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:cut_sandstone",
+    "path": "minecraft:sandstone"
+  },
+  "style": {
+    "houseStyle": "khajiit",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:smooth_sandstone",
+        "minecraft:orange_terracotta",
+        "minecraft:cut_sandstone",
+        "minecraft:sandstone",
+        "sandstone",
+        "minecraft:smooth_sandstone"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_1_0",
+          "prop_corinthe_1_1",
+          "prop_corinthe_1_2",
+          "prop_corinthe_1_3",
+          "prop_corinthe_1_4",
+          "prop_corinthe_1_5",
+          "prop_corinthe_1_6",
+          "prop_corinthe_1_7",
+          "prop_corinthe_1_8",
+          "prop_corinthe_1_9",
+          "prop_corinthe_1_10",
+          "prop_corinthe_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_2_0",
+          "prop_corinthe_2_1",
+          "prop_corinthe_2_2",
+          "prop_corinthe_2_3",
+          "prop_corinthe_2_4",
+          "prop_corinthe_2_5",
+          "prop_corinthe_2_6",
+          "prop_corinthe_2_7",
+          "prop_corinthe_2_8",
+          "prop_corinthe_2_9",
+          "prop_corinthe_2_10",
+          "prop_corinthe_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_3_0",
+          "prop_corinthe_3_1",
+          "prop_corinthe_3_2",
+          "prop_corinthe_3_3",
+          "prop_corinthe_3_4",
+          "prop_corinthe_3_5",
+          "prop_corinthe_3_6",
+          "prop_corinthe_3_7",
+          "prop_corinthe_3_8",
+          "prop_corinthe_3_9",
+          "prop_corinthe_3_10",
+          "prop_corinthe_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_4_0",
+          "prop_corinthe_4_1",
+          "prop_corinthe_4_2",
+          "prop_corinthe_4_3",
+          "prop_corinthe_4_4",
+          "prop_corinthe_4_5",
+          "prop_corinthe_4_6",
+          "prop_corinthe_4_7",
+          "prop_corinthe_4_8",
+          "prop_corinthe_4_9",
+          "prop_corinthe_4_10",
+          "prop_corinthe_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_5_0",
+          "prop_corinthe_5_1",
+          "prop_corinthe_5_2",
+          "prop_corinthe_5_3",
+          "prop_corinthe_5_4",
+          "prop_corinthe_5_5",
+          "prop_corinthe_5_6",
+          "prop_corinthe_5_7",
+          "prop_corinthe_5_8",
+          "prop_corinthe_5_9",
+          "prop_corinthe_5_10",
+          "prop_corinthe_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_6_0",
+          "prop_corinthe_6_1",
+          "prop_corinthe_6_2",
+          "prop_corinthe_6_3",
+          "prop_corinthe_6_4",
+          "prop_corinthe_6_5",
+          "prop_corinthe_6_6",
+          "prop_corinthe_6_7",
+          "prop_corinthe_6_8",
+          "prop_corinthe_6_9",
+          "prop_corinthe_6_10",
+          "prop_corinthe_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_7_0",
+          "prop_corinthe_7_1",
+          "prop_corinthe_7_2",
+          "prop_corinthe_7_3",
+          "prop_corinthe_7_4",
+          "prop_corinthe_7_5",
+          "prop_corinthe_7_6",
+          "prop_corinthe_7_7",
+          "prop_corinthe_7_8",
+          "prop_corinthe_7_9",
+          "prop_corinthe_7_10",
+          "prop_corinthe_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_8_0",
+          "prop_corinthe_8_1",
+          "prop_corinthe_8_2",
+          "prop_corinthe_8_3",
+          "prop_corinthe_8_4",
+          "prop_corinthe_8_5",
+          "prop_corinthe_8_6",
+          "prop_corinthe_8_7",
+          "prop_corinthe_8_8",
+          "prop_corinthe_8_9",
+          "prop_corinthe_8_10",
+          "prop_corinthe_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_9_0",
+          "prop_corinthe_9_1",
+          "prop_corinthe_9_2",
+          "prop_corinthe_9_3",
+          "prop_corinthe_9_4",
+          "prop_corinthe_9_5",
+          "prop_corinthe_9_6",
+          "prop_corinthe_9_7",
+          "prop_corinthe_9_8",
+          "prop_corinthe_9_9",
+          "prop_corinthe_9_10",
+          "prop_corinthe_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_10_0",
+          "prop_corinthe_10_1",
+          "prop_corinthe_10_2",
+          "prop_corinthe_10_3",
+          "prop_corinthe_10_4",
+          "prop_corinthe_10_5",
+          "prop_corinthe_10_6",
+          "prop_corinthe_10_7",
+          "prop_corinthe_10_8",
+          "prop_corinthe_10_9",
+          "prop_corinthe_10_10",
+          "prop_corinthe_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_11_0",
+          "prop_corinthe_11_1",
+          "prop_corinthe_11_2",
+          "prop_corinthe_11_3",
+          "prop_corinthe_11_4",
+          "prop_corinthe_11_5",
+          "prop_corinthe_11_6",
+          "prop_corinthe_11_7",
+          "prop_corinthe_11_8",
+          "prop_corinthe_11_9",
+          "prop_corinthe_11_10",
+          "prop_corinthe_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_12_0",
+          "prop_corinthe_12_1",
+          "prop_corinthe_12_2",
+          "prop_corinthe_12_3",
+          "prop_corinthe_12_4",
+          "prop_corinthe_12_5",
+          "prop_corinthe_12_6",
+          "prop_corinthe_12_7",
+          "prop_corinthe_12_8",
+          "prop_corinthe_12_9",
+          "prop_corinthe_12_10",
+          "prop_corinthe_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_13_0",
+          "prop_corinthe_13_1",
+          "prop_corinthe_13_2",
+          "prop_corinthe_13_3",
+          "prop_corinthe_13_4",
+          "prop_corinthe_13_5",
+          "prop_corinthe_13_6",
+          "prop_corinthe_13_7",
+          "prop_corinthe_13_8",
+          "prop_corinthe_13_9",
+          "prop_corinthe_13_10",
+          "prop_corinthe_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_14_0",
+          "prop_corinthe_14_1",
+          "prop_corinthe_14_2",
+          "prop_corinthe_14_3",
+          "prop_corinthe_14_4",
+          "prop_corinthe_14_5",
+          "prop_corinthe_14_6",
+          "prop_corinthe_14_7",
+          "prop_corinthe_14_8",
+          "prop_corinthe_14_9",
+          "prop_corinthe_14_10",
+          "prop_corinthe_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_15_0",
+          "prop_corinthe_15_1",
+          "prop_corinthe_15_2",
+          "prop_corinthe_15_3",
+          "prop_corinthe_15_4",
+          "prop_corinthe_15_5",
+          "prop_corinthe_15_6",
+          "prop_corinthe_15_7",
+          "prop_corinthe_15_8",
+          "prop_corinthe_15_9",
+          "prop_corinthe_15_10",
+          "prop_corinthe_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_16_0",
+          "prop_corinthe_16_1",
+          "prop_corinthe_16_2",
+          "prop_corinthe_16_3",
+          "prop_corinthe_16_4",
+          "prop_corinthe_16_5",
+          "prop_corinthe_16_6",
+          "prop_corinthe_16_7",
+          "prop_corinthe_16_8",
+          "prop_corinthe_16_9",
+          "prop_corinthe_16_10",
+          "prop_corinthe_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_17_0",
+          "prop_corinthe_17_1",
+          "prop_corinthe_17_2",
+          "prop_corinthe_17_3",
+          "prop_corinthe_17_4",
+          "prop_corinthe_17_5",
+          "prop_corinthe_17_6",
+          "prop_corinthe_17_7",
+          "prop_corinthe_17_8",
+          "prop_corinthe_17_9",
+          "prop_corinthe_17_10",
+          "prop_corinthe_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_18_0",
+          "prop_corinthe_18_1",
+          "prop_corinthe_18_2",
+          "prop_corinthe_18_3",
+          "prop_corinthe_18_4",
+          "prop_corinthe_18_5",
+          "prop_corinthe_18_6",
+          "prop_corinthe_18_7",
+          "prop_corinthe_18_8",
+          "prop_corinthe_18_9",
+          "prop_corinthe_18_10",
+          "prop_corinthe_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_19_0",
+          "prop_corinthe_19_1",
+          "prop_corinthe_19_2",
+          "prop_corinthe_19_3",
+          "prop_corinthe_19_4",
+          "prop_corinthe_19_5",
+          "prop_corinthe_19_6",
+          "prop_corinthe_19_7",
+          "prop_corinthe_19_8",
+          "prop_corinthe_19_9",
+          "prop_corinthe_19_10",
+          "prop_corinthe_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_20_0",
+          "prop_corinthe_20_1",
+          "prop_corinthe_20_2",
+          "prop_corinthe_20_3",
+          "prop_corinthe_20_4",
+          "prop_corinthe_20_5",
+          "prop_corinthe_20_6",
+          "prop_corinthe_20_7",
+          "prop_corinthe_20_8",
+          "prop_corinthe_20_9",
+          "prop_corinthe_20_10",
+          "prop_corinthe_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_corinthe_21_0",
+          "prop_corinthe_21_1",
+          "prop_corinthe_21_2",
+          "prop_corinthe_21_3",
+          "prop_corinthe_21_4",
+          "prop_corinthe_21_5",
+          "prop_corinthe_21_6",
+          "prop_corinthe_21_7",
+          "prop_corinthe_21_8",
+          "prop_corinthe_21_9",
+          "prop_corinthe_21_10",
+          "prop_corinthe_21_11"
+        ]
+      }
+    }
+  }
+}

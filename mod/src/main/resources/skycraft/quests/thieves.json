@@ -3,40 +3,197 @@
   "category": "faction",
   "faction": "thieves_guild",
   "region": "skyrim/the_rift",
-  "speakers": {"nocturnal": "Nocturnal", "gallus": "Gallus's Spirit"},
+  "speakers": {
+    "nocturnal": "Nocturnal",
+    "gallus": "Gallus's Spirit"
+  },
   "npcs": [
-    {"id": "brynjolf", "name": "Brynjolf", "role": "thief", "place": "riften", "offset": [6, -6], "greet": "Never done an honest day's work in your life for all that coin you're carrying, eh lass? Or lad. The light's poor."},
-    {"id": "mercer", "name": "Mercer Frey", "role": "thief", "place": "ragged_flagon", "offset": [2, 2], "greet": "Brynjolf vouches for you. That buys you a seat at the table. Keeping it is up to you."},
-    {"id": "delvin", "name": "Delvin Mallory", "role": "thief", "place": "ragged_flagon", "offset": [-2, 2], "greet": "Business has been terrible since the curse. Not that I believe in curses. Mostly."},
-    {"id": "vex", "name": "Vex", "role": "thief", "place": "ragged_flagon", "offset": [3, -2], "female": true, "greet": "Don't touch anything. And don't talk to me unless it's about money."},
-    {"id": "karliah", "name": "Karliah", "role": "assassin", "place": "nightingale_hall", "offset": [0, 0], "female": true, "greet": "Twenty-five years I've waited for someone to hear the truth. Sit, and listen."},
-    {"id": "maven", "name": "Maven Black-Briar", "role": "jarl", "place": "riften", "offset": [-10, 10], "female": true, "greet": "If you're here to beg, the Temple of Mara is down the street. If you're here to work, sit down and close your mouth."},
-    {"id": "keerava", "name": "Keerava", "role": "innkeeper", "place": "riften", "offset": [8, 10], "female": true, "greet": "The Bee and Barb serves drink and food. Trouble, it does not serve."},
-    {"id": "bersi", "name": "Bersi Honey-Hand", "role": "adventurer", "place": "riften", "offset": [-6, -12], "greet": "Pottery, fine pottery. And if you break it, you've bought it."},
-    {"id": "haelga", "name": "Haelga", "role": "priest", "place": "riften", "offset": [12, -14], "female": true, "greet": "Dibella blesses all who come to her with an open heart. Or an open purse."},
-    {"id": "sabjorn", "name": "Sabjorn", "role": "innkeeper", "place": "honningbrew_meadery", "offset": [0, 0], "greet": "Honningbrew mead, best in the hold. Or it will be, once I get rid of these skeevers."}
+    {
+      "id": "brynjolf",
+      "name": "Brynjolf",
+      "role": "thief",
+      "place": "riften",
+      "offset": [
+        6,
+        -6
+      ],
+      "greet": "Never done an honest day's work in your life for all that coin you're carrying, eh lass? Or lad. The light's poor."
+    },
+    {
+      "id": "mercer",
+      "name": "Mercer Frey",
+      "role": "thief",
+      "place": "ragged_flagon",
+      "offset": [
+        2,
+        2
+      ],
+      "greet": "Brynjolf vouches for you. That buys you a seat at the table. Keeping it is up to you."
+    },
+    {
+      "id": "delvin",
+      "name": "Delvin Mallory",
+      "role": "thief",
+      "place": "ragged_flagon",
+      "offset": [
+        -2,
+        2
+      ],
+      "greet": "Business has been terrible since the curse. Not that I believe in curses. Mostly."
+    },
+    {
+      "id": "vex",
+      "name": "Vex",
+      "role": "thief",
+      "place": "ragged_flagon",
+      "offset": [
+        3,
+        -2
+      ],
+      "female": true,
+      "greet": "Don't touch anything. And don't talk to me unless it's about money."
+    },
+    {
+      "id": "karliah",
+      "name": "Karliah",
+      "role": "assassin",
+      "place": "nightingale_hall",
+      "offset": [
+        0,
+        0
+      ],
+      "female": true,
+      "greet": "Twenty-five years I've waited for someone to hear the truth. Sit, and listen."
+    },
+    {
+      "id": "maven",
+      "name": "Maven Black-Briar",
+      "role": "jarl",
+      "place": "riften",
+      "offset": [
+        -10,
+        10
+      ],
+      "female": true,
+      "greet": "If you're here to beg, the Temple of Mara is down the street. If you're here to work, sit down and close your mouth."
+    },
+    {
+      "id": "keerava",
+      "name": "Keerava",
+      "role": "innkeeper",
+      "place": "riften",
+      "offset": [
+        8,
+        10
+      ],
+      "female": true,
+      "greet": "The Bee and Barb serves drink and food. Trouble, it does not serve."
+    },
+    {
+      "id": "bersi",
+      "name": "Bersi Honey-Hand",
+      "role": "adventurer",
+      "place": "riften",
+      "offset": [
+        -6,
+        -12
+      ],
+      "greet": "Pottery, fine pottery. And if you break it, you've bought it."
+    },
+    {
+      "id": "haelga",
+      "name": "Haelga",
+      "role": "priest",
+      "place": "riften",
+      "offset": [
+        12,
+        -14
+      ],
+      "female": true,
+      "greet": "Dibella blesses all who come to her with an open heart. Or an open purse."
+    },
+    {
+      "id": "sabjorn",
+      "name": "Sabjorn",
+      "role": "innkeeper",
+      "place": "honningbrew_meadery",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "Honningbrew mead, best in the hold. Or it will be, once I get rid of these skeevers."
+    }
   ],
   "relics": [
-    {"id": "goldenglow_bill", "name": "Goldenglow Bill of Sale", "desc": "Proof that someone has quietly bought Goldenglow Estate out from under its owner.", "icon": 11},
-    {"id": "honningbrew_poison", "name": "Vial of Skeever Bane", "desc": "Labeled pest poison. It is not pest poison.", "icon": 15},
-    {"id": "gallus_journal", "name": "Gallus's Encoded Journal", "desc": "Written in old Falmer script. Someone in Winterhold might read it.", "icon": 7},
-    {"id": "eyes_of_the_falmer", "name": "The Eyes of the Falmer", "desc": "Two great gems pried from a Dwemer statue. Worth more than most towns.", "icon": 26},
-    {"id": "skeleton_key", "name": "The Skeleton Key", "desc": "Nocturnal's own key. It opens anything: locks, doors, minds.", "icon": 8}
+    {
+      "id": "goldenglow_bill",
+      "name": "Goldenglow Bill of Sale",
+      "desc": "Proof that someone has quietly bought Goldenglow Estate out from under its owner.",
+      "icon": 11
+    },
+    {
+      "id": "honningbrew_poison",
+      "name": "Vial of Skeever Bane",
+      "desc": "Labeled pest poison. It is not pest poison.",
+      "icon": 15
+    },
+    {
+      "id": "gallus_journal",
+      "name": "Gallus's Encoded Journal",
+      "desc": "Written in old Falmer script. Someone in Winterhold might read it.",
+      "icon": 7
+    },
+    {
+      "id": "eyes_of_the_falmer",
+      "name": "The Eyes of the Falmer",
+      "desc": "Two great gems pried from a Dwemer statue. Worth more than most towns.",
+      "icon": 26
+    },
+    {
+      "id": "skeleton_key",
+      "name": "The Skeleton Key",
+      "desc": "Nocturnal's own key. It opens anything: locks, doors, minds.",
+      "icon": 8
+    }
   ],
   "scenes": {
     "karliah_truth": [
-      ["karliah", "I didn't murder Gallus. Mercer Frey did, and he stole the Skeleton Key from the Twilight Sepulcher. The Guild's bad luck is Nocturnal's displeasure."],
-      ["karliah", "Gallus kept a journal. It's in an old script I can't read. If we can read it, the Guild will believe us."]
+      [
+        "karliah",
+        "I didn't murder Gallus. Mercer Frey did, and he stole the Skeleton Key from the Twilight Sepulcher. The Guild's bad luck is Nocturnal's displeasure."
+      ],
+      [
+        "karliah",
+        "Gallus kept a journal. It's in an old script I can't read. If we can read it, the Guild will believe us."
+      ]
     ],
     "nightingale_oath": [
-      ["narrator", "In the hall of the Nightingales, Karliah leads you before a great stone circle. The shadows deepen until they feel like a held breath."],
-      ["nocturnal", "So. Another stands before me. Serve me as Nightingale, in life and after, and I will grant you my shadow. Return what was stolen."],
-      ["karliah", "That was Nocturnal. Now we hunt Mercer."]
+      [
+        "narrator",
+        "In the hall of the Nightingales, Karliah leads you before a great stone circle. The shadows deepen until they feel like a held breath."
+      ],
+      [
+        "nocturnal",
+        "So. Another stands before me. Serve me as Nightingale, in life and after, and I will grant you my shadow. Return what was stolen."
+      ],
+      [
+        "karliah",
+        "That was Nocturnal. Now we hunt Mercer."
+      ]
     ],
     "nocturnal_return": [
-      ["narrator", "The Skeleton Key slides into the Ebonmere. The pool of darkness ripples, and a figure of shadow and feathers rises from it."],
-      ["nocturnal", "The Key is home. You have done what you swore. The Guild's luck is restored, and you are mine, Nightingale. Walk in shadow."],
-      ["gallus", "Karliah. I'm free. Thank you, friend."]
+      [
+        "narrator",
+        "The Skeleton Key slides into the Ebonmere. The pool of darkness ripples, and a figure of shadow and feathers rises from it."
+      ],
+      [
+        "nocturnal",
+        "The Key is home. You have done what you swore. The Guild's luck is restored, and you are mine, Nightingale. Walk in shadow."
+      ],
+      [
+        "gallus",
+        "Karliah. I'm free. Thank you, friend."
+      ]
     ]
   },
   "quests": [
@@ -44,151 +201,419 @@
       "id": "tg_chance_arrangement",
       "title": "A Chance Arrangement",
       "start": "npc:brynjolf",
-      "requires": ["!faction:thieves_guild"],
+      "requires": [
+        "!faction:thieves_guild"
+      ],
       "offer": "What kind of work are you offering?",
       "pitch": "Something a bit shady. Lift a ring from a market stall and plant it on a merchant. Do it clean, and there's more where that came from. Meet me in the Ragged Flagon after.",
       "desc": "Brynjolf, a fast talker in Riften's market, offered me work for coin: steal something unnoticed, then meet him in the Ragged Flagon under the city.",
       "objectives": [
-        {"type": "crime", "cond": "items_stolen", "count": 1, "text": "Steal something in Riften without being caught"},
-        {"type": "go", "place": "ragged_flagon", "text": "Find the Ragged Flagon in the Ratway"},
-        {"type": "talk", "npc": "brynjolf", "text": "Speak with Brynjolf",
-         "topic": "I did what you asked.",
-         "reply": "Clean work. Welcome to the Thieves Guild, then. Mercer Frey runs things here, but you'll deal with me. First, we have a few debts to collect."}
+        {
+          "type": "crime",
+          "cond": "items_stolen",
+          "count": 1,
+          "text": "Steal something in Riften without being caught"
+        },
+        {
+          "type": "go",
+          "place": "ragged_flagon",
+          "text": "Find the Ragged Flagon in the Ratway"
+        },
+        {
+          "type": "talk",
+          "npc": "brynjolf",
+          "text": "Speak with Brynjolf",
+          "topic": "I did what you asked.",
+          "reply": "Clean work. Welcome to the Thieves Guild, then. Mercer Frey runs things here, but you'll deal with me. First, we have a few debts to collect."
+        }
       ],
-      "rewards": {"gold": 100, "join": true}
+      "rewards": {
+        "gold": 100,
+        "join": true
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_taking_care_of_business",
       "title": "Taking Care of Business",
       "start": "auto",
-      "requires": ["quest:tg_chance_arrangement|faction:thieves_guild"],
+      "requires": [
+        "quest:tg_chance_arrangement|faction:thieves_guild"
+      ],
       "desc": "Brynjolf wants three of Riften's merchants reminded that they owe the Guild: Keerava, Bersi Honey-Hand and Haelga.",
       "objectives": [
-        {"type": "talk", "npc": "keerava", "text": "Collect Keerava's debt",
-         "topic": "The Guild wants its money.",
-         "reply": "Tell Brynjolf he will have it. And tell him to stop sending strangers to my bar."},
-        {"type": "talk", "npc": "bersi", "text": "Collect Bersi Honey-Hand's debt",
-         "topic": "You owe the Guild. Pay up, or the pottery pays.",
-         "reply": "Not the urn! Fine, fine. Here. Take it and get out."},
-        {"type": "talk", "npc": "haelga", "text": "Collect Haelga's debt",
-         "topic": "Brynjolf sent me about your debt.",
-         "reply": "Dibella forgive me, I meant to pay. Here. And not a word about the... visitors to my bunkhouse."},
-        {"type": "talk", "npc": "brynjolf", "text": "Report to Brynjolf", "topic": "All three paid.",
-         "reply": "That's the way. Next job is bigger: Maven Black-Briar wants the Goldenglow Estate taught a lesson."}
+        {
+          "type": "talk",
+          "npc": "keerava",
+          "text": "Collect Keerava's debt",
+          "topic": "The Guild wants its money.",
+          "reply": "Tell Brynjolf he will have it. And tell him to stop sending strangers to my bar."
+        },
+        {
+          "type": "talk",
+          "npc": "bersi",
+          "text": "Collect Bersi Honey-Hand's debt",
+          "topic": "You owe the Guild. Pay up, or the pottery pays.",
+          "reply": "Not the urn! Fine, fine. Here. Take it and get out."
+        },
+        {
+          "type": "talk",
+          "npc": "haelga",
+          "text": "Collect Haelga's debt",
+          "topic": "Brynjolf sent me about your debt.",
+          "reply": "Dibella forgive me, I meant to pay. Here. And not a word about the... visitors to my bunkhouse."
+        },
+        {
+          "type": "talk",
+          "npc": "brynjolf",
+          "text": "Report to Brynjolf",
+          "topic": "All three paid.",
+          "reply": "That's the way. Next job is bigger: Maven Black-Briar wants the Goldenglow Estate taught a lesson."
+        }
       ],
-      "rewards": {"gold": 300, "faction_points": 2}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 2
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_loud_and_clear",
       "title": "Loud and Clear",
       "start": "auto",
-      "requires": ["quest:tg_taking_care_of_business"],
+      "requires": [
+        "quest:tg_taking_care_of_business"
+      ],
       "desc": "The owner of Goldenglow Estate, the honey farm on the lake, has stopped paying the Guild. Maven Black-Briar, our best client, wants the estate hurt badly, and wants to know who's backing its owner.",
       "objectives": [
-        {"type": "go", "place": "goldenglow_estate", "text": "Travel to Goldenglow Estate"},
-        {"type": "clear", "place": "goldenglow_estate", "text": "Get past the estate's mercenaries",
-         "spawn": [{"type": "skycraft:bandit", "count": 4, "name": "Goldenglow Mercenary"}]},
-        {"type": "retrieve", "place": "goldenglow_estate", "relic": "goldenglow_bill", "radius": 12, "text": "Search the owner's safe",
-         "journal": "Inside the safe was a bill of sale. Someone else bought Goldenglow, and signed it with a mark: a stylized sun."},
-        {"type": "deliver", "npc": "brynjolf", "relic": "goldenglow_bill", "text": "Bring the bill of sale to Brynjolf",
-         "topic": "Someone else owns Goldenglow now.",
-         "reply": "A buyer with a sun for a signature... Honningbrew Meadery has the same mark on its barrels. That's next. Maven will be pleased."}
+        {
+          "type": "go",
+          "place": "goldenglow_estate",
+          "text": "Travel to Goldenglow Estate"
+        },
+        {
+          "type": "clear",
+          "place": "goldenglow_estate",
+          "text": "Get past the estate's mercenaries",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4,
+              "name": "Goldenglow Mercenary"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "goldenglow_estate",
+          "relic": "goldenglow_bill",
+          "radius": 12,
+          "text": "Search the owner's safe",
+          "journal": "Inside the safe was a bill of sale. Someone else bought Goldenglow, and signed it with a mark: a stylized sun."
+        },
+        {
+          "type": "deliver",
+          "npc": "brynjolf",
+          "relic": "goldenglow_bill",
+          "text": "Bring the bill of sale to Brynjolf",
+          "topic": "Someone else owns Goldenglow now.",
+          "reply": "A buyer with a sun for a signature... Honningbrew Meadery has the same mark on its barrels. That's next. Maven will be pleased."
+        }
       ],
-      "rewards": {"gold": 400, "faction_points": 2}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 2
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_dampened_spirits",
       "title": "Dampened Spirits",
       "start": "auto",
-      "requires": ["quest:tg_loud_and_clear"],
+      "requires": [
+        "quest:tg_loud_and_clear"
+      ],
       "desc": "Honningbrew Meadery is cutting into the Black-Briar mead trade, and whoever bought Goldenglow is behind it. Maven wants Honningbrew ruined at its own tasting.",
       "objectives": [
-        {"type": "talk", "npc": "sabjorn", "text": "Talk to Sabjorn at Honningbrew Meadery",
-         "topic": "I hear you have a skeever problem.",
-         "reply": "Problem? An infestation! Clear out the basement and I'll pay you. Here, put this bane on the nests. Careful, it's strong.",
-         "actions": "relic:honningbrew_poison"},
-        {"type": "clear", "place": "honningbrew_meadery", "text": "Clear the skeevers from the meadery cellar",
-         "spawn": [{"type": "skycraft:skeever", "count": 5}]},
-        {"type": "deliver", "npc": "maven", "relic": "honningbrew_poison", "text": "Bring the poison to Maven",
-         "topic": "Sabjorn's 'pest poison' is something else entirely.",
-         "reply": "Captain of the guard tastes it at the opening, Sabjorn hangs, Honningbrew is mine. You have a future, thief."}
+        {
+          "type": "talk",
+          "npc": "sabjorn",
+          "text": "Talk to Sabjorn at Honningbrew Meadery",
+          "topic": "I hear you have a skeever problem.",
+          "reply": "Problem? An infestation! Clear out the basement and I'll pay you. Here, put this bane on the nests. Careful, it's strong.",
+          "actions": "relic:honningbrew_poison"
+        },
+        {
+          "type": "clear",
+          "place": "honningbrew_meadery",
+          "text": "Clear the skeevers from the meadery cellar",
+          "spawn": [
+            {
+              "type": "skycraft:skeever",
+              "count": 5
+            }
+          ]
+        },
+        {
+          "type": "deliver",
+          "npc": "maven",
+          "relic": "honningbrew_poison",
+          "text": "Bring the poison to Maven",
+          "topic": "Sabjorn's 'pest poison' is something else entirely.",
+          "reply": "Captain of the guard tastes it at the opening, Sabjorn hangs, Honningbrew is mine. You have a future, thief."
+        }
       ],
-      "rewards": {"gold": 500, "faction_points": 3}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_scoundrels_folly",
       "title": "Scoundrel's Folly",
       "start": "auto",
       "on_start": "relocate:karliah:snow_veil_sanctum:4:4",
-      "requires": ["quest:tg_dampened_spirits"],
+      "requires": [
+        "quest:tg_dampened_spirits"
+      ],
       "desc": "The sun mark belongs to a rival, and the trail leads to Snow Veil Sanctum, where a Guild traitor named Karliah may be hiding. Mercer Frey wants her dead.",
       "objectives": [
-        {"type": "talk", "npc": "mercer", "text": "Speak with Mercer Frey", "topic": "Brynjolf says you have a job for me.",
-         "reply": "Karliah. She murdered our last Guild Master, Gallus, twenty-five years ago. Now she's back. She's hiding in Snow Veil Sanctum. You're coming with me."},
-        {"type": "go", "place": "snow_veil_sanctum", "text": "Meet Mercer at Snow Veil Sanctum"},
-        {"type": "clear", "place": "snow_veil_sanctum", "placement": "structure", "text": "Fight through Snow Veil Sanctum",
-         "spawn": [{"type": "skycraft:draugr", "count": 4}]},
-        {"type": "talk", "npc": "karliah", "text": "Hear Karliah out", "topic": "Mercer says you killed Gallus.",
-         "reply": "Mercer said that? Mercer shot you in the back a moment ago. Look at the wound. Then listen to me.",
-         "actions": "scene:karliah_truth;relic:gallus_journal"},
-        {"type": "deliver", "npc": "brynjolf", "relic": "gallus_journal", "text": "Show Gallus's journal to Brynjolf",
-         "topic": "Mercer's been robbing the Guild blind. Gallus wrote it down.",
-         "reply": "Mercer... the vault! He's emptied the vault! Go with Karliah. I'll hold the Guild together. Find him."}
+        {
+          "type": "talk",
+          "npc": "mercer",
+          "text": "Speak with Mercer Frey",
+          "topic": "Brynjolf says you have a job for me.",
+          "reply": "Karliah. She murdered our last Guild Master, Gallus, twenty-five years ago. Now she's back. She's hiding in Snow Veil Sanctum. You're coming with me."
+        },
+        {
+          "type": "go",
+          "place": "snow_veil_sanctum",
+          "text": "Meet Mercer at Snow Veil Sanctum"
+        },
+        {
+          "type": "clear",
+          "place": "snow_veil_sanctum",
+          "placement": "structure",
+          "text": "Fight through Snow Veil Sanctum",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "karliah",
+          "text": "Hear Karliah out",
+          "topic": "Mercer says you killed Gallus.",
+          "reply": "Mercer said that? Mercer shot you in the back a moment ago. Look at the wound. Then listen to me.",
+          "actions": "scene:karliah_truth;relic:gallus_journal"
+        },
+        {
+          "type": "deliver",
+          "npc": "brynjolf",
+          "relic": "gallus_journal",
+          "text": "Show Gallus's journal to Brynjolf",
+          "topic": "Mercer's been robbing the Guild blind. Gallus wrote it down.",
+          "reply": "Mercer... the vault! He's emptied the vault! Go with Karliah. I'll hold the Guild together. Find him."
+        }
       ],
-      "rewards": {"gold": 500, "faction_points": 3}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_trinity_restored",
       "title": "Trinity Restored",
       "start": "auto",
       "on_start": "relocate:karliah:nightingale_hall",
-      "requires": ["quest:tg_scoundrels_folly"],
+      "requires": [
+        "quest:tg_scoundrels_folly"
+      ],
       "desc": "Karliah was a Nightingale, one of three agents sworn to the Daedric Prince Nocturnal. To catch Mercer we need Nocturnal's favor, and the Nightingale armor waiting in Nightingale Hall.",
       "objectives": [
-        {"type": "go", "place": "nightingale_hall", "text": "Travel to Nightingale Hall"},
-        {"type": "talk", "npc": "karliah", "text": "Take the Nightingale oath with Karliah", "topic": "I'm ready.",
-         "reply": "Then stand on the circle. Don't speak until she does.",
-         "actions": "scene:nightingale_oath"}
+        {
+          "type": "go",
+          "place": "nightingale_hall",
+          "text": "Travel to Nightingale Hall"
+        },
+        {
+          "type": "talk",
+          "npc": "karliah",
+          "text": "Take the Nightingale oath with Karliah",
+          "topic": "I'm ready.",
+          "reply": "Then stand on the circle. Don't speak until she does.",
+          "actions": "scene:nightingale_oath"
+        }
       ],
-      "rewards": {"gold": 300, "faction_points": 3, "flags": ["nightingale"],
-                  "items": [{"item": "minecraft:leather_chestplate", "name": "Nightingale Armor", "color": "1E1A24", "enchant": {"protection": 3}},
-                            {"item": "minecraft:leather_helmet", "name": "Nightingale Hood", "color": "1E1A24", "enchant": {"protection": 2}}]}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 3,
+        "flags": [
+          "nightingale"
+        ],
+        "items": [
+          {
+            "item": "minecraft:leather_chestplate",
+            "name": "Nightingale Armor",
+            "color": "1E1A24",
+            "enchant": {
+              "protection": 3
+            }
+          },
+          {
+            "item": "minecraft:leather_helmet",
+            "name": "Nightingale Hood",
+            "color": "1E1A24",
+            "enchant": {
+              "protection": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_blindsighted",
       "title": "Blindsighted",
       "start": "auto",
       "on_start": "relocate:karliah:irkngthand:6:6",
-      "requires": ["quest:tg_trinity_restored"],
+      "requires": [
+        "quest:tg_trinity_restored"
+      ],
       "desc": "Mercer Frey is after the Eyes of the Falmer, the great gems of the Dwemer ruin Irkngthand. That's where we'll catch him.",
       "objectives": [
-        {"type": "go", "place": "irkngthand", "text": "Travel to Irkngthand"},
-        {"type": "clear", "place": "irkngthand", "placement": "structure", "text": "Fight through the Falmer of Irkngthand",
-         "spawn": [{"type": "skycraft:falmer", "count": 4}]},
-        {"type": "kill", "place": "irkngthand", "placement": "structure", "text": "Kill Mercer Frey",
-         "spawn": [{"type": "npc:assassin", "name": "Mercer Frey, the Betrayer", "target": true, "boss": true, "hp": 3.0, "hostile": true}],
-         "actions": "retire:mercer;relic:eyes_of_the_falmer;relic:skeleton_key"},
-        {"type": "talk", "npc": "karliah", "text": "Speak with Karliah", "topic": "Mercer is dead. I have the Key.",
-         "reply": "Then there's one thing left. The Key goes home to the Twilight Sepulcher. Keep the gems; the Guild needs them more than Nocturnal does."}
+        {
+          "type": "go",
+          "place": "irkngthand",
+          "text": "Travel to Irkngthand"
+        },
+        {
+          "type": "clear",
+          "place": "irkngthand",
+          "placement": "structure",
+          "text": "Fight through the Falmer of Irkngthand",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "irkngthand",
+          "placement": "structure",
+          "text": "Kill Mercer Frey",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "name": "Mercer Frey, the Betrayer",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "hostile": true
+            }
+          ],
+          "actions": "retire:mercer;relic:eyes_of_the_falmer;relic:skeleton_key"
+        },
+        {
+          "type": "talk",
+          "npc": "karliah",
+          "text": "Speak with Karliah",
+          "topic": "Mercer is dead. I have the Key.",
+          "reply": "Then there's one thing left. The Key goes home to the Twilight Sepulcher. Keep the gems; the Guild needs them more than Nocturnal does."
+        }
       ],
-      "rewards": {"gold": 1000, "faction_points": 4}
+      "rewards": {
+        "gold": 1000,
+        "faction_points": 4
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     },
     {
       "id": "tg_darkness_returns",
       "title": "Darkness Returns",
       "start": "auto",
-      "requires": ["quest:tg_blindsighted"],
+      "requires": [
+        "quest:tg_blindsighted"
+      ],
       "desc": "The Skeleton Key must be returned to the Ebonmere in the Twilight Sepulcher, Nocturnal's temple. Only then will the Guild's luck return.",
       "objectives": [
-        {"type": "go", "place": "twilight_sepulcher", "text": "Travel to the Twilight Sepulcher"},
-        {"type": "clear", "place": "twilight_sepulcher", "placement": "structure", "text": "Pass the Nightingale Sentinels",
-         "spawn": [{"type": "skycraft:draugr", "count": 4, "name": "Nightingale Sentinel"}]},
-        {"type": "go", "place": "twilight_sepulcher", "radius": 10, "text": "Return the Skeleton Key to the Ebonmere",
-         "actions": "take:skeleton_key;scene:nocturnal_return"},
-        {"type": "talk", "npc": "brynjolf", "text": "Return to Brynjolf in the Ragged Flagon", "topic": "It's done. The Key is home.",
-         "reply": "I can feel it already: the coin's flowing again. The Guild needs a Guild Master, and nobody's earned it like you."}
+        {
+          "type": "go",
+          "place": "twilight_sepulcher",
+          "text": "Travel to the Twilight Sepulcher"
+        },
+        {
+          "type": "clear",
+          "place": "twilight_sepulcher",
+          "placement": "structure",
+          "text": "Pass the Nightingale Sentinels",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 4,
+              "name": "Nightingale Sentinel"
+            }
+          ]
+        },
+        {
+          "type": "go",
+          "place": "twilight_sepulcher",
+          "radius": 10,
+          "text": "Return the Skeleton Key to the Ebonmere",
+          "actions": "take:skeleton_key;scene:nocturnal_return"
+        },
+        {
+          "type": "talk",
+          "npc": "brynjolf",
+          "text": "Return to Brynjolf in the Ragged Flagon",
+          "topic": "It's done. The Key is home.",
+          "reply": "I can feel it already: the coin's flowing again. The Guild needs a Guild Master, and nobody's earned it like you."
+        }
       ],
-      "rewards": {"gold": 2000, "faction_points": 20, "title": "guild_master", "flags": ["guild_master"], "items": ["skycraft:nightingale_bow", "skycraft:chillrend"]}
+      "rewards": {
+        "gold": 2000,
+        "faction_points": 20,
+        "title": "guild_master",
+        "flags": [
+          "guild_master"
+        ],
+        "items": [
+          "skycraft:nightingale_bow",
+          "skycraft:chillrend"
+        ]
+      },
+      "why": [
+        "the_rift.L9.rebel_leaning_jarl",
+        "the_rift.L8.mara_temple"
+      ]
     }
   ]
 }

@@ -1,0 +1,289 @@
+{
+  "id": "tear",
+  "why": [
+    "deshaan.L3.lagoon_fens",
+    "deshaan.L4.paddy_round_tear",
+    "morrowind.L6.great_house_seats"
+  ],
+  "sil": "dres-canal-compound",
+  "base": "none",
+  "overlay": "tear",
+  "radius": 84,
+  "reach": 102,
+  "innKey": "tr_saltrice_barge_inn",
+  "names": {
+    "inn": "tr_saltrice_barge_inn",
+    "store": "tr_plantation_exchange",
+    "smithy": "tr_thorn_ironworks"
+  },
+  "gates": [
+    [
+      0,
+      -78
+    ],
+    [
+      -78,
+      0
+    ],
+    [
+      0,
+      78
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "name": "tear_dres_citadel",
+      "overlay": "tear"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        84
+      ],
+      "overlay": "tear"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_dres_council"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        61,
+        25
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_tribunal_temple"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_saltrice_barge_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        25,
+        61
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_marsh_chain_club"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_plantation_exchange"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -25,
+        61
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_thorn_ironworks"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_bog_apothecary"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -61,
+        25
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_tholer_dres_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_ulvur_townhouse"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -61,
+        -25
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_slaver_barracks"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_saltrice_granary"
+    },
+    {
+      "kind": "mill",
+      "use": "mill",
+      "wealth": "common",
+      "at": [
+        -25,
+        -61
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_lagoon_mill"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_canal_factor_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        25,
+        -61
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_overseer_house"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_paddy_shanty_1"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        61,
+        -25
+      ],
+      "face": "south",
+      "overlay": "tear",
+      "name": "tr_paddy_shanty_2"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "saltrice_canal",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "theme": "house_dres_chains",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "marsh_oil_cresset",
+      "count": 3
+    },
+    {
+      "type": "market",
+      "theme": "grain_wharf",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "tear_dres_citadel": "Grand Stockade of House Dres",
+    "tr_dres_council": "Dres Council Compound",
+    "tr_tribunal_temple": "Tear Tribunal Temple",
+    "tr_saltrice_barge_inn": "The Saltrice Barge Inn",
+    "tr_marsh_chain_club": "The Marsh-Chain Cornerclub",
+    "tr_plantation_exchange": "Southern Plantation Exchange",
+    "tr_thorn_ironworks": "Thorn-Border Ironworks",
+    "tr_bog_apothecary": "Bog-Reed Apothecary",
+    "tr_tholer_dres_manor": "Grandmaster Tholer Dres Manor",
+    "tr_ulvur_townhouse": "Ulvur Plantation Townhouse",
+    "tr_slaver_barracks": "Dres Slaver-Watch Barracks",
+    "tr_saltrice_granary": "Saltrice Granary Vault",
+    "tr_lagoon_mill": "Lagoon Tidal Mill",
+    "tr_canal_factor_house": "Canal-Factor's House",
+    "tr_overseer_house": "Overseer's Stone House",
+    "tr_paddy_shanty_1": "Argonian Paddy-Worker Shanty",
+    "tr_paddy_shanty_2": "Reed-Weir Shanty"
+  }
+}

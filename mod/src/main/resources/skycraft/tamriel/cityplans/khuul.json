@@ -1,0 +1,112 @@
+{
+  "id": "khuul",
+  "why": [
+    "west_gash.L1.gash_ridges",
+    "sheogorad.L2.cold_sea_storms"
+  ],
+  "sil": "northern-ash-fishing-pier",
+  "base": "none",
+  "overlay": "west_gash",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "west_gash"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "khuul_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        9,
+        29
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "khuul_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "khuul_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        -24,
+        -18
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "khuul_b_4"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "west_gash",
+      "name": "khuul_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "theme": "khuul_shore_well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "khuul_jetty_lamp",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "khuul_b_1": "Thongar's Tradehouse",
+    "khuul_b_2": "Aldos Braven's Shack",
+    "khuul_b_3": "Endris Dilmyn's Hut",
+    "khuul_b_4": "Svadstar's Boat-Shed",
+    "khuul_b_5": "Solstheim Ferry Pier"
+  },
+  "innKey": "khuul_b_1",
+  "names": {
+    "inn": "khuul_b_1"
+  }
+}

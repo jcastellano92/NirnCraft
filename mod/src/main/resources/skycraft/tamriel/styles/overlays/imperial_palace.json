@@ -1,5 +1,10 @@
 {
   "id": "imperial_palace",
+  "why": [
+    "heartlands.L1.island_bedrock",
+    "heartlands.L6.imperial_city",
+    "heartlands.L11.white_gold_tower"
+  ],
   "tint": {
     "wall": "minecraft:smooth_quartz",
     "wall2": "minecraft:quartz_block",

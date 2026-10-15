@@ -1,0 +1,356 @@
+{
+  "id": "ykalon",
+  "sil": "pine-ridge-charter-town",
+  "base": "none",
+  "overlay": "anticlere",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "ykalon_boar_and_bugle",
+  "names": {
+    "inn": "ykalon_boar_and_bugle",
+    "store": "ykalon_forest_staple",
+    "smithy": "ykalon_charcoal_iron_forge"
+  },
+  "titles": {
+    "ykalon_landmark": "Ykalon Charter Spire",
+    "ykalon_charter_keep": "Ykalon Charter-Hill Keep",
+    "ykalon_boar_and_bugle": "The Boar and Bugle Inn",
+    "ykalon_forest_staple": "Pine-Rosin & Timber Staple",
+    "ykalon_charcoal_iron_forge": "Forest-Charcoal Ironworks",
+    "ykalon_truffle_and_fern": "Wood-Sorrel & Agaric Apothecary",
+    "ykalon_kynareth_grove_chapel": "Chapel of Kynareth of the Pines",
+    "ykalon_foresters_bowyer": "Foresters' Longbow & Shaft Shop",
+    "ykalon_verderers_court": "Royal Verderer's Court-Hall",
+    "ykalon_north_road_watch": "North-Ridge Watchhouse",
+    "ykalon_huntsmen_stables": "Huntsmen's Relay Stables",
+    "ykalon_market_plaza": "Ykalon Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "ykalon_landmark",
+      "overlay": "anticlere"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "ykalon_charter_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "ykalon_boar_and_bugle"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "ykalon_forest_staple"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "ykalon_charcoal_iron_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "ykalon_truffle_and_fern"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "ykalon_kynareth_grove_chapel"
+    },
+    {
+      "kind": "store",
+      "use": "fletcher",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "ykalon_foresters_bowyer"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "ykalon_verderers_court"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "ykalon_north_road_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "ykalon_huntsmen_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "ykalon_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "anticlere"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "anticlere"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "birch",
+      "count": 1
+    },
+    {
+      "type": "flowers",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "id": "blankenmarch",
+  "why": [
+    "blackwood.L4.cypress_swamp",
+    "blackwood.L6.border_villages"
+  ],
+  "sil": "cypress-pond-hamlet",
+  "base": "none",
+  "overlay": "blackwood",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "blackwood"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "blankenmarch_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "blankenmarch_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "blankenmarch_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "blankenmarch_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "cypress_bayou",
+      "count": 1
+    },
+    {
+      "type": "tree_row",
+      "theme": "swamp_cypress",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "blankenmarch_b_1": "Blankenmarch Headman's Hall",
+    "blankenmarch_b_2": "Hanz gro-Hubrag's Cabin",
+    "blankenmarch_b_3": "Julitta Plotius's Cottage",
+    "blankenmarch_b_4": "S'thasa's Fisherman Hut"
+  }
+}

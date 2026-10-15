@@ -1,0 +1,186 @@
+{
+  "id": "hutan_tzel",
+  "why": [
+    "gideon.L1.western_levee_plain",
+    "gideon.L5.levee_rice_and_punt_trade",
+    "gideon.L6.gideon_walled_seat"
+  ],
+  "sil": "black-marsh-hutan-tzel-plan",
+  "base": "none",
+  "overlay": "gideon",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "gideon",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "gideon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "hutan_tzel_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "hutan_tzel_landmark",
+      "overlay": "gideon"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hutan_tzel_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "hutan_tzel_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "hutan_tzel_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "hutan_tzel_b_5",
+    "smithy": "hutan_tzel_b_7"
+  },
+  "titles": {
+    "hutan_tzel_b_1": "place.skycraft.hutan_tzel Council & Seat Hall",
+    "hutan_tzel_b_2": "place.skycraft.hutan_tzel High Sanctuary",
+    "hutan_tzel_b_3": "place.skycraft.hutan_tzel Fighters & Wayfarers Hall",
+    "hutan_tzel_b_4": "place.skycraft.hutan_tzel Mages & Chroniclers Spire",
+    "hutan_tzel_b_5": "place.skycraft.hutan_tzel The Lantern & Hearth Inn",
+    "hutan_tzel_b_6": "place.skycraft.hutan_tzel The Traveler's Rest Tavern",
+    "hutan_tzel_b_7": "place.skycraft.hutan_tzel Master Forge & Armorer",
+    "hutan_tzel_landmark": "High Seat of place.skycraft.hutan_tzel",
+    "hutan_tzel_plaza": "place.skycraft.hutan_tzel Central Plaza"
+  },
+  "innKey": "hutan_tzel_b_5"
+}

@@ -1091,5 +1091,10 @@
    "a": "pass_3",
    "b": "ink_stair"
   }
+ ],
+ "why": [
+  "solstheim.L1.moesring_massif",
+  "moesring.L1.temple_face",
+  "solstheim.L1.old_ash_hollows"
  ]
 }

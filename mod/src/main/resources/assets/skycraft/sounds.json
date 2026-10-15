@@ -3976,5 +3976,89 @@
       }
     ],
     "subtitle": "subtitles.skycraft.ambient.mourning"
+  },
+  "music.explore.yokuda": {
+    "sounds": [
+      {
+        "name": "skycraft:music/hammerfell_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.yokuda": {
+    "sounds": [
+      {
+        "name": "skycraft:music/hammerfell_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.pyandonea": {
+    "sounds": [
+      {
+        "name": "skycraft:music/summerset_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.pyandonea": {
+    "sounds": [
+      {
+        "name": "skycraft:music/summerset_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore.thras": {
+    "sounds": [
+      {
+        "name": "skycraft:music/black_marsh_day",
+        "stream": true
+      }
+    ]
+  },
+  "music.explore_night.thras": {
+    "sounds": [
+      {
+        "name": "skycraft:music/black_marsh_night",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.atmoran": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_1",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/town_2",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.akaviri": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_elven",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/town_2",
+        "stream": true
+      }
+    ]
+  },
+  "music.town.sload": {
+    "sounds": [
+      {
+        "name": "skycraft:music/town_dunmer",
+        "stream": true
+      },
+      {
+        "name": "skycraft:music/town_2",
+        "stream": true
+      }
+    ]
   }
 }

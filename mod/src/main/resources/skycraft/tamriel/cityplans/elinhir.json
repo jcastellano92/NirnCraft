@@ -1,0 +1,441 @@
+{
+  "id": "elinhir",
+  "sil": "highland-tier-spire",
+  "base": "none",
+  "overlay": "craglorn",
+  "radius": 118,
+  "reach": 126,
+  "fill_gap": 2,
+  "inn_key": "elinhir_falling_star_inn",
+  "names": {
+    "inn": "elinhir_falling_star_inn",
+    "store": "elinhir_high_pass_factors",
+    "smithy": "elinhir_meteoric_iron_forge"
+  },
+  "titles": {
+    "elinhir_landmark": "The Apex Spire of Elinhir",
+    "elinhir_governors_citadel": "High-Tier Citadel of Elinhir",
+    "elinhir_falling_star_inn": "The Falling Star Inn",
+    "elinhir_colovian_cup": "The Colovian Cup Tavern",
+    "elinhir_high_pass_factors": "Craglorn High-Pass Outfitter",
+    "elinhir_meteoric_iron_forge": "Star-Metal & Heavy-Steel Forge",
+    "elinhir_nirncrux_alembic": "Red-Crux & Mountain-Sage Alembic",
+    "elinhir_astrolabe_scriptorium": "The Spire Ephemeris & Folio House",
+    "elinhir_lodestone_cutters": "Lodestone & Amethyst Lapidary",
+    "elinhir_apex_mages_conclave": "Conclave of the Apex Tower",
+    "elinhir_fighters_hall": "Craglorn Escort Fighters Hall",
+    "elinhir_julianos_star_fane": "Star-Vaulted Temple of Julianos",
+    "elinhir_nedic_undercroft": "Nedic-Stone Catacombs of Arkay",
+    "elinhir_warden_kaia_hall": "Warden Kaia's Wind-Wall Manor",
+    "elinhir_tiered_granary": "The Seven-Vault Tiered Granary",
+    "elinhir_wind_wall_rampart": "Wind-Wall Rampart Watchhouse",
+    "elinhir_pass_mule_stables": "Jerall-Border Mule & Horse Mews",
+    "elinhir_market_plaza": "The Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -114
+    ],
+    [
+      114,
+      0
+    ],
+    [
+      0,
+      114
+    ],
+    [
+      -114,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 114,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "minaret",
+      "at": [
+        0,
+        -49
+      ],
+      "face": "south",
+      "name": "elinhir_landmark",
+      "overlay": "craglorn"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        31,
+        -43
+      ],
+      "face": "south",
+      "name": "elinhir_governors_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        67,
+        -48
+      ],
+      "face": "west",
+      "name": "elinhir_falling_star_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        51,
+        -15
+      ],
+      "face": "west",
+      "name": "elinhir_colovian_cup"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        82,
+        2
+      ],
+      "face": "west",
+      "name": "elinhir_high_pass_factors"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        50,
+        18
+      ],
+      "face": "west",
+      "name": "elinhir_meteoric_iron_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        64,
+        51
+      ],
+      "face": "west",
+      "name": "elinhir_nirncrux_alembic"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        29,
+        45
+      ],
+      "face": "north",
+      "name": "elinhir_astrolabe_scriptorium"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        20,
+        80
+      ],
+      "face": "north",
+      "name": "elinhir_lodestone_cutters"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -4,
+        53
+      ],
+      "face": "north",
+      "name": "elinhir_apex_mages_conclave"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -32,
+        75
+      ],
+      "face": "north",
+      "name": "elinhir_fighters_hall"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -35,
+        40
+      ],
+      "face": "north",
+      "name": "elinhir_julianos_star_fane"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -71,
+        41
+      ],
+      "face": "east",
+      "name": "elinhir_nedic_undercroft"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -52,
+        10
+      ],
+      "face": "east",
+      "name": "elinhir_warden_kaia_hall"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -81,
+        -10
+      ],
+      "face": "east",
+      "name": "elinhir_tiered_granary"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -48,
+        -23
+      ],
+      "face": "east",
+      "name": "elinhir_wind_wall_rampart"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -59,
+        -57
+      ],
+      "face": "east",
+      "name": "elinhir_pass_mule_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -100
+      ],
+      "to": [
+        0,
+        100
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -100,
+        0
+      ],
+      "to": [
+        100,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -61,
+        -61
+      ],
+      "to": [
+        61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        -61
+      ],
+      "to": [
+        61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        61
+      ],
+      "to": [
+        -61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -61,
+        61
+      ],
+      "to": [
+        -61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "elinhir_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        59
+      ],
+      "overlay": "craglorn"
+    },
+    {
+      "ring": [
+        59,
+        118
+      ],
+      "overlay": "craglorn"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 3
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:mara",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "jungle",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    },
+    {
+      "type": "pool",
+      "count": 1
+    }
+  ]
+}

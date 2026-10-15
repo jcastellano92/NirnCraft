@@ -1,0 +1,356 @@
+{
+  "id": "hallins_stand",
+  "sil": "south-pass-gate-fortress-town",
+  "base": "none",
+  "overlay": "bangkorai",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "hallins_stand_five_companions",
+  "names": {
+    "inn": "hallins_stand_five_companions",
+    "store": "hallins_stand_pass_commissary",
+    "smithy": "hallins_stand_ansei_memorial_forge"
+  },
+  "titles": {
+    "hallins_stand_landmark": "Hallin's Stand Pass-Gate",
+    "hallins_stand_citadel": "Citadel of Hallin's Stand",
+    "hallins_stand_five_companions": "The Five Companions Inn",
+    "hallins_stand_pass_commissary": "Bangkorai-Edge Caravan Commissary",
+    "hallins_stand_ansei_memorial_forge": "Hallin's Anvil Armoury",
+    "hallins_stand_desert_sage_shop": "Pass-Wind Sage & Poultice Shop",
+    "hallins_stand_hall_of_virtues": "Hall of the Martial Virtues",
+    "hallins_stand_ansei_crypt": "Crypt of the Sword-Saints",
+    "hallins_stand_gate_garrison": "South-Gate Pikemen Barracks",
+    "hallins_stand_north_wall_watch": "Garrison-Road Watchtower",
+    "hallins_stand_remount_lines": "Pass-Guard Cavalry Stables",
+    "hallins_stand_market_plaza": "Hallin's Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "gate_hammer",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "hallins_stand_landmark",
+      "overlay": "bangkorai"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "hallins_stand_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "hallins_stand_five_companions"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "hallins_stand_pass_commissary"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "hallins_stand_ansei_memorial_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "hallins_stand_desert_sage_shop"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "hallins_stand_hall_of_virtues"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "hallins_stand_ansei_crypt"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "hallins_stand_gate_garrison"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "hallins_stand_north_wall_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "hallins_stand_remount_lines"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "hallins_stand_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 5,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 4,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "bangkorai"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "bangkorai"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "jungle",
+      "count": 1
+    },
+    {
+      "type": "gatehouse",
+      "count": 1
+    }
+  ]
+}

@@ -136,7 +136,7 @@ public final class BuiltBuilder {
         p.mood = Pacing.of(p, room);
         switch (t) {
             case DWEMER -> DwemerRooms.decorate(p, room, r);
-            case FORT -> FortRooms.decorate(p, room, r);
+            case FORT, BRETON_KEEP_RUIN -> FortRooms.decorate(p, room, r);
             case RUIN -> CultureRooms.decorate(p, room, r);
             default -> BarrowRooms.decorate(p, room, r);
         }

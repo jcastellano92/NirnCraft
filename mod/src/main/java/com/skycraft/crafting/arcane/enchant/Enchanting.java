@@ -301,12 +301,16 @@ public final class Enchanting {
 
         ItemStack target = stack;
         boolean split = stack.getCount() > 1;
-        if (split) target = stack.split(1);
+        if (split) {
+            target = stack.split(1);
+            com.skycraft.loot.affix.ItemAffixes.copyAffixes(stack, target);
+        }
         Map<Enchantment, Integer> map = new LinkedHashMap<>(EnchantmentHelper.getEnchantments(target));
         map.put(ench, level);
         EnchantmentHelper.setEnchantments(map, target);
         CompoundTag tag = target.getOrCreateTag();
         tag.putInt(MARK, tag.getInt(MARK) + 1);
+        com.skycraft.loot.affix.ItemAffixes.onEnchant(target, ench, level, soul * 10);
         if (split) com.skycraft.inventory.Pack.giveOrDrop(player, target);
 
         SoulGemItem.consume(gem);

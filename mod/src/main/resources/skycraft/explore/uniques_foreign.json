@@ -1,0 +1,1486 @@
+[
+  {
+    "id": "atmora_ice_waste_unique_1",
+    "name": "Relic of place.skycraft.jylkurfyk_ice_tombs",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L4.glacier_fauna"
+    ],
+    "place": "jylkurfyk_ice_tombs",
+    "x": 900,
+    "z": -11800,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.jylkurfyk_ice_tombs in Ice Waste from the elder days."
+  },
+  {
+    "id": "atmora_ice_waste_unique_2",
+    "name": "Relic of place.skycraft.rimefang_cave",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L4.glacier_fauna"
+    ],
+    "place": "rimefang_cave",
+    "x": -4083,
+    "z": -12103,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.rimefang_cave in Ice Waste from the elder days."
+  },
+  {
+    "id": "atmora_ice_waste_unique_3",
+    "name": "Relic of place.skycraft.the_frozen_dragon_mound",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L4.glacier_fauna"
+    ],
+    "place": "the_frozen_dragon_mound",
+    "x": 3600,
+    "z": -12400,
+    "kind": "pedestal",
+    "item": "skycraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.the_frozen_dragon_mound in Ice Waste from the elder days."
+  },
+  {
+    "id": "atmora_ice_waste_unique_4",
+    "name": "Relic of place.skycraft.wolf_jarls_howe",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L4.glacier_fauna"
+    ],
+    "place": "wolf_jarls_howe",
+    "x": -400,
+    "z": -12900,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.wolf_jarls_howe in Ice Waste from the elder days."
+  },
+  {
+    "id": "atmora_frozen_forest_unique_1",
+    "name": "Relic of place.skycraft.atmoran_giants_cairn",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L4.petrified_rime_woods"
+    ],
+    "place": "atmoran_giants_cairn",
+    "x": 1700,
+    "z": -10300,
+    "kind": "pedestal",
+    "item": "skycraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.atmoran_giants_cairn in Frozen Forest from the elder days."
+  },
+  {
+    "id": "atmora_frozen_forest_unique_2",
+    "name": "Relic of place.skycraft.hrothgard_barrow",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L4.petrified_rime_woods"
+    ],
+    "place": "hrothgard_barrow",
+    "x": -2600,
+    "z": -11200,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.hrothgard_barrow in Frozen Forest from the elder days."
+  },
+  {
+    "id": "atmora_frozen_forest_unique_3",
+    "name": "Relic of place.skycraft.jylkurfyk",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L4.petrified_rime_woods"
+    ],
+    "place": "jylkurfyk",
+    "x": 300,
+    "z": -11300,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.jylkurfyk in Frozen Forest from the elder days."
+  },
+  {
+    "id": "atmora_frozen_forest_unique_4",
+    "name": "Relic of place.skycraft.saarvik_landing",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L4.petrified_rime_woods"
+    ],
+    "place": "saarvik_landing",
+    "x": -800,
+    "z": -10000,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.skycraft.saarvik_landing in Frozen Forest from the elder days."
+  },
+  {
+    "id": "atmora_frozen_forest_unique_5",
+    "name": "Relic of place.skycraft.skjaldborg",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L4.petrified_rime_woods"
+    ],
+    "place": "skjaldborg",
+    "x": 3930,
+    "z": -11199,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.skycraft.skjaldborg in Frozen Forest from the elder days."
+  },
+  {
+    "id": "atmora_frozen_forest_unique_6",
+    "name": "Relic of place.skycraft.vaermunds_rest",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L4.petrified_rime_woods"
+    ],
+    "place": "vaermunds_rest",
+    "x": -3600,
+    "z": -10500,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.vaermunds_rest in Frozen Forest from the elder days."
+  },
+  {
+    "id": "akavir_tsaesci_unique_1",
+    "name": "Relic of place.skycraft.black_lacquer_pagoda",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L4.crimson_reeds"
+    ],
+    "place": "black_lacquer_pagoda",
+    "x": 16400,
+    "z": 6200,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.black_lacquer_pagoda in Tsaesci from the elder days."
+  },
+  {
+    "id": "akavir_tsaesci_unique_2",
+    "name": "Relic of place.skycraft.serpent_jungle_camp",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L4.crimson_reeds"
+    ],
+    "place": "serpent_jungle_camp",
+    "x": 15000,
+    "z": 4000,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.serpent_jungle_camp in Tsaesci from the elder days."
+  },
+  {
+    "id": "akavir_tsaesci_unique_3",
+    "name": "Relic of place.skycraft.temple_of_the_serpent_emperor",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L4.crimson_reeds"
+    ],
+    "place": "temple_of_the_serpent_emperor",
+    "x": 15200,
+    "z": 5400,
+    "kind": "pedestal",
+    "item": "skycraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.temple_of_the_serpent_emperor in Tsaesci from the elder days."
+  },
+  {
+    "id": "akavir_tsaesci_unique_4",
+    "name": "Relic of place.skycraft.tsaesci_coil_shrine",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L4.crimson_reeds"
+    ],
+    "place": "tsaesci_coil_shrine",
+    "x": 16800,
+    "z": 7000,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.tsaesci_coil_shrine in Tsaesci from the elder days."
+  },
+  {
+    "id": "akavir_kamal_unique_1",
+    "name": "Relic of place.skycraft.adasooms_gate",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L4.ice_beetle_tundra"
+    ],
+    "place": "adasooms_gate",
+    "x": 16800,
+    "z": -800,
+    "kind": "pedestal",
+    "item": "skycraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.adasooms_gate in Kamal from the elder days."
+  },
+  {
+    "id": "akavir_kamal_unique_2",
+    "name": "Relic of place.skycraft.frost_throne_of_kamal",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L4.ice_beetle_tundra"
+    ],
+    "place": "frost_throne_of_kamal",
+    "x": 15200,
+    "z": 300,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.frost_throne_of_kamal in Kamal from the elder days."
+  },
+  {
+    "id": "akavir_kamal_unique_3",
+    "name": "Relic of place.skycraft.kamal_ice_halls",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L4.ice_beetle_tundra"
+    ],
+    "place": "kamal_ice_halls",
+    "x": 18803,
+    "z": -1584,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.kamal_ice_halls in Kamal from the elder days."
+  },
+  {
+    "id": "akavir_tang_mo_unique_1",
+    "name": "Relic of place.skycraft.tang_mo_watch",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L4.cloud_bamboo_groves"
+    ],
+    "place": "tang_mo_watch",
+    "x": 21198,
+    "z": 4444,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.tang_mo_watch in Tang Mo from the elder days."
+  },
+  {
+    "id": "akavir_tang_mo_unique_2",
+    "name": "Relic of place.skycraft.thousand_monkey_tree",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L4.cloud_bamboo_groves"
+    ],
+    "place": "thousand_monkey_tree",
+    "x": 22207,
+    "z": 4668,
+    "kind": "corpse",
+    "item": "skycraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.thousand_monkey_tree in Tang Mo from the elder days."
+  },
+  {
+    "id": "akavir_tang_mo_unique_3",
+    "name": "Relic of place.skycraft.tang_mo_harbor_village",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L4.cloud_bamboo_groves"
+    ],
+    "place": "tang_mo_harbor_village",
+    "x": 22600,
+    "z": 6000,
+    "kind": "pedestal",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.tang_mo_harbor_village in Tang Mo from the elder days."
+  },
+  {
+    "id": "akavir_ka_po_tun_unique_1",
+    "name": "Relic of place.skycraft.dragon_graveyard_of_akavir",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L4.golden_grass_steppe"
+    ],
+    "place": "dragon_graveyard_of_akavir",
+    "x": 19448,
+    "z": 1319,
+    "kind": "pedestal",
+    "item": "skycraft:glass_greatsword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.dragon_graveyard_of_akavir in Ka Po Tun from the elder days."
+  },
+  {
+    "id": "akavir_ka_po_tun_unique_2",
+    "name": "Relic of place.skycraft.hall_of_the_dragon_tigers",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L4.golden_grass_steppe"
+    ],
+    "place": "hall_of_the_dragon_tigers",
+    "x": 17000,
+    "z": 2200,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.skycraft.hall_of_the_dragon_tigers in Ka Po Tun from the elder days."
+  },
+  {
+    "id": "akavir_ka_po_tun_unique_3",
+    "name": "Relic of place.skycraft.ka_po_tun_steppe_fort",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L4.golden_grass_steppe"
+    ],
+    "place": "ka_po_tun_steppe_fort",
+    "x": 19600,
+    "z": 5800,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.skycraft.ka_po_tun_steppe_fort in Ka Po Tun from the elder days."
+  },
+  {
+    "id": "akavir_ka_po_tun_unique_4",
+    "name": "Relic of place.skycraft.tosh_rakas_palace",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L4.golden_grass_steppe"
+    ],
+    "place": "tosh_rakas_palace",
+    "x": 18200,
+    "z": 3600,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.tosh_rakas_palace in Ka Po Tun from the elder days."
+  },
+  {
+    "id": "akavir_ka_po_tun_unique_5",
+    "name": "Relic of place.skycraft.tiger_plains_village",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L4.golden_grass_steppe"
+    ],
+    "place": "tiger_plains_village",
+    "x": 20000,
+    "z": 3600,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.tiger_plains_village in Ka Po Tun from the elder days."
+  },
+  {
+    "id": "yokuda_yokudan_desert_unique_1",
+    "name": "Relic of place.skycraft.hall_of_the_ansei",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L4.date_palm_and_lynx_scrub"
+    ],
+    "place": "hall_of_the_ansei",
+    "x": -19500,
+    "z": 5200,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.skycraft.hall_of_the_ansei in Yokudan Desert from the elder days."
+  },
+  {
+    "id": "yokuda_yokudan_desert_unique_2",
+    "name": "Relic of place.skycraft.na_totambu_necropolis",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L4.date_palm_and_lynx_scrub"
+    ],
+    "place": "na_totambu_necropolis",
+    "x": -20800,
+    "z": 7200,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.skycraft.na_totambu_necropolis in Yokudan Desert from the elder days."
+  },
+  {
+    "id": "yokuda_yokudan_desert_unique_3",
+    "name": "Relic of place.skycraft.ra_gada_encampment",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L4.date_palm_and_lynx_scrub"
+    ],
+    "place": "ra_gada_encampment",
+    "x": -17200,
+    "z": 8200,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.ra_gada_encampment in Yokudan Desert from the elder days."
+  },
+  {
+    "id": "yokuda_yokudan_desert_unique_4",
+    "name": "Relic of place.skycraft.temple_of_satakal",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L4.date_palm_and_lynx_scrub"
+    ],
+    "place": "temple_of_satakal",
+    "x": -18400,
+    "z": 3600,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.temple_of_satakal in Yokudan Desert from the elder days."
+  },
+  {
+    "id": "yokuda_yokudan_desert_unique_5",
+    "name": "Relic of place.skycraft.hundings_dojo",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L4.date_palm_and_lynx_scrub"
+    ],
+    "place": "hundings_dojo",
+    "x": -18800,
+    "z": 4500,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.hundings_dojo in Yokudan Desert from the elder days."
+  },
+  {
+    "id": "yokuda_sunken_isles_unique_1",
+    "name": "Relic of place.skycraft.coral_choked_palace",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L4.shoal_reef_and_salt_scrub"
+    ],
+    "place": "coral_choked_palace",
+    "x": -17262,
+    "z": 12437,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.coral_choked_palace in Sunken Isles from the elder days."
+  },
+  {
+    "id": "yokuda_sunken_isles_unique_2",
+    "name": "Relic of place.skycraft.sunken_temple_of_the_yokudan_kings",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L4.shoal_reef_and_salt_scrub"
+    ],
+    "place": "sunken_temple_of_the_yokudan_kings",
+    "x": -18300,
+    "z": 11600,
+    "kind": "corpse",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.sunken_temple_of_the_yokudan_kings in Sunken Isles from the elder days."
+  },
+  {
+    "id": "pyandonea_maormer_isles_unique_1",
+    "name": "Relic of place.skycraft.orgnums_citadel",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L4.kelp_and_strangler_jungle"
+    ],
+    "place": "orgnums_citadel",
+    "x": -19800,
+    "z": 19600,
+    "kind": "pedestal",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.skycraft.orgnums_citadel in Maormer Isles from the elder days."
+  },
+  {
+    "id": "pyandonea_maormer_isles_unique_2",
+    "name": "Relic of place.skycraft.serpent_pens",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L4.kelp_and_strangler_jungle"
+    ],
+    "place": "serpent_pens",
+    "x": -21200,
+    "z": 20000,
+    "kind": "corpse",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.serpent_pens in Maormer Isles from the elder days."
+  },
+  {
+    "id": "pyandonea_maormer_isles_unique_3",
+    "name": "Relic of place.skycraft.storm_callers_spire",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L4.kelp_and_strangler_jungle"
+    ],
+    "place": "storm_callers_spire",
+    "x": -18270,
+    "z": 18927,
+    "kind": "pedestal",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.storm_callers_spire in Maormer Isles from the elder days."
+  },
+  {
+    "id": "pyandonea_maormer_isles_unique_4",
+    "name": "Relic of place.skycraft.mistveil_village",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L4.kelp_and_strangler_jungle"
+    ],
+    "place": "mistveil_village",
+    "x": -20171,
+    "z": 18649,
+    "kind": "corpse",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.mistveil_village in Maormer Isles from the elder days."
+  },
+  {
+    "id": "pyandonea_maormer_isles_unique_5",
+    "name": "Relic of place.skycraft.pyandonean_fleet_anchorage",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L4.kelp_and_strangler_jungle"
+    ],
+    "place": "pyandonean_fleet_anchorage",
+    "x": -18200,
+    "z": 20812,
+    "kind": "pedestal",
+    "item": "skycraft:orcish_mace",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved at place.skycraft.pyandonean_fleet_anchorage in Maormer Isles from the elder days."
+  },
+  {
+    "id": "thras_coral_kingdom_unique_1",
+    "name": "Relic of place.skycraft.coral_tower_of_thras",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L4.anemone_and_thrall_reef"
+    ],
+    "place": "coral_tower_of_thras",
+    "x": -15410,
+    "z": 16730,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 2
+    },
+    "note": "Preserved at place.skycraft.coral_tower_of_thras in Coral Kingdom from the elder days."
+  },
+  {
+    "id": "thras_coral_kingdom_unique_2",
+    "name": "Relic of place.skycraft.the_sunken_throne",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L4.anemone_and_thrall_reef"
+    ],
+    "place": "the_sunken_throne",
+    "x": -16418,
+    "z": 17341,
+    "kind": "corpse",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at place.skycraft.the_sunken_throne in Coral Kingdom from the elder days."
+  },
+  {
+    "id": "thras_coral_kingdom_unique_3",
+    "name": "Relic of place.skycraft.thrassian_plague_pits",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L4.anemone_and_thrall_reef"
+    ],
+    "place": "thrassian_plague_pits",
+    "x": -14600,
+    "z": 17800,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Preserved at place.skycraft.thrassian_plague_pits in Coral Kingdom from the elder days."
+  },
+  {
+    "id": "atmora_ice_waste_v4_unique_5",
+    "name": "Relic of Ice Waste Site 2 Dwemer Ruin (5)",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L10.entombed_great_halls"
+    ],
+    "place": "ice_waste_site_2_dwemer_ruin",
+    "x": 3683,
+    "z": -12352,
+    "kind": "camp",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Ice Waste Site 2 Dwemer Ruin in Ice Waste from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "atmora_ice_waste_v4_unique_6",
+    "name": "Relic of Ice Waste Site 3 Fort (6)",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L10.entombed_great_halls"
+    ],
+    "place": "ice_waste_site_3_fort",
+    "x": -317,
+    "z": -12852,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Ice Waste Site 3 Fort in Ice Waste from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "atmora_ice_waste_v4_unique_7",
+    "name": "Relic of Ice Waste Site 4 Keep (7)",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L10.entombed_great_halls"
+    ],
+    "place": "ice_waste_site_4_keep",
+    "x": -4001,
+    "z": -12055,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Ice Waste Site 4 Keep in Ice Waste from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "atmora_ice_waste_v4_unique_8",
+    "name": "Relic of Ice Waste Site 5 Fort Mage (8)",
+    "region": "ice_waste",
+    "why": [
+      "ice_waste.L1.glacial_shield",
+      "ice_waste.L10.entombed_great_halls"
+    ],
+    "place": "ice_waste_site_5_fort_mage",
+    "x": 945,
+    "z": -11746,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Ice Waste Site 5 Fort Mage in Ice Waste from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "atmora_frozen_forest_v4_unique_7",
+    "name": "Relic of Frozen Forest Site 1 Dwemer Ruin (7)",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L10.jylkurfyk_great_barrow"
+    ],
+    "place": "frozen_forest_site_1_dwemer_ruin",
+    "x": 2510,
+    "z": -10800,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Frozen Forest Site 1 Dwemer Ruin in Frozen Forest from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "atmora_frozen_forest_v4_unique_8",
+    "name": "Relic of Frozen Forest Site 2 Fort (8)",
+    "region": "frozen_forest",
+    "why": [
+      "frozen_forest.L1.fjord_valleys",
+      "frozen_forest.L10.jylkurfyk_great_barrow"
+    ],
+    "place": "frozen_forest_site_2_fort",
+    "x": 410,
+    "z": -11300,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Frozen Forest Site 2 Fort in Frozen Forest from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tsaesci_v4_unique_5",
+    "name": "Relic of Tsaesci Site 2 Dwemer Ruin (5)",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L10.citadel_of_ionith"
+    ],
+    "place": "tsaesci_site_2_dwemer_ruin",
+    "x": 15283,
+    "z": 5448,
+    "kind": "camp",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Tsaesci Site 2 Dwemer Ruin in Tsaesci from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tsaesci_v4_unique_6",
+    "name": "Relic of Tsaesci Site 3 Fort (6)",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L10.citadel_of_ionith"
+    ],
+    "place": "tsaesci_site_3_fort",
+    "x": 16883,
+    "z": 7048,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Tsaesci Site 3 Fort in Tsaesci from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tsaesci_v4_unique_7",
+    "name": "Relic of Tsaesci Site 4 Keep (7)",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L10.citadel_of_ionith"
+    ],
+    "place": "tsaesci_site_4_keep",
+    "x": 15083,
+    "z": 4048,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Tsaesci Site 4 Keep in Tsaesci from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tsaesci_v4_unique_8",
+    "name": "Relic of Tsaesci Site 5 Fort Mage (8)",
+    "region": "tsaesci",
+    "why": [
+      "tsaesci.L1.red_earth_basin",
+      "tsaesci.L10.citadel_of_ionith"
+    ],
+    "place": "tsaesci_site_5_fort_mage",
+    "x": 16445,
+    "z": 6254,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Tsaesci Site 5 Fort Mage in Tsaesci from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_kamal_v4_unique_4",
+    "name": "Relic of Kamal Site 2 Dwemer Ruin (4)",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L10.steam_ice_bastions"
+    ],
+    "place": "kamal_site_2_dwemer_ruin",
+    "x": 16827,
+    "z": -752,
+    "kind": "shrine",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 5
+    },
+    "note": "Preserved at Kamal Site 2 Dwemer Ruin in Kamal from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_kamal_v4_unique_5",
+    "name": "Relic of Kamal Site 3 Fort (5)",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L10.steam_ice_bastions"
+    ],
+    "place": "kamal_site_3_fort",
+    "x": 18831,
+    "z": -1536,
+    "kind": "camp",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Kamal Site 3 Fort in Kamal from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_kamal_v4_unique_6",
+    "name": "Relic of Kamal Site 4 Keep (6)",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L10.steam_ice_bastions"
+    ],
+    "place": "kamal_site_4_keep",
+    "x": 15227,
+    "z": 348,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Kamal Site 4 Keep in Kamal from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_kamal_v4_unique_7",
+    "name": "Relic of Kamal Site 5 Fort Mage (7)",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L10.steam_ice_bastions"
+    ],
+    "place": "kamal_site_5_fort_mage",
+    "x": 16827,
+    "z": -848,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Kamal Site 5 Fort Mage in Kamal from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_kamal_v4_unique_8",
+    "name": "Relic of Kamal Site 6 Akaviri Fort (8)",
+    "region": "kamal",
+    "why": [
+      "kamal.L1.volcanic_ice_peaks",
+      "kamal.L10.steam_ice_bastions"
+    ],
+    "place": "kamal_site_6_akaviri_fort",
+    "x": 18831,
+    "z": -1632,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Kamal Site 6 Akaviri Fort in Kamal from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tang_mo_v4_unique_4",
+    "name": "Relic of Tang Mo Site 2 Dwemer Ruin (4)",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L10.mist_pillar_sanctums"
+    ],
+    "place": "tang_mo_site_2_dwemer_ruin",
+    "x": 21225,
+    "z": 4492,
+    "kind": "shrine",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 5
+    },
+    "note": "Preserved at Tang Mo Site 2 Dwemer Ruin in Tang Mo from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tang_mo_v4_unique_5",
+    "name": "Relic of Tang Mo Site 3 Fort (5)",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L10.mist_pillar_sanctums"
+    ],
+    "place": "tang_mo_site_3_fort",
+    "x": 22235,
+    "z": 4620,
+    "kind": "camp",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Tang Mo Site 3 Fort in Tang Mo from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tang_mo_v4_unique_6",
+    "name": "Relic of Tang Mo Site 4 Keep (6)",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L10.mist_pillar_sanctums"
+    ],
+    "place": "tang_mo_site_4_keep",
+    "x": 21225,
+    "z": 4396,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Tang Mo Site 4 Keep in Tang Mo from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tang_mo_v4_unique_7",
+    "name": "Relic of Tang Mo Site 5 Fort Mage (7)",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L10.mist_pillar_sanctums"
+    ],
+    "place": "tang_mo_site_5_fort_mage",
+    "x": 22645,
+    "z": 5946,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Tang Mo Site 5 Fort Mage in Tang Mo from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_tang_mo_v4_unique_8",
+    "name": "Relic of Tang Mo Site 6 Akaviri Fort (8)",
+    "region": "tang_mo",
+    "why": [
+      "tang_mo.L1.karst_spire_isles",
+      "tang_mo.L10.mist_pillar_sanctums"
+    ],
+    "place": "tang_mo_site_6_akaviri_fort",
+    "x": 21263,
+    "z": 4390,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Tang Mo Site 6 Akaviri Fort in Tang Mo from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_ka_po_tun_v4_unique_6",
+    "name": "Relic of Ka Po Tun Site 2 Dwemer Ruin (6)",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L10.dragon_step_sanctuary"
+    ],
+    "place": "ka_po_tun_site_2_dwemer_ruin",
+    "x": 19558,
+    "z": 1319,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Ka Po Tun Site 2 Dwemer Ruin in Ka Po Tun from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_ka_po_tun_v4_unique_7",
+    "name": "Relic of Ka Po Tun Site 3 Fort (7)",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L10.dragon_step_sanctuary"
+    ],
+    "place": "ka_po_tun_site_3_fort",
+    "x": 20083,
+    "z": 3648,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Ka Po Tun Site 3 Fort in Ka Po Tun from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "akavir_ka_po_tun_v4_unique_8",
+    "name": "Relic of Ka Po Tun Site 4 Fort Mage (8)",
+    "region": "ka_po_tun",
+    "why": [
+      "ka_po_tun.L1.golden_steppe_mesa",
+      "ka_po_tun.L10.dragon_step_sanctuary"
+    ],
+    "place": "ka_po_tun_site_4_fort_mage",
+    "x": 18283,
+    "z": 3648,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Ka Po Tun Site 4 Fort Mage in Ka Po Tun from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_yokudan_desert_v4_unique_6",
+    "name": "Relic of Yokudan Desert Site 2 Dwemer Ruin (6)",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L10.vault_of_the_pankratosword"
+    ],
+    "place": "yokudan_desert_site_2_dwemer_ruin",
+    "x": -19390,
+    "z": 5200,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Yokudan Desert Site 2 Dwemer Ruin in Yokudan Desert from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_yokudan_desert_v4_unique_7",
+    "name": "Relic of Yokudan Desert Site 3 Fort (7)",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L10.vault_of_the_pankratosword"
+    ],
+    "place": "yokudan_desert_site_3_fort",
+    "x": -19490,
+    "z": 8400,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Yokudan Desert Site 3 Fort in Yokudan Desert from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_yokudan_desert_v4_unique_8",
+    "name": "Relic of Yokudan Desert Site 4 Fort Mage (8)",
+    "region": "yokudan_desert",
+    "why": [
+      "yokudan_desert.L1.sheared_red_mesas",
+      "yokudan_desert.L10.vault_of_the_pankratosword"
+    ],
+    "place": "yokudan_desert_site_4_fort_mage",
+    "x": -17490,
+    "z": 6600,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Yokudan Desert Site 4 Fort Mage in Yokudan Desert from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_sunken_isles_v4_unique_3",
+    "name": "Relic of Sunken Isles Site 2 Dwemer Ruin (3)",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L10.drowned_orichalc_vaults"
+    ],
+    "place": "sunken_isles_site_2_dwemer_ruin",
+    "x": -17973,
+    "z": 10948,
+    "kind": "chest",
+    "item": "skycraft:daedric_dagger",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Sunken Isles Site 2 Dwemer Ruin in Sunken Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_sunken_isles_v4_unique_4",
+    "name": "Relic of Sunken Isles Site 3 Fort (4)",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L10.drowned_orichalc_vaults"
+    ],
+    "place": "sunken_isles_site_3_fort",
+    "x": -18273,
+    "z": 11648,
+    "kind": "shrine",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 5
+    },
+    "note": "Preserved at Sunken Isles Site 3 Fort in Sunken Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_sunken_isles_v4_unique_5",
+    "name": "Relic of Sunken Isles Site 4 Keep (5)",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L10.drowned_orichalc_vaults"
+    ],
+    "place": "sunken_isles_site_4_keep",
+    "x": -17235,
+    "z": 12485,
+    "kind": "camp",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Sunken Isles Site 4 Keep in Sunken Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_sunken_isles_v4_unique_6",
+    "name": "Relic of Sunken Isles Site 5 Fort Mage (6)",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L10.drowned_orichalc_vaults"
+    ],
+    "place": "sunken_isles_site_5_fort_mage",
+    "x": -17973,
+    "z": 10852,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Sunken Isles Site 5 Fort Mage in Sunken Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_sunken_isles_v4_unique_7",
+    "name": "Relic of Sunken Isles Site 6 Akaviri Fort (7)",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L10.drowned_orichalc_vaults"
+    ],
+    "place": "sunken_isles_site_6_akaviri_fort",
+    "x": -18273,
+    "z": 11552,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Sunken Isles Site 6 Akaviri Fort in Sunken Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yokuda_sunken_isles_v4_unique_8",
+    "name": "Relic of Sunken Isles Site 7 Daedric Ruin (8)",
+    "region": "sunken_isles",
+    "why": [
+      "sunken_isles.L1.submerged_city_shelves",
+      "sunken_isles.L10.drowned_orichalc_vaults"
+    ],
+    "place": "sunken_isles_site_7_daedric_ruin",
+    "x": -17235,
+    "z": 12389,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Sunken Isles Site 7 Daedric Ruin in Sunken Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pyandonea_maormer_isles_v4_unique_6",
+    "name": "Relic of Maormer Isles Site 3 Fort (6)",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L10.sanctum_of_the_coiled_king"
+    ],
+    "place": "maormer_isles_site_3_fort",
+    "x": -18117,
+    "z": 20860,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Maormer Isles Site 3 Fort in Maormer Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pyandonea_maormer_isles_v4_unique_7",
+    "name": "Relic of Maormer Isles Site 4 Keep (7)",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L10.sanctum_of_the_coiled_king"
+    ],
+    "place": "maormer_isles_site_4_keep",
+    "x": -20089,
+    "z": 18697,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Maormer Isles Site 4 Keep in Maormer Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pyandonea_maormer_isles_v4_unique_8",
+    "name": "Relic of Maormer Isles Site 5 Fort Mage (8)",
+    "region": "maormer_isles",
+    "why": [
+      "maormer_isles.L1.volcanic_reef_isles",
+      "maormer_isles.L10.sanctum_of_the_coiled_king"
+    ],
+    "place": "maormer_isles_site_5_fort_mage",
+    "x": -19717,
+    "z": 19648,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Maormer Isles Site 5 Fort Mage in Maormer Isles from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "thras_coral_kingdom_v4_unique_4",
+    "name": "Relic of Coral Kingdom Site 2 Dwemer Ruin (4)",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L10.the_pillar_of_thras"
+    ],
+    "place": "coral_kingdom_site_2_dwemer_ruin",
+    "x": -15383,
+    "z": 16778,
+    "kind": "shrine",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 5
+    },
+    "note": "Preserved at Coral Kingdom Site 2 Dwemer Ruin in Coral Kingdom from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "thras_coral_kingdom_v4_unique_5",
+    "name": "Relic of Coral Kingdom Site 3 Fort (5)",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L10.the_pillar_of_thras"
+    ],
+    "place": "coral_kingdom_site_3_fort",
+    "x": -14573,
+    "z": 17848,
+    "kind": "camp",
+    "item": "skycraft:stalhrim_battleaxe",
+    "enchant": {
+      "sharpness": 5
+    },
+    "note": "Preserved at Coral Kingdom Site 3 Fort in Coral Kingdom from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "thras_coral_kingdom_v4_unique_6",
+    "name": "Relic of Coral Kingdom Site 4 Keep (6)",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L10.the_pillar_of_thras"
+    ],
+    "place": "coral_kingdom_site_4_keep",
+    "x": -16017,
+    "z": 16210,
+    "kind": "barrow",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 5
+    },
+    "note": "Preserved at Coral Kingdom Site 4 Keep in Coral Kingdom from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "thras_coral_kingdom_v4_unique_7",
+    "name": "Relic of Coral Kingdom Site 5 Fort Mage (7)",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L10.the_pillar_of_thras"
+    ],
+    "place": "coral_kingdom_site_5_fort_mage",
+    "x": -14573,
+    "z": 17752,
+    "kind": "ruin",
+    "item": "skycraft:bonemold_chestplate",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Coral Kingdom Site 5 Fort Mage in Coral Kingdom from the elder council.",
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "thras_coral_kingdom_v4_unique_8",
+    "name": "Relic of Coral Kingdom Site 6 Akaviri Fort (8)",
+    "region": "coral_kingdom",
+    "why": [
+      "coral_kingdom.L1.agonir_coral_caldera",
+      "coral_kingdom.L10.the_pillar_of_thras"
+    ],
+    "place": "coral_kingdom_site_6_akaviri_fort",
+    "x": -16353,
+    "z": 17287,
+    "kind": "cairn",
+    "item": "skycraft:chitin_helmet",
+    "enchant": {
+      "protection": 4
+    },
+    "note": "Preserved at Coral Kingdom Site 6 Akaviri Fort in Coral Kingdom from the elder council.",
+    "_r7_r12_v4": true
+  }
+]

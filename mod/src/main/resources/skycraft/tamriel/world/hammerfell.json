@@ -1,0 +1,5517 @@
+{
+  "province": "hammerfell",
+  "truth": "Hammerfell is a hot, dry land of desert, rock and sea. The Redguards came to it from sunken Yokuda: first a wave of warriors who took the land by the sword, then the royal court that followed. Their descendants are the Forebears and the Crowns, still divided over tradition, trade and the Empire. Water decides everything. Oases and wells belong to Crown families and desert tribes, the ports belong to Forebear merchant houses, and the caravan roads pay them both. Swords are a calling and the dead are honoured in great necropolises, so necromancers are hated above every other criminal. In the last war the Empire gave Hammerfell's land to the Dominion, and Hammerfell won it back alone.",
+  "layers": {
+    "L1": [
+      {
+        "id": "alikr_basin",
+        "text": "an interior basin of sand sea, gravel plain, red sandstone mesas and closed salt pans",
+        "cites": []
+      },
+      {
+        "id": "dragontail_wall",
+        "text": "a mountain wall on the east, black volcanic ridges with obsidian, sulphur and ore in the north (Daggerfall's data: 85 mines, 29 volcanic caves) and red rock cut by slot canyons in the south",
+        "cites": []
+      },
+      {
+        "id": "south_shore",
+        "text": "sea cliffs and terraces on the bay's south shore (Sentinel's harbour cliff)",
+        "cites": []
+      },
+      {
+        "id": "abecean_coast",
+        "text": "cliffs, arches and headlands on the southern sea",
+        "cites": []
+      },
+      {
+        "id": "bay_head_valleys",
+        "text": "red-clay river valleys at the bay head between the Dragontail and the Wrothgarian foothills",
+        "cites": []
+      },
+      {
+        "id": "craglorn_badlands",
+        "text": "eroded badlands with star-fall craters",
+        "cites": []
+      },
+      {
+        "id": "stros_island",
+        "text": "a two-lobed island with a high western plateau",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "dry_interior",
+        "text": "heat and very little rain",
+        "cites": [
+          "hammerfell.L1.alikr_basin"
+        ]
+      },
+      {
+        "id": "coast_shadow",
+        "text": "coastal hills take the sea rain, so the Alik'r beyond them is dry",
+        "cites": [
+          "hammerfell.L1.south_shore"
+        ]
+      },
+      {
+        "id": "winter_rains",
+        "text": "the coast gets mild winter rain",
+        "cites": [
+          "hammerfell.L1.south_shore"
+        ]
+      },
+      {
+        "id": "bay_lift",
+        "text": "moist bay air is forced up against the foothills, so the bay head is the only rainforest in the province",
+        "cites": [
+          "hammerfell.L1.bay_head_valleys",
+          "hammerfell.L1.dragontail_wall"
+        ]
+      },
+      {
+        "id": "sandstorms",
+        "text": "blinding dust and shifting dunes across the basin",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L2.dry_interior"
+        ]
+      },
+      {
+        "id": "mountain_cold",
+        "text": "frost and high winds along the eastern peaks",
+        "cites": [
+          "hammerfell.L1.dragontail_wall"
+        ]
+      },
+      {
+        "id": "abecean_storms",
+        "text": "warm squalls off the southern sea",
+        "cites": [
+          "hammerfell.L1.abecean_coast"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "oases_and_wells",
+        "text": "water exists only at oases, wells and underground channels",
+        "cites": [
+          "hammerfell.L1.alikr_basin"
+        ]
+      },
+      {
+        "id": "water_is_power",
+        "text": "every oasis belongs to a Crown family or to the tribe that holds its well, and caravans pay at each one. In the cities the palace owns the cisterns",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L2.dry_interior",
+          "hammerfell.L3.oases_and_wells"
+        ]
+      },
+      {
+        "id": "wadis",
+        "text": "dry beds that flood after rain",
+        "cites": [
+          "hammerfell.L2.winter_rains",
+          "hammerfell.L1.dragontail_wall"
+        ]
+      },
+      {
+        "id": "jungle_rivers",
+        "text": "perennial rivers at the bay head (Lainlyn, Totambu)",
+        "cites": [
+          "hammerfell.L2.bay_lift"
+        ]
+      },
+      {
+        "id": "snowmelt",
+        "text": "Dragontail streams feed the wadis",
+        "cites": [
+          "hammerfell.L2.mountain_cold"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "mosaic",
+        "text": "see section 2",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L2.dry_interior",
+          "hammerfell.L3.oases_and_wells"
+        ]
+      },
+      {
+        "id": "scorpions",
+        "text": "giant scorpions in the basin and hot plains (21 nests in the Alik'r and 22 in Dak'fron in Daggerfall's data)",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L2.dry_interior"
+        ]
+      },
+      {
+        "id": "sand_serpents",
+        "text": "burrowing serpents in the dune seas",
+        "cites": [
+          "hammerfell.L2.sandstorms"
+        ]
+      },
+      {
+        "id": "coast_harpies",
+        "text": "harpy nests clustering along the Abibon and southern sea cliffs",
+        "cites": [
+          "hammerfell.L1.abecean_coast"
+        ]
+      },
+      {
+        "id": "jungle_giants",
+        "text": "giant clans in the bay-head valleys (19 giant strongholds in Totambu)",
+        "cites": [
+          "hammerfell.L2.bay_lift"
+        ]
+      },
+      {
+        "id": "returning_dragons",
+        "text": "dragons back in the hot-desert dens",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L2.dry_interior"
+        ]
+      },
+      {
+        "id": "vent_daedra",
+        "text": "fire spirits in the volcanic caves",
+        "cites": [
+          "hammerfell.L1.dragontail_wall"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "caravans_and_salt",
+        "text": "desert caravan trains and salt-pan cutting",
+        "cites": [
+          "hammerfell.L3.water_is_power",
+          "hammerfell.L1.alikr_basin"
+        ]
+      },
+      {
+        "id": "dyes_and_spice",
+        "text": "Sentinel's terraces and port",
+        "cites": [
+          "hammerfell.L2.winter_rains"
+        ]
+      },
+      {
+        "id": "dragontail_ore",
+        "text": "iron, obsidian and sulphur",
+        "cites": [
+          "hammerfell.L1.dragontail_wall"
+        ]
+      },
+      {
+        "id": "blades",
+        "text": "swordsmiths in every city",
+        "cites": [
+          "hammerfell.L1.dragontail_wall",
+          "hammerfell.L5.dragontail_ore"
+        ]
+      },
+      {
+        "id": "timber_and_river_fish",
+        "text": "hardwood logging and river fisheries at the bay head",
+        "cites": [
+          "hammerfell.L3.jungle_rivers"
+        ]
+      },
+      {
+        "id": "oasis_dates",
+        "text": "date palms and irrigated gardens. Who gets rich: Crown families (oases and caravan tolls), Forebear merchant houses (ports and shipping) and the ore lords of the Dragontail",
+        "cites": [
+          "hammerfell.L3.oases_and_wells"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "harbour_and_oasis_cities",
+        "text": "walled port capitals and oasis seats",
+        "cites": [
+          "hammerfell.L3.oases_and_wells",
+          "hammerfell.L1.south_shore"
+        ]
+      },
+      {
+        "id": "caravanserais_at_wells",
+        "text": "fortified stops at every major well",
+        "cites": [
+          "hammerfell.L5.caravans_and_salt"
+        ]
+      },
+      {
+        "id": "jungle_river_ports",
+        "text": "stilted river towns at the bay head",
+        "cites": [
+          "hammerfell.L3.jungle_rivers"
+        ]
+      },
+      {
+        "id": "mining_terraces",
+        "text": "stepped black-stone towns in the mountains",
+        "cites": [
+          "hammerfell.L5.dragontail_ore"
+        ]
+      },
+      {
+        "id": "busy_centres",
+        "text": "Sentinel (capital, port and caravan terminus), Totambu (the river port), Taneth and Rihad",
+        "cites": [
+          "hammerfell.L5.dyes_and_spice",
+          "hammerfell.L5.caravans_and_salt"
+        ]
+      },
+      {
+        "id": "failing_edges",
+        "text": "Dak'fron's wells, Satakalaam's scorpion fields and the Antiphyllos dust",
+        "cites": [
+          "hammerfell.L4.returning_dragons",
+          "hammerfell.L4.scorpions"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "crowns_and_forebears",
+        "text": "the old royal nobility against the integrated warrior-merchant class",
+        "cites": [
+          "hammerfell.L5.caravans_and_salt",
+          "hammerfell.L6.harbour_and_oasis_cities"
+        ]
+      },
+      {
+        "id": "sword_rank",
+        "text": "a sword-master (Ansei) is honoured even when poor",
+        "cites": [
+          "hammerfell.L5.blades",
+          "hammerfell.L6.harbour_and_oasis_cities"
+        ]
+      },
+      {
+        "id": "nomads",
+        "text": "desert tribes outside the cities, proud and armed",
+        "cites": [
+          "hammerfell.L3.water_is_power"
+        ]
+      },
+      {
+        "id": "stained_hands",
+        "text": "dyers, salt-cutters and dockers are the poor",
+        "cites": [
+          "hammerfell.L5.dyes_and_spice",
+          "hammerfell.L5.caravans_and_salt"
+        ]
+      },
+      {
+        "id": "debt_miners",
+        "text": "miners bound by debt in the Dragontail",
+        "cites": [
+          "hammerfell.L5.dragontail_ore"
+        ]
+      },
+      {
+        "id": "outcasts",
+        "text": "necromancers are hunted, and foreigners are judged by deeds",
+        "cites": [
+          "hammerfell.L6.failing_edges",
+          "hammerfell.L7.crowns_and_forebears"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "yokudan_gods",
+        "text": "the Crowns keep the old gods (Satakal, Ruptga, Tu'whacca, Onsi, Zeht, Morwha and the HoonDing)",
+        "cites": [
+          "hammerfell.L6.harbour_and_oasis_cities",
+          "hammerfell.L7.crowns_and_forebears"
+        ]
+      },
+      {
+        "id": "eight_with_yokudan_faces",
+        "text": "the Forebears worship the Divines with Yokudan names (Sentinel's patron temple is Arkay's, the keeper of the dead, close to Tu'whacca)",
+        "cites": [
+          "hammerfell.L7.crowns_and_forebears"
+        ]
+      },
+      {
+        "id": "sword_path",
+        "text": "the sword as a spiritual discipline (the sword-singers)",
+        "cites": [
+          "hammerfell.L5.blades",
+          "hammerfell.L7.sword_rank"
+        ]
+      },
+      {
+        "id": "hate_necromancy",
+        "text": "the dead belong to Tu'whacca",
+        "cites": [
+          "hammerfell.L7.crowns_and_forebears",
+          "hammerfell.L8.yokudan_gods"
+        ]
+      },
+      {
+        "id": "necropolis_dead",
+        "text": "the dead lie in great tiered tombs",
+        "cites": [
+          "hammerfell.L8.yokudan_gods",
+          "hammerfell.L1.alikr_basin"
+        ]
+      },
+      {
+        "id": "distrust_empire",
+        "text": "resentment over the White-Gold Concordat cession",
+        "cites": [
+          "hammerfell.L6.harbour_and_oasis_cities",
+          "hammerfell.L7.crowns_and_forebears"
+        ]
+      },
+      {
+        "id": "hate_thalmor",
+        "text": "unyielding hostility toward the Dominion after the occupation",
+        "cites": [
+          "hammerfell.L6.harbour_and_oasis_cities",
+          "hammerfell.L7.crowns_and_forebears"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "crown_forebear_rift",
+        "text": "how to deal with the Empire, and who speaks for Hammerfell",
+        "cites": [
+          "hammerfell.L7.crowns_and_forebears",
+          "hammerfell.L8.distrust_empire"
+        ]
+      },
+      {
+        "id": "kings_and_lords",
+        "text": "city kings over fief lords",
+        "cites": [
+          "hammerfell.L6.harbour_and_oasis_cities"
+        ]
+      },
+      {
+        "id": "betony_claim",
+        "text": "Sentinel against Daggerfall (see `high_rock.md`)",
+        "cites": [
+          "hammerfell.L1.south_shore",
+          "hammerfell.L6.harbour_and_oasis_cities"
+        ]
+      },
+      {
+        "id": "collaborators",
+        "text": "those who opened gates to the Dominion are hunted",
+        "cites": [
+          "hammerfell.L7.outcasts",
+          "hammerfell.L8.hate_thalmor"
+        ]
+      },
+      {
+        "id": "ra_gada_bands",
+        "text": "free warrior-bands camp on the roads",
+        "cites": [
+          "hammerfell.L7.sword_rank"
+        ]
+      },
+      {
+        "id": "well_feuds",
+        "text": "rival claims over desert wells",
+        "cites": [
+          "hammerfell.L3.water_is_power"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "covens",
+        "text": "six witch covens on the Hammerfell shore",
+        "cites": [
+          "hammerfell.L4.mosaic",
+          "hammerfell.L9.kings_and_lords"
+        ]
+      },
+      {
+        "id": "bloodlines",
+        "text": "Selenu (Sentinel coast), Anthotis (desert), Khulari (mountains and jungle), Montalion (bay head)",
+        "cites": [
+          "hammerfell.L9.kings_and_lords"
+        ]
+      },
+      {
+        "id": "necropolises",
+        "text": "tiered royal and family catacombs",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L8.necropolis_dead"
+        ]
+      },
+      {
+        "id": "defiled_temples",
+        "text": "cults in the old gods' temples (26 desecrated temples in the Alik'r and 24 in Totambu in Daggerfall's data)",
+        "cites": [
+          "hammerfell.L4.scorpions",
+          "hammerfell.L8.yokudan_gods",
+          "hammerfell.L9.kings_and_lords"
+        ]
+      },
+      {
+        "id": "dwemer_halls",
+        "text": "Volenfell, Bthzark",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L1.stros_island"
+        ]
+      },
+      {
+        "id": "lava_tubes",
+        "text": "volcanic caverns under the eastern ridges",
+        "cites": [
+          "hammerfell.L1.dragontail_wall",
+          "hammerfell.L4.vent_daedra"
+        ]
+      },
+      {
+        "id": "smugglers_coves",
+        "text": "sea caves along the southern cliffs",
+        "cites": [
+          "hammerfell.L1.abecean_coast"
+        ]
+      },
+      {
+        "id": "necromancers",
+        "text": "hidden labs (7 in Mournoth in Daggerfall's data)",
+        "cites": [
+          "hammerfell.L8.hate_necromancy",
+          "hammerfell.L9.collaborators"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "before_the_redguards",
+        "text": "Nedic peoples, Orcs, beastfolk and the Dwemer held the land",
+        "cites": [
+          "hammerfell.L1.craglorn_badlands",
+          "hammerfell.L10.dwemer_halls"
+        ]
+      },
+      {
+        "id": "two_waves",
+        "text": "the warrior wave from sunken Yokuda took the land by the sword, and the royal court followed; the name Hammerfell and the sword-saint Hunding belong to this time",
+        "cites": [
+          "hammerfell.L7.crowns_and_forebears",
+          "hammerfell.L8.yokudan_gods",
+          "hammerfell.L8.sword_path"
+        ]
+      },
+      {
+        "id": "orsinium_siege",
+        "text": "Redguard warriors of the order of Diagna helped besiege the Orc city (`high_rock.md`)",
+        "cites": [
+          "hammerfell.L1.dragontail_wall",
+          "hammerfell.L8.sword_path"
+        ]
+      },
+      {
+        "id": "covenant_era",
+        "text": "the Second Era compact with High Rock and Wrothgar",
+        "cites": [
+          "hammerfell.L6.harbour_and_oasis_cities",
+          "hammerfell.L9.kings_and_lords"
+        ]
+      },
+      {
+        "id": "first_treaty",
+        "text": "in the late Second Era, after the Crowns' fleet was broken at Hunding Bay, a treaty signed on Stros M'kai made Hammerfell an Imperial province",
+        "cites": [
+          "hammerfell.L1.stros_island",
+          "hammerfell.L8.distrust_empire",
+          "hammerfell.L9.crown_forebear_rift"
+        ]
+      },
+      {
+        "id": "war_of_betony",
+        "text": "Sentinel's war with Daggerfall over Betony",
+        "cites": [
+          "hammerfell.L1.south_shore",
+          "hammerfell.L9.betony_claim"
+        ]
+      },
+      {
+        "id": "warp_in_the_west",
+        "text": "the Dragon Break that reshaped the Iliac crowns",
+        "cites": [
+          "hammerfell.L6.harbour_and_oasis_cities",
+          "hammerfell.L9.kings_and_lords"
+        ]
+      },
+      {
+        "id": "dragon_dens",
+        "text": "old dens in the hot desert, empty for an age",
+        "cites": [
+          "hammerfell.L1.alikr_basin",
+          "hammerfell.L4.returning_dragons"
+        ]
+      },
+      {
+        "id": "great_war",
+        "text": "the Empire ceded southern Hammerfell to the Dominion, Hammerfell fought on alone and won, and a second treaty was signed on Stros M'kai",
+        "cites": [
+          "hammerfell.L8.distrust_empire",
+          "hammerfell.L8.hate_thalmor",
+          "hammerfell.L9.collaborators"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "sentinel": {
+      "truth": "A capital of domes on a harbour cliff, ruling a coast of palm scrub and terraced gardens and a desert hinterland of salt flats. Sentinel's wealth is dye, spice and the end of the Alik'r caravan road. The king holds the cisterns, so he holds the city. The court is split between Crown nobles in the palace and Forebear merchants on the quays, and the Betony claim against Daggerfall is a weapon both sides use. The coast fiefs to the south-west are harpy country, and the Witches of the Marsh rule the reeds of Tigonus.",
+      "layers": {
+        "L1": [
+          {
+            "id": "harbour_cliff",
+            "text": "red stone cliffs enclosing Sentinel's anchorage",
+            "cites": [
+              "hammerfell.L1.south_shore"
+            ]
+          },
+          {
+            "id": "garden_terraces",
+            "text": "terraced slopes behind the city",
+            "cites": []
+          },
+          {
+            "id": "tigonus_lowland",
+            "text": "a low marshy shore east of the city",
+            "cites": []
+          },
+          {
+            "id": "abibon_coast",
+            "text": "harpy cliffs south-west",
+            "cites": [
+              "hammerfell.L1.abecean_coast"
+            ]
+          },
+          {
+            "id": "bergama_pans",
+            "text": "salt flats inland",
+            "cites": [
+              "hammerfell.L1.alikr_basin"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "winter_rain_coast",
+            "text": "mild winter showers along the shore",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "hammerfell.L2.winter_rains"
+            ]
+          },
+          {
+            "id": "marsh_heat",
+            "text": "humid haze over the eastern reeds",
+            "cites": [
+              "sentinel.L1.tigonus_lowland"
+            ]
+          },
+          {
+            "id": "inland_dry",
+            "text": "parched air behind the coastal hills",
+            "cites": [
+              "sentinel.L1.bergama_pans",
+              "hammerfell.L2.coast_shadow"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "palace_cisterns",
+            "text": "the palace stores the winter rain; the city drinks by the king's leave",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "sentinel.L2.winter_rain_coast",
+              "hammerfell.L3.water_is_power"
+            ]
+          },
+          {
+            "id": "wadi_river",
+            "text": "a wadi river through Tigonus to the bay",
+            "cites": [
+              "sentinel.L1.tigonus_lowland",
+              "sentinel.L2.winter_rain_coast",
+              "hammerfell.L3.wadis"
+            ]
+          },
+          {
+            "id": "terrace_channels",
+            "text": "stone rills watering the dye slopes",
+            "cites": [
+              "sentinel.L1.garden_terraces"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "coastal_maquis",
+            "text": "palm and olive-green scrub",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "sentinel.L2.winter_rain_coast"
+            ]
+          },
+          {
+            "id": "terrace_gardens",
+            "text": "fig, pomegranate and dye-plant rows",
+            "cites": [
+              "sentinel.L2.winter_rain_coast",
+              "sentinel.L3.terrace_channels"
+            ]
+          },
+          {
+            "id": "tigonus_marsh",
+            "text": "reeds, harpies and scorpions (Daggerfall's data: 12 and 11)",
+            "cites": [
+              "sentinel.L1.tigonus_lowland",
+              "sentinel.L3.wadi_river"
+            ]
+          },
+          {
+            "id": "harpy_cliffs",
+            "text": "sea-stack nests along the Abibon coast",
+            "cites": [
+              "sentinel.L1.abibon_coast",
+              "hammerfell.L4.coast_harpies"
+            ]
+          },
+          {
+            "id": "salt_flat",
+            "text": "white salt crust in the Bergama basin",
+            "cites": [
+              "sentinel.L1.bergama_pans"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "dye_works",
+            "text": "dye vats and drying terraces",
+            "cites": [
+              "sentinel.L4.terrace_gardens",
+              "hammerfell.L5.dyes_and_spice"
+            ]
+          },
+          {
+            "id": "spice_port",
+            "text": "ocean quays and warehouses",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "hammerfell.L5.dyes_and_spice"
+            ]
+          },
+          {
+            "id": "caravan_terminus",
+            "text": "the western end of the Alik'r trade road",
+            "cites": [
+              "sentinel.L1.bergama_pans",
+              "sentinel.L3.palace_cisterns",
+              "hammerfell.L5.caravans_and_salt"
+            ]
+          },
+          {
+            "id": "salt_pans",
+            "text": "Product: cobalt and saffron dyes, spice, Bergama salt, terrace oil",
+            "cites": [
+              "sentinel.L1.bergama_pans",
+              "sentinel.L4.salt_flat"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "dome_capital",
+            "text": "Sentinel on its harbour bluff",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "sentinel.L3.palace_cisterns"
+            ]
+          },
+          {
+            "id": "coast_fief_keeps",
+            "text": "six lords' seats down the coast and hinterland (Ayasofya, Jalallaara in Antiphyllos, Bergama, Myrkwasa, Pothago and Kairou, plus Abibon-Gora)",
+            "cites": [
+              "sentinel.L1.abibon_coast",
+              "sentinel.L5.dye_works"
+            ]
+          },
+          {
+            "id": "marsh_town",
+            "text": "Tigonus at the wadi ford",
+            "cites": [
+              "sentinel.L3.wadi_river",
+              "sentinel.L4.tigonus_marsh"
+            ]
+          },
+          {
+            "id": "ferry_head",
+            "text": "ferries to Daggerfall and Stros M'kai",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "sentinel.L5.spice_port"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "palace_crowns",
+            "text": "royal nobility in the upper palace quarter",
+            "cites": [
+              "sentinel.L3.palace_cisterns",
+              "sentinel.L6.dome_capital",
+              "hammerfell.L7.crowns_and_forebears"
+            ]
+          },
+          {
+            "id": "quay_forebears",
+            "text": "merchant houses on the harbour quays",
+            "cites": [
+              "sentinel.L5.spice_port",
+              "sentinel.L6.dome_capital",
+              "hammerfell.L7.crowns_and_forebears"
+            ]
+          },
+          {
+            "id": "dyers_quarter",
+            "text": "blue-handed workers in the lower town",
+            "cites": [
+              "sentinel.L5.dye_works",
+              "hammerfell.L7.stained_hands"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "arkay_patron",
+            "text": "Arkay in Sentinel, Julianos in Tigonus and Pothago, Mara in Ayasofya and Antiphyllos, Akatosh Chantry in Bergama, Kynareth in Myrkwasa, Z'en in Kairou and Dibella in Abibon-Gora",
+            "cites": [
+              "sentinel.L6.dome_capital",
+              "sentinel.L7.palace_crowns",
+              "hammerfell.L8.eight_with_yokudan_faces"
+            ]
+          },
+          {
+            "id": "marsh_witch_fear",
+            "text": "reed-charms hung on doors in Tigonus",
+            "cites": [
+              "sentinel.L4.tigonus_marsh",
+              "sentinel.L6.marsh_town"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "court_rift",
+            "text": "Crowns and Forebears struggle over the vizierate and water rations",
+            "cites": [
+              "sentinel.L7.palace_crowns",
+              "sentinel.L7.quay_forebears",
+              "hammerfell.L9.crown_forebear_rift"
+            ]
+          },
+          {
+            "id": "betony_lever",
+            "text": "both factions use the Betony claim against Daggerfall",
+            "cites": [
+              "sentinel.L6.ferry_head",
+              "sentinel.L7.quay_forebears",
+              "hammerfell.L9.betony_claim"
+            ]
+          },
+          {
+            "id": "candle_order",
+            "text": "the Order of the Candle guards the king, while the Knights of the Wheel and Order of the Cup hold Abibon-Gora",
+            "cites": [
+              "sentinel.L6.dome_capital",
+              "sentinel.L7.palace_crowns"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "cistern_undercroft",
+            "text": "the palace undercroft is the realm's largest dungeon in Daggerfall's data",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "sentinel.L3.palace_cisterns",
+              "sentinel.L9.court_rift"
+            ]
+          },
+          {
+            "id": "witches_of_the_marsh",
+            "text": "the marsh coven in Tigonus",
+            "cites": [
+              "sentinel.L4.tigonus_marsh",
+              "sentinel.L8.marsh_witch_fear",
+              "hammerfell.L10.covens"
+            ]
+          },
+          {
+            "id": "dust_witches",
+            "text": "the Dust Witches of Antiphyllos",
+            "cites": [
+              "sentinel.L1.bergama_pans",
+              "sentinel.L9.court_rift",
+              "hammerfell.L10.covens"
+            ]
+          },
+          {
+            "id": "selenu_coast",
+            "text": "Selenu and Anthotis vampire bloodlines",
+            "cites": [
+              "sentinel.L6.coast_fief_keeps",
+              "sentinel.L9.court_rift",
+              "hammerfell.L10.bloodlines"
+            ]
+          },
+          {
+            "id": "coven_of_the_tide",
+            "text": "sea-cave coven on the coast",
+            "cites": [
+              "sentinel.L1.abibon_coast",
+              "sentinel.L4.harpy_cliffs",
+              "hammerfell.L10.covens"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "lysandus_war",
+            "text": "Sentinel's army killed a king of Daggerfall",
+            "cites": [
+              "sentinel.L6.ferry_head",
+              "sentinel.L9.betony_lever",
+              "hammerfell.L11.war_of_betony"
+            ]
+          },
+          {
+            "id": "harbour_of_the_first_landing",
+            "text": "early Ra Gada anchorage on the southern bay",
+            "cites": [
+              "sentinel.L1.harbour_cliff",
+              "sentinel.L6.dome_capital",
+              "hammerfell.L11.two_waves"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "sentinel.L1.tigonus_lowland"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "sentinel.L4.coastal_maquis",
+            "sentinel.L4.harpy_cliffs"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "sentinel.L4.tigonus_marsh"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "sentinel.L5.caravan_terminus",
+            "sentinel.L6.dome_capital"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "sentinel.L5.caravan_terminus"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "sentinel.L5.caravan_terminus"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "sentinel.L5.caravan_terminus",
+            "sentinel.L6.dome_capital",
+            "sentinel.L6.coast_fief_keeps"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "sentinel.L5.caravan_terminus",
+            "sentinel.L6.coast_fief_keeps"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "sentinel.L8.arkay_patron"
+          ]
+        },
+        "jarl": {
+          "weight": 4,
+          "why": [
+            "sentinel.L6.dome_capital",
+            "sentinel.L6.coast_fief_keeps",
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "sentinel.L6.dome_capital",
+            "sentinel.L6.coast_fief_keeps"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "sentinel.L9.court_rift"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "sentinel.L6.coast_fief_keeps"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "sentinel.L8.arkay_patron"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "sentinel.L6.coast_fief_keeps"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "sentinel.L10.cistern_undercroft"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "sentinel.L6.coast_fief_keeps",
+            "sentinel.L6.marsh_town",
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "housekeeper": {
+          "weight": 4,
+          "why": [
+            "sentinel.L7.palace_crowns",
+            "sentinel.L7.dyers_quarter",
+            "sentinel.L6.coast_fief_keeps"
+          ]
+        },
+        "child": {
+          "weight": 4,
+          "why": [
+            "sentinel.L7.dyers_quarter",
+            "sentinel.L6.coast_fief_keeps",
+            "sentinel.L6.marsh_town"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "sentinel.L5.dye_works",
+            "sentinel.L7.dyers_quarter"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "sentinel.L5.dye_works",
+            "sentinel.L7.dyers_quarter"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "sentinel.L7.palace_crowns"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "sentinel.L5.dye_works"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "sentinel.L9.court_rift"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "ruin": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "dwemer": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "falmer": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "bandit": [
+          "sentinel.L5.caravan_terminus"
+        ],
+        "fort": [
+          "sentinel.L9.court_rift"
+        ],
+        "military": [
+          "sentinel.L9.court_rift"
+        ],
+        "mage": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "vampire": [
+          "sentinel.L10.selenu_coast"
+        ],
+        "necromancer": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "hagraven": [
+          "sentinel.L10.witches_of_the_marsh",
+          "sentinel.L10.dust_witches",
+          "sentinel.L10.coven_of_the_tide"
+        ],
+        "forsworn": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "beast": [
+          "sentinel.L4.terrace_gardens",
+          "sentinel.L10.coven_of_the_tide"
+        ],
+        "ice": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "mine": [
+          "sentinel.L1.tigonus_lowland"
+        ],
+        "grove": [
+          "sentinel.L4.coastal_maquis"
+        ],
+        "smuggler": [
+          "sentinel.L10.witches_of_the_marsh",
+          "sentinel.L10.coven_of_the_tide"
+        ],
+        "cave": [
+          "sentinel.L10.selenu_coast",
+          "sentinel.L10.coven_of_the_tide"
+        ],
+        "giant": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "dragon": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "tower": [
+          "sentinel.L10.cistern_undercroft"
+        ],
+        "cabin": [
+          "sentinel.L6.dome_capital"
+        ],
+        "wreck": [
+          "sentinel.L5.dye_works"
+        ]
+      }
+    },
+    "alikr_desert": {
+      "truth": "The heart of Hammerfell: a sea of dunes, gravel plains and red mesas. Wealth runs through wells along the caravan road, and every well is owned. Crown families hold the great oases, nomad tribes hold the hidden wells, and caravans pay both. Berbaaqnia is a walled caravanserai city. The hot Dak'fron plain has old dragon dens that were empty for an age and are not empty now. Under the sand lie Yokudan tombs, a buried royal city and a Dwemer hall half full of drift.",
+      "layers": {
+        "L1": [
+          {
+            "id": "erg",
+            "text": "dune sea, crests y 70-130",
+            "cites": [
+              "hammerfell.L1.alikr_basin"
+            ]
+          },
+          {
+            "id": "mesas",
+            "text": "red mesas to y 200",
+            "cites": []
+          },
+          {
+            "id": "reg_plain",
+            "text": "gravel plain",
+            "cites": []
+          },
+          {
+            "id": "dakfron_hot_plain",
+            "text": "scorched northern basin plain",
+            "cites": []
+          },
+          {
+            "id": "buried_valleys",
+            "text": "old valleys under the sand",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sandstorms",
+            "text": "shifting sand walls across the erg",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "hammerfell.L2.sandstorms"
+            ]
+          },
+          {
+            "id": "hot_dakfron",
+            "text": "extreme daytime heat in the northern plain",
+            "cites": [
+              "alikr_desert.L1.dakfron_hot_plain"
+            ]
+          },
+          {
+            "id": "cold_nights",
+            "text": "sharp desert frost after dark",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L1.mesas",
+              "hammerfell.L2.dry_interior"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "owned_wells",
+            "text": "deep oasis wells controlled by Crown lords",
+            "cites": [
+              "alikr_desert.L1.buried_valleys",
+              "alikr_desert.L2.hot_dakfron",
+              "hammerfell.L3.water_is_power"
+            ]
+          },
+          {
+            "id": "hidden_wells",
+            "text": "tribal wells known only to the tribes",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L1.buried_valleys"
+            ]
+          },
+          {
+            "id": "qanat_lines",
+            "text": "underground channels from the foothills to the oases",
+            "cites": [
+              "alikr_desert.L1.buried_valleys"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "erg_dunes",
+            "text": "star and crescent dunes",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L2.sandstorms"
+            ]
+          },
+          {
+            "id": "reg_plain",
+            "text": "gravel plain with thorn bushes",
+            "cites": [
+              "alikr_desert.L1.reg_plain",
+              "alikr_desert.L2.cold_nights"
+            ]
+          },
+          {
+            "id": "oasis_grove",
+            "text": "date palms and reed pools at the wells",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L3.qanat_lines"
+            ]
+          },
+          {
+            "id": "wadi_bed",
+            "text": "dry tamarisk channels",
+            "cites": [
+              "alikr_desert.L1.buried_valleys",
+              "hammerfell.L3.wadis"
+            ]
+          },
+          {
+            "id": "mesa_and_hoodoo",
+            "text": "red stone pillars and vulture ledges",
+            "cites": [
+              "alikr_desert.L1.mesas",
+              "alikr_desert.L2.sandstorms"
+            ]
+          },
+          {
+            "id": "scorpion_ground",
+            "text": "scorpion warrens in the gravel and rock",
+            "cites": [
+              "alikr_desert.L1.reg_plain",
+              "alikr_desert.L2.hot_dakfron",
+              "hammerfell.L4.scorpions"
+            ]
+          },
+          {
+            "id": "serpent_sands",
+            "text": "sand-serpent hunting grounds",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L2.sandstorms",
+              "hammerfell.L4.sand_serpents"
+            ]
+          },
+          {
+            "id": "dragon_dens",
+            "text": "high mesa and hot-plain dragon roosts",
+            "cites": [
+              "alikr_desert.L1.dakfron_hot_plain",
+              "alikr_desert.L1.mesas",
+              "hammerfell.L4.returning_dragons"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "caravan_tolls",
+            "text": "well dues along the desert road",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "hammerfell.L5.caravans_and_salt"
+            ]
+          },
+          {
+            "id": "salt_trade",
+            "text": "pan salt and rock salt trains",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L3.owned_wells",
+              "hammerfell.L5.caravans_and_salt"
+            ]
+          },
+          {
+            "id": "oasis_dates",
+            "text": "Product: rock salt, dates, desert horses' tack, Alik'r blades",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L4.oasis_grove",
+              "hammerfell.L5.oasis_dates"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "caravanserai_city",
+            "text": "Berbaaqnia, seat of the Alik'r Desert fief",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L5.caravan_tolls"
+            ]
+          },
+          {
+            "id": "well_towns",
+            "text": "Pheonahator (seat of the Dak'fron fief) and Bubyrydata",
+            "cites": [
+              "alikr_desert.L3.qanat_lines",
+              "alikr_desert.L5.oasis_dates"
+            ]
+          },
+          {
+            "id": "south_coast_cities",
+            "text": "Skaven, Hegathe and Gilane on the Arena road",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L5.caravan_tolls",
+              "hammerfell.L6.harbour_and_oasis_cities"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "crown_oasis_lords",
+            "text": "House Alik'ra and the well-owning nobility",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L6.caravanserai_city",
+              "hammerfell.L7.crowns_and_forebears"
+            ]
+          },
+          {
+            "id": "nomad_tribes",
+            "text": "free desert clans outside the city walls",
+            "cites": [
+              "alikr_desert.L3.hidden_wells",
+              "alikr_desert.L4.erg_dunes",
+              "hammerfell.L7.nomads"
+            ]
+          },
+          {
+            "id": "caravan_men",
+            "text": "camel and pack-horse drivers",
+            "cites": [
+              "alikr_desert.L5.caravan_tolls",
+              "alikr_desert.L6.caravanserai_city"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "yokudan_gods",
+            "text": "strict Crown devotion to Tu'whacca, Ruptga and Zeht",
+            "cites": [
+              "alikr_desert.L6.caravanserai_city",
+              "alikr_desert.L7.crown_oasis_lords",
+              "hammerfell.L8.yokudan_gods"
+            ]
+          },
+          {
+            "id": "stendarr_patron",
+            "text": "Stendarr in Berbaaqnia and Pheonahator",
+            "cites": [
+              "alikr_desert.L6.caravanserai_city",
+              "alikr_desert.L6.well_towns",
+              "hammerfell.L8.eight_with_yokudan_faces"
+            ]
+          },
+          {
+            "id": "well_oaths",
+            "text": "a sworn oath at a well cannot be broken",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L7.nomad_tribes"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "well_feud",
+            "text": "a Crown lord and a tribe claim the same well",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L7.crown_oasis_lords",
+              "alikr_desert.L7.nomad_tribes",
+              "hammerfell.L9.well_feuds"
+            ]
+          },
+          {
+            "id": "dragon_fear",
+            "text": "dragons waking over Dak'fron's wells",
+            "cites": [
+              "alikr_desert.L4.dragon_dens",
+              "alikr_desert.L6.well_towns"
+            ]
+          },
+          {
+            "id": "ra_gada_war_camps",
+            "text": "armed sword-bands camped along the caravan track",
+            "cites": [
+              "alikr_desert.L7.nomad_tribes",
+              "alikr_desert.L8.well_oaths",
+              "hammerfell.L9.ra_gada_bands"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "na_totambu_city",
+            "text": "buried royal city in the dunes (lost_city_of_the_na_totambu)",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L8.yokudan_gods",
+              "alikr_desert.L9.well_feud"
+            ]
+          },
+          {
+            "id": "volenfell",
+            "text": "the sand-choked Dwemer capital",
+            "cites": [
+              "alikr_desert.L1.erg",
+              "alikr_desert.L9.well_feud",
+              "hammerfell.L10.dwemer_halls"
+            ]
+          },
+          {
+            "id": "web_of_anker",
+            "text": "the great scorpion warren",
+            "cites": [
+              "alikr_desert.L4.scorpion_ground",
+              "alikr_desert.L9.dragon_fear"
+            ]
+          },
+          {
+            "id": "faughtas_guard",
+            "text": "a defiled temple keep",
+            "cites": [
+              "alikr_desert.L1.dakfron_hot_plain",
+              "alikr_desert.L8.yokudan_gods",
+              "alikr_desert.L9.dragon_fear"
+            ]
+          },
+          {
+            "id": "kykos_coven",
+            "text": "the Sisters of Kykos in Dak'fron",
+            "cites": [
+              "alikr_desert.L1.dakfron_hot_plain",
+              "alikr_desert.L4.scorpion_ground",
+              "hammerfell.L10.covens"
+            ]
+          },
+          {
+            "id": "defiled_temples",
+            "text": "desecrated desert shrines and Anthotis vampire haunts",
+            "cites": [
+              "alikr_desert.L4.scorpion_ground",
+              "alikr_desert.L8.yokudan_gods",
+              "alikr_desert.L9.well_feud",
+              "hammerfell.L10.defiled_temples"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "two_waves",
+            "text": "the Yokudan royal migration into the basin",
+            "cites": [
+              "alikr_desert.L6.caravanserai_city",
+              "alikr_desert.L7.crown_oasis_lords",
+              "alikr_desert.L10.na_totambu_city",
+              "hammerfell.L11.two_waves"
+            ]
+          },
+          {
+            "id": "dragon_dens",
+            "text": "ancient desert dragon mounds",
+            "cites": [
+              "alikr_desert.L1.dakfron_hot_plain",
+              "alikr_desert.L4.dragon_dens",
+              "alikr_desert.L9.dragon_fear",
+              "hammerfell.L11.dragon_dens"
+            ]
+          },
+          {
+            "id": "caravan_wars",
+            "text": "generations of oasis feuds between cities and tribes",
+            "cites": [
+              "alikr_desert.L3.owned_wells",
+              "alikr_desert.L5.caravan_tolls",
+              "alikr_desert.L9.well_feud"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L4.serpent_sands"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L4.serpent_sands"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L4.serpent_sands"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "merchant": {
+          "weight": 4,
+          "why": [
+            "alikr_desert.L5.caravan_tolls",
+            "alikr_desert.L5.salt_trade",
+            "alikr_desert.L6.caravanserai_city"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L5.salt_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L5.salt_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "alikr_desert.L5.caravan_tolls",
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "server": {
+          "weight": 4,
+          "why": [
+            "alikr_desert.L5.caravan_tolls",
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L8.yokudan_gods"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L7.crown_oasis_lords"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L8.yokudan_gods"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L10.na_totambu_city"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L7.crown_oasis_lords"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L7.crown_oasis_lords"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns",
+            "alikr_desert.L7.nomad_tribes"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "alikr_desert.L6.caravanserai_city",
+            "alikr_desert.L6.well_towns"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L7.nomad_tribes"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L7.crown_oasis_lords"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L7.crown_oasis_lords"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "alikr_desert.L5.caravan_tolls"
+          ]
+        },
+        "survivor": {
+          "weight": 2,
+          "why": [
+            "alikr_desert.L9.dragon_fear"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "alikr_desert.L8.yokudan_gods",
+          "alikr_desert.L11.dragon_dens"
+        ],
+        "ruin": [
+          "alikr_desert.L10.defiled_temples"
+        ],
+        "dwemer": [
+          "alikr_desert.L10.volenfell"
+        ],
+        "falmer": [
+          "alikr_desert.L10.volenfell"
+        ],
+        "bandit": [
+          "alikr_desert.L5.caravan_tolls"
+        ],
+        "fort": [
+          "alikr_desert.L9.well_feud"
+        ],
+        "military": [
+          "alikr_desert.L9.well_feud"
+        ],
+        "mage": [
+          "alikr_desert.L10.na_totambu_city"
+        ],
+        "vampire": [
+          "alikr_desert.L10.defiled_temples"
+        ],
+        "necromancer": [
+          "alikr_desert.L10.na_totambu_city"
+        ],
+        "hagraven": [
+          "alikr_desert.L10.kykos_coven"
+        ],
+        "forsworn": [
+          "alikr_desert.L10.na_totambu_city"
+        ],
+        "beast": [
+          "alikr_desert.L4.dragon_dens"
+        ],
+        "ice": [
+          "alikr_desert.L10.na_totambu_city"
+        ],
+        "mine": [
+          "alikr_desert.L5.caravan_tolls"
+        ],
+        "grove": [
+          "alikr_desert.L4.oasis_grove"
+        ],
+        "smuggler": [
+          "alikr_desert.L10.kykos_coven"
+        ],
+        "cave": [
+          "alikr_desert.L10.defiled_temples"
+        ],
+        "giant": [
+          "alikr_desert.L10.na_totambu_city"
+        ],
+        "dragon": [
+          "alikr_desert.L4.dragon_dens",
+          "alikr_desert.L9.dragon_fear"
+        ],
+        "tower": [
+          "alikr_desert.L10.na_totambu_city"
+        ],
+        "cabin": [
+          "alikr_desert.L6.caravanserai_city"
+        ],
+        "wreck": [
+          "alikr_desert.L5.caravan_tolls"
+        ]
+      }
+    },
+    "bangkorai": {
+      "truth": "The only green, wet corner of Hammerfell: red-clay river valleys under jungle at the bay head, with mountain fiefs above them. River ports trade timber, fish and cargo from the Bjoulsae bridge, and their towns are tavern-crowded and half Breton in manner. Totambu carries the name of the old royal line, which makes it sacred to the Crowns. Its timber lords and the Order of the Scarab are pushing into groves where giants live. Orc bands left over from old wars hold strongholds in the hills. The old Bangkorai pass, with its garrison, still guards the land road between High Rock and Hammerfell.",
+      "layers": {
+        "L1": [
+          {
+            "id": "red_clay_valleys",
+            "text": "wide alluvial valleys at the bay head",
+            "cites": [
+              "hammerfell.L1.bay_head_valleys"
+            ]
+          },
+          {
+            "id": "ephesus_heights",
+            "text": "steep mountain block above the jungle",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          },
+          {
+            "id": "santaki_ridge",
+            "text": "mountain fiefs on the southern flank",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          },
+          {
+            "id": "bangkorai_pass",
+            "text": "the fortified pass between High Rock and Hammerfell",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "bay_rain",
+            "text": "warm, heavy rain all year",
+            "cites": [
+              "bangkorai.L1.red_clay_valleys",
+              "hammerfell.L2.bay_lift"
+            ]
+          },
+          {
+            "id": "cloud_line",
+            "text": "mist on the heights",
+            "cites": [
+              "bangkorai.L1.ephesus_heights"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "lainlyn_river",
+            "text": "western bay-head river",
+            "cites": [
+              "bangkorai.L1.red_clay_valleys",
+              "bangkorai.L2.bay_rain",
+              "hammerfell.L3.jungle_rivers"
+            ]
+          },
+          {
+            "id": "totambu_river",
+            "text": "deep navigable river through Totambu",
+            "cites": [
+              "bangkorai.L1.red_clay_valleys",
+              "bangkorai.L2.bay_rain",
+              "hammerfell.L3.jungle_rivers"
+            ]
+          },
+          {
+            "id": "floods",
+            "text": "the rivers flood every wet season",
+            "cites": [
+              "bangkorai.L2.bay_rain"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "river_jungle",
+            "text": "dense broadleaf rainforest canopy",
+            "cites": [
+              "bangkorai.L2.bay_rain",
+              "bangkorai.L3.totambu_river"
+            ]
+          },
+          {
+            "id": "red_clay_banks",
+            "text": "reed and mud banks along the rivers",
+            "cites": [
+              "bangkorai.L3.floods"
+            ]
+          },
+          {
+            "id": "cloud_forest",
+            "text": "mossy highland woods on Ephesus and Santaki",
+            "cites": [
+              "bangkorai.L2.cloud_line"
+            ]
+          },
+          {
+            "id": "giant_glades",
+            "text": "huge old-growth clearings kept by giants",
+            "cites": [
+              "bangkorai.L2.bay_rain",
+              "bangkorai.L4.river_jungle",
+              "hammerfell.L4.jungle_giants"
+            ]
+          },
+          {
+            "id": "river_mouth_mangrove",
+            "text": "tidal mangrove channels at the bay head",
+            "cites": [
+              "bangkorai.L1.red_clay_valleys",
+              "bangkorai.L3.lainlyn_river"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "timber",
+            "text": "hardwood logging camps and sawmills",
+            "cites": [
+              "bangkorai.L4.river_jungle",
+              "hammerfell.L5.timber_and_river_fish"
+            ]
+          },
+          {
+            "id": "river_trade",
+            "text": "river barges and fish markets",
+            "cites": [
+              "bangkorai.L3.lainlyn_river",
+              "bangkorai.L3.totambu_river"
+            ]
+          },
+          {
+            "id": "bridge_traffic",
+            "text": "Product: hardwood, river fish, jungle resin, Lainlyn horn work",
+            "cites": [
+              "bangkorai.L1.bangkorai_pass",
+              "bangkorai.L3.lainlyn_river"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "river_port_city",
+            "text": "Totambu, seat of the Totambu fief",
+            "cites": [
+              "bangkorai.L3.totambu_river",
+              "bangkorai.L5.timber"
+            ]
+          },
+          {
+            "id": "ford_towns",
+            "text": "Lainlyn, Mournoth, Kozanset and Satakalaam on the river roads",
+            "cites": [
+              "bangkorai.L3.lainlyn_river",
+              "bangkorai.L5.river_trade"
+            ]
+          },
+          {
+            "id": "mountain_keeps",
+            "text": "Ephesus and Santaki in the heights",
+            "cites": [
+              "bangkorai.L1.ephesus_heights",
+              "bangkorai.L1.santaki_ridge"
+            ]
+          },
+          {
+            "id": "garrison_pass",
+            "text": "the Bangkorai Garrison stone wall across the pass",
+            "cites": [
+              "bangkorai.L1.bangkorai_pass",
+              "bangkorai.L5.bridge_traffic"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "timber_lords",
+            "text": "wealthy logging families and guild factors",
+            "cites": [
+              "bangkorai.L5.timber",
+              "bangkorai.L6.river_port_city"
+            ]
+          },
+          {
+            "id": "mixed_towns",
+            "text": "Breton and Redguard families side by side",
+            "cites": [
+              "bangkorai.L5.bridge_traffic",
+              "bangkorai.L6.ford_towns"
+            ]
+          },
+          {
+            "id": "river_labour",
+            "text": "woodcutters, boatmen and dock hands",
+            "cites": [
+              "bangkorai.L5.timber",
+              "bangkorai.L5.river_trade",
+              "bangkorai.L6.river_port_city"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "z_en_patron",
+            "text": "Z'en in Totambu, Dibella in Lainlyn and Satakalaam, Kynareth in Kozanset, Stendarr in Mournoth and Santaki, and Mara in Ephesus",
+            "cites": [
+              "bangkorai.L6.river_port_city",
+              "bangkorai.L7.timber_lords",
+              "hammerfell.L8.eight_with_yokudan_faces"
+            ]
+          },
+          {
+            "id": "na_totambu_reverence",
+            "text": "Crown pilgrims come to Totambu",
+            "cites": [
+              "bangkorai.L6.river_port_city",
+              "bangkorai.L7.timber_lords",
+              "hammerfell.L8.yokudan_gods"
+            ]
+          },
+          {
+            "id": "giant_taboo",
+            "text": "the old families do not cut the giants' groves",
+            "cites": [
+              "bangkorai.L4.giant_glades",
+              "bangkorai.L7.timber_lords"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "grove_push",
+            "text": "timber lords and the Order of the Scarab against the taboo",
+            "cites": [
+              "bangkorai.L5.timber",
+              "bangkorai.L8.giant_taboo"
+            ]
+          },
+          {
+            "id": "river_pirates",
+            "text": "river pirates and Host of the Horn patrols (10 prisons in Lainlyn in Daggerfall's data)",
+            "cites": [
+              "bangkorai.L3.lainlyn_river",
+              "bangkorai.L5.river_trade"
+            ]
+          },
+          {
+            "id": "forebear_ports",
+            "text": "trading river towns against Crown traditionalists",
+            "cites": [
+              "bangkorai.L6.ford_towns",
+              "bangkorai.L7.mixed_towns",
+              "hammerfell.L9.crown_forebear_rift"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "scarab_temple",
+            "text": "a drowned river temple in Totambu",
+            "cites": [
+              "bangkorai.L3.totambu_river",
+              "bangkorai.L4.river_jungle",
+              "bangkorai.L9.grove_push",
+              "hammerfell.L10.defiled_temples"
+            ]
+          },
+          {
+            "id": "orc_hill_bands",
+            "text": "Orc strongholds in the Totambu hills (21 in Daggerfall's data)",
+            "cites": [
+              "bangkorai.L1.ephesus_heights",
+              "bangkorai.L9.grove_push"
+            ]
+          },
+          {
+            "id": "mournoth_labs",
+            "text": "hidden necromancer laboratories in Mournoth",
+            "cites": [
+              "bangkorai.L6.ford_towns",
+              "bangkorai.L9.river_pirates",
+              "hammerfell.L10.necromancers"
+            ]
+          },
+          {
+            "id": "tide_witches",
+            "text": "the Tide Witches of Totambu",
+            "cites": [
+              "bangkorai.L4.river_mouth_mangrove",
+              "bangkorai.L9.river_pirates",
+              "hammerfell.L10.covens"
+            ]
+          },
+          {
+            "id": "khulari_heights",
+            "text": "Khulari and Montalion vampire bloodlines",
+            "cites": [
+              "bangkorai.L1.ephesus_heights",
+              "bangkorai.L6.mountain_keeps",
+              "bangkorai.L9.forebear_ports",
+              "hammerfell.L10.bloodlines"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "na_totambu_line",
+            "text": "the royal Yokudan dynasty remembered at Totambu",
+            "cites": [
+              "bangkorai.L6.river_port_city",
+              "bangkorai.L8.na_totambu_reverence",
+              "hammerfell.L11.two_waves"
+            ]
+          },
+          {
+            "id": "garrison_pass_wars",
+            "text": "the pass changed hands in every war between the provinces",
+            "cites": [
+              "bangkorai.L1.bangkorai_pass",
+              "bangkorai.L6.garrison_pass",
+              "bangkorai.L9.forebear_ports"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L5.river_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L5.timber",
+            "bangkorai.L5.bridge_traffic",
+            "bangkorai.L4.river_jungle"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "woodcutter": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L5.timber",
+            "bangkorai.L4.river_jungle",
+            "bangkorai.L4.cloud_forest"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L5.river_trade",
+            "bangkorai.L5.bridge_traffic",
+            "bangkorai.L3.floods"
+          ]
+        },
+        "hunter": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L4.river_jungle",
+            "bangkorai.L4.cloud_forest"
+          ]
+        },
+        "butcher": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L5.river_trade",
+            "bangkorai.L5.bridge_traffic"
+          ]
+        },
+        "fletcher": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L5.timber",
+            "bangkorai.L5.river_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L4.cloud_forest"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L5.river_trade",
+            "bangkorai.L6.ford_towns"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L5.river_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L5.river_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L6.river_port_city",
+            "bangkorai.L6.ford_towns"
+          ]
+        },
+        "cook": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L5.river_trade",
+            "bangkorai.L5.bridge_traffic"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L6.river_port_city",
+            "bangkorai.L6.ford_towns"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L5.timber"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L8.z_en_patron"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L6.river_port_city"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L6.river_port_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L7.timber_lords"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L6.river_port_city"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L8.z_en_patron"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L6.river_port_city"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L10.scarab_temple"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L9.river_pirates"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L6.ford_towns"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L6.river_port_city",
+            "bangkorai.L6.ford_towns",
+            "bangkorai.L7.mixed_towns"
+          ]
+        },
+        "housekeeper": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L7.mixed_towns",
+            "bangkorai.L6.river_port_city",
+            "bangkorai.L6.ford_towns"
+          ]
+        },
+        "child": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L7.mixed_towns",
+            "bangkorai.L6.river_port_city",
+            "bangkorai.L6.ford_towns"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L8.z_en_patron",
+            "bangkorai.L8.giant_taboo"
+          ]
+        },
+        "labourer": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L5.timber",
+            "bangkorai.L5.bridge_traffic",
+            "bangkorai.L7.river_labour"
+          ]
+        },
+        "worker": {
+          "weight": 4,
+          "why": [
+            "bangkorai.L5.timber",
+            "bangkorai.L5.bridge_traffic",
+            "bangkorai.L7.river_labour"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L7.timber_lords"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "bangkorai.L7.timber_lords"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 3,
+          "why": [
+            "bangkorai.L5.river_trade",
+            "bangkorai.L7.timber_lords"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "bangkorai.L9.grove_push"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "bangkorai.L8.na_totambu_reverence"
+        ],
+        "ruin": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "dwemer": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "falmer": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "bandit": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "fort": [
+          "bangkorai.L9.grove_push"
+        ],
+        "military": [
+          "bangkorai.L9.grove_push"
+        ],
+        "mage": [
+          "bangkorai.L10.mournoth_labs"
+        ],
+        "vampire": [
+          "bangkorai.L10.khulari_heights"
+        ],
+        "necromancer": [
+          "bangkorai.L10.mournoth_labs"
+        ],
+        "hagraven": [
+          "bangkorai.L10.tide_witches"
+        ],
+        "forsworn": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "beast": [
+          "bangkorai.L4.river_jungle",
+          "bangkorai.L10.mournoth_labs"
+        ],
+        "ice": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "mine": [
+          "bangkorai.L5.timber"
+        ],
+        "grove": [
+          "bangkorai.L4.giant_glades",
+          "bangkorai.L4.river_mouth_mangrove",
+          "bangkorai.L8.giant_taboo"
+        ],
+        "smuggler": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "cave": [
+          "bangkorai.L10.khulari_heights"
+        ],
+        "giant": [
+          "bangkorai.L4.giant_glades"
+        ],
+        "dragon": [
+          "bangkorai.L10.khulari_heights"
+        ],
+        "tower": [
+          "bangkorai.L10.scarab_temple"
+        ],
+        "cabin": [
+          "bangkorai.L5.timber"
+        ],
+        "wreck": [
+          "bangkorai.L5.timber"
+        ]
+      }
+    },
+    "dragontail": {
+      "truth": "The mountain wall between Hammerfell and Cyrodiil: black volcanic ridges in the north, red rock and slot canyons in the south. Its ore and obsidian arm every swordsmith in the province, and its miners are bound by debt to the lords of Dragontail city, a terraced town of black stone. Fumaroles steam in the high valleys, and fire spirits walk in the lava tubes. The Devilrock witches trade fire-pacts. Scourg Barrow, the greatest tomb in the mountains, is said to be waking.",
+      "layers": {
+        "L1": [
+          {
+            "id": "black_ridges",
+            "text": "basalt, obsidian, sulphur, y 280-420",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          },
+          {
+            "id": "red_wall",
+            "text": "a red-rock wall and slot canyons in the south, y 300-470",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          },
+          {
+            "id": "ore_seams",
+            "text": "rich iron, silver and obsidian veins",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "mountain_cold",
+            "text": "freezing nights and snow on the high crests",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "hammerfell.L2.mountain_cold"
+            ]
+          },
+          {
+            "id": "fume_haze",
+            "text": "volcanic ash and sulphur haze in the northern valleys",
+            "cites": [
+              "dragontail.L1.black_ridges"
+            ]
+          },
+          {
+            "id": "canyon_shade",
+            "text": "deep, cool shade in the southern slot canyons",
+            "cites": [
+              "dragontail.L1.red_wall"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "snowmelt",
+            "text": "highland torrents feeding the western wadis",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L2.mountain_cold",
+              "hammerfell.L3.snowmelt"
+            ]
+          },
+          {
+            "id": "canyon_springs",
+            "text": "seep springs in the red-rock gorges",
+            "cites": [
+              "dragontail.L2.canyon_shade"
+            ]
+          },
+          {
+            "id": "sulphur_springs",
+            "text": "hot mineral pools around the vents",
+            "cites": [
+              "dragontail.L1.black_ridges"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "volcanic_scree",
+            "text": "black basalt talus and obsidian glints",
+            "cites": [
+              "dragontail.L1.black_ridges"
+            ]
+          },
+          {
+            "id": "fumarole_field",
+            "text": "steaming vents and sulphur crust",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L3.sulphur_springs"
+            ]
+          },
+          {
+            "id": "canyon_fern",
+            "text": "shaded fern pockets in the red canyons",
+            "cites": [
+              "dragontail.L3.canyon_springs"
+            ]
+          },
+          {
+            "id": "cedar_ridge",
+            "text": "hardy mountain cedar and juniper above y 260",
+            "cites": [
+              "dragontail.L2.mountain_cold"
+            ]
+          },
+          {
+            "id": "vent_daedra",
+            "text": "fire spirits around the lava vents",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L4.fumarole_field",
+              "hammerfell.L4.vent_daedra"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "mines",
+            "text": "iron and silver galleries (85 in Daggerfall's data)",
+            "cites": [
+              "dragontail.L1.ore_seams",
+              "hammerfell.L5.dragontail_ore"
+            ]
+          },
+          {
+            "id": "obsidian_and_sulphur",
+            "text": "Product: iron, obsidian blades, sulphur, mountain cedar",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L3.sulphur_springs"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "terrace_city",
+            "text": "Dragontail, seat of the Dragontail Mountains fief",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L5.mines"
+            ]
+          },
+          {
+            "id": "mine_villages",
+            "text": "Morenanu and the ridge mining camps",
+            "cites": [
+              "dragontail.L5.mines"
+            ]
+          },
+          {
+            "id": "pass_to_kvatch",
+            "text": "Rihad's bazaar city and the southern road over the wall",
+            "cites": [
+              "dragontail.L1.red_wall",
+              "dragontail.L3.canyon_springs"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "ore_lords",
+            "text": "House Dragontail and the mine proprietors",
+            "cites": [
+              "dragontail.L5.mines",
+              "dragontail.L6.terrace_city"
+            ]
+          },
+          {
+            "id": "debt_miners",
+            "text": "miners bound by debt tallies to the black-stone terraces",
+            "cites": [
+              "dragontail.L5.mines",
+              "dragontail.L6.mine_villages",
+              "hammerfell.L7.debt_miners"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "arkay_patron",
+            "text": "Arkay's temple watching over the mountain dead",
+            "cites": [
+              "dragontail.L6.terrace_city",
+              "dragontail.L7.ore_lords",
+              "hammerfell.L8.eight_with_yokudan_faces"
+            ]
+          },
+          {
+            "id": "fire_pacts",
+            "text": "the Devilrock coven trades with fire spirits",
+            "cites": [
+              "dragontail.L4.vent_daedra",
+              "dragontail.L7.debt_miners"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "debt_unrest",
+            "text": "desperate miners strike bargains or riot against the debt-houses",
+            "cites": [
+              "dragontail.L7.debt_miners",
+              "dragontail.L8.fire_pacts"
+            ]
+          },
+          {
+            "id": "arms_for_both",
+            "text": "both Crowns and Forebears buy Dragontail steel",
+            "cites": [
+              "dragontail.L5.mines",
+              "dragontail.L7.ore_lords",
+              "hammerfell.L9.crown_forebear_rift"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "scourg_barrow",
+            "text": "the greatest mountain-king tomb in the range",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L8.arkay_patron",
+              "dragontail.L9.debt_unrest",
+              "hammerfell.L10.necropolises"
+            ]
+          },
+          {
+            "id": "devilrock_coven",
+            "text": "the Witches of Devilrock",
+            "cites": [
+              "dragontail.L4.vent_daedra",
+              "dragontail.L8.fire_pacts",
+              "hammerfell.L10.covens"
+            ]
+          },
+          {
+            "id": "mountain_witches",
+            "text": "high ridge witch circle",
+            "cites": [
+              "dragontail.L1.red_wall",
+              "dragontail.L4.cedar_ridge",
+              "hammerfell.L10.covens"
+            ]
+          },
+          {
+            "id": "lava_tubes",
+            "text": "volcanic caverns beneath the mines",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L4.vent_daedra",
+              "hammerfell.L10.lava_tubes"
+            ]
+          },
+          {
+            "id": "khulari_mines",
+            "text": "Khulari vampire haunts",
+            "cites": [
+              "dragontail.L5.mines",
+              "dragontail.L9.debt_unrest",
+              "hammerfell.L10.bloodlines"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "scourg_kings",
+            "text": "ancient mountain rulers entombed in Scourg Barrow",
+            "cites": [
+              "dragontail.L1.black_ridges",
+              "dragontail.L6.terrace_city",
+              "dragontail.L10.scourg_barrow"
+            ]
+          },
+          {
+            "id": "imperial_border",
+            "text": "the wall was the Empire's way in",
+            "cites": [
+              "dragontail.L1.red_wall",
+              "dragontail.L6.pass_to_kvatch",
+              "dragontail.L9.arms_for_both",
+              "hammerfell.L11.first_treaty"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 4,
+          "why": [
+            "dragontail.L5.mines",
+            "dragontail.L5.obsidian_and_sulphur",
+            "dragontail.L1.ore_seams"
+          ]
+        },
+        "smith": {
+          "weight": 3,
+          "why": [
+            "dragontail.L5.mines",
+            "dragontail.L5.obsidian_and_sulphur"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.pass_to_kvatch"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "dragontail.L8.arkay_patron",
+            "dragontail.L8.fire_pacts"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "dragontail.L6.terrace_city",
+            "dragontail.L6.mine_villages",
+            "dragontail.L6.pass_to_kvatch"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "dragontail.L6.terrace_city",
+            "dragontail.L6.pass_to_kvatch"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "dragontail.L8.arkay_patron"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.terrace_city"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.terrace_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "dragontail.L7.ore_lords"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.terrace_city"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "dragontail.L8.arkay_patron"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.terrace_city"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "dragontail.L10.scourg_barrow"
+          ]
+        },
+        "prisoner": {
+          "weight": 4,
+          "why": [
+            "dragontail.L7.ore_lords",
+            "dragontail.L7.debt_miners",
+            "dragontail.L9.debt_unrest"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "dragontail.L7.ore_lords"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "dragontail.L6.terrace_city",
+            "dragontail.L6.mine_villages"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.terrace_city"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "dragontail.L6.terrace_city"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "dragontail.L7.ore_lords"
+          ]
+        },
+        "labourer": {
+          "weight": 4,
+          "why": [
+            "dragontail.L5.mines",
+            "dragontail.L7.ore_lords",
+            "dragontail.L7.debt_miners"
+          ]
+        },
+        "worker": {
+          "weight": 4,
+          "why": [
+            "dragontail.L5.mines",
+            "dragontail.L7.ore_lords",
+            "dragontail.L7.debt_miners"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "dragontail.L7.ore_lords"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "dragontail.L7.ore_lords"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "dragontail.L5.mines"
+          ]
+        },
+        "survivor": {
+          "weight": 3,
+          "why": [
+            "dragontail.L9.arms_for_both",
+            "dragontail.L6.terrace_city"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "dragontail.L10.scourg_barrow",
+          "dragontail.L11.scourg_kings"
+        ],
+        "ruin": [
+          "dragontail.L10.scourg_barrow",
+          "dragontail.L11.scourg_kings"
+        ],
+        "dwemer": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "falmer": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "bandit": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "fort": [
+          "dragontail.L9.debt_unrest"
+        ],
+        "military": [
+          "dragontail.L9.debt_unrest"
+        ],
+        "mage": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "vampire": [
+          "dragontail.L10.khulari_mines"
+        ],
+        "necromancer": [
+          "dragontail.L8.arkay_patron"
+        ],
+        "hagraven": [
+          "dragontail.L10.devilrock_coven",
+          "dragontail.L10.mountain_witches",
+          "dragontail.L8.fire_pacts"
+        ],
+        "forsworn": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "beast": [
+          "dragontail.L10.lava_tubes"
+        ],
+        "ice": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "mine": [
+          "dragontail.L5.mines",
+          "dragontail.L5.obsidian_and_sulphur",
+          "dragontail.L1.ore_seams"
+        ],
+        "grove": [
+          "dragontail.L4.volcanic_scree"
+        ],
+        "smuggler": [
+          "dragontail.L10.devilrock_coven"
+        ],
+        "cave": [
+          "dragontail.L10.lava_tubes",
+          "dragontail.L10.khulari_mines"
+        ],
+        "giant": [
+          "dragontail.L4.fumarole_field"
+        ],
+        "dragon": [
+          "dragontail.L9.arms_for_both"
+        ],
+        "tower": [
+          "dragontail.L10.scourg_barrow"
+        ],
+        "cabin": [
+          "dragontail.L6.mine_villages"
+        ],
+        "wreck": [
+          "dragontail.L5.mines"
+        ]
+      }
+    },
+    "stros_mkai": {
+      "truth": "A small, two-lobed island in the southern sea. A harbour town (Port Hunding) climbs the east side of a south-facing bay toward a walled palace plateau, and a high western plateau holds a Dwemer ruin. Both treaties that bound Hammerfell to the Empire were signed here: the first after the Crowns lost at Hunding Bay, the second after Hammerfell beat the Dominion. That makes the island neutral ground that both Crowns and Forebears covet. Smugglers use the cave behind the waterfall. A necromancer's tower stands on an islet off the north-west coast, and the islanders do not row there.",
+      "layers": {
+        "L1": [
+          {
+            "id": "two_lobes",
+            "text": "east lobe (town and palace plateau), west lobe (high plateau)",
+            "cites": [
+              "hammerfell.L1.stros_island"
+            ]
+          },
+          {
+            "id": "harbour_bay",
+            "text": "a south-facing bay",
+            "cites": []
+          },
+          {
+            "id": "waterfall_cliff",
+            "text": "steep cliff north-west of the town",
+            "cites": []
+          },
+          {
+            "id": "south_point",
+            "text": "rocky southern headland",
+            "cites": []
+          },
+          {
+            "id": "necromancer_islet",
+            "text": "isolated rock off the north-west coast",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sea_climate",
+            "text": "warm, wet, storm-prone",
+            "cites": [
+              "stros_mkai.L1.harbour_bay",
+              "hammerfell.L2.abecean_storms"
+            ]
+          },
+          {
+            "id": "plateau_wind",
+            "text": "steady salt gusts over the western heights",
+            "cites": [
+              "stros_mkai.L1.two_lobes"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "waterfall_stream",
+            "text": "freshwater stream dropping into a gorge pool",
+            "cites": [
+              "stros_mkai.L1.waterfall_cliff"
+            ]
+          },
+          {
+            "id": "palace_cistern",
+            "text": "stone reservoirs under the palace plateau",
+            "cites": [
+              "stros_mkai.L1.two_lobes",
+              "stros_mkai.L2.sea_climate",
+              "hammerfell.L3.water_is_power"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "island_palm_coast",
+            "text": "white sand and palms around the bay",
+            "cites": [
+              "stros_mkai.L2.sea_climate"
+            ]
+          },
+          {
+            "id": "jungle_hills",
+            "text": "the east hills (Redguard's jungle camp)",
+            "cites": [
+              "stros_mkai.L2.sea_climate",
+              "stros_mkai.L3.waterfall_stream"
+            ]
+          },
+          {
+            "id": "plateau_scrub",
+            "text": "wind-bent scrub on the western lobe",
+            "cites": [
+              "stros_mkai.L2.plateau_wind"
+            ]
+          },
+          {
+            "id": "reef_shallows",
+            "text": "coral and wreck-strewn shallows",
+            "cites": [
+              "stros_mkai.L1.harbour_bay",
+              "stros_mkai.L1.south_point"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "harbour_trade",
+            "text": "Abecean shipping and treaty delegations",
+            "cites": [
+              "stros_mkai.L1.harbour_bay"
+            ]
+          },
+          {
+            "id": "dwemer_salvage",
+            "text": "brass scrap and gears from the western plateau",
+            "cites": [
+              "stros_mkai.L1.two_lobes",
+              "stros_mkai.L4.plateau_scrub"
+            ]
+          },
+          {
+            "id": "shipwrights",
+            "text": "boatyards on the west quay",
+            "cites": [
+              "stros_mkai.L1.harbour_bay",
+              "stros_mkai.L4.jungle_hills"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "port_hunding",
+            "text": "town on the bay's east shore, warehouse and harbour tower on the west quay",
+            "cites": [
+              "stros_mkai.L1.harbour_bay",
+              "stros_mkai.L5.harbour_trade"
+            ]
+          },
+          {
+            "id": "palace_plateau",
+            "text": "walled governor's palace north-east of the town",
+            "cites": [
+              "stros_mkai.L1.two_lobes",
+              "stros_mkai.L3.palace_cistern"
+            ]
+          },
+          {
+            "id": "lighthouse_point",
+            "text": "the great beacon on the south point",
+            "cites": [
+              "stros_mkai.L1.south_point",
+              "stros_mkai.L5.harbour_trade"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "harbour_lord_and_merchants",
+            "text": "Forebear port factors and treaty envoys",
+            "cites": [
+              "stros_mkai.L5.harbour_trade",
+              "stros_mkai.L6.port_hunding",
+              "stros_mkai.L6.palace_plateau"
+            ]
+          },
+          {
+            "id": "sailors_and_smugglers",
+            "text": "island crews who know every hidden cove",
+            "cites": [
+              "stros_mkai.L5.harbour_trade",
+              "stros_mkai.L6.port_hunding"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "hunding_memory",
+            "text": "the sword-saint's name on the port",
+            "cites": [
+              "stros_mkai.L6.port_hunding",
+              "stros_mkai.L7.harbour_lord_and_merchants"
+            ]
+          },
+          {
+            "id": "fear_of_the_islet",
+            "text": "no islander rows toward the north-west rock",
+            "cites": [
+              "stros_mkai.L1.necromancer_islet",
+              "stros_mkai.L7.sailors_and_smugglers",
+              "hammerfell.L8.hate_necromancy"
+            ]
+          },
+          {
+            "id": "treaty_pride",
+            "text": "pride in the Second Treaty victory",
+            "cites": [
+              "stros_mkai.L6.palace_plateau",
+              "stros_mkai.L7.harbour_lord_and_merchants"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "treaty_ground",
+            "text": "neutral ground both factions want",
+            "cites": [
+              "stros_mkai.L6.palace_plateau",
+              "stros_mkai.L8.treaty_pride",
+              "hammerfell.L9.crown_forebear_rift"
+            ]
+          },
+          {
+            "id": "smuggling_ring",
+            "text": "contraband moving behind the customs quay",
+            "cites": [
+              "stros_mkai.L1.waterfall_cliff",
+              "stros_mkai.L7.sailors_and_smugglers"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "catacombs",
+            "text": "catacombs under the town centre with entrance by the bell tower",
+            "cites": [
+              "stros_mkai.L1.two_lobes",
+              "stros_mkai.L6.port_hunding",
+              "stros_mkai.L9.treaty_ground"
+            ]
+          },
+          {
+            "id": "waterfall_hideout",
+            "text": "smugglers' grotto behind the falls",
+            "cites": [
+              "stros_mkai.L1.waterfall_cliff",
+              "stros_mkai.L3.waterfall_stream",
+              "stros_mkai.L9.smuggling_ring",
+              "hammerfell.L10.smugglers_coves"
+            ]
+          },
+          {
+            "id": "ngastas_isle",
+            "text": "the necromancer's tower on the north-west islet",
+            "cites": [
+              "stros_mkai.L1.necromancer_islet",
+              "stros_mkai.L8.fear_of_the_islet",
+              "stros_mkai.L9.treaty_ground",
+              "hammerfell.L10.necromancers"
+            ]
+          },
+          {
+            "id": "bthzark",
+            "text": "Dwemer ruin on the western plateau",
+            "cites": [
+              "stros_mkai.L1.two_lobes",
+              "stros_mkai.L5.dwemer_salvage",
+              "hammerfell.L10.dwemer_halls"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "hunding_bay_battle",
+            "text": "the naval battle that broke the Crown fleet",
+            "cites": [
+              "stros_mkai.L1.harbour_bay",
+              "stros_mkai.L6.port_hunding",
+              "stros_mkai.L8.hunding_memory",
+              "hammerfell.L11.first_treaty"
+            ]
+          },
+          {
+            "id": "first_treaty",
+            "text": "the Second Era compact with Tiber Septim",
+            "cites": [
+              "stros_mkai.L6.palace_plateau",
+              "stros_mkai.L9.treaty_ground",
+              "hammerfell.L11.first_treaty"
+            ]
+          },
+          {
+            "id": "second_treaty",
+            "text": "the Fourth Era peace after driving out the Dominion",
+            "cites": [
+              "stros_mkai.L6.palace_plateau",
+              "stros_mkai.L8.treaty_pride",
+              "stros_mkai.L9.treaty_ground",
+              "hammerfell.L11.great_war"
+            ]
+          },
+          {
+            "id": "garrison_rising",
+            "text": "Cyrus's uprising against the Imperial garrison in the late Second Era",
+            "cites": [
+              "stros_mkai.L6.port_hunding",
+              "stros_mkai.L9.treaty_ground",
+              "stros_mkai.L10.catacombs"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "stros_mkai.L5.harbour_trade",
+            "stros_mkai.L4.island_palm_coast"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "stros_mkai.L5.harbour_trade",
+            "stros_mkai.L6.port_hunding"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "stros_mkai.L5.harbour_trade",
+            "stros_mkai.L6.port_hunding"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L8.hunding_memory"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "stros_mkai.L6.palace_plateau"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L6.port_hunding"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L8.hunding_memory"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L9.treaty_ground"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "stros_mkai.L10.waterfall_hideout"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "stros_mkai.L6.port_hunding",
+            "stros_mkai.L6.palace_plateau"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "stros_mkai.L6.port_hunding",
+            "stros_mkai.L6.palace_plateau"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "stros_mkai.L6.port_hunding",
+            "stros_mkai.L6.palace_plateau"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L7.harbour_lord_and_merchants"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "stros_mkai.L9.treaty_ground"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "stros_mkai.L11.hunding_bay_battle"
+        ],
+        "ruin": [
+          "stros_mkai.L10.bthzark"
+        ],
+        "dwemer": [
+          "stros_mkai.L10.bthzark"
+        ],
+        "falmer": [
+          "stros_mkai.L10.catacombs"
+        ],
+        "bandit": [
+          "stros_mkai.L10.waterfall_hideout"
+        ],
+        "fort": [
+          "stros_mkai.L9.treaty_ground"
+        ],
+        "military": [
+          "stros_mkai.L9.treaty_ground"
+        ],
+        "mage": [
+          "stros_mkai.L10.ngastas_isle"
+        ],
+        "vampire": [
+          "stros_mkai.L10.catacombs"
+        ],
+        "necromancer": [
+          "stros_mkai.L10.ngastas_isle"
+        ],
+        "hagraven": [
+          "stros_mkai.L10.catacombs"
+        ],
+        "forsworn": [
+          "stros_mkai.L10.catacombs"
+        ],
+        "beast": [
+          "stros_mkai.L4.island_palm_coast"
+        ],
+        "ice": [
+          "stros_mkai.L4.reef_shallows"
+        ],
+        "mine": [
+          "stros_mkai.L5.harbour_trade"
+        ],
+        "grove": [
+          "stros_mkai.L4.island_palm_coast"
+        ],
+        "smuggler": [
+          "stros_mkai.L10.waterfall_hideout",
+          "stros_mkai.L5.harbour_trade"
+        ],
+        "cave": [
+          "stros_mkai.L10.waterfall_hideout"
+        ],
+        "giant": [
+          "stros_mkai.L10.catacombs"
+        ],
+        "dragon": [
+          "stros_mkai.L10.catacombs"
+        ],
+        "tower": [
+          "stros_mkai.L10.catacombs",
+          "stros_mkai.L10.ngastas_isle"
+        ],
+        "cabin": [
+          "stros_mkai.L6.port_hunding"
+        ],
+        "wreck": [
+          "stros_mkai.L5.dwemer_salvage"
+        ]
+      }
+    },
+    "craglorn": {
+      "truth": "Craglorn is a high, dry tableland of red badlands, wind-carved spires and star-fall craters wedged between the Dragontail Mountains, Bangkorai and Skyrim's Falkreath pass. In the east, Elinhir climbs granite tiers as a city of mages, star-watchers and stone-cutters; in the north-west, Dragonstar rings its famous gladiator arena inside a border fort. Long before the Redguards landed, Nedic star-cults built observatories and vaulted bastions into the crags, and fallen sky-shards still fuse the sand into eerie glass. Today arena patrons fix fights in Dragonstar while serpents and Celestial cultists stir in the ancient pinnacles.",
+      "layers": {
+        "L1": [
+          {
+            "id": "craglorn_badlands",
+            "text": "eroded red badlands, hoodoo canyons and high tablelands",
+            "cites": [
+              "hammerfell.L1.craglorn_badlands"
+            ]
+          },
+          {
+            "id": "starfall_craters",
+            "text": "round impact craters lined with fused glass and sky-iron",
+            "cites": [
+              "craglorn.L1.craglorn_badlands"
+            ]
+          },
+          {
+            "id": "elinhir_granite_tiers",
+            "text": "stepped granite ridges toward the Falkreath pass",
+            "cites": [
+              "hammerfell.L1.dragontail_wall"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "high_dry_air",
+            "text": "thin, dry air and cloudless nights ideal for watching the stars",
+            "cites": [
+              "craglorn.L1.craglorn_badlands",
+              "hammerfell.L2.dry_interior"
+            ]
+          },
+          {
+            "id": "pass_chill",
+            "text": "cold mountain gusts sweeping down from the northern border",
+            "cites": [
+              "craglorn.L1.elinhir_granite_tiers",
+              "hammerfell.L2.mountain_cold"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "canyon_seeps",
+            "text": "seasonal canyon streams and deep rock cisterns",
+            "cites": [
+              "craglorn.L1.craglorn_badlands",
+              "craglorn.L2.high_dry_air",
+              "hammerfell.L3.wadis"
+            ]
+          },
+          {
+            "id": "crater_basins",
+            "text": "mineral-tainted pools in the old impact craters",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L2.high_dry_air",
+              "craglorn.L3.canyon_seeps"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "badland_scrub",
+            "text": "juniper, thornbush and red-rock lichen",
+            "cites": [
+              "craglorn.L1.craglorn_badlands",
+              "craglorn.L2.high_dry_air"
+            ]
+          },
+          {
+            "id": "crater_beasts",
+            "text": "giant scorpions, dune rippers and crystal-warped creatures",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L3.crater_basins",
+              "hammerfell.L4.scorpions"
+            ]
+          },
+          {
+            "id": "ridge_vultures",
+            "text": "vultures and mountain lions on the crags",
+            "cites": [
+              "craglorn.L1.elinhir_granite_tiers"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "crater_glass_and_ore",
+            "text": "sky-glass, granite quarrying and highland iron mines",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L1.elinhir_granite_tiers",
+              "hammerfell.L5.dragontail_ore"
+            ]
+          },
+          {
+            "id": "arena_wagering",
+            "text": "gladiator bouts, beast-trapping and border caravan trade at Dragonstar",
+            "cites": [
+              "craglorn.L3.canyon_seeps"
+            ]
+          },
+          {
+            "id": "pass_trade",
+            "text": "the highway between Elinhir, Mournoth and Falkreath",
+            "cites": [
+              "craglorn.L1.elinhir_granite_tiers"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "elinhir_city",
+            "text": "the tiered granite city of towers and star-schools (highland-tier-spire)",
+            "cites": [
+              "craglorn.L1.elinhir_granite_tiers",
+              "craglorn.L5.crater_glass_and_ore"
+            ]
+          },
+          {
+            "id": "dragonstar_city",
+            "text": "the arena-ringed border city (arena-ringed-fort)",
+            "cites": [
+              "craglorn.L3.canyon_seeps",
+              "craglorn.L5.arena_wagering"
+            ]
+          },
+          {
+            "id": "scavenger_camps",
+            "text": "prospector and star-watcher camps around the craters",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L5.crater_glass_and_ore"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "mage_patrons",
+            "text": "Elinhir's scholar-nobles and astrologers",
+            "cites": [
+              "craglorn.L5.crater_glass_and_ore",
+              "craglorn.L6.elinhir_city"
+            ]
+          },
+          {
+            "id": "arena_promoters_and_fighters",
+            "text": "fight-fixers, trainers and debt-bound gladiators in Dragonstar",
+            "cites": [
+              "craglorn.L5.arena_wagering",
+              "craglorn.L6.dragonstar_city",
+              "hammerfell.L7.sword_rank"
+            ]
+          },
+          {
+            "id": "border_caravaneers",
+            "text": "Nord, Breton and Redguard traders on the pass road",
+            "cites": [
+              "craglorn.L5.pass_trade",
+              "craglorn.L6.dragonstar_city"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "star_watching",
+            "text": "ancient astronomical traditions reading the constellations (Warrior, Mage, Thief and Serpent)",
+            "cites": [
+              "craglorn.L2.high_dry_air",
+              "craglorn.L6.elinhir_city",
+              "craglorn.L7.mage_patrons"
+            ]
+          },
+          {
+            "id": "arena_glory",
+            "text": "blood-sport honour in the Dragonstar ring",
+            "cites": [
+              "craglorn.L6.dragonstar_city",
+              "craglorn.L7.arena_promoters_and_fighters",
+              "hammerfell.L8.sword_path"
+            ]
+          },
+          {
+            "id": "celestial_reverence",
+            "text": "awe and dread of the Nedic Celestial guardians",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L7.mage_patrons"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "fixed_bouts",
+            "text": "corrupt patrons rig the Dragonstar seven-fight circuit",
+            "cites": [
+              "craglorn.L5.arena_wagering",
+              "craglorn.L7.arena_promoters_and_fighters",
+              "craglorn.L8.arena_glory"
+            ]
+          },
+          {
+            "id": "serpent_cult_rising",
+            "text": "Scaled Court fanatics awaken the old Nedic star-shrines",
+            "cites": [
+              "craglorn.L8.celestial_reverence",
+              "hammerfell.L9.kings_and_lords"
+            ]
+          },
+          {
+            "id": "border_friction",
+            "text": "northern border tensions with Skyrim and Cyrodiil",
+            "cites": [
+              "craglorn.L5.pass_trade",
+              "craglorn.L6.dragonstar_city"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "sanctum_ophidia",
+            "text": "the Serpent cult's subterranean bastion and temple",
+            "cites": [
+              "craglorn.L1.craglorn_badlands",
+              "craglorn.L8.celestial_reverence",
+              "craglorn.L9.serpent_cult_rising"
+            ]
+          },
+          {
+            "id": "skyreach_pinnacle",
+            "text": "a high Nedic observatory city spanning the peaks",
+            "cites": [
+              "craglorn.L1.elinhir_granite_tiers",
+              "craglorn.L8.star_watching",
+              "craglorn.L9.serpent_cult_rising"
+            ]
+          },
+          {
+            "id": "aetherian_archive",
+            "text": "a sealed trial-vault of star magic",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L7.mage_patrons",
+              "craglorn.L9.serpent_cult_rising"
+            ]
+          },
+          {
+            "id": "valley_of_scars",
+            "text": "Nedic catacombs and scorpion-haunted fissures",
+            "cites": [
+              "craglorn.L1.craglorn_badlands",
+              "craglorn.L4.crater_beasts",
+              "craglorn.L9.serpent_cult_rising"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "nedic_star_empire",
+            "text": "the Nedic star-cities built before the Ra Gada invasion",
+            "cites": [
+              "craglorn.L1.elinhir_granite_tiers",
+              "craglorn.L8.celestial_reverence",
+              "craglorn.L10.skyreach_pinnacle",
+              "hammerfell.L11.before_the_redguards"
+            ]
+          },
+          {
+            "id": "fall_of_the_shards",
+            "text": "the ancient sky-falls that scarred the badlands (lore-web ham_2)",
+            "cites": [
+              "craglorn.L1.starfall_craters",
+              "craglorn.L10.aetherian_archive",
+              "craglorn.L10.valley_of_scars"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore",
+            "craglorn.L1.starfall_craters"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "craglorn.L3.canyon_seeps"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "craglorn.L5.arena_wagering",
+            "craglorn.L5.pass_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 4,
+          "why": [
+            "craglorn.L5.arena_wagering",
+            "craglorn.L5.pass_trade",
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "craglorn.L5.arena_wagering",
+            "craglorn.L5.pass_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "server": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "bard": {
+          "weight": 2,
+          "why": [
+            "craglorn.L8.arena_glory"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "craglorn.L8.star_watching"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "craglorn.L9.serpent_cult_rising"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "craglorn.L6.elinhir_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "craglorn.L9.serpent_cult_rising"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "craglorn.L7.mage_patrons",
+            "craglorn.L8.star_watching"
+          ]
+        },
+        "mage": {
+          "weight": 3,
+          "why": [
+            "craglorn.L8.star_watching",
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "craglorn.L9.border_friction",
+            "craglorn.L6.dragonstar_city",
+            "craglorn.L6.scavenger_camps"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "craglorn.L10.sanctum_ophidia"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "craglorn.L6.elinhir_city"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "craglorn.L7.mage_patrons"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "craglorn.L5.crater_glass_and_ore"
+          ]
+        },
+        "survivor": {
+          "weight": 3,
+          "why": [
+            "craglorn.L9.fixed_bouts",
+            "craglorn.L6.dragonstar_city"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "ruin": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "dwemer": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "falmer": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "bandit": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "fort": [
+          "craglorn.L9.border_friction",
+          "craglorn.L6.dragonstar_city"
+        ],
+        "military": [
+          "craglorn.L9.border_friction"
+        ],
+        "mage": [
+          "craglorn.L10.aetherian_archive",
+          "craglorn.L8.star_watching",
+          "craglorn.L7.mage_patrons"
+        ],
+        "vampire": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "necromancer": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "hagraven": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "forsworn": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "beast": [
+          "craglorn.L4.badland_scrub"
+        ],
+        "ice": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "mine": [
+          "craglorn.L5.crater_glass_and_ore",
+          "craglorn.L1.starfall_craters"
+        ],
+        "grove": [
+          "craglorn.L4.badland_scrub"
+        ],
+        "smuggler": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "cave": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "giant": [
+          "craglorn.L4.crater_beasts"
+        ],
+        "dragon": [
+          "craglorn.L9.fixed_bouts"
+        ],
+        "tower": [
+          "craglorn.L10.sanctum_ophidia"
+        ],
+        "cabin": [
+          "craglorn.L6.scavenger_camps"
+        ],
+        "wreck": [
+          "craglorn.L5.crater_glass_and_ore"
+        ]
+      }
+    },
+    "hews_bane": {
+      "truth": "Hew's Bane is a sun-baked peninsula of limestone headlands, sea arches and sheltered coves on the southern Abecean coast. Taneth rises in cliff-palace terraces above a wealthy harbour, while Abah's Landing crowds a stilt-pier cove where merchant syndicates and the Thieves Guild share the docks. During the Great War, Taneth fell to the Aldmeri Dominion after traitors opened its gates; twenty years later, the city is rebuilding through sea trade, but Alik'r hunters still track the remaining collaborators from Hammerfell to Skyrim. Ancient Yokudan necropolises and flooded slave-coves line the cliffs beyond the terraced pool gardens.",
+      "layers": {
+        "L1": [
+          {
+            "id": "abecean_headlands",
+            "text": "steep limestone headlands, sea arches and hidden coves on the southern sea",
+            "cites": [
+              "hammerfell.L1.abecean_coast"
+            ]
+          },
+          {
+            "id": "taneth_cliff_shelf",
+            "text": "stepped coastal cliffs overlooking the eastern anchorage",
+            "cites": [
+              "hews_bane.L1.abecean_headlands"
+            ]
+          },
+          {
+            "id": "abahs_cove",
+            "text": "a sinkhole-rimmed harbour basin on the peninsula tip",
+            "cites": [
+              "hews_bane.L1.abecean_headlands"
+            ]
+          }
+        ],
+        "L2": [
+          {
+            "id": "warm_abecean_breeze",
+            "text": "hot, bright summers and mild winter showers",
+            "cites": [
+              "hews_bane.L1.abecean_headlands",
+              "hammerfell.L2.winter_rains"
+            ]
+          },
+          {
+            "id": "southern_squalls",
+            "text": "sudden late-summer gales driving ships into the coves",
+            "cites": [
+              "hews_bane.L1.abecean_headlands",
+              "hammerfell.L2.abecean_storms"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "cliff_cisterns",
+            "text": "stepped aqueducts and pool-garden reservoirs catching winter rain",
+            "cites": [
+              "hews_bane.L1.taneth_cliff_shelf",
+              "hews_bane.L2.warm_abecean_breeze",
+              "hammerfell.L3.water_is_power"
+            ]
+          },
+          {
+            "id": "tidal_caverns",
+            "text": "sea-level grottoes and flooded limestone channels under the docks",
+            "cites": [
+              "hews_bane.L1.abahs_cove",
+              "hews_bane.L2.southern_squalls"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "palm_and_cypress_terraces",
+            "text": "date palms, cypresses and scented pool gardens on the shelves",
+            "cites": [
+              "hews_bane.L2.warm_abecean_breeze",
+              "hews_bane.L3.cliff_cisterns"
+            ]
+          },
+          {
+            "id": "sea_cliff_harpies",
+            "text": "harpies and sea birds nesting on the outer arches",
+            "cites": [
+              "hews_bane.L1.abecean_headlands",
+              "hammerfell.L4.coast_harpies"
+            ]
+          },
+          {
+            "id": "cove_reefs",
+            "text": "reef shallows and giant crabs along the peninsula",
+            "cites": [
+              "hews_bane.L1.abahs_cove",
+              "hews_bane.L3.tidal_caverns"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "abecean_shipping",
+            "text": "sea trade in pearls, spices, wine and textiles along the Arena coast road",
+            "cites": [
+              "hews_bane.L1.taneth_cliff_shelf",
+              "hews_bane.L1.abahs_cove",
+              "hammerfell.L5.dyes_and_spice"
+            ]
+          },
+          {
+            "id": "smuggled_cargo",
+            "text": "untaxed goods moving through Abah's Landing",
+            "cites": [
+              "hews_bane.L3.tidal_caverns",
+              "hews_bane.L5.abecean_shipping"
+            ]
+          },
+          {
+            "id": "terrace_perfume",
+            "text": "pressed oils, glasswork and dye vats",
+            "cites": [
+              "hews_bane.L4.palm_and_cypress_terraces"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "taneth_city",
+            "text": "the terraced cliff-palace city rebuilding after the war (cliff-palace-terraces)",
+            "cites": [
+              "hews_bane.L1.taneth_cliff_shelf",
+              "hews_bane.L3.cliff_cisterns",
+              "hews_bane.L5.abecean_shipping"
+            ]
+          },
+          {
+            "id": "abahs_landing",
+            "text": "the stilt-pier merchant port on the peninsula (stilt-pier-harbour)",
+            "cites": [
+              "hews_bane.L1.abahs_cove",
+              "hews_bane.L5.smuggled_cargo"
+            ]
+          },
+          {
+            "id": "necropolis_cliffs",
+            "text": "tiered tomb gates cut into the inland bluffs",
+            "cites": [
+              "hews_bane.L1.abecean_headlands",
+              "hews_bane.L3.cliff_cisterns"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "forebear_merchant_syndicates",
+            "text": "rich Forebear shipping houses and counting-house lords",
+            "cites": [
+              "hews_bane.L5.abecean_shipping",
+              "hews_bane.L6.taneth_city",
+              "hews_bane.L6.abahs_landing",
+              "hammerfell.L7.crowns_and_forebears"
+            ]
+          },
+          {
+            "id": "dock_thieves_and_cutpurses",
+            "text": "the Thieves Guild and harbour gangs who rule the stilt walkways",
+            "cites": [
+              "hews_bane.L5.smuggled_cargo",
+              "hews_bane.L6.abahs_landing"
+            ]
+          },
+          {
+            "id": "hunted_traitors",
+            "text": "families accused of opening Taneth's gates to the Dominion",
+            "cites": [
+              "hews_bane.L6.taneth_city",
+              "hammerfell.L7.outcasts"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "forebear_temples",
+            "text": "coastal temples of the Eight alongside Tu'whacca's tomb-keepers",
+            "cites": [
+              "hews_bane.L6.taneth_city",
+              "hews_bane.L7.forebear_merchant_syndicates",
+              "hammerfell.L8.eight_with_yokudan_faces"
+            ]
+          },
+          {
+            "id": "no_forgiveness_oath",
+            "text": "public memorials and bitter verses remembering the occupation",
+            "cites": [
+              "hews_bane.L7.hunted_traitors",
+              "hammerfell.L8.hate_thalmor"
+            ]
+          },
+          {
+            "id": "nocturnal_coin_custom",
+            "text": "dockside superstitions and thieves' marks at the Landing",
+            "cites": [
+              "hews_bane.L6.abahs_landing",
+              "hews_bane.L7.dock_thieves_and_cutpurses"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "collaborator_hunt",
+            "text": "Alik'r swordsmen and Taneth's court hunt those who betrayed the city in the Great War",
+            "cites": [
+              "hews_bane.L7.hunted_traitors",
+              "hews_bane.L8.no_forgiveness_oath",
+              "hammerfell.L9.collaborators"
+            ]
+          },
+          {
+            "id": "syndicate_vs_thieves",
+            "text": "merchant-house guards and the Thieves Guild contest Abah's Landing",
+            "cites": [
+              "hews_bane.L5.smuggled_cargo",
+              "hews_bane.L7.forebear_merchant_syndicates",
+              "hews_bane.L7.dock_thieves_and_cutpurses"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "ahaleb_necropolis",
+            "text": "a vast cliffside Yokudan necropolis disturbed by tomb-robbers",
+            "cites": [
+              "hews_bane.L1.abecean_headlands",
+              "hews_bane.L6.necropolis_cliffs",
+              "hews_bane.L9.collaborator_hunt",
+              "hammerfell.L10.necropolises"
+            ]
+          },
+          {
+            "id": "thrall_cove",
+            "text": "a fortified slaver and smuggler grotto",
+            "cites": [
+              "hews_bane.L1.abahs_cove",
+              "hews_bane.L3.tidal_caverns",
+              "hews_bane.L9.syndicate_vs_thieves",
+              "hammerfell.L10.smugglers_coves"
+            ]
+          },
+          {
+            "id": "hubalajad_palace",
+            "text": "a grand prince's tomb-palace riddled with traps",
+            "cites": [
+              "hews_bane.L1.taneth_cliff_shelf",
+              "hews_bane.L8.forebear_temples",
+              "hews_bane.L9.collaborator_hunt"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "betrayal_of_taneth",
+            "text": "the Great War siege when traitors opened Taneth's gate to the Dominion",
+            "cites": [
+              "hews_bane.L6.taneth_city",
+              "hews_bane.L8.no_forgiveness_oath",
+              "hews_bane.L9.collaborator_hunt",
+              "hammerfell.L11.great_war"
+            ]
+          },
+          {
+            "id": "prince_hubalajad_folly",
+            "text": "the extravagant Yokudan prince who built a palace for the dead (lore-web ham_3)",
+            "cites": [
+              "hews_bane.L6.necropolis_cliffs",
+              "hews_bane.L10.hubalajad_palace",
+              "hammerfell.L11.two_waves"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "hews_bane.L5.abecean_shipping",
+            "hews_bane.L3.tidal_caverns",
+            "hews_bane.L4.sea_cliff_harpies"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L5.abecean_shipping",
+            "hews_bane.L6.abahs_landing"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L5.abecean_shipping",
+            "hews_bane.L8.forebear_temples"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L5.abecean_shipping",
+            "hews_bane.L6.abahs_landing"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L8.forebear_temples"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L6.taneth_city",
+            "hews_bane.L9.collaborator_hunt"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L6.taneth_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L9.collaborator_hunt"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L7.forebear_merchant_syndicates"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L8.forebear_temples"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L9.collaborator_hunt"
+          ]
+        },
+        "fence": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L10.thrall_cove",
+            "hews_bane.L5.smuggled_cargo"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L7.forebear_merchant_syndicates"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L7.forebear_merchant_syndicates"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L6.taneth_city"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L7.forebear_merchant_syndicates"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L7.forebear_merchant_syndicates"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L7.forebear_merchant_syndicates"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L5.terrace_perfume",
+            "hews_bane.L7.dock_thieves_and_cutpurses"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "hews_bane.L5.terrace_perfume",
+            "hews_bane.L7.dock_thieves_and_cutpurses"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L7.dock_thieves_and_cutpurses"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L7.dock_thieves_and_cutpurses"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "hews_bane.L7.dock_thieves_and_cutpurses"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "hews_bane.L9.collaborator_hunt"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "hews_bane.L10.ahaleb_necropolis",
+          "hews_bane.L10.hubalajad_palace",
+          "hews_bane.L8.forebear_temples"
+        ],
+        "ruin": [
+          "hews_bane.L10.ahaleb_necropolis",
+          "hews_bane.L10.hubalajad_palace",
+          "hews_bane.L8.forebear_temples"
+        ],
+        "dwemer": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "falmer": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "bandit": [
+          "hews_bane.L10.thrall_cove",
+          "hews_bane.L5.abecean_shipping",
+          "hews_bane.L5.smuggled_cargo"
+        ],
+        "fort": [
+          "hews_bane.L10.thrall_cove"
+        ],
+        "military": [
+          "hews_bane.L9.collaborator_hunt"
+        ],
+        "mage": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "vampire": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "necromancer": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "hagraven": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "forsworn": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "beast": [
+          "hews_bane.L4.palm_and_cypress_terraces"
+        ],
+        "ice": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "mine": [
+          "hews_bane.L5.abecean_shipping"
+        ],
+        "grove": [
+          "hews_bane.L4.palm_and_cypress_terraces"
+        ],
+        "smuggler": [
+          "hews_bane.L10.thrall_cove",
+          "hews_bane.L5.smuggled_cargo"
+        ],
+        "cave": [
+          "hews_bane.L10.thrall_cove"
+        ],
+        "giant": [
+          "hews_bane.L4.cove_reefs"
+        ],
+        "dragon": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "tower": [
+          "hews_bane.L10.ahaleb_necropolis"
+        ],
+        "cabin": [
+          "hews_bane.L6.taneth_city"
+        ],
+        "wreck": [
+          "hews_bane.L5.abecean_shipping"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "unirrigated_grain",
+      "b": "alikr_desert.L4.erg_dunes",
+      "reason": "The mobile sand sea of the Alik'r erg cannot grow crops without an oasis well or qanat"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "timber_sawmill",
+      "b": "sentinel.L4.salt_flat",
+      "reason": "Closed-basin salt flats in Bergama have no timber canopy; logging belongs to Bangkorai's river jungles"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "open_necromancer_altar",
+      "b": "hammerfell.L8.hate_necromancy",
+      "reason": "Redguard cities honour the consecrated dead under Tu'whacca and Arkay and outlaw open necromancy"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "falmer_warband",
+      "b": "alikr_desert.L10.volenfell",
+      "reason": "Hammerfell's Dwemer halls like Volenfell are sand-choked automaton ruins without Skyrim's Falmer"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L5.dragontail_ore",
+        "hammerfell.L5.oasis_dates",
+        "hammerfell.L1.dragontail_wall"
+      ]
+    },
+    "smith": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L5.dragontail_ore",
+        "hammerfell.L5.blades",
+        "hammerfell.L5.oasis_dates"
+      ]
+    },
+    "jeweler": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "farmer": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "farmhand": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "lumberjack": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "mill_hand": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "woodcutter": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "fisher": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish",
+        "hammerfell.L4.sand_serpents",
+        "hammerfell.L4.coast_harpies"
+      ]
+    },
+    "hunter": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.oasis_dates"
+      ]
+    },
+    "butcher": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "fletcher": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "alchemist": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L5.caravans_and_salt",
+        "hammerfell.L5.oasis_dates",
+        "hammerfell.L6.harbour_and_oasis_cities"
+      ]
+    },
+    "tailor": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "bookseller": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L8.eight_with_yokudan_faces"
+      ]
+    },
+    "innkeeper": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities"
+      ]
+    },
+    "cook": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L5.timber_and_river_fish"
+      ]
+    },
+    "server": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities"
+      ]
+    },
+    "bard": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "priest": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L8.eight_with_yokudan_faces",
+        "hammerfell.L8.hate_necromancy",
+        "hammerfell.L8.necropolis_dead"
+      ]
+    },
+    "jarl": {
+      "weight": 3,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities",
+        "hammerfell.L6.busy_centres"
+      ]
+    },
+    "steward": {
+      "weight": 3,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities",
+        "hammerfell.L6.busy_centres"
+      ]
+    },
+    "housecarl": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L7.crowns_and_forebears",
+        "hammerfell.L7.sword_rank",
+        "hammerfell.L9.ra_gada_bands"
+      ]
+    },
+    "court_wizard": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L8.yokudan_gods"
+      ]
+    },
+    "guard": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities"
+      ]
+    },
+    "fence": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L10.smugglers_coves"
+      ]
+    },
+    "prisoner": {
+      "weight": 2,
+      "why": [
+        "hammerfell.L7.debt_miners"
+      ]
+    },
+    "beggar": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L7.sword_rank",
+        "hammerfell.L7.stained_hands",
+        "hammerfell.L6.failing_edges"
+      ]
+    },
+    "citizen": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities",
+        "hammerfell.L6.jungle_river_ports",
+        "hammerfell.L6.mining_terraces"
+      ]
+    },
+    "housekeeper": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities",
+        "hammerfell.L6.jungle_river_ports",
+        "hammerfell.L6.mining_terraces"
+      ]
+    },
+    "child": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities",
+        "hammerfell.L6.jungle_river_ports",
+        "hammerfell.L6.mining_terraces"
+      ]
+    },
+    "elder": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L7.crowns_and_forebears",
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L8.distrust_empire"
+      ]
+    },
+    "labourer": {
+      "weight": 4,
+      "why": [
+        "hammerfell.L7.sword_rank",
+        "hammerfell.L7.stained_hands",
+        "hammerfell.L7.debt_miners"
+      ]
+    },
+    "worker": {
+      "weight": 3,
+      "why": [
+        "hammerfell.L7.stained_hands",
+        "hammerfell.L7.debt_miners"
+      ]
+    },
+    "guild_leader": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L7.crowns_and_forebears"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L7.crowns_and_forebears"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L5.caravans_and_salt"
+      ]
+    },
+    "survivor": {
+      "weight": 1,
+      "why": [
+        "hammerfell.L9.crown_forebear_rift"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "hammerfell.L8.yokudan_gods",
+      "hammerfell.L8.necropolis_dead",
+      "hammerfell.L11.first_treaty"
+    ],
+    "ruin": [
+      "hammerfell.L8.necropolis_dead"
+    ],
+    "dwemer": [
+      "hammerfell.L10.dwemer_halls",
+      "hammerfell.L11.before_the_redguards"
+    ],
+    "falmer": [
+      "hammerfell.L10.covens"
+    ],
+    "bandit": [
+      "hammerfell.L10.smugglers_coves",
+      "hammerfell.L5.oasis_dates"
+    ],
+    "fort": [
+      "hammerfell.L6.caravanserais_at_wells"
+    ],
+    "military": [
+      "hammerfell.L9.crown_forebear_rift"
+    ],
+    "mage": [
+      "hammerfell.L10.necromancers",
+      "hammerfell.L7.outcasts"
+    ],
+    "vampire": [
+      "hammerfell.L10.bloodlines"
+    ],
+    "necromancer": [
+      "hammerfell.L10.necromancers",
+      "hammerfell.L8.eight_with_yokudan_faces",
+      "hammerfell.L8.hate_necromancy"
+    ],
+    "hagraven": [
+      "hammerfell.L10.covens"
+    ],
+    "forsworn": [
+      "hammerfell.L10.covens"
+    ],
+    "beast": [
+      "hammerfell.L4.returning_dragons",
+      "hammerfell.L4.vent_daedra",
+      "hammerfell.L10.lava_tubes"
+    ],
+    "ice": [
+      "hammerfell.L10.covens"
+    ],
+    "mine": [
+      "hammerfell.L5.dragontail_ore",
+      "hammerfell.L5.oasis_dates",
+      "hammerfell.L1.dragontail_wall"
+    ],
+    "grove": [
+      "hammerfell.L4.mosaic"
+    ],
+    "smuggler": [
+      "hammerfell.L10.covens",
+      "hammerfell.L10.smugglers_coves"
+    ],
+    "cave": [
+      "hammerfell.L10.lava_tubes",
+      "hammerfell.L10.smugglers_coves",
+      "hammerfell.L1.dragontail_wall"
+    ],
+    "giant": [
+      "hammerfell.L4.scorpions",
+      "hammerfell.L4.jungle_giants"
+    ],
+    "dragon": [
+      "hammerfell.L4.returning_dragons"
+    ],
+    "tower": [
+      "hammerfell.L10.covens"
+    ],
+    "cabin": [
+      "hammerfell.L6.harbour_and_oasis_cities"
+    ],
+    "wreck": [
+      "hammerfell.L5.caravans_and_salt"
+    ]
+  }
+}

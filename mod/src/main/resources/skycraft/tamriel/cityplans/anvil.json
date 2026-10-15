@@ -1,0 +1,318 @@
+{
+  "id": "anvil",
+  "why": [
+    "gold_coast.L1.low_sea_cliffs",
+    "gold_coast.L5.anvil_shipping",
+    "gold_coast.L6.anvil_harbour"
+  ],
+  "sil": "harbour-crescent",
+  "base": "none",
+  "overlay": "anvil",
+  "radius": 98,
+  "reach": 114,
+  "innKey": "anvil_counts_arms",
+  "names": {
+    "inn": "anvil_counts_arms",
+    "store": "anvil_lelles_merchandise",
+    "smithy": "anvil_morvayns_peacemakers"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      84
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        -36,
+        48
+      ],
+      "face": "south",
+      "name": "anvil_castle_anvil",
+      "overlay": "anvil"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        20,
+        -22
+      ],
+      "face": "south",
+      "name": "anvil_chapel_spire",
+      "overlay": "anvil"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        98
+      ],
+      "overlay": "anvil"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_chapel_of_dibella"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        21
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        52
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_counts_arms"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_flowing_bowl"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -16,
+        56
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_focsle_boarding_house"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_morvayns_peacemakers"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -49,
+        31
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_lelles_merchandise"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_benirus_manor"
+    },
+    {
+      "kind": "tower",
+      "use": "watchtower",
+      "wealth": "common",
+      "at": [
+        -57,
+        -11
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_lighthouse"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_harbour_customs"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -35,
+        -46
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_quill_weave_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_oaken_hull_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        5,
+        -58
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_strangers_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_gogan_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        43,
+        -39
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_newheims_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "anvil",
+      "name": "anvil_ulfgar_house"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "anvil_mermaid",
+      "count": 2
+    },
+    {
+      "type": "statue",
+      "theme": "divine:dibella",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "harbour_lanterns",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "gold_coast_sails",
+      "count": 2
+    },
+    {
+      "type": "pool",
+      "theme": "harbour_basin",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "anvil_castle_anvil": "Castle Anvil",
+    "anvil_chapel_spire": "Great Chapel of Dibella Spire",
+    "anvil_chapel_of_dibella": "Great Chapel of Dibella",
+    "anvil_fighters_guild": "Anvil Fighters Guild",
+    "anvil_mages_guild": "Anvil Mages Guild",
+    "anvil_counts_arms": "The Count's Arms",
+    "anvil_flowing_bowl": "The Flowing Bowl",
+    "anvil_focsle_boarding_house": "The Fo'c's'le",
+    "anvil_morvayns_peacemakers": "Morvayn's Peacemakers",
+    "anvil_lelles_merchandise": "Lelles' Quality Merchandise",
+    "anvil_benirus_manor": "Benirus Manor",
+    "anvil_lighthouse": "Anvil Lighthouse",
+    "anvil_harbour_customs": "Harbourmaster's Customs House",
+    "anvil_quill_weave_house": "Quill-Weave's Townhouse",
+    "anvil_oaken_hull_house": "Heinrich Oaken-Hull's House",
+    "anvil_strangers_house": "The Stranger's Abandoned House",
+    "anvil_gogan_house": "Gogan and Maelona's House",
+    "anvil_newheims_house": "Newheim the Portly's House",
+    "anvil_ulfgar_house": "Ulfgar Fog-Eye's Watch Quarters"
+  }
+}

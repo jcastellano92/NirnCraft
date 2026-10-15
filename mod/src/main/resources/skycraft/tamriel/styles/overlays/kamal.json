@@ -1,0 +1,841 @@
+{
+  "id": "kamal",
+  "why": [
+    "kamal.L1.volcanic_ice_peaks",
+    "kamal.L5.glacial_iron_and_trophies",
+    "kamal.L6.kamal_pass_watch"
+  ],
+  "tint": {
+    "wall": "minecraft:red_terracotta",
+    "wall2": "minecraft:dark_oak_planks",
+    "low": "minecraft:polished_blackstone_bricks",
+    "wood": "dark_oak",
+    "roof": "deepslate_tile",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "polished_blackstone_bricks",
+    "cityWall2": "minecraft:dark_oak_planks",
+    "plaza": "minecraft:red_terracotta",
+    "plaza2": "minecraft:polished_blackstone_bricks",
+    "path": "minecraft:polished_blackstone"
+  },
+  "style": {
+    "houseStyle": "akaviri",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:red_terracotta",
+        "minecraft:dark_oak_planks",
+        "minecraft:polished_blackstone_bricks",
+        "minecraft:polished_blackstone",
+        "polished_blackstone_bricks",
+        "minecraft:red_terracotta"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_1_0",
+          "prop_kamal_1_1",
+          "prop_kamal_1_2",
+          "prop_kamal_1_3",
+          "prop_kamal_1_4",
+          "prop_kamal_1_5",
+          "prop_kamal_1_6",
+          "prop_kamal_1_7",
+          "prop_kamal_1_8",
+          "prop_kamal_1_9",
+          "prop_kamal_1_10",
+          "prop_kamal_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_2_0",
+          "prop_kamal_2_1",
+          "prop_kamal_2_2",
+          "prop_kamal_2_3",
+          "prop_kamal_2_4",
+          "prop_kamal_2_5",
+          "prop_kamal_2_6",
+          "prop_kamal_2_7",
+          "prop_kamal_2_8",
+          "prop_kamal_2_9",
+          "prop_kamal_2_10",
+          "prop_kamal_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_3_0",
+          "prop_kamal_3_1",
+          "prop_kamal_3_2",
+          "prop_kamal_3_3",
+          "prop_kamal_3_4",
+          "prop_kamal_3_5",
+          "prop_kamal_3_6",
+          "prop_kamal_3_7",
+          "prop_kamal_3_8",
+          "prop_kamal_3_9",
+          "prop_kamal_3_10",
+          "prop_kamal_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_4_0",
+          "prop_kamal_4_1",
+          "prop_kamal_4_2",
+          "prop_kamal_4_3",
+          "prop_kamal_4_4",
+          "prop_kamal_4_5",
+          "prop_kamal_4_6",
+          "prop_kamal_4_7",
+          "prop_kamal_4_8",
+          "prop_kamal_4_9",
+          "prop_kamal_4_10",
+          "prop_kamal_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_5_0",
+          "prop_kamal_5_1",
+          "prop_kamal_5_2",
+          "prop_kamal_5_3",
+          "prop_kamal_5_4",
+          "prop_kamal_5_5",
+          "prop_kamal_5_6",
+          "prop_kamal_5_7",
+          "prop_kamal_5_8",
+          "prop_kamal_5_9",
+          "prop_kamal_5_10",
+          "prop_kamal_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_6_0",
+          "prop_kamal_6_1",
+          "prop_kamal_6_2",
+          "prop_kamal_6_3",
+          "prop_kamal_6_4",
+          "prop_kamal_6_5",
+          "prop_kamal_6_6",
+          "prop_kamal_6_7",
+          "prop_kamal_6_8",
+          "prop_kamal_6_9",
+          "prop_kamal_6_10",
+          "prop_kamal_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_7_0",
+          "prop_kamal_7_1",
+          "prop_kamal_7_2",
+          "prop_kamal_7_3",
+          "prop_kamal_7_4",
+          "prop_kamal_7_5",
+          "prop_kamal_7_6",
+          "prop_kamal_7_7",
+          "prop_kamal_7_8",
+          "prop_kamal_7_9",
+          "prop_kamal_7_10",
+          "prop_kamal_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_8_0",
+          "prop_kamal_8_1",
+          "prop_kamal_8_2",
+          "prop_kamal_8_3",
+          "prop_kamal_8_4",
+          "prop_kamal_8_5",
+          "prop_kamal_8_6",
+          "prop_kamal_8_7",
+          "prop_kamal_8_8",
+          "prop_kamal_8_9",
+          "prop_kamal_8_10",
+          "prop_kamal_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_9_0",
+          "prop_kamal_9_1",
+          "prop_kamal_9_2",
+          "prop_kamal_9_3",
+          "prop_kamal_9_4",
+          "prop_kamal_9_5",
+          "prop_kamal_9_6",
+          "prop_kamal_9_7",
+          "prop_kamal_9_8",
+          "prop_kamal_9_9",
+          "prop_kamal_9_10",
+          "prop_kamal_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_10_0",
+          "prop_kamal_10_1",
+          "prop_kamal_10_2",
+          "prop_kamal_10_3",
+          "prop_kamal_10_4",
+          "prop_kamal_10_5",
+          "prop_kamal_10_6",
+          "prop_kamal_10_7",
+          "prop_kamal_10_8",
+          "prop_kamal_10_9",
+          "prop_kamal_10_10",
+          "prop_kamal_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_11_0",
+          "prop_kamal_11_1",
+          "prop_kamal_11_2",
+          "prop_kamal_11_3",
+          "prop_kamal_11_4",
+          "prop_kamal_11_5",
+          "prop_kamal_11_6",
+          "prop_kamal_11_7",
+          "prop_kamal_11_8",
+          "prop_kamal_11_9",
+          "prop_kamal_11_10",
+          "prop_kamal_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_12_0",
+          "prop_kamal_12_1",
+          "prop_kamal_12_2",
+          "prop_kamal_12_3",
+          "prop_kamal_12_4",
+          "prop_kamal_12_5",
+          "prop_kamal_12_6",
+          "prop_kamal_12_7",
+          "prop_kamal_12_8",
+          "prop_kamal_12_9",
+          "prop_kamal_12_10",
+          "prop_kamal_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_13_0",
+          "prop_kamal_13_1",
+          "prop_kamal_13_2",
+          "prop_kamal_13_3",
+          "prop_kamal_13_4",
+          "prop_kamal_13_5",
+          "prop_kamal_13_6",
+          "prop_kamal_13_7",
+          "prop_kamal_13_8",
+          "prop_kamal_13_9",
+          "prop_kamal_13_10",
+          "prop_kamal_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_14_0",
+          "prop_kamal_14_1",
+          "prop_kamal_14_2",
+          "prop_kamal_14_3",
+          "prop_kamal_14_4",
+          "prop_kamal_14_5",
+          "prop_kamal_14_6",
+          "prop_kamal_14_7",
+          "prop_kamal_14_8",
+          "prop_kamal_14_9",
+          "prop_kamal_14_10",
+          "prop_kamal_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_15_0",
+          "prop_kamal_15_1",
+          "prop_kamal_15_2",
+          "prop_kamal_15_3",
+          "prop_kamal_15_4",
+          "prop_kamal_15_5",
+          "prop_kamal_15_6",
+          "prop_kamal_15_7",
+          "prop_kamal_15_8",
+          "prop_kamal_15_9",
+          "prop_kamal_15_10",
+          "prop_kamal_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_16_0",
+          "prop_kamal_16_1",
+          "prop_kamal_16_2",
+          "prop_kamal_16_3",
+          "prop_kamal_16_4",
+          "prop_kamal_16_5",
+          "prop_kamal_16_6",
+          "prop_kamal_16_7",
+          "prop_kamal_16_8",
+          "prop_kamal_16_9",
+          "prop_kamal_16_10",
+          "prop_kamal_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_17_0",
+          "prop_kamal_17_1",
+          "prop_kamal_17_2",
+          "prop_kamal_17_3",
+          "prop_kamal_17_4",
+          "prop_kamal_17_5",
+          "prop_kamal_17_6",
+          "prop_kamal_17_7",
+          "prop_kamal_17_8",
+          "prop_kamal_17_9",
+          "prop_kamal_17_10",
+          "prop_kamal_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_18_0",
+          "prop_kamal_18_1",
+          "prop_kamal_18_2",
+          "prop_kamal_18_3",
+          "prop_kamal_18_4",
+          "prop_kamal_18_5",
+          "prop_kamal_18_6",
+          "prop_kamal_18_7",
+          "prop_kamal_18_8",
+          "prop_kamal_18_9",
+          "prop_kamal_18_10",
+          "prop_kamal_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_19_0",
+          "prop_kamal_19_1",
+          "prop_kamal_19_2",
+          "prop_kamal_19_3",
+          "prop_kamal_19_4",
+          "prop_kamal_19_5",
+          "prop_kamal_19_6",
+          "prop_kamal_19_7",
+          "prop_kamal_19_8",
+          "prop_kamal_19_9",
+          "prop_kamal_19_10",
+          "prop_kamal_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_20_0",
+          "prop_kamal_20_1",
+          "prop_kamal_20_2",
+          "prop_kamal_20_3",
+          "prop_kamal_20_4",
+          "prop_kamal_20_5",
+          "prop_kamal_20_6",
+          "prop_kamal_20_7",
+          "prop_kamal_20_8",
+          "prop_kamal_20_9",
+          "prop_kamal_20_10",
+          "prop_kamal_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:red_terracotta",
+        "wall_secondary": "minecraft:dark_oak_planks",
+        "plinth": "minecraft:polished_blackstone_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:red_terracotta",
+          "minecraft:dark_oak_planks",
+          "minecraft:polished_blackstone_bricks",
+          "polished_blackstone_bricks",
+          "minecraft:red_terracotta",
+          "minecraft:polished_blackstone"
+        ],
+        "props": [
+          "prop_kamal_21_0",
+          "prop_kamal_21_1",
+          "prop_kamal_21_2",
+          "prop_kamal_21_3",
+          "prop_kamal_21_4",
+          "prop_kamal_21_5",
+          "prop_kamal_21_6",
+          "prop_kamal_21_7",
+          "prop_kamal_21_8",
+          "prop_kamal_21_9",
+          "prop_kamal_21_10",
+          "prop_kamal_21_11"
+        ]
+      }
+    }
+  }
+}

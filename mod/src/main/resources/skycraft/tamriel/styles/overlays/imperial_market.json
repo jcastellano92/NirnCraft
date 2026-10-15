@@ -1,5 +1,10 @@
 {
   "id": "imperial_market",
+  "why": [
+    "heartlands.L1.island_bedrock",
+    "heartlands.L5.capital_economy",
+    "heartlands.L6.imperial_city"
+  ],
   "tint": {
     "wall": "minecraft:calcite",
     "wall2": "minecraft:diorite",

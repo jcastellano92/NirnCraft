@@ -1,0 +1,186 @@
+{
+  "id": "mistveil_village",
+  "why": [
+    "maormer_isles.L1.volcanic_reef_isles",
+    "maormer_isles.L5.black_pearl_and_scale_trade",
+    "maormer_isles.L6.mistveil_and_fleet_anchorage"
+  ],
+  "sil": "pyandonea-mistveil-village-plan",
+  "base": "none",
+  "overlay": "maormer_isles",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "maormer_isles",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "maormer_isles",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "mistveil_village_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "mistveil_village_landmark",
+      "overlay": "maormer_isles"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "maormer_isles",
+      "name": "mistveil_village_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "mistveil_village_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "mistveil_village_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "mistveil_village_b_5",
+    "smithy": "mistveil_village_b_7"
+  },
+  "titles": {
+    "mistveil_village_b_1": "place.skycraft.mistveil_village Council & Seat Hall",
+    "mistveil_village_b_2": "place.skycraft.mistveil_village High Sanctuary",
+    "mistveil_village_b_3": "place.skycraft.mistveil_village Fighters & Wayfarers Hall",
+    "mistveil_village_b_4": "place.skycraft.mistveil_village Mages & Chroniclers Spire",
+    "mistveil_village_b_5": "place.skycraft.mistveil_village The Lantern & Hearth Inn",
+    "mistveil_village_b_6": "place.skycraft.mistveil_village The Traveler's Rest Tavern",
+    "mistveil_village_b_7": "place.skycraft.mistveil_village Master Forge & Armorer",
+    "mistveil_village_landmark": "High Seat of place.skycraft.mistveil_village",
+    "mistveil_village_plaza": "place.skycraft.mistveil_village Central Plaza"
+  },
+  "innKey": "mistveil_village_b_5"
+}

@@ -1,0 +1,356 @@
+{
+  "id": "glenumbra_moors",
+  "sil": "heather-tor-ring-keep",
+  "base": "none",
+  "overlay": "glenumbra",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "glenumbra_moors_hounded_stag",
+  "names": {
+    "inn": "glenumbra_moors_hounded_stag",
+    "store": "glenumbra_moors_wool_staple",
+    "smithy": "glenumbra_moors_shears_forge"
+  },
+  "titles": {
+    "glenumbra_moors_landmark": "Moors Tor Ring-Stones",
+    "glenumbra_moors_grimley_keep": "Grimley Tor Fortified Keep",
+    "glenumbra_moors_hounded_stag": "The Hounded Stag Inn",
+    "glenumbra_moors_wool_staple": "Moor-Sheep Wool Staple",
+    "glenumbra_moors_shears_forge": "Iron-Shears & Horseshoe Smithy",
+    "glenumbra_moors_heather_still": "Heather-Honey & Belladonna Still",
+    "glenumbra_moors_stendarr_fane": "Tor-Side Fane of Stendarr",
+    "glenumbra_moors_cairn_vault": "Lintel-Stone Burial Vault",
+    "glenumbra_moors_hound_masters": "Moor-Hound Huntsmen's Hall",
+    "glenumbra_moors_beacon_tor": "Beacon-Tor Watchhouse",
+    "glenumbra_moors_drovers_pen": "Sheep-Drovers' Fold & Stables",
+    "glenumbra_moors_market_plaza": "Moors Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "stone_circle",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "glenumbra_moors_landmark",
+      "overlay": "glenumbra"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "glenumbra_moors_grimley_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "glenumbra_moors_hounded_stag"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "glenumbra_moors_wool_staple"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "glenumbra_moors_shears_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "glenumbra_moors_heather_still"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "glenumbra_moors_stendarr_fane"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "glenumbra_moors_cairn_vault"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "glenumbra_moors_hound_masters"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "glenumbra_moors_beacon_tor"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "glenumbra_moors_drovers_pen"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "glenumbra_moors_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "glenumbra"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "glenumbra"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "count": 1
+    },
+    {
+      "type": "tree_row",
+      "count": 1
+    }
+  ]
+}

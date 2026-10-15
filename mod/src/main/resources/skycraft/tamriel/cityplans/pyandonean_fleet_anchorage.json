@@ -1,0 +1,291 @@
+{
+  "id": "pyandonean_fleet_anchorage",
+  "why": [
+    "maormer_isles.L1.volcanic_reef_isles",
+    "maormer_isles.L5.black_pearl_and_scale_trade",
+    "maormer_isles.L6.mistveil_and_fleet_anchorage"
+  ],
+  "sil": "shell-raft-fleet",
+  "base": "none",
+  "overlay": "pyandonean_fleet_anchorage",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "pyandonean_fleet_anchorage",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "maormer_isles",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "pyandonean_fleet_anchorage_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "sea_stack",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "pyandonean_fleet_anchorage_landmark",
+      "overlay": "pyandonean_fleet_anchorage"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "pyandonean_fleet_anchorage",
+      "name": "pyandonean_fleet_anchorage_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "pool",
+      "theme": "pyandonean_fleet_anchorage_pool",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "pyandonean_fleet_anchorage_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "pyandonean_fleet_anchorage_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "pyandonean_fleet_anchorage_b_5",
+    "store": "pyandonean_fleet_anchorage_b_10",
+    "smithy": "pyandonean_fleet_anchorage_b_7"
+  },
+  "titles": {
+    "pyandonean_fleet_anchorage_b_1": "place.skycraft.pyandonean_fleet_anchorage Council & Seat Hall",
+    "pyandonean_fleet_anchorage_b_2": "place.skycraft.pyandonean_fleet_anchorage High Sanctuary",
+    "pyandonean_fleet_anchorage_b_3": "place.skycraft.pyandonean_fleet_anchorage Fighters & Wayfarers Hall",
+    "pyandonean_fleet_anchorage_b_4": "place.skycraft.pyandonean_fleet_anchorage Mages & Chroniclers Spire",
+    "pyandonean_fleet_anchorage_b_5": "place.skycraft.pyandonean_fleet_anchorage The Lantern & Hearth Inn",
+    "pyandonean_fleet_anchorage_b_6": "place.skycraft.pyandonean_fleet_anchorage The Traveler's Rest Tavern",
+    "pyandonean_fleet_anchorage_b_7": "place.skycraft.pyandonean_fleet_anchorage Master Forge & Armorer",
+    "pyandonean_fleet_anchorage_b_8": "place.skycraft.pyandonean_fleet_anchorage Botanicals & Remedies",
+    "pyandonean_fleet_anchorage_b_9": "place.skycraft.pyandonean_fleet_anchorage Scriptorium & Charts",
+    "pyandonean_fleet_anchorage_b_10": "place.skycraft.pyandonean_fleet_anchorage Grand Provisioner & Sundries",
+    "pyandonean_fleet_anchorage_b_11": "place.skycraft.pyandonean_fleet_anchorage Silk & Hide Clothier",
+    "pyandonean_fleet_anchorage_b_12": "place.skycraft.pyandonean_fleet_anchorage Lapidary & Signets",
+    "pyandonean_fleet_anchorage_b_13": "place.skycraft.pyandonean_fleet_anchorage Wayfarer Stables & Post",
+    "pyandonean_fleet_anchorage_b_14": "place.skycraft.pyandonean_fleet_anchorage Bonded Factor Warehouse",
+    "pyandonean_fleet_anchorage_landmark": "High Seat of place.skycraft.pyandonean_fleet_anchorage",
+    "pyandonean_fleet_anchorage_plaza": "place.skycraft.pyandonean_fleet_anchorage Central Plaza"
+  },
+  "innKey": "pyandonean_fleet_anchorage_b_5"
+}

@@ -115,6 +115,43 @@ public final class LootCommand {
                             Collectibles.Entry e = Collectibles.entry(StringArgumentType.getString(c, "collection") + "/" + StringArgumentType.getString(c, "entry"));
                             return give(c, e == null ? ItemStack.EMPTY : e.create());
                         })))));
+        d.register(Commands.literal("skycraft-items").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("roll").then(Commands.argument("table", ResourceLocationArgument.id())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggestResource(tables(c.getSource().getServer()), b))
+                        .executes(c -> rollItems(c, -1))
+                        .then(Commands.argument("level", IntegerArgumentType.integer(1, 100))
+                                .executes(c -> rollItems(c, IntegerArgumentType.getInteger(c, "level"))))))
+                .then(Commands.literal("selftest").executes(c -> {
+                    List<String> problems = com.skycraft.loot.affix.ItemAffixes.selftest();
+                    for (String p : problems) c.getSource().sendFailure(Component.literal("PROBLEM: " + p));
+                    c.getSource().sendSuccess(() -> Component.literal(problems.isEmpty() ? "affix selftest OK" : "affix selftest FAILED: " + problems.size()), false);
+                    return problems.isEmpty() ? 1 : 0;
+                })));
+    }
+
+    private static int rollItems(CommandContext<CommandSourceStack> c, int level) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer player = c.getSource().getPlayerOrException();
+        ResourceLocation table = ResourceLocationArgument.getId(c, "table");
+        int lvl = level > 0 ? level : SkyData.get(player).getLevel();
+        LootLevels.override(lvl);
+        List<ItemStack> rolled;
+        try {
+            rolled = LootApi.roll(player.serverLevel(), table, player.blockPosition(), player);
+        } finally {
+            LootLevels.override(null);
+        }
+        c.getSource().sendSuccess(() -> Component.literal("Rolled " + table + " at L" + lvl + " (" + rolled.size() + " stacks):"), false);
+        for (ItemStack s : rolled) {
+            String affixSummary = com.skycraft.loot.affix.ItemAffixes.hasAffixes(s)
+                    ? " [quality=" + com.skycraft.loot.affix.ItemAffixes.qualityLabelId(s)
+                    + (com.skycraft.loot.affix.ItemAffixes.makerId(s) != null ? ", maker=" + com.skycraft.loot.affix.ItemAffixes.makerId(s) : "")
+                    + (com.skycraft.loot.affix.ItemAffixes.storiedId(s) != null ? ", storied=" + com.skycraft.loot.affix.ItemAffixes.storiedId(s) : "")
+                    + "]" : "";
+            String line = "  " + s.getCount() + "x " + s.getHoverName().getString() + " (" + ItemValues.getStack(s) + "g)" + affixSummary;
+            c.getSource().sendSuccess(() -> Component.literal(line), false);
+            com.skycraft.inventory.Inv.giveOrDrop(player, s.copy());
+        }
+        return rolled.size();
     }
 
     private static List<ResourceLocation> tables(MinecraftServer server) {

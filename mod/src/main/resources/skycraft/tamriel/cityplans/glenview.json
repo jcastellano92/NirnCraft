@@ -1,0 +1,186 @@
+{
+  "id": "glenview",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
+  "sil": "summerset-glenview-plan",
+  "base": "none",
+  "overlay": "summerset_isle",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "glenview_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "glenview_landmark",
+      "overlay": "summerset_isle"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "summerset_isle",
+      "name": "glenview_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "statue",
+      "theme": "glenview_statue",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "glenview_garden",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "glenview_b_5",
+    "smithy": "glenview_b_7"
+  },
+  "titles": {
+    "glenview_b_1": "place.skycraft.glenview Council & Seat Hall",
+    "glenview_b_2": "place.skycraft.glenview High Sanctuary",
+    "glenview_b_3": "place.skycraft.glenview Fighters & Wayfarers Hall",
+    "glenview_b_4": "place.skycraft.glenview Mages & Chroniclers Spire",
+    "glenview_b_5": "place.skycraft.glenview The Lantern & Hearth Inn",
+    "glenview_b_6": "place.skycraft.glenview The Traveler's Rest Tavern",
+    "glenview_b_7": "place.skycraft.glenview Master Forge & Armorer",
+    "glenview_landmark": "High Seat of place.skycraft.glenview",
+    "glenview_plaza": "place.skycraft.glenview Central Plaza"
+  },
+  "innKey": "glenview_b_5"
+}

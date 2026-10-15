@@ -1,0 +1,222 @@
+{
+  "id": "hoarfrost_downs",
+  "sil": "frost-wind-sheep-fold-village",
+  "base": "none",
+  "overlay": "rivenspire",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "hoarfrost_frozen_fleece_inn",
+  "names": {
+    "inn": "hoarfrost_frozen_fleece_inn",
+    "store": "hoarfrost_wool_and_tallow",
+    "smithy": "hoarfrost_frost_nail_forge"
+  },
+  "titles": {
+    "hoarfrost_downs_landmark": "Hoarfrost Wind-Cairn Circle",
+    "hoarfrost_frozen_fleece_inn": "The Frozen Fleece Inn",
+    "hoarfrost_wool_and_tallow": "Downs Wool & Tallow Store",
+    "hoarfrost_frost_nail_forge": "Frost-Nail & Crook Smithy",
+    "hoarfrost_carding_barn": "Carding & Felt-Cloak Barn",
+    "hoarfrost_kynareth_cairn": "Wind-Cairn of Kynareth",
+    "hoarfrost_winter_sheep_cote": "Stone-Walled Winter Sheep-Cote",
+    "hoarfrost_downs_market_plaza": "Hoarfrost Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "stone_circle",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "hoarfrost_downs_landmark",
+      "overlay": "rivenspire"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "hoarfrost_frozen_fleece_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "hoarfrost_wool_and_tallow"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "hoarfrost_frost_nail_forge"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "hoarfrost_carding_barn"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "hoarfrost_kynareth_cairn"
+    },
+    {
+      "kind": "stables",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "hoarfrost_winter_sheep_cote"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "hoarfrost_downs_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "rivenspire"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "rivenspire"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 1
+    }
+  ]
+}

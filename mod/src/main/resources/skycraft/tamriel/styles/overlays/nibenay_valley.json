@@ -1,0 +1,24 @@
+{
+  "id": "nibenay_valley",
+  "why": [
+    "nibenay_valley.L1.river_flats",
+    "nibenay_valley.L4.reed_marsh",
+    "nibenay_valley.L6.green_road_inns"
+  ],
+  "tint": {
+    "wall": "minecraft:spruce_planks",
+    "wall2": "minecraft:mud_bricks",
+    "low": "minecraft:mossy_cobblestone",
+    "wood": "spruce",
+    "roof": "spruce",
+    "thatch": "true",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mud_bricks",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:mossy_cobblestone",
+    "path": "minecraft:packed_mud"
+  }
+}

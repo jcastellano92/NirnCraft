@@ -1,0 +1,841 @@
+{
+  "id": "hundings_dojo",
+  "why": [
+    "yokudan_desert.L1.sheared_red_mesas",
+    "yokudan_desert.L5.orichalcum_and_star_charts",
+    "yokudan_desert.L6.new_tava_pilgrim_port"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:yellow_terracotta",
+    "low": "minecraft:chiseled_sandstone",
+    "wood": "acacia",
+    "roof": "smooth_sandstone",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:yellow_terracotta",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:chiseled_sandstone",
+    "path": "minecraft:cut_sandstone"
+  },
+  "style": {
+    "houseStyle": "yokudan",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:smooth_sandstone",
+        "minecraft:yellow_terracotta",
+        "minecraft:chiseled_sandstone",
+        "minecraft:cut_sandstone",
+        "sandstone",
+        "minecraft:smooth_sandstone"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_1_0",
+          "prop_hundings_dojo_1_1",
+          "prop_hundings_dojo_1_2",
+          "prop_hundings_dojo_1_3",
+          "prop_hundings_dojo_1_4",
+          "prop_hundings_dojo_1_5",
+          "prop_hundings_dojo_1_6",
+          "prop_hundings_dojo_1_7",
+          "prop_hundings_dojo_1_8",
+          "prop_hundings_dojo_1_9",
+          "prop_hundings_dojo_1_10",
+          "prop_hundings_dojo_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_2_0",
+          "prop_hundings_dojo_2_1",
+          "prop_hundings_dojo_2_2",
+          "prop_hundings_dojo_2_3",
+          "prop_hundings_dojo_2_4",
+          "prop_hundings_dojo_2_5",
+          "prop_hundings_dojo_2_6",
+          "prop_hundings_dojo_2_7",
+          "prop_hundings_dojo_2_8",
+          "prop_hundings_dojo_2_9",
+          "prop_hundings_dojo_2_10",
+          "prop_hundings_dojo_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_3_0",
+          "prop_hundings_dojo_3_1",
+          "prop_hundings_dojo_3_2",
+          "prop_hundings_dojo_3_3",
+          "prop_hundings_dojo_3_4",
+          "prop_hundings_dojo_3_5",
+          "prop_hundings_dojo_3_6",
+          "prop_hundings_dojo_3_7",
+          "prop_hundings_dojo_3_8",
+          "prop_hundings_dojo_3_9",
+          "prop_hundings_dojo_3_10",
+          "prop_hundings_dojo_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_4_0",
+          "prop_hundings_dojo_4_1",
+          "prop_hundings_dojo_4_2",
+          "prop_hundings_dojo_4_3",
+          "prop_hundings_dojo_4_4",
+          "prop_hundings_dojo_4_5",
+          "prop_hundings_dojo_4_6",
+          "prop_hundings_dojo_4_7",
+          "prop_hundings_dojo_4_8",
+          "prop_hundings_dojo_4_9",
+          "prop_hundings_dojo_4_10",
+          "prop_hundings_dojo_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_5_0",
+          "prop_hundings_dojo_5_1",
+          "prop_hundings_dojo_5_2",
+          "prop_hundings_dojo_5_3",
+          "prop_hundings_dojo_5_4",
+          "prop_hundings_dojo_5_5",
+          "prop_hundings_dojo_5_6",
+          "prop_hundings_dojo_5_7",
+          "prop_hundings_dojo_5_8",
+          "prop_hundings_dojo_5_9",
+          "prop_hundings_dojo_5_10",
+          "prop_hundings_dojo_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_6_0",
+          "prop_hundings_dojo_6_1",
+          "prop_hundings_dojo_6_2",
+          "prop_hundings_dojo_6_3",
+          "prop_hundings_dojo_6_4",
+          "prop_hundings_dojo_6_5",
+          "prop_hundings_dojo_6_6",
+          "prop_hundings_dojo_6_7",
+          "prop_hundings_dojo_6_8",
+          "prop_hundings_dojo_6_9",
+          "prop_hundings_dojo_6_10",
+          "prop_hundings_dojo_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_7_0",
+          "prop_hundings_dojo_7_1",
+          "prop_hundings_dojo_7_2",
+          "prop_hundings_dojo_7_3",
+          "prop_hundings_dojo_7_4",
+          "prop_hundings_dojo_7_5",
+          "prop_hundings_dojo_7_6",
+          "prop_hundings_dojo_7_7",
+          "prop_hundings_dojo_7_8",
+          "prop_hundings_dojo_7_9",
+          "prop_hundings_dojo_7_10",
+          "prop_hundings_dojo_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_8_0",
+          "prop_hundings_dojo_8_1",
+          "prop_hundings_dojo_8_2",
+          "prop_hundings_dojo_8_3",
+          "prop_hundings_dojo_8_4",
+          "prop_hundings_dojo_8_5",
+          "prop_hundings_dojo_8_6",
+          "prop_hundings_dojo_8_7",
+          "prop_hundings_dojo_8_8",
+          "prop_hundings_dojo_8_9",
+          "prop_hundings_dojo_8_10",
+          "prop_hundings_dojo_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_9_0",
+          "prop_hundings_dojo_9_1",
+          "prop_hundings_dojo_9_2",
+          "prop_hundings_dojo_9_3",
+          "prop_hundings_dojo_9_4",
+          "prop_hundings_dojo_9_5",
+          "prop_hundings_dojo_9_6",
+          "prop_hundings_dojo_9_7",
+          "prop_hundings_dojo_9_8",
+          "prop_hundings_dojo_9_9",
+          "prop_hundings_dojo_9_10",
+          "prop_hundings_dojo_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_10_0",
+          "prop_hundings_dojo_10_1",
+          "prop_hundings_dojo_10_2",
+          "prop_hundings_dojo_10_3",
+          "prop_hundings_dojo_10_4",
+          "prop_hundings_dojo_10_5",
+          "prop_hundings_dojo_10_6",
+          "prop_hundings_dojo_10_7",
+          "prop_hundings_dojo_10_8",
+          "prop_hundings_dojo_10_9",
+          "prop_hundings_dojo_10_10",
+          "prop_hundings_dojo_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_11_0",
+          "prop_hundings_dojo_11_1",
+          "prop_hundings_dojo_11_2",
+          "prop_hundings_dojo_11_3",
+          "prop_hundings_dojo_11_4",
+          "prop_hundings_dojo_11_5",
+          "prop_hundings_dojo_11_6",
+          "prop_hundings_dojo_11_7",
+          "prop_hundings_dojo_11_8",
+          "prop_hundings_dojo_11_9",
+          "prop_hundings_dojo_11_10",
+          "prop_hundings_dojo_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_12_0",
+          "prop_hundings_dojo_12_1",
+          "prop_hundings_dojo_12_2",
+          "prop_hundings_dojo_12_3",
+          "prop_hundings_dojo_12_4",
+          "prop_hundings_dojo_12_5",
+          "prop_hundings_dojo_12_6",
+          "prop_hundings_dojo_12_7",
+          "prop_hundings_dojo_12_8",
+          "prop_hundings_dojo_12_9",
+          "prop_hundings_dojo_12_10",
+          "prop_hundings_dojo_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_13_0",
+          "prop_hundings_dojo_13_1",
+          "prop_hundings_dojo_13_2",
+          "prop_hundings_dojo_13_3",
+          "prop_hundings_dojo_13_4",
+          "prop_hundings_dojo_13_5",
+          "prop_hundings_dojo_13_6",
+          "prop_hundings_dojo_13_7",
+          "prop_hundings_dojo_13_8",
+          "prop_hundings_dojo_13_9",
+          "prop_hundings_dojo_13_10",
+          "prop_hundings_dojo_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_14_0",
+          "prop_hundings_dojo_14_1",
+          "prop_hundings_dojo_14_2",
+          "prop_hundings_dojo_14_3",
+          "prop_hundings_dojo_14_4",
+          "prop_hundings_dojo_14_5",
+          "prop_hundings_dojo_14_6",
+          "prop_hundings_dojo_14_7",
+          "prop_hundings_dojo_14_8",
+          "prop_hundings_dojo_14_9",
+          "prop_hundings_dojo_14_10",
+          "prop_hundings_dojo_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_15_0",
+          "prop_hundings_dojo_15_1",
+          "prop_hundings_dojo_15_2",
+          "prop_hundings_dojo_15_3",
+          "prop_hundings_dojo_15_4",
+          "prop_hundings_dojo_15_5",
+          "prop_hundings_dojo_15_6",
+          "prop_hundings_dojo_15_7",
+          "prop_hundings_dojo_15_8",
+          "prop_hundings_dojo_15_9",
+          "prop_hundings_dojo_15_10",
+          "prop_hundings_dojo_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_16_0",
+          "prop_hundings_dojo_16_1",
+          "prop_hundings_dojo_16_2",
+          "prop_hundings_dojo_16_3",
+          "prop_hundings_dojo_16_4",
+          "prop_hundings_dojo_16_5",
+          "prop_hundings_dojo_16_6",
+          "prop_hundings_dojo_16_7",
+          "prop_hundings_dojo_16_8",
+          "prop_hundings_dojo_16_9",
+          "prop_hundings_dojo_16_10",
+          "prop_hundings_dojo_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_17_0",
+          "prop_hundings_dojo_17_1",
+          "prop_hundings_dojo_17_2",
+          "prop_hundings_dojo_17_3",
+          "prop_hundings_dojo_17_4",
+          "prop_hundings_dojo_17_5",
+          "prop_hundings_dojo_17_6",
+          "prop_hundings_dojo_17_7",
+          "prop_hundings_dojo_17_8",
+          "prop_hundings_dojo_17_9",
+          "prop_hundings_dojo_17_10",
+          "prop_hundings_dojo_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_18_0",
+          "prop_hundings_dojo_18_1",
+          "prop_hundings_dojo_18_2",
+          "prop_hundings_dojo_18_3",
+          "prop_hundings_dojo_18_4",
+          "prop_hundings_dojo_18_5",
+          "prop_hundings_dojo_18_6",
+          "prop_hundings_dojo_18_7",
+          "prop_hundings_dojo_18_8",
+          "prop_hundings_dojo_18_9",
+          "prop_hundings_dojo_18_10",
+          "prop_hundings_dojo_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_19_0",
+          "prop_hundings_dojo_19_1",
+          "prop_hundings_dojo_19_2",
+          "prop_hundings_dojo_19_3",
+          "prop_hundings_dojo_19_4",
+          "prop_hundings_dojo_19_5",
+          "prop_hundings_dojo_19_6",
+          "prop_hundings_dojo_19_7",
+          "prop_hundings_dojo_19_8",
+          "prop_hundings_dojo_19_9",
+          "prop_hundings_dojo_19_10",
+          "prop_hundings_dojo_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_20_0",
+          "prop_hundings_dojo_20_1",
+          "prop_hundings_dojo_20_2",
+          "prop_hundings_dojo_20_3",
+          "prop_hundings_dojo_20_4",
+          "prop_hundings_dojo_20_5",
+          "prop_hundings_dojo_20_6",
+          "prop_hundings_dojo_20_7",
+          "prop_hundings_dojo_20_8",
+          "prop_hundings_dojo_20_9",
+          "prop_hundings_dojo_20_10",
+          "prop_hundings_dojo_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:yellow_terracotta",
+        "plinth": "minecraft:chiseled_sandstone",
+        "carpentry": "acacia",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "yellow",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone",
+          "minecraft:chiseled_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:yellow_terracotta",
+          "minecraft:chiseled_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:cut_sandstone"
+        ],
+        "props": [
+          "prop_hundings_dojo_21_0",
+          "prop_hundings_dojo_21_1",
+          "prop_hundings_dojo_21_2",
+          "prop_hundings_dojo_21_3",
+          "prop_hundings_dojo_21_4",
+          "prop_hundings_dojo_21_5",
+          "prop_hundings_dojo_21_6",
+          "prop_hundings_dojo_21_7",
+          "prop_hundings_dojo_21_8",
+          "prop_hundings_dojo_21_9",
+          "prop_hundings_dojo_21_10",
+          "prop_hundings_dojo_21_11"
+        ]
+      }
+    }
+  }
+}

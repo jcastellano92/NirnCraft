@@ -1,0 +1,236 @@
+{
+  "id": "tumnosh_stronghold",
+  "sil": "orc-quarry-bastion-palisade",
+  "base": "none",
+  "overlay": "orsinium",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "",
+  "names": {
+    "inn": "",
+    "store": "",
+    "smithy": "tumnosh_wedge_and_maul"
+  },
+  "titles": {
+    "tumnosh_stronghold_landmark": "Tumnosh Granite-Hoist",
+    "tumnosh_stone_hearth_hall": "Clan Tumnosh Mason-Chieftain's Hall",
+    "tumnosh_wedge_and_maul": "Wedge and Heavy-Maul Smithy",
+    "tumnosh_dressed_basalt_yard": "Orsinium-Road Basalt Dressing Yard",
+    "tumnosh_lichen_poultice_hut": "Crag-Lichen & Marrow Poultice Hut",
+    "tumnosh_haul_echatere_pens": "Stone-Haul Echatere Pens",
+    "tumnosh_malacath_altar": "Split-Boulder Altar of Malacath",
+    "tumnosh_stronghold_market_plaza": "Tumnosh Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [
+    {
+      "r": 30,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        3.14
+      ],
+      "towers": true,
+      "flags": [
+        "palisade"
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "headframe",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "tumnosh_stronghold_landmark",
+      "overlay": "orsinium"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "tumnosh_stone_hearth_hall"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "tumnosh_wedge_and_maul"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "tumnosh_dressed_basalt_yard"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "tumnosh_lichen_poultice_hut"
+    },
+    {
+      "kind": "stables",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "tumnosh_haul_echatere_pens"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "tumnosh_malacath_altar"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "tumnosh_stronghold_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "orsinium"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "orsinium"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "daedric:malacath",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    }
+  ]
+}

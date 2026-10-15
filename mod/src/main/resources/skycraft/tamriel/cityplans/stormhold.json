@@ -1,0 +1,335 @@
+{
+  "id": "stormhold",
+  "why": [
+    "stormhold.L1.stormhold_shelf",
+    "stormhold.L5.border_caravan_exchange",
+    "stormhold.L6.stormhold_ring_over_ruin"
+  ],
+  "sil": "twin-ziggurat-bridge-fort",
+  "base": "none",
+  "overlay": "stormhold",
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "stormhold",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "stormhold",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "stormhold_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "stormhold_landmark",
+      "overlay": "stormhold"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 92,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        26,
+        23
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "stormhold",
+      "name": "stormhold_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -29,
+        -18
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -42,
+        -55
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -9,
+        -33
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        6,
+        -69
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        15,
+        -31
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        51,
+        -47
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        32,
+        -12
+      ],
+      "face": "south",
+      "overlay": "stormhold",
+      "name": "stormhold_b_17"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "stormhold_pond",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "stormhold_shrine",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "stormhold_lamps",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "stormhold_banners",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "stormhold_b_5",
+    "store": "stormhold_b_10",
+    "smithy": "stormhold_b_7"
+  },
+  "titles": {
+    "stormhold_b_1": "place.skycraft.stormhold Council & Seat Hall",
+    "stormhold_b_2": "place.skycraft.stormhold High Sanctuary",
+    "stormhold_b_3": "place.skycraft.stormhold Fighters & Wayfarers Hall",
+    "stormhold_b_4": "place.skycraft.stormhold Mages & Chroniclers Spire",
+    "stormhold_b_5": "place.skycraft.stormhold The Lantern & Hearth Inn",
+    "stormhold_b_6": "place.skycraft.stormhold The Traveler's Rest Tavern",
+    "stormhold_b_7": "place.skycraft.stormhold Master Forge & Armorer",
+    "stormhold_b_8": "place.skycraft.stormhold Botanicals & Remedies",
+    "stormhold_b_9": "place.skycraft.stormhold Scriptorium & Charts",
+    "stormhold_b_10": "place.skycraft.stormhold Grand Provisioner & Sundries",
+    "stormhold_b_11": "place.skycraft.stormhold Silk & Hide Clothier",
+    "stormhold_b_12": "place.skycraft.stormhold Lapidary & Signets",
+    "stormhold_b_13": "place.skycraft.stormhold Wayfarer Stables & Post",
+    "stormhold_b_14": "place.skycraft.stormhold Bonded Factor Warehouse",
+    "stormhold_b_15": "place.skycraft.stormhold Watch Garrison Barracks",
+    "stormhold_b_16": "place.skycraft.stormhold High Steward's Manor",
+    "stormhold_b_17": "place.skycraft.stormhold Merchant-Factor's Villa",
+    "stormhold_landmark": "High Seat of place.skycraft.stormhold",
+    "stormhold_plaza": "place.skycraft.stormhold Central Plaza"
+  },
+  "innKey": "stormhold_b_5"
+}

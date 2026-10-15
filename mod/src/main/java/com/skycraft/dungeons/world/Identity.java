@@ -154,7 +154,7 @@ public final class Identity {
     static void surfaceMarker(Painter p, DungeonPiece c) {
         Entry e = of(c.place);
         if (e == null || c.special != Special.NONE || c.variant != 0 || c.doors != 0 || c.extra != 0 || c.role != DungeonPiece.ROLE_NORMAL) return;
-        if (c.theme.underground() && c.theme != Theme.FORT) return;
+        if (c.theme.underground() && !c.theme.hasUndercroft()) return;
         var b = c.getBoundingBox();
         int cx = (b.minX() + b.maxX()) / 2, cz = (b.minZ() + b.maxZ()) / 2;
         Direction f = c.facing(), r = f.getClockWise();
@@ -177,7 +177,7 @@ public final class Identity {
         ensureMotifPad(p, mx, mz, baseY, f.getOpposite(), padFloor);
         Blueprints.placeAt(p, "motif:" + e.motif(), mx, mz, baseY, f.getOpposite());
         // and its master, waiting inside (forts keep theirs in the cellars)
-        String boss = c.theme == Theme.FORT ? null : surfaceBoss(c.theme, e.family());
+        String boss = c.theme.hasUndercroft() ? null : surfaceBoss(c.theme, e.family());
         if (boss != null) {
             int bx = fx - f.getStepX() * 5, bz = fz - f.getStepZ() * 5;
             int by = standY(p, bx, bz, baseY);
@@ -198,7 +198,8 @@ public final class Identity {
             case "grove" -> Mobs.spriggan();
             case "dwemer" -> Mobs.DWARVEN_CENTURION;
             case "mage", "necromancer" -> Mobs.necromancer();
-            case "vampire" -> Mobs.vampireLord();
+            case "vampire", "breton_keep_ruin" -> Mobs.vampireLord();
+            case "scorpion_den" -> Mobs.giantScorpion();
             default -> null;
         };
     }

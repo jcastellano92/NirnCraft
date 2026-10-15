@@ -1,79 +1,335 @@
 {
   "id": "rimmen",
-  "base": "none",
+  "why": [
+    "rimmen.L1.rimmen_cliff",
+    "rimmen.L5.artisan_trade",
+    "rimmen.L6.rimmen_seat"
+  ],
   "sil": "cliff-palace-over-necropolis",
-  "reach": 120,
-  "radius": 120,
+  "base": "none",
   "overlay": "rimmen",
-  "names": {"inn": "rimmen_moonlit_court_inn", "store": "rimmen_artisan_masterworks", "smithy": "rimmen_sandforge"},
-  "innKey": "rimmen_moonlit_court_inn",
-  "gates": [[0, 112]],
-  "terraces": [
-    {"rect": [-80, -78, 80, -40], "level": 8, "parapet": 1},
-    {"rect": [-80, -40, 80, -8], "level": 4, "parapet": 1}
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
   ],
-  "walls": [{"r": 106, "sides": 16, "h": 9, "gates": [0], "flags": ["major"]}],
-  "landmarks": [
-    {"id": "cliff", "at": [-55, -92], "size": [55, 25], "h": 46, "margin": 5},
-    {"id": "cliff", "at": [0, -92], "size": [55, 25], "h": 46, "margin": 5, "name": "keep"},
-    {"id": "cliff", "at": [55, -92], "size": [55, 25], "h": 46, "margin": 5}
-  ],
-  "buildings": [
-    {"kind": "palace", "at": [0, -58], "size": [21, 29], "face": "S", "flags": ["upper", "rich", "seat"], "name": "rimmen_palace", "raise": 8},
-    {"kind": "hall_of_dead", "at": [-70, -22], "size": [9, 11], "face": "E", "name": "rimmen_necropolis_gate", "raise": 4},
-    {"kind": "mine", "at": [68, -66], "size": [7, 14], "face": "S", "variant": 2, "flags": ["no_beard"], "name": "rimmen_necropolis_stair", "raise": 8},
-    {"kind": "longhouse", "at": [-40, -24], "size": [13, 25], "face": "S", "flags": ["upper"], "name": "rimmen_artisan_masterworks", "raise": 4}
-  ],
-  "nets": [
-    {"type": "path", "via": [[0, 112], [10, 94], [-8, 76], [6, 58], [-4, 40], [0, 22]], "width": 5, "major": true, "tag": "low"},
-    {"type": "path", "via": [[0, 22], [-6, 6], [8, -8], [0, -22]], "width": 5, "major": true, "tag": "mid", "raise": 4},
-    {"type": "switchback", "from": [0, -22], "to": [0, -46], "legs": 3, "amp": 22, "width": 4, "major": true, "tag": "mid", "raise": 4},
-    {"type": "path", "via": [[-100, 60], [-70, 70], [-36, 60], [0, 62], [36, 60], [70, 70], [100, 60]], "width": 3, "tag": "low"},
-    {"type": "loop", "at": [0, 52], "rx": 78, "rz": 48, "wobble": 6, "lobes": 3, "phase": 0.7, "width": 3, "rank": 1, "tag": "low"},
-    {"type": "path", "via": [[-90, 20], [-60, 26], [-30, 18], [0, 24]], "width": 3, "tag": "low"},
-    {"type": "path", "via": [[90, 20], [60, 26], [30, 18], [0, 24]], "width": 3, "tag": "low"},
-    {"type": "path", "via": [[-76, -22], [-52, -28], [-26, -20], [0, -22], [26, -20], [52, -28], [76, -22]], "width": 3, "tag": "mid", "raise": 4},
-    {"type": "path", "via": [[-70, -56], [-40, -62], [-24, -50]], "width": 3, "tag": "mid", "raise": 8},
-    {"type": "path", "via": [[70, -56], [40, -62], [24, -50]], "width": 3, "tag": "mid", "raise": 8}
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "rimmen",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "rimmen",
+      "wealth": "common"
+    }
   ],
   "plazas": [
-    {"at": [0, 22], "size": 17, "variant": 1, "stalls": 5, "name": "rimmen_sun_square"}
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "rimmen_plaza"
+    }
   ],
-  "zones": [
-    {"at": [0, -58], "r": 36, "zone": "noble"},
-    {"at": [0, 40], "r": 28, "zone": "centre"},
-    {"at": [66, 56], "r": 26, "zone": "craft"},
-    {"at": [-70, 58], "r": 28, "zone": "poor"}
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "rimmen_landmark",
+      "overlay": "rimmen"
+    }
   ],
-  "fabric": {"radius": 108, "target": 0.55},
-  "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "rimmen_moonlit_court_inn", "on": "low"},
-    {"kind": "smithy", "size": [11, 9], "name": "rimmen_sandforge", "on": "low"},
-    {"kind": "store", "count": 3, "on": "low"},
-    {"kind": "alchemist", "on": "low"},
-    {"kind": "temple", "size": [11, 17], "on": "mid", "raise": 4}
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 92,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        26,
+        23
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "rimmen",
+      "name": "rimmen_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -29,
+        -18
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -42,
+        -55
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -9,
+        -33
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        6,
+        -69
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        15,
+        -31
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        51,
+        -47
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        32,
+        -12
+      ],
+      "face": "south",
+      "overlay": "rimmen",
+      "name": "rimmen_b_17"
+    }
   ],
   "features": [
-    {"type": "fountain", "where": "square"},
-    {"type": "pool", "at": [0, -40]},
-    {"type": "great_tree", "theme": "acacia", "where": "free"},
-    {"type": "statue", "theme": "divine:dibella", "where": "square"},
-    {"type": "memorial", "where": "free"},
-    {"type": "banners", "count": 2, "where": "gate"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "low"},
-    {"type": "market", "where": "free"},
-    {"type": "shrine", "theme": "divine:arkay", "where": "free"},
-    {"type": "aqueduct", "where": "edge"},
-    {"type": "garden", "where": "free"},
-    {"type": "bell_tower", "where": "free"}
+    {
+      "type": "fountain",
+      "theme": "rimmen_fountain",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "theme": "rimmen_market",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "rimmen_lamps",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "rimmen_banners",
+      "count": 3
+    }
   ],
+  "names": {
+    "inn": "rimmen_b_5",
+    "store": "rimmen_b_10",
+    "smithy": "rimmen_b_7"
+  },
   "titles": {
-    "rimmen_moonlit_court_inn": "The Moonlit Court Inn",
-    "rimmen_artisan_masterworks": "Artisan Masterworks",
-    "rimmen_sandforge": "The Sandforge",
-    "rimmen_palace": "Rimmen Palace",
-    "rimmen_necropolis_gate": "Necropolis Gate Shrine",
-    "rimmen_necropolis_stair": "Necropolis Stair",
-    "rimmen_sun_square": "Sun Square"
-  }
+    "rimmen_b_1": "place.skycraft.rimmen Council & Seat Hall",
+    "rimmen_b_2": "place.skycraft.rimmen High Sanctuary",
+    "rimmen_b_3": "place.skycraft.rimmen Fighters & Wayfarers Hall",
+    "rimmen_b_4": "place.skycraft.rimmen Mages & Chroniclers Spire",
+    "rimmen_b_5": "place.skycraft.rimmen The Lantern & Hearth Inn",
+    "rimmen_b_6": "place.skycraft.rimmen The Traveler's Rest Tavern",
+    "rimmen_b_7": "place.skycraft.rimmen Master Forge & Armorer",
+    "rimmen_b_8": "place.skycraft.rimmen Botanicals & Remedies",
+    "rimmen_b_9": "place.skycraft.rimmen Scriptorium & Charts",
+    "rimmen_b_10": "place.skycraft.rimmen Grand Provisioner & Sundries",
+    "rimmen_b_11": "place.skycraft.rimmen Silk & Hide Clothier",
+    "rimmen_b_12": "place.skycraft.rimmen Lapidary & Signets",
+    "rimmen_b_13": "place.skycraft.rimmen Wayfarer Stables & Post",
+    "rimmen_b_14": "place.skycraft.rimmen Bonded Factor Warehouse",
+    "rimmen_b_15": "place.skycraft.rimmen Watch Garrison Barracks",
+    "rimmen_b_16": "place.skycraft.rimmen High Steward's Manor",
+    "rimmen_b_17": "place.skycraft.rimmen Merchant-Factor's Villa",
+    "rimmen_landmark": "High Seat of place.skycraft.rimmen",
+    "rimmen_plaza": "place.skycraft.rimmen Central Plaza"
+  },
+  "innKey": "rimmen_b_5"
 }

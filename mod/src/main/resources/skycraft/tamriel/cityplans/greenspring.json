@@ -1,0 +1,291 @@
+{
+  "id": "greenspring",
+  "why": [
+    "helstrom.L1.helstrom_root_dome",
+    "helstrom.L4.elder_hist_canopy",
+    "helstrom.L6.helstrom_ring_and_thorn_port"
+  ],
+  "sil": "black-marsh-greenspring-plan",
+  "base": "none",
+  "overlay": "helstrom",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "helstrom",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "helstrom",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "greenspring_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "greenspring_landmark",
+      "overlay": "helstrom"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "greenspring_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "greenspring_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "greenspring_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "greenspring_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "greenspring_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "helstrom",
+      "name": "greenspring_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "helstrom",
+      "name": "greenspring_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "greenspring_pond",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "greenspring_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "greenspring_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "greenspring_b_5",
+    "store": "greenspring_b_10",
+    "smithy": "greenspring_b_7"
+  },
+  "titles": {
+    "greenspring_b_1": "place.skycraft.greenspring Council & Seat Hall",
+    "greenspring_b_2": "place.skycraft.greenspring High Sanctuary",
+    "greenspring_b_3": "place.skycraft.greenspring Fighters & Wayfarers Hall",
+    "greenspring_b_4": "place.skycraft.greenspring Mages & Chroniclers Spire",
+    "greenspring_b_5": "place.skycraft.greenspring The Lantern & Hearth Inn",
+    "greenspring_b_6": "place.skycraft.greenspring The Traveler's Rest Tavern",
+    "greenspring_b_7": "place.skycraft.greenspring Master Forge & Armorer",
+    "greenspring_b_8": "place.skycraft.greenspring Botanicals & Remedies",
+    "greenspring_b_9": "place.skycraft.greenspring Scriptorium & Charts",
+    "greenspring_b_10": "place.skycraft.greenspring Grand Provisioner & Sundries",
+    "greenspring_b_11": "place.skycraft.greenspring Silk & Hide Clothier",
+    "greenspring_b_12": "place.skycraft.greenspring Lapidary & Signets",
+    "greenspring_b_13": "place.skycraft.greenspring Wayfarer Stables & Post",
+    "greenspring_b_14": "place.skycraft.greenspring Bonded Factor Warehouse",
+    "greenspring_landmark": "High Seat of place.skycraft.greenspring",
+    "greenspring_plaza": "place.skycraft.greenspring Central Plaza"
+  },
+  "innKey": "greenspring_b_5"
+}

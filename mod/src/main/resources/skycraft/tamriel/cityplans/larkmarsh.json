@@ -1,0 +1,99 @@
+{
+  "id": "larkmarsh",
+  "why": [
+    "nibenay_basin.L4.lake_arrius_reeds",
+    "nibenay_basin.L6.blue_road_villages"
+  ],
+  "sil": "reed-dyke-causeway",
+  "base": "none",
+  "overlay": "nibenay_basin",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "nibenay_basin"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "mill",
+      "use": "mill",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "nibenay_basin",
+      "name": "larkmarsh_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "nibenay_basin",
+      "name": "larkmarsh_b_2"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "nibenay_basin",
+      "name": "larkmarsh_b_3"
+    },
+    {
+      "kind": "farmhouse",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "nibenay_basin",
+      "name": "larkmarsh_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "waterwheel",
+      "theme": "larkmarsh_weir",
+      "count": 2
+    },
+    {
+      "type": "pond",
+      "theme": "eel_trap_pool",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "larkmarsh_b_1": "Larkmarsh Weir-Mill",
+    "larkmarsh_b_2": "Eel-Trapper's Stilted Cottage",
+    "larkmarsh_b_3": "The Heron and Weir",
+    "larkmarsh_b_4": "Peat-Stack Barn"
+  },
+  "innKey": "larkmarsh_b_3",
+  "names": {
+    "inn": "larkmarsh_b_3"
+  }
+}

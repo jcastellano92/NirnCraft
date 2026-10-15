@@ -1,0 +1,307 @@
+{
+  "region": "cyrodiil/nibenay_valley",
+  "province": "cyrodiil",
+  "line": "story_nibenay_valley",
+  "category": "main",
+  "title": "The Lady's Lucky Day",
+  "why": [
+    "cyrodiil/nibenay_valley.L9.corrupt_clerk",
+    "cyrodiil/nibenay_valley.L8.lucky_old_lady",
+    "cyrodiil/nibenay_valley.L7.slum_city",
+    "cyrodiil/nibenay_valley.L10.skooma_dens"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "bravil",
+    "places": [
+      "bravil",
+      "oblivion_gate_90",
+      "copper_wood_grotto",
+      "oblivion_gate_91",
+      "oblivion_gate_37",
+      "nenyond_twyll",
+      "drunken_dragon_inn",
+      "echo_hill_mill",
+      "wind_wick_mine",
+      "yewfield_stones",
+      "niben_river_bridge",
+      "eastern_elsweyr_gate",
+      "castle_faregyl",
+      "nonius_homestead"
+    ],
+    "max_road_blocks": 600,
+    "rumour": "Every copper coin tossed into the Lucky Old Lady's fountain in Bravil vanishes before dawn, replaced by stamped brass tokens that only the midnight skooma-barges accept.",
+    "notice": "CHAPEL OF MARA & BRAVIL CANAL WATCH: Seeking an honest blade to investigate the night-tampering at the Lucky Old Lady plaza and Lunar Fang Docks.",
+    "npc": "story_nibenay_valley_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_nibenay_valley_01_copper_in_the_fountain",
+      "order": 1,
+      "title": "Brass in the Basin",
+      "region": "cyrodiil/nibenay_valley",
+      "category": "main",
+      "start": "board:bravil",
+      "prereq": null,
+      "why": [
+        "cyrodiil/nibenay_valley.L8.lucky_old_lady",
+        "cyrodiil/nibenay_valley.L7.slum_city"
+      ],
+      "places": [
+        "bravil",
+        "lunar_fang_docks"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bravil",
+          "objective": "Keep watch over the Lucky Old Lady statue in Bravil and collect the stamped brass tokens"
+        },
+        {
+          "id": 20,
+          "place": "lunar_fang_docks",
+          "objective": "Follow the token-runner along the canal boardwalk to Lunar Fang Docks"
+        },
+        {
+          "id": 30,
+          "place": "bravil",
+          "objective": "Show the harbour-stamp impression to Sister-Almoner Viera at the Bravil Chapel"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Keep watch over the Lucky Old Lady statue in Bravil and collect the stamped brass tokens"
+        },
+        {
+          "type": "go",
+          "place": "lunar_fang_docks",
+          "text": "Follow the token-runner along the canal boardwalk to Lunar Fang Docks"
+        },
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Show the harbour-stamp impression to Sister-Almoner Viera at the Bravil Chapel"
+        }
+      ],
+      "consequence": "world_state:bravil_fountain_tokens_traced",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "requires": [],
+      "consequence_detail": {
+        "world_state": "bravil_fountain_tokens_traced",
+        "flag": "story_nv_tokens_traced",
+        "summary": "The brass tokens in the fountain are struck with the private customs die of Bravil's senior harbour clerk."
+      }
+    },
+    {
+      "id": "story_nibenay_valley_02_the_barge_manifest",
+      "order": 2,
+      "title": "The Upriver Toll-Book",
+      "region": "cyrodiil/nibenay_valley",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_nibenay_valley_01_copper_in_the_fountain",
+      "requires": [
+        "story_nibenay_valley_01_copper_in_the_fountain"
+      ],
+      "why": [
+        "cyrodiil/nibenay_valley.L9.corrupt_clerk",
+        "cyrodiil/nibenay_valley.L10.skooma_dens"
+      ],
+      "places": [
+        "bravil",
+        "inn_of_ill_omen",
+        "faregyl_inn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bravil",
+          "objective": "Track the night-barge couriers north from Bravil along the Green Road"
+        },
+        {
+          "id": 20,
+          "place": "inn_of_ill_omen",
+          "objective": "Search the courier's saddlebags at the Inn of Ill Omen for the river-lock schedule"
+        },
+        {
+          "id": 30,
+          "place": "faregyl_inn",
+          "objective": "Question the retired lock-keeper at Faregyl Inn about Clerk Petronius's hidden cistern"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Track the night-barge couriers north from Bravil along the Green Road"
+        },
+        {
+          "type": "go",
+          "place": "inn_of_ill_omen",
+          "text": "Search the courier's saddlebags at the Inn of Ill Omen for the river-lock schedule"
+        },
+        {
+          "type": "go",
+          "place": "faregyl_inn",
+          "text": "Question the retired lock-keeper at Faregyl Inn about Clerk Petronius's hidden cistern"
+        }
+      ],
+      "consequence": "world_state:bravil_cistern_schedule_found",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "bravil_cistern_schedule_found",
+        "flag": "story_nv_schedule_found",
+        "summary": "The lock-keeper reveals that an old brick customs cistern directly under the Lucky Old Lady plaza is opened by a bronze key kept at Fort Aurus."
+      }
+    },
+    {
+      "id": "story_nibenay_valley_03_vault_of_the_matron",
+      "order": 3,
+      "title": "The Bronze Key of Aurus",
+      "region": "cyrodiil/nibenay_valley",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_nibenay_valley_02_the_barge_manifest",
+      "requires": [
+        "story_nibenay_valley_02_the_barge_manifest"
+      ],
+      "why": [
+        "cyrodiil/nibenay_valley.L9.elsweyr_gates",
+        "cyrodiil/nibenay_valley.L10.smuggler_caves"
+      ],
+      "places": [
+        "faregyl_inn",
+        "fort_aurus",
+        "bravil"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "faregyl_inn",
+          "objective": "Cross the Niben valley east from Faregyl Inn toward Fort Aurus"
+        },
+        {
+          "id": 20,
+          "place": "fort_aurus",
+          "objective": "Defeat the river-syndicate guards at Fort Aurus and recover the bronze cistern key"
+        },
+        {
+          "id": 30,
+          "place": "bravil",
+          "objective": "Carry the bronze key back to the Lucky Old Lady plaza in Bravil"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "faregyl_inn",
+          "text": "Cross the Niben valley east from Faregyl Inn toward Fort Aurus"
+        },
+        {
+          "type": "clear",
+          "place": "fort_aurus",
+          "text": "Defeat the river-syndicate guards at Fort Aurus and recover the bronze cistern key"
+        },
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Carry the bronze key back to the Lucky Old Lady plaza in Bravil"
+        }
+      ],
+      "consequence": "world_state:fort_aurus_key_recovered",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "fort_aurus_key_recovered",
+        "flag": "story_nv_key_recovered",
+        "summary": "With the bronze key from Fort Aurus, the secret customs vault beneath the Lucky Old Lady can be unlocked."
+      }
+    },
+    {
+      "id": "story_nibenay_valley_04_the_ladys_reckoning",
+      "order": 4,
+      "title": "The Lady's Lucky Day",
+      "region": "cyrodiil/nibenay_valley",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_nibenay_valley_03_vault_of_the_matron",
+      "requires": [
+        "story_nibenay_valley_03_vault_of_the_matron"
+      ],
+      "finale": true,
+      "why": [
+        "cyrodiil/nibenay_valley.L9.corrupt_clerk",
+        "cyrodiil/nibenay_valley.L8.mara_chapel"
+      ],
+      "places": [
+        "fort_aurus",
+        "bravil"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "fort_aurus",
+          "objective": "Bring the Fort Aurus tariff rolls downriver to Bravil"
+        },
+        {
+          "id": 20,
+          "place": "bravil",
+          "objective": "Unlock the plaza cistern beneath the Lucky Old Lady and defeat Clerk Petronius's syndicate guard"
+        },
+        {
+          "id": 30,
+          "place": "bravil",
+          "objective": "Distribute the recovered customs chest to the Chapel of Mara's canal-alms house in Bravil"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "fort_aurus",
+          "text": "Bring the Fort Aurus tariff rolls downriver to Bravil"
+        },
+        {
+          "type": "clear",
+          "place": "bravil",
+          "text": "Unlock the plaza cistern beneath the Lucky Old Lady and defeat Clerk Petronius's syndicate guard"
+        },
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Distribute the recovered customs chest to the Chapel of Mara's canal-alms house in Bravil"
+        }
+      ],
+      "consequence": "world_state:bravil_lucky_lady_vault_cleansed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Friend of the Lucky Lady",
+        "unique_item": "skycraft:redguard_sword"
+      },
+      "consequence_detail": {
+        "world_state": "bravil_lucky_lady_vault_cleansed",
+        "flag": "story_nv_finale_complete",
+        "summary": "Clerk Petronius and his Council of Ash paymaster are arrested beneath the plaza, and the stolen river-tariffs fund Bravil's canal repairs."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_nibenay_valley_hook_npc",
+      "name": "Warden of Bravil",
+      "role": "guard",
+      "place": "bravil",
+      "greet": "Every copper coin tossed into the Lucky Old Lady's fountain in Bravil vanishes before dawn, replaced by stamped brass tokens that only the midnight skooma-barges accept."
+    }
+  ]
+}

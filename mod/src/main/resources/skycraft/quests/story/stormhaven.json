@@ -1,0 +1,410 @@
+{
+  "region": "high_rock/stormhaven",
+  "title": "The Pilgrim's Bell of Shalgora",
+  "summary": "Rescue the abbey caravans of Stormhaven from a syndicate of turnpike highwaymen and Sanguine revel-cultists operating out of Farangel's Delve and Bonesnap Ruins.",
+  "why": [
+    "stormhaven.L7.abbey_stewards",
+    "stormhaven.L7.pilgrim_bands",
+    "stormhaven.L8.mara_heartland",
+    "stormhaven.L9.pilgrim_tolls",
+    "stormhaven.L10.woodland_covens"
+  ],
+  "hook": {
+    "place": "shalgora",
+    "places": [
+      "briarhaven_mine",
+      "camwick_grotto",
+      "castle_valois",
+      "crossminster_lair",
+      "duval_farm",
+      "everhelm_hollow",
+      "fontaine_farm",
+      "goldley",
+      "highwold_pit",
+      "lowmoor_sanctum",
+      "penhaven_cavern",
+      "perrin_homestead",
+      "redwych_grotto",
+      "shalgora",
+      "shrine_namira_high_rock",
+      "the_merry_hound"
+    ],
+    "npc": "story_sh_abbot_clément",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_sh_abbot_clément",
+      "name": "Abbot Clement of Shalgora",
+      "role": "priest",
+      "place": "shalgora",
+      "greet": "Grace of the Eight upon you, wayfarer. Have a care on the abbey turnpike—three pilgrim companies vanished between here and Urvaius.",
+      "talk": [
+        "Our abbey stewards maintain the bridges and hospice-inns across Stormhaven, yet someone is drugging the wayside wine-casks with crimson lotus.",
+        "Pilgrims wake in chains inside Farangel's Delve with their offerings stripped. Speak with Provost-Marshal Thibault at Firebrand Keep."
+      ]
+    },
+    {
+      "id": "story_sh_marshal_thibault",
+      "name": "Provost-Marshal Thibault",
+      "role": "knight",
+      "place": "firebrand_keep",
+      "greet": "The turnpike barons collect the road-toll and leave my lancers to patrol fifty leagues of forest with half a garrison!",
+      "talk": [
+        "A former toll-warden named Reynard the Red-Cup has joined Sanguine's revel-cultists and woodland highwaymen.",
+        "They lure pilgrims from Urvaius into Farangel's Delve, then sell the ransom-notes through Bonesnap Ruins. Question Innkeeper Margot in Urvaius."
+      ]
+    },
+    {
+      "id": "story_sh_innkeeper_margot",
+      "name": "Margot of the Pilgrim's Rest",
+      "role": "innkeeper",
+      "place": "urvaius",
+      "greet": "Don't touch the spiced claret in the cellar! A carter wearing Firebrand livery delivered it at dusk, and it smells of sleeping-poppy.",
+      "talk": [
+        "I followed the carter's lantern-marks to Farangel's Delve, where Toll-Master Gaspard guards the drugged pilgrims.",
+        "Free the pilgrims in Farangel's Delve, and they'll tell you where Reynard the Red-Cup keeps the abbey's reliquary!"
+      ]
+    },
+    {
+      "id": "story_sh_castellan_evrard",
+      "name": "Castellan Evrard",
+      "role": "guard",
+      "place": "wind_keep",
+      "greet": "Well struck at Farangel's Delve! Half the freed pilgrims have already reached the shelter of Wind Keep.",
+      "talk": [
+        "Reynard the Red-Cup has fortified Bonesnap Ruins with his highwaymen and woodland warlocks.",
+        "Take the abbey banner into Bonesnap Ruins and reclaim the Reliquary of Mara!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_sh_tollmaster_gaspard": {
+      "name": "Toll-Master Gaspard",
+      "rank": "boss",
+      "place": "farangels_delve",
+      "weapon": "steel_sword",
+      "helmet": "chainmail_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.5
+    },
+    "story_sh_reynard_red_cup": {
+      "name": "Reynard the Red-Cup",
+      "rank": "boss",
+      "place": "bonesnap_ruins",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.2,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_sh_urvaius_cellar": [
+      "Margot of the Pilgrim's Rest: Look at the bung-seal on this wine cask—stamped with the abbey's lily, but the wax is laced with red rose-thorn!",
+      "Provost-Marshal Thibault: Reynard's highwaymen are intercepting the hospice wagons at Glenmoor Memorial and swapping the casks.",
+      "Margot of the Pilgrim's Rest: Hurry to Farangel's Delve before they ship the sleeping pilgrims downriver!"
+    ],
+    "story_sh_farangel_cells": [
+      "Toll-Master Gaspard: Every pilgrim on the Stormhaven road pays twice—once at the turnpike gate, and once in our cells!",
+      "Provost-Marshal Thibault: Drop the cage keys, Gaspard, or we'll hang you from your own toll-beam!"
+    ],
+    "story_sh_bonesnap_revel": [
+      "Reynard the Red-Cup: Why should the abbeys hoard gold in cold stone reliquaries when one drop of lotus-wine turns a miser into a prince?",
+      "Castellan Evrard: You poisoned honest wayfarers and sold your oath for a gilded cup, Reynard!",
+      "Reynard the Red-Cup: Then drink deep of cold steel!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_stormhaven_01_lotus_cask",
+      "region": "high_rock/stormhaven",
+      "category": "main",
+      "title": "The Drugged Hospice Wine",
+      "giver": "story_sh_abbot_clément",
+      "start": "npc:story_sh_abbot_clément",
+      "requires": [],
+      "why": [
+        "stormhaven.L7.abbey_stewards",
+        "stormhaven.L8.mara_heartland",
+        "stormhaven.L8.revel_temptation"
+      ],
+      "summary": "Report the missing pilgrim caravans to Provost-Marshal Thibault at Firebrand Keep and inspect the drugged wine in Urvaius.",
+      "intro": [
+        "Pilgrim companies traveling the abbey turnpike from Shalgora have vanished after drinking at wayside hospices.",
+        "Speak with Provost-Marshal Thibault at Firebrand Keep, then inspect the cellar casks with Margot in Urvaius."
+      ],
+      "complete": [
+        "The casks in Urvaius were laced with sleeping-lotus by highwaymen operating out of Farangel's Delve."
+      ],
+      "journal": {
+        "start": "Abbot Clement in Shalgora sent me to Firebrand Keep and Urvaius to investigate the vanishing pilgrims.",
+        "done": "We discovered lotus-drugged wine casks in Urvaius pointing to Farangel's Delve."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "firebrand_keep",
+          "npc": "story_sh_marshal_thibault",
+          "text": "Consult Provost-Marshal Thibault at Firebrand Keep"
+        },
+        {
+          "type": "scene",
+          "place": "urvaius",
+          "target": "scene:story_sh_urvaius_cellar",
+          "text": "Inspect the drugged wine cask in Urvaius"
+        },
+        {
+          "type": "talk",
+          "place": "urvaius",
+          "npc": "story_sh_innkeeper_margot",
+          "text": "Question Margot of the Pilgrim's Rest in Urvaius"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "firebrand_keep",
+        "urvaius"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "firebrand_keep",
+          "objective": "Consult Provost-Marshal Thibault at Firebrand Keep"
+        },
+        {
+          "id": 20,
+          "place": "urvaius",
+          "objective": "Inspect the drugged wine cask in Urvaius"
+        },
+        {
+          "id": 30,
+          "place": "urvaius",
+          "objective": "Question Margot of the Pilgrim's Rest in Urvaius"
+        }
+      ],
+      "consequence": "guard_banner:stormhaven_stage_1"
+    },
+    {
+      "id": "ms1_stormhaven_02_farangels_delve",
+      "region": "high_rock/stormhaven",
+      "category": "main",
+      "title": "Chains in Farangel's Delve",
+      "giver": "story_sh_innkeeper_margot",
+      "start": "auto",
+      "requires": [
+        "ms1_stormhaven_01_lotus_cask"
+      ],
+      "why": [
+        "stormhaven.L7.pilgrim_bands",
+        "stormhaven.L9.pilgrim_tolls"
+      ],
+      "summary": "Enter Farangel's Delve, defeat Toll-Master Gaspard, and free the captive pilgrims.",
+      "intro": [
+        "Toll-Master Gaspard holds the kidnapped pilgrims in the subterranean galleries of Farangel's Delve.",
+        "Storm Farangel's Delve, defeat Gaspard, and unlock the pilgrim cages."
+      ],
+      "complete": [
+        "The captives were freed from Farangel's Delve and revealed that Reynard the Red-Cup carried the Abbey Reliquary toward Wind Keep and Bonesnap Ruins."
+      ],
+      "journal": {
+        "start": "I must enter Farangel's Delve and defeat Toll-Master Gaspard to free the pilgrims.",
+        "done": "I defeated Toll-Master Gaspard and learned Reynard the Red-Cup is inside Bonesnap Ruins."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "farangels_delve",
+          "text": "Enter Farangel's Delve"
+        },
+        {
+          "type": "scene",
+          "place": "farangels_delve",
+          "target": "scene:story_sh_farangel_cells",
+          "text": "Confront Toll-Master Gaspard by the holding cells"
+        },
+        {
+          "type": "boss",
+          "place": "farangels_delve",
+          "target": "story_sh_tollmaster_gaspard",
+          "text": "Defeat Toll-Master Gaspard"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "farangels_delve"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "farangels_delve",
+          "objective": "Enter Farangel's Delve"
+        },
+        {
+          "id": 20,
+          "place": "farangels_delve",
+          "objective": "Confront Toll-Master Gaspard by the holding cells"
+        },
+        {
+          "id": 30,
+          "place": "farangels_delve",
+          "objective": "Defeat Toll-Master Gaspard"
+        }
+      ],
+      "consequence": "npc_schedule:stormhaven_stage_2"
+    },
+    {
+      "id": "ms1_stormhaven_03_glenmoor_road",
+      "region": "high_rock/stormhaven",
+      "category": "main",
+      "title": "The Turnpike Ambush",
+      "giver": "story_sh_marshal_thibault",
+      "start": "auto",
+      "requires": [
+        "ms1_stormhaven_02_farangels_delve"
+      ],
+      "why": [
+        "stormhaven.L7.wood_outlaws",
+        "stormhaven.L9.highway_banditry"
+      ],
+      "summary": "Clear the wagon-swap site at Glenmoor Memorial and meet Castellan Evrard at Wind Keep.",
+      "intro": [
+        "Reynard's outriders use the old stones of Glenmoor Memorial as a lookout to ambush hospice wagons.",
+        "Scout Glenmoor Memorial and report to Castellan Evrard at Wind Keep."
+      ],
+      "complete": [
+        "Castellan Evrard secured the turnpike around Wind Keep and prepared the assault on Bonesnap Ruins."
+      ],
+      "journal": {
+        "start": "I must inspect the ambush site at Glenmoor Memorial and meet Castellan Evrard at Wind Keep.",
+        "done": "Castellan Evrard marshaled his guards for the strike on Bonesnap Ruins."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "glenmoor_memorial",
+          "text": "Secure the highway lookout at Glenmoor Memorial"
+        },
+        {
+          "type": "talk",
+          "place": "wind_keep",
+          "npc": "story_sh_castellan_evrard",
+          "text": "Meet Castellan Evrard at Wind Keep"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "glenmoor_memorial",
+        "wind_keep"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "glenmoor_memorial",
+          "objective": "Secure the highway lookout at Glenmoor Memorial"
+        },
+        {
+          "id": 20,
+          "place": "wind_keep",
+          "objective": "Meet Castellan Evrard at Wind Keep"
+        }
+      ],
+      "consequence": "shrine_state:stormhaven_stage_3"
+    },
+    {
+      "id": "ms1_stormhaven_04_bonesnap_reliquary",
+      "region": "high_rock/stormhaven",
+      "category": "main",
+      "title": "The Red-Cup's Last Toast",
+      "giver": "story_sh_castellan_evrard",
+      "start": "auto",
+      "requires": [
+        "ms1_stormhaven_03_glenmoor_road"
+      ],
+      "finale": true,
+      "why": [
+        "stormhaven.L8.wayside_miracles",
+        "stormhaven.L9.highway_banditry",
+        "stormhaven.L10.sanguines_demesne"
+      ],
+      "summary": "Storm Bonesnap Ruins, defeat Reynard the Red-Cup, and return the Reliquary of Mara to Abbot Clement in Shalgora.",
+      "intro": [
+        "Reynard the Red-Cup is holding a profane banquet inside Bonesnap Ruins using the stolen Reliquary of Mara.",
+        "Enter Bonesnap Ruins, defeat Reynard, and return the reliquary to Abbot Clement in Shalgora."
+      ],
+      "complete": [
+        "Reynard the Red-Cup has been vanquished, the Reliquary of Mara shines once more in Shalgora, and the abbey turnpikes are safe for travellers."
+      ],
+      "journal": {
+        "start": "I must enter Bonesnap Ruins, defeat Reynard the Red-Cup, and return the reliquary to Abbot Clement in Shalgora.",
+        "done": "I defeated Reynard the Red-Cup in Bonesnap Ruins and restored the Reliquary of Mara to Shalgora."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "bonesnap_ruins",
+          "text": "Enter Bonesnap Ruins"
+        },
+        {
+          "type": "scene",
+          "place": "bonesnap_ruins",
+          "target": "scene:story_sh_bonesnap_revel",
+          "text": "Interrupt Reynard's revel in the inner hall"
+        },
+        {
+          "type": "boss",
+          "place": "bonesnap_ruins",
+          "target": "story_sh_reynard_red_cup",
+          "text": "Defeat Reynard the Red-Cup"
+        },
+        {
+          "type": "talk",
+          "place": "shalgora",
+          "npc": "story_sh_abbot_clément",
+          "text": "Return the Reliquary of Mara to Abbot Clement in Shalgora"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "bonesnap_ruins",
+        "shalgora"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bonesnap_ruins",
+          "objective": "Enter Bonesnap Ruins"
+        },
+        {
+          "id": 20,
+          "place": "bonesnap_ruins",
+          "objective": "Interrupt Reynard's revel in the inner hall"
+        },
+        {
+          "id": 30,
+          "place": "bonesnap_ruins",
+          "objective": "Defeat Reynard the Red-Cup"
+        },
+        {
+          "id": 40,
+          "place": "shalgora",
+          "objective": "Return the Reliquary of Mara to Abbot Clement in Shalgora"
+        }
+      ],
+      "consequence": "settlement_prosperity:stormhaven_stage_4"
+    }
+  ]
+}

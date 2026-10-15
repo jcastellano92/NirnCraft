@@ -1,0 +1,291 @@
+{
+  "id": "baandari_trading_post",
+  "why": [
+    "malabal_tor.L1.xylo_gorge",
+    "malabal_tor.L4.jungle_understorey",
+    "malabal_tor.L6.silvenar_seat"
+  ],
+  "sil": "valenwood-baandari-trading-post-plan",
+  "base": "none",
+  "overlay": "malabal_tor",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "baandari_trading_post_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "baandari_trading_post_landmark",
+      "overlay": "malabal_tor"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "baandari_trading_post_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "baandari_trading_post_great_tree",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "theme": "baandari_trading_post_garden",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "baandari_trading_post_lamps",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "baandari_trading_post_b_5",
+    "store": "baandari_trading_post_b_10",
+    "smithy": "baandari_trading_post_b_7"
+  },
+  "titles": {
+    "baandari_trading_post_b_1": "place.skycraft.baandari_trading_post Council & Seat Hall",
+    "baandari_trading_post_b_2": "place.skycraft.baandari_trading_post High Sanctuary",
+    "baandari_trading_post_b_3": "place.skycraft.baandari_trading_post Fighters & Wayfarers Hall",
+    "baandari_trading_post_b_4": "place.skycraft.baandari_trading_post Mages & Chroniclers Spire",
+    "baandari_trading_post_b_5": "place.skycraft.baandari_trading_post The Lantern & Hearth Inn",
+    "baandari_trading_post_b_6": "place.skycraft.baandari_trading_post The Traveler's Rest Tavern",
+    "baandari_trading_post_b_7": "place.skycraft.baandari_trading_post Master Forge & Armorer",
+    "baandari_trading_post_b_8": "place.skycraft.baandari_trading_post Botanicals & Remedies",
+    "baandari_trading_post_b_9": "place.skycraft.baandari_trading_post Scriptorium & Charts",
+    "baandari_trading_post_b_10": "place.skycraft.baandari_trading_post Grand Provisioner & Sundries",
+    "baandari_trading_post_b_11": "place.skycraft.baandari_trading_post Silk & Hide Clothier",
+    "baandari_trading_post_b_12": "place.skycraft.baandari_trading_post Lapidary & Signets",
+    "baandari_trading_post_b_13": "place.skycraft.baandari_trading_post Wayfarer Stables & Post",
+    "baandari_trading_post_b_14": "place.skycraft.baandari_trading_post Bonded Factor Warehouse",
+    "baandari_trading_post_landmark": "High Seat of place.skycraft.baandari_trading_post",
+    "baandari_trading_post_plaza": "place.skycraft.baandari_trading_post Central Plaza"
+  },
+  "innKey": "baandari_trading_post_b_5"
+}

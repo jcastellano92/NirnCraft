@@ -1,0 +1,840 @@
+{
+  "id": "vvardenfell_ashlands",
+  "why": [
+    "vvardenfell_ashlands.L1.ash_plain",
+    "vvardenfell_ashlands.L1.crab_shell_rock"
+  ],
+  "tint": {
+    "wall": "minecraft:terracotta",
+    "wall2": "minecraft:packed_mud",
+    "low": "minecraft:polished_andesite",
+    "wood": "dark_oak",
+    "roof": "mud_brick",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "mud_bricks",
+    "cityWall2": "minecraft:packed_mud",
+    "plaza": "minecraft:polished_andesite",
+    "plaza2": "minecraft:polished_andesite",
+    "path": "minecraft:packed_mud"
+  },
+  "style": {
+    "houseStyle": "redoran",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:terracotta",
+        "minecraft:packed_mud",
+        "minecraft:polished_andesite",
+        "minecraft:packed_mud",
+        "mud_bricks",
+        "minecraft:polished_andesite"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_1_0",
+          "prop_vvardenfell_ashlands_1_1",
+          "prop_vvardenfell_ashlands_1_2",
+          "prop_vvardenfell_ashlands_1_3",
+          "prop_vvardenfell_ashlands_1_4",
+          "prop_vvardenfell_ashlands_1_5",
+          "prop_vvardenfell_ashlands_1_6",
+          "prop_vvardenfell_ashlands_1_7",
+          "prop_vvardenfell_ashlands_1_8",
+          "prop_vvardenfell_ashlands_1_9",
+          "prop_vvardenfell_ashlands_1_10",
+          "prop_vvardenfell_ashlands_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_2_0",
+          "prop_vvardenfell_ashlands_2_1",
+          "prop_vvardenfell_ashlands_2_2",
+          "prop_vvardenfell_ashlands_2_3",
+          "prop_vvardenfell_ashlands_2_4",
+          "prop_vvardenfell_ashlands_2_5",
+          "prop_vvardenfell_ashlands_2_6",
+          "prop_vvardenfell_ashlands_2_7",
+          "prop_vvardenfell_ashlands_2_8",
+          "prop_vvardenfell_ashlands_2_9",
+          "prop_vvardenfell_ashlands_2_10",
+          "prop_vvardenfell_ashlands_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_3_0",
+          "prop_vvardenfell_ashlands_3_1",
+          "prop_vvardenfell_ashlands_3_2",
+          "prop_vvardenfell_ashlands_3_3",
+          "prop_vvardenfell_ashlands_3_4",
+          "prop_vvardenfell_ashlands_3_5",
+          "prop_vvardenfell_ashlands_3_6",
+          "prop_vvardenfell_ashlands_3_7",
+          "prop_vvardenfell_ashlands_3_8",
+          "prop_vvardenfell_ashlands_3_9",
+          "prop_vvardenfell_ashlands_3_10",
+          "prop_vvardenfell_ashlands_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_4_0",
+          "prop_vvardenfell_ashlands_4_1",
+          "prop_vvardenfell_ashlands_4_2",
+          "prop_vvardenfell_ashlands_4_3",
+          "prop_vvardenfell_ashlands_4_4",
+          "prop_vvardenfell_ashlands_4_5",
+          "prop_vvardenfell_ashlands_4_6",
+          "prop_vvardenfell_ashlands_4_7",
+          "prop_vvardenfell_ashlands_4_8",
+          "prop_vvardenfell_ashlands_4_9",
+          "prop_vvardenfell_ashlands_4_10",
+          "prop_vvardenfell_ashlands_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_5_0",
+          "prop_vvardenfell_ashlands_5_1",
+          "prop_vvardenfell_ashlands_5_2",
+          "prop_vvardenfell_ashlands_5_3",
+          "prop_vvardenfell_ashlands_5_4",
+          "prop_vvardenfell_ashlands_5_5",
+          "prop_vvardenfell_ashlands_5_6",
+          "prop_vvardenfell_ashlands_5_7",
+          "prop_vvardenfell_ashlands_5_8",
+          "prop_vvardenfell_ashlands_5_9",
+          "prop_vvardenfell_ashlands_5_10",
+          "prop_vvardenfell_ashlands_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_6_0",
+          "prop_vvardenfell_ashlands_6_1",
+          "prop_vvardenfell_ashlands_6_2",
+          "prop_vvardenfell_ashlands_6_3",
+          "prop_vvardenfell_ashlands_6_4",
+          "prop_vvardenfell_ashlands_6_5",
+          "prop_vvardenfell_ashlands_6_6",
+          "prop_vvardenfell_ashlands_6_7",
+          "prop_vvardenfell_ashlands_6_8",
+          "prop_vvardenfell_ashlands_6_9",
+          "prop_vvardenfell_ashlands_6_10",
+          "prop_vvardenfell_ashlands_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_7_0",
+          "prop_vvardenfell_ashlands_7_1",
+          "prop_vvardenfell_ashlands_7_2",
+          "prop_vvardenfell_ashlands_7_3",
+          "prop_vvardenfell_ashlands_7_4",
+          "prop_vvardenfell_ashlands_7_5",
+          "prop_vvardenfell_ashlands_7_6",
+          "prop_vvardenfell_ashlands_7_7",
+          "prop_vvardenfell_ashlands_7_8",
+          "prop_vvardenfell_ashlands_7_9",
+          "prop_vvardenfell_ashlands_7_10",
+          "prop_vvardenfell_ashlands_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_8_0",
+          "prop_vvardenfell_ashlands_8_1",
+          "prop_vvardenfell_ashlands_8_2",
+          "prop_vvardenfell_ashlands_8_3",
+          "prop_vvardenfell_ashlands_8_4",
+          "prop_vvardenfell_ashlands_8_5",
+          "prop_vvardenfell_ashlands_8_6",
+          "prop_vvardenfell_ashlands_8_7",
+          "prop_vvardenfell_ashlands_8_8",
+          "prop_vvardenfell_ashlands_8_9",
+          "prop_vvardenfell_ashlands_8_10",
+          "prop_vvardenfell_ashlands_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_9_0",
+          "prop_vvardenfell_ashlands_9_1",
+          "prop_vvardenfell_ashlands_9_2",
+          "prop_vvardenfell_ashlands_9_3",
+          "prop_vvardenfell_ashlands_9_4",
+          "prop_vvardenfell_ashlands_9_5",
+          "prop_vvardenfell_ashlands_9_6",
+          "prop_vvardenfell_ashlands_9_7",
+          "prop_vvardenfell_ashlands_9_8",
+          "prop_vvardenfell_ashlands_9_9",
+          "prop_vvardenfell_ashlands_9_10",
+          "prop_vvardenfell_ashlands_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_10_0",
+          "prop_vvardenfell_ashlands_10_1",
+          "prop_vvardenfell_ashlands_10_2",
+          "prop_vvardenfell_ashlands_10_3",
+          "prop_vvardenfell_ashlands_10_4",
+          "prop_vvardenfell_ashlands_10_5",
+          "prop_vvardenfell_ashlands_10_6",
+          "prop_vvardenfell_ashlands_10_7",
+          "prop_vvardenfell_ashlands_10_8",
+          "prop_vvardenfell_ashlands_10_9",
+          "prop_vvardenfell_ashlands_10_10",
+          "prop_vvardenfell_ashlands_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_11_0",
+          "prop_vvardenfell_ashlands_11_1",
+          "prop_vvardenfell_ashlands_11_2",
+          "prop_vvardenfell_ashlands_11_3",
+          "prop_vvardenfell_ashlands_11_4",
+          "prop_vvardenfell_ashlands_11_5",
+          "prop_vvardenfell_ashlands_11_6",
+          "prop_vvardenfell_ashlands_11_7",
+          "prop_vvardenfell_ashlands_11_8",
+          "prop_vvardenfell_ashlands_11_9",
+          "prop_vvardenfell_ashlands_11_10",
+          "prop_vvardenfell_ashlands_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_12_0",
+          "prop_vvardenfell_ashlands_12_1",
+          "prop_vvardenfell_ashlands_12_2",
+          "prop_vvardenfell_ashlands_12_3",
+          "prop_vvardenfell_ashlands_12_4",
+          "prop_vvardenfell_ashlands_12_5",
+          "prop_vvardenfell_ashlands_12_6",
+          "prop_vvardenfell_ashlands_12_7",
+          "prop_vvardenfell_ashlands_12_8",
+          "prop_vvardenfell_ashlands_12_9",
+          "prop_vvardenfell_ashlands_12_10",
+          "prop_vvardenfell_ashlands_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_13_0",
+          "prop_vvardenfell_ashlands_13_1",
+          "prop_vvardenfell_ashlands_13_2",
+          "prop_vvardenfell_ashlands_13_3",
+          "prop_vvardenfell_ashlands_13_4",
+          "prop_vvardenfell_ashlands_13_5",
+          "prop_vvardenfell_ashlands_13_6",
+          "prop_vvardenfell_ashlands_13_7",
+          "prop_vvardenfell_ashlands_13_8",
+          "prop_vvardenfell_ashlands_13_9",
+          "prop_vvardenfell_ashlands_13_10",
+          "prop_vvardenfell_ashlands_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_14_0",
+          "prop_vvardenfell_ashlands_14_1",
+          "prop_vvardenfell_ashlands_14_2",
+          "prop_vvardenfell_ashlands_14_3",
+          "prop_vvardenfell_ashlands_14_4",
+          "prop_vvardenfell_ashlands_14_5",
+          "prop_vvardenfell_ashlands_14_6",
+          "prop_vvardenfell_ashlands_14_7",
+          "prop_vvardenfell_ashlands_14_8",
+          "prop_vvardenfell_ashlands_14_9",
+          "prop_vvardenfell_ashlands_14_10",
+          "prop_vvardenfell_ashlands_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_15_0",
+          "prop_vvardenfell_ashlands_15_1",
+          "prop_vvardenfell_ashlands_15_2",
+          "prop_vvardenfell_ashlands_15_3",
+          "prop_vvardenfell_ashlands_15_4",
+          "prop_vvardenfell_ashlands_15_5",
+          "prop_vvardenfell_ashlands_15_6",
+          "prop_vvardenfell_ashlands_15_7",
+          "prop_vvardenfell_ashlands_15_8",
+          "prop_vvardenfell_ashlands_15_9",
+          "prop_vvardenfell_ashlands_15_10",
+          "prop_vvardenfell_ashlands_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_16_0",
+          "prop_vvardenfell_ashlands_16_1",
+          "prop_vvardenfell_ashlands_16_2",
+          "prop_vvardenfell_ashlands_16_3",
+          "prop_vvardenfell_ashlands_16_4",
+          "prop_vvardenfell_ashlands_16_5",
+          "prop_vvardenfell_ashlands_16_6",
+          "prop_vvardenfell_ashlands_16_7",
+          "prop_vvardenfell_ashlands_16_8",
+          "prop_vvardenfell_ashlands_16_9",
+          "prop_vvardenfell_ashlands_16_10",
+          "prop_vvardenfell_ashlands_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_17_0",
+          "prop_vvardenfell_ashlands_17_1",
+          "prop_vvardenfell_ashlands_17_2",
+          "prop_vvardenfell_ashlands_17_3",
+          "prop_vvardenfell_ashlands_17_4",
+          "prop_vvardenfell_ashlands_17_5",
+          "prop_vvardenfell_ashlands_17_6",
+          "prop_vvardenfell_ashlands_17_7",
+          "prop_vvardenfell_ashlands_17_8",
+          "prop_vvardenfell_ashlands_17_9",
+          "prop_vvardenfell_ashlands_17_10",
+          "prop_vvardenfell_ashlands_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_18_0",
+          "prop_vvardenfell_ashlands_18_1",
+          "prop_vvardenfell_ashlands_18_2",
+          "prop_vvardenfell_ashlands_18_3",
+          "prop_vvardenfell_ashlands_18_4",
+          "prop_vvardenfell_ashlands_18_5",
+          "prop_vvardenfell_ashlands_18_6",
+          "prop_vvardenfell_ashlands_18_7",
+          "prop_vvardenfell_ashlands_18_8",
+          "prop_vvardenfell_ashlands_18_9",
+          "prop_vvardenfell_ashlands_18_10",
+          "prop_vvardenfell_ashlands_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_19_0",
+          "prop_vvardenfell_ashlands_19_1",
+          "prop_vvardenfell_ashlands_19_2",
+          "prop_vvardenfell_ashlands_19_3",
+          "prop_vvardenfell_ashlands_19_4",
+          "prop_vvardenfell_ashlands_19_5",
+          "prop_vvardenfell_ashlands_19_6",
+          "prop_vvardenfell_ashlands_19_7",
+          "prop_vvardenfell_ashlands_19_8",
+          "prop_vvardenfell_ashlands_19_9",
+          "prop_vvardenfell_ashlands_19_10",
+          "prop_vvardenfell_ashlands_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_20_0",
+          "prop_vvardenfell_ashlands_20_1",
+          "prop_vvardenfell_ashlands_20_2",
+          "prop_vvardenfell_ashlands_20_3",
+          "prop_vvardenfell_ashlands_20_4",
+          "prop_vvardenfell_ashlands_20_5",
+          "prop_vvardenfell_ashlands_20_6",
+          "prop_vvardenfell_ashlands_20_7",
+          "prop_vvardenfell_ashlands_20_8",
+          "prop_vvardenfell_ashlands_20_9",
+          "prop_vvardenfell_ashlands_20_10",
+          "prop_vvardenfell_ashlands_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:terracotta",
+        "wall_secondary": "minecraft:packed_mud",
+        "plinth": "minecraft:polished_andesite",
+        "carpentry": "dark_oak",
+        "roofing": "mud_brick",
+        "banner_dye": "red",
+        "paving": [
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:terracotta",
+          "minecraft:packed_mud",
+          "minecraft:polished_andesite",
+          "mud_bricks",
+          "minecraft:polished_andesite",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_vvardenfell_ashlands_21_0",
+          "prop_vvardenfell_ashlands_21_1",
+          "prop_vvardenfell_ashlands_21_2",
+          "prop_vvardenfell_ashlands_21_3",
+          "prop_vvardenfell_ashlands_21_4",
+          "prop_vvardenfell_ashlands_21_5",
+          "prop_vvardenfell_ashlands_21_6",
+          "prop_vvardenfell_ashlands_21_7",
+          "prop_vvardenfell_ashlands_21_8",
+          "prop_vvardenfell_ashlands_21_9",
+          "prop_vvardenfell_ashlands_21_10",
+          "prop_vvardenfell_ashlands_21_11"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "id": "tel_vos",
+  "why": [
+    "grazelands.L1.grass_slopes",
+    "morrowind.L6.great_house_seats"
+  ],
+  "sil": "imperial-fort-fungal-hybrid",
+  "base": "none",
+  "overlay": "grazelands",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "grazelands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "tel_vos_b_1"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        29
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "tel_vos_b_2"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "tel_vos_b_3"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -24,
+        -18
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "tel_vos_b_4"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "tel_vos_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "tel_vos_overgrown_bastion",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "aryon_telvanni",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "tel_vos_b_1": "Master Aryon's Central Tower",
+    "tel_vos_b_2": "Tel Vos Southern Keep",
+    "tel_vos_b_3": "Tel Vos Tradehouse",
+    "tel_vos_b_4": "Tel Vos Imperial Shrine",
+    "tel_vos_b_5": "Aryon's Museum"
+  }
+}

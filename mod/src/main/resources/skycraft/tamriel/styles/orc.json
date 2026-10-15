@@ -2,36 +2,998 @@
   "_doc": "Orc (Orsimer) style sheet: log longhouses under hide roofs, stone footings, forges everywhere.",
   "windows": "fence",
   "horns": true,
-  "faith": ["stendarr", "arkay", "talos"],
-  "crops": ["potatoes", "beetroots"],
-  "animals": ["goat", "pig", "chicken", "dog"],
-  "colors": ["red", "black", "brown"],
-  "forms": {"ring": 3, "cluster": 2, "linear": 1},
-  "roofs": {"poor": {"gable": 2, "shed": 1}, "common": {"gable": 3, "steep": 1}, "wealthy": {"steep": 2, "gable": 1}, "noble": {"steep": 1}},
-  "halls": {"steep": 1},
-  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 2, "l": 1}, "noble": {"l": 1, "t": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 2], "noble": [2, 2]},
-  "rules": {"timber": 0.2, "porch": 0.2, "balcony": 0.0, "shutters": 0.0, "flowerBoxes": 0.0, "chimney": 0.9, "annex": 0.5, "banners": 0.6, "lanterns": 0.3, "awning": 0.1},
-  "tiers": {
+  "faith": [
+    "stendarr",
+    "arkay",
+    "talos"
+  ],
+  "crops": [
+    "potatoes",
+    "beetroots"
+  ],
+  "animals": [
+    "goat",
+    "pig",
+    "chicken",
+    "dog"
+  ],
+  "colors": [
+    "red",
+    "black",
+    "brown"
+  ],
+  "forms": {
+    "ring": 3,
+    "cluster": 2,
+    "linear": 1
+  },
+  "roofs": {
+    "poor": {
+      "gable": 2,
+      "shed": 1
+    },
+    "common": {
+      "gable": 3,
+      "steep": 1
+    },
+    "wealthy": {
+      "steep": 2,
+      "gable": 1
+    },
+    "noble": {
+      "steep": 1
+    }
+  },
+  "halls": {
+    "steep": 1
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 1
+    },
+    "wealthy": {
+      "rect": 2,
+      "l": 1
+    },
+    "noble": {
+      "l": 1,
+      "t": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "spruce_log", "low": "cobbled_deepslate", "roof": "spruce", "roofFull": "brown_wool", "wood": "spruce", "timber": false},
-      {"wall": "dark_oak_log", "low": "cobblestone", "roof": "dark_oak", "roofFull": "brown_wool", "wood": "dark_oak", "timber": false},
-      {"wall": "cobbled_deepslate", "low": "cobbled_deepslate", "roof": "spruce", "roofFull": "gray_wool", "wood": "spruce", "timber": false}
+      1,
+      1
     ],
     "common": [
-      {"wall": "spruce_log", "low": "cobbled_deepslate", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "red"},
-      {"wall": "stripped_dark_oak_log", "low": "cobbled_deepslate", "roof": "dark_oak", "wood": "dark_oak", "timber": false, "accent": "black"},
-      {"wall": "dark_oak_planks", "low": "cobblestone", "roof": "spruce", "roofFull": "brown_wool", "wood": "dark_oak", "accent": "brown"}
+      1,
+      1
     ],
     "wealthy": [
-      {"wall": "dark_oak_log", "low": "deepslate_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false, "accent": "red"},
-      {"wall": "cobbled_deepslate", "wall2": "deepslate_bricks", "low": "cobbled_deepslate", "roof": "spruce", "wood": "spruce", "timber": false, "accent": "black"},
-      {"wall": "spruce_log", "low": "polished_blackstone", "roof": "dark_oak", "wood": "spruce", "timber": false, "accent": "brown"}
+      1,
+      2
     ],
     "noble": [
-      {"wall": "deepslate_bricks", "low": "polished_blackstone", "roof": "deepslate_tile", "wood": "dark_oak", "timber": false, "accent": "red"},
-      {"wall": "dark_oak_log", "low": "polished_blackstone_bricks", "roof": "blackstone", "wood": "dark_oak", "timber": false, "accent": "black"},
-      {"wall": "stripped_spruce_log", "low": "deepslate_bricks", "roof": "deepslate_tile", "wood": "spruce", "timber": false, "accent": "red"}
+      2,
+      2
     ]
+  },
+  "rules": {
+    "timber": 0.2,
+    "porch": 0.2,
+    "balcony": 0.0,
+    "shutters": 0.0,
+    "flowerBoxes": 0.0,
+    "chimney": 0.9,
+    "annex": 0.5,
+    "banners": 0.6,
+    "lanterns": 0.3,
+    "awning": 0.1
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "spruce_log",
+        "low": "cobbled_deepslate",
+        "roof": "spruce",
+        "roofFull": "brown_wool",
+        "wood": "spruce",
+        "timber": false
+      },
+      {
+        "wall": "dark_oak_log",
+        "low": "cobblestone",
+        "roof": "dark_oak",
+        "roofFull": "brown_wool",
+        "wood": "dark_oak",
+        "timber": false
+      },
+      {
+        "wall": "cobbled_deepslate",
+        "low": "cobbled_deepslate",
+        "roof": "spruce",
+        "roofFull": "gray_wool",
+        "wood": "spruce",
+        "timber": false
+      }
+    ],
+    "common": [
+      {
+        "wall": "spruce_log",
+        "low": "cobbled_deepslate",
+        "roof": "spruce",
+        "wood": "spruce",
+        "timber": false,
+        "accent": "red"
+      },
+      {
+        "wall": "stripped_dark_oak_log",
+        "low": "cobbled_deepslate",
+        "roof": "dark_oak",
+        "wood": "dark_oak",
+        "timber": false,
+        "accent": "black"
+      },
+      {
+        "wall": "dark_oak_planks",
+        "low": "cobblestone",
+        "roof": "spruce",
+        "roofFull": "brown_wool",
+        "wood": "dark_oak",
+        "accent": "brown"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "dark_oak_log",
+        "low": "deepslate_bricks",
+        "roof": "deepslate_tile",
+        "wood": "dark_oak",
+        "timber": false,
+        "accent": "red"
+      },
+      {
+        "wall": "cobbled_deepslate",
+        "wall2": "deepslate_bricks",
+        "low": "cobbled_deepslate",
+        "roof": "spruce",
+        "wood": "spruce",
+        "timber": false,
+        "accent": "black"
+      },
+      {
+        "wall": "spruce_log",
+        "low": "polished_blackstone",
+        "roof": "dark_oak",
+        "wood": "spruce",
+        "timber": false,
+        "accent": "brown"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "deepslate_bricks",
+        "low": "polished_blackstone",
+        "roof": "deepslate_tile",
+        "wood": "dark_oak",
+        "timber": false,
+        "accent": "red"
+      },
+      {
+        "wall": "dark_oak_log",
+        "low": "polished_blackstone_bricks",
+        "roof": "blackstone",
+        "wood": "dark_oak",
+        "timber": false,
+        "accent": "black"
+      },
+      {
+        "wall": "stripped_spruce_log",
+        "low": "deepslate_bricks",
+        "roof": "deepslate_tile",
+        "wood": "spruce",
+        "timber": false,
+        "accent": "red"
+      }
+    ]
+  },
+  "styles": {
+    "orsinium": {
+      "forms": {
+        "hilltop": 3,
+        "ring": 3,
+        "cluster": 2
+      },
+      "windows": "bars",
+      "horns": true,
+      "rules": {
+        "timber": 0.25,
+        "porch": 0.25,
+        "balcony": 0.15,
+        "chimney": 0.95,
+        "annex": 0.55,
+        "banners": 0.75,
+        "lanterns": 0.5,
+        "tower": 0.55
+      },
+      "roofs": {
+        "poor": {
+          "gable": 2,
+          "steep": 1
+        },
+        "common": {
+          "steep": 3,
+          "gable": 2
+        },
+        "wealthy": {
+          "steep": 3,
+          "gable": 1
+        },
+        "noble": {
+          "steep": 3,
+          "crenel": 1
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "slag-wall bunkhouse",
+            "wall": "cobbled_deepslate",
+            "low": "cobbled_deepslate",
+            "roof": "spruce",
+            "roofFull": "gray_wool",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "brown"
+          },
+          {
+            "name": "quarry-sledged hut",
+            "wall": "spruce_log",
+            "low": "cobbled_deepslate",
+            "roof": "dark_oak",
+            "roofFull": "brown_wool",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "charcoal-burner's cabin",
+            "wall": "dark_oak_log",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          }
+        ],
+        "common": [
+          {
+            "name": "iron-clamped longhouse",
+            "wall": "deepslate_bricks",
+            "low": "cobbled_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "foundry-worker's hall",
+            "wall": "spruce_log",
+            "wall2": "deepslate_bricks",
+            "low": "cobbled_deepslate",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "stamped-earth barracks",
+            "wall": "stripped_dark_oak_log",
+            "low": "deepslate_bricks",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "master-smith's forge-hall",
+            "wall": "deepslate_bricks",
+            "wall2": "polished_deepslate",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "iron_bars",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "armourer's bastion",
+            "wall": "polished_blackstone_bricks",
+            "low": "deepslate_bricks",
+            "roof": "blackstone",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "clan-elder's hearth-lodge",
+            "wall": "dark_oak_log",
+            "low": "polished_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "noble": [
+          {
+            "name": "blood-forge citadel",
+            "wall": "polished_blackstone_bricks",
+            "wall2": "chiseled_deepslate",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "window": "iron_bars",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "king's iron-ribbed hall",
+            "wall": "deepslate_tiles",
+            "wall2": "deepslate_bricks",
+            "low": "polished_deepslate",
+            "roof": "polished_blackstone_brick",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "pariah's high keep",
+            "wall": "deepslate_bricks",
+            "low": "chiseled_polished_blackstone",
+            "roof": "blackstone",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "fharun": {
+      "forms": {
+        "ring": 4,
+        "hilltop": 2,
+        "cluster": 1
+      },
+      "windows": "fence",
+      "horns": true,
+      "rules": {
+        "timber": 0.15,
+        "porch": 0.15,
+        "balcony": 0.05,
+        "chimney": 0.9,
+        "annex": 0.5,
+        "banners": 0.7,
+        "lanterns": 0.4,
+        "tower": 0.5
+      },
+      "roofs": {
+        "poor": {
+          "shed": 2,
+          "gable": 1
+        },
+        "common": {
+          "gable": 3,
+          "steep": 1
+        },
+        "wealthy": {
+          "steep": 3
+        },
+        "noble": {
+          "steep": 2,
+          "crenel": 1
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "sea-cliff turf hut",
+            "wall": "cobbled_deepslate",
+            "low": "cobbled_deepslate",
+            "roof": "spruce",
+            "roofFull": "gray_wool",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "drift-log shanty",
+            "wall": "spruce_log",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "roofFull": "brown_wool",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "brown"
+          },
+          {
+            "name": "seal-hunter's cell",
+            "wall": "tuff",
+            "low": "cobbled_deepslate",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "common": [
+          {
+            "name": "rime-stone longhouse",
+            "wall": "cobbled_deepslate",
+            "wall2": "spruce_log",
+            "low": "deepslate_bricks",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "whale-ribbed lodge",
+            "wall": "stripped_spruce_log",
+            "low": "cobbled_deepslate",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "bluff-watch barracks",
+            "wall": "deepslate_bricks",
+            "low": "cobbled_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "cliff-stronghold hall",
+            "wall": "deepslate_bricks",
+            "low": "polished_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "harbour-chain bastion",
+            "wall": "polished_deepslate",
+            "low": "cobbled_deepslate",
+            "roof": "blackstone",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "wise-woman's hearth",
+            "wall": "dark_oak_log",
+            "low": "deepslate_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "noble": [
+          {
+            "name": "fharun sea-citadel",
+            "wall": "deepslate_bricks",
+            "wall2": "chiseled_deepslate",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "chieftain's storm-hall",
+            "wall": "polished_blackstone_bricks",
+            "low": "polished_deepslate",
+            "roof": "blackstone",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "iron-prow keep",
+            "wall": "stripped_dark_oak_log",
+            "low": "polished_blackstone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "dragontail_stronghold": {
+      "forms": {
+        "ring": 3,
+        "hilltop": 3,
+        "cluster": 1
+      },
+      "windows": "fence",
+      "horns": true,
+      "rules": {
+        "timber": 0.1,
+        "porch": 0.2,
+        "balcony": 0.1,
+        "chimney": 0.9,
+        "annex": 0.55,
+        "banners": 0.65,
+        "lanterns": 0.4,
+        "tower": 0.45
+      },
+      "roofs": {
+        "poor": {
+          "shed": 2,
+          "flat": 1
+        },
+        "common": {
+          "gable": 3,
+          "flat": 1
+        },
+        "wealthy": {
+          "steep": 2,
+          "gable": 2
+        },
+        "noble": {
+          "steep": 2,
+          "crenel": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "red-scree pit-hut",
+            "wall": "red_sandstone",
+            "low": "cobbled_deepslate",
+            "roof": "acacia",
+            "roofFull": "brown_wool",
+            "wood": "acacia",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "copper-slag shelter",
+            "wall": "granite",
+            "low": "cobblestone",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          },
+          {
+            "name": "goat-herd's stone pen",
+            "wall": "terracotta",
+            "low": "cobbled_deepslate",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          }
+        ],
+        "common": [
+          {
+            "name": "canyon-forge longhouse",
+            "wall": "polished_granite",
+            "wall2": "dark_oak_log",
+            "low": "cobbled_deepslate",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "iron-mesa bunkhouse",
+            "wall": "red_sandstone",
+            "low": "deepslate_bricks",
+            "roof": "deepslate_tile",
+            "wood": "acacia",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "smelter-yard lodge",
+            "wall": "deepslate_bricks",
+            "low": "polished_granite",
+            "roof": "spruce",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "ore-thane's hall",
+            "wall": "deepslate_bricks",
+            "wall2": "polished_granite",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "blood-anvil keep",
+            "wall": "polished_blackstone_bricks",
+            "low": "deepslate_bricks",
+            "roof": "blackstone",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "pass-guard stronghold",
+            "wall": "cut_red_sandstone",
+            "low": "polished_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "noble": [
+          {
+            "name": "warchief's crag-bastion",
+            "wall": "polished_blackstone_bricks",
+            "wall2": "chiseled_red_sandstone",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "malacath's anvil-fane",
+            "wall": "deepslate_bricks",
+            "wall2": "chiseled_deepslate",
+            "low": "chiseled_polished_blackstone",
+            "roof": "polished_blackstone_brick",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "iron-peak citadel",
+            "wall": "polished_granite",
+            "low": "polished_blackstone_bricks",
+            "roof": "blackstone",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "betony_crag": {
+      "forms": {
+        "ring": 3,
+        "harbour": 2,
+        "cluster": 2
+      },
+      "windows": "fence",
+      "horns": true,
+      "rules": {
+        "timber": 0.25,
+        "porch": 0.2,
+        "balcony": 0.1,
+        "chimney": 0.85,
+        "annex": 0.45,
+        "banners": 0.65,
+        "lanterns": 0.45,
+        "tower": 0.4
+      },
+      "roofs": {
+        "poor": {
+          "gable": 2,
+          "shed": 1
+        },
+        "common": {
+          "gable": 3,
+          "steep": 1
+        },
+        "wealthy": {
+          "steep": 2,
+          "gable": 1
+        },
+        "noble": {
+          "steep": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "hull-timber hut",
+            "wall": "dark_oak_planks",
+            "low": "mossy_cobblestone",
+            "roof": "spruce",
+            "roofFull": "brown_wool",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          },
+          {
+            "name": "cove-stone shelter",
+            "wall": "mossy_cobblestone",
+            "low": "cobblestone",
+            "roof": "dark_oak",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "kelp-dryer's shed",
+            "wall": "spruce_log",
+            "low": "mossy_cobblestone",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "common": [
+          {
+            "name": "sea-cliff longhouse",
+            "wall": "spruce_log",
+            "low": "mossy_stone_bricks",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "breaker-wall lodge",
+            "wall": "mossy_stone_bricks",
+            "low": "cobbled_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "oar-house barracks",
+            "wall": "stripped_dark_oak_log",
+            "low": "mossy_cobblestone",
+            "roof": "spruce",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "island-reaver's hall",
+            "wall": "deepslate_bricks",
+            "wall2": "mossy_stone_bricks",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "watch-headland keep",
+            "wall": "dark_oak_log",
+            "low": "deepslate_bricks",
+            "roof": "blackstone",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "beacon-forge house",
+            "wall": "stone_bricks",
+            "low": "cobbled_deepslate",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "noble": [
+          {
+            "name": "crag-chieftain's hold",
+            "wall": "deepslate_bricks",
+            "wall2": "chiseled_stone_bricks",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "sea-gate stronghold",
+            "wall": "polished_blackstone_bricks",
+            "low": "deepslate_bricks",
+            "roof": "polished_blackstone_brick",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "iron-headland hall",
+            "wall": "dark_oak_log",
+            "low": "polished_blackstone_bricks",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ]
+      }
+    },
+    "skyrim_stronghold": {
+      "forms": {
+        "ring": 4,
+        "cluster": 1
+      },
+      "windows": "fence",
+      "horns": true,
+      "rules": {
+        "timber": 0.2,
+        "porch": 0.25,
+        "balcony": 0.0,
+        "chimney": 0.95,
+        "annex": 0.5,
+        "banners": 0.6,
+        "lanterns": 0.35,
+        "tower": 0.35
+      },
+      "roofs": {
+        "poor": {
+          "gable": 2,
+          "shed": 1
+        },
+        "common": {
+          "gable": 3,
+          "steep": 1
+        },
+        "wealthy": {
+          "steep": 2,
+          "gable": 1
+        },
+        "noble": {
+          "steep": 2
+        }
+      },
+      "tiers": {
+        "poor": [
+          {
+            "name": "palisade watch-hut",
+            "wall": "spruce_log",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "roofFull": "brown_wool",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "brown"
+          },
+          {
+            "name": "mine-mouth cabin",
+            "wall": "cobbled_deepslate",
+            "low": "cobbled_deepslate",
+            "roof": "dark_oak",
+            "roofFull": "gray_wool",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "hide-tanner's shed",
+            "wall": "dark_oak_log",
+            "low": "cobblestone",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ],
+        "common": [
+          {
+            "name": "hearth-wife's lodge",
+            "wall": "spruce_log",
+            "low": "cobbled_deepslate",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "huntsman's longhouse",
+            "wall": "stripped_dark_oak_log",
+            "low": "stone_bricks",
+            "roof": "dark_oak",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "quern-house",
+            "wall": "dark_oak_planks",
+            "low": "cobbled_deepslate",
+            "roof": "spruce",
+            "roofFull": "brown_wool",
+            "wood": "dark_oak",
+            "accent": "brown"
+          }
+        ],
+        "wealthy": [
+          {
+            "name": "forgemaster's hall",
+            "wall": "dark_oak_log",
+            "low": "deepslate_bricks",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "shaman's herb-lodge",
+            "wall": "cobbled_deepslate",
+            "wall2": "deepslate_bricks",
+            "low": "cobbled_deepslate",
+            "roof": "spruce",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "brawler's mead-hall",
+            "wall": "spruce_log",
+            "low": "polished_blackstone",
+            "roof": "dark_oak",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "brown"
+          }
+        ],
+        "noble": [
+          {
+            "name": "chief's great longhouse",
+            "wall": "deepslate_bricks",
+            "low": "polished_blackstone",
+            "roof": "deepslate_tile",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "red"
+          },
+          {
+            "name": "blood-kin council hall",
+            "wall": "dark_oak_log",
+            "low": "polished_blackstone_bricks",
+            "roof": "blackstone",
+            "wood": "dark_oak",
+            "timber": false,
+            "accent": "black"
+          },
+          {
+            "name": "grudge-stone keep",
+            "wall": "stripped_spruce_log",
+            "low": "deepslate_bricks",
+            "roof": "deepslate_tile",
+            "wood": "spruce",
+            "timber": false,
+            "accent": "red"
+          }
+        ]
+      }
+    }
   }
 }

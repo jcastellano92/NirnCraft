@@ -303,9 +303,13 @@ def polyline_field(line, radius, extra=None, gx=None, gz=None):
 
 # ---------------------------------------------------------------------------------------------------------------------
 def anchor_list():
-    out = []
+    by_id = {}
     for p in json.load(open(PLACES, encoding="utf-8")):
-        out.append((p["id"], p["region"], p["x"], p["z"], p.get("radius", 150)))
+        by_id[p["id"]] = (p["id"], p["region"], p["x"], p["z"], p.get("radius", 150))
+    for pid, (rid, x, z) in ILIAC_ANCHORS.items():
+        rad = by_id[pid][4] if pid in by_id else 150
+        by_id[pid] = (pid, rid, x, z, rad)
+    out = list(by_id.values())
     for pid, (rid, x, z) in SKYRIM_ANCHORS.items():
         out.append((pid, rid, x, z, 140))
     return out
@@ -323,7 +327,9 @@ def settlement_pads():
         for p in json.load(open(f, encoding="utf-8")):
             s = PAD_STRENGTH.get(p["type"])
             if s:
-                out[p["id"]] = (p["id"], p["x"], p["z"], p.get("radius", 120), s)
+                pid = p["id"]
+                _, x, z = ILIAC_ANCHORS.get(pid, (p.get("region"), p["x"], p["z"]))
+                out[pid] = (pid, x, z, p.get("radius", 120), s)
     return list(out.values())
 
 
@@ -949,6 +955,8 @@ def write_assets(o):
              "music": prov, "weather": r["weather"]}
         if r.get("capital"):
             e["capital"] = r["capital"]
+        if r.get("realm_banner"):
+            e["realm_banner"] = r["realm_banner"]
         if r.get("terrain"):
             e["terrain"] = dict(zip(["base", "relief", "rough", "crag", "dunes", "wet", "coast"], r["terrain"]))
         if r.get("procedural"):
@@ -959,12 +967,22 @@ def write_assets(o):
 
     lang = {e["name"]: REGION_NAMES.get(e["id"], e["id"].split("/")[1].replace("_", " ").title()) for e in table}
     lang["region.skycraft.realm.generated"] = "%s"
+    lang.update(RIVER_NAMES)
     with open(LANG, "w", encoding="utf-8", newline="\n") as f:
         json.dump(dict(sorted(lang.items())), f, indent=2, ensure_ascii=False)
         f.write("\n")
 
 
 LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft", "tamriel_regions.json")
+RIVER_NAMES = {
+    "river.skycraft.daggerfall_river": "Ilessan Water",
+    "river.skycraft.anticlere_river": "Maran Water",
+    "river.skycraft.dwynnen_river": "Karstbeck",
+    "river.skycraft.bjoulsae_river": "Bjoulsae River",
+    "river.skycraft.sentinel_wadi": "Wadi Tigonus",
+    "river.skycraft.lainlyn_river": "Lainlyn Run",
+    "river.skycraft.totambu_river": "Totambu River",
+}
 REGION_NAMES = {
     "sea/open_ocean": "The Open Sea", "sea/sea_of_ghosts": "Sea of Ghosts", "sea/abecean_sea": "Abecean Sea",
     "sea/iliac_bay": "Iliac Bay", "sea/topal_bay": "Topal Bay", "sea/inner_sea": "Inner Sea",
@@ -981,10 +999,12 @@ REGION_NAMES = {
     "morrowind/ascadian_isles": "Ascadian Isles", "morrowind/grazelands": "Grazelands", "morrowind/molag_amur": "Molag Amur",
     "morrowind/azuras_coast": "Azura's Coast", "morrowind/sheogorad": "Sheogorad", "morrowind/telvannis": "Telvannis",
     "morrowind/deshaan": "Deshaan", "morrowind/stonefalls": "Stonefalls",
+    "high_rock/daggerfall": "Daggerfall", "high_rock/anticlere": "Anticlere", "high_rock/dwynnen": "Dwynnen",
     "high_rock/glenumbra": "Glenumbra", "high_rock/stormhaven": "Stormhaven", "high_rock/rivenspire": "Rivenspire",
     "high_rock/wrothgar": "Wrothgar", "high_rock/wayrest": "Wayrest", "high_rock/bjoulsae": "Bjoulsae River",
-    "hammerfell/alikr_desert": "Alik'r Desert", "hammerfell/bangkorai": "Bangkorai", "hammerfell/craglorn": "Craglorn",
-    "hammerfell/stros_mkai": "Stros M'Kai", "hammerfell/hews_bane": "Hew's Bane", "hammerfell/dragontail": "Dragontail Mountains",
+    "hammerfell/sentinel": "Sentinel", "hammerfell/alikr_desert": "Alik'r Desert", "hammerfell/bangkorai": "Bangkorai",
+    "hammerfell/craglorn": "Craglorn", "hammerfell/stros_mkai": "Stros M'Kai", "hammerfell/hews_bane": "Hew's Bane",
+    "hammerfell/dragontail": "Dragontail Mountains",
     "black_marsh/shadowfen": "Shadowfen", "black_marsh/murkmire": "Murkmire", "black_marsh/gideon": "Gideon",
     "black_marsh/stormhold": "Stormhold", "black_marsh/helstrom": "Helstrom", "black_marsh/lilmoth": "Lilmoth",
     "elsweyr/anequina": "Anequina", "elsweyr/rimmen": "Rimmen", "elsweyr/torval": "Torval", "elsweyr/pellitine": "Pellitine",
@@ -1011,6 +1031,11 @@ SKYRIM_ANCHORS = {  # from the reference markers (Whiterun = 0, 0)
     "karthwasten": ("skyrim/the_reach", -2420, -729), "kynesgrove": ("skyrim/eastmarch", 1825, -298),
     "shors_stone": ("skyrim/the_rift", 2269, 842), "throat_of_the_world": ("skyrim/whiterun", 590, 650),
 }
+ILIAC_ANCHORS = {  # IB1 binding anchor updates (TAMRIEL.md section 9)
+    "daggerfall": ("high_rock/daggerfall", -9300, 2600),
+    "sentinel": ("hammerfell/sentinel", -7976, 4900),
+    "elinhir": ("hammerfell/craglorn", -3950, 3800),
+}
 COASTAL = {"anvil", "leyawiin", "vivec", "sadrith_mora", "necrom", "raven_rock", "wayrest", "daggerfall", "sentinel",
            "taneth", "lilmoth", "senchal", "woodhearth", "alinor", "firsthold", "solitude", "dawnstar", "winterhold"}
 ON_RIVER = {"dragon_bridge"}  # bridge towns: the river runs through them
@@ -1022,6 +1047,7 @@ def anchors():
     out = {}
     for p in json.load(open(PLACES, encoding="utf-8")):
         out[p["id"]] = (p["region"], p["x"], p["z"])
+    out.update(ILIAC_ANCHORS)
     out.update(SKYRIM_ANCHORS)
     return out
 

@@ -1,0 +1,855 @@
+{
+ "id": "vilverin",
+ "why": [
+  "heartlands.L1.ayleid_footings",
+  "heartlands.L10.lake_cult_caves"
+ ],
+ "kit": "altmer",
+ "entry_depth": 22,
+ "palette": {
+  "wall": [
+   "minecraft:calcite*5",
+   "minecraft:smooth_quartz*4",
+   "minecraft:quartz_bricks*3",
+   "minecraft:polished_diorite*2",
+   "minecraft:sea_lantern*1"
+  ],
+  "floor": [
+   "minecraft:smooth_quartz*5",
+   "minecraft:calcite*3",
+   "minecraft:quartz_bricks*2"
+  ],
+  "ceiling": [
+   "minecraft:calcite*4",
+   "minecraft:smooth_quartz*3"
+  ],
+  "rock": "minecraft:calcite",
+  "trim": "minecraft:chiseled_quartz_block",
+  "pillar": "minecraft:quartz_pillar",
+  "cap": "minecraft:chiseled_quartz_block",
+  "light": "minecraft:sea_lantern",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:diorite_wall",
+  "stair": "minecraft:smooth_quartz_stairs"
+ },
+ "boss": {
+  "id": "skycraft:necromancer|minecraft:evoker",
+  "name": "Jalbert the Culanwe Necromancer"
+ },
+ "books": {
+  "lore_1": {
+   "title": "Canopy of Culanwe",
+   "author": "Scholar Umbacano",
+   "pages": [
+    "Across the reed-shallows from the Imperial Prison stands Vilverin, whose four subterranean tiers descend from bandit campfires into a necromancer's sanctum beneath a carved Ayleid star-statue."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "r_entry",
+   "name": "Lakeshore Pillared Entry",
+   "at": [
+    0,
+    0
+   ],
+   "y": -8,
+   "half": [
+    5,
+    6
+   ],
+   "h": 12,
+   "role": "start",
+   "doors": {
+    "s": 8
+   },
+   "ops": [
+    {
+     "op": "landing",
+     "y": 8,
+     "depth": 3,
+     "stairs": 3
+    },
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Rumare Bandit Lookout",
+       "mode": "awake",
+       "n": 2
+      },
+      {
+       "id": "minecraft:zombie",
+       "name": "Vilverin Bone-Walker",
+       "mode": "sleep",
+       "n": 1,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_1",
+   "name": "Bandit Provision Vault",
+   "at": [
+    -1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Rumare Bandit Lookout",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_1",
+   "name": "East Reed Cistern",
+   "at": [
+    1,
+    0
+   ],
+   "y": -8,
+   "half": [
+    4,
+    4
+   ],
+   "h": 6,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 3
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Vilverin Bone-Walker",
+       "mode": "ambush",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_minor",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "r_rotunda",
+   "name": "Hall of Welkynd Pedestals",
+   "at": [
+    0,
+    -1
+   ],
+   "y": -10,
+   "half": [
+    5,
+    5
+   ],
+   "h": 10,
+   "ops": [
+    {
+     "op": "bowl",
+     "tiers": 2,
+     "width": 2,
+     "step": 1
+    },
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Culanwe Shade",
+       "mode": "awake",
+       "n": 2,
+       "where": "ledge"
+      },
+      {
+       "id": "minecraft:vindicator",
+       "name": "Welkynd Sentinel",
+       "mode": "ambush",
+       "n": 1,
+       "where": "ledge"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_2",
+   "name": "Bone-Pit Ossuary",
+   "at": [
+    -1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Vilverin Bone-Walker",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_2",
+   "name": "Star-Relief Gallery",
+   "at": [
+    1,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Culanwe Shade",
+       "mode": "sleep",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      -3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "e"
+    }
+   ]
+  },
+  {
+   "id": "r_shaft",
+   "name": "Sanctum of the Varla Cage",
+   "at": [
+    0,
+    -2
+   ],
+   "y": -13,
+   "half": [
+    5,
+    5
+   ],
+   "h": 12,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vindicator",
+       "name": "Welkynd Sentinel",
+       "mode": "elite",
+       "at": [
+        [
+         0,
+         -3
+        ]
+       ]
+      },
+      {
+       "id": "minecraft:skeleton",
+       "name": "Rumare Bandit Lookout",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_west_3",
+   "name": "West Sarcophagus Hall",
+   "at": [
+    -1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Culanwe Shade",
+       "mode": "sleep",
+       "at": [
+        [
+         -3,
+         -3
+        ],
+        [
+         -3,
+         0
+        ],
+        [
+         -3,
+         3
+        ],
+        [
+         3,
+         3
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_common",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_east_3",
+   "name": "East Sarcophagus Hall",
+   "at": [
+    1,
+    -2
+   ],
+   "y": -17,
+   "half": [
+    4,
+    5
+   ],
+   "h": 9,
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 1,
+     "every": 4
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Welkynd Sentinel",
+       "mode": "ambush",
+       "n": 3,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      4
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_conduit",
+   "name": "Necromancer's Embalming Cell",
+   "at": [
+    -1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 8,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:vex",
+       "name": "Culanwe Shade",
+       "mode": "awake",
+       "n": 2,
+       "where": "any"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      3,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "w"
+    }
+   ]
+  },
+  {
+   "id": "r_boss",
+   "name": "Altar of Culanwe",
+   "at": [
+    0,
+    -3
+   ],
+   "y": -22,
+   "half": [
+    6,
+    6
+   ],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {
+     "op": "pillars",
+     "inset": 2,
+     "every": 4,
+     "light": true
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 5
+    },
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 10
+    },
+    {
+     "op": "boss",
+     "at": [
+      0,
+      -2
+     ],
+     "dais": 2
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -5
+     ],
+     "table": "skycraft:chests/dungeon_boss",
+     "face": "s",
+     "capstone": true
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Welkynd Sentinel",
+       "mode": "sleep",
+       "at": [
+        [
+         -4,
+         3
+        ],
+        [
+         4,
+         3
+        ],
+        [
+         -4,
+         0
+        ],
+        [
+         4,
+         0
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_study",
+   "name": "Jalbert's Scriptorium",
+   "at": [
+    1,
+    -3
+   ],
+   "y": -21,
+   "half": [
+    4,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 4,
+     "y": 4
+    },
+    {
+     "op": "fill",
+     "from": [
+      3,
+      -3,
+      0
+     ],
+     "to": [
+      3,
+      -3,
+      0
+     ],
+     "block": "trim"
+    },
+    {
+     "op": "lectern",
+     "at": [
+      3,
+      -3,
+      1
+     ],
+     "book": "lore_1",
+     "candle": true,
+     "face": "w"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Vilverin Bone-Walker",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_basin",
+   "name": "Rumare Seepage Basin",
+   "at": [
+    -2,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "flood",
+     "sink": 3,
+     "margin": 1,
+     "causeway": 3,
+     "rails": false
+    },
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Rumare Bandit Lookout",
+       "mode": "awake",
+       "n": 1,
+       "where": "lane"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_reliquary",
+   "name": "Ayleid Reliquary",
+   "at": [
+    2,
+    -1
+   ],
+   "y": -14,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      -3
+     ],
+     "table": "skycraft:chests/dungeon_cache",
+     "face": "s"
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Culanwe Shade",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r_outer_walk",
+   "name": "Deep Conduit Walk",
+   "at": [
+    -2,
+    -2
+   ],
+   "y": -18,
+   "half": [
+    3,
+    4
+   ],
+   "h": 7,
+   "ops": [
+    {
+     "op": "walllights",
+     "every": 3,
+     "y": 4
+    },
+    {
+     "op": "mobs",
+     "list": [
+      {
+       "id": "minecraft:skeleton",
+       "name": "Vilverin Bone-Walker",
+       "mode": "sleep",
+       "n": 2,
+       "where": "wall"
+      }
+     ]
+    },
+    {
+     "op": "chest",
+     "at": [
+      0,
+      3
+     ],
+     "table": "skycraft:chests/dungeon_minor",
+     "face": "n"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "a": "r_entry",
+   "b": "r_west_1"
+  },
+  {
+   "a": "r_entry",
+   "b": "r_east_1"
+  },
+  {
+   "a": "r_entry",
+   "b": "r_rotunda"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_west_2"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_east_2"
+  },
+  {
+   "a": "r_west_2",
+   "b": "r_basin"
+  },
+  {
+   "a": "r_east_2",
+   "b": "r_reliquary"
+  },
+  {
+   "a": "r_rotunda",
+   "b": "r_shaft",
+   "gate": "r_rotunda"
+  },
+  {
+   "a": "r_shaft",
+   "b": "r_west_3"
+  },
+  {
+   "a": "r_shaft",
+   "b": "r_east_3"
+  },
+  {
+   "a": "r_west_3",
+   "b": "r_conduit"
+  },
+  {
+   "a": "r_east_3",
+   "b": "r_study"
+  },
+  {
+   "a": "r_study",
+   "b": "r_boss",
+   "gate": "r_study",
+   "trap": true
+  },
+  {
+   "a": "r_west_3",
+   "b": "r_outer_walk"
+  },
+  {
+   "a": "r_basin",
+   "b": "r_outer_walk"
+  }
+ ]
+}

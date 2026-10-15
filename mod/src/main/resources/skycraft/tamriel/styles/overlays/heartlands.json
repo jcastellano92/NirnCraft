@@ -1,0 +1,23 @@
+{
+  "id": "heartlands",
+  "why": [
+    "heartlands.L1.island_bedrock",
+    "heartlands.L4.heath_and_grain",
+    "heartlands.L6.red_ring_villages"
+  ],
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:stone_bricks",
+    "low": "minecraft:stone_bricks",
+    "wood": "oak",
+    "roof": "brick",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:calcite",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:bricks",
+    "path": "minecraft:gravel"
+  }
+}

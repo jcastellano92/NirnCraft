@@ -1,0 +1,840 @@
+{
+  "id": "molag_amur",
+  "why": [
+    "molag_amur.L1.lava_field",
+    "molag_amur.L1.obsidian_flats"
+  ],
+  "tint": {
+    "wall": "minecraft:polished_basalt",
+    "wall2": "minecraft:blackstone",
+    "low": "minecraft:deepslate_bricks",
+    "wood": "dark_oak",
+    "roof": "deepslate_tile",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "deepslate_bricks",
+    "cityWall2": "minecraft:blackstone",
+    "plaza": "minecraft:blackstone",
+    "plaza2": "minecraft:deepslate_bricks",
+    "path": "minecraft:basalt"
+  },
+  "style": {
+    "houseStyle": "temple",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:polished_basalt",
+        "minecraft:blackstone",
+        "minecraft:deepslate_bricks",
+        "minecraft:basalt",
+        "deepslate_bricks",
+        "minecraft:blackstone"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_1_0",
+          "prop_molag_amur_1_1",
+          "prop_molag_amur_1_2",
+          "prop_molag_amur_1_3",
+          "prop_molag_amur_1_4",
+          "prop_molag_amur_1_5",
+          "prop_molag_amur_1_6",
+          "prop_molag_amur_1_7",
+          "prop_molag_amur_1_8",
+          "prop_molag_amur_1_9",
+          "prop_molag_amur_1_10",
+          "prop_molag_amur_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_2_0",
+          "prop_molag_amur_2_1",
+          "prop_molag_amur_2_2",
+          "prop_molag_amur_2_3",
+          "prop_molag_amur_2_4",
+          "prop_molag_amur_2_5",
+          "prop_molag_amur_2_6",
+          "prop_molag_amur_2_7",
+          "prop_molag_amur_2_8",
+          "prop_molag_amur_2_9",
+          "prop_molag_amur_2_10",
+          "prop_molag_amur_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_3_0",
+          "prop_molag_amur_3_1",
+          "prop_molag_amur_3_2",
+          "prop_molag_amur_3_3",
+          "prop_molag_amur_3_4",
+          "prop_molag_amur_3_5",
+          "prop_molag_amur_3_6",
+          "prop_molag_amur_3_7",
+          "prop_molag_amur_3_8",
+          "prop_molag_amur_3_9",
+          "prop_molag_amur_3_10",
+          "prop_molag_amur_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_4_0",
+          "prop_molag_amur_4_1",
+          "prop_molag_amur_4_2",
+          "prop_molag_amur_4_3",
+          "prop_molag_amur_4_4",
+          "prop_molag_amur_4_5",
+          "prop_molag_amur_4_6",
+          "prop_molag_amur_4_7",
+          "prop_molag_amur_4_8",
+          "prop_molag_amur_4_9",
+          "prop_molag_amur_4_10",
+          "prop_molag_amur_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_5_0",
+          "prop_molag_amur_5_1",
+          "prop_molag_amur_5_2",
+          "prop_molag_amur_5_3",
+          "prop_molag_amur_5_4",
+          "prop_molag_amur_5_5",
+          "prop_molag_amur_5_6",
+          "prop_molag_amur_5_7",
+          "prop_molag_amur_5_8",
+          "prop_molag_amur_5_9",
+          "prop_molag_amur_5_10",
+          "prop_molag_amur_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_6_0",
+          "prop_molag_amur_6_1",
+          "prop_molag_amur_6_2",
+          "prop_molag_amur_6_3",
+          "prop_molag_amur_6_4",
+          "prop_molag_amur_6_5",
+          "prop_molag_amur_6_6",
+          "prop_molag_amur_6_7",
+          "prop_molag_amur_6_8",
+          "prop_molag_amur_6_9",
+          "prop_molag_amur_6_10",
+          "prop_molag_amur_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_7_0",
+          "prop_molag_amur_7_1",
+          "prop_molag_amur_7_2",
+          "prop_molag_amur_7_3",
+          "prop_molag_amur_7_4",
+          "prop_molag_amur_7_5",
+          "prop_molag_amur_7_6",
+          "prop_molag_amur_7_7",
+          "prop_molag_amur_7_8",
+          "prop_molag_amur_7_9",
+          "prop_molag_amur_7_10",
+          "prop_molag_amur_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_8_0",
+          "prop_molag_amur_8_1",
+          "prop_molag_amur_8_2",
+          "prop_molag_amur_8_3",
+          "prop_molag_amur_8_4",
+          "prop_molag_amur_8_5",
+          "prop_molag_amur_8_6",
+          "prop_molag_amur_8_7",
+          "prop_molag_amur_8_8",
+          "prop_molag_amur_8_9",
+          "prop_molag_amur_8_10",
+          "prop_molag_amur_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_9_0",
+          "prop_molag_amur_9_1",
+          "prop_molag_amur_9_2",
+          "prop_molag_amur_9_3",
+          "prop_molag_amur_9_4",
+          "prop_molag_amur_9_5",
+          "prop_molag_amur_9_6",
+          "prop_molag_amur_9_7",
+          "prop_molag_amur_9_8",
+          "prop_molag_amur_9_9",
+          "prop_molag_amur_9_10",
+          "prop_molag_amur_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_10_0",
+          "prop_molag_amur_10_1",
+          "prop_molag_amur_10_2",
+          "prop_molag_amur_10_3",
+          "prop_molag_amur_10_4",
+          "prop_molag_amur_10_5",
+          "prop_molag_amur_10_6",
+          "prop_molag_amur_10_7",
+          "prop_molag_amur_10_8",
+          "prop_molag_amur_10_9",
+          "prop_molag_amur_10_10",
+          "prop_molag_amur_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_11_0",
+          "prop_molag_amur_11_1",
+          "prop_molag_amur_11_2",
+          "prop_molag_amur_11_3",
+          "prop_molag_amur_11_4",
+          "prop_molag_amur_11_5",
+          "prop_molag_amur_11_6",
+          "prop_molag_amur_11_7",
+          "prop_molag_amur_11_8",
+          "prop_molag_amur_11_9",
+          "prop_molag_amur_11_10",
+          "prop_molag_amur_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_12_0",
+          "prop_molag_amur_12_1",
+          "prop_molag_amur_12_2",
+          "prop_molag_amur_12_3",
+          "prop_molag_amur_12_4",
+          "prop_molag_amur_12_5",
+          "prop_molag_amur_12_6",
+          "prop_molag_amur_12_7",
+          "prop_molag_amur_12_8",
+          "prop_molag_amur_12_9",
+          "prop_molag_amur_12_10",
+          "prop_molag_amur_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_13_0",
+          "prop_molag_amur_13_1",
+          "prop_molag_amur_13_2",
+          "prop_molag_amur_13_3",
+          "prop_molag_amur_13_4",
+          "prop_molag_amur_13_5",
+          "prop_molag_amur_13_6",
+          "prop_molag_amur_13_7",
+          "prop_molag_amur_13_8",
+          "prop_molag_amur_13_9",
+          "prop_molag_amur_13_10",
+          "prop_molag_amur_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_14_0",
+          "prop_molag_amur_14_1",
+          "prop_molag_amur_14_2",
+          "prop_molag_amur_14_3",
+          "prop_molag_amur_14_4",
+          "prop_molag_amur_14_5",
+          "prop_molag_amur_14_6",
+          "prop_molag_amur_14_7",
+          "prop_molag_amur_14_8",
+          "prop_molag_amur_14_9",
+          "prop_molag_amur_14_10",
+          "prop_molag_amur_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_15_0",
+          "prop_molag_amur_15_1",
+          "prop_molag_amur_15_2",
+          "prop_molag_amur_15_3",
+          "prop_molag_amur_15_4",
+          "prop_molag_amur_15_5",
+          "prop_molag_amur_15_6",
+          "prop_molag_amur_15_7",
+          "prop_molag_amur_15_8",
+          "prop_molag_amur_15_9",
+          "prop_molag_amur_15_10",
+          "prop_molag_amur_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_16_0",
+          "prop_molag_amur_16_1",
+          "prop_molag_amur_16_2",
+          "prop_molag_amur_16_3",
+          "prop_molag_amur_16_4",
+          "prop_molag_amur_16_5",
+          "prop_molag_amur_16_6",
+          "prop_molag_amur_16_7",
+          "prop_molag_amur_16_8",
+          "prop_molag_amur_16_9",
+          "prop_molag_amur_16_10",
+          "prop_molag_amur_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_17_0",
+          "prop_molag_amur_17_1",
+          "prop_molag_amur_17_2",
+          "prop_molag_amur_17_3",
+          "prop_molag_amur_17_4",
+          "prop_molag_amur_17_5",
+          "prop_molag_amur_17_6",
+          "prop_molag_amur_17_7",
+          "prop_molag_amur_17_8",
+          "prop_molag_amur_17_9",
+          "prop_molag_amur_17_10",
+          "prop_molag_amur_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_18_0",
+          "prop_molag_amur_18_1",
+          "prop_molag_amur_18_2",
+          "prop_molag_amur_18_3",
+          "prop_molag_amur_18_4",
+          "prop_molag_amur_18_5",
+          "prop_molag_amur_18_6",
+          "prop_molag_amur_18_7",
+          "prop_molag_amur_18_8",
+          "prop_molag_amur_18_9",
+          "prop_molag_amur_18_10",
+          "prop_molag_amur_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_19_0",
+          "prop_molag_amur_19_1",
+          "prop_molag_amur_19_2",
+          "prop_molag_amur_19_3",
+          "prop_molag_amur_19_4",
+          "prop_molag_amur_19_5",
+          "prop_molag_amur_19_6",
+          "prop_molag_amur_19_7",
+          "prop_molag_amur_19_8",
+          "prop_molag_amur_19_9",
+          "prop_molag_amur_19_10",
+          "prop_molag_amur_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_20_0",
+          "prop_molag_amur_20_1",
+          "prop_molag_amur_20_2",
+          "prop_molag_amur_20_3",
+          "prop_molag_amur_20_4",
+          "prop_molag_amur_20_5",
+          "prop_molag_amur_20_6",
+          "prop_molag_amur_20_7",
+          "prop_molag_amur_20_8",
+          "prop_molag_amur_20_9",
+          "prop_molag_amur_20_10",
+          "prop_molag_amur_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:polished_basalt",
+        "wall_secondary": "minecraft:blackstone",
+        "plinth": "minecraft:deepslate_bricks",
+        "carpentry": "dark_oak",
+        "roofing": "deepslate_tile",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:blackstone",
+          "minecraft:basalt",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:polished_basalt",
+          "minecraft:blackstone",
+          "minecraft:deepslate_bricks",
+          "deepslate_bricks",
+          "minecraft:blackstone",
+          "minecraft:basalt"
+        ],
+        "props": [
+          "prop_molag_amur_21_0",
+          "prop_molag_amur_21_1",
+          "prop_molag_amur_21_2",
+          "prop_molag_amur_21_3",
+          "prop_molag_amur_21_4",
+          "prop_molag_amur_21_5",
+          "prop_molag_amur_21_6",
+          "prop_molag_amur_21_7",
+          "prop_molag_amur_21_8",
+          "prop_molag_amur_21_9",
+          "prop_molag_amur_21_10",
+          "prop_molag_amur_21_11"
+        ]
+      }
+    }
+  }
+}

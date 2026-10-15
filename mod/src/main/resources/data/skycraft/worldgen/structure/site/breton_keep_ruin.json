@@ -1,0 +1,18 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "breton_keep_ruin",
+  "kit": "breton_keep_ruin",
+  "place": {
+    "types": [
+      "fort",
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "breton_keep_ruin"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

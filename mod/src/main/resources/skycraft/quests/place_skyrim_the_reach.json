@@ -2,41 +2,189 @@
   "line": "place_skyrim_the_reach",
   "category": "side",
   "npcs": [
-    {"id": "pln_skyrim_the_reach_ancilia", "name": "Ancilia Varro", "role": "scholar", "place": "markarth", "offset": [5, -4],
-     "female": true, "greet": "If you've come about the Dwemer, you'll have to wait. If you've come about my assistant, you may sit down."},
-    {"id": "pln_skyrim_the_reach_bergljot", "name": "Bergljot", "role": "miner", "place": "karthwasten", "offset": [3, 4],
-     "female": true, "greet": "Silver's the only thing in Karthwasten that stays where you put it. People don't."},
-    {"id": "pln_skyrim_the_reach_hrefna", "name": "Hrefna", "role": "merchant", "place": "soljunds_sinkhole", "offset": [-4, 2],
-     "female": true, "greet": "Mine clerk, at your service. If you're buying moonstone, I'm afraid we're a little short this month."},
-    {"id": "pln_skyrim_the_reach_ulfgar", "name": "Ulfgar the Lamp-Keeper", "role": "citizen", "place": "old_hroldan", "offset": [2, -3],
-     "female": false, "greet": "Mind the stairs, traveller. And if you hear footsteps upstairs tonight, mind your own business."},
-    {"id": "pln_skyrim_the_reach_bashnag", "name": "Bashnag gro-Larak", "role": "hunter", "place": "mor_khazgur", "offset": [-5, 3],
-     "female": false, "greet": "You smell of the road. Good. The road is better than the cave."},
-    {"id": "pln_skyrim_the_reach_dagny", "name": "Dagny Hollow-Voice", "role": "farmer", "place": "markarth_stables", "offset": [4, 2],
-     "female": true, "greet": "Need your horse watered? Fine. Need directions to Ragnvald? Don't."},
-    {"id": "pln_skyrim_the_reach_aurelia", "name": "Aurelia Salvius", "role": "farmer", "place": "salvius_farm", "offset": [-3, -4],
-     "female": true, "greet": "Bread's two septims, cheese is three. News of my brother is free, if you have any."},
-    {"id": "pln_skyrim_the_reach_murbol", "name": "Murbol gro-Shak", "role": "blacksmith", "place": "dushnikh_yal", "offset": [4, -2],
-     "female": false, "greet": "Outsider. You have the look of someone who goes into tombs. Do you?"}
+    {
+      "id": "pln_skyrim_the_reach_ancilia",
+      "name": "Ancilia Varro",
+      "role": "scholar",
+      "place": "markarth",
+      "offset": [
+        5,
+        -4
+      ],
+      "female": true,
+      "greet": "If you've come about the Dwemer, you'll have to wait. If you've come about my assistant, you may sit down."
+    },
+    {
+      "id": "pln_skyrim_the_reach_bergljot",
+      "name": "Bergljot",
+      "role": "miner",
+      "place": "karthwasten",
+      "offset": [
+        3,
+        4
+      ],
+      "female": true,
+      "greet": "Silver's the only thing in Karthwasten that stays where you put it. People don't."
+    },
+    {
+      "id": "pln_skyrim_the_reach_hrefna",
+      "name": "Hrefna",
+      "role": "merchant",
+      "place": "soljunds_sinkhole",
+      "offset": [
+        -4,
+        2
+      ],
+      "female": true,
+      "greet": "Mine clerk, at your service. If you're buying moonstone, I'm afraid we're a little short this month."
+    },
+    {
+      "id": "pln_skyrim_the_reach_ulfgar",
+      "name": "Ulfgar the Lamp-Keeper",
+      "role": "citizen",
+      "place": "old_hroldan",
+      "offset": [
+        2,
+        -3
+      ],
+      "female": false,
+      "greet": "Mind the stairs, traveller. And if you hear footsteps upstairs tonight, mind your own business."
+    },
+    {
+      "id": "pln_skyrim_the_reach_bashnag",
+      "name": "Bashnag gro-Larak",
+      "role": "hunter",
+      "place": "mor_khazgur",
+      "offset": [
+        -5,
+        3
+      ],
+      "female": false,
+      "greet": "You smell of the road. Good. The road is better than the cave."
+    },
+    {
+      "id": "pln_skyrim_the_reach_dagny",
+      "name": "Dagny Hollow-Voice",
+      "role": "farmer",
+      "place": "markarth_stables",
+      "offset": [
+        4,
+        2
+      ],
+      "female": true,
+      "greet": "Need your horse watered? Fine. Need directions to Ragnvald? Don't."
+    },
+    {
+      "id": "pln_skyrim_the_reach_aurelia",
+      "name": "Aurelia Salvius",
+      "role": "farmer",
+      "place": "salvius_farm",
+      "offset": [
+        -3,
+        -4
+      ],
+      "female": true,
+      "greet": "Bread's two septims, cheese is three. News of my brother is free, if you have any."
+    },
+    {
+      "id": "pln_skyrim_the_reach_murbol",
+      "name": "Murbol gro-Shak",
+      "role": "blacksmith",
+      "place": "dushnikh_yal",
+      "offset": [
+        4,
+        -2
+      ],
+      "female": false,
+      "greet": "Outsider. You have the look of someone who goes into tombs. Do you?"
+    }
   ],
   "relics": [
-    {"id": "plr_deepwood_redoubt_whistle", "name": "Toki's Hawk Whistle", "desc": "A child's whistle carved in the shape of a hawk, the wood worn smooth by small hands."},
-    {"id": "plr_darkfall_cave_tusk", "name": "Durz's Tusk-String", "desc": "A leather cord strung with boar tusks and a single bear claw, the mark of a Mor Khazgur hunter."},
-    {"id": "plr_dragon_bridge_overlook_ledger", "name": "Karthwasten Pay Ledger", "desc": "A miners' ledger listing every ingot dug and every septim the Silver-Bloods still owe."},
-    {"id": "plr_harmugstahl_notes", "name": "Vane's Binding Notes", "desc": "A mage's notebook of spider-binding glyphs, the pages stiff with dried venom."},
-    {"id": "plr_liars_retreat_moonstone", "name": "Soljund's Moonstone Strongbox", "desc": "A small iron strongbox, heavy with raw moonstone from Soljund's Sinkhole."},
-    {"id": "plr_reach_imperial_camp_satchel", "name": "Asellio's Dispatch Satchel", "desc": "A Legion courier's satchel. Its seal has been cut and pressed shut again with blue wax."},
-    {"id": "plr_bthardamz_lexicon", "name": "Ancilia's Dwemer Lexicon", "desc": "A Dwemer lexicon of bronze and crystal, the glyphs on its faces faintly warm to the touch."},
-    {"id": "plr_broken_tower_redoubt_letter", "name": "Hrofi's Folded Letter", "desc": "A letter in a miner's careful hand, addressed to his sister in Karthwasten."},
-    {"id": "plr_sundered_towers_ledger", "name": "Vorald's Hidden Ledger", "desc": "A Silver-Blood factor's private accounts, recording steel sold to the Forsworn."},
-    {"id": "plr_ragnvald_lantern", "name": "Eirik's Brass Lantern", "desc": "A dented brass lantern with the name Hollow-Voice scratched into the base."},
-    {"id": "plr_blind_cliff_cave_knife", "name": "Ulvra's Rite-Knife", "desc": "A crooked knife of black stone, its handle wrapped in feathers and human hair."},
-    {"id": "plr_left_hand_mine_pick", "name": "Salvius Family Pick", "desc": "A well-kept mining pick with an Imperial eagle burned into the haft."},
-    {"id": "plr_reachwater_rock_axe", "name": "Grudge-Marked Orichalcum Axe", "desc": "An Orcish axe whose haft is carved with the grudge-marks of Dushnikh Yal."},
-    {"id": "plr_fort_sungard_standard", "name": "Fourth Cohort Eagle Standard", "desc": "A tarnished Legion standard, still mounted on its pole, its eagle missing one wing."},
-    {"id": "plr_gloomreach_satchel", "name": "Sinnoc's Spore Satchel", "desc": "A leather satchel packed with glowing fungus caps that light the inside of your pack."},
-    {"id": "plr_valthume_shield", "name": "Ketil's Hawk Shield", "desc": "A round Nord shield, the hawk once painted on its face faded almost to nothing."},
-    {"id": "plr_the_lover_stone_token", "name": "Aiwen's Braided Token", "desc": "A small knot of braided hair, red thread and a single hawk feather."}
+    {
+      "id": "plr_deepwood_redoubt_whistle",
+      "name": "Toki's Hawk Whistle",
+      "desc": "A child's whistle carved in the shape of a hawk, the wood worn smooth by small hands."
+    },
+    {
+      "id": "plr_darkfall_cave_tusk",
+      "name": "Durz's Tusk-String",
+      "desc": "A leather cord strung with boar tusks and a single bear claw, the mark of a Mor Khazgur hunter."
+    },
+    {
+      "id": "plr_dragon_bridge_overlook_ledger",
+      "name": "Karthwasten Pay Ledger",
+      "desc": "A miners' ledger listing every ingot dug and every septim the Silver-Bloods still owe."
+    },
+    {
+      "id": "plr_harmugstahl_notes",
+      "name": "Vane's Binding Notes",
+      "desc": "A mage's notebook of spider-binding glyphs, the pages stiff with dried venom."
+    },
+    {
+      "id": "plr_liars_retreat_moonstone",
+      "name": "Soljund's Moonstone Strongbox",
+      "desc": "A small iron strongbox, heavy with raw moonstone from Soljund's Sinkhole."
+    },
+    {
+      "id": "plr_reach_imperial_camp_satchel",
+      "name": "Asellio's Dispatch Satchel",
+      "desc": "A Legion courier's satchel. Its seal has been cut and pressed shut again with blue wax."
+    },
+    {
+      "id": "plr_bthardamz_lexicon",
+      "name": "Ancilia's Dwemer Lexicon",
+      "desc": "A Dwemer lexicon of bronze and crystal, the glyphs on its faces faintly warm to the touch."
+    },
+    {
+      "id": "plr_broken_tower_redoubt_letter",
+      "name": "Hrofi's Folded Letter",
+      "desc": "A letter in a miner's careful hand, addressed to his sister in Karthwasten."
+    },
+    {
+      "id": "plr_sundered_towers_ledger",
+      "name": "Vorald's Hidden Ledger",
+      "desc": "A Silver-Blood factor's private accounts, recording steel sold to the Forsworn."
+    },
+    {
+      "id": "plr_ragnvald_lantern",
+      "name": "Eirik's Brass Lantern",
+      "desc": "A dented brass lantern with the name Hollow-Voice scratched into the base."
+    },
+    {
+      "id": "plr_blind_cliff_cave_knife",
+      "name": "Ulvra's Rite-Knife",
+      "desc": "A crooked knife of black stone, its handle wrapped in feathers and human hair."
+    },
+    {
+      "id": "plr_left_hand_mine_pick",
+      "name": "Salvius Family Pick",
+      "desc": "A well-kept mining pick with an Imperial eagle burned into the haft."
+    },
+    {
+      "id": "plr_reachwater_rock_axe",
+      "name": "Grudge-Marked Orichalcum Axe",
+      "desc": "An Orcish axe whose haft is carved with the grudge-marks of Dushnikh Yal."
+    },
+    {
+      "id": "plr_fort_sungard_standard",
+      "name": "Fourth Cohort Eagle Standard",
+      "desc": "A tarnished Legion standard, still mounted on its pole, its eagle missing one wing."
+    },
+    {
+      "id": "plr_gloomreach_satchel",
+      "name": "Sinnoc's Spore Satchel",
+      "desc": "A leather satchel packed with glowing fungus caps that light the inside of your pack."
+    },
+    {
+      "id": "plr_valthume_shield",
+      "name": "Ketil's Hawk Shield",
+      "desc": "A round Nord shield, the hawk once painted on its face faded almost to nothing."
+    },
+    {
+      "id": "plr_the_lover_stone_token",
+      "name": "Aiwen's Braided Token",
+      "desc": "A small knot of braided hair, red thread and a single hawk feather."
+    }
   ],
   "quests": [
     {
@@ -47,17 +195,56 @@
       "desc": "A woodcutter from Dragon Bridge left a letter at Deepwood Redoubt. The Forsworn took his son Toki, and a hagraven named Ungrid has him.",
       "pitch": "A woodcutter from Dragon Bridge broke his arm trying to get into Deepwood Redoubt after his boy. The crones have the child. Somebody with a stronger arm should try.",
       "objectives": [
-        {"type": "go", "place": "deepwood_redoubt", "text": "Enter Deepwood Redoubt"},
-        {"type": "kill", "place": "deepwood_redoubt", "placement": "structure", "text": "Kill Gristle-Mother Ungrid",
-         "spawn": [{"type": "skycraft:hagraven", "name": "Gristle-Mother Ungrid", "target": true, "boss": true, "hp": 1.5},
-                   {"type": "skycraft:forsworn", "count": 2}]},
-        {"type": "retrieve", "place": "deepwood_redoubt", "placement": "structure", "relic": "plr_deepwood_redoubt_whistle",
-         "text": "Search the cages for Toki",
-         "spawn": [{"type": "skycraft:forsworn", "count": 2}],
-         "journal": "The cage was empty but for the hawk whistle. Small footprints led out through a gap cut in the briars. Toki may have run."}
+        {
+          "type": "go",
+          "place": "deepwood_redoubt",
+          "text": "Enter Deepwood Redoubt"
+        },
+        {
+          "type": "kill",
+          "place": "deepwood_redoubt",
+          "placement": "structure",
+          "text": "Kill Gristle-Mother Ungrid",
+          "spawn": [
+            {
+              "type": "skycraft:hagraven",
+              "name": "Gristle-Mother Ungrid",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:forsworn",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "deepwood_redoubt",
+          "placement": "structure",
+          "relic": "plr_deepwood_redoubt_whistle",
+          "text": "Search the cages for Toki",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 2
+            }
+          ],
+          "journal": "The cage was empty but for the hawk whistle. Small footprints led out through a gap cut in the briars. Toki may have run."
+        }
       ],
-      "rewards": {"gold": 220, "items": ["skycraft:fur_boots"]},
-      "outro": "Horgeir waits at the mill in Dragon Bridge. The whistle, and the footprints, will give him a reason to keep waiting."
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:fur_boots"
+        ]
+      },
+      "outro": "Horgeir waits at the mill in Dragon Bridge. The whistle, and the footprints, will give him a reason to keep waiting.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_darkfall_cave",
@@ -68,20 +255,64 @@
       "pitch": "Not my quarry. My brother. Durz went into Darkfall Cave after a wounded bear. The chief says it is my shame to carry. I carry it. But I cannot carry it into that dark alone and come back out.",
       "desc": "Bashnag gro-Larak of Mor Khazgur asked me to find out what happened to his brother Durz in Darkfall Cave.",
       "objectives": [
-        {"type": "go", "place": "darkfall_cave", "text": "Search Darkfall Cave for Durz"},
-        {"type": "kill", "place": "darkfall_cave", "placement": "structure", "text": "Kill the Falmer who took Durz's bow",
-         "spawn": [{"type": "skycraft:falmer", "name": "The Bow-Thief", "target": true, "boss": true, "hp": 1.5},
-                   {"type": "skycraft:chaurus", "count": 2}]},
-        {"type": "retrieve", "place": "darkfall_cave", "placement": "structure", "relic": "plr_darkfall_cave_tusk",
-         "text": "Recover Durz's tusk-string",
-         "spawn": [{"type": "skycraft:falmer", "count": 2}],
-         "journal": "Durz died hidden in a crack in the rock, his tusk-string still around his neck."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_bashnag", "relic": "plr_darkfall_cave_tusk",
-         "text": "Bring the tusk-string to Bashnag in Mor Khazgur",
-         "topic": "I found Durz.", "reply": "...Then he hangs by the fire tonight, with our father. You did a thing for an Orc that Orcs do not ask. Mor Khazgur will remember your face."}
+        {
+          "type": "go",
+          "place": "darkfall_cave",
+          "text": "Search Darkfall Cave for Durz"
+        },
+        {
+          "type": "kill",
+          "place": "darkfall_cave",
+          "placement": "structure",
+          "text": "Kill the Falmer who took Durz's bow",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "name": "The Bow-Thief",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:chaurus",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "darkfall_cave",
+          "placement": "structure",
+          "relic": "plr_darkfall_cave_tusk",
+          "text": "Recover Durz's tusk-string",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "count": 2
+            }
+          ],
+          "journal": "Durz died hidden in a crack in the rock, his tusk-string still around his neck."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_bashnag",
+          "relic": "plr_darkfall_cave_tusk",
+          "text": "Bring the tusk-string to Bashnag in Mor Khazgur",
+          "topic": "I found Durz.",
+          "reply": "...Then he hangs by the fire tonight, with our father. You did a thing for an Orc that Orcs do not ask. Mor Khazgur will remember your face."
+        }
       ],
-      "rewards": {"gold": 260, "items": ["skycraft:orcish_war_axe"]},
-      "outro": "Bashnag hung the tusk-string over the longhouse fire and went hunting the next morning."
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "skycraft:orcish_war_axe"
+        ]
+      },
+      "outro": "Bashnag hung the tusk-string over the longhouse fire and went hunting the next morning.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_dragon_bridge_overlook",
@@ -91,18 +322,51 @@
       "desc": "Bandits at Dragon Bridge Overlook stole the Karthwasten payroll, and with it the ledger the miners need to prove what the Silver-Bloods owe them.",
       "pitch": "Hrodvar Toll-Taker's lot took the Karthwasten payroll. Coin's gone, most like, but the miners' ledger is worth more to them than the silver. Bergljot in Karthwasten would kiss whoever brought it home.",
       "objectives": [
-        {"type": "kill", "place": "dragon_bridge_overlook", "text": "Kill Hrodvar Toll-Taker",
-         "spawn": [{"type": "skycraft:bandit_chief", "name": "Hrodvar Toll-Taker", "target": true, "boss": true, "hp": 1.3},
-                   {"type": "skycraft:bandit", "count": 3}]},
-        {"type": "retrieve", "place": "dragon_bridge_overlook", "relic": "plr_dragon_bridge_overlook_ledger",
-         "text": "Find the Karthwasten pay ledger",
-         "journal": "The payroll chest was half empty, but the ledger was wrapped in oilcloth at the bottom."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_bergljot", "relic": "plr_dragon_bridge_overlook_ledger",
-         "text": "Return the ledger to Bergljot in Karthwasten",
-         "topic": "I have your pay ledger.", "reply": "Every ingot, every septim, every lie the factor told us. With this we can go to Understone Keep and make them listen. Or at least make them pretend to."}
+        {
+          "type": "kill",
+          "place": "dragon_bridge_overlook",
+          "text": "Kill Hrodvar Toll-Taker",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Hrodvar Toll-Taker",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            },
+            {
+              "type": "skycraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "dragon_bridge_overlook",
+          "relic": "plr_dragon_bridge_overlook_ledger",
+          "text": "Find the Karthwasten pay ledger",
+          "journal": "The payroll chest was half empty, but the ledger was wrapped in oilcloth at the bottom."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_bergljot",
+          "relic": "plr_dragon_bridge_overlook_ledger",
+          "text": "Return the ledger to Bergljot in Karthwasten",
+          "topic": "I have your pay ledger.",
+          "reply": "Every ingot, every septim, every lie the factor told us. With this we can go to Understone Keep and make them listen. Or at least make them pretend to."
+        }
       ],
-      "rewards": {"gold": 180, "items": ["skycraft:studded_helmet"]},
-      "outro": "The miners of Karthwasten copied the ledger three times and hid each copy in a different house."
+      "rewards": {
+        "gold": 180,
+        "items": [
+          "skycraft:studded_helmet"
+        ]
+      },
+      "outro": "The miners of Karthwasten copied the ledger three times and hid each copy in a different house.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_harmugstahl",
@@ -112,18 +376,63 @@
       "desc": "A shepherd's note found in Harmugstahl names the mage Ostrel Vane, who feeds travellers to the giant spiders he breeds behind the fort's walls.",
       "pitch": "Shepherd from Karthwasten took sheep to the wizard at Harmugstahl and never came back. His wife won't hear he ran off. Something's eating people in that fort, and it isn't the wizard. Not directly.",
       "objectives": [
-        {"type": "go", "place": "harmugstahl", "text": "Get inside Harmugstahl"},
-        {"type": "clear", "place": "harmugstahl", "placement": "structure", "text": "Kill Vane's spiders",
-         "spawn": [{"type": "skycraft:frostbite_spider", "count": 4}]},
-        {"type": "kill", "place": "harmugstahl", "placement": "structure", "text": "Kill Ostrel Vane",
-         "spawn": [{"type": "npc:mage", "name": "Ostrel Vane", "target": true, "boss": true, "hp": 1.5},
-                   {"type": "skycraft:frostbite_spider", "name": "Specimen IV", "hp": 2}]},
-        {"type": "retrieve", "place": "harmugstahl", "placement": "structure", "relic": "plr_harmugstahl_notes",
-         "text": "Take Vane's binding notes",
-         "journal": "Vane's notes describe glyphs that bind beasts to a place. The College would want them. Perhaps nobody should have them."}
+        {
+          "type": "go",
+          "place": "harmugstahl",
+          "text": "Get inside Harmugstahl"
+        },
+        {
+          "type": "clear",
+          "place": "harmugstahl",
+          "placement": "structure",
+          "text": "Kill Vane's spiders",
+          "spawn": [
+            {
+              "type": "skycraft:frostbite_spider",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "harmugstahl",
+          "placement": "structure",
+          "text": "Kill Ostrel Vane",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "name": "Ostrel Vane",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:frostbite_spider",
+              "name": "Specimen IV",
+              "hp": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "harmugstahl",
+          "placement": "structure",
+          "relic": "plr_harmugstahl_notes",
+          "text": "Take Vane's binding notes",
+          "journal": "Vane's notes describe glyphs that bind beasts to a place. The College would want them. Perhaps nobody should have them."
+        }
       ],
-      "rewards": {"gold": 240, "items": ["skycraft:spell_tome_lesser_ward"]},
-      "outro": "Without its master, Harmugstahl is quiet. The webs in the walls will take years to fall."
+      "rewards": {
+        "gold": 240,
+        "items": [
+          "skycraft:spell_tome_lesser_ward"
+        ]
+      },
+      "outro": "Without its master, Harmugstahl is quiet. The webs in the walls will take years to fall.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_liars_retreat",
@@ -134,20 +443,64 @@
       "pitch": "Short by thirty pieces and two escorts. Bandits at Liar's Retreat took the cart, and their chief, a talker called Sweet-Tongue Ottar, will swear on his mother's grave it went into the river. Bring back the strongbox and I'll pay you what the escorts were supposed to earn.",
       "desc": "Hrefna, the mine clerk at Soljund's Sinkhole, wants her stolen moonstone back from the bandits at Liar's Retreat.",
       "objectives": [
-        {"type": "go", "place": "liars_retreat", "text": "Go to Liar's Retreat"},
-        {"type": "kill", "place": "liars_retreat", "placement": "structure", "text": "Kill Sweet-Tongue Ottar",
-         "spawn": [{"type": "skycraft:bandit_chief", "name": "Sweet-Tongue Ottar", "target": true, "boss": true, "hp": 1.4},
-                   {"type": "skycraft:bandit", "count": 2}]},
-        {"type": "retrieve", "place": "liars_retreat", "placement": "structure", "relic": "plr_liars_retreat_moonstone",
-         "text": "Recover the moonstone strongbox",
-         "spawn": [{"type": "skycraft:bandit", "count": 2}],
-         "journal": "The strongbox was exactly where Ottar's orders said it would be. The one honest thing he ever wrote."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_hrefna", "relic": "plr_liars_retreat_moonstone",
-         "text": "Bring the moonstone to Hrefna at Soljund's Sinkhole",
-         "topic": "Your moonstone, all of it.", "reply": "Thirty pieces, I'll count them twice. Pa will say I should have hired you in the first place. Pa will be right. Don't tell him I said so."}
+        {
+          "type": "go",
+          "place": "liars_retreat",
+          "text": "Go to Liar's Retreat"
+        },
+        {
+          "type": "kill",
+          "place": "liars_retreat",
+          "placement": "structure",
+          "text": "Kill Sweet-Tongue Ottar",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Sweet-Tongue Ottar",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            },
+            {
+              "type": "skycraft:bandit",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "liars_retreat",
+          "placement": "structure",
+          "relic": "plr_liars_retreat_moonstone",
+          "text": "Recover the moonstone strongbox",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 2
+            }
+          ],
+          "journal": "The strongbox was exactly where Ottar's orders said it would be. The one honest thing he ever wrote."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_hrefna",
+          "relic": "plr_liars_retreat_moonstone",
+          "text": "Bring the moonstone to Hrefna at Soljund's Sinkhole",
+          "topic": "Your moonstone, all of it.",
+          "reply": "Thirty pieces, I'll count them twice. Pa will say I should have hired you in the first place. Pa will be right. Don't tell him I said so."
+        }
       ],
-      "rewards": {"gold": 200, "items": ["skycraft:lockpick*5"]},
-      "outro": "Soljund's Sinkhole sent its next shipment with an escort paid on arrival, not in advance."
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:lockpick*5"
+        ]
+      },
+      "outro": "Soljund's Sinkhole sent its next shipment with an escort paid on arrival, not in advance.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_four_skull_lookout",
@@ -157,14 +510,37 @@
       "desc": "Sweet-Tongue Ottar sold fake treasure maps to Four Skull Lookout. His own notes admit the story behind them might be true: a Legion pay chest buried beneath the skull facing west.",
       "pitch": "Everybody laughs at Ottar's maps. But nobody I know ever dug under the west skull at Four Skull Lookout. Everybody gave up before then.",
       "objectives": [
-        {"type": "go", "place": "four_skull_lookout", "text": "Go to Four Skull Lookout"},
-        {"type": "retrieve", "place": "four_skull_lookout", "offset": [-14, 4], "item": "skycraft:imperial_sword",
-         "text": "Dig beneath the skull that faces the sunset",
-         "spawn": [{"type": "skycraft:draugr", "count": 2}],
-         "journal": "Under the west skull lay a Legion pay chest from 4E 176, its officer's sword still wrapped in oiled leather. The lie was true all along."}
+        {
+          "type": "go",
+          "place": "four_skull_lookout",
+          "text": "Go to Four Skull Lookout"
+        },
+        {
+          "type": "retrieve",
+          "place": "four_skull_lookout",
+          "offset": [
+            -14,
+            4
+          ],
+          "item": "skycraft:imperial_sword",
+          "text": "Dig beneath the skull that faces the sunset",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ],
+          "journal": "Under the west skull lay a Legion pay chest from 4E 176, its officer's sword still wrapped in oiled leather. The lie was true all along."
+        }
       ],
-      "rewards": {"gold": 240},
-      "outro": "Somewhere in Bruma, a paymaster's widow will never know the chest was found. The Emperor will never know either."
+      "rewards": {
+        "gold": 240
+      },
+      "outro": "Somewhere in Bruma, a paymaster's widow will never know the chest was found. The Emperor will never know either.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_reach_imperial_camp",
@@ -174,31 +550,84 @@
       "desc": "A Legion dispatch rider vanished on the road by Deep Folk Crossing with the troop rolls of the whole Reach garrison. The tribune at the Reach Imperial Camp wants the satchel back, no questions asked.",
       "pitch": "The Legion tribune at the camp by Bthardamz is hiring. One of his riders went missing at Deep Folk Crossing with something important. He blames the Forsworn. He also blames the Stormcloaks. He'll pay whoever finds out which.",
       "objectives": [
-        {"type": "go", "place": "deep_folk_crossing", "text": "Search the road at Deep Folk Crossing"},
-        {"type": "retrieve", "place": "deep_folk_crossing", "offset": [10, 6], "relic": "plr_reach_imperial_camp_satchel",
-         "text": "Recover the courier's satchel",
-         "spawn": [{"type": "skycraft:forsworn", "count": 3}],
-         "journal": "The Forsworn had the satchel, but its seal had been cut and pressed shut again with blue wax. Someone read the troop rolls before the Forsworn ever touched them."}
+        {
+          "type": "go",
+          "place": "deep_folk_crossing",
+          "text": "Search the road at Deep Folk Crossing"
+        },
+        {
+          "type": "retrieve",
+          "place": "deep_folk_crossing",
+          "offset": [
+            10,
+            6
+          ],
+          "relic": "plr_reach_imperial_camp_satchel",
+          "text": "Recover the courier's satchel",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 3
+            }
+          ],
+          "journal": "The Forsworn had the satchel, but its seal had been cut and pressed shut again with blue wax. Someone read the troop rolls before the Forsworn ever touched them."
+        }
       ],
-      "rewards": {"gold": 200, "items": ["skycraft:imperial_sword"]},
-      "outro": "The tribune took the satchel and turned the blue wax over in his fingers for a long time without speaking."
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:imperial_sword"
+        ]
+      },
+      "outro": "The tribune took the satchel and turned the blue wax over in his fingers for a long time without speaking.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_dragontooth_crater",
       "title": "The Goat-Thief",
       "region": "skyrim/the_reach",
       "start": "manual",
-      "requires": ["level:20"],
+      "requires": [
+        "level:20"
+      ],
       "desc": "A dragon nests in Dragontooth Crater and raids the herds of Karthwasten. The hunter Ingrith wounded it under the jaw before it burned her.",
       "pitch": "There's a dragon in Dragontooth Crater stealing goats and frightening children. Ingrith Sure-Shot got an arrow into it before it cooked her bow arm. Somebody needs to finish what she started.",
       "objectives": [
-        {"type": "go", "place": "dragontooth_crater", "text": "Climb to the rim of Dragontooth Crater"},
-        {"type": "kill", "place": "dragontooth_crater", "text": "Slay the Goat-Thief",
-         "spawn": [{"type": "skycraft:dragon", "name": "The Goat-Thief", "target": true, "boss": true, "hp": 1.0}],
-         "journal": "An old arrow was still lodged under the dragon's jaw. Ingrith had not missed."}
+        {
+          "type": "go",
+          "place": "dragontooth_crater",
+          "text": "Climb to the rim of Dragontooth Crater"
+        },
+        {
+          "type": "kill",
+          "place": "dragontooth_crater",
+          "text": "Slay the Goat-Thief",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "name": "The Goat-Thief",
+              "target": true,
+              "boss": true,
+              "hp": 1.0
+            }
+          ],
+          "journal": "An old arrow was still lodged under the dragon's jaw. Ingrith had not missed."
+        }
       ],
-      "rewards": {"gold": 380, "items": ["skycraft:soul_gem_greater"]},
-      "outro": "Karthwasten's goats graze to the crater's rim again. The miners call it Ingrith's Field now."
+      "rewards": {
+        "gold": 380,
+        "items": [
+          "skycraft:soul_gem_greater"
+        ]
+      },
+      "outro": "Karthwasten's goats graze to the crater's rim again. The miners call it Ingrith's Field now.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_bthardamz",
@@ -209,20 +638,64 @@
       "pitch": "Fennick. Brilliant, careless, and Breton. I sent him to copy the gate of Bthardamz and he took my best lexicon inside. If you find Fennick, tell him he's sacked. If you find the lexicon, bring it to me. In that order of importance, I'm afraid. No, the other order. I'm upset.",
       "desc": "Ancilia Varro, a Dwemer scholar in Markarth, sent her assistant Fennick to Bthardamz. He has not returned, and neither has her lexicon.",
       "objectives": [
-        {"type": "go", "place": "bthardamz", "text": "Enter Bthardamz"},
-        {"type": "kill", "place": "bthardamz", "placement": "structure", "text": "Destroy the warden of the great hall",
-         "spawn": [{"type": "skycraft:dwarven_centurion", "name": "Great Hall Warden", "target": true, "boss": true, "hp": 1.3},
-                   {"type": "skycraft:dwarven_sphere", "count": 1}]},
-        {"type": "retrieve", "place": "bthardamz", "placement": "structure", "relic": "plr_bthardamz_lexicon",
-         "text": "Take the lexicon from the slot by the great hall door",
-         "spawn": [{"type": "skycraft:dwarven_spider", "count": 3}],
-         "journal": "The lexicon came free with a hiss of steam. There was no sign of Fennick but a trail of ink-stained footprints heading for the exit."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_ancilia", "relic": "plr_bthardamz_lexicon",
-         "text": "Return the lexicon to Ancilia Varro in Markarth",
-         "topic": "Your lexicon. Fennick wasn't there.", "reply": "Because Fennick limped through my door last night and fainted on the rug. He's unsacked, by the way. He copied the whole great hall from inside a pipe. Ridiculous boy. Thank you. Truly."}
+        {
+          "type": "go",
+          "place": "bthardamz",
+          "text": "Enter Bthardamz"
+        },
+        {
+          "type": "kill",
+          "place": "bthardamz",
+          "placement": "structure",
+          "text": "Destroy the warden of the great hall",
+          "spawn": [
+            {
+              "type": "skycraft:dwarven_centurion",
+              "name": "Great Hall Warden",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            },
+            {
+              "type": "skycraft:dwarven_sphere",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "bthardamz",
+          "placement": "structure",
+          "relic": "plr_bthardamz_lexicon",
+          "text": "Take the lexicon from the slot by the great hall door",
+          "spawn": [
+            {
+              "type": "skycraft:dwarven_spider",
+              "count": 3
+            }
+          ],
+          "journal": "The lexicon came free with a hiss of steam. There was no sign of Fennick but a trail of ink-stained footprints heading for the exit."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_ancilia",
+          "relic": "plr_bthardamz_lexicon",
+          "text": "Return the lexicon to Ancilia Varro in Markarth",
+          "topic": "Your lexicon. Fennick wasn't there.",
+          "reply": "Because Fennick limped through my door last night and fainted on the rug. He's unsacked, by the way. He copied the whole great hall from inside a pipe. Ridiculous boy. Thank you. Truly."
+        }
       ],
-      "rewards": {"gold": 300, "items": ["skycraft:dwarven_helmet"]},
-      "outro": "Ancilia's monograph on Bthardamz will have a footnote thanking you, and a much longer one complaining about Fennick."
+      "rewards": {
+        "gold": 300,
+        "items": [
+          "skycraft:dwarven_helmet"
+        ]
+      },
+      "outro": "Ancilia's monograph on Bthardamz will have a footnote thanking you, and a much longer one complaining about Fennick.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_broken_tower_redoubt",
@@ -233,23 +706,75 @@
       "pitch": "My brother. Hrofi. They took him up to Broken Tower Redoubt in Sun's Height, and every few nights they yell his name from the ridge so we know he's still theirs. I can't pay much. Bring him home.",
       "desc": "Bergljot of Karthwasten asked me to rescue her brother Hrofi from the Forsworn at Broken Tower Redoubt.",
       "objectives": [
-        {"type": "go", "place": "broken_tower_redoubt", "text": "Break into Broken Tower Redoubt"},
-        {"type": "kill", "place": "broken_tower_redoubt", "placement": "structure", "text": "Kill Kaelin Thorn-Chest",
-         "spawn": [{"type": "skycraft:forsworn", "name": "Kaelin Thorn-Chest", "target": true, "boss": true, "hp": 2.0},
-                   {"type": "skycraft:forsworn", "count": 2}]},
-        {"type": "retrieve", "place": "broken_tower_redoubt", "placement": "structure", "relic": "plr_broken_tower_redoubt_letter",
-         "text": "Search the redoubt for Hrofi",
-         "spawn": [{"type": "skycraft:forsworn", "count": 2}],
-         "journal": "Hrofi's cage was open and empty. Under the furs of a Reachwoman's bed lay a letter in his hand. He was not taken. He chose."},
-        {"type": "talk", "npc": "pln_skyrim_the_reach_bergljot", "text": "Tell Bergljot what became of Hrofi",
-         "topic": "About your brother...", "reply": "Say it. Whatever it is, say it plainly.",
-         "choices": [
-           {"label": "Give her Hrofi's letter.", "reply": "He... chose them. Over us. Over Mother. No. Not over us. Over the Silver-Bloods. I can't even say he's wrong. Thank you for not lying to me.", "actions": "take:plr_broken_tower_redoubt_letter;flag:reach_hrofi_truth"},
-           {"label": "Tell her he died bravely.", "reply": "Then I'll cut his name on the family stone. At least he didn't die a slave. Thank you for telling me.", "actions": "take:plr_broken_tower_redoubt_letter;flag:reach_hrofi_lie"}
-         ]}
+        {
+          "type": "go",
+          "place": "broken_tower_redoubt",
+          "text": "Break into Broken Tower Redoubt"
+        },
+        {
+          "type": "kill",
+          "place": "broken_tower_redoubt",
+          "placement": "structure",
+          "text": "Kill Kaelin Thorn-Chest",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "name": "Kaelin Thorn-Chest",
+              "target": true,
+              "boss": true,
+              "hp": 2.0
+            },
+            {
+              "type": "skycraft:forsworn",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "broken_tower_redoubt",
+          "placement": "structure",
+          "relic": "plr_broken_tower_redoubt_letter",
+          "text": "Search the redoubt for Hrofi",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 2
+            }
+          ],
+          "journal": "Hrofi's cage was open and empty. Under the furs of a Reachwoman's bed lay a letter in his hand. He was not taken. He chose."
+        },
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_the_reach_bergljot",
+          "text": "Tell Bergljot what became of Hrofi",
+          "topic": "About your brother...",
+          "reply": "Say it. Whatever it is, say it plainly.",
+          "choices": [
+            {
+              "label": "Give her Hrofi's letter.",
+              "reply": "He... chose them. Over us. Over Mother. No. Not over us. Over the Silver-Bloods. I can't even say he's wrong. Thank you for not lying to me.",
+              "actions": "take:plr_broken_tower_redoubt_letter;flag:reach_hrofi_truth"
+            },
+            {
+              "label": "Tell her he died bravely.",
+              "reply": "Then I'll cut his name on the family stone. At least he didn't die a slave. Thank you for telling me.",
+              "actions": "take:plr_broken_tower_redoubt_letter;flag:reach_hrofi_lie"
+            }
+          ]
+        }
       ],
-      "rewards": {"gold": 220, "items": ["skycraft:forsworn_chestplate"]},
-      "outro": "Whatever Bergljot believes, the Forsworn have stopped shouting Hrofi's name from the ridge."
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:forsworn_chestplate"
+        ]
+      },
+      "outro": "Whatever Bergljot believes, the Forsworn have stopped shouting Hrofi's name from the ridge.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_sundered_towers",
@@ -259,19 +784,56 @@
       "desc": "A hidden ledger at Sundered Towers shows that Vorald, a Silver-Blood factor, arms the Forsworn and then collects a reward for 'recovering' what they steal from Karthwasten.",
       "pitch": "The Forsworn at Sundered Towers have Markarth steel. Somebody's selling it to them. Find out who, and the miners of Karthwasten will owe you their lives, or at least their wages.",
       "objectives": [
-        {"type": "go", "place": "sundered_towers", "text": "Go to the Sundered Towers"},
-        {"type": "kill", "place": "sundered_towers", "text": "Kill Nairne the Stone-Singer",
-         "spawn": [{"type": "skycraft:forsworn", "name": "Nairne the Stone-Singer", "target": true, "boss": true, "hp": 1.5},
-                   {"type": "skycraft:forsworn", "count": 3}]},
-        {"type": "retrieve", "place": "sundered_towers", "relic": "plr_sundered_towers_ledger",
-         "text": "Find proof of who is arming the Forsworn",
-         "journal": "Vorald, a factor of the Silver-Bloods, has been selling steel to the Forsworn and claiming rewards for returning the very silver they steal."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_bergljot", "relic": "plr_sundered_towers_ledger",
-         "text": "Show Vorald's ledger to Bergljot in Karthwasten",
-         "topic": "Look at what the Silver-Bloods' factor has been doing.", "reply": "Steel to the Forsworn, rewards from the Silver-Bloods, and us robbed in between. Vorald. Of course it's Vorald. Thonar won't hang him for it, but Thonar will hang him for not sharing. Either way, Karthwasten sleeps easier."}
+        {
+          "type": "go",
+          "place": "sundered_towers",
+          "text": "Go to the Sundered Towers"
+        },
+        {
+          "type": "kill",
+          "place": "sundered_towers",
+          "text": "Kill Nairne the Stone-Singer",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "name": "Nairne the Stone-Singer",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:forsworn",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "sundered_towers",
+          "relic": "plr_sundered_towers_ledger",
+          "text": "Find proof of who is arming the Forsworn",
+          "journal": "Vorald, a factor of the Silver-Bloods, has been selling steel to the Forsworn and claiming rewards for returning the very silver they steal."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_bergljot",
+          "relic": "plr_sundered_towers_ledger",
+          "text": "Show Vorald's ledger to Bergljot in Karthwasten",
+          "topic": "Look at what the Silver-Bloods' factor has been doing.",
+          "reply": "Steel to the Forsworn, rewards from the Silver-Bloods, and us robbed in between. Vorald. Of course it's Vorald. Thonar won't hang him for it, but Thonar will hang him for not sharing. Either way, Karthwasten sleeps easier."
+        }
       ],
-      "rewards": {"gold": 230, "items": ["skycraft:steel_dagger"]},
-      "outro": "A week later, Vorald the factor was found at the bottom of the Karth. Nobody in Karthwasten asked how."
+      "rewards": {
+        "gold": 230,
+        "items": [
+          "skycraft:steel_dagger"
+        ]
+      },
+      "outro": "A week later, Vorald the factor was found at the bottom of the Karth. Nobody in Karthwasten asked how.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_ragnvald",
@@ -282,20 +844,64 @@
       "pitch": "Because my brother Eirik did. Two hired diggers went with him, and they came back with packs full of silver and no Eirik. They say a dead king woke up. I say they left him. Either way, bring me something of his. I'd like to bury something.",
       "desc": "Dagny Hollow-Voice of Markarth Stables wants to know what became of her brother Eirik in the barrow of Ragnvald.",
       "objectives": [
-        {"type": "go", "place": "ragnvald", "text": "Enter Ragnvald"},
-        {"type": "kill", "place": "ragnvald", "placement": "structure", "text": "Lay Hrodulf the Tithe-Keeper to rest",
-         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Hrodulf the Tithe-Keeper", "target": true, "boss": true, "hp": 1.5},
-                   {"type": "skycraft:draugr", "count": 2}]},
-        {"type": "retrieve", "place": "ragnvald", "placement": "structure", "relic": "plr_ragnvald_lantern",
-         "text": "Find Eirik behind the Tithe-Keeper's throne",
-         "spawn": [{"type": "skycraft:draugr", "count": 2}],
-         "journal": "Eirik died behind the throne, his lantern beside him, its wick burned down to nothing."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_dagny", "relic": "plr_ragnvald_lantern",
-         "text": "Bring Eirik's lantern to Dagny at Markarth Stables",
-         "topic": "I found Eirik. I'm sorry.", "reply": "His lantern. He never went anywhere without it, he was afraid of the dark, did you know that? Grown man. Afraid of the dark, and he went into Ragnvald anyway. Thank you. I'll light it for him tonight."}
+        {
+          "type": "go",
+          "place": "ragnvald",
+          "text": "Enter Ragnvald"
+        },
+        {
+          "type": "kill",
+          "place": "ragnvald",
+          "placement": "structure",
+          "text": "Lay Hrodulf the Tithe-Keeper to rest",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Hrodulf the Tithe-Keeper",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "ragnvald",
+          "placement": "structure",
+          "relic": "plr_ragnvald_lantern",
+          "text": "Find Eirik behind the Tithe-Keeper's throne",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ],
+          "journal": "Eirik died behind the throne, his lantern beside him, its wick burned down to nothing."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_dagny",
+          "relic": "plr_ragnvald_lantern",
+          "text": "Bring Eirik's lantern to Dagny at Markarth Stables",
+          "topic": "I found Eirik. I'm sorry.",
+          "reply": "His lantern. He never went anywhere without it, he was afraid of the dark, did you know that? Grown man. Afraid of the dark, and he went into Ragnvald anyway. Thank you. I'll light it for him tonight."
+        }
       ],
-      "rewards": {"gold": 260, "items": ["skycraft:steel_greatsword"]},
-      "outro": "A brass lantern burns at Markarth Stables every night now, hung where the road turns north toward Ragnvald."
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "skycraft:steel_greatsword"
+        ]
+      },
+      "outro": "A brass lantern burns at Markarth Stables every night now, hung where the road turns north toward Ragnvald.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_blind_cliff_cave",
@@ -305,16 +911,50 @@
       "desc": "A Reachwoman named Aiwen was sold to the hagraven Ulvra Ash-Tongue at Blind Cliff Cave, to be made into a hagraven herself. Without Ulvra's rite-knife, the becoming cannot happen.",
       "pitch": "The crones at Blind Cliff Cave mean to turn a girl into one of their own come the dark of the moon. Poor thing threw a message out of the smoke hole. If someone took the old hag's knife, there'd be no rite at all.",
       "objectives": [
-        {"type": "go", "place": "blind_cliff_cave", "text": "Enter Blind Cliff Cave"},
-        {"type": "kill", "place": "blind_cliff_cave", "placement": "structure", "text": "Kill Ulvra Ash-Tongue",
-         "spawn": [{"type": "skycraft:hagraven", "name": "Ulvra Ash-Tongue", "target": true, "boss": true, "hp": 1.6},
-                   {"type": "skycraft:forsworn", "count": 2}]},
-        {"type": "retrieve", "place": "blind_cliff_cave", "placement": "structure", "relic": "plr_blind_cliff_cave_knife",
-         "text": "Take the rite-knife",
-         "journal": "With the knife in hand there can be no becoming. Aiwen was gone, and a cut rope hung by the smoke hole. Someone had come for her first."}
+        {
+          "type": "go",
+          "place": "blind_cliff_cave",
+          "text": "Enter Blind Cliff Cave"
+        },
+        {
+          "type": "kill",
+          "place": "blind_cliff_cave",
+          "placement": "structure",
+          "text": "Kill Ulvra Ash-Tongue",
+          "spawn": [
+            {
+              "type": "skycraft:hagraven",
+              "name": "Ulvra Ash-Tongue",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            },
+            {
+              "type": "skycraft:forsworn",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "blind_cliff_cave",
+          "placement": "structure",
+          "relic": "plr_blind_cliff_cave_knife",
+          "text": "Take the rite-knife",
+          "journal": "With the knife in hand there can be no becoming. Aiwen was gone, and a cut rope hung by the smoke hole. Someone had come for her first."
+        }
       ],
-      "rewards": {"gold": 260, "items": ["skycraft:forsworn_helmet"]},
-      "outro": "Two pairs of footprints led away from Blind Cliff Cave toward the Lover Stone: a woman's, and a miner's heavy boots."
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "skycraft:forsworn_helmet"
+        ]
+      },
+      "outro": "Two pairs of footprints led away from Blind Cliff Cave toward the Lover Stone: a woman's, and a miner's heavy boots.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_the_lover_stone",
@@ -324,14 +964,32 @@
       "desc": "A letter under the Lover Stone, from a Reachwoman named Aiwen to a Karthwasten miner's son named Leif, left her braided token behind for him.",
       "pitch": "There's a letter under the Lover Stone that's been there since the new moon. Meant for some lad in Karthwasten. Shame to let the rain have it.",
       "objectives": [
-        {"type": "retrieve", "place": "the_lover_stone", "relic": "plr_the_lover_stone_token",
-         "text": "Take Aiwen's braided token from beneath the stone"},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_bergljot", "relic": "plr_the_lover_stone_token",
-         "text": "Bring the token to Leif's mother, Bergljot, in Karthwasten",
-         "topic": "This was left for your son Leif.", "reply": "A Reach girl's token. So that's where he's been sneaking off to. He left two nights ago with his pick and a coil of rope, toward Blind Cliff Cave. If you're going that way... no. I won't ask. I'll keep this for him."}
+        {
+          "type": "retrieve",
+          "place": "the_lover_stone",
+          "relic": "plr_the_lover_stone_token",
+          "text": "Take Aiwen's braided token from beneath the stone"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_bergljot",
+          "relic": "plr_the_lover_stone_token",
+          "text": "Bring the token to Leif's mother, Bergljot, in Karthwasten",
+          "topic": "This was left for your son Leif.",
+          "reply": "A Reach girl's token. So that's where he's been sneaking off to. He left two nights ago with his pick and a coil of rope, toward Blind Cliff Cave. If you're going that way... no. I won't ask. I'll keep this for him."
+        }
       ],
-      "rewards": {"gold": 120, "items": ["skycraft:amulet_of_mara"]},
-      "outro": "Bergljot keeps the braided token on the shelf by her door, where Leif will see it when he comes home."
+      "rewards": {
+        "gold": 120,
+        "items": [
+          "skycraft:amulet_of_mara"
+        ]
+      },
+      "outro": "Bergljot keeps the braided token on the shelf by her door, where Leif will see it when he comes home.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_rebels_cairn",
@@ -341,15 +999,55 @@
       "desc": "The necromancer Corvin Ashdown is digging into Rebel's Cairn to raise the bones of Faolan, the Red Eagle, as his servant.",
       "pitch": "Some pale fellow with a lot of candles is trying to dig up the Red Eagle at Rebel's Cairn. The Forsworn are furious. I don't love the Forsworn, but I love necromancers less.",
       "objectives": [
-        {"type": "go", "place": "rebels_cairn", "text": "Go to Rebel's Cairn"},
-        {"type": "clear", "place": "rebels_cairn", "placement": "structure", "text": "Put down the necromancer's raised dead",
-         "spawn": [{"type": "minecraft:skeleton", "count": 3}, {"type": "skycraft:draugr", "count": 2}]},
-        {"type": "kill", "place": "rebels_cairn", "placement": "structure", "text": "Stop Corvin Ashdown before the seal breaks",
-         "spawn": [{"type": "skycraft:necromancer", "name": "Corvin Ashdown", "target": true, "boss": true, "hp": 1.5}],
-         "journal": "The inner seal of the Red Eagle's tomb is cracked, but it holds. Whatever the Reachfolk believe, Faolan sleeps on."}
+        {
+          "type": "go",
+          "place": "rebels_cairn",
+          "text": "Go to Rebel's Cairn"
+        },
+        {
+          "type": "clear",
+          "place": "rebels_cairn",
+          "placement": "structure",
+          "text": "Put down the necromancer's raised dead",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "rebels_cairn",
+          "placement": "structure",
+          "text": "Stop Corvin Ashdown before the seal breaks",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "name": "Corvin Ashdown",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ],
+          "journal": "The inner seal of the Red Eagle's tomb is cracked, but it holds. Whatever the Reachfolk believe, Faolan sleeps on."
+        }
       ],
-      "rewards": {"gold": 240, "items": ["skycraft:soul_gem_common"]},
-      "outro": "The next morning there were fresh ochre marks on the cairn stone. The Forsworn had come to see their king was safe."
+      "rewards": {
+        "gold": 240,
+        "items": [
+          "skycraft:soul_gem_common"
+        ]
+      },
+      "outro": "The next morning there were fresh ochre marks on the cairn stone. The Forsworn had come to see their king was safe.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_left_hand_mine",
@@ -360,19 +1058,58 @@
       "pitch": "Lucan went back down the deep drift at Left Hand Mine for our father's pick after Skaggi closed it. The spiders came up through the old Dwarven cut. Skaggi won't send anyone. Would you?",
       "desc": "Aurelia Salvius asked me to find her brother Lucan, lost in the closed deep drift of Left Hand Mine.",
       "objectives": [
-        {"type": "go", "place": "left_hand_mine", "text": "Enter the deep drift of Left Hand Mine"},
-        {"type": "kill", "place": "left_hand_mine", "placement": "structure", "text": "Kill the Drift-Mother",
-         "spawn": [{"type": "skycraft:frostbite_spider", "name": "The Drift-Mother", "target": true, "boss": true, "hp": 2.0},
-                   {"type": "skycraft:frostbite_spider", "count": 2}]},
-        {"type": "retrieve", "place": "left_hand_mine", "placement": "structure", "relic": "plr_left_hand_mine_pick",
-         "text": "Find Lucan beyond the Dwarven door",
-         "journal": "Lucan Salvius was alive, thin and grinning, sitting very still behind the steam pipe with the pick across his knees. His hands shook too much to carry it, so he gave it to me."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_aurelia", "relic": "plr_left_hand_mine_pick",
-         "text": "Bring the pick to Aurelia at Salvius Farm",
-         "topic": "Lucan's alive. He's on his way home.", "reply": "Alive? Alive! And he made you carry the pick, didn't he. Of course he did. Divines bless you. I'm baking the spiced bread tonight, all of it, and he is not getting any until he says thank you."}
+        {
+          "type": "go",
+          "place": "left_hand_mine",
+          "text": "Enter the deep drift of Left Hand Mine"
+        },
+        {
+          "type": "kill",
+          "place": "left_hand_mine",
+          "placement": "structure",
+          "text": "Kill the Drift-Mother",
+          "spawn": [
+            {
+              "type": "skycraft:frostbite_spider",
+              "name": "The Drift-Mother",
+              "target": true,
+              "boss": true,
+              "hp": 2.0
+            },
+            {
+              "type": "skycraft:frostbite_spider",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "left_hand_mine",
+          "placement": "structure",
+          "relic": "plr_left_hand_mine_pick",
+          "text": "Find Lucan beyond the Dwarven door",
+          "journal": "Lucan Salvius was alive, thin and grinning, sitting very still behind the steam pipe with the pick across his knees. His hands shook too much to carry it, so he gave it to me."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_aurelia",
+          "relic": "plr_left_hand_mine_pick",
+          "text": "Bring the pick to Aurelia at Salvius Farm",
+          "topic": "Lucan's alive. He's on his way home.",
+          "reply": "Alive? Alive! And he made you carry the pick, didn't he. Of course he did. Divines bless you. I'm baking the spiced bread tonight, all of it, and he is not getting any until he says thank you."
+        }
       ],
-      "rewards": {"gold": 200, "items": ["skycraft:steel_war_axe"]},
-      "outro": "The Salvius pick hangs over the farmhouse door. Lucan says he will never go below the second timber frame again. Nobody believes him."
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:steel_war_axe"
+        ]
+      },
+      "outro": "The Salvius pick hangs over the farmhouse door. Lucan says he will never go below the second timber frame again. Nobody believes him.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_reachwater_rock",
@@ -383,20 +1120,64 @@
       "pitch": "Grave robbers came to Dushnikh Yal by night and stole my grandfather's axe from the longhouse. They hide in Reachwater Rock and think Orcs fear the dead. I do not fear the dead. I fear my chief, who says it is my shame. Bring back the axe and kill the one who took it, and the shame is gone.",
       "desc": "Murbol gro-Shak of Dushnikh Yal wants his grandfather's orichalcum axe back from the grave robbers at Reachwater Rock.",
       "objectives": [
-        {"type": "go", "place": "reachwater_rock", "text": "Go to Reachwater Rock"},
-        {"type": "kill", "place": "reachwater_rock", "placement": "structure", "text": "Kill Fjotra the Spade",
-         "spawn": [{"type": "skycraft:bandit_chief", "name": "Fjotra the Spade", "target": true, "boss": true, "hp": 1.3},
-                   {"type": "skycraft:bandit", "count": 2}]},
-        {"type": "retrieve", "place": "reachwater_rock", "placement": "structure", "relic": "plr_reachwater_rock_axe",
-         "text": "Recover the grudge-marked axe",
-         "spawn": [{"type": "skycraft:draugr", "count": 3}],
-         "journal": "The robbers woke the tomb's dead. The axe lay in the hands of a dead robber, whom the draugr had found first."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_murbol", "relic": "plr_reachwater_rock_axe",
-         "text": "Return the axe to Murbol in Dushnikh Yal",
-         "topic": "Your grandfather's axe.", "reply": "The grudge-marks are all here. Good. I will cut one more into the haft tonight, for the robbers, and one for you, outsider. Not a grudge. The other kind."}
+        {
+          "type": "go",
+          "place": "reachwater_rock",
+          "text": "Go to Reachwater Rock"
+        },
+        {
+          "type": "kill",
+          "place": "reachwater_rock",
+          "placement": "structure",
+          "text": "Kill Fjotra the Spade",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Fjotra the Spade",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            },
+            {
+              "type": "skycraft:bandit",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "reachwater_rock",
+          "placement": "structure",
+          "relic": "plr_reachwater_rock_axe",
+          "text": "Recover the grudge-marked axe",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            }
+          ],
+          "journal": "The robbers woke the tomb's dead. The axe lay in the hands of a dead robber, whom the draugr had found first."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_murbol",
+          "relic": "plr_reachwater_rock_axe",
+          "text": "Return the axe to Murbol in Dushnikh Yal",
+          "topic": "Your grandfather's axe.",
+          "reply": "The grudge-marks are all here. Good. I will cut one more into the haft tonight, for the robbers, and one for you, outsider. Not a grudge. The other kind."
+        }
       ],
-      "rewards": {"gold": 260, "items": ["skycraft:steel_mace"]},
-      "outro": "Murbol cut a new mark into his grandfather's axe: the first in four generations that does not stand for an enemy."
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "skycraft:steel_mace"
+        ]
+      },
+      "outro": "Murbol cut a new mark into his grandfather's axe: the first in four generations that does not stand for an enemy.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_fort_sungard",
@@ -406,17 +1187,58 @@
       "desc": "Vatrius Hollow, a Legion deserter, holds Fort Sungard with a band of turncoats, taxing the road in the Emperor's name. As long as the cohort's eagle standard hangs in his hall, his men believe they are still soldiers.",
       "pitch": "Fort Sungard's 'garrison' charged my brother thirty septims to use his own road. They're deserters flying a Legion flag. Take the flag away and I reckon they'll stop pretending.",
       "objectives": [
-        {"type": "go", "place": "fort_sungard", "text": "Go to Fort Sungard"},
-        {"type": "clear", "place": "fort_sungard", "text": "Break the deserters on the walls",
-         "spawn": [{"type": "skycraft:bandit", "name": "Sungard Deserter", "count": 4}]},
-        {"type": "kill", "place": "fort_sungard", "placement": "structure", "text": "Kill 'Commander' Vatrius Hollow",
-         "spawn": [{"type": "skycraft:bandit_chief", "name": "Vatrius Hollow", "target": true, "boss": true, "hp": 1.5}]},
-        {"type": "retrieve", "place": "fort_sungard", "placement": "structure", "relic": "plr_fort_sungard_standard",
-         "text": "Take down the eagle standard",
-         "journal": "The eagle standard came off its hooks easily. Without it, Fort Sungard is just an empty fort full of tired men."}
+        {
+          "type": "go",
+          "place": "fort_sungard",
+          "text": "Go to Fort Sungard"
+        },
+        {
+          "type": "clear",
+          "place": "fort_sungard",
+          "text": "Break the deserters on the walls",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "name": "Sungard Deserter",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fort_sungard",
+          "placement": "structure",
+          "text": "Kill 'Commander' Vatrius Hollow",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Vatrius Hollow",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "fort_sungard",
+          "placement": "structure",
+          "relic": "plr_fort_sungard_standard",
+          "text": "Take down the eagle standard",
+          "journal": "The eagle standard came off its hooks easily. Without it, Fort Sungard is just an empty fort full of tired men."
+        }
       ],
-      "rewards": {"gold": 280, "items": ["skycraft:imperial_light_chestplate"]},
-      "outro": "The road past Fort Sungard is free again. Somewhere in the Legion's records, the Fourth Cohort's eagle is still listed as lost."
+      "rewards": {
+        "gold": 280,
+        "items": [
+          "skycraft:imperial_light_chestplate"
+        ]
+      },
+      "outro": "The road past Fort Sungard is free again. Somewhere in the Legion's records, the Fourth Cohort's eagle is still listed as lost.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_gloomreach",
@@ -426,17 +1248,56 @@
       "desc": "The spore-gatherer Sinnoc went into Gloomreach to harvest glowing fungus for an alchemist in Markarth and never came out. His full satchel is hidden behind the second falls.",
       "pitch": "Fellow called Sinnoc went into Gloomreach for glowing mushrooms. Took a Markarth alchemist's money in advance and didn't come back. Honest sort, for a mushroom man. His satchel's still down there somewhere.",
       "objectives": [
-        {"type": "go", "place": "gloomreach", "text": "Enter Gloomreach"},
-        {"type": "retrieve", "place": "gloomreach", "placement": "structure", "relic": "plr_gloomreach_satchel",
-         "text": "Find Sinnoc's satchel behind the second falls",
-         "spawn": [{"type": "skycraft:falmer", "count": 2}]},
-        {"type": "kill", "place": "gloomreach", "placement": "structure", "text": "Kill the Falmer gardener",
-         "spawn": [{"type": "skycraft:falmer", "name": "The Gardener", "target": true, "boss": true, "hp": 1.6},
-                   {"type": "skycraft:chaurus", "count": 2}],
-         "journal": "The Gardener wore a cord of teeth and one Nord ring. Sinnoc's, I think. The fungus beds will go untended now."}
+        {
+          "type": "go",
+          "place": "gloomreach",
+          "text": "Enter Gloomreach"
+        },
+        {
+          "type": "retrieve",
+          "place": "gloomreach",
+          "placement": "structure",
+          "relic": "plr_gloomreach_satchel",
+          "text": "Find Sinnoc's satchel behind the second falls",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "gloomreach",
+          "placement": "structure",
+          "text": "Kill the Falmer gardener",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "name": "The Gardener",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            },
+            {
+              "type": "skycraft:chaurus",
+              "count": 2
+            }
+          ],
+          "journal": "The Gardener wore a cord of teeth and one Nord ring. Sinnoc's, I think. The fungus beds will go untended now."
+        }
       ],
-      "rewards": {"gold": 220, "items": ["skycraft:soul_gem_common"]},
-      "outro": "The glowing caps fetch a fine price in Markarth. Sinnoc's debt to his alchemist is paid, as he wanted."
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:soul_gem_common"
+        ]
+      },
+      "outro": "The glowing caps fetch a fine price in Markarth. Sinnoc's debt to his alchemist is paid, as he wanted.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_valthume",
@@ -447,20 +1308,64 @@
       "pitch": "Not the Emperor, whatever the carters say. A soldier called Ketil, who died in that room when Hjalti took the village. His shield went into Valthume with the dead of both sides, and he's walked the floor looking for it ever since. My family's kept his lamp lit four hundred years. I'd like to be the one who lets it go out.",
       "desc": "Ulfgar the Lamp-Keeper of Old Hroldan asked me to bring the soldier Ketil's shield back from the barrow of Valthume so his ghost can rest.",
       "objectives": [
-        {"type": "go", "place": "valthume", "text": "Enter Valthume"},
-        {"type": "kill", "place": "valthume", "placement": "structure", "text": "Defeat the Warden of Valthume",
-         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "The Warden of Valthume", "target": true, "boss": true, "hp": 1.6},
-                   {"type": "skycraft:draugr", "count": 2}]},
-        {"type": "retrieve", "place": "valthume", "placement": "structure", "relic": "plr_valthume_shield",
-         "text": "Recover the hawk shield",
-         "spawn": [{"type": "skycraft:draugr", "count": 2}],
-         "journal": "Among the warden's hoard of shields was a round one with a faded hawk. It felt lighter than it should have."},
-        {"type": "deliver", "npc": "pln_skyrim_the_reach_ulfgar", "relic": "plr_valthume_shield",
-         "text": "Bring Ketil's shield to Ulfgar at Old Hroldan",
-         "topic": "I have Ketil's shield.", "reply": "The hawk. Grandmother described it exactly. I'll hang it over the bed tonight, and tomorrow, for the first time in four hundred years, I'll let the lamp go out. Thank you. And thank you from him, I expect."}
+        {
+          "type": "go",
+          "place": "valthume",
+          "text": "Enter Valthume"
+        },
+        {
+          "type": "kill",
+          "place": "valthume",
+          "placement": "structure",
+          "text": "Defeat the Warden of Valthume",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "The Warden of Valthume",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "valthume",
+          "placement": "structure",
+          "relic": "plr_valthume_shield",
+          "text": "Recover the hawk shield",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ],
+          "journal": "Among the warden's hoard of shields was a round one with a faded hawk. It felt lighter than it should have."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_the_reach_ulfgar",
+          "relic": "plr_valthume_shield",
+          "text": "Bring Ketil's shield to Ulfgar at Old Hroldan",
+          "topic": "I have Ketil's shield.",
+          "reply": "The hawk. Grandmother described it exactly. I'll hang it over the bed tonight, and tomorrow, for the first time in four hundred years, I'll let the lamp go out. Thank you. And thank you from him, I expect."
+        }
       ],
-      "rewards": {"gold": 260, "items": ["minecraft:shield"]},
-      "outro": "The lamp in the upstairs room at Old Hroldan has gone out. The shutters still rattle sometimes, but Ulfgar says that is only the wind now."
+      "rewards": {
+        "gold": 260,
+        "items": [
+          "minecraft:shield"
+        ]
+      },
+      "outro": "The lamp in the upstairs room at Old Hroldan has gone out. The shutters still rattle sometimes, but Ulfgar says that is only the wind now.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_lost_valley_redoubt",
@@ -470,16 +1375,53 @@
       "desc": "Teodric, a minstrel of the Bards College, is held in a cage above the falls at Lost Valley Redoubt, singing nightly for the hagraven Kerath Burnt-Feather. She is running out of patience.",
       "pitch": "The crones at Lost Valley Redoubt grabbed a minstrel from the Bards College. They keep him singing for his supper. Word is the old hag burned his lute. He hasn't got many songs left.",
       "objectives": [
-        {"type": "go", "place": "lost_valley_redoubt", "text": "Reach Lost Valley Redoubt"},
-        {"type": "clear", "place": "lost_valley_redoubt", "text": "Cut through the Forsworn guarding the falls",
-         "spawn": [{"type": "skycraft:forsworn", "count": 4}]},
-        {"type": "kill", "place": "lost_valley_redoubt", "text": "Kill Kerath Burnt-Feather and take her keys",
-         "spawn": [{"type": "skycraft:hagraven", "name": "Kerath Burnt-Feather", "target": true, "boss": true, "hp": 1.7},
-                   {"type": "skycraft:forsworn", "count": 1}],
-         "journal": "Teodric climbed out of his cage, bowed with great ceremony, and set off for Solitude singing a brand-new song about a hero at Bard's Leap."}
+        {
+          "type": "go",
+          "place": "lost_valley_redoubt",
+          "text": "Reach Lost Valley Redoubt"
+        },
+        {
+          "type": "clear",
+          "place": "lost_valley_redoubt",
+          "text": "Cut through the Forsworn guarding the falls",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "lost_valley_redoubt",
+          "text": "Kill Kerath Burnt-Feather and take her keys",
+          "spawn": [
+            {
+              "type": "skycraft:hagraven",
+              "name": "Kerath Burnt-Feather",
+              "target": true,
+              "boss": true,
+              "hp": 1.7
+            },
+            {
+              "type": "skycraft:forsworn",
+              "count": 1
+            }
+          ],
+          "journal": "Teodric climbed out of his cage, bowed with great ceremony, and set off for Solitude singing a brand-new song about a hero at Bard's Leap."
+        }
       ],
-      "rewards": {"gold": 300, "items": ["skycraft:elven_bow"]},
-      "outro": "The Bards College has a new ballad this season. It is mostly accurate."
+      "rewards": {
+        "gold": 300,
+        "items": [
+          "skycraft:elven_bow"
+        ]
+      },
+      "outro": "The Bards College has a new ballad this season. It is mostly accurate.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_bards_leap_summit",
@@ -489,13 +1431,31 @@
       "desc": "A heartbroken bard carved a verse on the rock above Bard's Leap: he dropped his lost love's ring into the pool beneath the falls, and whoever finds it may keep it.",
       "pitch": "There's a verse on the rock at Bard's Leap about a ring dropped in the pool below. Lots of folk have looked. Nobody's thought to look where the water actually lands.",
       "objectives": [
-        {"type": "go", "place": "bards_leap_summit", "text": "Read the verse at the top of Bard's Leap"},
-        {"type": "retrieve", "place": "bards_leap_summit", "offset": [6, 10], "item": "skycraft:gold_ring",
-         "text": "Search the pool beneath the falls for the ring",
-         "journal": "Wedged in the stones where the falls strike the pool: a gold ring, engraved inside with the name Ingrith."}
+        {
+          "type": "go",
+          "place": "bards_leap_summit",
+          "text": "Read the verse at the top of Bard's Leap"
+        },
+        {
+          "type": "retrieve",
+          "place": "bards_leap_summit",
+          "offset": [
+            6,
+            10
+          ],
+          "item": "skycraft:gold_ring",
+          "text": "Search the pool beneath the falls for the ring",
+          "journal": "Wedged in the stones where the falls strike the pool: a gold ring, engraved inside with the name Ingrith."
+        }
       ],
-      "rewards": {"gold": 120},
-      "outro": "The ring was never meant for you. It fits anyway."
+      "rewards": {
+        "gold": 120
+      },
+      "outro": "The ring was never meant for you. It fits anyway.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     },
     {
       "id": "pl_dragon_mound_harmugstahl",
@@ -505,16 +1465,53 @@
       "desc": "A cult calling itself the Returning Wing chants over the dragon burial mound north of Harmugstahl, hoping to wake the dragon inside with blood.",
       "pitch": "Robed lunatics are chanting at the dragon mound north of Harmugstahl. They took a shepherd from Karthwasten last week. If they wake what's in there, we'll all be goats.",
       "objectives": [
-        {"type": "go", "place": "dragon_mound_harmugstahl", "text": "Go to the dragon mound north of Harmugstahl"},
-        {"type": "kill", "place": "dragon_mound_harmugstahl", "text": "Silence Brother Valmund",
-         "spawn": [{"type": "npc:mage", "name": "Brother Valmund", "target": true, "boss": true, "hp": 1.5},
-                   {"type": "npc:mage", "count": 2}]},
-        {"type": "clear", "place": "dragon_mound_harmugstahl", "text": "Put down the dead the chanting stirred",
-         "spawn": [{"type": "skycraft:draugr", "count": 3}],
-         "journal": "The chanting stopped, and the mound settled. Whatever sleeps beneath it sleeps on, for now."}
+        {
+          "type": "go",
+          "place": "dragon_mound_harmugstahl",
+          "text": "Go to the dragon mound north of Harmugstahl"
+        },
+        {
+          "type": "kill",
+          "place": "dragon_mound_harmugstahl",
+          "text": "Silence Brother Valmund",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "name": "Brother Valmund",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "npc:mage",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "dragon_mound_harmugstahl",
+          "text": "Put down the dead the chanting stirred",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            }
+          ],
+          "journal": "The chanting stopped, and the mound settled. Whatever sleeps beneath it sleeps on, for now."
+        }
       ],
-      "rewards": {"gold": 230, "items": ["skycraft:amulet_of_talos"]},
-      "outro": "The Returning Wing's sermons were left to rot in the rain. The mound north of Harmugstahl is quiet."
+      "rewards": {
+        "gold": 230,
+        "items": [
+          "skycraft:amulet_of_talos"
+        ]
+      },
+      "outro": "The Returning Wing's sermons were left to rot in the rain. The mound north of Harmugstahl is quiet.",
+      "why": [
+        "the_reach.L9.native_uprising",
+        "the_reach.L8.old_gods"
+      ]
     }
   ]
 }

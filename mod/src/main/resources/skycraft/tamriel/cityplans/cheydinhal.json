@@ -1,0 +1,313 @@
+{
+  "id": "cheydinhal",
+  "why": [
+    "nibenay_basin.L1.valus_foothills",
+    "nibenay_basin.L3.corbolo",
+    "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+  ],
+  "sil": "canal-twin-bank",
+  "base": "none",
+  "overlay": "cheydinhal",
+  "radius": 98,
+  "reach": 114,
+  "innKey": "cheydinhal_newlands_lodge",
+  "names": {
+    "inn": "cheydinhal_newlands_lodge",
+    "store": "cheydinhal_borbas_goods",
+    "smithy": "cheydinhal_march_rider"
+  },
+  "gates": [
+    [
+      -92,
+      0
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -46
+      ],
+      "face": "south",
+      "name": "cheydinhal_castle_cheydinhal",
+      "overlay": "cheydinhal"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        22,
+        -14
+      ],
+      "face": "south",
+      "name": "cheydinhal_chapel_spire",
+      "overlay": "cheydinhal"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        98
+      ],
+      "overlay": "cheydinhal"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_chapel_of_arkay"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        21
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        52
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_newlands_lodge"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_bridge_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -16,
+        56
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_borbas_goods"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_mach_nas_books"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -49,
+        31
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_march_rider"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_abandoned_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -57,
+        -11
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_riverview_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_rythe_lythandas_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -35,
+        -46
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_willow_bank"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_aldos_othran_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        5,
+        -58
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_llevana_nedaren_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_ohtimbars_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        43,
+        -39
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_maguls_house"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "cheydinhal",
+      "name": "cheydinhal_guard_barracks"
+    }
+  ],
+  "features": [
+    {
+      "type": "tree_row",
+      "theme": "weeping_willow",
+      "count": 3
+    },
+    {
+      "type": "garden",
+      "theme": "corbolo_bank",
+      "count": 3
+    },
+    {
+      "type": "well",
+      "theme": "mages_guild_well",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "cheydinhal_iron",
+      "count": 3
+    }
+  ],
+  "titles": {
+    "cheydinhal_castle_cheydinhal": "Castle Cheydinhal",
+    "cheydinhal_chapel_spire": "Great Chapel of Arkay Spire",
+    "cheydinhal_chapel_of_arkay": "Great Chapel of Arkay",
+    "cheydinhal_fighters_guild": "Cheydinhal Fighters Guild",
+    "cheydinhal_mages_guild": "Cheydinhal Mages Guild",
+    "cheydinhal_newlands_lodge": "Newlands Lodge",
+    "cheydinhal_bridge_inn": "Cheydinhal Bridge Inn",
+    "cheydinhal_borbas_goods": "Borba's Goods and Stores",
+    "cheydinhal_mach_nas_books": "Mach-Na's Books",
+    "cheydinhal_march_rider": "The March Rider",
+    "cheydinhal_abandoned_house": "Abandoned Sanctuary House",
+    "cheydinhal_riverview_manor": "Riverview Manor",
+    "cheydinhal_rythe_lythandas_house": "Rythe Lythandas's Studio",
+    "cheydinhal_willow_bank": "Willow Bank Townhouse",
+    "cheydinhal_aldos_othran_house": "Aldos Othran's House",
+    "cheydinhal_llevana_nedaren_house": "Llevana Nedaren's House",
+    "cheydinhal_ohtimbars_house": "Ohtimbar's House",
+    "cheydinhal_maguls_house": "Magul's House",
+    "cheydinhal_guard_barracks": "Ulrich Leland's Guardhouse"
+  }
+}

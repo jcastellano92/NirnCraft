@@ -1,0 +1,199 @@
+{
+  "id": "hrothgard_barrow",
+  "why": [
+    "frozen_forest.L1.fjord_valleys",
+    "frozen_forest.L4.petrified_rime_woods",
+    "frozen_forest.L6.jylkurfyk_port_ruins"
+  ],
+  "sil": "atmora-hrothgard-barrow-plan",
+  "base": "none",
+  "overlay": "frozen_forest",
+  "radius": 24,
+  "reach": 36,
+  "gates": [
+    [
+      0,
+      22
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        11
+      ],
+      "overlay": "frozen_forest",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        11,
+        24
+      ],
+      "overlay": "frozen_forest",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "hrothgard_barrow_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "arch",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "hrothgard_barrow_landmark",
+      "overlay": "frozen_forest"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 20,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        12,
+        12
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        9
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -12,
+        12
+      ],
+      "face": "north",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -9,
+        0
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -12,
+        -12
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -9
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        12,
+        -12
+      ],
+      "face": "south",
+      "overlay": "frozen_forest",
+      "name": "hrothgard_barrow_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "hrothgard_barrow_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "hrothgard_barrow_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "hrothgard_barrow_b_5",
+    "smithy": "hrothgard_barrow_b_7"
+  },
+  "titles": {
+    "hrothgard_barrow_b_1": "place.skycraft.hrothgard_barrow Council & Seat Hall",
+    "hrothgard_barrow_b_2": "place.skycraft.hrothgard_barrow High Sanctuary",
+    "hrothgard_barrow_b_3": "place.skycraft.hrothgard_barrow Fighters & Wayfarers Hall",
+    "hrothgard_barrow_b_4": "place.skycraft.hrothgard_barrow Mages & Chroniclers Spire",
+    "hrothgard_barrow_b_5": "place.skycraft.hrothgard_barrow The Lantern & Hearth Inn",
+    "hrothgard_barrow_b_6": "place.skycraft.hrothgard_barrow The Traveler's Rest Tavern",
+    "hrothgard_barrow_b_7": "place.skycraft.hrothgard_barrow Master Forge & Armorer",
+    "hrothgard_barrow_b_8": "place.skycraft.hrothgard_barrow Botanicals & Remedies",
+    "hrothgard_barrow_landmark": "High Seat of place.skycraft.hrothgard_barrow",
+    "hrothgard_barrow_plaza": "place.skycraft.hrothgard_barrow Central Plaza"
+  },
+  "innKey": "hrothgard_barrow_b_5"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "hews_bane",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:smooth_sandstone",
+    "low": "minecraft:cut_sandstone",
+    "roof": "dark_prismarine",
+    "trim": "jungle",
+    "wood": "jungle",
+    "accent": "cyan"
+  },
+  "palette": {
+    "cityWall": "cut_sandstone",
+    "cityWall2": "minecraft:smooth_sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:prismarine_bricks",
+    "path": "minecraft:sandstone"
+  }
+}

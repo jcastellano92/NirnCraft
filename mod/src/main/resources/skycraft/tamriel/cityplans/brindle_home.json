@@ -1,0 +1,95 @@
+{
+  "id": "brindle_home",
+  "why": [
+    "colovian_highlands.L5.wool_and_horses",
+    "colovian_highlands.L6.spring_hamlets"
+  ],
+  "sil": "highland-pasture-cot",
+  "base": "none",
+  "overlay": "colovian_highlands",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "colovian_highlands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "brindle_home_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "brindle_home_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "brindle_home_b_3"
+    },
+    {
+      "kind": "farmhouse",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "brindle_home_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "theme": "brindle_spring",
+      "count": 1
+    },
+    {
+      "type": "flowers",
+      "theme": "colovian_heather",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "brindle_home_b_1": "Brindle Home Farmhouse",
+    "brindle_home_b_2": "Engorm's Shepherd Cottage",
+    "brindle_home_b_3": "Pinarius Inventius's Lodge",
+    "brindle_home_b_4": "Brindle Wool Barn"
+  }
+}

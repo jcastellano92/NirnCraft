@@ -1,0 +1,186 @@
+{
+  "id": "tang_mo_harbor_village",
+  "why": [
+    "tang_mo.L1.karst_spire_isles",
+    "tang_mo.L5.open_charter_spice_trade",
+    "tang_mo.L6.tang_mo_treaty_harbor"
+  ],
+  "sil": "junk-harbour-lanterns",
+  "base": "none",
+  "overlay": "tang_mo_harbor_village",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        18
+      ],
+      "overlay": "tang_mo_harbor_village",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        18,
+        38
+      ],
+      "overlay": "tang_mo",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "tang_mo_harbor_village_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -10
+      ],
+      "name": "tang_mo_harbor_village_landmark",
+      "overlay": "tang_mo_harbor_village"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 7,
+      "r1": 34,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        17,
+        21
+      ],
+      "face": "north",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        13
+      ],
+      "face": "north",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -25,
+        12
+      ],
+      "face": "north",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -12,
+        -6
+      ],
+      "face": "south",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -27
+      ],
+      "face": "south",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "tang_mo_harbor_village",
+      "name": "tang_mo_harbor_village_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "tang_mo_harbor_village_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "tang_mo_harbor_village_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "tang_mo_harbor_village_b_5",
+    "smithy": "tang_mo_harbor_village_b_7"
+  },
+  "titles": {
+    "tang_mo_harbor_village_b_1": "place.skycraft.tang_mo_harbor_village Council & Seat Hall",
+    "tang_mo_harbor_village_b_2": "place.skycraft.tang_mo_harbor_village High Sanctuary",
+    "tang_mo_harbor_village_b_3": "place.skycraft.tang_mo_harbor_village Fighters & Wayfarers Hall",
+    "tang_mo_harbor_village_b_4": "place.skycraft.tang_mo_harbor_village Mages & Chroniclers Spire",
+    "tang_mo_harbor_village_b_5": "place.skycraft.tang_mo_harbor_village The Lantern & Hearth Inn",
+    "tang_mo_harbor_village_b_6": "place.skycraft.tang_mo_harbor_village The Traveler's Rest Tavern",
+    "tang_mo_harbor_village_b_7": "place.skycraft.tang_mo_harbor_village Master Forge & Armorer",
+    "tang_mo_harbor_village_landmark": "High Seat of place.skycraft.tang_mo_harbor_village",
+    "tang_mo_harbor_village_plaza": "place.skycraft.tang_mo_harbor_village Central Plaza"
+  },
+  "innKey": "tang_mo_harbor_village_b_5"
+}

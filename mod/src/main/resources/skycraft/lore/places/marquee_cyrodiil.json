@@ -1,157 +1,193 @@
 {
- "places": {
-  "imperial_city_prison": {
-   "hook": "The Imperial City Prison squats below the Waterfront, a place of locks and ledgers where a man may be forgotten in perfectly good order.",
-   "rumour": "They say the Prison has a cell for every sort of crime, and one with no number at all. The warders pass it quickly and do not look at the door.",
-   "notes": [
-    {
-     "id": "warder_tally",
-     "kind": "ledger",
-     "title": "Warder's Tally, Waterfront Block",
-     "author": "Warder Hostus Bell",
-     "at": "chest",
-     "pages": [
-      "^WARDER'S TALLY, WATERFRONT BLOCK\n^Month of the Sun's Dusk\nCell eleven: one forger, unrepentant. Cell twelve: one forger, penitent. Cell fourteen: empty, though the straw is warm. Cell fifteen: occupied. I did not note by whom. The lock was turned from the inside.",
-      "To the next warder: do not take the lamp past cell sixteen. Whoever lives there likes the dark, and has asked, politely, for a little more of it. I have been polite in return. It is not the worst arrangement I have made in twenty years of service."
-     ]
+  "places": {
+    "imperial_city_prison": {
+      "hook": "The Imperial City Prison squats below the Waterfront, a place of locks and ledgers where a man may be forgotten in perfectly good order.",
+      "rumour": "They say the Prison has a cell for every sort of crime, and one with no number at all. The warders pass it quickly and do not look at the door.",
+      "notes": [
+        {
+          "id": "warder_tally",
+          "kind": "ledger",
+          "title": "Warder's Tally, Waterfront Block",
+          "author": "Warder Hostus Bell",
+          "at": "chest",
+          "pages": [
+            "^WARDER'S TALLY, WATERFRONT BLOCK\n^Month of the Sun's Dusk\nCell eleven: one forger, unrepentant. Cell twelve: one forger, penitent. Cell fourteen: empty, though the straw is warm. Cell fifteen: occupied. I did not note by whom. The lock was turned from the inside.",
+            "To the next warder: do not take the lamp past cell sixteen. Whoever lives there likes the dark, and has asked, politely, for a little more of it. I have been polite in return. It is not the worst arrangement I have made in twenty years of service."
+          ]
+        }
+      ],
+      "why": [
+        "cyrodiil.L8.daedric_shrines",
+        "cyrodiil.L8.arena_glory"
+      ]
+    },
+    "arboretum": {
+      "hook": "A great domed glasshouse where the Empire grows a specimen of every tree it has ever conquered, and a few that conquered it.",
+      "rumour": "The Arboretum's oldest tree is meant to be a cutting of the Eldergleam-grove stock, brought south by Alessia. Ask the Archivist about it and you will be there until dinner.",
+      "notes": [
+        {
+          "id": "seedling_ledger",
+          "kind": "ledger",
+          "title": "Arboretum Accessions Ledger",
+          "author": "Pomponia Sedge",
+          "at": "site",
+          "pages": [
+            "^ACCESSIONS, LAST QUARTER\n^No. 3114: Silverbirch scion, Nobles District donation, thriving.\n^No. 3115: Fire-cedar, Valenwood stock, dying; the Archivist will not hear of it.\n^No. 3116: a bulb of unknown origin, delivered by a barge-woman who gave no name. It has bloomed twice. The flowers are blue and warm to the touch.",
+            "Query for the next committee: if a flower is warm, is it a flower? I have asked three alchemists and a priest of Dibella. The priest said yes. The alchemists said send it back."
+          ]
+        }
+      ],
+      "why": [
+        "cyrodiil.L8.wayshrines",
+        "cyrodiil.L8.elf_ruin_fear"
+      ]
+    },
+    "bruma_caverns": {
+      "hook": "A split in the Jerall foothills where Bruma's old smugglers hid from the Legion, and where something is said to hide from them.",
+      "rumour": "The caverns drain into the creek that turns the Mountain Smithy's wheel. Every winter the water runs red for a night. Brandt Ironsled says it is iron in the stone. Brandt Ironsled does not go up there.",
+      "notes": [
+        {
+          "id": "chandlers_complaint",
+          "kind": "letter",
+          "title": "Chandler's Complaint",
+          "author": "Hrodgar the Chandler",
+          "at": "chest",
+          "pages": [
+            "#Bruma, the second of Frostfall\nTo the Collector of Candles, Imperial City,\nSir, the beeswax you sent is mostly paraffin. My customers are Nords at heart, and a Nord can smell a cheat at forty paces. Three of them have told me so in language I would rather not set down.",
+            "Further, one black candle was found at the mouth of the caverns last week, still lit, with no trace of who carried it. I have my suspicions. I will not write them. I will say only that the Legion's courier does not pass this way as often as he should, and that the new Captain looks at the mountain as though it owed her money."
+          ]
+        }
+      ],
+      "why": [
+        "jerall_mountains.L5.silver_mines",
+        "jerall_mountains.L6.bruma_on_the_pass"
+      ]
+    },
+    "lucky_old_lady_statue": {
+      "hook": "A weathered stone woman at the top of Bravil's oldest stair, her open hand dark with the polish of a thousand wishes.",
+      "rumour": "The Lucky Old Lady is meant to answer one wish a year. Mother Nettle says she answers none, and takes the coin for being listened to.",
+      "notes": [
+        {
+          "id": "wish_scraps",
+          "kind": "notes",
+          "title": "Scraps Left in the Hand",
+          "author": "Various",
+          "at": "site",
+          "pages": [
+            "^Scraps of paper, folded small, left tucked into the stone fingers:\n\"Let my boy come back from the Gold Coast with all his fingers.\"\n\"Let the Count die slowly and the clerk quickly.\"\n\"Let Mother Nettle's eels love me.\"",
+            "\"Let someone read this and know that I am not well, and I am not saying anything, and the rope is still where I left it.\" (The last note is torn. Someone has written beneath it, in a different hand: \"Come to the Lodge on Morndas. There is soup.\")"
+          ]
+        }
+      ],
+      "why": [
+        "cyrodiil.L9.border_pressure",
+        "cyrodiil.L10.abandoned_forts"
+      ]
+    },
+    "the_blue_netch": {
+      "hook": "A Skingrad-road inn whose sign shows a blue netch the size of a barn, which, by the innkeeper's account, is a modest likeness.",
+      "rumour": "They say the Blue Netch's ale is made with water from a well that was dug by Ayleids. It makes your hands very cold, and your jokes very good.",
+      "notes": [
+        {
+          "id": "netch_tally",
+          "kind": "ledger",
+          "title": "The Blue Netch's Tab Board",
+          "author": "Gaspara Vell",
+          "at": "site",
+          "pages": [
+            "^TAB BOARD, THE BLUE NETCH\n^Rolf the cooper owes 6 silver. Rolf the cooper says he is not Rolf the cooper. Rolf the cooper owes 6 silver.\n^The Count's own coachman owes 14 and has been told to pay in wine.\n^One Dunmer scholar owes nothing and has asked, three times, whether the netch on the sign is anatomically correct.",
+            "Note to self: do not let the scholar into the cellar. Last time he took measurements and left a note on the door saying the netch was \"forty hands shy of life size, in the mouth.\" We have been drinking quieter since."
+          ]
+        }
+      ],
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L5.river_trade"
+      ]
+    },
+    "benirus_manor": {
+      "hook": "A fine house on the Anvil cliffs, abandoned within living memory, whose shutters bang at night with the rhythm of a heartbeat.",
+      "rumour": "Gull the harbour-gull is said to nest on the Benirus roof. Sailors say the gull is the manor's last tenant and the only one who pays rent.",
+      "notes": [
+        {
+          "id": "manor_inventory",
+          "kind": "list",
+          "title": "Inventory of Benirus Manor",
+          "author": "Notary Saffer Quill",
+          "at": "chest",
+          "pages": [
+            "^INVENTORY OF BENIRUS MANOR, taken at the instance of the Count's Receiver\n^Sixteen chairs, two repairable. One harpsichord, silent. One portrait of a lady in green, the eyes unaccountably wet. One barrel of pickled herring, labelled in a childish hand as \"for the Ghosts.\"",
+            "Remark of the notary: the herring was eaten, and the barrel has been refilled, since. I did not see by whom. I did not look. I left a copper by the door and was not robbed on the way home."
+          ]
+        }
+      ],
+      "why": [
+        "cyrodiil.L8.wayshrines",
+        "cyrodiil.L8.elf_ruin_fear"
+      ]
+    },
+    "kvatch_arena": {
+      "hook": "The ring of seats under which Kvatch's survivors huddle in canvas and rope, a place of spectacle turned shelter.",
+      "rumour": "Under the arena stands, the tavern-keeper pours her ale into dented Legion helmets. She will tell you it is a joke. If you ask whose helmets, she will tell you something else.",
+      "notes": [
+        {
+          "id": "canvas_cup_menu",
+          "kind": "list",
+          "title": "The Canvas Cup: Menu and Rules",
+          "author": "Hetta Rooke",
+          "at": "chest",
+          "pages": [
+            "^THE CANVAS CUP\n^Soup, gritty. Bread, warm. Ale, in helmets. Wine, in smaller helmets.\n^RULES: No fighting in the cup. No fighting near the cup. No fighting about whose cup it is. The cup is the cup. Hetta is Hetta.",
+            "On the back, in a different hand: \"Sixteen helmets. Sixteen men. If you drink from one, say his name. If you do not know his name, ask. Hetta will tell you. She has them all.\""
+          ]
+        }
+      ],
+      "why": [
+        "gold_coast.L7.dock_labour",
+        "gold_coast.L8.akatosh_chapel"
+      ]
+    },
+    "chorrol_milegate": {
+      "hook": "A little milestone fort on the Chorrol road, long since out of the Legion's hands, where the road sign still says Chorrol, 4 miles, and means it.",
+      "rumour": "The Chorrol milegate is a good place to stop. It has no inn, no priest, and no guard. It does have a very old well that never runs dry, and a curious habit of guests leaving early.",
+      "notes": [
+        {
+          "id": "milegate_logbook",
+          "kind": "report",
+          "title": "Milegate Logbook, Final Entries",
+          "author": "Sergeant Ottis Rumm",
+          "at": "chest",
+          "pages": [
+            "^LOGBOOK, CHORROL MILEGATE\n^Fourteenth of Rain's Hand: three wagons, one cart, a lame mule. All accounted for.\n^Fifteenth: four wagons. One, I did not see arrive. It had no driver. It had a full load of barrels and a note in the back that said \"for the Count, when he calls.\" I did not open the barrels.",
+            "^Sixteenth: five wagons. The extra wagon has come again. The barrels are heavier today. The note now reads \"for the Count, now.\" I have moved the patrol to the north wall. If anyone finds this, do not send a replacement. The wagon will not need a driver."
+          ]
+        }
+      ],
+      "why": [
+        "colovian_highlands.L6.closed_villages",
+        "colovian_highlands.L8.stendarr_chapel"
+      ]
+    },
+    "knights_of_the_thorn_lodge": {
+      "hook": "A modest lodge on the Cheydinhal road with a thorny rose carved above the door, empty and swept, and cleaner than its reputation.",
+      "rumour": "The Knights of the Thorn are said to have a hall near Cheydinhal. The lodge-keeper says the knights are gone. The candles say otherwise.",
+      "notes": [
+        {
+          "id": "lodge_visitors_book",
+          "kind": "ledger",
+          "title": "Lodge Visitors' Book",
+          "author": "Warden Peridot Hale",
+          "at": "chest",
+          "pages": [
+            "^VISITORS TO THE LODGE\n^Dawn of Frostfall: a Breton, hungry. Fed.\n^Noon: two Legion deserters. Fed, and sent down the south road with directions and a warning.\n^Dusk: a knight who gave no name and drank only water. He left his sword on the table and walked out. I do not know whether it was a gift or a debt.",
+            "^Midnight: the sword is gone. So is the water. The cup is full. I will not describe the sound the cup made."
+          ]
+        }
+      ],
+      "why": [
+        "nibenay_basin.L9.market_quarrel",
+        "nibenay_basin.L10.valus_keeps"
+      ]
     }
-   ]
-  },
-  "arboretum": {
-   "hook": "A great domed glasshouse where the Empire grows a specimen of every tree it has ever conquered, and a few that conquered it.",
-   "rumour": "The Arboretum's oldest tree is meant to be a cutting of the Eldergleam-grove stock, brought south by Alessia. Ask the Archivist about it and you will be there until dinner.",
-   "notes": [
-    {
-     "id": "seedling_ledger",
-     "kind": "ledger",
-     "title": "Arboretum Accessions Ledger",
-     "author": "Pomponia Sedge",
-     "at": "site",
-     "pages": [
-      "^ACCESSIONS, LAST QUARTER\n^No. 3114: Silverbirch scion, Nobles District donation, thriving.\n^No. 3115: Fire-cedar, Valenwood stock, dying; the Archivist will not hear of it.\n^No. 3116: a bulb of unknown origin, delivered by a barge-woman who gave no name. It has bloomed twice. The flowers are blue and warm to the touch.",
-      "Query for the next committee: if a flower is warm, is it a flower? I have asked three alchemists and a priest of Dibella. The priest said yes. The alchemists said send it back."
-     ]
-    }
-   ]
-  },
-  "bruma_caverns": {
-   "hook": "A split in the Jerall foothills where Bruma's old smugglers hid from the Legion, and where something is said to hide from them.",
-   "rumour": "The caverns drain into the creek that turns the Mountain Smithy's wheel. Every winter the water runs red for a night. Brandt Ironsled says it is iron in the stone. Brandt Ironsled does not go up there.",
-   "notes": [
-    {
-     "id": "chandlers_complaint",
-     "kind": "letter",
-     "title": "Chandler's Complaint",
-     "author": "Hrodgar the Chandler",
-     "at": "chest",
-     "pages": [
-      "#Bruma, the second of Frostfall\nTo the Collector of Candles, Imperial City,\nSir, the beeswax you sent is mostly paraffin. My customers are Nords at heart, and a Nord can smell a cheat at forty paces. Three of them have told me so in language I would rather not set down.",
-      "Further, one black candle was found at the mouth of the caverns last week, still lit, with no trace of who carried it. I have my suspicions. I will not write them. I will say only that the Legion's courier does not pass this way as often as he should, and that the new Captain looks at the mountain as though it owed her money."
-     ]
-    }
-   ]
-  },
-  "lucky_old_lady_statue": {
-   "hook": "A weathered stone woman at the top of Bravil's oldest stair, her open hand dark with the polish of a thousand wishes.",
-   "rumour": "The Lucky Old Lady is meant to answer one wish a year. Mother Nettle says she answers none, and takes the coin for being listened to.",
-   "notes": [
-    {
-     "id": "wish_scraps",
-     "kind": "notes",
-     "title": "Scraps Left in the Hand",
-     "author": "Various",
-     "at": "site",
-     "pages": [
-      "^Scraps of paper, folded small, left tucked into the stone fingers:\n\"Let my boy come back from the Gold Coast with all his fingers.\"\n\"Let the Count die slowly and the clerk quickly.\"\n\"Let Mother Nettle's eels love me.\"",
-      "\"Let someone read this and know that I am not well, and I am not saying anything, and the rope is still where I left it.\" (The last note is torn. Someone has written beneath it, in a different hand: \"Come to the Lodge on Morndas. There is soup.\")"
-     ]
-    }
-   ]
-  },
-  "the_blue_netch": {
-   "hook": "A Skingrad-road inn whose sign shows a blue netch the size of a barn, which, by the innkeeper's account, is a modest likeness.",
-   "rumour": "They say the Blue Netch's ale is made with water from a well that was dug by Ayleids. It makes your hands very cold, and your jokes very good.",
-   "notes": [
-    {
-     "id": "netch_tally",
-     "kind": "ledger",
-     "title": "The Blue Netch's Tab Board",
-     "author": "Gaspara Vell",
-     "at": "site",
-     "pages": [
-      "^TAB BOARD, THE BLUE NETCH\n^Rolf the cooper owes 6 silver. Rolf the cooper says he is not Rolf the cooper. Rolf the cooper owes 6 silver.\n^The Count's own coachman owes 14 and has been told to pay in wine.\n^One Dunmer scholar owes nothing and has asked, three times, whether the netch on the sign is anatomically correct.",
-      "Note to self: do not let the scholar into the cellar. Last time he took measurements and left a note on the door saying the netch was \"forty hands shy of life size, in the mouth.\" We have been drinking quieter since."
-     ]
-    }
-   ]
-  },
-  "benirus_manor": {
-   "hook": "A fine house on the Anvil cliffs, abandoned within living memory, whose shutters bang at night with the rhythm of a heartbeat.",
-   "rumour": "Gull the harbour-gull is said to nest on the Benirus roof. Sailors say the gull is the manor's last tenant and the only one who pays rent.",
-   "notes": [
-    {
-     "id": "manor_inventory",
-     "kind": "list",
-     "title": "Inventory of Benirus Manor",
-     "author": "Notary Saffer Quill",
-     "at": "chest",
-     "pages": [
-      "^INVENTORY OF BENIRUS MANOR, taken at the instance of the Count's Receiver\n^Sixteen chairs, two repairable. One harpsichord, silent. One portrait of a lady in green, the eyes unaccountably wet. One barrel of pickled herring, labelled in a childish hand as \"for the Ghosts.\"",
-      "Remark of the notary: the herring was eaten, and the barrel has been refilled, since. I did not see by whom. I did not look. I left a copper by the door and was not robbed on the way home."
-     ]
-    }
-   ]
-  },
-  "kvatch_arena": {
-   "hook": "The ring of seats under which Kvatch's survivors huddle in canvas and rope, a place of spectacle turned shelter.",
-   "rumour": "Under the arena stands, the tavern-keeper pours her ale into dented Legion helmets. She will tell you it is a joke. If you ask whose helmets, she will tell you something else.",
-   "notes": [
-    {
-     "id": "canvas_cup_menu",
-     "kind": "list",
-     "title": "The Canvas Cup: Menu and Rules",
-     "author": "Hetta Rooke",
-     "at": "chest",
-     "pages": [
-      "^THE CANVAS CUP\n^Soup, gritty. Bread, warm. Ale, in helmets. Wine, in smaller helmets.\n^RULES: No fighting in the cup. No fighting near the cup. No fighting about whose cup it is. The cup is the cup. Hetta is Hetta.",
-      "On the back, in a different hand: \"Sixteen helmets. Sixteen men. If you drink from one, say his name. If you do not know his name, ask. Hetta will tell you. She has them all.\""
-     ]
-    }
-   ]
-  },
-  "chorrol_milegate": {
-   "hook": "A little milestone fort on the Chorrol road, long since out of the Legion's hands, where the road sign still says Chorrol, 4 miles, and means it.",
-   "rumour": "The Chorrol milegate is a good place to stop. It has no inn, no priest, and no guard. It does have a very old well that never runs dry, and a curious habit of guests leaving early.",
-   "notes": [
-    {
-     "id": "milegate_logbook",
-     "kind": "report",
-     "title": "Milegate Logbook, Final Entries",
-     "author": "Sergeant Ottis Rumm",
-     "at": "chest",
-     "pages": [
-      "^LOGBOOK, CHORROL MILEGATE\n^Fourteenth of Rain's Hand: three wagons, one cart, a lame mule. All accounted for.\n^Fifteenth: four wagons. One, I did not see arrive. It had no driver. It had a full load of barrels and a note in the back that said \"for the Count, when he calls.\" I did not open the barrels.",
-      "^Sixteenth: five wagons. The extra wagon has come again. The barrels are heavier today. The note now reads \"for the Count, now.\" I have moved the patrol to the north wall. If anyone finds this, do not send a replacement. The wagon will not need a driver."
-     ]
-    }
-   ]
-  },
-  "knights_of_the_thorn_lodge": {
-   "hook": "A modest lodge on the Cheydinhal road with a thorny rose carved above the door, empty and swept, and cleaner than its reputation.",
-   "rumour": "The Knights of the Thorn are said to have a hall near Cheydinhal. The lodge-keeper says the knights are gone. The candles say otherwise.",
-   "notes": [
-    {
-     "id": "lodge_visitors_book",
-     "kind": "ledger",
-     "title": "Lodge Visitors' Book",
-     "author": "Warden Peridot Hale",
-     "at": "chest",
-     "pages": [
-      "^VISITORS TO THE LODGE\n^Dawn of Frostfall: a Breton, hungry. Fed.\n^Noon: two Legion deserters. Fed, and sent down the south road with directions and a warning.\n^Dusk: a knight who gave no name and drank only water. He left his sword on the table and walked out. I do not know whether it was a gift or a debt.",
-      "^Midnight: the sword is gone. So is the water. The cup is full. I will not describe the sound the cup made."
-     ]
-    }
-   ]
   }
- }
 }

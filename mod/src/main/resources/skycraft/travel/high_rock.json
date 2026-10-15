@@ -1,0 +1,5815 @@
+{
+  "province": "high_rock",
+  "why": [
+    "high_rock.L3.many_rivers",
+    "high_rock.L5.bay_shipping",
+    "high_rock.L5.tolls",
+    "high_rock.L6.capitals_at_mouths",
+    "high_rock.L8.eight_and_patrons"
+  ],
+  "modes": [
+    "carriage",
+    "boat",
+    "barge",
+    "guild_guide",
+    "wayshrine"
+  ],
+  "nodes": [
+    {
+      "id": "daggerfall",
+      "place": "daggerfall",
+      "name": "place.skycraft.daggerfall",
+      "region": "high_rock/daggerfall",
+      "x": -9300,
+      "z": 2600,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "daggerfall.L6.capital_on_island",
+        "daggerfall.L5.river_toll"
+      ]
+    },
+    {
+      "id": "wayrest",
+      "place": "wayrest",
+      "name": "place.skycraft.wayrest",
+      "region": "high_rock/wayrest",
+      "x": -5300,
+      "z": 3300,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "barge",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wayrest.L6.harbour_capital",
+        "wayrest.L5.guild_shipping"
+      ]
+    },
+    {
+      "id": "orsinium",
+      "place": "orsinium",
+      "name": "place.skycraft.orsinium",
+      "region": "high_rock/wrothgar",
+      "x": -4300,
+      "z": 300,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wrothgar.L6.orsinium_city",
+        "wrothgar.L5.orichalcum_forges"
+      ]
+    },
+    {
+      "id": "camlorn",
+      "place": "camlorn",
+      "name": "place.skycraft.camlorn",
+      "region": "high_rock/glenumbra",
+      "x": -9000,
+      "z": -200,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L6.camlorn_city",
+        "glenumbra.L5.wool_and_cloth"
+      ]
+    },
+    {
+      "id": "shornhelm",
+      "place": "shornhelm",
+      "name": "place.skycraft.shornhelm",
+      "region": "high_rock/rivenspire",
+      "x": -7600,
+      "z": -1300,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "rivenspire.L6.shornhelm_city",
+        "rivenspire.L5.quarry_and_iron"
+      ]
+    },
+    {
+      "id": "northpoint",
+      "place": "northpoint",
+      "name": "place.skycraft.northpoint",
+      "region": "high_rock/rivenspire",
+      "x": -7600,
+      "z": -2600,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "rivenspire.L6.northpoint_port",
+        "rivenspire.L5.northpoint_shipping"
+      ]
+    },
+    {
+      "id": "evermor",
+      "place": "evermor",
+      "name": "place.skycraft.evermor",
+      "region": "high_rock/bjoulsae",
+      "x": -6600,
+      "z": 200,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "barge",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "bjoulsae.L6.evermor_city",
+        "bjoulsae.L5.barge_trade"
+      ]
+    },
+    {
+      "id": "farrun",
+      "place": "farrun",
+      "name": "place.skycraft.farrun",
+      "region": "high_rock/bjoulsae",
+      "x": -6550,
+      "z": -1500,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "barge",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "bjoulsae.L6.druadach_border_fort",
+        "bjoulsae.L5.barge_trade"
+      ]
+    },
+    {
+      "id": "jehanna",
+      "place": "jehanna",
+      "name": "place.skycraft.jehanna",
+      "region": "high_rock/wrothgar",
+      "x": -5800,
+      "z": -2400,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L1.high_passes"
+      ]
+    },
+    {
+      "id": "glenpoint",
+      "place": "glenpoint",
+      "name": "place.skycraft.glenpoint",
+      "region": "high_rock/daggerfall",
+      "x": -11050,
+      "z": 1650,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "daggerfall.L6.glenpoint_watch",
+        "daggerfall.L6.ferry_head"
+      ]
+    },
+    {
+      "id": "ilessan_hills",
+      "place": "ilessan_hills",
+      "name": "place.skycraft.ilessan_hills",
+      "region": "high_rock/daggerfall",
+      "x": -8800,
+      "z": 1800,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "daggerfall.L1.ilessan_hills",
+        "daggerfall.L5.hides_and_wool"
+      ]
+    },
+    {
+      "id": "tulune",
+      "place": "tulune",
+      "name": "place.skycraft.tulune",
+      "region": "high_rock/daggerfall",
+      "x": -8200,
+      "z": 2600,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "daggerfall.L1.dagger_bluffs",
+        "daggerfall.L5.river_toll"
+      ]
+    },
+    {
+      "id": "aldcroft",
+      "place": "aldcroft",
+      "name": "place.skycraft.aldcroft",
+      "region": "high_rock/glenumbra",
+      "x": -9800,
+      "z": 1150,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L6.moor_steadings"
+      ]
+    },
+    {
+      "id": "crosswych",
+      "place": "crosswych",
+      "name": "place.skycraft.crosswych",
+      "region": "high_rock/glenumbra",
+      "x": -8650,
+      "z": 950,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L1.camlorn_hill",
+        "glenumbra.L5.wool_and_cloth"
+      ]
+    },
+    {
+      "id": "glenumbra_moors",
+      "place": "glenumbra_moors",
+      "name": "place.skycraft.glenumbra_moors",
+      "region": "high_rock/glenumbra",
+      "x": -10250,
+      "z": 450,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L1.western_moors",
+        "glenumbra.L5.peat_cutting"
+      ]
+    },
+    {
+      "id": "daenia",
+      "place": "daenia",
+      "name": "place.skycraft.daenia",
+      "region": "high_rock/glenumbra",
+      "x": -10250,
+      "z": -1250,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L6.moor_steadings",
+        "glenumbra.L5.peat_cutting"
+      ]
+    },
+    {
+      "id": "northmoor",
+      "place": "northmoor",
+      "name": "place.skycraft.northmoor",
+      "region": "high_rock/glenumbra",
+      "x": -9750,
+      "z": -1600,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L1.ocean_cliffs",
+        "glenumbra.L6.cliff_villages"
+      ]
+    },
+    {
+      "id": "eagles_brook",
+      "place": "eagles_brook",
+      "name": "place.skycraft.eagles_brook",
+      "region": "high_rock/glenumbra",
+      "x": -9700,
+      "z": -450,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "glenumbra.L3.camlorn_stream",
+        "glenumbra.L5.wool_and_cloth"
+      ]
+    },
+    {
+      "id": "alcaire",
+      "place": "alcaire",
+      "name": "place.skycraft.alcaire",
+      "region": "high_rock/anticlere",
+      "x": -8050,
+      "z": 2250,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "anticlere.L3.water_meadows",
+        "anticlere.L5.grain_and_mills"
+      ]
+    },
+    {
+      "id": "anticlere",
+      "place": "anticlere",
+      "name": "place.skycraft.anticlere",
+      "region": "high_rock/anticlere",
+      "x": -7950,
+      "z": 50,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "anticlere.L6.anticlere_meadow_city",
+        "anticlere.L5.grain_and_mills"
+      ]
+    },
+    {
+      "id": "shalgora",
+      "place": "shalgora",
+      "name": "place.skycraft.shalgora",
+      "region": "high_rock/anticlere",
+      "x": -7900,
+      "z": 1150,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "anticlere.L6.settler_villages",
+        "anticlere.L3.mill_chain"
+      ]
+    },
+    {
+      "id": "urvaius",
+      "place": "urvaius",
+      "name": "place.skycraft.urvaius",
+      "region": "high_rock/anticlere",
+      "x": -7600,
+      "z": 650,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "anticlere.L6.scarp_keeps",
+        "anticlere.L5.charcoal_burners"
+      ]
+    },
+    {
+      "id": "ykalon",
+      "place": "ykalon",
+      "name": "place.skycraft.ykalon",
+      "region": "high_rock/stormhaven",
+      "x": -7650,
+      "z": -300,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "stormhaven.L1.rolling_uplands",
+        "stormhaven.L5.charcoal_and_timber"
+      ]
+    },
+    {
+      "id": "koeglin_village",
+      "place": "koeglin_village",
+      "name": "place.skycraft.koeglin_village",
+      "region": "high_rock/stormhaven",
+      "x": -7550,
+      "z": 2800,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "stormhaven.L6.koeglin_village",
+        "stormhaven.L5.pilgrim_hospitality"
+      ]
+    },
+    {
+      "id": "weeping_giant",
+      "place": "weeping_giant",
+      "name": "place.skycraft.weeping_giant",
+      "region": "high_rock/stormhaven",
+      "x": -7600,
+      "z": 1650,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "stormhaven.L6.weeping_giant",
+        "stormhaven.L11.old_pilgrim_way"
+      ]
+    },
+    {
+      "id": "dwynnen",
+      "place": "dwynnen",
+      "name": "place.skycraft.dwynnen",
+      "region": "high_rock/dwynnen",
+      "x": -7100,
+      "z": 2600,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "dwynnen.L6.gorge_bridge_city",
+        "dwynnen.L5.bridge_toll"
+      ]
+    },
+    {
+      "id": "kambria",
+      "place": "kambria",
+      "name": "place.skycraft.kambria",
+      "region": "high_rock/dwynnen",
+      "x": -6650,
+      "z": 2550,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "dwynnen.L6.crossroads_jail",
+        "dwynnen.L5.mercenary_trade"
+      ]
+    },
+    {
+      "id": "bhoriane",
+      "place": "bhoriane",
+      "name": "place.skycraft.bhoriane",
+      "region": "high_rock/dwynnen",
+      "x": -6500,
+      "z": 1300,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "barge",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "dwynnen.L1.bhoriane_ore",
+        "dwynnen.L5.bhoriane_mines"
+      ]
+    },
+    {
+      "id": "menevia",
+      "place": "menevia",
+      "name": "place.skycraft.menevia",
+      "region": "high_rock/wayrest",
+      "x": -5947,
+      "z": 1866,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "barge",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wayrest.L6.border_keep",
+        "wayrest.L3.bjoulsae_artery"
+      ]
+    },
+    {
+      "id": "gavaudon",
+      "place": "gavaudon",
+      "name": "place.skycraft.gavaudon",
+      "region": "high_rock/wrothgar",
+      "x": -5400,
+      "z": 1600,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "barge",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wrothgar.L5.newing_barons",
+        "wrothgar.L6.newing_shelf_city"
+      ]
+    },
+    {
+      "id": "phrygias",
+      "place": "phrygias",
+      "name": "place.skycraft.phrygias",
+      "region": "high_rock/bjoulsae",
+      "x": -5950,
+      "z": -700,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "barge",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "bjoulsae.L6.barge_landings",
+        "bjoulsae.L5.horse_breeding"
+      ]
+    },
+    {
+      "id": "crestshade",
+      "place": "crestshade",
+      "name": "place.skycraft.crestshade",
+      "region": "high_rock/rivenspire",
+      "x": -9150,
+      "z": -1750,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "rivenspire.L1.dark_crags",
+        "rivenspire.L6.crag_watch_keeps"
+      ]
+    },
+    {
+      "id": "hoarfrost_downs",
+      "place": "hoarfrost_downs",
+      "name": "place.skycraft.hoarfrost_downs",
+      "region": "high_rock/rivenspire",
+      "x": -8400,
+      "z": -2350,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "rivenspire.L5.quarry_and_iron",
+        "rivenspire.L5.goat_and_rye"
+      ]
+    },
+    {
+      "id": "fells_run",
+      "place": "fells_run",
+      "name": "place.skycraft.fells_run",
+      "region": "high_rock/rivenspire",
+      "x": -8350,
+      "z": -850,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "rivenspire.L5.goat_and_rye",
+        "rivenspire.L6.crag_watch_keeps"
+      ]
+    },
+    {
+      "id": "moiras_hope",
+      "place": "moiras_hope",
+      "name": "place.skycraft.moiras_hope",
+      "region": "high_rock/rivenspire",
+      "x": -8050,
+      "z": -1150,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "rivenspire.L1.shornhelm_gap",
+        "rivenspire.L8.second_lamp_custom"
+      ]
+    },
+    {
+      "id": "morkul_stronghold_high_rock",
+      "place": "morkul_stronghold_high_rock",
+      "name": "place.skycraft.morkul_stronghold_high_rock",
+      "region": "high_rock/wrothgar",
+      "x": -5000,
+      "z": -700,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wrothgar.L5.stronghold_mines",
+        "wrothgar.L6.stronghold_per_mine"
+      ]
+    },
+    {
+      "id": "fharun_stronghold",
+      "place": "fharun_stronghold",
+      "name": "place.skycraft.fharun_stronghold",
+      "region": "high_rock/wrothgar",
+      "x": -5000,
+      "z": 1200,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wrothgar.L5.stronghold_mines",
+        "wrothgar.L8.malacath"
+      ]
+    },
+    {
+      "id": "tumnosh_stronghold",
+      "place": "tumnosh_stronghold",
+      "name": "place.skycraft.tumnosh_stronghold",
+      "region": "high_rock/wrothgar",
+      "x": -3800,
+      "z": 1550,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wrothgar.L5.orichalcum_forges",
+        "wrothgar.L6.stronghold_per_mine"
+      ]
+    },
+    {
+      "id": "betony",
+      "place": "betony",
+      "name": "place.skycraft.betony",
+      "region": "high_rock/daggerfall",
+      "x": -8300,
+      "z": 2900,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "port",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "daggerfall.L6.ferry_head",
+        "high_rock.L9.betony_claim"
+      ]
+    },
+    {
+      "id": "balfiera",
+      "place": "isle_of_balfiera",
+      "name": "place.skycraft.isle_of_balfiera",
+      "region": "high_rock/wayrest",
+      "x": -7625,
+      "z": 3490,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "port",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "wayrest.L1.balfiera",
+        "wayrest.L6.pilgrim_isle"
+      ]
+    },
+    {
+      "id": "shrine_azura_high_rock",
+      "place": "shrine_azura_high_rock",
+      "name": "place.skycraft.shrine_azura_high_rock",
+      "region": "high_rock/wayrest",
+      "x": -5877,
+      "z": 2833,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ],
+      "blessing": "akatosh"
+    },
+    {
+      "id": "shrine_boethiah_high_rock",
+      "place": "shrine_boethiah_high_rock",
+      "name": "place.skycraft.shrine_boethiah_high_rock",
+      "region": "high_rock/daggerfall",
+      "x": -9232,
+      "z": 2116,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ],
+      "blessing": "kynareth"
+    },
+    {
+      "id": "shrine_clavicus_vile_high_rock",
+      "place": "shrine_clavicus_vile_high_rock",
+      "name": "place.skycraft.shrine_clavicus_vile_high_rock",
+      "region": "high_rock/glenumbra",
+      "x": -8482,
+      "z": -13,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ],
+      "blessing": "mara"
+    },
+    {
+      "id": "shrine_hermaeus_mora_high_rock",
+      "place": "shrine_hermaeus_mora_high_rock",
+      "name": "place.skycraft.shrine_hermaeus_mora_high_rock",
+      "region": "high_rock/rivenspire",
+      "x": -7839,
+      "z": -709,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ],
+      "blessing": "stendarr"
+    },
+    {
+      "id": "shrine_hircine_high_rock",
+      "place": "shrine_hircine_high_rock",
+      "name": "place.skycraft.shrine_hircine_high_rock",
+      "region": "high_rock/stormhaven",
+      "x": -7205,
+      "z": 473,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ],
+      "blessing": "mara"
+    },
+    {
+      "id": "shrine_malacath_high_rock",
+      "place": "shrine_malacath_high_rock",
+      "name": "place.skycraft.shrine_malacath_high_rock",
+      "region": "high_rock/wrothgar",
+      "x": -4849,
+      "z": 588,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ],
+      "blessing": "kynareth"
+    },
+    {
+      "id": "shrine_mehrunes_dagon_high_rock",
+      "place": "shrine_mehrunes_dagon_high_rock",
+      "name": "place.skycraft.shrine_mehrunes_dagon_high_rock",
+      "region": "high_rock/wayrest",
+      "x": -5155,
+      "z": 2758,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ],
+      "blessing": "akatosh"
+    },
+    {
+      "id": "shrine_mephala_high_rock",
+      "place": "shrine_mephala_high_rock",
+      "name": "place.skycraft.shrine_mephala_high_rock",
+      "region": "high_rock/anticlere",
+      "x": -8697,
+      "z": 2274,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ],
+      "blessing": "mara"
+    },
+    {
+      "id": "shrine_meridia_high_rock",
+      "place": "shrine_meridia_high_rock",
+      "name": "place.skycraft.shrine_meridia_high_rock",
+      "region": "high_rock/glenumbra",
+      "x": -8628,
+      "z": 480,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ],
+      "blessing": "mara"
+    },
+    {
+      "id": "shrine_molag_bal_high_rock",
+      "place": "shrine_molag_bal_high_rock",
+      "name": "place.skycraft.shrine_molag_bal_high_rock",
+      "region": "high_rock/rivenspire",
+      "x": -8202,
+      "z": -1473,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ],
+      "blessing": "stendarr"
+    },
+    {
+      "id": "shrine_namira_high_rock",
+      "place": "shrine_namira_high_rock",
+      "name": "place.skycraft.shrine_namira_high_rock",
+      "region": "high_rock/stormhaven",
+      "x": -7125,
+      "z": -477,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ],
+      "blessing": "mara"
+    },
+    {
+      "id": "shrine_nocturnal_high_rock",
+      "place": "shrine_nocturnal_high_rock",
+      "name": "place.skycraft.shrine_nocturnal_high_rock",
+      "region": "high_rock/wrothgar",
+      "x": -5167,
+      "z": 320,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ],
+      "blessing": "kynareth"
+    },
+    {
+      "id": "shrine_peryite_high_rock",
+      "place": "shrine_peryite_high_rock",
+      "name": "place.skycraft.shrine_peryite_high_rock",
+      "region": "high_rock/wrothgar",
+      "x": -4562,
+      "z": 2951,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ],
+      "blessing": "kynareth"
+    },
+    {
+      "id": "shrine_sanguine_high_rock",
+      "place": "shrine_sanguine_high_rock",
+      "name": "place.skycraft.shrine_sanguine_high_rock",
+      "region": "high_rock/daggerfall",
+      "x": -9665,
+      "z": 2246,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ],
+      "blessing": "kynareth"
+    },
+    {
+      "id": "shrine_sheogorath_high_rock",
+      "place": "shrine_sheogorath_high_rock",
+      "name": "place.skycraft.shrine_sheogorath_high_rock",
+      "region": "high_rock/glenumbra",
+      "x": -9476,
+      "z": 338,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ],
+      "blessing": "mara"
+    },
+    {
+      "id": "shrine_vaermina_high_rock",
+      "place": "shrine_vaermina_high_rock",
+      "name": "place.skycraft.shrine_vaermina_high_rock",
+      "region": "high_rock/rivenspire",
+      "x": -7168,
+      "z": -968,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "shrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ],
+      "blessing": "stendarr"
+    },
+    {
+      "id": "wayshrine_daggerfall_1",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_1",
+      "region": "high_rock/daggerfall",
+      "x": -10096,
+      "z": 1744,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_2",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_2",
+      "region": "high_rock/daggerfall",
+      "x": -9328,
+      "z": 1520,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_3",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_3",
+      "region": "high_rock/daggerfall",
+      "x": -9744,
+      "z": 2736,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_4",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_4",
+      "region": "high_rock/daggerfall",
+      "x": -8912,
+      "z": 1328,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_5",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_5",
+      "region": "high_rock/daggerfall",
+      "x": -8368,
+      "z": 1712,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_6",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_6",
+      "region": "high_rock/daggerfall",
+      "x": -8784,
+      "z": 2704,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_7",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_7",
+      "region": "high_rock/daggerfall",
+      "x": -10096,
+      "z": 2192,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_daggerfall_8",
+      "name": "travel.skycraft.node.wayshrine_daggerfall_8",
+      "region": "high_rock/daggerfall",
+      "x": -9648,
+      "z": 1808,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_anticlere_1",
+      "name": "travel.skycraft.node.wayshrine_anticlere_1",
+      "region": "high_rock/anticlere",
+      "x": -6992,
+      "z": 1616,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_anticlere_2",
+      "name": "travel.skycraft.node.wayshrine_anticlere_2",
+      "region": "high_rock/anticlere",
+      "x": -7472,
+      "z": 2192,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_anticlere_3",
+      "name": "travel.skycraft.node.wayshrine_anticlere_3",
+      "region": "high_rock/anticlere",
+      "x": -8304,
+      "z": 1296,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_dwynnen_1",
+      "name": "travel.skycraft.node.wayshrine_dwynnen_1",
+      "region": "high_rock/dwynnen",
+      "x": -6512,
+      "z": 1968,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "dwynnen.L8.dibella_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_dwynnen_2",
+      "name": "travel.skycraft.node.wayshrine_dwynnen_2",
+      "region": "high_rock/dwynnen",
+      "x": -6160,
+      "z": 2352,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "dwynnen.L8.dibella_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_dwynnen_3",
+      "name": "travel.skycraft.node.wayshrine_dwynnen_3",
+      "region": "high_rock/dwynnen",
+      "x": -6992,
+      "z": 2128,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "dibella",
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "dwynnen.L8.dibella_patron"
+      ]
+    },
+    {
+      "id": "wayshrine_wayrest_1",
+      "name": "travel.skycraft.node.wayshrine_wayrest_1",
+      "region": "high_rock/wayrest",
+      "x": -4336,
+      "z": 3600,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "id": "wayshrine_wayrest_2",
+      "name": "travel.skycraft.node.wayshrine_wayrest_2",
+      "region": "high_rock/wayrest",
+      "x": -6416,
+      "z": 3088,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "id": "wayshrine_wayrest_3",
+      "name": "travel.skycraft.node.wayshrine_wayrest_3",
+      "region": "high_rock/wayrest",
+      "x": -4816,
+      "z": 3440,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "akatosh",
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_1",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_1",
+      "region": "high_rock/wrothgar",
+      "x": -3440,
+      "z": -1712,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_2",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_2",
+      "region": "high_rock/wrothgar",
+      "x": -4656,
+      "z": -1936,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_3",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_3",
+      "region": "high_rock/wrothgar",
+      "x": -3344,
+      "z": -464,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_4",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_4",
+      "region": "high_rock/wrothgar",
+      "x": -3408,
+      "z": 656,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_5",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_5",
+      "region": "high_rock/wrothgar",
+      "x": -4112,
+      "z": -1040,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_6",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_6",
+      "region": "high_rock/wrothgar",
+      "x": -5488,
+      "z": -1520,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_7",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_7",
+      "region": "high_rock/wrothgar",
+      "x": -4592,
+      "z": 2032,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_8",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_8",
+      "region": "high_rock/wrothgar",
+      "x": -6704,
+      "z": -2448,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_9",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_9",
+      "region": "high_rock/wrothgar",
+      "x": -4272,
+      "z": 1008,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_10",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_10",
+      "region": "high_rock/wrothgar",
+      "x": -4368,
+      "z": -400,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_11",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_11",
+      "region": "high_rock/wrothgar",
+      "x": -3856,
+      "z": 2224,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_12",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_12",
+      "region": "high_rock/wrothgar",
+      "x": -5136,
+      "z": -2480,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_13",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_13",
+      "region": "high_rock/wrothgar",
+      "x": -5712,
+      "z": -80,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_14",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_14",
+      "region": "high_rock/wrothgar",
+      "x": -5552,
+      "z": 848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_15",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_15",
+      "region": "high_rock/wrothgar",
+      "x": -4752,
+      "z": -1296,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_16",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_16",
+      "region": "high_rock/wrothgar",
+      "x": -3696,
+      "z": 80,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_17",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_17",
+      "region": "high_rock/wrothgar",
+      "x": -3472,
+      "z": -1072,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_18",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_18",
+      "region": "high_rock/wrothgar",
+      "x": -4112,
+      "z": -1648,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_19",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_19",
+      "region": "high_rock/wrothgar",
+      "x": -5456,
+      "z": 2224,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_20",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_20",
+      "region": "high_rock/wrothgar",
+      "x": -6032,
+      "z": -1840,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_21",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_21",
+      "region": "high_rock/wrothgar",
+      "x": -6256,
+      "z": -2832,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_22",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_22",
+      "region": "high_rock/wrothgar",
+      "x": -4880,
+      "z": -144,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_23",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_23",
+      "region": "high_rock/wrothgar",
+      "x": -3376,
+      "z": 1200,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_24",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_24",
+      "region": "high_rock/wrothgar",
+      "x": -4528,
+      "z": 1488,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_25",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_25",
+      "region": "high_rock/wrothgar",
+      "x": -5680,
+      "z": -2928,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_26",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_26",
+      "region": "high_rock/wrothgar",
+      "x": -5488,
+      "z": -976,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_27",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_27",
+      "region": "high_rock/wrothgar",
+      "x": -3856,
+      "z": -560,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_28",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_28",
+      "region": "high_rock/wrothgar",
+      "x": -5424,
+      "z": -2032,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_29",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_29",
+      "region": "high_rock/wrothgar",
+      "x": -4336,
+      "z": 2480,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_30",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_30",
+      "region": "high_rock/wrothgar",
+      "x": -3920,
+      "z": 624,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_31",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_31",
+      "region": "high_rock/wrothgar",
+      "x": -6512,
+      "z": -2000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_32",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_32",
+      "region": "high_rock/wrothgar",
+      "x": -5456,
+      "z": -496,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_33",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_33",
+      "region": "high_rock/wrothgar",
+      "x": -4976,
+      "z": 2320,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_34",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_34",
+      "region": "high_rock/wrothgar",
+      "x": -4944,
+      "z": 1712,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_35",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_35",
+      "region": "high_rock/wrothgar",
+      "x": -5680,
+      "z": 400,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_36",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_36",
+      "region": "high_rock/wrothgar",
+      "x": -4560,
+      "z": -848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_37",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_37",
+      "region": "high_rock/wrothgar",
+      "x": -5040,
+      "z": -1680,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_38",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_38",
+      "region": "high_rock/wrothgar",
+      "x": -4176,
+      "z": 1840,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_39",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_39",
+      "region": "high_rock/wrothgar",
+      "x": -3824,
+      "z": 1072,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_40",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_40",
+      "region": "high_rock/wrothgar",
+      "x": -6256,
+      "z": -2384,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_41",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_41",
+      "region": "high_rock/wrothgar",
+      "x": -3536,
+      "z": 1904,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_42",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_42",
+      "region": "high_rock/wrothgar",
+      "x": -3760,
+      "z": -1392,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_wrothgar_43",
+      "name": "travel.skycraft.node.wayshrine_wrothgar_43",
+      "region": "high_rock/wrothgar",
+      "x": -3280,
+      "z": -16,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_1",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_1",
+      "region": "high_rock/glenumbra",
+      "x": -11120,
+      "z": -688,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_2",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_2",
+      "region": "high_rock/glenumbra",
+      "x": -9136,
+      "z": -976,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_3",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_3",
+      "region": "high_rock/glenumbra",
+      "x": -10448,
+      "z": -304,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_4",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_4",
+      "region": "high_rock/glenumbra",
+      "x": -10864,
+      "z": -1360,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_5",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_5",
+      "region": "high_rock/glenumbra",
+      "x": -9296,
+      "z": 880,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_6",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_6",
+      "region": "high_rock/glenumbra",
+      "x": -9712,
+      "z": -1040,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_7",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_7",
+      "region": "high_rock/glenumbra",
+      "x": -10608,
+      "z": -848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_8",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_8",
+      "region": "high_rock/glenumbra",
+      "x": -10000,
+      "z": -16,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_9",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_9",
+      "region": "high_rock/glenumbra",
+      "x": -10224,
+      "z": -1776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_10",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_10",
+      "region": "high_rock/glenumbra",
+      "x": -10128,
+      "z": -720,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_11",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_11",
+      "region": "high_rock/glenumbra",
+      "x": -8784,
+      "z": -624,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_12",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_12",
+      "region": "high_rock/glenumbra",
+      "x": -8720,
+      "z": -1200,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_13",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_13",
+      "region": "high_rock/glenumbra",
+      "x": -8240,
+      "z": -400,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_14",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_14",
+      "region": "high_rock/glenumbra",
+      "x": -9360,
+      "z": -1360,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_15",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_15",
+      "region": "high_rock/glenumbra",
+      "x": -9040,
+      "z": 240,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_16",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_16",
+      "region": "high_rock/glenumbra",
+      "x": -9872,
+      "z": -2032,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_17",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_17",
+      "region": "high_rock/glenumbra",
+      "x": -9264,
+      "z": -560,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_18",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_18",
+      "region": "high_rock/glenumbra",
+      "x": -9840,
+      "z": 592,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_glenumbra_19",
+      "name": "travel.skycraft.node.wayshrine_glenumbra_19",
+      "region": "high_rock/glenumbra",
+      "x": -9424,
+      "z": -112,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_1",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_1",
+      "region": "high_rock/rivenspire",
+      "x": -7248,
+      "z": -1936,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_2",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_2",
+      "region": "high_rock/rivenspire",
+      "x": -7856,
+      "z": -2032,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_3",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_3",
+      "region": "high_rock/rivenspire",
+      "x": -9008,
+      "z": -2320,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_4",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_4",
+      "region": "high_rock/rivenspire",
+      "x": -8592,
+      "z": -1840,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_5",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_5",
+      "region": "high_rock/rivenspire",
+      "x": -8016,
+      "z": -2928,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_6",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_6",
+      "region": "high_rock/rivenspire",
+      "x": -7120,
+      "z": -2768,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_7",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_7",
+      "region": "high_rock/rivenspire",
+      "x": -7056,
+      "z": -1456,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_8",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_8",
+      "region": "high_rock/rivenspire",
+      "x": -9488,
+      "z": -2320,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_9",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_9",
+      "region": "high_rock/rivenspire",
+      "x": -7536,
+      "z": -3024,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_rivenspire_10",
+      "name": "travel.skycraft.node.wayshrine_rivenspire_10",
+      "region": "high_rock/rivenspire",
+      "x": -7184,
+      "z": -2352,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "stendarr",
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "id": "wayshrine_stormhaven_1",
+      "name": "travel.skycraft.node.wayshrine_stormhaven_1",
+      "region": "high_rock/stormhaven",
+      "x": -7056,
+      "z": 1040,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "id": "wayshrine_stormhaven_2",
+      "name": "travel.skycraft.node.wayshrine_stormhaven_2",
+      "region": "high_rock/stormhaven",
+      "x": -8144,
+      "z": 688,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "id": "wayshrine_stormhaven_3",
+      "name": "travel.skycraft.node.wayshrine_stormhaven_3",
+      "region": "high_rock/stormhaven",
+      "x": -7056,
+      "z": 16,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "id": "wayshrine_stormhaven_4",
+      "name": "travel.skycraft.node.wayshrine_stormhaven_4",
+      "region": "high_rock/stormhaven",
+      "x": -7504,
+      "z": 144,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "id": "wayshrine_stormhaven_5",
+      "name": "travel.skycraft.node.wayshrine_stormhaven_5",
+      "region": "high_rock/stormhaven",
+      "x": -7472,
+      "z": 1232,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "mara",
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_1",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_1",
+      "region": "high_rock/bjoulsae",
+      "x": -6224,
+      "z": 720,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_2",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_2",
+      "region": "high_rock/bjoulsae",
+      "x": -6544,
+      "z": -880,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_3",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_3",
+      "region": "high_rock/bjoulsae",
+      "x": -5904,
+      "z": 1296,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_4",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_4",
+      "region": "high_rock/bjoulsae",
+      "x": -6032,
+      "z": -1264,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_5",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_5",
+      "region": "high_rock/bjoulsae",
+      "x": -6384,
+      "z": -336,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_6",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_6",
+      "region": "high_rock/bjoulsae",
+      "x": -6704,
+      "z": 688,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_7",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_7",
+      "region": "high_rock/bjoulsae",
+      "x": -6128,
+      "z": 240,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_8",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_8",
+      "region": "high_rock/bjoulsae",
+      "x": -6256,
+      "z": 1616,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_9",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_9",
+      "region": "high_rock/bjoulsae",
+      "x": -6736,
+      "z": -528,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "id": "wayshrine_bjoulsae_10",
+      "name": "travel.skycraft.node.wayshrine_bjoulsae_10",
+      "region": "high_rock/bjoulsae",
+      "x": -6800,
+      "z": -1168,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "blessing": "kynareth",
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "from": "daggerfall",
+      "to": "tulune",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "high_rock.L5.tolls"
+      ]
+    },
+    {
+      "from": "tulune",
+      "to": "alcaire",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "high_rock.L5.tolls"
+      ]
+    },
+    {
+      "from": "alcaire",
+      "to": "koeglin_village",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L6.koeglin_village",
+        "stormhaven.L5.pilgrim_hospitality"
+      ]
+    },
+    {
+      "from": "koeglin_village",
+      "to": "dwynnen",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L6.gorge_bridge_city",
+        "dwynnen.L5.bridge_toll"
+      ]
+    },
+    {
+      "from": "dwynnen",
+      "to": "kambria",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L6.crossroads_jail",
+        "dwynnen.L5.mercenary_trade"
+      ]
+    },
+    {
+      "from": "kambria",
+      "to": "wayrest",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L6.harbour_capital",
+        "high_rock.L5.tolls"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "wayrest",
+      "mode": "carriage",
+      "fee": 35,
+      "duration": 18,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.capital_on_island",
+        "wayrest.L6.harbour_capital"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "anticlere",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 14,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "anticlere.L6.anticlere_meadow_city"
+      ]
+    },
+    {
+      "from": "anticlere",
+      "to": "dwynnen",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 12,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L6.anticlere_meadow_city",
+        "dwynnen.L6.gorge_bridge_city"
+      ]
+    },
+    {
+      "from": "dwynnen",
+      "to": "wayrest",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 14,
+      "path": "north_shore_road",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "wayrest.L6.harbour_capital"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "ilessan_hills",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "glenumbra_road",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L1.ilessan_hills",
+        "daggerfall.L5.hides_and_wool"
+      ]
+    },
+    {
+      "from": "ilessan_hills",
+      "to": "crosswych",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "glenumbra_road",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "daggerfall.L5.hides_and_wool"
+      ]
+    },
+    {
+      "from": "crosswych",
+      "to": "camlorn",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "glenumbra_road",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.camlorn_city",
+        "glenumbra.L5.wool_and_cloth"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "camlorn",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 16,
+      "path": "glenumbra_road",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.capital_on_island",
+        "glenumbra.L6.camlorn_city"
+      ]
+    },
+    {
+      "from": "camlorn",
+      "to": "eagles_brook",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "glenumbra_road",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.camlorn_city",
+        "glenumbra.L3.camlorn_stream"
+      ]
+    },
+    {
+      "from": "eagles_brook",
+      "to": "northmoor",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "glenumbra_road",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L1.ocean_cliffs",
+        "glenumbra.L6.cliff_villages"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "aldcroft",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "daggerfall_bluff_lane",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.salt_pans",
+        "glenumbra.L5.wool_and_cloth"
+      ]
+    },
+    {
+      "from": "aldcroft",
+      "to": "glenpoint",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "daggerfall_bluff_lane",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.glenpoint_watch",
+        "daggerfall.L1.glenpoint_headland"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "glenpoint",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "daggerfall_bluff_lane",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.capital_on_island",
+        "daggerfall.L6.glenpoint_watch"
+      ]
+    },
+    {
+      "from": "aldcroft",
+      "to": "glenumbra_moors",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "glenumbra_moor_lane",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L1.western_moors",
+        "glenumbra.L5.peat_cutting"
+      ]
+    },
+    {
+      "from": "glenumbra_moors",
+      "to": "daenia",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "glenumbra_moor_lane",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.moor_steadings",
+        "glenumbra.L5.peat_cutting"
+      ]
+    },
+    {
+      "from": "daenia",
+      "to": "northmoor",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "glenumbra_moor_lane",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.moor_steadings",
+        "glenumbra.L6.cliff_villages"
+      ]
+    },
+    {
+      "from": "alcaire",
+      "to": "weeping_giant",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "anticlere_meadow_lane",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L3.water_meadows",
+        "stormhaven.L6.weeping_giant"
+      ]
+    },
+    {
+      "from": "weeping_giant",
+      "to": "shalgora",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "anticlere_meadow_lane",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L6.weeping_giant",
+        "anticlere.L6.settler_villages"
+      ]
+    },
+    {
+      "from": "shalgora",
+      "to": "urvaius",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "anticlere_meadow_lane",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L3.mill_chain",
+        "anticlere.L6.scarp_keeps"
+      ]
+    },
+    {
+      "from": "urvaius",
+      "to": "anticlere",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "anticlere_meadow_lane",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L6.scarp_keeps",
+        "anticlere.L6.anticlere_meadow_city"
+      ]
+    },
+    {
+      "from": "anticlere",
+      "to": "ykalon",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "anticlere_meadow_lane",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L6.anticlere_meadow_city",
+        "stormhaven.L1.rolling_uplands"
+      ]
+    },
+    {
+      "from": "koeglin_village",
+      "to": "weeping_giant",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "stormhaven_pilgrim_lane",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L6.koeglin_village",
+        "stormhaven.L6.weeping_giant"
+      ]
+    },
+    {
+      "from": "camlorn",
+      "to": "ykalon",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "high_rock_northern_backbone",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.camlorn_city",
+        "stormhaven.L1.rolling_uplands"
+      ]
+    },
+    {
+      "from": "ykalon",
+      "to": "shornhelm",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "high_rock_northern_backbone",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L1.rolling_uplands",
+        "rivenspire.L6.shornhelm_city"
+      ]
+    },
+    {
+      "from": "camlorn",
+      "to": "shornhelm",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 16,
+      "path": "high_rock_northern_backbone",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.camlorn_city",
+        "rivenspire.L6.shornhelm_city"
+      ]
+    },
+    {
+      "from": "shornhelm",
+      "to": "northpoint",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "high_rock_northern_backbone",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.shornhelm_city",
+        "rivenspire.L6.northpoint_port"
+      ]
+    },
+    {
+      "from": "northpoint",
+      "to": "farrun",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 14,
+      "path": "high_rock_northern_backbone",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L5.northpoint_shipping",
+        "bjoulsae.L6.druadach_border_fort"
+      ]
+    },
+    {
+      "from": "farrun",
+      "to": "jehanna",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "high_rock_northern_backbone",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L6.druadach_border_fort",
+        "wrothgar.L6.pass_inns"
+      ]
+    },
+    {
+      "from": "northmoor",
+      "to": "crestshade",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "rivenspire_crag_lane",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.cliff_villages",
+        "rivenspire.L1.dark_crags"
+      ]
+    },
+    {
+      "from": "crestshade",
+      "to": "hoarfrost_downs",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "rivenspire_crag_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L1.dark_crags",
+        "rivenspire.L5.quarry_and_iron"
+      ]
+    },
+    {
+      "from": "hoarfrost_downs",
+      "to": "northpoint",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "rivenspire_crag_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L5.quarry_and_iron",
+        "rivenspire.L6.northpoint_port"
+      ]
+    },
+    {
+      "from": "shornhelm",
+      "to": "moiras_hope",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "rivenspire_crag_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.shornhelm_city",
+        "rivenspire.L1.shornhelm_gap"
+      ]
+    },
+    {
+      "from": "moiras_hope",
+      "to": "fells_run",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 8,
+      "path": "rivenspire_crag_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L1.shornhelm_gap",
+        "rivenspire.L5.goat_and_rye"
+      ]
+    },
+    {
+      "from": "fells_run",
+      "to": "camlorn",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "rivenspire_crag_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L5.goat_and_rye",
+        "glenumbra.L6.camlorn_city"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "menevia",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "dwynnen_gorge_lane",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L6.harbour_capital",
+        "wayrest.L6.border_keep"
+      ]
+    },
+    {
+      "from": "menevia",
+      "to": "gavaudon",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "wrothgar_pass_road",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L6.border_keep",
+        "wrothgar.L6.newing_shelf_city"
+      ]
+    },
+    {
+      "from": "gavaudon",
+      "to": "bhoriane",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "wrothgar_pass_road",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.newing_shelf_city",
+        "dwynnen.L5.bhoriane_mines"
+      ]
+    },
+    {
+      "from": "bhoriane",
+      "to": "evermor",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 12,
+      "path": "wrothgar_pass_road",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L5.bhoriane_mines",
+        "bjoulsae.L6.evermor_city"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "evermor",
+      "mode": "carriage",
+      "fee": 30,
+      "duration": 16,
+      "path": "wrothgar_pass_road",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L6.harbour_capital",
+        "bjoulsae.L6.evermor_city"
+      ]
+    },
+    {
+      "from": "evermor",
+      "to": "orsinium",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 14,
+      "path": "wrothgar_pass_road",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L6.evermor_city",
+        "wrothgar.L6.orsinium_city"
+      ]
+    },
+    {
+      "from": "evermor",
+      "to": "phrygias",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "bjoulsae_towpath_lane",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L6.evermor_city",
+        "bjoulsae.L5.horse_breeding"
+      ]
+    },
+    {
+      "from": "phrygias",
+      "to": "farrun",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "bjoulsae_towpath_lane",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.horse_breeding",
+        "bjoulsae.L6.druadach_border_fort"
+      ]
+    },
+    {
+      "from": "evermor",
+      "to": "farrun",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 14,
+      "path": "druadach_highway",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L6.evermor_city",
+        "bjoulsae.L6.druadach_border_fort"
+      ]
+    },
+    {
+      "from": "orsinium",
+      "to": "fharun_stronghold",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "wrothgar_stronghold_lane",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.orsinium_city",
+        "wrothgar.L5.stronghold_mines"
+      ]
+    },
+    {
+      "from": "fharun_stronghold",
+      "to": "gavaudon",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "wrothgar_stronghold_lane",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L5.stronghold_mines",
+        "wrothgar.L6.newing_shelf_city"
+      ]
+    },
+    {
+      "from": "orsinium",
+      "to": "morkul_stronghold_high_rock",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 10,
+      "path": "wrothgar_stronghold_lane",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.orsinium_city",
+        "wrothgar.L6.stronghold_per_mine"
+      ]
+    },
+    {
+      "from": "morkul_stronghold_high_rock",
+      "to": "jehanna",
+      "mode": "carriage",
+      "fee": 20,
+      "duration": 14,
+      "path": "wrothgar_stronghold_lane",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.stronghold_per_mine",
+        "wrothgar.L6.pass_inns"
+      ]
+    },
+    {
+      "from": "orsinium",
+      "to": "tumnosh_stronghold",
+      "mode": "carriage",
+      "fee": 15,
+      "duration": 12,
+      "path": "wrothgar_east_lane",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.orsinium_city",
+        "wrothgar.L5.orichalcum_forges"
+      ]
+    },
+    {
+      "from": "orsinium",
+      "to": "jehanna",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 16,
+      "path": "wrothgar_pass_road",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.orsinium_city",
+        "wrothgar.L6.pass_inns"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "menevia",
+      "mode": "barge",
+      "fee": 12,
+      "duration": 10,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L3.bjoulsae_artery",
+        "wayrest.L5.chain_dues"
+      ]
+    },
+    {
+      "from": "menevia",
+      "to": "gavaudon",
+      "mode": "barge",
+      "fee": 12,
+      "duration": 10,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L3.bjoulsae_artery",
+        "wrothgar.L6.newing_shelf_city"
+      ]
+    },
+    {
+      "from": "gavaudon",
+      "to": "bhoriane",
+      "mode": "barge",
+      "fee": 12,
+      "duration": 10,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L3.upper_bjoulsae",
+        "dwynnen.L5.bhoriane_mines"
+      ]
+    },
+    {
+      "from": "bhoriane",
+      "to": "evermor",
+      "mode": "barge",
+      "fee": 15,
+      "duration": 12,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L6.barge_landings"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "evermor",
+      "mode": "barge",
+      "fee": 25,
+      "duration": 16,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L3.bjoulsae_artery",
+        "bjoulsae.L5.barge_trade"
+      ]
+    },
+    {
+      "from": "evermor",
+      "to": "phrygias",
+      "mode": "barge",
+      "fee": 12,
+      "duration": 10,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L3.upper_bjoulsae",
+        "bjoulsae.L6.barge_landings"
+      ]
+    },
+    {
+      "from": "phrygias",
+      "to": "farrun",
+      "mode": "barge",
+      "fee": 15,
+      "duration": 10,
+      "path": "bjoulsae_river_barge",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L6.druadach_border_fort"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "wayrest",
+      "mode": "boat",
+      "fee": 60,
+      "duration": 18,
+      "path": "iliac_bay_sea_lane",
+      "bidirectional": true,
+      "why": [
+        "high_rock.L5.bay_shipping",
+        "wayrest.L5.guild_shipping"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "betony",
+      "mode": "boat",
+      "fee": 25,
+      "duration": 10,
+      "path": "betony_strait_ferry",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.ferry_head",
+        "high_rock.L9.betony_claim"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "balfiera",
+      "mode": "boat",
+      "fee": 40,
+      "duration": 14,
+      "path": "balfiera_pilgrim_ferry",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.ferry_head",
+        "wayrest.L6.pilgrim_isle"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "balfiera",
+      "mode": "boat",
+      "fee": 30,
+      "duration": 12,
+      "path": "balfiera_pilgrim_ferry",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L6.pilgrim_isle"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "koeglin_village",
+      "mode": "boat",
+      "fee": 20,
+      "duration": 10,
+      "path": "stormhaven_bay_ferry",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "stormhaven.L6.koeglin_village"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "glenpoint",
+      "mode": "boat",
+      "fee": 20,
+      "duration": 10,
+      "path": "glenpoint_headland_ferry",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L6.ferry_head",
+        "daggerfall.L6.glenpoint_watch"
+      ]
+    },
+    {
+      "from": "northpoint",
+      "to": "daggerfall",
+      "mode": "boat",
+      "fee": 65,
+      "duration": 18,
+      "path": "western_ocean_sea_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L5.northpoint_shipping",
+        "high_rock.L5.bay_shipping"
+      ]
+    },
+    {
+      "from": "northpoint",
+      "to": "wayrest",
+      "mode": "boat",
+      "fee": 75,
+      "duration": 20,
+      "path": "northern_cape_sea_lane",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L5.northpoint_shipping",
+        "wayrest.L5.guild_shipping"
+      ]
+    },
+    {
+      "from": "northpoint",
+      "to": "farrun",
+      "mode": "boat",
+      "fee": 30,
+      "duration": 12,
+      "path": "ghost_sea_coaster",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L5.northpoint_shipping",
+        "bjoulsae.L6.druadach_border_fort"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "wayrest",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "high_rock.L8.direnni_nostalgia",
+        "wayrest.L8.direnni_awe"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "camlorn",
+      "mode": "guild_guide",
+      "fee": 35,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "high_rock.L8.direnni_nostalgia",
+        "glenumbra.L6.camlorn_city"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "anticlere",
+      "mode": "guild_guide",
+      "fee": 35,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "high_rock.L8.direnni_nostalgia",
+        "anticlere.L6.anticlere_meadow_city"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "shornhelm",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L8.direnni_awe",
+        "rivenspire.L6.shornhelm_city"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "evermor",
+      "mode": "guild_guide",
+      "fee": 40,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L8.direnni_awe",
+        "bjoulsae.L6.evermor_city"
+      ]
+    },
+    {
+      "from": "shornhelm",
+      "to": "northpoint",
+      "mode": "guild_guide",
+      "fee": 35,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.shornhelm_city",
+        "rivenspire.L6.northpoint_port"
+      ]
+    },
+    {
+      "from": "camlorn",
+      "to": "shornhelm",
+      "mode": "guild_guide",
+      "fee": 40,
+      "duration": 4,
+      "path": "mages_guild_leyline",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L6.camlorn_city",
+        "rivenspire.L6.shornhelm_city"
+      ]
+    },
+    {
+      "from": "shrine_azura_high_rock",
+      "to": "wayshrine_dwynnen_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wayrest_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "from": "shrine_boethiah_high_rock",
+      "to": "shrine_sanguine_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "shrine_clavicus_vile_high_rock",
+      "to": "wayshrine_glenumbra_13",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "shrine_hermaeus_mora_high_rock",
+      "to": "ykalon",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "shrine_hircine_high_rock",
+      "to": "urvaius",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "shrine_malacath_high_rock",
+      "to": "shrine_nocturnal_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "shrine_mehrunes_dagon_high_rock",
+      "to": "wayshrine_wrothgar_33",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wayrest_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "from": "shrine_mephala_high_rock",
+      "to": "wayshrine_daggerfall_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "anticlere_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "from": "shrine_meridia_high_rock",
+      "to": "crosswych",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "shrine_molag_bal_high_rock",
+      "to": "moiras_hope",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "shrine_namira_high_rock",
+      "to": "wayshrine_bjoulsae_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "shrine_nocturnal_high_rock",
+      "to": "shrine_malacath_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "shrine_peryite_high_rock",
+      "to": "wayshrine_wrothgar_29",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "shrine_sanguine_high_rock",
+      "to": "wayshrine_daggerfall_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "shrine_sheogorath_high_rock",
+      "to": "wayshrine_glenumbra_18",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "shrine_vaermina_high_rock",
+      "to": "wayshrine_bjoulsae_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_1",
+      "to": "wayshrine_daggerfall_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_2",
+      "to": "wayshrine_daggerfall_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_3",
+      "to": "daggerfall",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_4",
+      "to": "wayshrine_daggerfall_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_5",
+      "to": "wayshrine_anticlere_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_6",
+      "to": "shrine_mephala_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_7",
+      "to": "shrine_sanguine_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_daggerfall_8",
+      "to": "wayshrine_daggerfall_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "daggerfall_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "daggerfall.L5.river_toll",
+        "daggerfall.L8.kynareth_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_anticlere_1",
+      "to": "wayshrine_dwynnen_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "anticlere_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_anticlere_2",
+      "to": "wayshrine_dwynnen_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "anticlere_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_anticlere_3",
+      "to": "wayshrine_daggerfall_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "anticlere_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "anticlere.L8.mara_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_dwynnen_1",
+      "to": "wayshrine_bjoulsae_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "dwynnen_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "dwynnen.L8.dibella_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_dwynnen_2",
+      "to": "wayshrine_dwynnen_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "dwynnen_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "dwynnen.L8.dibella_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_dwynnen_3",
+      "to": "dwynnen",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "dwynnen_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "dwynnen.L5.bridge_toll",
+        "dwynnen.L8.dibella_patron"
+      ]
+    },
+    {
+      "from": "wayshrine_wayrest_1",
+      "to": "wayshrine_wayrest_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wayrest_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "from": "wayshrine_wayrest_2",
+      "to": "kambria",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wayrest_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "from": "wayshrine_wayrest_3",
+      "to": "wayrest",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wayrest_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wayrest.L5.guild_shipping",
+        "wayrest.L8.akatosh_chantry"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_1",
+      "to": "wayshrine_wrothgar_42",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_2",
+      "to": "wayshrine_wrothgar_37",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_3",
+      "to": "wayshrine_wrothgar_43",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_4",
+      "to": "wayshrine_wrothgar_30",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_5",
+      "to": "wayshrine_wrothgar_36",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_6",
+      "to": "wayshrine_wrothgar_37",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_7",
+      "to": "wayshrine_wrothgar_38",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_8",
+      "to": "wayshrine_wrothgar_40",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_9",
+      "to": "wayshrine_wrothgar_39",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_10",
+      "to": "wayshrine_wrothgar_36",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_11",
+      "to": "wayshrine_wrothgar_41",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_12",
+      "to": "wayshrine_wrothgar_28",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_13",
+      "to": "wayshrine_wrothgar_35",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_14",
+      "to": "wayshrine_wrothgar_35",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_15",
+      "to": "wayshrine_wrothgar_37",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_16",
+      "to": "wayshrine_wrothgar_43",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_17",
+      "to": "wayshrine_wrothgar_42",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_18",
+      "to": "wayshrine_wrothgar_42",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_19",
+      "to": "wayshrine_wrothgar_33",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_20",
+      "to": "wayshrine_wrothgar_31",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_21",
+      "to": "wayshrine_wrothgar_40",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_22",
+      "to": "shrine_nocturnal_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_23",
+      "to": "wayshrine_wrothgar_39",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_24",
+      "to": "wayshrine_wrothgar_34",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_25",
+      "to": "jehanna",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_26",
+      "to": "wayshrine_wrothgar_32",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_27",
+      "to": "wayshrine_wrothgar_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_28",
+      "to": "wayshrine_wrothgar_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_29",
+      "to": "wayshrine_wrothgar_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_30",
+      "to": "wayshrine_wrothgar_39",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_31",
+      "to": "wayshrine_wrothgar_40",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_32",
+      "to": "wayshrine_wrothgar_26",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_33",
+      "to": "shrine_mehrunes_dagon_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_34",
+      "to": "gavaudon",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_35",
+      "to": "wayshrine_wrothgar_14",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_36",
+      "to": "morkul_stronghold_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_37",
+      "to": "wayshrine_wrothgar_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_38",
+      "to": "wayshrine_wrothgar_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_39",
+      "to": "wayshrine_wrothgar_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_40",
+      "to": "wayshrine_wrothgar_21",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_41",
+      "to": "tumnosh_stronghold",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_42",
+      "to": "wayshrine_wrothgar_17",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_wrothgar_43",
+      "to": "wayshrine_wrothgar_16",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "wrothgar_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "wrothgar.L6.pass_inns",
+        "wrothgar.L8.kynareth_newing"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_1",
+      "to": "wayshrine_glenumbra_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_2",
+      "to": "wayshrine_glenumbra_17",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_3",
+      "to": "wayshrine_glenumbra_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_4",
+      "to": "wayshrine_glenumbra_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_5",
+      "to": "shrine_sheogorath_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_6",
+      "to": "wayshrine_glenumbra_14",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_7",
+      "to": "wayshrine_glenumbra_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_8",
+      "to": "eagles_brook",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_9",
+      "to": "wayshrine_glenumbra_16",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_10",
+      "to": "wayshrine_glenumbra_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_11",
+      "to": "camlorn",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_12",
+      "to": "wayshrine_glenumbra_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_13",
+      "to": "shrine_clavicus_vile_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_14",
+      "to": "crestshade",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_15",
+      "to": "camlorn",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_16",
+      "to": "wayshrine_glenumbra_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_17",
+      "to": "wayshrine_glenumbra_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_18",
+      "to": "glenumbra_moors",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_glenumbra_19",
+      "to": "camlorn",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "glenumbra_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "glenumbra.L8.mara_cathedral"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_1",
+      "to": "wayshrine_rivenspire_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_2",
+      "to": "wayshrine_rivenspire_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_3",
+      "to": "wayshrine_rivenspire_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_4",
+      "to": "shrine_molag_bal_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_5",
+      "to": "wayshrine_rivenspire_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_6",
+      "to": "wayshrine_rivenspire_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_7",
+      "to": "wayshrine_bjoulsae_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_8",
+      "to": "wayshrine_glenumbra_16",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_9",
+      "to": "northpoint",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_rivenspire_10",
+      "to": "wayshrine_rivenspire_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "rivenspire_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "rivenspire.L6.crag_watch_keeps",
+        "rivenspire.L8.stendarr_and_arkay"
+      ]
+    },
+    {
+      "from": "wayshrine_stormhaven_1",
+      "to": "wayshrine_stormhaven_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "wayshrine_stormhaven_2",
+      "to": "shalgora",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "wayshrine_stormhaven_3",
+      "to": "wayshrine_stormhaven_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "wayshrine_stormhaven_4",
+      "to": "shrine_hircine_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "wayshrine_stormhaven_5",
+      "to": "shalgora",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "stormhaven_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "stormhaven.L5.pilgrim_hospitality",
+        "stormhaven.L8.mara_heartland"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_1",
+      "to": "wayshrine_bjoulsae_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_2",
+      "to": "wayshrine_bjoulsae_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_3",
+      "to": "wayshrine_bjoulsae_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_4",
+      "to": "farrun",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_5",
+      "to": "wayshrine_bjoulsae_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_6",
+      "to": "wayshrine_bjoulsae_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_7",
+      "to": "evermor",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_8",
+      "to": "menevia",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_9",
+      "to": "shrine_namira_high_rock",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "wayshrine_bjoulsae_10",
+      "to": "wayshrine_rivenspire_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "bjoulsae_cairn_trail",
+      "bidirectional": true,
+      "why": [
+        "bjoulsae.L5.barge_trade",
+        "bjoulsae.L8.water_relic_veneration"
+      ]
+    }
+  ]
+}

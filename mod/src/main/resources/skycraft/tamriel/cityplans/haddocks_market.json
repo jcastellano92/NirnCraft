@@ -1,0 +1,222 @@
+{
+  "id": "haddocks_market",
+  "sil": "canyon-crossroads-tent-suq",
+  "base": "none",
+  "overlay": "craglorn",
+  "radius": 24,
+  "reach": 32,
+  "fill_gap": 2,
+  "inn_key": "haddocks_market_dusty_flagon",
+  "names": {
+    "inn": "haddocks_market_dusty_flagon",
+    "store": "haddocks_market_salvage_stalls",
+    "smithy": "haddocks_market_tinker_anvil"
+  },
+  "titles": {
+    "haddocks_market_landmark": "Haddock's Canvas Suq",
+    "haddocks_market_dusty_flagon": "The Dusty Flagon Tent-Inn",
+    "haddocks_market_salvage_stalls": "Nedic-Relic & Rope Outfitter",
+    "haddocks_market_tinker_anvil": "Travelling Tinker's Anvil",
+    "haddocks_market_scorpion_oil": "Rock-Scorpion Oil & Tonic Stall",
+    "haddocks_market_pack_lines": "Canyon Pack-Mule Tether-Lines",
+    "haddocks_market_wayfarer_cairn": "Wayfarers' Cairn of Zenithar",
+    "haddocks_market_market_plaza": "Haddock's Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -20
+    ],
+    [
+      0,
+      20
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "awning_row",
+      "at": [
+        0,
+        -10
+      ],
+      "face": "south",
+      "name": "haddocks_market_landmark",
+      "overlay": "craglorn"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        6,
+        -8
+      ],
+      "face": "south",
+      "name": "haddocks_market_dusty_flagon"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        16,
+        -1
+      ],
+      "face": "west",
+      "name": "haddocks_market_salvage_stalls"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        7,
+        7
+      ],
+      "face": "north",
+      "name": "haddocks_market_tinker_anvil"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -1,
+        16
+      ],
+      "face": "north",
+      "name": "haddocks_market_scorpion_oil"
+    },
+    {
+      "kind": "stables",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        -8,
+        6
+      ],
+      "face": "east",
+      "name": "haddocks_market_pack_lines"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -16,
+        -4
+      ],
+      "face": "east",
+      "name": "haddocks_market_wayfarer_cairn"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -17
+      ],
+      "to": [
+        0,
+        17
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -17,
+        0
+      ],
+      "to": [
+        17,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "haddocks_market_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "craglorn"
+    },
+    {
+      "ring": [
+        12,
+        24
+      ],
+      "overlay": "craglorn"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:akatosh",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    }
+  ]
+}

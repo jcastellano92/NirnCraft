@@ -1,0 +1,19 @@
+{
+  "id": "rivenspire",
+  "tint": {
+    "wall": "minecraft:deepslate_bricks",
+    "wall2": "minecraft:cobbled_deepslate",
+    "low": "minecraft:polished_deepslate",
+    "roof": "crimson",
+    "trim": "dark_oak",
+    "wood": "dark_oak",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "deepslate_bricks",
+    "cityWall2": "minecraft:cracked_deepslate_bricks",
+    "plaza": "minecraft:deepslate_tiles",
+    "plaza2": "minecraft:polished_deepslate",
+    "path": "minecraft:cobbled_deepslate"
+  }
+}

@@ -1,0 +1,840 @@
+{
+  "id": "tear",
+  "why": [
+    "deshaan.L3.lagoon_fens",
+    "deshaan.L4.paddy_round_tear"
+  ],
+  "tint": {
+    "wall": "minecraft:mud_bricks",
+    "wall2": "minecraft:mossy_stone_bricks",
+    "low": "minecraft:polished_basalt",
+    "wood": "mangrove",
+    "roof": "mud_brick",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:polished_basalt",
+    "path": "minecraft:packed_mud"
+  },
+  "style": {
+    "houseStyle": "dres",
+    "forms": {
+      "cluster": 6,
+      "linear": 4,
+      "canal": 3,
+      "ring": 2
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.5,
+      "balcony": 0.45,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:mud_bricks",
+        "minecraft:mossy_stone_bricks",
+        "minecraft:polished_basalt",
+        "minecraft:packed_mud",
+        "mossy_stone_bricks",
+        "minecraft:mud_bricks"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "silt_strider_dock",
+        "ancestor_alcove",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "velothi_obelisk"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "bonemold_rack"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_1_0",
+          "prop_tear_1_1",
+          "prop_tear_1_2",
+          "prop_tear_1_3",
+          "prop_tear_1_4",
+          "prop_tear_1_5",
+          "prop_tear_1_6",
+          "prop_tear_1_7",
+          "prop_tear_1_8",
+          "prop_tear_1_9",
+          "prop_tear_1_10",
+          "prop_tear_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_2_0",
+          "prop_tear_2_1",
+          "prop_tear_2_2",
+          "prop_tear_2_3",
+          "prop_tear_2_4",
+          "prop_tear_2_5",
+          "prop_tear_2_6",
+          "prop_tear_2_7",
+          "prop_tear_2_8",
+          "prop_tear_2_9",
+          "prop_tear_2_10",
+          "prop_tear_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_3_0",
+          "prop_tear_3_1",
+          "prop_tear_3_2",
+          "prop_tear_3_3",
+          "prop_tear_3_4",
+          "prop_tear_3_5",
+          "prop_tear_3_6",
+          "prop_tear_3_7",
+          "prop_tear_3_8",
+          "prop_tear_3_9",
+          "prop_tear_3_10",
+          "prop_tear_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_4_0",
+          "prop_tear_4_1",
+          "prop_tear_4_2",
+          "prop_tear_4_3",
+          "prop_tear_4_4",
+          "prop_tear_4_5",
+          "prop_tear_4_6",
+          "prop_tear_4_7",
+          "prop_tear_4_8",
+          "prop_tear_4_9",
+          "prop_tear_4_10",
+          "prop_tear_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_5_0",
+          "prop_tear_5_1",
+          "prop_tear_5_2",
+          "prop_tear_5_3",
+          "prop_tear_5_4",
+          "prop_tear_5_5",
+          "prop_tear_5_6",
+          "prop_tear_5_7",
+          "prop_tear_5_8",
+          "prop_tear_5_9",
+          "prop_tear_5_10",
+          "prop_tear_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_6_0",
+          "prop_tear_6_1",
+          "prop_tear_6_2",
+          "prop_tear_6_3",
+          "prop_tear_6_4",
+          "prop_tear_6_5",
+          "prop_tear_6_6",
+          "prop_tear_6_7",
+          "prop_tear_6_8",
+          "prop_tear_6_9",
+          "prop_tear_6_10",
+          "prop_tear_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_7_0",
+          "prop_tear_7_1",
+          "prop_tear_7_2",
+          "prop_tear_7_3",
+          "prop_tear_7_4",
+          "prop_tear_7_5",
+          "prop_tear_7_6",
+          "prop_tear_7_7",
+          "prop_tear_7_8",
+          "prop_tear_7_9",
+          "prop_tear_7_10",
+          "prop_tear_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_8_0",
+          "prop_tear_8_1",
+          "prop_tear_8_2",
+          "prop_tear_8_3",
+          "prop_tear_8_4",
+          "prop_tear_8_5",
+          "prop_tear_8_6",
+          "prop_tear_8_7",
+          "prop_tear_8_8",
+          "prop_tear_8_9",
+          "prop_tear_8_10",
+          "prop_tear_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_9_0",
+          "prop_tear_9_1",
+          "prop_tear_9_2",
+          "prop_tear_9_3",
+          "prop_tear_9_4",
+          "prop_tear_9_5",
+          "prop_tear_9_6",
+          "prop_tear_9_7",
+          "prop_tear_9_8",
+          "prop_tear_9_9",
+          "prop_tear_9_10",
+          "prop_tear_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_10_0",
+          "prop_tear_10_1",
+          "prop_tear_10_2",
+          "prop_tear_10_3",
+          "prop_tear_10_4",
+          "prop_tear_10_5",
+          "prop_tear_10_6",
+          "prop_tear_10_7",
+          "prop_tear_10_8",
+          "prop_tear_10_9",
+          "prop_tear_10_10",
+          "prop_tear_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_11_0",
+          "prop_tear_11_1",
+          "prop_tear_11_2",
+          "prop_tear_11_3",
+          "prop_tear_11_4",
+          "prop_tear_11_5",
+          "prop_tear_11_6",
+          "prop_tear_11_7",
+          "prop_tear_11_8",
+          "prop_tear_11_9",
+          "prop_tear_11_10",
+          "prop_tear_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_12_0",
+          "prop_tear_12_1",
+          "prop_tear_12_2",
+          "prop_tear_12_3",
+          "prop_tear_12_4",
+          "prop_tear_12_5",
+          "prop_tear_12_6",
+          "prop_tear_12_7",
+          "prop_tear_12_8",
+          "prop_tear_12_9",
+          "prop_tear_12_10",
+          "prop_tear_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_13_0",
+          "prop_tear_13_1",
+          "prop_tear_13_2",
+          "prop_tear_13_3",
+          "prop_tear_13_4",
+          "prop_tear_13_5",
+          "prop_tear_13_6",
+          "prop_tear_13_7",
+          "prop_tear_13_8",
+          "prop_tear_13_9",
+          "prop_tear_13_10",
+          "prop_tear_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_14_0",
+          "prop_tear_14_1",
+          "prop_tear_14_2",
+          "prop_tear_14_3",
+          "prop_tear_14_4",
+          "prop_tear_14_5",
+          "prop_tear_14_6",
+          "prop_tear_14_7",
+          "prop_tear_14_8",
+          "prop_tear_14_9",
+          "prop_tear_14_10",
+          "prop_tear_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_15_0",
+          "prop_tear_15_1",
+          "prop_tear_15_2",
+          "prop_tear_15_3",
+          "prop_tear_15_4",
+          "prop_tear_15_5",
+          "prop_tear_15_6",
+          "prop_tear_15_7",
+          "prop_tear_15_8",
+          "prop_tear_15_9",
+          "prop_tear_15_10",
+          "prop_tear_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_16_0",
+          "prop_tear_16_1",
+          "prop_tear_16_2",
+          "prop_tear_16_3",
+          "prop_tear_16_4",
+          "prop_tear_16_5",
+          "prop_tear_16_6",
+          "prop_tear_16_7",
+          "prop_tear_16_8",
+          "prop_tear_16_9",
+          "prop_tear_16_10",
+          "prop_tear_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_17_0",
+          "prop_tear_17_1",
+          "prop_tear_17_2",
+          "prop_tear_17_3",
+          "prop_tear_17_4",
+          "prop_tear_17_5",
+          "prop_tear_17_6",
+          "prop_tear_17_7",
+          "prop_tear_17_8",
+          "prop_tear_17_9",
+          "prop_tear_17_10",
+          "prop_tear_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_18_0",
+          "prop_tear_18_1",
+          "prop_tear_18_2",
+          "prop_tear_18_3",
+          "prop_tear_18_4",
+          "prop_tear_18_5",
+          "prop_tear_18_6",
+          "prop_tear_18_7",
+          "prop_tear_18_8",
+          "prop_tear_18_9",
+          "prop_tear_18_10",
+          "prop_tear_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_19_0",
+          "prop_tear_19_1",
+          "prop_tear_19_2",
+          "prop_tear_19_3",
+          "prop_tear_19_4",
+          "prop_tear_19_5",
+          "prop_tear_19_6",
+          "prop_tear_19_7",
+          "prop_tear_19_8",
+          "prop_tear_19_9",
+          "prop_tear_19_10",
+          "prop_tear_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_20_0",
+          "prop_tear_20_1",
+          "prop_tear_20_2",
+          "prop_tear_20_3",
+          "prop_tear_20_4",
+          "prop_tear_20_5",
+          "prop_tear_20_6",
+          "prop_tear_20_7",
+          "prop_tear_20_8",
+          "prop_tear_20_9",
+          "prop_tear_20_10",
+          "prop_tear_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:mud_bricks",
+        "wall_secondary": "minecraft:mossy_stone_bricks",
+        "plinth": "minecraft:polished_basalt",
+        "carpentry": "mangrove",
+        "roofing": "mud_brick",
+        "banner_dye": "green",
+        "paving": [
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks"
+        ],
+        "trim_blocks": [
+          "minecraft:mud_bricks",
+          "minecraft:mossy_stone_bricks",
+          "minecraft:polished_basalt",
+          "mossy_stone_bricks",
+          "minecraft:mud_bricks",
+          "minecraft:packed_mud"
+        ],
+        "props": [
+          "prop_tear_21_0",
+          "prop_tear_21_1",
+          "prop_tear_21_2",
+          "prop_tear_21_3",
+          "prop_tear_21_4",
+          "prop_tear_21_5",
+          "prop_tear_21_6",
+          "prop_tear_21_7",
+          "prop_tear_21_8",
+          "prop_tear_21_9",
+          "prop_tear_21_10",
+          "prop_tear_21_11"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,445 @@
+{
+  "id": "skaven",
+  "sil": "caravan-basin-arcade-fort",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 118,
+  "reach": 126,
+  "fill_gap": 2,
+  "inn_key": "skaven_seven_wells_caravanserai",
+  "names": {
+    "inn": "skaven_seven_wells_caravanserai",
+    "store": "skaven_trans_alikr_bazaar",
+    "smithy": "skaven_spear_and_buckler"
+  },
+  "titles": {
+    "skaven_landmark": "Great Cistern-Mosque of Skaven",
+    "skaven_sand_citadel": "Citadel of the Basin-Prince",
+    "skaven_seven_wells_caravanserai": "The Seven Wells Caravanserai",
+    "skaven_red_whirlwind_inn": "The Red Whirlwind Tavern",
+    "skaven_trans_alikr_bazaar": "Trans-Alik'r Caravan Provisioners",
+    "skaven_spear_and_buckler": "Skaven Spear & Brass-Buckler Forge",
+    "skaven_aloe_and_scorpion": "Desert-Aloe & Venom Apothecary",
+    "skaven_quartz_and_copper": "Sun-Quartz & Hammered-Brass Suq",
+    "skaven_burnoose_weavers": "Woven-Wool Burnoose & Tent-Cloth Hall",
+    "skaven_caravan_masters_hall": "High Pass Caravan-Masters' Hall",
+    "skaven_fighters_guild": "Dune-Lancers Fighters Guildhall",
+    "skaven_zeht_granary_fane": "Domed Fane of Zeht & the Cisterns",
+    "skaven_rock_tomb_gate": "Sand-Sealed Ancestor Necropolis",
+    "skaven_water_bailiff_court": "Court of the Qanat Water-Bailiff",
+    "skaven_salt_block_magazine": "Salt-Block & Date-Bale Magazine",
+    "skaven_bangkorai_road_gate": "North-Pass Toll & Watch Gate",
+    "skaven_great_camel_yard": "Great Caravan Camel & Courser Yard",
+    "skaven_market_plaza": "Great Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -114
+    ],
+    [
+      114,
+      0
+    ],
+    [
+      0,
+      114
+    ],
+    [
+      -114,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 114,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        -49
+      ],
+      "face": "south",
+      "name": "skaven_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        31,
+        -43
+      ],
+      "face": "south",
+      "name": "skaven_sand_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        67,
+        -48
+      ],
+      "face": "west",
+      "name": "skaven_seven_wells_caravanserai"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        51,
+        -15
+      ],
+      "face": "west",
+      "name": "skaven_red_whirlwind_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        82,
+        2
+      ],
+      "face": "west",
+      "name": "skaven_trans_alikr_bazaar"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        50,
+        18
+      ],
+      "face": "west",
+      "name": "skaven_spear_and_buckler"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        64,
+        51
+      ],
+      "face": "west",
+      "name": "skaven_aloe_and_scorpion"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        29,
+        45
+      ],
+      "face": "north",
+      "name": "skaven_quartz_and_copper"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        20,
+        80
+      ],
+      "face": "north",
+      "name": "skaven_burnoose_weavers"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -4,
+        53
+      ],
+      "face": "north",
+      "name": "skaven_caravan_masters_hall"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -32,
+        75
+      ],
+      "face": "north",
+      "name": "skaven_fighters_guild"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -35,
+        40
+      ],
+      "face": "north",
+      "name": "skaven_zeht_granary_fane"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -71,
+        41
+      ],
+      "face": "east",
+      "name": "skaven_rock_tomb_gate"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -52,
+        10
+      ],
+      "face": "east",
+      "name": "skaven_water_bailiff_court"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -81,
+        -10
+      ],
+      "face": "east",
+      "name": "skaven_salt_block_magazine"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -48,
+        -23
+      ],
+      "face": "east",
+      "name": "skaven_bangkorai_road_gate"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -59,
+        -57
+      ],
+      "face": "east",
+      "name": "skaven_great_camel_yard"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -100
+      ],
+      "to": [
+        0,
+        100
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -100,
+        0
+      ],
+      "to": [
+        100,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -61,
+        -61
+      ],
+      "to": [
+        61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        -61
+      ],
+      "to": [
+        61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        61
+      ],
+      "to": [
+        -61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -61,
+        61
+      ],
+      "to": [
+        -61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "skaven_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        59
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        59,
+        118
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:julianos",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:stendarr",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    }
+  ]
+}

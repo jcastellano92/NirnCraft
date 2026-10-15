@@ -31,120 +31,118 @@ named buildings and 3.2 named NPCs per named town; dungeon identity 5%).
 
 ## 1. World model sheet
 
-Data target: `tamriel/world/valenwood.json` (MS22). Field ids are data ids; cites in brackets; `P.` is the province.
+Data target: `tamriel/world/valenwood.json` (MS22). Field ids are data ids; cites in parentheses; `vw.` is the province.
 
-### 1.1 Province world truth
+### 1.1 Province sheet (`valenwood`)
 
-Valenwood is the forest that its people have sworn never to harm. The Bosmer keep the Green Pact: no living plant of
-Valenwood may be cut or eaten by them, so they live on meat, bone, hide and sap, and buy their grain and wood from
-Khajiit and Imperial traders. Their cities grow inside giant graht-oaks, and status rises with height, from the poor
-on the ground to the Treethane in the crown; one city walks between four seasonal sites. Ayleid ruins lie under the
-roots. Elden Root is the Dominion's forest capital, where the Thalmor stand beside a Camoran king, while the Silvenar
-and the Green Lady speak for the people and the Pact. Colovian poachers press on the Strid, Maormer raid the coast,
-and the March keeps an old truce with the Khajiit.
+**World truth.** Valenwood is the forest that its people have sworn never to harm. The Bosmer keep the Green Pact: no
+living plant of Valenwood may be cut or eaten by them, so they live on meat, bone, hide and sap, and buy grain and
+timber from Khajiit and Imperial traders. Their cities grow inside giant graht-oaks where status rises with height from
+root to crown, and Falinesti walks between four seasonal sites while Ayleid ruins lie beneath the roots. Elden Root is
+the Dominion's forest capital, where Thalmor envoys stand beside a Camoran king while the Silvenar and Green Lady speak
+for the Pact against Colovian poachers and Maormer raiders.
 
-### 1.2 Province sheet (P)
-
-| Layer | Fields `id`: meaning [cites] |
+| Layer | Fields `id` (cites): meaning |
 | --- | --- |
 | L1 Geology | `forest_basin`: a low basin of deep humus over old sediments, little exposed rock. `river_gorges`: the Xylo and the Strid and their feeders cut 20-40 blocks below the forest floor. `march_knolls`: sandstone knolls and low ridges in Reaper's March, to 60-120 blocks. `karst_sinks`: sinkhole lakes where limestone lies under the humus. `delta_coast`: mangrove deltas and drowned river mouths on the south and west coast. `poor_ore`: little metal near the surface, some bog iron only |
-| L2 Climate | `warm_wet`: warm and wet all year, wettest in the south-west [forest_basin, delta_coast]. `under_canopy`: below the crowns the floor is dim, still and humid [warm_wet]. `drier_march`: Reaper's March is drier and seasonal, grading into Elsweyr's savanna [march_knolls]. `south_storms`: sea storms and sea mists from the south-west [delta_coast]. `four_seasons_felt`: the forest's seasons show as leaf colour, fruiting and migration rather than snow [warm_wet] |
-| L3 Water | `river_net`: the Xylo in the north-west, the Strid on the Cyrodiil border, and many forest rivers [river_gorges, warm_wet]. `crown_cisterns`: rain caught in the hollows and bromeliad pools of the giant trees; tree-cities drink from their own trees [under_canopy]. `sink_lakes` [karst_sinks]. `who_holds_water`: water is everywhere; what is held is the trees: Treethanes control the city-trees and so the cisterns, the shelter and the height [crown_cisterns] |
-| L4 Ecology | `canopy_layers`: four vertical layers (floor, understorey, canopy, emergent crowns), each with its own life [under_canopy]. `graht_oaks`: giant trees in groves on the deepest soils, the only places large enough for cities [forest_basin]. `pact_forest`: the forest grows uncut wherever Bosmer live, because their covenant forbids harming its plants; old growth reaches to every doorstep [graht_oaks, canopy_layers]. `game_abundance`: deer, boar, wild pigs, birds and timber mammoths in glades [pact_forest]. `predators`: big cats in the March, giant spiders and wasps in the understorey, hoarvors in wet hollows, imga in the canopy [canopy_layers, river_net]. `green_hostiles`: spriggans, stranglers and walking plant-beasts guard old groves [pact_forest] |
-| L5 Economy | `meat_and_jagga`: hunting, pig-keeping and smokehouses; jagga is fermented from pig's milk [game_abundance]. `bone_hide_craft`: bows of horn and bone, armour of hide and bone, because local wood may not be cut and metal is scarce [pact_forest, poor_ore]. `pact_imports`: grain, bread, timber, paper, wine and iron bought from Elsweyr and Cyrodiil [pact_forest]. `sap_given`: graht-oaks yield sap through openings sung into the bark; tapping is a priestly craft, not cutting [graht_oaks, pact_forest]. `ports`: Woodhearth, Haven, Southpoint and Velyn Harbor import what the Pact forbids [delta_coast, pact_imports]. `pelts_and_feathers`: the export trade [game_abundance] |
-| L6 Settlement | `tree_cities`: cities stand where graht-oaks stand, not where rivers cross [graht_oaks, crown_cisterns]. `walking_city`: Falinesti, a giant tree that migrates among four seasonal sites [graht_oaks, four_seasons_felt]. `delta_ports` [ports]. `march_border_towns`: the March's towns sit on knolls and fords on the Elsweyr and Cyrodiil roads, mixed Bosmer and Khajiit [march_knolls, pact_imports]. `busy_centres`: Elden Root (capital and Dominion seat), Woodhearth (port), Falinesti (wherever it stands), Arenthia and Rawl'kha (border trade) [tree_cities, ports, pact_imports]. `poor_places`: ground camps under the city-trees, hunting villages whose game has thinned, coastal villages after a raid [tree_cities, game_abundance] |
-| L7 Society | `vertical_rank`: the higher you live the higher you stand: Treethane and court in the crown, craftsmen on the trunk tiers, hunters on the boughs, the poor and outsiders at the roots and on the ground [tree_cities]. `treethanes`: each city's ruler [tree_cities]. `hunters_honoured`: the best hunters are the city's heroes [meat_and_jagga]. `spinners`: priest-storytellers who keep and shape the people's story [tree_cities]. `outsider_traders`: Khajiit and Imperial merchants handle plant goods the Bosmer cannot, so they are needed and kept low [pact_imports]. `pact_breakers`: Bosmer who break the Pact are cast out to the ground or beyond [pact_forest] |
-| L8 Culture | `yffre_faith`: Y'ffre the Storyteller, giver of the Pact; shrines are story-stones and living groves [pact_forest, spinners]. `meat_mandate`: the slain are to be eaten, within three days, and nothing is wasted [pact_forest, meat_and_jagga]. `wild_hunt`: a rite of transformation into a ravening host, called in extremity and feared by all [pact_forest]. `silvenar_and_lady`: the Silvenar embodies the people's will, the Green Lady is its champion; their bond is the Pact made flesh [treethanes, yffre_faith]. `wilderking`: a forest-spirit protector bound to Greenshade [yffre_faith]. `burial_trees`: the dead are given back to the forest in burial trees and root tombs [pact_forest]. `songs_not_stone`: history is sung and spun, not carved [spinners]. `outsiders`: wary of Colovians, uneasy partners of the Thalmor, rivals and friends of the Khajiit [pact_imports] |
-| L9 Politics | `camoran_court`: a Camoran king in Elden Root, seated with Thalmor support; Valenwood is a Dominion province [treethanes]. `thalmor_in_the_crown`: Thalmor envoys live in the crown of the Elden Tree [camoran_court, vertical_rank]. `silvenar_vs_thalmor`: the Silvenar guards the Pact against Dominion "improvements" [silvenar_and_lady, camoran_court]. `strid_border`: Colovian loggers and poachers on the Strid; old border wars [river_net, pact_imports]. `march_truce`: a renewed truce between Bosmer and Khajiit elders in the March [march_border_towns]. `maormer_raids`: Pyandonean raiders on the south-west coast [south_storms, ports]. Festival (MS16): **the Arrival** (when Falinesti reaches its winter site: a great hunt and a feast with no plant on the table) [walking_city, meat_mandate] |
-| L10 Hidden | `ayleid_vaults`: Ayleid ruins under the roots; stone survives only where the floor is firm [forest_basin]. `root_tombs`: burial trees and root tombs [burial_trees]. `spriggan_groves` [green_hostiles]. `wild_hunt_grounds`: sites where hunts were called; still wrong [wild_hunt]. `poacher_camps` on the Strid [strid_border]. `maormer_beachheads` [maormer_raids]. `feast_lodges`: hunters' lodges where the Mandate is abused into cannibal cults [meat_mandate]. `hircine_packs`: werewolf packs of Hircine's hunters [hunters_honoured]. `septim_forts`: Imperial border forts, now held by bandits, Khajiit or Thalmor [strid_border]. `thalmor_cells`: dissidents held in hollow trees [thalmor_in_the_crown] |
-| L11 History | `dawn_pact`: the covenant with Y'ffre in the forest's first age. `ayleid_age`: Ayleid settlement in the north and east. `camoran_line`: an ancient royal line, including a Third Era usurper who overran the province. `imperial_province`: the Septim era, its forts and trading posts. `dominion_union`: early Fourth Era union with Summerset under the Thalmor. `great_war`: Bosmer archers in the Dominion's war against the Empire. `walking_legend`: Falinesti's walk, sung by every Spinner |
+| L2 Climate | `warm_wet` (L1.forest_basin, L1.delta_coast): warm and wet all year, wettest in the south-west. `under_canopy` (L1.forest_basin, L2.warm_wet): below the crowns the floor is dim, still and humid. `drier_march` (L1.march_knolls): Reaper's March is drier and seasonal, grading into Elsweyr's savanna. `south_storms` (L1.delta_coast): sea storms and sea mists from the south-west. `four_seasons_felt` (L1.forest_basin, L2.warm_wet): the forest's seasons show as leaf colour, fruiting and migration rather than snow |
+| L3 Water | `river_net` (L1.river_gorges, L2.warm_wet): the Xylo in the north-west, the Strid on the Cyrodiil border, and many forest rivers. `crown_cisterns` (L1.forest_basin, L2.under_canopy): rain caught in the hollows and bromeliad pools of the giant trees; tree-cities drink from their own trees. `sink_lakes` (L1.karst_sinks): clear karst sinkhole pools. `who_holds_water` (L1.forest_basin, L3.crown_cisterns): water is everywhere; what is held is the trees: Treethanes control the city-trees and so the cisterns, the shelter and the height |
+| L4 Ecology | `canopy_layers` (L2.under_canopy): four vertical layers (floor, understorey, canopy, emergent crowns), each with its own life. `graht_oaks` (L1.forest_basin, L2.warm_wet): giant trees in groves on the deepest soils, the only places large enough for cities. `pact_forest` (L1.forest_basin, L4.graht_oaks, L4.canopy_layers): the forest grows uncut wherever Bosmer live, because their covenant forbids harming its plants; old growth reaches to every doorstep. `game_abundance` (L2.warm_wet, L4.pact_forest): deer, boar, wild pigs, birds and timber mammoths in glades. `predators` (L3.river_net, L4.canopy_layers): big cats in the March, giant spiders and wasps in the understorey, hoarvors in wet hollows, imga in the canopy. `green_hostiles` (L1.forest_basin, L4.pact_forest): spriggans, stranglers and walking plant-beasts guard old groves |
+| L5 Economy | `meat_and_jagga` (L4.game_abundance): hunting, pig-keeping and smokehouses; jagga is fermented from pig's milk. `bone_hide_craft` (L1.poor_ore, L4.pact_forest): bows of horn and bone, armour of hide and bone, because local wood may not be cut and metal is scarce. `pact_imports` (L4.pact_forest): grain, bread, timber, paper, wine and iron bought from Elsweyr and Cyrodiil. `sap_given` (L4.graht_oaks, L4.pact_forest): graht-oaks yield sap through openings sung into the bark; tapping is a priestly craft, not cutting. `ports` (L1.delta_coast, L5.pact_imports): Woodhearth, Haven, Southpoint and Velyn Harbor import what the Pact forbids. `pelts_and_feathers` (L4.game_abundance): the export trade |
+| L6 Settlement | `tree_cities` (L3.crown_cisterns, L4.graht_oaks): cities stand where graht-oaks stand, not where rivers cross. `walking_city` (L2.four_seasons_felt, L4.graht_oaks): Falinesti, a giant tree that migrates among four seasonal sites. `delta_ports` (L1.delta_coast, L5.ports): coastal stilt and root ports. `march_border_towns` (L1.march_knolls, L5.pact_imports): the March's towns sit on knolls and fords on the Elsweyr and Cyrodiil roads, mixed Bosmer and Khajiit. `busy_centres` (L5.ports, L5.pact_imports, L6.tree_cities): Elden Root (capital and Dominion seat), Woodhearth (port), Falinesti (wherever it stands), Arenthia and Rawl'kha (border trade). `poor_places` (L4.game_abundance, L6.tree_cities): ground camps under the city-trees, hunting villages whose game has thinned, coastal villages after a raid |
+| L7 Society | `vertical_rank` (L6.tree_cities): the higher you live the higher you stand: Treethane and court in the crown, craftsmen on the trunk tiers, hunters on the boughs, the poor and outsiders at the roots and on the ground. `treethanes` (L3.who_holds_water, L6.tree_cities): each city's ruler. `hunters_honoured` (L5.meat_and_jagga): the best hunters are the city's heroes. `spinners` (L6.tree_cities): priest-storytellers who keep and shape the people's story. `outsider_traders` (L5.pact_imports): Khajiit and Imperial merchants handle plant goods the Bosmer cannot, so they are needed and kept low. `pact_breakers` (L4.pact_forest): Bosmer who break the Pact are cast out to the ground or beyond |
+| L8 Culture | `yffre_faith` (L4.pact_forest, L7.spinners): Y'ffre the Storyteller, giver of the Pact; shrines are story-stones and living groves. `meat_mandate` (L4.pact_forest, L5.meat_and_jagga): the slain are to be eaten, within three days, and nothing is wasted. `wild_hunt` (L4.pact_forest): a rite of transformation into a ravening host, called in extremity and feared by all. `silvenar_and_lady` (L7.treethanes, L8.yffre_faith): the Silvenar embodies the people's will, the Green Lady is its champion; their bond is the Pact made flesh. `wilderking` (L4.pact_forest, L8.yffre_faith): a forest-spirit protector bound to Greenshade. `burial_trees` (L4.pact_forest): the dead are given back to the forest in burial trees and root tombs. `songs_not_stone` (L7.spinners): history is sung and spun, not carved. `outsiders` (L5.pact_imports): wary of Colovians, uneasy partners of the Thalmor, rivals and friends of the Khajiit |
+| L9 Politics | `camoran_court` (L7.treethanes): a Camoran king in Elden Root, seated with Thalmor support; Valenwood is a Dominion province. `thalmor_in_the_crown` (L7.vertical_rank, L9.camoran_court): Thalmor envoys live in the crown of the Elden Tree. `silvenar_vs_thalmor` (L8.silvenar_and_lady, L9.camoran_court): the Silvenar guards the Pact against Dominion improvements. `strid_border` (L3.river_net, L5.pact_imports): Colovian loggers and poachers on the Strid; old border wars. `march_truce` (L6.march_border_towns): a renewed truce between Bosmer and Khajiit elders in the March. `maormer_raids` (L2.south_storms, L5.ports): Pyandonean raiders on the south-west coast. `the_arrival` (L6.walking_city, L8.meat_mandate): winter festival when Falinesti reaches its winter site with a great hunt and a plantless feast |
+| L10 Hidden | `ayleid_vaults` (L1.forest_basin): Ayleid ruins under the roots; stone survives only where the floor is firm. `root_tombs` (L4.pact_forest, L8.burial_trees): burial trees and root tombs. `spriggan_groves` (L4.green_hostiles): warded ancient glades. `wild_hunt_grounds` (L4.pact_forest, L8.wild_hunt): sites where hunts were called; still wrong. `poacher_camps` (L4.pact_forest, L9.strid_border): illegal Colovian logging camps on the Strid. `maormer_beachheads` (L1.delta_coast, L9.maormer_raids): sea-elf raid coves. `feast_lodges` (L4.game_abundance, L8.meat_mandate): hunters' lodges where the Mandate is abused into cannibal cults. `hircine_packs` (L4.predators, L7.hunters_honoured): werewolf packs of Hircine's hunters. `septim_forts` (L1.march_knolls, L9.strid_border): Imperial border forts, now held by bandits, Khajiit or Thalmor. `thalmor_cells` (L4.graht_oaks, L9.thalmor_in_the_crown): dissidents held in hollow trees |
+| L11 History | `dawn_pact` (L4.pact_forest, L8.yffre_faith): the covenant with Y'ffre in the forest's first age. `ayleid_age` (L10.ayleid_vaults): Ayleid settlement in the north and east. `camoran_line` (L9.camoran_court): an ancient royal line, including a Third Era usurper who overran the province. `imperial_province` (L10.septim_forts): the Septim era, its forts and trading posts. `dominion_union` (L9.thalmor_in_the_crown): early Fourth Era union with Summerset under the Thalmor. `great_war` (L9.camoran_court): Bosmer archers in the Dominion's war against the Empire. `walking_legend` (L6.walking_city, L7.spinners): Falinesti's walk, sung by every Spinner |
 
-### 1.3 Region sub-sheets
+### 1.2 Grahtwood (`valenwood/grahtwood`, 10.06 km², capital Elden Root, levels 20-42)
 
-**Grahtwood** (`valenwood/grahtwood`, 10.06 km², capital Elden Root, levels 20-42; large: two halves, the north
-round Elden Root and the south coast round Haven).
-World truth: the heart of the forest and of the Dominion's hold on it. The Elden Tree rises over everything, a city in
-one trunk with the Camoran court and the Thalmor in its crown and the poor among its roots. Around it stand old
-Ayleid vaults the Thalmor's scholars are reopening, burial trees, timber-mammoth glades and the winter site of
-Falinesti. The south coast is a separate world: Haven and Southpoint, delta ports on mangrove roots that buy the grain
-and iron the Pact forbids, watching the sea for Maormer sails.
+**World truth.** Grahtwood is the heart of the forest and of the Dominion's hold on it. The Elden Tree rises over
+everything, a city in one trunk with the Camoran court and the Thalmor in its crown and the poor among its roots.
+Around it stand old Ayleid vaults the Thalmor's scholars are reopening, burial trees, timber-mammoth glades and the
+winter site of Falinesti. The south coast is a separate world: Haven and Southpoint, delta ports on mangrove roots that
+buy the grain and iron the Pact forbids, watching the sea for Maormer sails.
 
-| Layer | Fields [cites] |
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `elden_grove_soil` the deepest soils [P.forest_basin]. `grahtwood_sinks` [P.karst_sinks]. `south_deltas` [P.delta_coast] |
-| L2 | `deep_canopy` [P.under_canopy]. `coastal_wet` [P.south_storms] |
-| L3 | `elden_cisterns` [P.crown_cisterns]. `lady_solace_fen` [grahtwood_sinks] |
-| L4 | `graht_grove`, `old_growth_floor`, `mammoth_glade`, `sink_lake`, `mangrove_delta`, `burial_grove` (section 2) |
-| L5 | `sap_tappers` [P.sap_given]. `capital_market` [P.pact_imports]. `delta_trade` Haven and Southpoint [P.ports]. `kwama_tenders` at Burroot (eggs are not plants) [P.meat_and_jagga] |
-| L6 | `elden_root_capital` [P.tree_cities, elden_grove_soil]. `haven_port` south seat [south_deltas]. `redfur_post` a trading post for outsiders at the forest edge [capital_market]. `falinesti_winter_site` [P.walking_city] |
-| L7 | `crown_court_thalmor` [P.vertical_rank]. `root_poor` [P.vertical_rank]. `delta_merchants` [delta_trade] |
-| L8 | `elden_temple` [P.yffre_faith]. `crown_lamp` a light in the Elden Tree's crown, said to show the Pact holds (lore-web val_1) [elden_cisterns] |
-| L9 | `court_vs_voice` the Camoran court and the Silvenar's Voice in the same tree [P.silvenar_vs_thalmor]. `ayleid_digs` Thalmor scholars reopening vaults [P.thalmor_in_the_crown] |
-| L10 | `ayleid_vaults_grahtwood` (signature theme: Ne Salas, Laeloria, Reliquary of Stars, Ossuary of Telacar) [P.ayleid_vaults, ayleid_digs]. `maarselok_lair` a dragon's lair from the Second Era [P.green_hostiles]. `elden_grove` (Arena's staff dungeon) [P.root_tombs] |
-| L11 | `cormount_battle` a border battle remembered by a memorial [P.camoran_line]. `ayleid_north` [P.ayleid_age] |
+| L1 | `elden_grove_soil`: the deepest humus soils in the central basin. `grahtwood_sinks`: limestone sinkholes under the forest floor. `south_deltas`: mangrove deltas on the southern coast |
+| L2 | `deep_canopy` (vw.L2.under_canopy, L1.elden_grove_soil): dim, humid air beneath the giant crowns. `coastal_wet` (vw.L2.south_storms, L1.south_deltas): sea fogs and warm squalls on the delta coast |
+| L3 | `elden_cisterns` (vw.L3.crown_cisterns, L2.deep_canopy): high bromeliad and hollow reservoirs in the Elden Tree. `lady_solace_fen` (vw.L3.sink_lakes, L1.grahtwood_sinks): flooded karst fen |
+| L4 | `graht_grove` (vw.L4.graht_oaks, L1.elden_grove_soil): giant city-oaks. `old_growth_floor` (vw.L4.pact_forest, L2.deep_canopy): dense uncut forest to the door. `mammoth_glade` (vw.L4.game_abundance, L1.elden_grove_soil): natural treefall glades with timber mammoths. `sink_lake` (L1.grahtwood_sinks, L3.lady_solace_fen): clear fern-ringed sink pools. `mangrove_delta` (L1.south_deltas, L2.coastal_wet): coastal mangrove roots. `burial_grove` (vw.L4.pact_forest, L1.elden_grove_soil): old trees hung with bone tokens |
+| L5 | `sap_tappers` (vw.L5.sap_given, L4.graht_grove): priestly sap singers. `capital_market` (vw.L5.pact_imports, L4.graht_grove): imported grain, wood and iron at the roots. `delta_trade` (vw.L5.ports, L1.south_deltas): Haven and Southpoint maritime trade. `kwama_tenders` (vw.L5.meat_and_jagga, L1.elden_grove_soil): Burroot egg-mines |
+| L6 | `elden_root_capital` (vw.L6.tree_cities, L1.elden_grove_soil, L4.graht_grove): the capital grown inside the Elden Tree. `haven_port` (vw.L6.delta_ports, L1.south_deltas): southern port seat. `redfur_post` (L5.capital_market): trading post for outsiders at the forest edge. `falinesti_winter_site` (vw.L6.walking_city, L4.graht_grove): the southern seasonal clearing of the walking city |
+| L7 | `crown_court_thalmor` (vw.L7.vertical_rank, L6.elden_root_capital): Camoran courtiers and Thalmor envoys in the highest boughs. `root_poor` (vw.L7.vertical_rank, L6.elden_root_capital): ground-dwellers and outsider peddlers among the roots. `delta_merchants` (L5.delta_trade): port factors at Haven and Southpoint |
+| L8 | `elden_temple` (vw.L8.yffre_faith, L6.elden_root_capital): story-shrines in the trunk. `crown_lamp` (L3.elden_cisterns, L6.elden_root_capital): a sacred light in the Elden Tree's crown said to show the Pact holds |
+| L9 | `court_vs_voice` (vw.L9.silvenar_vs_thalmor, L7.crown_court_thalmor): the Camoran court and the Silvenar's Voice in the same tree. `ayleid_digs` (vw.L9.thalmor_in_the_crown, L7.crown_court_thalmor): Thalmor scholars reopening sealed Ayleid vaults |
+| L10 | `ayleid_vaults_grahtwood` (vw.L10.ayleid_vaults, L1.elden_grove_soil, L9.ayleid_digs): Ne Salas, Laeloria, Reliquary of Stars and Ossuary of Telacar. `maarselok_lair` (vw.L4.green_hostiles, L1.elden_grove_soil): a blighted dragon lair from the Second Era. `elden_grove` (vw.L10.root_tombs, L4.burial_grove): Arena's staff dungeon under the ancient roots |
+| L11 | `cormount_battle` (vw.L11.camoran_line, L6.elden_root_capital): a dynastic border battle remembered by a memorial grove. `ayleid_north` (vw.L11.ayleid_age, L10.ayleid_vaults_grahtwood): the Ayleid refugee kingdoms under the oaks |
 
-**Greenshade** (`valenwood/greenshade`, 4.52 km², seat Woodhearth, levels 24-45).
-World truth: the wet, misty west, where marsh, mangrove and graht-oak meet the sea. Woodhearth is a city of rope
-bridges strung among tall trees, a port the Pact allows to trade with Summerset and Senchal, with the poor camped on
-the ground. The Wilderking, the forest's spirit-guardian, holds court in a grove the living rarely find. The burned
-Ayleid City of Ash and the shifting Labyrinth lie inland. Maormer raiders camp on the drowned coast, and the
-Spinners say the Wilderking has gone quiet.
+### 1.3 Greenshade (`valenwood/greenshade`, 4.52 km², seat Woodhearth, levels 24-45)
 
-| Layer | Fields [cites] |
+**World truth.** Greenshade is the wet, misty west where marsh, mangrove and graht-oak meet the Abecean Sea. Woodhearth
+is a city of rope bridges strung among tall coastal trees, a port the Pact allows to trade with Summerset and Senchal,
+with the poorest Bosmer and outsiders camped on the muddy ground below. The Wilderking, the forest's spirit-guardian,
+holds court in a hollow grove the living rarely find. The burned Ayleid City of Ash and the shifting Labyrinth lie
+inland. Maormer raiders camp on the drowned coast, and the Spinners say the Wilderking has gone quiet.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `drowned_coast` [P.delta_coast]. `mire_basins` [P.forest_basin] |
-| L2 | `sea_mists` [P.south_storms]. `wettest_west` [P.warm_wet] |
-| L3 | `marsh_water` Gathongor's Mire, Verrant Morass [mire_basins]. `woodhearth_bay` [drowned_coast] |
-| L4 | `mire_fen`, `mangrove_delta`, `bridge_canopy`, `wisp_hollow`, `spriggan_grove`, `drowned_beach` (section 2) |
-| L5 | `bridge_port` [P.ports]. `net_fishing` [woodhearth_bay]. `reed_weaving` from dead reed only (the Pact allows the fallen) [P.pact_forest] |
-| L6 | `woodhearth_seat` [P.tree_cities, woodhearth_bay]. `greenheart` a marsh town inside a hollow tree [mire_basins]. `marbruk` a glade fort-town of outsiders and Bosmer on the road east [P.pact_imports] |
-| L7 | `bridge_district_rank` [P.vertical_rank]. `ground_camp` the poorest of Valenwood [P.poor_places] |
-| L8 | `wilderking_court` [P.wilderking]. `spinners_of_greenshade` [P.spinners] |
-| L9 | `wilderking_silent` the spirit no longer answers [wilderking_court]. `maormer_shore` [P.maormer_raids] |
-| L10 | `wilderking_spirits` (signature theme: groves of the Wilderking's corrupted servants) [wilderking_silent]. `city_of_ash` [P.ayleid_vaults]. `labyrinth` [P.ayleid_vaults]. `maormer_camp` [maormer_shore] |
-| L11 | `ash_fire` the Ayleid city burned [P.ayleid_age]. `wilderking_line` each Wilderking chosen from the living [P.dawn_pact] |
+| L1 | `drowned_coast`: subsided beaches and mangrove estuaries on the western sea. `mire_basins`: low peat-and-clay hollows inland |
+| L2 | `sea_mists` (vw.L2.south_storms, L1.drowned_coast): rolling salt fog off the Abecean. `wettest_west` (vw.L2.warm_wet, L1.mire_basins): heavy year-round rain |
+| L3 | `marsh_water` (L1.mire_basins, L2.wettest_west): Gathongor's Mire and Verrant Morass. `woodhearth_bay` (L1.drowned_coast): sheltered harbour sound |
+| L4 | `mire_fen` (L3.marsh_water): reeds, stranglers and hoarvors. `mangrove_delta` (L1.drowned_coast, L3.woodhearth_bay): coastal mangrove roots. `bridge_canopy` (vw.L4.canopy_layers, L3.woodhearth_bay): tall straight trees linked by rope bridges. `wisp_hollow` (L2.sea_mists, L3.marsh_water): shaded hollows lit by wisps. `spriggan_grove` (vw.L4.green_hostiles, L1.mire_basins): vine-draped ancient ruins. `drowned_beach` (L1.drowned_coast): dead surf-washed trunks |
+| L5 | `bridge_port` (vw.L5.ports, L3.woodhearth_bay): shipping with Summerset and Senchal. `net_fishing` (L3.woodhearth_bay): bay and estuary fisheries. `reed_weaving` (vw.L4.pact_forest, L4.mire_fen): craft from dead fallen reed only |
+| L6 | `woodhearth_seat` (vw.L6.tree_cities, L3.woodhearth_bay, L4.bridge_canopy): the rope-bridge port city. `greenheart` (vw.L6.tree_cities, L1.mire_basins): a marsh town inside a hollow tree. `marbruk` (vw.L5.pact_imports, L1.mire_basins): a glade fort-town of outsiders and Bosmer on the road east |
+| L7 | `bridge_district_rank` (vw.L7.vertical_rank, L6.woodhearth_seat): high bridge tiers above the docks. `ground_camp` (vw.L6.poor_places, L6.woodhearth_seat): the poorest of Valenwood on the mud floor |
+| L8 | `wilderking_court` (vw.L8.wilderking, L4.spriggan_grove): the living spirit-throne of the western woods. `spinners_of_greenshade` (vw.L7.spinners, L6.greenheart): story-priests of the mire |
+| L9 | `wilderking_silent` (L8.wilderking_court): the forest guardian no longer answers the Spinners. `maormer_shore` (vw.L9.maormer_raids, L1.drowned_coast): sea-elf landings along the western coves |
+| L10 | `wilderking_spirits` (L4.spriggan_grove, L9.wilderking_silent): groves of the Wilderking's corrupted servants. `city_of_ash` (vw.L10.ayleid_vaults, L1.mire_basins): burned Ayleid citadel. `labyrinth` (vw.L10.ayleid_vaults, L4.spriggan_grove): shifting root-and-stone maze. `maormer_camp` (vw.L10.maormer_beachheads, L1.drowned_coast, L9.maormer_shore): fortified sea-elf beachheads |
+| L11 | `ash_fire` (vw.L11.ayleid_age, L10.city_of_ash): the burning of the western Ayleid city. `wilderking_line` (vw.L11.dawn_pact, L8.wilderking_court): each Wilderking chosen from a mortal host |
 
-**Malabal Tor** (`valenwood/malabal_tor`, 3.63 km², seat Silvenar, levels 22-44).
-World truth: the deep jungle of the north-west on the Xylo, the Bosmer heartland that the Dominion reaches least.
-The city of Silvenar is a hidden court under hollowed root arches, where the Silvenar holds audience and the Green
-Lady trains. Falinesti stands here in summer. Orc enclaves keep an uneasy truce with their hunting neighbours, Velyn
-Harbor trades on the coast, and the oldest Wild Hunt grounds lie in the jungle where hoarvors breed. Here the Pact is
-kept most strictly and the Thalmor are least welcome.
+### 1.4 Malabal Tor (`valenwood/malabal_tor`, 3.63 km², seat Silvenar, levels 22-44)
 
-| Layer | Fields [cites] |
+**World truth.** Malabal Tor is the deep jungle of the north-west on the Xylo River, the Bosmer heartland that the
+Dominion reaches least. The city of Silvenar is a hidden court under hollowed root arches, where the Silvenar holds
+audience and the Green Lady trains. Falinesti stands here in summer. Wood Orc enclaves keep an uneasy truce with their
+hunting neighbours, Velyn Harbor trades on the coast, and the oldest Wild Hunt grounds lie in the jungle where hoarvors
+breed. Here the Pact is kept most strictly and the Thalmor are least welcome.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `xylo_gorge` [P.river_gorges]. `jungle_floor` [P.forest_basin] |
-| L2 | `hothouse` [P.warm_wet, P.under_canopy] |
-| L3 | `xylo_basin` [P.river_net]. `velyn_bay` [P.delta_coast] |
-| L4 | `jungle_understorey`, `xylo_gorge_walls`, `hoarvor_hollow`, `root_amphitheatre`, `canopy_high`, `orc_clearing` (section 2) |
-| L5 | `strict_hunters` [P.meat_and_jagga]. `velyn_trade` [P.ports]. `orc_smiths` iron work traded to Bosmer [P.poor_ore] |
-| L6 | `silvenar_seat` [P.tree_cities]. `falinesti_summer_site` [P.walking_city]. `velyn_harbor` [velyn_bay]. `orc_enclaves` Drabul, Jathsogur [orc_smiths] |
-| L7 | `silvenar_court` [P.silvenar_and_lady]. `orc_outsiders` [orc_enclaves] |
-| L8 | `strictest_pact` [P.pact_forest]. `green_lady_trials` [P.silvenar_and_lady] |
-| L9 | `lady_succession` the Green Lady's trial for a successor [green_lady_trials]. `orc_truce` [orc_enclaves] |
-| L10 | `wild_hunt_grounds_xylo` (signature theme) [P.wild_hunt_grounds]. `tomb_of_the_apostates` [P.root_tombs]. `hoarvor_pit` [hoarvor_hollow] |
-| L11 | `apostates` Bosmer who once broke the Pact and were sealed in a tree [P.dawn_pact] |
+| L1 | `xylo_gorge`: the steep 30-block gorge of the Xylo River. `jungle_floor`: deep wet humus in the north-western basin |
+| L2 | `hothouse` (vw.L2.warm_wet, vw.L2.under_canopy, L1.jungle_floor): steaming, rain-drenched understorey air |
+| L3 | `xylo_basin` (vw.L3.river_net, L1.xylo_gorge): the Xylo and its waterfalls. `velyn_bay` (vw.L1.delta_coast, L1.xylo_gorge): the north-western harbour mouth |
+| L4 | `jungle_understorey` (L1.jungle_floor, L2.hothouse): lianas, giant ferns, wasps and spiders. `xylo_gorge_walls` (L1.xylo_gorge, L3.xylo_basin): hanging roots and spray. `hoarvor_hollow` (vw.L4.predators, L2.hothouse): rot-pools where hoarvors breed. `root_amphitheatre` (vw.L4.graht_oaks, L1.jungle_floor): arching roots lit by fireflies. `canopy_high` (vw.L4.canopy_layers, L2.hothouse): tallest crowns where imga nest. `orc_clearing` (L1.jungle_floor): stump-cleared forge rings of the Wood Orcs |
+| L5 | `strict_hunters` (vw.L5.meat_and_jagga, L4.jungle_understorey): bone-bow hunting and smokehouses. `velyn_trade` (vw.L5.ports, L3.velyn_bay): coastal shipping. `orc_smiths` (vw.L1.poor_ore, L4.orc_clearing): iron work traded to Bosmer |
+| L6 | `silvenar_seat` (vw.L6.tree_cities, L4.root_amphitheatre): the hidden court city under root arches. `falinesti_summer_site` (vw.L6.walking_city, L4.canopy_high): the northern summer site of the walking tree. `velyn_harbor` (L3.velyn_bay, L5.velyn_trade): western port town. `orc_enclaves` (L4.orc_clearing, L5.orc_smiths): the strongholds of Drabul and Jathsogur |
+| L7 | `silvenar_court` (vw.L8.silvenar_and_lady, L6.silvenar_seat): keepers of the people's voice. `orc_outsiders` (L6.orc_enclaves): Wood Orc clans living outside the Pact |
+| L8 | `strictest_pact` (vw.L4.pact_forest, L5.strict_hunters): orthodox Meat Mandate observance. `green_lady_trials` (vw.L8.silvenar_and_lady, L6.silvenar_seat): the martial trials of the forest's champion |
+| L9 | `lady_succession` (L8.green_lady_trials): the Green Lady's trial for a successor. `orc_truce` (L6.orc_enclaves, L8.strictest_pact): tension over Wood Orc timber cutting |
+| L10 | `wild_hunt_grounds_xylo` (vw.L10.wild_hunt_grounds, L4.jungle_understorey, L9.lady_succession): ancient transformation glades. `tomb_of_the_apostates` (vw.L10.root_tombs, L4.root_amphitheatre): Pact-breakers sealed in living wood. `hoarvor_pit` (L1.jungle_floor, L4.hoarvor_hollow): subterranean blood-tick caverns |
+| L11 | `apostates` (vw.L11.dawn_pact, L10.tomb_of_the_apostates): Bosmer who once broke the Pact and were entombed in a tree |
 
-**Reaper's March** (`valenwood/reapers_march`, 5.98 km², seat Arenthia, levels 18-40).
-World truth: the borderland where Valenwood meets Elsweyr and Cyrodiil, drier knolls and savanna between groves.
-Bosmer and Khajiit share it under a truce renewed with a bone on a stone altar each generation. Arenthia hangs its
-gardens over a waterfall; Rawl'kha is a Khajiit city in the trees; old Imperial forts watch the roads. Werewolf
-packs of Hircine's hunters run the knolls, the Maw of Lorkhaj glowers on the Khajiit side, and this year one bone of
-the truce is missing.
+### 1.5 Reaper's March (`valenwood/reapers_march`, 5.98 km², seat Arenthia, levels 18-40)
 
-| Layer | Fields [cites] |
+**World truth.** Reaper's March is the borderland where Valenwood meets Elsweyr and Cyrodiil, a country of drier red
+knolls and golden savanna between oak groves. Bosmer and Khajiit share it under a truce renewed with a bone laid on a
+stone altar each generation. Arenthia hangs its gardens over a waterfall; Rawl'kha is a Khajiit temple-city among the
+trees; old Imperial forts watch the roads. Werewolf packs of Hircine's hunters run the knolls, the Maw of Lorkhaj
+glowers on the Khajiit side, and this year one bone of the truce is missing.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `knolls` [P.march_knolls]. `strid_valley` [P.river_gorges] |
-| L2 | `dry_season` [P.drier_march] |
-| L3 | `waterdancer_falls` [P.river_net]. `strid` [P.river_net] |
-| L4 | `savanna_grove_mosaic`, `knoll_scrub`, `riverine_gallery`, `khajiit_fields`, `henge_heath`, `poacher_scar` (section 2) |
-| L5 | `grain_road` the Pact trade from Elsweyr [P.pact_imports]. `khajiit_farming` Khajiit farm here; they are not bound by the Pact [P.pact_imports]. `border_tolls` [P.march_border_towns] |
-| L6 | `arenthia_seat` over the falls [waterdancer_falls, knolls]. `rawlkha` Khajiit city [khajiit_farming]. `border_cluster` Eagle Vale, Emperor's Run, Longvale, Wasten Brukbrook (spread to >= 600 apart) [border_tolls] |
-| L7 | `mixed_town_rank` Bosmer high, Khajiit low in Arenthia, reversed in Rawl'kha [P.vertical_rank]. `truce_elders` [P.march_truce] |
-| L8 | `bone_truce_rite` [P.march_truce]. `moonmont` Khajiit temple [P.outsiders] |
-| L9 | `missing_bone` (lore-web val_4) [bone_truce_rite]. `colovian_pressure` [P.strid_border] |
-| L10 | `hircine_packs_march` (signature theme) [P.hircine_packs]. `maw_of_lorkhaj` a sealed Khajiit dark site [moonmont]. `septim_forts_march` Grimwatch, Sphinxmoth [P.septim_forts]. `selenes_web` (Arena's starting dungeon) [P.green_hostiles] |
-| L11 | `march_wars` [P.imperial_province]. `thizzrini` an arena of the old wars [march_wars] |
+| L1 | `knolls`: red sandstone knolls and dry ridges up to 120 blocks. `strid_valley`: the incised border gorge of the Strid River |
+| L2 | `dry_season` (vw.L2.drier_march, L1.knolls): warm dry winds off the Elsweyr plateau |
+| L3 | `waterdancer_falls` (vw.L3.river_net, L1.knolls): the high cascade at Arenthia. `strid` (vw.L3.river_net, L1.strid_valley): the border river facing Colovia |
+| L4 | `savanna_grove_mosaic` (L1.knolls, L2.dry_season): golden grass with oak islands and big cats. `knoll_scrub` (L1.knolls, L2.dry_season): thorn and red rock. `riverine_gallery` (L3.strid): tall riverside trees. `khajiit_fields` (L1.knolls, L3.waterdancer_falls): farmed grain and cane plots round Khajiit towns. `henge_heath` (L1.knolls): short turf around bone-white stones. `poacher_scar` (L1.strid_valley, L3.strid): felled stumps along the Colovian bank |
+| L5 | `grain_road` (vw.L5.pact_imports, L2.dry_season): the Pact caravan trade from Elsweyr. `khajiit_farming` (vw.L5.pact_imports, L4.khajiit_fields): Khajiit farm here as they are not bound by the Pact. `border_tolls` (vw.L6.march_border_towns, L3.strid): bridge and road customs |
+| L6 | `arenthia_seat` (L1.knolls, L3.waterdancer_falls): the waterfall seat of the March. `rawlkha` (L4.khajiit_fields, L5.khajiit_farming): Khajiit market and temple city. `border_cluster` (L3.strid, L5.border_tolls): Eagle Vale, Emperor's Run, Longvale and Wasten Brukbrook |
+| L7 | `mixed_town_rank` (vw.L7.vertical_rank, L6.arenthia_seat, L6.rawlkha): Bosmer high and Khajiit low in Arenthia, reversed in Rawl'kha. `truce_elders` (vw.L9.march_truce, L6.arenthia_seat): joint Bosmer-Khajiit border arbiters |
+| L8 | `bone_truce_rite` (vw.L9.march_truce, L4.henge_heath): generational oath at Reaper's Henge. `moonmont` (vw.L8.outsiders, L6.rawlkha): Khajiit lunar shrine on the border |
+| L9 | `missing_bone` (L7.truce_elders, L8.bone_truce_rite): a stolen truce-bone threatening border war. `colovian_pressure` (vw.L9.strid_border, L4.poacher_scar): Colovian loggers and poachers crossing the Strid |
+| L10 | `hircine_packs_march` (vw.L10.hircine_packs, L1.knolls, L4.savanna_grove_mosaic): werewolf hunting packs on the knolls. `maw_of_lorkhaj` (L1.knolls, L8.moonmont): a sealed Khajiit dro-m'Athra dark site. `septim_forts_march` (vw.L10.septim_forts, L1.strid_valley, L9.colovian_pressure): Grimwatch and Sphinxmoth border forts. `selenes_web` (vw.L4.green_hostiles, L4.savanna_grove_mosaic): Arena's starting dungeon in the March |
+| L11 | `march_wars` (vw.L11.imperial_province, L10.septim_forts_march): the Three Banners and Colovian border campaigns. `thizzrini` (L6.rawlkha, L11.march_wars): the grand arena of the old border wars |
 
 ---
 

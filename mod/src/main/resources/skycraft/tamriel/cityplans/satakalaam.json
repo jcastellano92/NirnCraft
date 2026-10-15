@@ -1,0 +1,356 @@
+{
+  "id": "satakalaam",
+  "sil": "serpent-canyon-terraced-fief",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "satakalaam_shed_skin_inn",
+  "names": {
+    "inn": "satakalaam_shed_skin_inn",
+    "store": "satakalaam_copper_ingot_suq",
+    "smithy": "satakalaam_scale_mail_forge"
+  },
+  "titles": {
+    "satakalaam_landmark": "Twin Domes of Satakalaam",
+    "satakalaam_canyon_citadel": "Citadel of the Coiled Pass",
+    "satakalaam_shed_skin_inn": "The Shed-Skin Inn",
+    "satakalaam_copper_ingot_suq": "Canyon Copper & Spice Suq",
+    "satakalaam_scale_mail_forge": "Scale-Mail & Khopesh Forge",
+    "satakalaam_viper_fang_shop": "Sand-Viper Antivenin Apothecary",
+    "satakalaam_satakal_shrine_hall": "Twin-Domed Sanctuary of the Worldskin",
+    "satakalaam_cliff_niches": "Terraced Cliff-Niche Tombs",
+    "satakalaam_copper_syndic_house": "Copper-Mine Syndic's Manor",
+    "satakalaam_gorge_watch": "Wadi-Mouth Watchtower",
+    "satakalaam_mule_terraces": "Lower-Terrace Pack Stables",
+    "satakalaam_market_plaza": "Twin Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "satakalaam_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "satakalaam_canyon_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "satakalaam_shed_skin_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "satakalaam_copper_ingot_suq"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "satakalaam_scale_mail_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "satakalaam_viper_fang_shop"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "satakalaam_satakal_shrine_hall"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "satakalaam_cliff_niches"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "satakalaam_copper_syndic_house"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "satakalaam_gorge_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "satakalaam_mule_terraces"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "satakalaam_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "jungle",
+      "count": 1
+    },
+    {
+      "type": "memorial",
+      "count": 1
+    }
+  ]
+}

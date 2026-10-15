@@ -31,96 +31,98 @@ region, 3.38 bosses and shrines per km²) with the fewest creature kinds (10) an
 
 ## 1. World model sheet
 
-Data target: `tamriel/world/summerset.json` (MS22). Field ids are data ids; cites in brackets; `P.` is the province.
+Data target: `tamriel/world/summerset.json` (MS22). Field ids are data ids; cites in parentheses; `su.` is the province.
 
-### 1.1 Province world truth
+### 1.1 Province sheet (`summerset`)
 
-Summerset is the Altmer homeland and the Thalmor's heart: two bright islands of white cliffs, crystal-strewn coasts,
-terraced vineyards and ordered gardens, with Artaeum, the Psijics' island, half in the mist. Lineage decides a life
-here: kinlord houses rule cities, Sapiarchs keep learning at the Crystal Tower, the Thalmor govern from Alinor and
-their justiciars watch everyone, and outsiders work in harbour quarters on permits. The Altmer honour their ancestors
-in crystal vaults and deny that any man became a god. The sea is the danger: Maormer raid Auridon, the Sload's vents
-breach the coast, and hidden Daedric cults grow inside the perfect cities. Arena's names survive only on old maps.
+**World truth.** Summerset is the Altmer homeland and the Thalmor's heart: two bright islands of white cliffs,
+crystal-strewn coasts, terraced vineyards and ordered gardens, with Artaeum, the Psijics' island, half in the mist.
+Lineage decides a life here: kinlord houses rule cities, Sapiarchs keep learning at the Crystal Tower, the Thalmor
+govern from Alinor and their justiciars watch everyone, and outsiders work in harbour quarters on permits. The Altmer
+honour their ancestors in crystal vaults and deny that any man became a god. The sea is the danger: Maormer raid
+Auridon, the Sload's vents breach the coast, and hidden Daedric cults grow inside the perfect cities while Imperial-era
+names survive only on old maps.
 
-### 1.2 Province sheet (P)
-
-| Layer | Fields `id`: meaning [cites] |
+| Layer | Fields `id` (cites): meaning |
 | --- | --- |
 | L1 Geology | `white_cliffs`: pale limestone cliffs round both islands, 40-80 blocks, broken by harbour coves. `central_upland`: a granite upland in the middle of Summerset Isle, to 120, where the Crystal Tower stands. `auridon_ridge`: Auridon's spine, 60-120. `crystal_seams`: quartz and crystal veins that weather out onto the beaches. `terrace_loams`: well-drained loams on the cliff-top downs. `sea_trench`: deep water close to the south and west shores. `coral_shelf`: reefs on the warmer southern shore |
-| L2 Climate | `mild_maritime`: mild, sunny and even all year [white_cliffs]. `bright_air`: clear air and strong light that sets the crystal glittering [mild_maritime, crystal_seams]. `west_fogs`: sea fogs off the western ocean [sea_trench]. `south_gales`: storms arrive from the south over deep water [sea_trench]. `warmer_auridon`: Auridon is warmer and wetter, almost tropical [auridon_ridge]. `artaeum_mist`: a standing mist round Artaeum that does not follow the weather [west_fogs] |
-| L3 Water | `short_streams`: short clear streams off the upland, falling over the cliffs [central_upland]. `cisterns_and_fountains`: cities draw from engineered cisterns and enchanted fountains [short_streams]. `water_wardens`: each city's water is held by its kinlord house and released to public fountains on a schedule; inland estates hold their own springs [cisterns_and_fountains]. `tidal_causeway`: Firsthold reached at low tide [white_cliffs] |
-| L4 Ecology | `garden_island`: a managed landscape of hedged gardens, orchards and vineyards; true wild land survives only on the upland, the cliffs and the wastes [terrace_loams, mild_maritime]. `vine_terraces` [terrace_loams]. `cliff_gryphons`: gryphons nest on the high cliffs [white_cliffs]. `indrik_downs`: indriks and deer on the meadow downs [garden_island]. `crystal_shores`: sea birds, crabs and glittering sands [crystal_seams]. `silk_spiders`: giant spiders in old upland caves, their silk prized [central_upland]. `salt_wastes`: the Corgrad Wastes, a scoured salt-and-rock tableland where nothing is planted [central_upland, south_gales]. `reef_life` [coral_shelf] |
-| L5 Economy | `wine`: the isles' famous wine [vine_terraces]. `crystal_and_lenses`: crystal cut for lenses, focus stones and glass [crystal_seams]. `learning`: books, enchantment and instruction, exported and guarded [crystal_and_lenses]. `silk` [silk_spiders]. `ships`: eagle-prowed ships from cove yards [white_cliffs]. `pearls_and_fish` [reef_life]. `gryphon_eggs`: taken under licence, tithed to the houses [cliff_gryphons]. `restricted_imports`: grain, labour and raw goods come through two open ports only [ships] |
-| L6 Settlement | `harbour_cities`: cities stand at the breaks in the cliffs where streams reach the sea [white_cliffs, short_streams]. `upland_colleges`: the Crystal Tower and the colleges on the upland [central_upland]. `vineyard_villas`: estates and villages on the downs [vine_terraces]. `auridon_frontline`: Auridon's towns face the sea lanes and Valenwood; foreign ships land there first [auridon_ridge, restricted_imports]. `busy_centres`: Alinor (capital, Thalmor seat), Shimmerene (the open port), Lillandril (scholars), Vulkhel Guard (Auridon's open port), Skywatch (Auridon's court) [harbour_cities, learning, restricted_imports]. `failing_places`: estates of fallen lines, villages at the Corgrad edge, fishing hamlets after Maormer raids [salt_wastes] |
-| L7 Society | `lineage_registry`: rank by recorded lineage; marriages arranged and registered [harbour_cities]. `kinlord_houses`: old houses rule cities and hold the water [water_wardens]. `sapiarchs`: scholar-priests of the Crystal Tower [upland_colleges]. `thalmor_order`: Thalmor officials and justiciars over all [kinlord_houses]. `lesser_lines`: Altmer of doubted lineage as servants, sailors and labourers [lineage_registry]. `permit_outsiders`: Bosmer, Khajiit and other Dominion subjects on work permits in harbour quarters, barred from the interior without a pass [restricted_imports]. `dissidents`: Altmer who reject the Thalmor, watched or vanished [thalmor_order] |
-| L8 Culture | `ancestor_faith`: the Aldmeri gods as ancestors (Auri-El, Magnus, Syrabane, Phynaster, Xarxes, Mara and others); family vaults and ancestor shrines [lineage_registry]. `no_man_god`: the denial that any man became a god; Talos worship hunted [ancestor_faith, thalmor_order]. `propriety`: etiquette, beauty and order as virtues; a college teaches them [lineage_registry]. `old_ways`: the Psijics' older philosophy, outside the Thalmor's faith [artaeum_mist, ancestor_faith]. `outsiders_lesser`: other peoples are tolerated, not equal [permit_outsiders]. `magic_heritage`: magic as birthright and duty [learning]. `lamplit_dead`: the dead keep their lamps in the family vault [ancestor_faith] |
-| L9 Politics | `thalmor_rule`: the Thalmor govern the isles and the Dominion from Alinor [thalmor_order]. `kinlord_resentment`: old houses resent the Thalmor's grip [kinlord_houses]. `psijic_apart`: Artaeum answers to no one; the Thalmor want its relics [old_ways]. `maormer_war`: Pyandonea raids Auridon and the south coast [south_gales, auridon_frontline]. `sload_shadow`: Sload agents and their vents in the southern sea [sea_trench]. `dominion_clients`: Valenwood and Elsweyr governed through envoys [thalmor_rule]. Festival (MS16): **the Ancestors' Vigil** at midwinter, when every house lights its vault and the Crystal Tower turns its beam to the sea [lamplit_dead, upland_colleges] |
-| L10 Hidden | `crystal_vaults`: ancestral vaults of crystal and lamps under family estates [lamplit_dead, crystal_seams]. `direnni_ruins`: ruins of the clan that left for High Rock [harbour_cities]. `daedric_cults`: hidden cults inside the perfect cities, for those the order crushes [dissidents, propriety]. `abyssal_vents`: Sload-made geysers that open from the deep and spill sea creatures [sload_shadow, sea_trench]. `maormer_beachheads` [maormer_war]. `justiciar_cells`: secret prisons for dissidents [thalmor_rule]. `spider_cathedral` [silk_spiders]. `smuggler_coves`: outsider smugglers in sea caves [permit_outsiders]. `psijic_eddies`: places where time does not run straight [old_ways] |
-| L11 History | `aldmeri_landing`: the Aldmer settle the isles in the Merethic Era and raise the Crystal Tower. `direnni_departure`: the Direnni clan leaves for High Rock. `sload_plague`: the Sload's plague in the First Era and the allied fleet that sank Thras. `first_dominion`: the Second Era alliance of Altmer, Bosmer and Khajiit. `thalmor_coup`: early in the Fourth Era the Thalmor take power and rename the isles Alinor, erasing foreign names. `great_war`: the war on the Empire and the Concordat. `old_maps`: Imperial-era maps still carry the erased names [thalmor_coup] |
+| L2 Climate | `mild_maritime` (L1.white_cliffs): mild, sunny and even all year. `bright_air` (L1.crystal_seams, L2.mild_maritime): clear air and strong light that sets the crystal glittering. `west_fogs` (L1.sea_trench): sea fogs off the western ocean. `south_gales` (L1.sea_trench): storms arrive from the south over deep water. `warmer_auridon` (L1.auridon_ridge): Auridon is warmer and wetter, almost tropical. `artaeum_mist` (L1.sea_trench, L2.west_fogs): a standing mist round Artaeum that does not follow the weather |
+| L3 Water | `short_streams` (L1.central_upland, L2.mild_maritime): short clear streams off the upland, falling over the cliffs. `cisterns_and_fountains` (L1.central_upland, L3.short_streams): cities draw from engineered cisterns and enchanted fountains. `water_wardens` (L1.white_cliffs, L3.cisterns_and_fountains): each city's water is held by its kinlord house and released to public fountains on a schedule; inland estates hold their own springs. `tidal_causeway` (L1.white_cliffs): Firsthold reached at low tide |
+| L4 Ecology | `garden_island` (L1.terrace_loams, L2.mild_maritime): a managed landscape of hedged gardens, orchards and vineyards; true wild land survives only on the upland, the cliffs and the wastes. `vine_terraces` (L1.terrace_loams, L2.bright_air): south-facing vineyard slopes. `cliff_gryphons` (L1.white_cliffs): gryphons nest on the high cliffs. `indrik_downs` (L1.terrace_loams, L4.garden_island): indriks and deer on the meadow downs. `crystal_shores` (L1.crystal_seams): sea birds, crabs and glittering sands. `silk_spiders` (L1.central_upland): giant spiders in old upland caves, their silk prized. `salt_wastes` (L1.central_upland, L2.south_gales): the Corgrad Wastes, a scoured salt-and-rock tableland where nothing is planted. `reef_life` (L1.coral_shelf): warm southern coral reefs |
+| L5 Economy | `wine` (L4.vine_terraces): the isles' famous wine. `crystal_and_lenses` (L1.crystal_seams): crystal cut for lenses, focus stones and glass. `learning` (L1.central_upland, L5.crystal_and_lenses): books, enchantment and instruction, exported and guarded. `silk` (L4.silk_spiders): spider-silk weaving. `ships` (L1.white_cliffs): eagle-prowed ships from cove yards. `pearls_and_fish` (L4.reef_life): coastal fisheries and pearl diving. `gryphon_eggs` (L4.cliff_gryphons): taken under licence, tithed to the houses. `restricted_imports` (L1.white_cliffs, L5.ships): grain, labour and raw goods come through two open ports only |
+| L6 Settlement | `harbour_cities` (L1.white_cliffs, L3.short_streams): cities stand at the breaks in the cliffs where streams reach the sea. `upland_colleges` (L1.central_upland, L5.learning): the Crystal Tower and the colleges on the upland. `vineyard_villas` (L4.vine_terraces, L5.wine): estates and villages on the downs. `auridon_frontline` (L1.auridon_ridge, L5.restricted_imports): Auridon's towns face the sea lanes and Valenwood; foreign ships land there first. `busy_centres` (L5.learning, L5.restricted_imports, L6.harbour_cities): Alinor (capital, Thalmor seat), Shimmerene (the open port), Lillandril (scholars), Vulkhel Guard (Auridon's open port), Skywatch (Auridon's court). `failing_places` (L4.salt_wastes): estates of fallen lines, villages at the Corgrad edge, fishing hamlets after Maormer raids |
+| L7 Society | `lineage_registry` (L6.harbour_cities): rank by recorded lineage; marriages arranged and registered. `kinlord_houses` (L3.water_wardens, L6.harbour_cities): old houses rule cities and hold the water. `sapiarchs` (L6.upland_colleges): scholar-priests of the Crystal Tower. `thalmor_order` (L6.harbour_cities, L7.kinlord_houses): Thalmor officials and justiciars over all. `lesser_lines` (L6.vineyard_villas, L7.lineage_registry): Altmer of doubted lineage as servants, sailors and labourers. `permit_outsiders` (L5.restricted_imports, L6.harbour_cities): Bosmer, Khajiit and other Dominion subjects on work permits in harbour quarters, barred from the interior without a pass. `dissidents` (L6.upland_colleges, L7.thalmor_order): Altmer who reject the Thalmor, watched or vanished |
+| L8 Culture | `ancestor_faith` (L7.lineage_registry): the Aldmeri gods as ancestors (Auri-El, Magnus, Syrabane, Phynaster, Xarxes, Mara and others); family vaults and ancestor shrines. `no_man_god` (L7.thalmor_order, L8.ancestor_faith): the denial that any man became a god; Talos worship hunted. `propriety` (L7.lineage_registry): etiquette, beauty and order as virtues; a college teaches them. `old_ways` (L2.artaeum_mist, L7.sapiarchs): the Psijics' older philosophy, outside the Thalmor's faith. `outsiders_lesser` (L7.permit_outsiders): other peoples are tolerated, not equal. `magic_heritage` (L5.learning, L7.sapiarchs): magic as birthright and duty. `lamplit_dead` (L7.lineage_registry, L8.ancestor_faith): the dead keep their lamps in the family vault |
+| L9 Politics | `thalmor_rule` (L7.thalmor_order, L8.no_man_god): the Thalmor govern the isles and the Dominion from Alinor. `kinlord_resentment` (L7.kinlord_houses, L8.propriety): old houses resent the Thalmor's grip. `psijic_apart` (L8.old_ways): Artaeum answers to no one; the Thalmor want its relics. `maormer_war` (L2.south_gales, L6.auridon_frontline): Pyandonea raids Auridon and the south coast. `sload_shadow` (L1.sea_trench): Sload agents and their vents in the southern sea. `dominion_clients` (L7.permit_outsiders, L9.thalmor_rule): Valenwood and Elsweyr governed through envoys. `ancestors_vigil` (L6.upland_colleges, L8.lamplit_dead): midwinter festival when every house lights its vault and the Crystal Tower turns its beam to the sea |
+| L10 Hidden | `crystal_vaults` (L1.crystal_seams, L8.lamplit_dead): ancestral vaults of crystal and lamps under family estates. `direnni_ruins` (L1.white_cliffs, L6.harbour_cities): ruins of the clan that left for High Rock. `daedric_cults` (L7.dissidents, L8.propriety, L9.thalmor_rule): hidden cults inside the perfect cities, for those the order crushes. `abyssal_vents` (L1.sea_trench, L9.sload_shadow): Sload-made geysers that open from the deep and spill sea creatures. `maormer_beachheads` (L1.white_cliffs, L9.maormer_war): hidden sea-elf landing coves. `justiciar_cells` (L9.thalmor_rule): secret prisons for dissidents. `spider_cathedral` (L4.silk_spiders): webbed caverns in the upland rock. `smuggler_coves` (L1.white_cliffs, L7.permit_outsiders): outsider smugglers in sea caves. `psijic_eddies` (L1.crystal_seams, L8.old_ways, L9.psijic_apart): places where time does not run straight |
+| L11 History | `aldmeri_landing` (L1.white_cliffs, L6.upland_colleges): the Aldmer settle the isles in the Merethic Era and raise the Crystal Tower. `direnni_departure` (L10.direnni_ruins): the Direnni clan leaves for High Rock. `sload_plague` (L9.sload_shadow, L10.abyssal_vents): the Sload's plague in the First Era and the allied fleet that sank Thras. `first_dominion` (L9.dominion_clients): the Second Era alliance of Altmer, Bosmer and Khajiit. `thalmor_coup` (L9.thalmor_rule): early in the Fourth Era the Thalmor take power and rename the isles Alinor, erasing foreign names. `great_war` (L8.no_man_god, L9.thalmor_rule): the war on the Empire and the Concordat. `old_maps` (L6.harbour_cities, L9.thalmor_rule): Imperial-era maps still carry the erased names |
 
-### 1.3 Region sub-sheets
+### 1.2 Summerset Isle (`summerset/summerset_isle`, 10.37 km², capital Alinor, levels 25-45)
 
-**Summerset Isle** (`summerset/summerset_isle`, 10.37 km², capital Alinor, levels 25-45; large: an east half round
-Alinor, Shimmerene and Dusk, and a west half round Lillandril and Cloudrest).
-World truth: the larger island, the most ordered land in Tamriel. Alinor's sixteen avenues radiate from the Crystal
-Tower's sight-line; Shimmerene is the one port where outsiders crowd; Lillandril's libraries stand open to the sky;
-Cloudrest hangs over the sea. Vineyards climb the downs, gryphons nest on the cliffs and the Corgrad Wastes lie salt-
-white inland. Under the order, kinlord houses fight the Thalmor by etiquette, Sload vents breach the south shore and a
-cult of the Mad God remembers a temple Arena knew.
+**World truth.** The larger island is the most ordered land in Tamriel. Alinor's sixteen avenues radiate from the
+Crystal Tower's sight-line; Shimmerene is the one port where outsiders crowd into a permit quarter; Lillandril's
+libraries stand open to the sky; Cloudrest hangs over the sea on its mountain eyrie. Vineyards climb the downs,
+gryphons nest on the cliffs and the Corgrad Wastes lie salt-white inland. Under the order, kinlord houses fight the
+Thalmor by etiquette, Sload vents breach the south shore and a cult of the Mad God remembers a temple Arena knew.
 
-| Layer | Fields [cites] |
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `tower_upland` [P.central_upland]. `south_shelf` [P.coral_shelf]. `corgrad_tableland` [P.salt_wastes] |
-| L2 | `prism_noon` [P.bright_air]. `west_fog_coast` Lillandril and Cloudrest [P.west_fogs] |
-| L3 | `alinor_aqueduct` [P.short_streams]. `upland_springs` (Norlor, Calinaan, Faaril) [P.short_streams] |
-| L4 | `crystal_coast`, `vine_terraces`, `meadow_downs`, `gryphon_cliffs`, `salt_waste`, `coral_forest`, `ornamental_ring` (section 2) |
-| L5 | `alinor_court_economy` [P.learning]. `shimmerene_open_port` [P.restricted_imports]. `lillandril_books` [P.learning]. `wineries` (Oleander Coast, Queiisen, Torancar, Valiel, Calandil) [P.wine] |
-| L6 | `alinor_capital` [P.harbour_cities, alinor_aqueduct]. `east_half` Shimmerene, Dusk, Sunhold [P.harbour_cities]. `west_half` Lillandril, Cloudrest, West Guard [west_fog_coast]. `colleges` Sapiarchs, Illumination Academy [P.upland_colleges] |
-| L7 | `alinor_houses` [P.kinlord_houses]. `shimmerene_permit_quarter` [P.permit_outsiders]. `vineyard_labour` [P.lesser_lines] |
-| L8 | `tower_faith` [P.ancestor_faith]. `sacred_numbers` a garden of geometry as devotion [P.propriety] |
-| L9 | `house_vs_thalmor` [P.kinlord_resentment]. `geyser_alarm` [P.sload_shadow] |
-| L10 | `abyssal_geysers` (signature theme: the Corgrad, Direnni, Rellenthil, Sil-Var-Woad, Sunhold and Welenkin vents) [P.abyssal_vents]. `cathedral_of_webs` [P.spider_cathedral]. `tower_undervaults` [P.crystal_vaults, tower_upland]. `temple_of_the_mad_god` (Arena's starting dungeon) [P.daedric_cults] |
-| L11 | `direnni_acropolis` [P.direnni_departure]. `erased_names` [P.old_maps] |
+| L1 | `tower_upland`: the central granite upland around the Crystal Tower. `south_shelf`: warm southern coral shelf. `corgrad_tableland`: scoured salt-and-rock tableland |
+| L2 | `prism_noon` (su.L2.bright_air, L1.tower_upland): noon light refracting off crystal spires. `west_fog_coast` (su.L2.west_fogs, L1.tower_upland): sea fogs around Lillandril and Cloudrest |
+| L3 | `alinor_aqueduct` (su.L3.short_streams, L1.tower_upland): white-stone aqueducts feeding the capital. `upland_springs` (su.L3.short_streams, L1.tower_upland): the clear springs of Norlor, Calinaan and Faaril |
+| L4 | `crystal_coast` (su.L4.crystal_shores, L2.prism_noon): glittering white beaches. `vine_terraces` (su.L4.vine_terraces, L2.prism_noon): terraced hills of grape and olive. `meadow_downs` (su.L4.indrik_downs, L3.upland_springs): hedged flower downs. `gryphon_cliffs` (su.L4.cliff_gryphons, L1.tower_upland): high coastal eyries. `salt_waste` (su.L4.salt_wastes, L1.corgrad_tableland): the barren Corgrad flats. `coral_forest` (su.L4.reef_life, L1.south_shelf): southern reef shallows. `ornamental_ring` (su.L4.garden_island, L3.alinor_aqueduct): clipped city gardens |
+| L5 | `alinor_court_economy` (su.L5.learning, L3.alinor_aqueduct): glass, crystal lenses and court patronage. `shimmerene_open_port` (su.L5.restricted_imports, L1.south_shelf): the southern open customs port. `lillandril_books` (su.L5.learning, L2.west_fog_coast): scholarly presses and enchantment. `wineries` (su.L5.wine, L4.vine_terraces): the estates of Oleander Coast, Queiisen, Torancar, Valiel and Calandil |
+| L6 | `alinor_capital` (su.L6.harbour_cities, L3.alinor_aqueduct): the sixteen-avenue capital. `east_half` (su.L6.harbour_cities, L5.shimmerene_open_port): Shimmerene, Dusk and Sunhold. `west_half` (L2.west_fog_coast, L5.lillandril_books): Lillandril, Cloudrest and West Guard. `colleges` (su.L6.upland_colleges, L1.tower_upland): the College of Sapiarchs and Illumination Academy |
+| L7 | `alinor_houses` (su.L7.kinlord_houses, L6.alinor_capital): ancient noble lineages of the capital. `shimmerene_permit_quarter` (su.L7.permit_outsiders, L5.shimmerene_open_port): walled dock quarter for foreign factors. `vineyard_labour` (su.L7.lesser_lines, L5.wineries): estate vintners and stewards |
+| L8 | `tower_faith` (su.L8.ancestor_faith, L6.colleges): Sapiarch ancestor liturgy at the Crystal Tower. `sacred_numbers` (su.L8.propriety, L4.ornamental_ring): gardens of geometry as devotion |
+| L9 | `house_vs_thalmor` (su.L9.kinlord_resentment, L7.alinor_houses): quiet lineage resistance to Justiciar oversight. `geyser_alarm` (su.L9.sload_shadow, L1.south_shelf): coastal panic over rising abyssal vents |
+| L10 | `abyssal_geysers` (su.L10.abyssal_vents, L1.south_shelf, L9.geyser_alarm): the Corgrad, Direnni, Rellenthil, Sil-Var-Woad, Sunhold and Welenkin vents. `cathedral_of_webs` (su.L10.spider_cathedral, L1.tower_upland): upland spider-cult caverns. `tower_undervaults` (su.L10.crystal_vaults, L1.tower_upland): ancestral crystal crypts. `temple_of_the_mad_god` (su.L10.daedric_cults, L1.corgrad_tableland, L9.house_vs_thalmor): Arena's starting dungeon hidden in the wastes |
+| L11 | `direnni_acropolis` (su.L11.direnni_departure, L1.tower_upland): the empty white acropolis of the departed clan. `erased_names` (su.L11.old_maps, L9.house_vs_thalmor): villages whose Imperial-era names survive only on contraband charts |
 
-**Auridon** (`summerset/auridon`, 2.79 km², seat Firsthold, levels 22-44).
-World truth: the warmer northern island, Summerset's front door and its front line. Foreign ships must land at
-Vulkhel Guard; Firsthold sits on a tidal rock, Skywatch on its hill under a great orrery. Maormer raiders strike the
-coves and the Dominion marines answer from Hightide Keep. In the Banished Cells and Mehrunes' Spite, Daedric cults
-the Thalmor deny exist are growing. Auridon's people are prouder of their island's history than of its quiet.
+### 1.3 Auridon (`summerset/auridon`, 2.79 km², seat Firsthold, levels 22-44)
 
-| Layer | Fields [cites] |
+**World truth.** Auridon is the warmer northern island, Summerset's front door and its military front line facing the
+continent. Foreign ships must land at Vulkhel Guard's open quays; Firsthold sits on a tidal rock reached by a low
+causeway, and Skywatch crowns its hill under a great brass orrery. Maormer raiders strike the coves in every southern
+gale, and the Dominion marines answer from Hightide Keep. In the Banished Cells and Mehrunes' Spite, Daedric cults that
+the Thalmor officially deny exist are growing among disgraced scions. Auridon's people are prouder of their island's
+ancient guard duty than of its quiet.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `ridge` [P.auridon_ridge]. `tide_rock` Firsthold [P.tidal_causeway] |
-| L2 | `warm_wet_auridon` [P.warmer_auridon] |
-| L3 | `ridge_falls` Beacon Falls [P.short_streams] |
-| L4 | `palm_groves`, `ridge_pines`, `crystal_coast`, `tidal_flats`, `raid_scar`, `dolmen_heath` (section 2) |
-| L5 | `vulkhel_open_port` [P.restricted_imports]. `fisheries` [P.pearls_and_fish]. `skywatch_learning` the orrery [P.learning] |
-| L6 | `firsthold_seat` [tide_rock]. `skywatch` [ridge]. `vulkhel_guard` [vulkhel_open_port]. `mathiisen` [P.vineyard_villas] |
-| L7 | `marines` [P.thalmor_order]. `vulkhel_outsiders` [P.permit_outsiders] |
-| L8 | `propriety_college` the College of Aldmeri Propriety [P.propriety] |
-| L9 | `maormer_front` [P.maormer_war]. `cult_denial` [P.daedric_cults] |
-| L10 | `maormer_beachheads_auridon` (signature theme: `maormer_invasion_camp`, sea caves, wrecks) [maormer_front]. `banished_cells`, `mehrunes_spite` [cult_denial]. `heritance_proving_ground` [P.crystal_vaults] |
-| L11 | `first_landing_lore` Firsthold's claim to be the oldest settlement [P.aldmeri_landing] |
+| L1 | `ridge`: Auridon's central limestone and granite spine. `tide_rock`: Firsthold's tidal headland and causeway shelf |
+| L2 | `warm_wet_auridon` (su.L2.warmer_auridon, L1.ridge): warm, humid breezes off the Abecean |
+| L3 | `ridge_falls` (su.L3.short_streams, L1.ridge): Beacon Falls and coastal cascades |
+| L4 | `palm_groves` (L2.warm_wet_auridon, L3.ridge_falls): coastal palms and flowering broadleaf. `ridge_pines` (L1.ridge, L2.warm_wet_auridon): umbrella pines along the high spine. `crystal_coast` (su.L4.crystal_shores, L1.tide_rock): quartz-sand coves. `tidal_flats` (su.L3.tidal_causeway, L1.tide_rock): mudflats and pools around Firsthold. `raid_scar` (su.L2.south_gales, L1.tide_rock): burned landing beaches. `dolmen_heath` (su.L4.garden_island, L1.ridge): turf and standing stones |
+| L5 | `vulkhel_open_port` (su.L5.restricted_imports, L1.tide_rock): customs, ship repair and foreign factor trade. `fisheries` (su.L5.pearls_and_fish, L4.tidal_flats): coastal fishing fleets. `skywatch_learning` (su.L5.learning, L1.ridge): the high orrery and naval academy |
+| L6 | `firsthold_seat` (L1.tide_rock, su.L3.tidal_causeway): the northern court city on its tidal rock. `skywatch` (L1.ridge, L5.skywatch_learning): the stepped hill-city under the orrery. `vulkhel_guard` (L5.vulkhel_open_port): the southern port town. `mathiisen` (su.L6.vineyard_villas, L3.ridge_falls): inland smithing and vineyard town |
+| L7 | `marines` (su.L7.thalmor_order, L6.vulkhel_guard): Dominion naval officers and coastal watches. `vulkhel_outsiders` (su.L7.permit_outsiders, L5.vulkhel_open_port): foreign traders and sailors under harbour curfew |
+| L8 | `propriety_college` (su.L8.propriety, L6.skywatch): the College of Aldmeri Propriety where suspect scions are re-educated |
+| L9 | `maormer_front` (su.L9.maormer_war, L7.marines): sea-elf raids and Hightide Keep counter-strikes. `cult_denial` (su.L9.thalmor_rule, L8.propriety_college): Veiled Heritance and Daedric cells suppressed by Justiciars |
+| L10 | `maormer_beachheads_auridon` (su.L10.maormer_beachheads, L4.raid_scar, L9.maormer_front): sea-elf invasion camps, sea caves and wrecks. `banished_cells` (su.L10.daedric_cults, L1.ridge, L9.cult_denial): the high-security prison vault. `mehrunes_spite` (su.L10.daedric_cults, L1.ridge, L9.cult_denial): sunken Dagonite shrine. `heritance_proving_ground` (su.L10.crystal_vaults, L1.ridge, L9.cult_denial): rebel training crypts |
+| L11 | `first_landing_lore` (su.L11.aldmeri_landing, L6.firsthold_seat): Firsthold's claim to be the oldest Aldmeri landing in the isles |
 
-**Artaeum** (`summerset/artaeum`, 0.43 km², levels 30-45; a small region).
-World truth: the Psijics' island off Summerset, there in the mist and sometimes not there at all. Ceporah Tower, the
-Grand Psijic Villa and a ruined older college stand among lotus pools under the Statue of Syrabane. The Order keeps
-the Old Ways and relics no one else may touch; time runs strangely in its vaults and in the Dreaming Cave. The
-Thalmor want those relics. A boat comes for those the Order invites, and only in the mist.
+### 1.4 Artaeum (`summerset/artaeum`, 0.43 km², levels 30-45)
 
-| Layer | Fields [cites] |
+**World truth.** Artaeum is the Psijic Order's island off Summerset, there in the mist and sometimes not in the mortal
+world at all. Ceporah Tower, the Grand Psijic Villa and a ruined older college stand among quiet lotus pools under the
+Statue of Syrabane. The Order keeps the Old Ways and dangerous relics no one else may touch; time runs strangely in its
+under-vaults and in the Dreaming Cave. The Thalmor covet those relics and resent an Altmer authority they cannot
+command. A silent boat comes for those the Ritemaster invites, and only through the standing mist.
+
+| Layer | Fields (cites) |
 | --- | --- |
-| L1 | `isle_rock` [P.white_cliffs] |
-| L2 | `standing_mist` [P.artaeum_mist] |
-| L3 | `lotus_pools` [P.short_streams] |
-| L4 | `mist_forest`, `lotus_meadow`, `crystal_spires`, `shore_of_stones`, `eddy_glade`, `syrabane_heath` (section 2) |
-| L5 | `relic_keeping` [P.old_ways]. `craftworks` [P.learning] |
-| L6 | `psijic_villa` and `ceporah_tower` [relic_keeping] |
-| L7 | `order_ranks` monks, ritemasters, loremasters [P.old_ways] |
-| L8 | `syrabane_statue` [P.ancestor_faith]. `old_ways_rite` [P.old_ways] |
-| L9 | `thalmor_want_relics` [P.psijic_apart] |
-| L10 | `psijic_time_vaults` (signature theme: `psijic_relic_vaults`, `traitors_vault`, `dreaming_cave`) [P.psijic_eddies] |
-| L11 | `vanishing_isle` the island has left the world before and come back [standing_mist] |
+| L1 | `isle_rock`: white limestone cliffs and pre-Aldmeri crystal outcrops rising from the western sea |
+| L2 | `standing_mist` (su.L2.artaeum_mist, L1.isle_rock): a timeless silver mist volume that hides the island from uninvited ships |
+| L3 | `lotus_pools` (su.L3.short_streams, L1.isle_rock): stepped meditation pools and clear springs |
+| L4 | `mist_forest` (L1.isle_rock, L2.standing_mist): pale broadleaf trees, moss and wisps. `lotus_meadow` (L3.lotus_pools): quiet flowering meadows. `crystal_spires` (su.L1.crystal_seams, L1.isle_rock): humming natural crystal pillars. `shore_of_stones` (L1.isle_rock): grey pebble beaches and carved markers. `eddy_glade` (L1.isle_rock, L2.standing_mist): glades where falling leaves hang suspended in air. `syrabane_heath` (L1.isle_rock, L3.lotus_pools): high flowered turf round the monument |
+| L5 | `relic_keeping` (su.L5.learning, L1.isle_rock): containment and study of dangerous magical artifacts. `craftworks` (su.L5.crystal_and_lenses, L4.crystal_spires): focus-lenses and scrying spheres |
+| L6 | `psijic_villa` (L3.lotus_pools, L5.relic_keeping): the Grand Psijic Villa and lecture terraces. `ceporah_tower` (L1.isle_rock, L5.relic_keeping): the pre-Aldmeri tower older than the Crystal Tower |
+| L7 | `order_ranks` (su.L7.sapiarchs, L6.psijic_villa): monks, initiates, loremasters and the Ritemaster chosen by merit, not lineage |
+| L8 | `syrabane_statue` (su.L8.ancestor_faith, L4.syrabane_heath): monument to the Warlock's Ring and the Ancestor-Mage. `old_ways_rite` (su.L8.old_ways, L7.order_ranks): veneration of the Eleven Forces and ancestral spirits without Thalmor dogma |
+| L9 | `thalmor_want_relics` (su.L9.psijic_apart, L5.relic_keeping): Justiciar agents seeking entry to seize the Order's sealed vaults |
+| L10 | `psijic_time_vaults` (su.L10.psijic_eddies, L1.isle_rock, L9.thalmor_want_relics): the Psijic Relic Vaults, the Traitor's Vault and the Dreaming Cave |
+| L11 | `vanishing_isle` (su.L11.aldmeri_landing, L2.standing_mist, L6.ceporah_tower): the centuries when Artaeum left the mortal sea and returned |
 
 ---
 

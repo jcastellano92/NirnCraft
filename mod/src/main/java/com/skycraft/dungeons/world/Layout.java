@@ -98,7 +98,7 @@ public final class Layout {
     /** Half-width of a surface site's footprint (its piece box reaches this far from the centre). */
     public static int surfaceRadius(Site site) {
         return switch (site.theme()) {
-            case FORT -> 15;
+            case FORT, BRETON_KEEP_RUIN -> 15;
             case GIANT_CAMP -> 13;
             case DRAGON_LAIR -> 12;
             case DAEDRIC_SHRINE -> 9;
@@ -128,7 +128,7 @@ public final class Layout {
     /** Blocks the surface piece reaches above its ground level. */
     private static int surfaceAbove(Site site) {
         return switch (site.theme()) {
-            case FORT -> 24;
+            case FORT, BRETON_KEEP_RUIN -> 24;
             case DAEDRIC_SHRINE -> 20;
             case DRAGON_LAIR -> 16;
             case WATCHTOWER -> 26;
@@ -148,7 +148,7 @@ public final class Layout {
     /** Blocks the surface piece reaches below its ground level (foundations, cellars, wells). */
     private static int surfaceBelow(Site site) {
         return switch (site.theme()) {
-            case FORT -> 14;
+            case FORT, BRETON_KEEP_RUIN -> 14;
             case GREAT_LIFT -> 96;
             case SHIPWRECK -> 14;
             case SKY_HAVEN, HIGH_HROTHGAR, PRINCE_SHRINE -> 24;

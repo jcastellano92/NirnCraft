@@ -1,0 +1,186 @@
+{
+  "id": "moss_claw_village",
+  "why": [
+    "shadowfen.L1.border_karst",
+    "shadowfen.L4.pitcher_bog",
+    "shadowfen.L6.percolating_mire_posts"
+  ],
+  "sil": "black-marsh-moss-claw-village-plan",
+  "base": "none",
+  "overlay": "shadowfen",
+  "radius": 26,
+  "reach": 38,
+  "gates": [
+    [
+      0,
+      24
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "shadowfen",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        12,
+        26
+      ],
+      "overlay": "shadowfen",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "moss_claw_village_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -7
+      ],
+      "name": "moss_claw_village_landmark",
+      "overlay": "shadowfen"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 5,
+      "r1": 22,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        12,
+        15
+      ],
+      "face": "north",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -2,
+        9
+      ],
+      "face": "north",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -17,
+        8
+      ],
+      "face": "north",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        -4
+      ],
+      "face": "south",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -4,
+        -18
+      ],
+      "face": "south",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        6,
+        -7
+      ],
+      "face": "south",
+      "overlay": "shadowfen",
+      "name": "moss_claw_village_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "moss_claw_village_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "moss_claw_village_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "moss_claw_village_b_5",
+    "smithy": "moss_claw_village_b_7"
+  },
+  "titles": {
+    "moss_claw_village_b_1": "place.skycraft.moss_claw_village Council & Seat Hall",
+    "moss_claw_village_b_2": "place.skycraft.moss_claw_village High Sanctuary",
+    "moss_claw_village_b_3": "place.skycraft.moss_claw_village Fighters & Wayfarers Hall",
+    "moss_claw_village_b_4": "place.skycraft.moss_claw_village Mages & Chroniclers Spire",
+    "moss_claw_village_b_5": "place.skycraft.moss_claw_village The Lantern & Hearth Inn",
+    "moss_claw_village_b_6": "place.skycraft.moss_claw_village The Traveler's Rest Tavern",
+    "moss_claw_village_b_7": "place.skycraft.moss_claw_village Master Forge & Armorer",
+    "moss_claw_village_landmark": "High Seat of place.skycraft.moss_claw_village",
+    "moss_claw_village_plaza": "place.skycraft.moss_claw_village Central Plaza"
+  },
+  "innKey": "moss_claw_village_b_5"
+}

@@ -44,6 +44,7 @@ public final class Regions {
     private static final Region[] BY_INDEX;
     private static final Terrain[] TERRAIN;
     private static final Map<String, Integer> INDEX;
+    private static final Map<String, String> REALM_BANNER;
     private static final List<Region> ALL;
     private static final Map<String, Region> DIMENSIONS = new ConcurrentHashMap<>();
 
@@ -51,6 +52,7 @@ public final class Regions {
         List<Region> list = new ArrayList<>();
         List<Terrain> terrain = new ArrayList<>();
         Map<String, Integer> index = new LinkedHashMap<>();
+        Map<String, String> banners = new LinkedHashMap<>();
         try (InputStream in = Regions.class.getResourceAsStream("/skycraft/tamriel/regions.json")) {
             if (in == null) throw new IllegalStateException("missing skycraft/tamriel/regions.json");
             JsonArray arr = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonArray();
@@ -66,6 +68,9 @@ public final class Regions {
                 if (o.has("index") && o.get("index").getAsInt() != list.size()) {
                     throw new IllegalStateException("regions.json index mismatch at " + r.id());
                 }
+                if (o.has("realm_banner") && !o.get("realm_banner").isJsonNull()) {
+                    banners.put(r.id(), o.get("realm_banner").getAsString());
+                }
                 index.put(r.id(), list.size());
                 list.add(r);
                 terrain.add(parseTerrain(o));
@@ -75,6 +80,7 @@ public final class Regions {
             list.clear();
             terrain.clear();
             index.clear();
+            banners.clear();
             list.add(new Region("sea/open_ocean", "sea", "sea", "none", Component.translatable("region.skycraft.sea.open_ocean"),
                     40, 60, "sea/open_ocean", "sea", "maritime", null));
             terrain.add(Terrain.DEFAULT);
@@ -86,11 +92,20 @@ public final class Regions {
         BY_INDEX = list.toArray(new Region[0]);
         TERRAIN = terrain.toArray(new Terrain[0]);
         INDEX = Collections.unmodifiableMap(index);
+        REALM_BANNER = Collections.unmodifiableMap(banners);
         ALL = List.copyOf(list);
         Skycraft.LOGGER.info("Loaded {} regions of Nirn", ALL.size());
     }
 
     private Regions() {}
+
+    public static String realmBanner(Region region) {
+        return region == null ? "" : realmBanner(region.id());
+    }
+
+    public static String realmBanner(String regionId) {
+        return regionId == null ? "" : REALM_BANNER.getOrDefault(regionId, "");
+    }
 
     private static Terrain parseTerrain(JsonObject o) {
         if (!o.has("terrain")) return Terrain.DEFAULT;

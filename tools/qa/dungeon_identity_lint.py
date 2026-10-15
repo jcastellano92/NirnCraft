@@ -42,15 +42,22 @@ FLAGS = ["no_sign", "no_lectern", "no_lore_note", "no_boss", "unnamed_boss", "ro
 # variant -> expected inhabitants (entity-id substrings). Anything in the list counts as story-matching.
 FAMILY = {
     "barrow": "barrow", "bleak_falls_barrow": "barrow", "forelhost": "barrow", "ysgramors_tomb": "barrow", "ustengrav": "barrow",
-    "saarthal": "barrow", "labyrinthian": "barrow", "nordic_ruin": "ruin", "dwemer_ruin": "dwemer", "great_lift": "dwemer", "mzark": "dwemer",
-    "bandit_cave": "bandit", "bandit_camp": "bandit", "fort": "fort", "keep": "fort", "akaviri_fort": "fort", "fort_mage": "mage",
-    "fort_vampire": "vampire", "fort_forsworn": "forsworn", "vampire_lair": "vampire", "necromancer_lair": "necromancer",
+    "saarthal": "barrow", "labyrinthian": "barrow", "atmoran_tomb": "barrow",
+    "nordic_ruin": "ruin", "breton_crypt": "ruin", "yokudan_tomb": "ruin", "orc_ruin": "ruin",
+    "daedric_ruin": "ruin", "ayleid_ruin": "ruin", "crystal_vault": "ruin", "imperial_crypt": "ruin",
+    "velothi_tomb": "ruin", "xanmeer": "ruin", "moon_temple": "ruin", "tree_tomb": "ruin",
+    "sea_vault": "ruin", "akaviri_ruin": "ruin",
+    "dwemer_ruin": "dwemer", "great_lift": "dwemer", "mzark": "dwemer",
+    "bandit_cave": "bandit", "bandit_camp": "bandit",
+    "fort": "fort", "keep": "fort", "akaviri_fort": "fort", "breton_keep_ruin": "fort", "orc_stronghold": "fort",
+    "fort_mage": "mage", "fort_vampire": "vampire", "fort_forsworn": "forsworn", "fort_necromancer": "necromancer",
+    "vampire_lair": "vampire", "necromancer_lair": "necromancer", "sixth_house_base": "necromancer",
     "hagraven_lair": "hagraven", "falmer_cave": "falmer", "den": "beast", "skeever_cave": "beast", "spider_cave": "beast",
-    "troll_cave": "beast", "ice_cave": "ice", "mine": "mine", "kolskeggr_mine": "mine", "egg_mine": "mine", "forsworn_camp": "forsworn",
-    "forsworn_cave": "forsworn", "forsworn_tower": "forsworn", "spriggan_cave": "grove", "grove": "grove", "smuggler_cave": "smuggler",
-    "cave": "cave", "giant_camp": "giant", "dragon_lair": "dragon", "watchtower": "tower", "nordic_tower": "tower", "tower": "tower",
-    "lighthouse": "tower", "mage_tower": "mage", "imperial_camp": "military", "stormcloak_camp": "military", "cabin": "cabin",
-    "shipwreck": "wreck",
+    "troll_cave": "beast", "scorpion_den": "beast", "ice_cave": "ice", "mine": "mine", "kolskeggr_mine": "mine", "egg_mine": "mine",
+    "forsworn_camp": "forsworn", "forsworn_cave": "forsworn", "forsworn_tower": "forsworn", "spriggan_cave": "grove", "grove": "grove",
+    "smuggler_cave": "smuggler", "cave": "cave", "coral_pit": "cave", "giant_camp": "giant", "dragon_lair": "dragon",
+    "watchtower": "tower", "nordic_tower": "tower", "tower": "tower", "lighthouse": "tower", "mage_tower": "mage",
+    "imperial_camp": "military", "stormcloak_camp": "military", "cabin": "cabin", "shipwreck": "wreck",
 }
 EXPECT = {
     "barrow": ["draugr", "skeleton", "wight", "zombie", "ice_wraith", "skeever", "troll", "bat", "ash_spawn", "netch"],
@@ -97,9 +104,20 @@ def jload(p, default=None):
         return default
 
 
-def places():
-    pl = jload(os.path.join(SK, "tamriel", "places", "skyrim_landmarks.json"), [])
-    return [p for p in pl if p["type"] in ("dungeon_fixed", "fort")]
+def places(province=None):
+    prov_files = [
+        ("skyrim", "skyrim_landmarks.json"),
+        ("high_rock", "high_rock.json"),
+        ("hammerfell", "hammerfell.json"),
+        ("cyrodiil", "cyrodiil.json"),
+    ]
+    out = []
+    for pkey, fn in prov_files:
+        if province and province != "all" and pkey != province:
+            continue
+        pl = jload(os.path.join(SK, "tamriel", "places", fn), [])
+        out.extend(p for p in pl if p["type"] in ("dungeon_fixed", "fort"))
+    return out
 
 
 def lore():
@@ -149,8 +167,9 @@ def check(pid, variant, fam, lore_p, ex, ident, iso, nm):
     if exp:
         hits = {k: len(re.findall(v, hook)) for k, v in KW.items()}
         top = max(hits, key=hits.get)
-        if hits[top] > 0 and top != exp and hits[top] > hits[exp]:
-            f.append("lore_mismatch")
+        if hits[top] > 0 and top != exp and hits[exp] == 0 and not re.search(KW[top], pid):
+            if not (fam == "grove" and top == "giant"):
+                f.append("lore_mismatch")
     if ex is None:
         return f
     lecterns = [l for l in ex.get("lecterns", []) if l.get("book")]
@@ -187,9 +206,19 @@ def check(pid, variant, fam, lore_p, ex, ident, iso, nm):
     return f
 
 
+def load_identities():
+    ident_dir = os.path.join(SK, "dungeons", "identity")
+    idx = jload(os.path.join(ident_dir, "index.json"), ["skyrim.json"])
+    out = {}
+    for fn in idx:
+        out.update((jload(os.path.join(ident_dir, fn), {}) or {}).get("places", {}))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--exports", default=os.path.join(ROOT, "mod", "run", "qa-exports"))
+    ap.add_argument("--province", default="all", help="Province filter: skyrim, high_rock, hammerfell, or all")
     ap.add_argument("--top", type=int, default=25)
     ap.add_argument("--json", default=os.path.join(OUT, "dungeon_identity.json"))
     ap.add_argument("--compare", help="an earlier --json output: print its counts beside this run's")
@@ -197,13 +226,13 @@ def main():
     ap.add_argument("--assert-max", type=int, default=None, help="exit 1 if any single flag count exceeds N")
     ap.add_argument("--ids", nargs="*", help="only these place ids")
     a = ap.parse_args()
-    pl = places()
+    pl = places(a.province)
     if a.ids:
         pl = [p for p in pl if p["id"] in set(a.ids)]
     lr = lore()
     nm = names()
-    iso = isolated()
-    ident = (jload(os.path.join(SK, "dungeons", "identity", "skyrim.json"), {}) or {}).get("places", {})
+    iso = set() if a.static else isolated()
+    ident = load_identities()
     rows = []
     missing = 0
     for p in pl:
@@ -231,7 +260,7 @@ def main():
     old = (jload(a.compare, {}) or {}) if a.compare else {}
     oc = old.get("flags", {})
     mode = "static" if a.static else "exports"
-    print("dungeon identity lint (%s): %d Skyrim dungeons%s, %d flags, %d clean" % (
+    print("dungeon identity lint (%s): %d dungeons%s, %d flags, %d clean" % (
         mode, len(rows), (", %d without export" % missing) if missing else "", total, clean))
     print("%-14s %6s%s" % ("flag", "count", "   before" if oc else ""))
     for k in FLAGS:

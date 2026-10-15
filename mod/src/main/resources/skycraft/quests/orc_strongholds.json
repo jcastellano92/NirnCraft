@@ -3,37 +3,126 @@
   "category": "faction",
   "faction": "orc_strongholds",
   "region": "high_rock/wrothgar",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "coldperch_cavern": {"x": -4000, "z": 650, "r": 32, "name": "Coldperch Cavern"},
-    "old_orsinium": {"x": -4700, "z": -100, "r": 50, "name": "Old Orsinium"}
+    "coldperch_cavern": {
+      "x": -4000,
+      "z": 650,
+      "r": 32,
+      "name": "Coldperch Cavern"
+    },
+    "old_orsinium": {
+      "x": -4700,
+      "z": -100,
+      "r": 50,
+      "name": "Old Orsinium"
+    }
   },
   "npcs": [
-    {"id": "burguk_gro_dushnikh", "name": "Chief Burguk gro-Dushnikh", "role": "jarl", "place": "dushnikh_yal", "offset": [3, 2],
-     "greet": "Dushnikh Yal does not feed strangers. Strangers feed Dushnikh Yal, or they leave. Which are you?"},
-    {"id": "murbul", "name": "Murbul", "role": "priest", "place": "dushnikh_yal", "offset": [-4, 5], "female": true,
-     "greet": "Malacath watches the stronghold through my eyes. Today they are tired eyes, so speak plainly."},
-    {"id": "larak_gro_khazgur", "name": "Chief Larak", "role": "jarl", "place": "mor_khazgur", "offset": [2, 3],
-     "greet": "Burguk sends a messenger instead of coming himself. That tells me most of what I need to know."},
-    {"id": "ghamrash_gra_shura", "name": "Forgemaster Ghamrash gra-Shura", "role": "blacksmith", "place": "orsinium", "offset": [6, -4], "female": true, "hall": "orc_strongholds",
-     "greet": "Every wall in Orsinium starts as ore in somebody's hands. Usually mine. What have you brought me?"}
+    {
+      "id": "burguk_gro_dushnikh",
+      "name": "Chief Burguk gro-Dushnikh",
+      "role": "jarl",
+      "place": "dushnikh_yal",
+      "offset": [
+        3,
+        2
+      ],
+      "greet": "Dushnikh Yal does not feed strangers. Strangers feed Dushnikh Yal, or they leave. Which are you?"
+    },
+    {
+      "id": "murbul",
+      "name": "Murbul",
+      "role": "priest",
+      "place": "dushnikh_yal",
+      "offset": [
+        -4,
+        5
+      ],
+      "female": true,
+      "greet": "Malacath watches the stronghold through my eyes. Today they are tired eyes, so speak plainly."
+    },
+    {
+      "id": "larak_gro_khazgur",
+      "name": "Chief Larak",
+      "role": "jarl",
+      "place": "mor_khazgur",
+      "offset": [
+        2,
+        3
+      ],
+      "greet": "Burguk sends a messenger instead of coming himself. That tells me most of what I need to know."
+    },
+    {
+      "id": "ghamrash_gra_shura",
+      "name": "Forgemaster Ghamrash gra-Shura",
+      "role": "blacksmith",
+      "place": "orsinium",
+      "offset": [
+        6,
+        -4
+      ],
+      "female": true,
+      "hall": "orc_strongholds",
+      "greet": "Every wall in Orsinium starts as ore in somebody's hands. Usually mine. What have you brought me?"
+    }
   ],
   "relics": [
-    {"id": "orc_giant_knucklebone", "name": "Giant's Knucklebone", "desc": "As big as a fist, and yellow with age. Wise-women grind such bones for their charms.", "icon": 26},
-    {"id": "orc_bloodline_axe", "name": "Bloodline Axe of Dushnikh", "desc": "A broad iron axe notched by twelve generations of chiefs. Each notch has a name, and Burguk can recite them all.", "icon": 21},
-    {"id": "orc_orichalc_ore", "name": "Orichalc Ore", "desc": "A lump of green-veined ore, heavy as guilt. Forged right, it makes the hardest steel the Orcs know.", "icon": 17},
-    {"id": "orc_old_keystone", "name": "Keystone of Old Orsinium", "desc": "A carved block from the gate of an older Orsinium, cut when the city was young and still believed it would last.", "icon": 1}
+    {
+      "id": "orc_giant_knucklebone",
+      "name": "Giant's Knucklebone",
+      "desc": "As big as a fist, and yellow with age. Wise-women grind such bones for their charms.",
+      "icon": 26
+    },
+    {
+      "id": "orc_bloodline_axe",
+      "name": "Bloodline Axe of Dushnikh",
+      "desc": "A broad iron axe notched by twelve generations of chiefs. Each notch has a name, and Burguk can recite them all.",
+      "icon": 21
+    },
+    {
+      "id": "orc_orichalc_ore",
+      "name": "Orichalc Ore",
+      "desc": "A lump of green-veined ore, heavy as guilt. Forged right, it makes the hardest steel the Orcs know.",
+      "icon": 17
+    },
+    {
+      "id": "orc_old_keystone",
+      "name": "Keystone of Old Orsinium",
+      "desc": "A carved block from the gate of an older Orsinium, cut when the city was young and still believed it would last.",
+      "icon": 1
+    }
   ],
   "scenes": {
     "orc_the_code": [
-      ["murbul", "You went to the Furious One's shrine and came back. That is the first part of any answer. Now hear the rest."],
-      ["murbul", "The stronghold is stronger than any Orc in it. The chief leads until someone stronger takes his place. What words cannot settle, blood-price settles. And we kneel to no one, not to kings and not to gods. Malacath least of all; he would spit on it."],
-      ["narrator", "Murbul presses ash from her fire against your brow with her thumb. It is still warm."]
+      [
+        "murbul",
+        "You went to the Furious One's shrine and came back. That is the first part of any answer. Now hear the rest."
+      ],
+      [
+        "murbul",
+        "The stronghold is stronger than any Orc in it. The chief leads until someone stronger takes his place. What words cannot settle, blood-price settles. And we kneel to no one, not to kings and not to gods. Malacath least of all; he would spit on it."
+      ],
+      [
+        "narrator",
+        "Murbul presses ash from her fire against your brow with her thumb. It is still warm."
+      ]
     ],
     "orc_honored_chief": [
-      ["narrator", "The Hall of the Clans is full: chiefs, wise-women and smiths from every stronghold in Wrothgar, standing shoulder to shoulder under the smoke-black rafters."],
-      ["gurak", "Outsider, Blood-Kin, smith's runner, ogre-killer, and today the one who put Bazrag on his back in front of all of you. The Code is plain. Strength is honoured."],
-      ["gurak", "From this day you are an Honored Chief of the Orsimer. You have no stronghold of your own, so you will be welcome in all of them. Try not to eat them out of house and home."]
+      [
+        "narrator",
+        "The Hall of the Clans is full: chiefs, wise-women and smiths from every stronghold in Wrothgar, standing shoulder to shoulder under the smoke-black rafters."
+      ],
+      [
+        "gurak",
+        "Outsider, Blood-Kin, smith's runner, ogre-killer, and today the one who put Bazrag on his back in front of all of you. The Code is plain. Strength is honoured."
+      ],
+      [
+        "gurak",
+        "From this day you are an Honored Chief of the Orsimer. You have no stronghold of your own, so you will be welcome in all of them. Try not to eat them out of house and home."
+      ]
     ]
   },
   "quests": [
@@ -41,157 +130,497 @@
       "id": "orc_blood_kin",
       "title": "Blood-Kin",
       "start": "npc:burguk_gro_dushnikh",
-      "requires": ["!faction:orc_strongholds"],
+      "requires": [
+        "!faction:orc_strongholds"
+      ],
       "offer": "I want to earn a place among the Orcs.",
       "pitch": "Then earn it. A giant has come down out of the hills and is stamping my goats flat for sport. Kill it, and bring Murbul something of it for her charms. Then we will talk about places.",
       "desc": "Chief Burguk gro-Dushnikh of Dushnikh Yal will consider me as Blood-Kin if I kill the giant that has been killing the stronghold's herds.",
       "objectives": [
-        {"type": "kill", "place": "dushnikh_yal", "offset": [220, -140], "text": "Kill the giant raiding Dushnikh Yal's herds",
-         "spawn": [{"type": "skycraft:giant", "name": "Hill-Stomper", "target": true, "boss": true, "hp": 2.0, "dmg": 1.2}],
-         "journal": "The giant had a goat under each arm when I found it, and it did not want to give either of them back."},
-        {"type": "retrieve", "place": "dushnikh_yal", "offset": [220, -140], "relic": "orc_giant_knucklebone", "radius": 12, "text": "Take a knucklebone from the giant"},
-        {"type": "deliver", "npc": "murbul", "relic": "orc_giant_knucklebone", "text": "Bring the knucklebone to Murbul the wise-woman",
-         "topic": "Chief Burguk said you'd want this.",
-         "reply": "A good bone, from a big one. It will make a fine charm against sickness for the little ones. Go and tell Burguk the wise-woman is satisfied. He will pretend that does not matter to him."},
-        {"type": "talk", "npc": "burguk_gro_dushnikh", "text": "Report to Chief Burguk",
-         "topic": "The giant is dead, and Murbul has her bone.",
-         "reply": "Then you have fed the stronghold instead of eating from it. That is the beginning of being Orc. You are Blood-Kin to Dushnikh Yal. Eat with us tonight, and do not complain about the food."}
+        {
+          "type": "kill",
+          "place": "dushnikh_yal",
+          "offset": [
+            220,
+            -140
+          ],
+          "text": "Kill the giant raiding Dushnikh Yal's herds",
+          "spawn": [
+            {
+              "type": "skycraft:giant",
+              "name": "Hill-Stomper",
+              "target": true,
+              "boss": true,
+              "hp": 2.0,
+              "dmg": 1.2
+            }
+          ],
+          "journal": "The giant had a goat under each arm when I found it, and it did not want to give either of them back."
+        },
+        {
+          "type": "retrieve",
+          "place": "dushnikh_yal",
+          "offset": [
+            220,
+            -140
+          ],
+          "relic": "orc_giant_knucklebone",
+          "radius": 12,
+          "text": "Take a knucklebone from the giant"
+        },
+        {
+          "type": "deliver",
+          "npc": "murbul",
+          "relic": "orc_giant_knucklebone",
+          "text": "Bring the knucklebone to Murbul the wise-woman",
+          "topic": "Chief Burguk said you'd want this.",
+          "reply": "A good bone, from a big one. It will make a fine charm against sickness for the little ones. Go and tell Burguk the wise-woman is satisfied. He will pretend that does not matter to him."
+        },
+        {
+          "type": "talk",
+          "npc": "burguk_gro_dushnikh",
+          "text": "Report to Chief Burguk",
+          "topic": "The giant is dead, and Murbul has her bone.",
+          "reply": "Then you have fed the stronghold instead of eating from it. That is the beginning of being Orc. You are Blood-Kin to Dushnikh Yal. Eat with us tonight, and do not complain about the food."
+        }
       ],
       "outro": "I killed the giant that preyed on Dushnikh Yal's herds. Chief Burguk named me Blood-Kin of the stronghold, and so of the Orcs.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:orcish_helmet", "skycraft:orcish_war_axe"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:orcish_helmet",
+          "skycraft:orcish_war_axe"
+        ]
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
     },
     {
       "id": "orc_code_of_malacath",
       "title": "The Code of Malacath",
       "start": "npc:murbul",
-      "requires": ["quest:orc_blood_kin|faction:orc_strongholds"],
+      "requires": [
+        "quest:orc_blood_kin|faction:orc_strongholds"
+      ],
       "offer": "You're watching me again, wise-woman.",
       "pitch": "Blood-Kin who do not know the Code are guests with sharper teeth. Malacath is the god of the cast-out and the cursed, and his Code is how the cast-out live. Go to his shrine in Wrothgar, beyond the mountains, and listen. Then come back and tell me what you heard.",
       "desc": "Murbul, wise-woman of Dushnikh Yal, sent me to the shrine of Malacath in Wrothgar to learn the meaning of the god's Code.",
       "objectives": [
-        {"type": "go", "place": "shrine_malacath_high_rock", "text": "Travel to the shrine of Malacath in Wrothgar"},
-        {"type": "clear", "place": "shrine_malacath_high_rock", "text": "Drive the ogres away from the shrine",
-         "spawn": [{"type": "skycraft:ogre", "count": 2, "name": "Shrine-Fouling Ogre"}],
-         "journal": "Two ogres were using the shrine's offering bowl as a cooking pot. Malacath, I suspect, found that funnier than I did."},
-        {"type": "wait", "hours": 1, "place": "shrine_malacath_high_rock", "text": "Kneel before the shrine and listen",
-         "journal": "I did not hear a voice. I heard the wind, and the fire, and my own breathing. And then, somehow, I understood that I had been told not to kneel."},
-        {"type": "talk", "npc": "murbul", "text": "Return to Murbul at Dushnikh Yal",
-         "topic": "I went to Malacath's shrine. I think it told me something.",
-         "reply": "It always does, if you are not too proud to hear it, or too humble. Tell me, then. What did the Furious One teach you?"},
-        {"type": "talk", "npc": "murbul", "text": "Tell Murbul what you learned",
-         "choices": [
-           {"label": "That strength is something you carry for others.", "reply": "Yes. A strong Orc alone is only a bandit. A strong Orc with a stronghold is a wall.", "actions": "flag:orc_code_wall;scene:orc_the_code"},
-           {"label": "That nobody gives you a place. You take it.", "reply": "That is how most of us learn it. Just remember that what you take, someone may take from you.", "actions": "flag:orc_code_take;scene:orc_the_code"},
-           {"label": "That he doesn't want to be begged. He wants to be proven right.", "reply": "Ha! You heard him clearly. The cast-out god, proven right by the cast-out. That is the whole of it.", "actions": "flag:orc_code_proof;scene:orc_the_code"}
-         ]}
+        {
+          "type": "go",
+          "place": "shrine_malacath_high_rock",
+          "text": "Travel to the shrine of Malacath in Wrothgar"
+        },
+        {
+          "type": "clear",
+          "place": "shrine_malacath_high_rock",
+          "text": "Drive the ogres away from the shrine",
+          "spawn": [
+            {
+              "type": "skycraft:ogre",
+              "count": 2,
+              "name": "Shrine-Fouling Ogre"
+            }
+          ],
+          "journal": "Two ogres were using the shrine's offering bowl as a cooking pot. Malacath, I suspect, found that funnier than I did."
+        },
+        {
+          "type": "wait",
+          "hours": 1,
+          "place": "shrine_malacath_high_rock",
+          "text": "Kneel before the shrine and listen",
+          "journal": "I did not hear a voice. I heard the wind, and the fire, and my own breathing. And then, somehow, I understood that I had been told not to kneel."
+        },
+        {
+          "type": "talk",
+          "npc": "murbul",
+          "text": "Return to Murbul at Dushnikh Yal",
+          "topic": "I went to Malacath's shrine. I think it told me something.",
+          "reply": "It always does, if you are not too proud to hear it, or too humble. Tell me, then. What did the Furious One teach you?"
+        },
+        {
+          "type": "talk",
+          "npc": "murbul",
+          "text": "Tell Murbul what you learned",
+          "choices": [
+            {
+              "label": "That strength is something you carry for others.",
+              "reply": "Yes. A strong Orc alone is only a bandit. A strong Orc with a stronghold is a wall.",
+              "actions": "flag:orc_code_wall;scene:orc_the_code"
+            },
+            {
+              "label": "That nobody gives you a place. You take it.",
+              "reply": "That is how most of us learn it. Just remember that what you take, someone may take from you.",
+              "actions": "flag:orc_code_take;scene:orc_the_code"
+            },
+            {
+              "label": "That he doesn't want to be begged. He wants to be proven right.",
+              "reply": "Ha! You heard him clearly. The cast-out god, proven right by the cast-out. That is the whole of it.",
+              "actions": "flag:orc_code_proof;scene:orc_the_code"
+            }
+          ]
+        }
       ],
       "outro": "I knelt at Malacath's shrine in Wrothgar and came back with an answer. Murbul taught me the Code of Malacath and marked my brow with ash from her fire.",
-      "rewards": {"gold": 250, "faction_points": 3}
+      "rewards": {
+        "gold": 250,
+        "faction_points": 3
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
     },
     {
       "id": "orc_blood_price",
       "title": "The Blood-Price",
       "start": "auto",
-      "requires": ["quest:orc_code_of_malacath"],
+      "requires": [
+        "quest:orc_code_of_malacath"
+      ],
       "desc": "The ancestral axe of Dushnikh Yal has been stolen, and Chief Burguk blames Chief Larak of Mor Khazgur. He wants the axe back, or blood-price paid.",
       "objectives": [
-        {"type": "talk", "npc": "burguk_gro_dushnikh", "text": "Speak with Chief Burguk",
-         "topic": "Murbul says something's been stolen.",
-         "reply": "The axe of my line. Twelve chiefs carried it. Larak of Mor Khazgur has wanted it since we were boys. Go to his stronghold and tell him to give it back or pay the blood-price. I would go myself, but then there would be a war, and Murbul says we cannot afford one this winter."},
-        {"type": "go", "place": "mor_khazgur", "text": "Travel to Mor Khazgur"},
-        {"type": "talk", "npc": "larak_gro_khazgur", "text": "Confront Chief Larak",
-         "topic": "Burguk says you took his axe.",
-         "reply": "Burguk would blame me for the snow. Forsworn raided us both the same week. They took my brother's shield and three of my hunters. The raiders came out of Bruca's Leap Redoubt. Go there if you want Burguk's axe. Bring back my brother's shield and I will call it even."},
-        {"type": "clear", "place": "brucas_leap_redoubt", "placement": "structure", "text": "Clear the Forsworn out of Bruca's Leap Redoubt",
-         "spawn": [{"type": "skycraft:forsworn", "count": 3, "name": "Forsworn Raider"}]},
-        {"type": "kill", "place": "brucas_leap_redoubt", "placement": "structure", "text": "Kill the Briarheart who led the raids",
-         "spawn": [{"type": "skycraft:forsworn", "name": "Briarheart Raid-Leader", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4}],
-         "journal": "The Briarheart had hung the Orc trophies from the roof of the redoubt: a shield, a helm, and an old iron axe notched along the haft."},
-        {"type": "retrieve", "place": "brucas_leap_redoubt", "placement": "structure", "relic": "orc_bloodline_axe", "radius": 10, "text": "Take back the axe of Dushnikh Yal"},
-        {"type": "deliver", "npc": "burguk_gro_dushnikh", "relic": "orc_bloodline_axe", "text": "Return the axe to Chief Burguk",
-         "topic": "Your axe. The Forsworn took it, not Larak. They hit Mor Khazgur too.",
-         "reply": "Hm. So Larak is not a thief. Only ugly. What would you have me do now, Blood-Kin? You have earned an opinion."},
-        {"type": "talk", "npc": "burguk_gro_dushnikh", "text": "Advise Chief Burguk",
-         "choices": [
-           {"label": "Send Larak the shield I took back, and a gift of your own. End the feud.", "reply": "A gift. To Larak. Murbul will laugh at me for a month. ...Fine. Peace is cheaper than war, and the Forsworn are the real enemy.", "actions": "flag:orc_feud_ended"},
-           {"label": "You accused him in front of your clan. Pay him the blood-price for the insult.", "reply": "Blood-price, from me, to him. That is the Code, and you are right. I will pay. It will hurt more than any axe.", "actions": "flag:orc_blood_price_paid"}
-         ]}
+        {
+          "type": "talk",
+          "npc": "burguk_gro_dushnikh",
+          "text": "Speak with Chief Burguk",
+          "topic": "Murbul says something's been stolen.",
+          "reply": "The axe of my line. Twelve chiefs carried it. Larak of Mor Khazgur has wanted it since we were boys. Go to his stronghold and tell him to give it back or pay the blood-price. I would go myself, but then there would be a war, and Murbul says we cannot afford one this winter."
+        },
+        {
+          "type": "go",
+          "place": "mor_khazgur",
+          "text": "Travel to Mor Khazgur"
+        },
+        {
+          "type": "talk",
+          "npc": "larak_gro_khazgur",
+          "text": "Confront Chief Larak",
+          "topic": "Burguk says you took his axe.",
+          "reply": "Burguk would blame me for the snow. Forsworn raided us both the same week. They took my brother's shield and three of my hunters. The raiders came out of Bruca's Leap Redoubt. Go there if you want Burguk's axe. Bring back my brother's shield and I will call it even."
+        },
+        {
+          "type": "clear",
+          "place": "brucas_leap_redoubt",
+          "placement": "structure",
+          "text": "Clear the Forsworn out of Bruca's Leap Redoubt",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "count": 3,
+              "name": "Forsworn Raider"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "brucas_leap_redoubt",
+          "placement": "structure",
+          "text": "Kill the Briarheart who led the raids",
+          "spawn": [
+            {
+              "type": "skycraft:forsworn",
+              "name": "Briarheart Raid-Leader",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4
+            }
+          ],
+          "journal": "The Briarheart had hung the Orc trophies from the roof of the redoubt: a shield, a helm, and an old iron axe notched along the haft."
+        },
+        {
+          "type": "retrieve",
+          "place": "brucas_leap_redoubt",
+          "placement": "structure",
+          "relic": "orc_bloodline_axe",
+          "radius": 10,
+          "text": "Take back the axe of Dushnikh Yal"
+        },
+        {
+          "type": "deliver",
+          "npc": "burguk_gro_dushnikh",
+          "relic": "orc_bloodline_axe",
+          "text": "Return the axe to Chief Burguk",
+          "topic": "Your axe. The Forsworn took it, not Larak. They hit Mor Khazgur too.",
+          "reply": "Hm. So Larak is not a thief. Only ugly. What would you have me do now, Blood-Kin? You have earned an opinion."
+        },
+        {
+          "type": "talk",
+          "npc": "burguk_gro_dushnikh",
+          "text": "Advise Chief Burguk",
+          "choices": [
+            {
+              "label": "Send Larak the shield I took back, and a gift of your own. End the feud.",
+              "reply": "A gift. To Larak. Murbul will laugh at me for a month. ...Fine. Peace is cheaper than war, and the Forsworn are the real enemy.",
+              "actions": "flag:orc_feud_ended"
+            },
+            {
+              "label": "You accused him in front of your clan. Pay him the blood-price for the insult.",
+              "reply": "Blood-price, from me, to him. That is the Code, and you are right. I will pay. It will hurt more than any axe.",
+              "actions": "flag:orc_blood_price_paid"
+            }
+          ]
+        }
       ],
       "outro": "The Forsworn, not Mor Khazgur, stole the axe of Dushnikh Yal. I took it back from Bruca's Leap Redoubt, and on my advice Chief Burguk settled things with Chief Larak instead of starting a war.",
-      "rewards": {"gold": 400, "faction_points": 4}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 4
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
     },
     {
       "id": "orc_the_forgemasters_ore",
       "title": "The Forgemaster's Ore",
       "start": "auto",
-      "requires": ["quest:orc_blood_price"],
+      "requires": [
+        "quest:orc_blood_price"
+      ],
       "desc": "Word of my deeds has reached Orsinium. Forgemaster Ghamrash gra-Shura of the Hall of the Clans has sent for me: the city's forges are starving for orichalc.",
       "objectives": [
-        {"type": "go", "place": "orsinium", "text": "Travel to Orsinium"},
-        {"type": "talk", "npc": "ghamrash_gra_shura", "text": "Speak with Forgemaster Ghamrash in the Hall of the Clans",
-         "topic": "You sent for me, Forgemaster?",
-         "reply": "I did. The orichalc seam at Coldperch Cavern feeds half the forges in this city, and a pack of durzogs has moved into the workings and eaten two of my miners. The King wants walls. Walls want steel. Steel wants ore. You see the problem."},
-        {"type": "go", "place": "coldperch_cavern", "text": "Go to Coldperch Cavern"},
-        {"type": "clear", "place": "coldperch_cavern", "placement": "structure", "text": "Kill the durzogs infesting the mine",
-         "spawn": [{"type": "skycraft:durzog", "count": 4, "name": "Coldperch Durzog"},
-                   {"type": "skycraft:durzog", "name": "Durzog Pack-Mother", "boss": true, "hp": 2.5, "dmg": 1.4}],
-         "journal": "The durzogs had denned in the deepest gallery, among the miners' abandoned picks. The pack-mother was the size of a pony and twice as bad-tempered."},
-        {"type": "retrieve", "place": "coldperch_cavern", "placement": "structure", "relic": "orc_orichalc_ore", "radius": 10, "text": "Bring up a load of orichalc ore"},
-        {"type": "deliver", "npc": "ghamrash_gra_shura", "relic": "orc_orichalc_ore", "text": "Bring the ore to Forgemaster Ghamrash",
-         "topic": "The mine is clear. Here's the first of the ore.",
-         "reply": "Green right through. Good ore, better miner. I'll have the crews back down there by morning. Here: I made this from the last of the old stock. Orsinium steel for an Orsinium friend."}
+        {
+          "type": "go",
+          "place": "orsinium",
+          "text": "Travel to Orsinium"
+        },
+        {
+          "type": "talk",
+          "npc": "ghamrash_gra_shura",
+          "text": "Speak with Forgemaster Ghamrash in the Hall of the Clans",
+          "topic": "You sent for me, Forgemaster?",
+          "reply": "I did. The orichalc seam at Coldperch Cavern feeds half the forges in this city, and a pack of durzogs has moved into the workings and eaten two of my miners. The King wants walls. Walls want steel. Steel wants ore. You see the problem."
+        },
+        {
+          "type": "go",
+          "place": "coldperch_cavern",
+          "text": "Go to Coldperch Cavern"
+        },
+        {
+          "type": "clear",
+          "place": "coldperch_cavern",
+          "placement": "structure",
+          "text": "Kill the durzogs infesting the mine",
+          "spawn": [
+            {
+              "type": "skycraft:durzog",
+              "count": 4,
+              "name": "Coldperch Durzog"
+            },
+            {
+              "type": "skycraft:durzog",
+              "name": "Durzog Pack-Mother",
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4
+            }
+          ],
+          "journal": "The durzogs had denned in the deepest gallery, among the miners' abandoned picks. The pack-mother was the size of a pony and twice as bad-tempered."
+        },
+        {
+          "type": "retrieve",
+          "place": "coldperch_cavern",
+          "placement": "structure",
+          "relic": "orc_orichalc_ore",
+          "radius": 10,
+          "text": "Bring up a load of orichalc ore"
+        },
+        {
+          "type": "deliver",
+          "npc": "ghamrash_gra_shura",
+          "relic": "orc_orichalc_ore",
+          "text": "Bring the ore to Forgemaster Ghamrash",
+          "topic": "The mine is clear. Here's the first of the ore.",
+          "reply": "Green right through. Good ore, better miner. I'll have the crews back down there by morning. Here: I made this from the last of the old stock. Orsinium steel for an Orsinium friend."
+        }
       ],
       "outro": "I cleared the durzogs from Coldperch Cavern and brought orichalc ore back for Forgemaster Ghamrash. The forges of Orsinium are burning again.",
-      "rewards": {"gold": 500, "faction_points": 3, "items": ["skycraft:orsinium_chestplate"]}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3,
+        "items": [
+          "skycraft:orsinium_chestplate"
+        ]
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
     },
     {
       "id": "orc_stone_upon_stone",
       "title": "Stone Upon Stone",
       "start": "npc:gurak",
-      "requires": ["quest:orc_the_forgemasters_ore"],
+      "requires": [
+        "quest:orc_the_forgemasters_ore"
+      ],
       "offer": "Forgemaster Ghamrash says you're rebuilding the walls.",
       "pitch": "Every time Orsinium has fallen, we have built it again from its own bones. The keystone of the old gate lies in the ruins of Old Orsinium, and an ogre clan squats on it. Bring me that stone, and enough cut stone to set it in, and the new gate will carry the old one's name.",
       "desc": "King Gurak is rebuilding Orsinium's walls. He wants the keystone of the old gate recovered from the ruins of Old Orsinium, and stone enough to set it.",
       "objectives": [
-        {"type": "go", "place": "old_orsinium", "text": "Travel to the ruins of Old Orsinium"},
-        {"type": "clear", "place": "old_orsinium", "placement": "structure", "text": "Drive the ogre clan from the ruins",
-         "spawn": [{"type": "skycraft:ogre", "count": 3, "name": "Ruin Ogre"}]},
-        {"type": "kill", "place": "old_orsinium", "placement": "structure", "text": "Kill the ogre matriarch, Thurga Stone-Chewer",
-         "spawn": [{"type": "skycraft:ogre", "name": "Thurga Stone-Chewer", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5}],
-         "journal": "Thurga had made a throne of the old gate's stones and was sitting on the keystone itself. She did not take kindly to being asked to stand."},
-        {"type": "retrieve", "place": "old_orsinium", "placement": "structure", "relic": "orc_old_keystone", "radius": 10, "text": "Recover the keystone of the old gate"},
-        {"type": "deliver", "npc": "gurak", "relic": "orc_old_keystone", "text": "Bring the keystone to King Gurak",
-         "topic": "The keystone of the old gate, my king.",
-         "reply": "Older than my grandfather's grandfather, and still square. Good. Now the masons need stone to bed it in. Bring cut stone to the Forgemaster; she is keeping the tally."},
-        {"type": "deliver", "npc": "ghamrash_gra_shura", "item": "minecraft:stone_bricks", "count": 32, "text": "Bring thirty-two stone bricks to Forgemaster Ghamrash",
-         "topic": "Stone for the new gate.",
-         "reply": "Thirty-two, all square. The masons will set the keystone at dawn. Stay and watch, Blood-Kin. You will want to say you were there."}
+        {
+          "type": "go",
+          "place": "old_orsinium",
+          "text": "Travel to the ruins of Old Orsinium"
+        },
+        {
+          "type": "clear",
+          "place": "old_orsinium",
+          "placement": "structure",
+          "text": "Drive the ogre clan from the ruins",
+          "spawn": [
+            {
+              "type": "skycraft:ogre",
+              "count": 3,
+              "name": "Ruin Ogre"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "old_orsinium",
+          "placement": "structure",
+          "text": "Kill the ogre matriarch, Thurga Stone-Chewer",
+          "spawn": [
+            {
+              "type": "skycraft:ogre",
+              "name": "Thurga Stone-Chewer",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5
+            }
+          ],
+          "journal": "Thurga had made a throne of the old gate's stones and was sitting on the keystone itself. She did not take kindly to being asked to stand."
+        },
+        {
+          "type": "retrieve",
+          "place": "old_orsinium",
+          "placement": "structure",
+          "relic": "orc_old_keystone",
+          "radius": 10,
+          "text": "Recover the keystone of the old gate"
+        },
+        {
+          "type": "deliver",
+          "npc": "gurak",
+          "relic": "orc_old_keystone",
+          "text": "Bring the keystone to King Gurak",
+          "topic": "The keystone of the old gate, my king.",
+          "reply": "Older than my grandfather's grandfather, and still square. Good. Now the masons need stone to bed it in. Bring cut stone to the Forgemaster; she is keeping the tally."
+        },
+        {
+          "type": "deliver",
+          "npc": "ghamrash_gra_shura",
+          "item": "minecraft:stone_bricks",
+          "count": 32,
+          "text": "Bring thirty-two stone bricks to Forgemaster Ghamrash",
+          "topic": "Stone for the new gate.",
+          "reply": "Thirty-two, all square. The masons will set the keystone at dawn. Stay and watch, Blood-Kin. You will want to say you were there."
+        }
       ],
       "outro": "I recovered the keystone of Old Orsinium's gate from an ogre clan and brought stone to set it in. The new gate of Orsinium stands on the bones of the old.",
-      "rewards": {"gold": 600, "faction_points": 4, "items": ["skycraft:orsinium_helmet", "skycraft:orsinium_leggings"]}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 4,
+        "items": [
+          "skycraft:orsinium_helmet",
+          "skycraft:orsinium_leggings"
+        ]
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
     },
     {
       "id": "orc_honored_chief",
       "title": "Honored Chief",
       "start": "auto",
-      "requires": ["quest:orc_stone_upon_stone"],
+      "requires": [
+        "quest:orc_stone_upon_stone"
+      ],
       "desc": "King Gurak means to honour me before the chiefs in the Hall of the Clans. Chief Bazrag gro-Fharun, who despises outsiders, has demanded the right to test me first, as the Code allows.",
       "objectives": [
-        {"type": "talk", "npc": "gurak", "text": "Speak with King Gurak",
-         "topic": "I hear Bazrag wants a word with me.",
-         "reply": "Bazrag wants several words with you, and most of them are fists. He says no outsider should stand among the chiefs. The Code says he may test you. It does not say he must survive it, but I would rather he did. He has a good stronghold."},
-        {"type": "kill", "place": "orsinium", "offset": [-25, 20], "radius": 20, "flee_at": 0.25, "text": "Beat Chief Bazrag gro-Fharun in the ring",
-         "spawn": [{"type": "npc:adventurer", "name": "Chief Bazrag gro-Fharun", "target": true, "boss": true, "hp": 4.0, "dmg": 1.6, "hostile": true, "armor": "#5a7a3a", "weapon": "skycraft:orcish_warhammer"}],
-         "journal": "Bazrag hit like a falling wall. When he finally went down to one knee, he spat out a tooth, laughed, and held out his hand."},
-        {"type": "talk", "npc": "gurak", "text": "Stand before the chiefs in the Hall of the Clans",
-         "topic": "Bazrag yielded.",
-         "reply": "He did, and now he says you are the best fight he has had in ten years. Stand there. The chiefs are watching, and I have something to say.",
-         "actions": "scene:orc_honored_chief"}
+        {
+          "type": "talk",
+          "npc": "gurak",
+          "text": "Speak with King Gurak",
+          "topic": "I hear Bazrag wants a word with me.",
+          "reply": "Bazrag wants several words with you, and most of them are fists. He says no outsider should stand among the chiefs. The Code says he may test you. It does not say he must survive it, but I would rather he did. He has a good stronghold."
+        },
+        {
+          "type": "kill",
+          "place": "orsinium",
+          "offset": [
+            -25,
+            20
+          ],
+          "radius": 20,
+          "flee_at": 0.25,
+          "text": "Beat Chief Bazrag gro-Fharun in the ring",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Chief Bazrag gro-Fharun",
+              "target": true,
+              "boss": true,
+              "hp": 4.0,
+              "dmg": 1.6,
+              "hostile": true,
+              "armor": "#5a7a3a",
+              "weapon": "skycraft:orcish_warhammer"
+            }
+          ],
+          "journal": "Bazrag hit like a falling wall. When he finally went down to one knee, he spat out a tooth, laughed, and held out his hand."
+        },
+        {
+          "type": "talk",
+          "npc": "gurak",
+          "text": "Stand before the chiefs in the Hall of the Clans",
+          "topic": "Bazrag yielded.",
+          "reply": "He did, and now he says you are the best fight he has had in ten years. Stand there. The chiefs are watching, and I have something to say.",
+          "actions": "scene:orc_honored_chief"
+        }
       ],
       "outro": "I beat Chief Bazrag gro-Fharun in the ring, and King Gurak named me an Honored Chief of the Orsimer before every stronghold in Wrothgar.",
-      "rewards": {"gold": 1200, "faction_points": 7, "perks": 1, "flags": ["orc_honored_chief"],
-                  "items": [{"item": "skycraft:ebony_warhammer", "name": "Gatebreaker of Orsinium", "enchant": {"sharpness": 4, "knockback": 2, "unbreaking": 3}},
-                            {"item": "skycraft:orsinium_boots", "name": "Honored Chief's Greaves", "enchant": {"protection": 3, "feather_falling": 2}}]}
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 7,
+        "perks": 1,
+        "flags": [
+          "orc_honored_chief"
+        ],
+        "items": [
+          {
+            "item": "skycraft:ebony_warhammer",
+            "name": "Gatebreaker of Orsinium",
+            "enchant": {
+              "sharpness": 4,
+              "knockback": 2,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:orsinium_boots",
+            "name": "Honored Chief's Greaves",
+            "enchant": {
+              "protection": 3,
+              "feather_falling": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "wrothgar.L9.ore_rights",
+        "wrothgar.L8.malacath"
+      ]
     }
   ]
 }

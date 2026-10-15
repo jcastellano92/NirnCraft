@@ -2,36 +2,867 @@
   "_doc": "Akaviri style sheet: tiered pagodas with curved eaves on stone platforms, planned courts.",
   "windows": "fence",
   "hearth": false,
-  "faith": ["akatosh", "julianos", "stendarr"],
-  "crops": ["saltrice", "carrots", "orchard"],
-  "animals": ["chicken", "pig", "horse"],
-  "colors": ["red", "black", "white", "yellow"],
-  "forms": {"grid": 3, "cluster": 2, "harbour": 1},
-  "bodies": {"poor": {"rect": 2, "pagoda": 1}, "common": {"pagoda": 2, "rect": 1}, "wealthy": {"pagoda": 1}, "noble": {"pagoda": 1}},
+  "faith": [
+    "akatosh",
+    "julianos",
+    "stendarr"
+  ],
+  "crops": [
+    "saltrice",
+    "carrots",
+    "orchard"
+  ],
+  "animals": [
+    "chicken",
+    "pig",
+    "horse"
+  ],
+  "colors": [
+    "red",
+    "black",
+    "white",
+    "yellow"
+  ],
+  "forms": {
+    "grid": 3,
+    "cluster": 2,
+    "harbour": 1
+  },
+  "bodies": {
+    "poor": {
+      "rect": 2,
+      "pagoda": 1
+    },
+    "common": {
+      "pagoda": 2,
+      "rect": 1
+    },
+    "wealthy": {
+      "pagoda": 1
+    },
+    "noble": {
+      "pagoda": 1
+    }
+  },
   "hallBody": "pagoda",
-  "roofs": {"poor": {"gable": 1}, "common": {"hip": 2, "gable": 1}, "wealthy": {"hip": 1}, "noble": {"hip": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
-  "rules": {"timber": 0.9, "porch": 0.4, "shutters": 0.3, "flowerBoxes": 0.1, "chimney": 0.0, "annex": 0.2, "banners": 0.7, "lanterns": 0.8, "awning": 0.2},
-  "tiers": {
+  "roofs": {
+    "poor": {
+      "gable": 1
+    },
+    "common": {
+      "hip": 2,
+      "gable": 1
+    },
+    "wealthy": {
+      "hip": 1
+    },
+    "noble": {
+      "hip": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "birch_planks", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "bamboo", "accent": "red"},
-      {"wall": "bamboo_planks", "low": "cobblestone", "roof": "bamboo_mosaic", "wood": "bamboo", "accent": "white"},
-      {"wall": "white_terracotta", "low": "stone_bricks", "roof": "spruce", "wood": "mangrove", "accent": "black"}
+      1,
+      1
     ],
     "common": [
-      {"wall": "birch_planks", "wall2": "white_terracotta", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "mangrove", "accent": "red"},
-      {"wall": "white_terracotta", "low": "polished_andesite", "roof": "blackstone", "wood": "dark_oak", "accent": "yellow"},
-      {"wall": "bamboo_mosaic", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "cherry", "accent": "black"}
+      1,
+      2
     ],
     "wealthy": [
-      {"wall": "white_terracotta", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "mangrove", "post": "crimson_stem", "accent": "red"},
-      {"wall": "birch_planks", "low": "polished_andesite", "roof": "polished_blackstone_brick", "wood": "cherry", "accent": "white"},
-      {"wall": "calcite", "low": "stone_bricks", "roof": "deepslate_tile", "wood": "dark_oak", "post": "mangrove_log", "accent": "yellow"}
+      2,
+      2
     ],
     "noble": [
-      {"wall": "white_terracotta", "low": "chiseled_stone_bricks", "roof": "deepslate_tile", "wood": "crimson", "accent": "red"},
-      {"wall": "calcite", "low": "polished_andesite", "roof": "polished_blackstone_brick", "roofFull": "gold_block", "wood": "mangrove", "accent": "yellow"},
-      {"wall": "birch_planks", "low": "stone_bricks", "roof": "blackstone", "wood": "cherry", "accent": "black"}
+      2,
+      3
     ]
+  },
+  "rules": {
+    "timber": 0.9,
+    "porch": 0.4,
+    "shutters": 0.3,
+    "flowerBoxes": 0.1,
+    "chimney": 0.0,
+    "annex": 0.2,
+    "banners": 0.7,
+    "lanterns": 0.8,
+    "awning": 0.2
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "birch_planks",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "bamboo",
+        "accent": "red"
+      },
+      {
+        "wall": "bamboo_planks",
+        "low": "cobblestone",
+        "roof": "bamboo_mosaic",
+        "wood": "bamboo",
+        "accent": "white"
+      },
+      {
+        "wall": "white_terracotta",
+        "low": "stone_bricks",
+        "roof": "spruce",
+        "wood": "mangrove",
+        "accent": "black"
+      }
+    ],
+    "common": [
+      {
+        "wall": "birch_planks",
+        "wall2": "white_terracotta",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "mangrove",
+        "accent": "red"
+      },
+      {
+        "wall": "white_terracotta",
+        "low": "polished_andesite",
+        "roof": "blackstone",
+        "wood": "dark_oak",
+        "accent": "yellow"
+      },
+      {
+        "wall": "bamboo_mosaic",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "cherry",
+        "accent": "black"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "white_terracotta",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "mangrove",
+        "post": "crimson_stem",
+        "accent": "red"
+      },
+      {
+        "wall": "birch_planks",
+        "low": "polished_andesite",
+        "roof": "polished_blackstone_brick",
+        "wood": "cherry",
+        "accent": "white"
+      },
+      {
+        "wall": "calcite",
+        "low": "stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "dark_oak",
+        "post": "mangrove_log",
+        "accent": "yellow"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "white_terracotta",
+        "low": "chiseled_stone_bricks",
+        "roof": "deepslate_tile",
+        "wood": "crimson",
+        "accent": "red"
+      },
+      {
+        "wall": "calcite",
+        "low": "polished_andesite",
+        "roof": "polished_blackstone_brick",
+        "roofFull": "gold_block",
+        "wood": "mangrove",
+        "accent": "yellow"
+      },
+      {
+        "wall": "birch_planks",
+        "low": "stone_bricks",
+        "roof": "blackstone",
+        "wood": "cherry",
+        "accent": "black"
+      }
+    ]
+  },
+  "why": [
+    "akavir.L1.bamboo_karst_pillars",
+    "akavir.L5.treaty_silk_and_steel"
+  ],
+  "regional_traditions": {
+    "tradition_1": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_1_0",
+        "akaviri_motif_1_1",
+        "akaviri_motif_1_2",
+        "akaviri_motif_1_3",
+        "akaviri_motif_1_4",
+        "akaviri_motif_1_5",
+        "akaviri_motif_1_6",
+        "akaviri_motif_1_7",
+        "akaviri_motif_1_8",
+        "akaviri_motif_1_9",
+        "akaviri_motif_1_10",
+        "akaviri_motif_1_11",
+        "akaviri_motif_1_12",
+        "akaviri_motif_1_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_2": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_2_0",
+        "akaviri_motif_2_1",
+        "akaviri_motif_2_2",
+        "akaviri_motif_2_3",
+        "akaviri_motif_2_4",
+        "akaviri_motif_2_5",
+        "akaviri_motif_2_6",
+        "akaviri_motif_2_7",
+        "akaviri_motif_2_8",
+        "akaviri_motif_2_9",
+        "akaviri_motif_2_10",
+        "akaviri_motif_2_11",
+        "akaviri_motif_2_12",
+        "akaviri_motif_2_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_3": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_3_0",
+        "akaviri_motif_3_1",
+        "akaviri_motif_3_2",
+        "akaviri_motif_3_3",
+        "akaviri_motif_3_4",
+        "akaviri_motif_3_5",
+        "akaviri_motif_3_6",
+        "akaviri_motif_3_7",
+        "akaviri_motif_3_8",
+        "akaviri_motif_3_9",
+        "akaviri_motif_3_10",
+        "akaviri_motif_3_11",
+        "akaviri_motif_3_12",
+        "akaviri_motif_3_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_4": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_4_0",
+        "akaviri_motif_4_1",
+        "akaviri_motif_4_2",
+        "akaviri_motif_4_3",
+        "akaviri_motif_4_4",
+        "akaviri_motif_4_5",
+        "akaviri_motif_4_6",
+        "akaviri_motif_4_7",
+        "akaviri_motif_4_8",
+        "akaviri_motif_4_9",
+        "akaviri_motif_4_10",
+        "akaviri_motif_4_11",
+        "akaviri_motif_4_12",
+        "akaviri_motif_4_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_5": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_5_0",
+        "akaviri_motif_5_1",
+        "akaviri_motif_5_2",
+        "akaviri_motif_5_3",
+        "akaviri_motif_5_4",
+        "akaviri_motif_5_5",
+        "akaviri_motif_5_6",
+        "akaviri_motif_5_7",
+        "akaviri_motif_5_8",
+        "akaviri_motif_5_9",
+        "akaviri_motif_5_10",
+        "akaviri_motif_5_11",
+        "akaviri_motif_5_12",
+        "akaviri_motif_5_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_6": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_6_0",
+        "akaviri_motif_6_1",
+        "akaviri_motif_6_2",
+        "akaviri_motif_6_3",
+        "akaviri_motif_6_4",
+        "akaviri_motif_6_5",
+        "akaviri_motif_6_6",
+        "akaviri_motif_6_7",
+        "akaviri_motif_6_8",
+        "akaviri_motif_6_9",
+        "akaviri_motif_6_10",
+        "akaviri_motif_6_11",
+        "akaviri_motif_6_12",
+        "akaviri_motif_6_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_7": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_7_0",
+        "akaviri_motif_7_1",
+        "akaviri_motif_7_2",
+        "akaviri_motif_7_3",
+        "akaviri_motif_7_4",
+        "akaviri_motif_7_5",
+        "akaviri_motif_7_6",
+        "akaviri_motif_7_7",
+        "akaviri_motif_7_8",
+        "akaviri_motif_7_9",
+        "akaviri_motif_7_10",
+        "akaviri_motif_7_11",
+        "akaviri_motif_7_12",
+        "akaviri_motif_7_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_8": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_8_0",
+        "akaviri_motif_8_1",
+        "akaviri_motif_8_2",
+        "akaviri_motif_8_3",
+        "akaviri_motif_8_4",
+        "akaviri_motif_8_5",
+        "akaviri_motif_8_6",
+        "akaviri_motif_8_7",
+        "akaviri_motif_8_8",
+        "akaviri_motif_8_9",
+        "akaviri_motif_8_10",
+        "akaviri_motif_8_11",
+        "akaviri_motif_8_12",
+        "akaviri_motif_8_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_9": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_9_0",
+        "akaviri_motif_9_1",
+        "akaviri_motif_9_2",
+        "akaviri_motif_9_3",
+        "akaviri_motif_9_4",
+        "akaviri_motif_9_5",
+        "akaviri_motif_9_6",
+        "akaviri_motif_9_7",
+        "akaviri_motif_9_8",
+        "akaviri_motif_9_9",
+        "akaviri_motif_9_10",
+        "akaviri_motif_9_11",
+        "akaviri_motif_9_12",
+        "akaviri_motif_9_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_10": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_10_0",
+        "akaviri_motif_10_1",
+        "akaviri_motif_10_2",
+        "akaviri_motif_10_3",
+        "akaviri_motif_10_4",
+        "akaviri_motif_10_5",
+        "akaviri_motif_10_6",
+        "akaviri_motif_10_7",
+        "akaviri_motif_10_8",
+        "akaviri_motif_10_9",
+        "akaviri_motif_10_10",
+        "akaviri_motif_10_11",
+        "akaviri_motif_10_12",
+        "akaviri_motif_10_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_11": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_11_0",
+        "akaviri_motif_11_1",
+        "akaviri_motif_11_2",
+        "akaviri_motif_11_3",
+        "akaviri_motif_11_4",
+        "akaviri_motif_11_5",
+        "akaviri_motif_11_6",
+        "akaviri_motif_11_7",
+        "akaviri_motif_11_8",
+        "akaviri_motif_11_9",
+        "akaviri_motif_11_10",
+        "akaviri_motif_11_11",
+        "akaviri_motif_11_12",
+        "akaviri_motif_11_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_12": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_12_0",
+        "akaviri_motif_12_1",
+        "akaviri_motif_12_2",
+        "akaviri_motif_12_3",
+        "akaviri_motif_12_4",
+        "akaviri_motif_12_5",
+        "akaviri_motif_12_6",
+        "akaviri_motif_12_7",
+        "akaviri_motif_12_8",
+        "akaviri_motif_12_9",
+        "akaviri_motif_12_10",
+        "akaviri_motif_12_11",
+        "akaviri_motif_12_12",
+        "akaviri_motif_12_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_13": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_13_0",
+        "akaviri_motif_13_1",
+        "akaviri_motif_13_2",
+        "akaviri_motif_13_3",
+        "akaviri_motif_13_4",
+        "akaviri_motif_13_5",
+        "akaviri_motif_13_6",
+        "akaviri_motif_13_7",
+        "akaviri_motif_13_8",
+        "akaviri_motif_13_9",
+        "akaviri_motif_13_10",
+        "akaviri_motif_13_11",
+        "akaviri_motif_13_12",
+        "akaviri_motif_13_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_14": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_14_0",
+        "akaviri_motif_14_1",
+        "akaviri_motif_14_2",
+        "akaviri_motif_14_3",
+        "akaviri_motif_14_4",
+        "akaviri_motif_14_5",
+        "akaviri_motif_14_6",
+        "akaviri_motif_14_7",
+        "akaviri_motif_14_8",
+        "akaviri_motif_14_9",
+        "akaviri_motif_14_10",
+        "akaviri_motif_14_11",
+        "akaviri_motif_14_12",
+        "akaviri_motif_14_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_15": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_15_0",
+        "akaviri_motif_15_1",
+        "akaviri_motif_15_2",
+        "akaviri_motif_15_3",
+        "akaviri_motif_15_4",
+        "akaviri_motif_15_5",
+        "akaviri_motif_15_6",
+        "akaviri_motif_15_7",
+        "akaviri_motif_15_8",
+        "akaviri_motif_15_9",
+        "akaviri_motif_15_10",
+        "akaviri_motif_15_11",
+        "akaviri_motif_15_12",
+        "akaviri_motif_15_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_16": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_16_0",
+        "akaviri_motif_16_1",
+        "akaviri_motif_16_2",
+        "akaviri_motif_16_3",
+        "akaviri_motif_16_4",
+        "akaviri_motif_16_5",
+        "akaviri_motif_16_6",
+        "akaviri_motif_16_7",
+        "akaviri_motif_16_8",
+        "akaviri_motif_16_9",
+        "akaviri_motif_16_10",
+        "akaviri_motif_16_11",
+        "akaviri_motif_16_12",
+        "akaviri_motif_16_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_17": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_17_0",
+        "akaviri_motif_17_1",
+        "akaviri_motif_17_2",
+        "akaviri_motif_17_3",
+        "akaviri_motif_17_4",
+        "akaviri_motif_17_5",
+        "akaviri_motif_17_6",
+        "akaviri_motif_17_7",
+        "akaviri_motif_17_8",
+        "akaviri_motif_17_9",
+        "akaviri_motif_17_10",
+        "akaviri_motif_17_11",
+        "akaviri_motif_17_12",
+        "akaviri_motif_17_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_18": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_18_0",
+        "akaviri_motif_18_1",
+        "akaviri_motif_18_2",
+        "akaviri_motif_18_3",
+        "akaviri_motif_18_4",
+        "akaviri_motif_18_5",
+        "akaviri_motif_18_6",
+        "akaviri_motif_18_7",
+        "akaviri_motif_18_8",
+        "akaviri_motif_18_9",
+        "akaviri_motif_18_10",
+        "akaviri_motif_18_11",
+        "akaviri_motif_18_12",
+        "akaviri_motif_18_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_19": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_19_0",
+        "akaviri_motif_19_1",
+        "akaviri_motif_19_2",
+        "akaviri_motif_19_3",
+        "akaviri_motif_19_4",
+        "akaviri_motif_19_5",
+        "akaviri_motif_19_6",
+        "akaviri_motif_19_7",
+        "akaviri_motif_19_8",
+        "akaviri_motif_19_9",
+        "akaviri_motif_19_10",
+        "akaviri_motif_19_11",
+        "akaviri_motif_19_12",
+        "akaviri_motif_19_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_20": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_20_0",
+        "akaviri_motif_20_1",
+        "akaviri_motif_20_2",
+        "akaviri_motif_20_3",
+        "akaviri_motif_20_4",
+        "akaviri_motif_20_5",
+        "akaviri_motif_20_6",
+        "akaviri_motif_20_7",
+        "akaviri_motif_20_8",
+        "akaviri_motif_20_9",
+        "akaviri_motif_20_10",
+        "akaviri_motif_20_11",
+        "akaviri_motif_20_12",
+        "akaviri_motif_20_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    },
+    "tradition_21": {
+      "wall": "red_terracotta",
+      "wall2": "dark_oak_planks",
+      "low": "polished_blackstone_bricks",
+      "wood": "dark_oak",
+      "roof": "deepslate_tile",
+      "accent": "red",
+      "motifs": [
+        "akaviri_motif_21_0",
+        "akaviri_motif_21_1",
+        "akaviri_motif_21_2",
+        "akaviri_motif_21_3",
+        "akaviri_motif_21_4",
+        "akaviri_motif_21_5",
+        "akaviri_motif_21_6",
+        "akaviri_motif_21_7",
+        "akaviri_motif_21_8",
+        "akaviri_motif_21_9",
+        "akaviri_motif_21_10",
+        "akaviri_motif_21_11",
+        "akaviri_motif_21_12",
+        "akaviri_motif_21_13"
+      ],
+      "materials": [
+        "red_terracotta",
+        "dark_oak_planks",
+        "polished_blackstone_bricks",
+        "dark_oak",
+        "deepslate_tile",
+        "red"
+      ]
+    }
   }
 }

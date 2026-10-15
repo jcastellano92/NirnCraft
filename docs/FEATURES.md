@@ -129,12 +129,16 @@ Better Combat provides the directional swing animations. Everything else is Skyc
     Dragonbone and the provincial styles. There are also 81 polearms, 4 crossbows, 15 kinds of arrows and bolts, and
     13 staves.
   * **Armour:** 48 armour sets with 3D models (25 light, 23 heavy) and 26 shields.
-  * **Artifacts:** 17, among them Auriel's Bow, the Nightingale Bow, Spellbreaker, the Wabbajack and the Staff of
-    Magnus.
-  * **Leveled loot:** the material of the gear you find follows your level. Rare legendary items carry special
-    prefixes such as Staggering or Vampiric.
-* **Leveled enemies.** Creatures scale with you (more health and damage) and earn Skyrim's rank names, such as
-  Bandit Outlaw → Bandit Marauder and Restless Draugr → Draugr Scourge.
+  * **Artifacts and unique relics:** 17 Daedric/legendary artifacts (Auriel's Bow, Nightingale Bow, Spellbreaker,
+    Wabbajack, Staff of Magnus...) plus **512 unique placed relics** (`uniques_*.json`) across all 11 provinces.
+  * **Leveled loot and item affixes (`ItemAffixes`):** the material and enchantment tier of gear follow your level across
+    six bands (`1–5`, `6–12`, `13–20`, `21–30`, `31–42`, `43+`). Weapons and armour roll Skyrim-style suffixes (`of Embers`
+    .. `of the Inferno`, `of Frost` .. `of the Blizzard`, `of Sparks` .. `of the Tempest`, `of Minor Health` .. `of Peerless
+    Health`) and rare prefixes (`Staggering`, `Vampiric`, `Scorching`, `Soul-Snaring`, `Spellbreaking`), all of which can be
+    disenchanted at the Arcane Enchanter to learn the family enchantment.
+* **Leveled enemies.** Creatures scale with you (more health and damage), follow regional level bands (`max - min <= 20`,
+  with story quests clamped within `±8` via `Leveling.storyQuestLevel`), and earn Skyrim's rank names, such as Bandit
+  Outlaw → Bandit Marauder and Restless Draugr → Draugr Scourge.
 
 ## Magic and the Voice
 
@@ -258,7 +262,7 @@ Better Combat provides the directional swing animations. Everything else is Skyc
 * **Reputation** (**Y**). There are twelve factions, from Hated to Revered. Factions that hate you send hit squads.
 * **Joinable factions.** Companions, College of Winterhold, Thieves Guild, Dark Brotherhood, Imperial Legion,
   Stormcloaks and the Bards College, each with ranks, trials and contracts.
-* **98 story quests**, written as data:
+* **5,442 authored quests**, written as data (`3,817` multi-stage story quests + `1,625` regional side/contract quests):
 
   | Questline | Quests |
   | --- | --- |
@@ -272,11 +276,11 @@ Better Combat provides the directional swing animations. Everything else is Skyc
   | Solstheim | 6 |
   | Companions | 5 |
   | Bards College | 4 |
-  | The other provinces | 8 |
+  | Regional MS1 story arcs (`quests/story/*.json`, all 75 land regions) & provincial chains | 3,727 |
+  | Regional side stories, guild contracts & favours (`quests/*.json`) | 1,625 |
 
-  There are also side stories (The Golden Claw, Waking Nightmare, The Forsworn Conspiracy...), the College's school
-  trials, and radiant work: favours, Jarls' bounties (bandit leaders, giants, Deathlords, dragons), legendary hunts,
-  faction contracts and province-flavoured errands.
+  Every town, city and capital also has a **Notice Board** (`NoticeBoards`) posting 3–6 live jobs that refresh every two
+  in-game days and target real uncleared dungeons `300–1,500` blocks away.
 * **The journal** (**J**). It has Main, Side, Misc, Factions, Reputation, Stats and Party tabs.
   * Track a quest to put it on the compass. You can also abandon quests.
   * A step that has been stuck for three days can be skipped.
@@ -348,17 +352,23 @@ hostiles and wildlife have separate budgets.
 
 [WORLD.md](WORLD.md) covers the geography. In brief:
 
-* **The map.** Tamriel is built at full scale, with Whiterun at 0, 0. Foreign lands lie beyond it, and endless
-  generated lands beyond those. There are 113 biomes, 79 regions and 602 named places.
-* **Discovery.** You get "DISCOVERED" and "CLEARED" banners, region and province banners, and compass markers.
+* **The map.** Tamriel is built at full scale, with Whiterun at 0, 0. Foreign lands lie beyond it, and deterministic
+  4,096×4,096 endless generated tiles (`TilePlanner`) beyond those. There are 113 biomes, 533 micro-biomes, 83 regions
+  and 7,546 named places.
+* **Discovery.** You get "DISCOVERED" and "CLEARED" banners, region arrival banners with local rumours and music stings,
+  and compass markers (including subtle hints for undiscovered places within 150 blocks).
 * **The map screen** (**M**). A painted parchment map with fog of war, your discoveries, quest markers, your party
   and a custom marker.
 * **Fast travel.** Travel to any place you've discovered, unless you're in combat or near enemies, over-encumbered,
   riding or falling. In singleplayer it advances the clock.
-* **Carriages and silt striders.** Paid rides between cities, and between Vvardenfell's ports.
+* **Multi-modal travel (`TravelNetworks`).** Carriages, caravans, ships and ferries, river boats, silt striders, Mages
+  Guild guides, Dunmer propylon chambers, Divine/Almsivi Intervention, Great Lifts, and wilderness wayshrines.
 * **Horses.** Six breeds, sold at stables for 1,000 to 5,000 Septims. Wild horses can be tamed in a balance
   minigame. Call yours with **H**.
-* **Roads.** Signposts and lanterns, with Khajiit caravans, travellers, patrols and bandit ambushes along them.
+* **Roads.** Signposts (naming the next settlement, inn, and nearby dungeons) and lanterns, with Khajiit caravans,
+  travellers, patrols and 125+ regional encounter scenes along them.
+* **Festivals (`FestivalCalendar`).** 83 regional and Tamrielic festivals across the 12 months of the year, dressing
+  town plazas with banners, lanterns, market stalls and festival quests.
 * **Oblivion and Sovngarde.** The Nether is Oblivion and the End is Sovngarde, with their own fog, music and
   discoveries. Alduin waits in Sovngarde.
 * **Sky and weather.**
@@ -386,18 +396,6 @@ hostiles and wildlife have separate budgets.
   * Dragon souls go to everyone nearby.
   * PvP counts as a crime, and party friendly fire is off by default (`skycraft-quest.toml`).
 * **Joining a world.** You're offered a fast travel to your party leader.
-
-## Coming next
-
-These are being built now and are not yet in the pack:
-
-* **Skycraft's own vampirism and lycanthropy.** Until it lands, the pack still includes the third-party Vampirism
-  and Werewolves mods. Vampirism's vampire forests, hunter camps and faction villages are switched off.
-* **Sailing and ports.** Carriages already skip routes that would cross open sea.
-* **Deeper economy and alchemy integration**, and **terrain polish**.
-  * **Deep Delver** (Mining 75): obsidian and end stone.
-
-  Blocks you placed yourself are always breakable. `restrictDigging` in `config/skycraft-common.toml` turns this off.
 
 ## Skills, leveling and perks [Core]
 

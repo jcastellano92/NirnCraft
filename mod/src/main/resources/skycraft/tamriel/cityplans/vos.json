@@ -1,0 +1,112 @@
+{
+  "id": "vos",
+  "why": [
+    "grazelands.L1.grass_slopes",
+    "grazelands.L4.wickwheat_steppe"
+  ],
+  "sil": "velothi-farming-bluff-terraces",
+  "base": "none",
+  "overlay": "grazelands",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "grazelands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "vos_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        10,
+        30
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "vos_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "vos_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -26,
+        -19
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "vos_b_4"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "grazelands",
+      "name": "vos_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "theme": "vos_bluff_well",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "vos_velothi",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "vos_b_1": "Vos Chapel",
+    "vos_b_2": "Varo Tradehouse",
+    "vos_b_3": "Ulvil Llothas's Farmhouse",
+    "vos_b_4": "Mandyn Ralas's Cottage",
+    "vos_b_5": "Vos Harbour Dock-Shed"
+  },
+  "innKey": "vos_b_2",
+  "names": {
+    "inn": "vos_b_2"
+  }
+}

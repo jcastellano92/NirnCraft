@@ -1,70 +1,309 @@
 {
   "id": "balmora",
-  "base": "none",
+  "why": [
+    "west_gash.L1.odai_gorge",
+    "west_gash.L3.odai_river",
+    "morrowind.L6.great_house_seats"
+  ],
   "sil": "twin-bank-river-terrace",
-  "reach": 120,
-  "radius": 120,
-  "kit": "hlaalu",
+  "base": "none",
   "overlay": "balmora",
-  "names": {"inn": "balmora_council_club", "store": "balmora_saltrice_exchange", "smithy": "balmora_river_forge"},
-  "innKey": "balmora_council_club",
-  "gates": [[0, 74], [-74, -1], [74, -1]],
-  "terraces": [
-    {"rect": [-30, -78, 30, -42], "level": 3, "parapet": 1}
+  "radius": 96,
+  "reach": 114,
+  "innKey": "bm_eight_plates",
+  "names": {
+    "inn": "bm_eight_plates",
+    "store": "bm_ravirrs_trader",
+    "smithy": "bm_meldors_forge"
+  },
+  "gates": [
+    [
+      0,
+      -90
+    ],
+    [
+      0,
+      90
+    ],
+    [
+      90,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "awning_row",
+      "at": [
+        -18,
+        0
+      ],
+      "face": "south",
+      "name": "balmora_commercial_plaza",
+      "overlay": "balmora"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "balmora"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "west_gash"
+    }
   ],
   "buildings": [
-    {"kind": "manor", "at": [0, -60], "size": [17, 19], "face": "S", "flags": ["upper", "rich", "seat"], "name": "balmora_council_manor", "raise": 3},
-    {"kind": "tower", "at": [78, 56], "size": [7, 7], "h": 30, "margin": 1, "name": "balmora_silt_strider_port"}
-  ],
-  "nets": [
-    {"type": "canal", "via": [[-30, -108], [-38, -76], [-28, -38], [-36, 0], [-24, 38], [-34, 74], [-28, 112]], "width": 11, "bridges": [0.27, 0.5, 0.74], "bridge_width": 5},
-    {"type": "path", "via": [[0, 74], [8, 56], [-4, 36], [10, 14], [-2, -8], [4, -32]], "width": 5, "major": true, "tag": "east"},
-    {"type": "path", "via": [[-74, -1], [-58, 6], [-46, -4]], "width": 4, "major": true, "tag": "west"},
-    {"type": "path", "via": [[74, -1], [56, 4], [34, -6], [14, -8]], "width": 4, "major": true, "tag": "east"},
-    {"type": "path", "via": [[-52, 44], [-50, 20], [-52, -14], [-46, -46], [-50, -80]], "width": 3, "tag": "west"},
-    {"type": "path", "via": [[-4, 76], [-8, 58], [-10, 42]], "width": 3, "tag": "east"},
-    {"type": "path", "via": [[20, 100], [34, 70], [30, 40], [42, 14], [38, -20], [44, -52]], "width": 3, "tag": "east"},
-    {"type": "path", "via": [[66, 70], [50, 54], [30, 58]], "width": 3, "tag": "east"},
-    {"type": "path", "via": [[-84, 56], [-62, 52], [-44, 60]], "width": 3, "tag": "west"},
-    {"type": "path", "via": [[-70, -40], [-52, -60], [-44, -92]], "width": 3, "tag": "west"},
-    {"type": "path", "via": [[56, -40], [38, -66], [22, -84]], "width": 3, "tag": "east"}
-  ],
-  "plazas": [
-    {"at": [10, 34], "size": 15, "variant": 1, "stalls": 6, "name": "balmora_guild_row"}
-  ],
-  "zones": [
-    {"at": [10, -60], "r": 30, "zone": "noble"},
-    {"at": [10, 30], "r": 26, "zone": "centre"},
-    {"at": [-56, 30], "r": 24, "zone": "craft"},
-    {"at": [70, 60], "r": 24, "zone": "poor"}
-  ],
-  "fabric": {"radius": 108, "target": 0.55},
-  "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "balmora_council_club", "on": "east"},
-    {"kind": "store", "count": 3, "name": "balmora_saltrice_exchange", "on": "east"},
-    {"kind": "smithy", "size": [11, 9], "name": "balmora_river_forge", "on": "west"},
-    {"kind": "alchemist", "count": 2, "on": "west"},
-    {"kind": "temple", "size": [11, 17], "on": "east"}
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_hlaalu_council_manor"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        63,
+        25
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_tribunal_temple"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        30,
+        61
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_eight_plates"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        65
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_south_wall_cornerclub"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_council_club"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -58,
+        36
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_lucky_lockup"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_nalcarya_alchemist"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -67,
+        -12
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_meldors_forge"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_ravirrs_trader"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -41,
+        -54
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_clagius_outfitter"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_dorisa_books"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        6,
+        -68
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_nerano_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_hlaalo_manor"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        50,
+        -46
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_caius_cosades_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "balmora",
+      "name": "bm_dura_gra_bol_house"
+    }
   ],
   "features": [
-    {"type": "shrine", "theme": "tribunal:almalexia", "where": "street", "tag": "east"},
-    {"type": "statue", "theme": "tribunal:vivec", "where": "square"},
-    {"type": "fountain", "where": "square"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "banners", "count": 2, "where": "gate"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "east"},
-    {"type": "market", "where": "free"},
-    {"type": "garden", "where": "free"},
-    {"type": "pond", "where": "edge"},
-    {"type": "waterwheel", "at": [-18, 16]},
-    {"type": "great_tree", "theme": "dark_oak", "where": "free"}
+    {
+      "type": "lamps",
+      "theme": "odai_paper_lanterns",
+      "count": 4
+    },
+    {
+      "type": "banners",
+      "theme": "house_hlaalu_scales",
+      "count": 4
+    },
+    {
+      "type": "market",
+      "theme": "balmora_awning_stalls",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "odai_cistern",
+      "count": 1
+    }
   ],
   "titles": {
-    "balmora_council_club": "The Council Club",
-    "balmora_saltrice_exchange": "Saltrice Exchange",
-    "balmora_river_forge": "River Forge",
-    "balmora_council_manor": "Hlaalu Council Manor",
-    "balmora_silt_strider_port": "Silt Strider Port",
-    "balmora_guild_row": "Guild Row"
+    "balmora_commercial_plaza": "Balmora Commercial Plaza",
+    "bm_hlaalu_council_manor": "Hlaalu Council Manor",
+    "bm_tribunal_temple": "Balmora Tribunal Temple",
+    "bm_fighters_guild": "Balmora Fighters Guild",
+    "bm_mages_guild": "Balmora Mages Guild",
+    "bm_eight_plates": "Eight Plates",
+    "bm_south_wall_cornerclub": "South Wall Cornerclub",
+    "bm_council_club": "Council Club",
+    "bm_lucky_lockup": "Lucky Lockup",
+    "bm_nalcarya_alchemist": "Nalcarya of White Haven",
+    "bm_meldors_forge": "Meldor's Armor & Forge",
+    "bm_ravirrs_trader": "Ra'Virr's Trader",
+    "bm_clagius_outfitter": "Clagius Clanler's Outfitter",
+    "bm_dorisa_books": "Dorisa Darvel's Bookseller",
+    "bm_nerano_manor": "Nerano Manor",
+    "bm_hlaalo_manor": "Hlaalo Manor",
+    "bm_caius_cosades_house": "Caius Cosades's House",
+    "bm_dura_gra_bol_house": "Dura gra-Bol's Tower House"
   }
 }

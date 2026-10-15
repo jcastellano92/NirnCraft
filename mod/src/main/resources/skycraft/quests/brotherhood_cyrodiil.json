@@ -3,38 +3,122 @@
   "category": "faction",
   "faction": "dark_brotherhood",
   "region": "cyrodiil/nibenay_basin",
-  "speakers": {"narrator": "Narrator", "night_mother": "The Night Mother"},
+  "speakers": {
+    "narrator": "Narrator",
+    "night_mother": "The Night Mother"
+  },
   "places": {
-    "wreck_of_the_gilded_gull": {"x": 3880, "z": 10180, "r": 30, "name": "Wreck of the Gilded Gull"},
-    "vallerian_lodge": {"x": 3960, "z": 4740, "r": 28, "name": "Vallerian Hunting Lodge"},
-    "fort_farragut": {"x": 3380, "z": 4720, "r": 32, "name": "Fort Farragut"},
-    "night_mother_crypt": {"x": 1960, "z": 8820, "r": 26, "name": "Crypt of the Night Mother"}
+    "wreck_of_the_gilded_gull": {
+      "x": 3880,
+      "z": 10180,
+      "r": 30,
+      "name": "Wreck of the Gilded Gull"
+    },
+    "vallerian_lodge": {
+      "x": 3960,
+      "z": 4740,
+      "r": 28,
+      "name": "Vallerian Hunting Lodge"
+    },
+    "fort_farragut": {
+      "x": 3380,
+      "z": 4720,
+      "r": 32,
+      "name": "Fort Farragut"
+    },
+    "night_mother_crypt": {
+      "x": 1960,
+      "z": 8820,
+      "r": 26,
+      "name": "Crypt of the Night Mother"
+    }
   },
   "npcs": [
-    {"id": "lucien_lachance", "name": "Lucien Lachance", "role": "assassin", "place": "cheydinhal", "offset": [-14, 12],
-     "greet": "Don't be alarmed. I've been watching you for some time, and I like what I've seen. The Family has an offer for you."},
-    {"id": "vicente_valtieri", "name": "Vicente Valtieri", "role": "vampire", "place": "cheydinhal", "offset": [3, 6], "hall": "dark_brotherhood",
-     "greet": "Forgive me if I don't offer my hand. It's cold, and I've learned that guests find it unsettling. Contracts, my friend, are my department."},
-    {"id": "ocheeva", "name": "Ocheeva", "role": "assassin", "place": "cheydinhal", "offset": [5, 3], "female": true, "hall": "dark_brotherhood",
-     "greet": "The Sanctuary is your home now. Eat, sleep, train. When there is work, Vicente will tell you. When there is trouble, I will."}
+    {
+      "id": "lucien_lachance",
+      "name": "Lucien Lachance",
+      "role": "assassin",
+      "place": "cheydinhal",
+      "offset": [
+        -14,
+        12
+      ],
+      "greet": "Don't be alarmed. I've been watching you for some time, and I like what I've seen. The Family has an offer for you."
+    },
+    {
+      "id": "vicente_valtieri",
+      "name": "Vicente Valtieri",
+      "role": "vampire",
+      "place": "cheydinhal",
+      "offset": [
+        3,
+        6
+      ],
+      "hall": "dark_brotherhood",
+      "greet": "Forgive me if I don't offer my hand. It's cold, and I've learned that guests find it unsettling. Contracts, my friend, are my department."
+    },
+    {
+      "id": "ocheeva",
+      "name": "Ocheeva",
+      "role": "assassin",
+      "place": "cheydinhal",
+      "offset": [
+        5,
+        3
+      ],
+      "female": true,
+      "hall": "dark_brotherhood",
+      "greet": "The Sanctuary is your home now. Eat, sleep, train. When there is work, Vicente will tell you. When there is trouble, I will."
+    }
   ],
   "relics": [
-    {"id": "gull_captains_log", "name": "Captain's Log of the Gilded Gull", "desc": "The last page is a tally of ransoms. The handwriting gets shakier toward the end.", "icon": 7},
-    {"id": "forged_black_hand_orders", "name": "Forged Black Hand Orders", "desc": "Orders in Lucien's style, sealed with a Speaker's mark. The ink is only weeks old, and the mark is wrong.", "icon": 11}
+    {
+      "id": "gull_captains_log",
+      "name": "Captain's Log of the Gilded Gull",
+      "desc": "The last page is a tally of ransoms. The handwriting gets shakier toward the end.",
+      "icon": 7
+    },
+    {
+      "id": "forged_black_hand_orders",
+      "name": "Forged Black Hand Orders",
+      "desc": "Orders in Lucien's style, sealed with a Speaker's mark. The ink is only weeks old, and the mark is wrong.",
+      "icon": 11
+    }
   ],
   "scenes": {
     "dbc_purification": [
-      ["narrator", "The note is in Lucien's hand and bears the Black Hand's seal. Its instruction is short: the Cheydinhal Sanctuary harbours a traitor, and the Sanctuary must be cleansed."],
-      ["narrator", "Below, the Family is at supper. Someone laughs at one of Vicente's stories. The order does not say which of them is the traitor."]
+      [
+        "narrator",
+        "The note is in Lucien's hand and bears the Black Hand's seal. Its instruction is short: the Cheydinhal Sanctuary harbours a traitor, and the Sanctuary must be cleansed."
+      ],
+      [
+        "narrator",
+        "Below, the Family is at supper. Someone laughs at one of Vicente's stories. The order does not say which of them is the traitor."
+      ]
     ],
     "dbc_lucien_framed": [
-      ["lucien_lachance", "I never wrote those orders. Someone in the Black Hand has been forging my seal and feeding our own people to the Family's knives."],
-      ["lucien_lachance", "The Hand thinks I'm the traitor. They'll come for me before long. There is only one who knows the truth: the Night Mother. Her crypt lies beneath Bravil."]
+      [
+        "lucien_lachance",
+        "I never wrote those orders. Someone in the Black Hand has been forging my seal and feeding our own people to the Family's knives."
+      ],
+      [
+        "lucien_lachance",
+        "The Hand thinks I'm the traitor. They'll come for me before long. There is only one who knows the truth: the Night Mother. Her crypt lies beneath Bravil."
+      ]
     ],
     "dbc_night_mother": [
-      ["narrator", "In the crypt below Bravil, a stone coffin stands among cold candles. A woman's voice speaks from inside it, soft and very close."],
-      ["night_mother", "My Speaker is innocent. The one who betrayed my children wears their trust like a cloak, and you have just torn it from him."],
-      ["night_mother", "Hear me now, and only you. You will be my Listener. My words will come to you, and through you to the Family."]
+      [
+        "narrator",
+        "In the crypt below Bravil, a stone coffin stands among cold candles. A woman's voice speaks from inside it, soft and very close."
+      ],
+      [
+        "night_mother",
+        "My Speaker is innocent. The one who betrayed my children wears their trust like a cloak, and you have just torn it from him."
+      ],
+      [
+        "night_mother",
+        "Hear me now, and only you. You will be my Listener. My words will come to you, and through you to the Family."
+      ]
     ]
   },
   "quests": [
@@ -42,131 +126,483 @@
       "id": "dbc_a_dark_offer",
       "title": "A Dark Offer",
       "start": "npc:lucien_lachance",
-      "requires": ["!faction:dark_brotherhood", "!faction:morag_tong"],
+      "requires": [
+        "!faction:dark_brotherhood",
+        "!faction:morag_tong"
+      ],
       "offer": "Who are you, and why are you following me?",
       "pitch": "Lucien Lachance, of the Dark Brotherhood. You have a talent the world wastes. Prove it to me: a moneylender in Bravil, Gaelan Hollowtree, has been sentenced by someone who paid us dearly. Kill him, and come to the Cheydinhal Sanctuary. The door will ask you a question. Answer it with 'Silence, my Brother.'",
       "desc": "Lucien Lachance, a Speaker of the Dark Brotherhood, found me and made an offer: murder a Bravil moneylender named Gaelan Hollowtree, and the Brotherhood will take me in at its Sanctuary in Cheydinhal.",
       "objectives": [
-        {"type": "go", "place": "bravil", "text": "Travel to Bravil"},
-        {"type": "kill", "place": "bravil", "offset": [32, -18], "placement": "near", "text": "Kill Gaelan Hollowtree",
-         "spawn": [{"type": "npc:merchant", "name": "Gaelan Hollowtree", "target": true}],
-         "journal": "Hollowtree was counting coins when I found him. He never finished the stack."},
-        {"type": "go", "place": "cheydinhal", "offset": [3, 6], "radius": 10, "text": "Go to the Dark Brotherhood Sanctuary in Cheydinhal"},
-        {"type": "talk", "npc": "ocheeva", "text": "Speak with Ocheeva in the Sanctuary",
-         "topic": "Silence, my Brother. Lucien Lachance sent me.",
-         "reply": "Then welcome home. The Family is small here, and close. You will take your contracts from Vicente. Lucien will visit, when he must."}
+        {
+          "type": "go",
+          "place": "bravil",
+          "text": "Travel to Bravil"
+        },
+        {
+          "type": "kill",
+          "place": "bravil",
+          "offset": [
+            32,
+            -18
+          ],
+          "placement": "near",
+          "text": "Kill Gaelan Hollowtree",
+          "spawn": [
+            {
+              "type": "npc:merchant",
+              "name": "Gaelan Hollowtree",
+              "target": true
+            }
+          ],
+          "journal": "Hollowtree was counting coins when I found him. He never finished the stack."
+        },
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "offset": [
+            3,
+            6
+          ],
+          "radius": 10,
+          "text": "Go to the Dark Brotherhood Sanctuary in Cheydinhal"
+        },
+        {
+          "type": "talk",
+          "npc": "ocheeva",
+          "text": "Speak with Ocheeva in the Sanctuary",
+          "topic": "Silence, my Brother. Lucien Lachance sent me.",
+          "reply": "Then welcome home. The Family is small here, and close. You will take your contracts from Vicente. Lucien will visit, when he must.",
+          "place": "cheydinhal"
+        }
       ],
       "outro": "I murdered Gaelan Hollowtree and was welcomed into the Cheydinhal Sanctuary of the Dark Brotherhood.",
-      "rewards": {"gold": 200, "join": true, "items": ["skycraft:shrouded_chestplate", "skycraft:iron_dagger"]}
+      "rewards": {
+        "gold": 200,
+        "join": true,
+        "items": [
+          "skycraft:shrouded_chestplate",
+          "skycraft:iron_dagger"
+        ]
+      },
+      "region": "cyrodiil/nibenay_basin",
+      "why": [
+        "cyrodiil/nibenay_basin.L7.dunmer_quarter",
+        "cyrodiil/nibenay_basin.L7.knightly_dilettantes"
+      ],
+      "consequence": {
+        "world_state": "dbc_a_dark_offer_resolved",
+        "flag": "conseq_dbc_a_dark_offer",
+        "summary": "I murdered Gaelan Hollowtree and was welcomed into the Cheydinhal Sanctuary of the Dark Brotherhood."
+      }
     },
     {
       "id": "dbc_salt_and_silence",
       "title": "Salt and Silence",
       "start": "npc:vicente_valtieri",
-      "requires": ["quest:dbc_a_dark_offer|faction:dark_brotherhood"],
+      "requires": [
+        "quest:dbc_a_dark_offer|faction:dark_brotherhood"
+      ],
       "offer": "Do you have a contract for me, Vicente?",
       "pitch": "A charming one. Captain Garro Velmont ran his ship aground in Topal Bay and now holds the wreck like a fortress, ransoming the passengers he pulled out of the water. Someone in Leyawiin would like him to stop. Permanently.",
       "desc": "Vicente Valtieri gave me my first true contract: Captain Garro Velmont, who holds his own wrecked ship in Topal Bay and ransoms its survivors.",
       "objectives": [
-        {"type": "go", "place": "wreck_of_the_gilded_gull", "text": "Find the wreck of the Gilded Gull near Leyawiin"},
-        {"type": "clear", "place": "wreck_of_the_gilded_gull", "text": "Deal with Velmont's crew",
-         "spawn": [{"type": "npc:thug", "count": 3, "name": "Gilded Gull Sailor", "hostile": true}]},
-        {"type": "kill", "place": "wreck_of_the_gilded_gull", "text": "Kill Captain Garro Velmont",
-         "spawn": [{"type": "npc:thug", "name": "Captain Garro Velmont", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3, "hostile": true, "weapon": "skycraft:steel_sword"}]},
-        {"type": "retrieve", "place": "wreck_of_the_gilded_gull", "relic": "gull_captains_log", "radius": 10, "text": "Take the captain's log as proof"},
-        {"type": "deliver", "npc": "vicente_valtieri", "relic": "gull_captains_log", "text": "Return to Vicente Valtieri",
-         "topic": "Velmont is dead. His log, for the client.",
-         "reply": "Splendid. The prisoners will find their own way home, I imagine, and the client will sleep soundly. Your payment, with my compliments."}
+        {
+          "type": "go",
+          "place": "wreck_of_the_gilded_gull",
+          "text": "Find the wreck of the Gilded Gull near Leyawiin"
+        },
+        {
+          "type": "clear",
+          "place": "wreck_of_the_gilded_gull",
+          "text": "Deal with Velmont's crew",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "count": 3,
+              "name": "Gilded Gull Sailor",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "wreck_of_the_gilded_gull",
+          "text": "Kill Captain Garro Velmont",
+          "spawn": [
+            {
+              "type": "npc:thug",
+              "name": "Captain Garro Velmont",
+              "target": true,
+              "boss": true,
+              "hp": 2.0,
+              "dmg": 1.3,
+              "hostile": true,
+              "weapon": "skycraft:steel_sword"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "wreck_of_the_gilded_gull",
+          "relic": "gull_captains_log",
+          "radius": 10,
+          "text": "Take the captain's log as proof"
+        },
+        {
+          "type": "deliver",
+          "npc": "vicente_valtieri",
+          "relic": "gull_captains_log",
+          "text": "Return to Vicente Valtieri",
+          "topic": "Velmont is dead. His log, for the client.",
+          "reply": "Splendid. The prisoners will find their own way home, I imagine, and the client will sleep soundly. Your payment, with my compliments.",
+          "place": "cheydinhal"
+        }
       ],
       "outro": "I killed Captain Garro Velmont aboard his own wreck. Vicente was delighted, in the way only a very old vampire can be.",
-      "rewards": {"gold": 400, "faction_points": 2}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 2
+      },
+      "region": "cyrodiil/blackwood",
+      "why": [
+        "cyrodiil/blackwood.L7.khajiit_border_village",
+        "cyrodiil/blackwood.L8.argonian_hist_reverence"
+      ],
+      "consequence": {
+        "world_state": "dbc_salt_and_silence_resolved",
+        "flag": "conseq_dbc_salt_and_silence",
+        "summary": "I killed Captain Garro Velmont aboard his own wreck. Vicente was delighted, in the way only a very old vampire can be."
+      }
     },
     {
       "id": "dbc_a_quiet_gathering",
       "title": "A Quiet Gathering",
       "start": "npc:vicente_valtieri",
-      "requires": ["quest:dbc_salt_and_silence"],
+      "requires": [
+        "quest:dbc_salt_and_silence"
+      ],
       "offer": "Anything more delicate?",
       "pitch": "Very delicate. Five guests have been invited to a hunting party at the Vallerian lodge, east of Cheydinhal, each promised a share of a dead man's fortune. Our client wants three of them dead before the week is out, and the others too frightened to say why. Make it look like the lodge itself is cursed.",
       "desc": "Vicente Valtieri sent me to the Vallerian hunting lodge, where guests gathered for an inheritance. Three of them are to die, one by one, without the others ever seeing who did it.",
       "objectives": [
-        {"type": "go", "place": "vallerian_lodge", "text": "Join the guests at the Vallerian lodge"},
-        {"type": "kill", "place": "vallerian_lodge", "offset": [6, -4], "placement": "near", "text": "Kill the first guest, Ser Draco Annius, while he sleeps",
-         "spawn": [{"type": "npc:citizen", "name": "Ser Draco Annius", "target": true}]},
-        {"type": "kill", "place": "vallerian_lodge", "offset": [-8, 6], "placement": "near", "text": "Kill the second guest, Neris Telvar, alone in the cellar",
-         "spawn": [{"type": "npc:citizen", "name": "Neris Telvar", "target": true}],
-         "journal": "By the second morning the guests were eating with their backs to the wall. Nobody suspected the polite newcomer who poured the wine."},
-        {"type": "kill", "place": "vallerian_lodge", "offset": [14, 10], "placement": "near", "text": "Kill the last mark, Brutus Venn, who has armed himself",
-         "spawn": [{"type": "npc:adventurer", "name": "Brutus Venn", "target": true, "hostile": true, "hp": 1.5}]},
-        {"type": "talk", "npc": "vicente_valtieri", "text": "Report to Vicente Valtieri",
-         "topic": "Three guests dead. The other two fled before breakfast, swearing the lodge is haunted.",
-         "reply": "Haunted! The client will adore that. You have an artist's touch. Lucien will hear of it, I promise you."}
+        {
+          "type": "go",
+          "place": "vallerian_lodge",
+          "text": "Join the guests at the Vallerian lodge"
+        },
+        {
+          "type": "kill",
+          "place": "vallerian_lodge",
+          "offset": [
+            6,
+            -4
+          ],
+          "placement": "near",
+          "text": "Kill the first guest, Ser Draco Annius, while he sleeps",
+          "spawn": [
+            {
+              "type": "npc:citizen",
+              "name": "Ser Draco Annius",
+              "target": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "vallerian_lodge",
+          "offset": [
+            -8,
+            6
+          ],
+          "placement": "near",
+          "text": "Kill the second guest, Neris Telvar, alone in the cellar",
+          "spawn": [
+            {
+              "type": "npc:citizen",
+              "name": "Neris Telvar",
+              "target": true
+            }
+          ],
+          "journal": "By the second morning the guests were eating with their backs to the wall. Nobody suspected the polite newcomer who poured the wine."
+        },
+        {
+          "type": "kill",
+          "place": "vallerian_lodge",
+          "offset": [
+            14,
+            10
+          ],
+          "placement": "near",
+          "text": "Kill the last mark, Brutus Venn, who has armed himself",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Brutus Venn",
+              "target": true,
+              "hostile": true,
+              "hp": 1.5
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "vicente_valtieri",
+          "text": "Report to Vicente Valtieri",
+          "topic": "Three guests dead. The other two fled before breakfast, swearing the lodge is haunted.",
+          "reply": "Haunted! The client will adore that. You have an artist's touch. Lucien will hear of it, I promise you.",
+          "place": "cheydinhal"
+        }
       ],
       "outro": "Three guests died at the Vallerian lodge, and the two survivors will tell anyone who listens that the place is cursed.",
-      "rewards": {"gold": 600, "faction_points": 3, "items": [{"item": "skycraft:shrouded_boots", "name": "Shrouded Boots", "enchant": {"feather_falling": 2}}]}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 3,
+        "items": [
+          {
+            "item": "skycraft:shrouded_boots",
+            "name": "Shrouded Boots",
+            "enchant": {
+              "feather_falling": 2
+            }
+          }
+        ]
+      },
+      "region": "cyrodiil/nibenay_basin",
+      "why": [
+        "cyrodiil/nibenay_basin.L7.knightly_dilettantes",
+        "cyrodiil/nibenay_basin.L8.dunmer_ancestor_rites"
+      ],
+      "consequence": {
+        "world_state": "dbc_a_quiet_gathering_resolved",
+        "flag": "conseq_dbc_a_quiet_gathering",
+        "summary": "Three guests died at the Vallerian lodge, and the two survivors will tell anyone who listens that the place is cursed."
+      }
     },
     {
       "id": "dbc_purification",
       "title": "Purification",
       "start": "auto",
-      "requires": ["quest:dbc_a_quiet_gathering"],
+      "requires": [
+        "quest:dbc_a_quiet_gathering"
+      ],
       "desc": "Sealed orders from the Black Hand reached me in Lucien's handwriting. They say the Cheydinhal Sanctuary harbours a traitor and must be cleansed, every member of it. I have to decide what to do.",
       "objectives": [
-        {"type": "go", "place": "cheydinhal", "offset": [3, 6], "radius": 10, "text": "Return to the Cheydinhal Sanctuary", "actions": "scene:dbc_purification"},
-        {"type": "talk", "npc": "ocheeva", "text": "Decide what to do with the order",
-         "topic": "I've received orders from the Black Hand about this Sanctuary.",
-         "reply": "You have that look. The one people have before they do something they can't undo. Whatever it is, I'd rather hear it now."},
-        {"type": "talk", "npc": "ocheeva", "text": "Choose: obey the Purification order, or warn the Family",
-         "choices": [
-           {"label": "The Hand has spoken. I'll carry out the order.", "reply": "Then do what you came for, and may the Night Mother forgive whoever wrote that order.", "actions": "flag:dbc_purified;retire:ocheeva;retire:vicente_valtieri"},
-           {"label": "This order is wrong. I'm warning you instead.", "reply": "Lucien would never... no. Someone wants us dead and wants you to hold the knife. Go to Lucien. Find out who.", "actions": "flag:dbc_refused_purification"}
-         ]}
+        {
+          "type": "go",
+          "place": "cheydinhal",
+          "offset": [
+            3,
+            6
+          ],
+          "radius": 10,
+          "text": "Return to the Cheydinhal Sanctuary",
+          "actions": "scene:dbc_purification"
+        },
+        {
+          "type": "talk",
+          "npc": "ocheeva",
+          "text": "Decide what to do with the order",
+          "topic": "I've received orders from the Black Hand about this Sanctuary.",
+          "reply": "You have that look. The one people have before they do something they can't undo. Whatever it is, I'd rather hear it now.",
+          "place": "cheydinhal"
+        },
+        {
+          "type": "talk",
+          "npc": "ocheeva",
+          "text": "Choose: obey the Purification order, or warn the Family",
+          "choices": [
+            {
+              "label": "The Hand has spoken. I'll carry out the order.",
+              "reply": "Then do what you came for, and may the Night Mother forgive whoever wrote that order.",
+              "actions": "flag:dbc_purified;retire:ocheeva;retire:vicente_valtieri"
+            },
+            {
+              "label": "This order is wrong. I'm warning you instead.",
+              "reply": "Lucien would never... no. Someone wants us dead and wants you to hold the knife. Go to Lucien. Find out who.",
+              "actions": "flag:dbc_refused_purification"
+            }
+          ],
+          "place": "cheydinhal"
+        }
       ],
       "outro": "I chose what to do with the Purification order. Either way, Lucien Lachance has some explaining to do.",
-      "rewards": {"gold": 500, "faction_points": 4}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "region": "cyrodiil/nibenay_basin",
+      "why": [
+        "cyrodiil/nibenay_basin.L8.arkay_chapel",
+        "cyrodiil/nibenay_basin.L9.dunmer_count"
+      ],
+      "consequence": {
+        "world_state": "dbc_purification_resolved",
+        "flag": "conseq_dbc_purification",
+        "summary": "I chose what to do with the Purification order. Either way, Lucien Lachance has some explaining to do."
+      }
     },
     {
       "id": "dbc_speaker_betrayed",
       "title": "A Speaker Betrayed",
       "start": "auto",
-      "requires": ["quest:dbc_purification"],
+      "requires": [
+        "quest:dbc_purification"
+      ],
       "desc": "Lucien Lachance has fled to Fort Farragut, his hideout near Cheydinhal, and sent word that the orders I received were never his. Someone inside the Black Hand is forging them.",
       "on_start": "relocate:lucien_lachance:fort_farragut",
       "objectives": [
-        {"type": "go", "place": "fort_farragut", "text": "Travel to Fort Farragut"},
-        {"type": "clear", "place": "fort_farragut", "placement": "structure", "text": "Fight off the assassins sent for Lucien",
-         "spawn": [{"type": "npc:assassin", "count": 3, "name": "Black Hand Executioner", "hostile": true, "armor": "#1a1a1a"}]},
-        {"type": "retrieve", "place": "fort_farragut", "relic": "forged_black_hand_orders", "radius": 10, "text": "Search the executioners for their orders"},
-        {"type": "deliver", "npc": "lucien_lachance", "relic": "forged_black_hand_orders", "text": "Show the orders to Lucien Lachance",
-         "topic": "The executioners carried these. Your seal, but not your hand.",
-         "reply": "No. Not mine. Listen to me carefully.",
-         "actions": "scene:dbc_lucien_framed"}
+        {
+          "type": "go",
+          "place": "fort_farragut",
+          "text": "Travel to Fort Farragut"
+        },
+        {
+          "type": "clear",
+          "place": "fort_farragut",
+          "placement": "structure",
+          "text": "Fight off the assassins sent for Lucien",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "count": 3,
+              "name": "Black Hand Executioner",
+              "hostile": true,
+              "armor": "#1a1a1a"
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "fort_farragut",
+          "relic": "forged_black_hand_orders",
+          "radius": 10,
+          "text": "Search the executioners for their orders"
+        },
+        {
+          "type": "deliver",
+          "npc": "lucien_lachance",
+          "relic": "forged_black_hand_orders",
+          "text": "Show the orders to Lucien Lachance",
+          "topic": "The executioners carried these. Your seal, but not your hand.",
+          "reply": "No. Not mine. Listen to me carefully.",
+          "actions": "scene:dbc_lucien_framed",
+          "place": "cheydinhal"
+        }
       ],
       "outro": "Lucien Lachance has been framed by a traitor in the Black Hand. Only the Night Mother can name the culprit, and her crypt lies beneath Bravil.",
-      "rewards": {"gold": 600, "faction_points": 5}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 5
+      },
+      "region": "cyrodiil/nibenay_basin",
+      "why": [
+        "cyrodiil/nibenay_basin.L8.dunmer_ancestor_rites",
+        "cyrodiil/nibenay_basin.L9.market_quarrel"
+      ],
+      "consequence": {
+        "world_state": "dbc_speaker_betrayed_resolved",
+        "flag": "conseq_dbc_speaker_betrayed",
+        "summary": "Lucien Lachance has been framed by a traitor in the Black Hand. Only the Night Mother can name the culprit, and her crypt lies beneath Bravil."
+      }
     },
     {
       "id": "dbc_night_mothers_crypt",
       "title": "The Night Mother's Crypt",
       "start": "auto",
-      "requires": ["quest:dbc_speaker_betrayed"],
+      "requires": [
+        "quest:dbc_speaker_betrayed"
+      ],
       "desc": "To clear Lucien's name, I must reach the Night Mother's crypt beneath Bravil before the traitor does, and stand before her coffin.",
       "objectives": [
-        {"type": "go", "place": "night_mother_crypt", "text": "Find the Night Mother's crypt beneath Bravil"},
-        {"type": "clear", "place": "night_mother_crypt", "placement": "structure", "text": "Pass the crypt's guardians",
-         "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Crypt Guardian"}, {"type": "minecraft:wither_skeleton", "name": "Faithful of Sithis"}]},
-        {"type": "kill", "place": "night_mother_crypt", "placement": "structure", "text": "Kill the traitor, Mathieu Bellamont",
-         "spawn": [{"type": "npc:assassin", "name": "Mathieu Bellamont", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true, "armor": "#1a1a1a", "weapon": "skycraft:ebony_dagger"}],
-         "journal": "Bellamont was waiting by the coffin, sure that I would come to destroy it. He had forged every order and sold every life. He died at the Night Mother's feet.",
-         "actions": "scene:dbc_night_mother"},
-        {"type": "talk", "npc": "lucien_lachance", "text": "Tell Lucien Lachance what the Night Mother said",
-         "topic": "The Night Mother spoke to me. Bellamont was the traitor, and you are clear.",
-         "reply": "She spoke to you? Then everything changes. You are the Listener now, and the Black Hand answers to you. I'll be the first to kneel."}
+        {
+          "type": "go",
+          "place": "night_mother_crypt",
+          "text": "Find the Night Mother's crypt beneath Bravil"
+        },
+        {
+          "type": "clear",
+          "place": "night_mother_crypt",
+          "placement": "structure",
+          "text": "Pass the crypt's guardians",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "name": "Crypt Guardian"
+            },
+            {
+              "type": "minecraft:wither_skeleton",
+              "name": "Faithful of Sithis"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "night_mother_crypt",
+          "placement": "structure",
+          "text": "Kill the traitor, Mathieu Bellamont",
+          "spawn": [
+            {
+              "type": "npc:assassin",
+              "name": "Mathieu Bellamont",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "armor": "#1a1a1a",
+              "weapon": "skycraft:ebony_dagger"
+            }
+          ],
+          "journal": "Bellamont was waiting by the coffin, sure that I would come to destroy it. He had forged every order and sold every life. He died at the Night Mother's feet.",
+          "actions": "scene:dbc_night_mother"
+        },
+        {
+          "type": "talk",
+          "npc": "lucien_lachance",
+          "text": "Tell Lucien Lachance what the Night Mother said",
+          "topic": "The Night Mother spoke to me. Bellamont was the traitor, and you are clear.",
+          "reply": "She spoke to you? Then everything changes. You are the Listener now, and the Black Hand answers to you. I'll be the first to kneel.",
+          "place": "cheydinhal"
+        }
       ],
       "outro": "I killed the traitor Mathieu Bellamont in the Night Mother's crypt, and she chose me as her Listener. Lucien Lachance's name is clear.",
-      "rewards": {"gold": 1500, "faction_points": 6, "flags": ["dbc_listener"], "perks": 1,
-                  "items": [{"item": "skycraft:ebony_dagger", "name": "The Listener's Kiss", "enchant": {"sharpness": 4, "looting": 2}},
-                            {"item": "skycraft:shrouded_helmet", "name": "Shrouded Cowl of the Listener", "enchant": {"protection": 3}}]}
+      "rewards": {
+        "gold": 1500,
+        "faction_points": 6,
+        "flags": [
+          "dbc_listener"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "skycraft:ebony_dagger",
+            "name": "The Listener's Kiss",
+            "enchant": {
+              "sharpness": 4,
+              "looting": 2
+            }
+          },
+          {
+            "item": "skycraft:shrouded_helmet",
+            "name": "Shrouded Cowl of the Listener",
+            "enchant": {
+              "protection": 3
+            }
+          }
+        ]
+      },
+      "region": "cyrodiil/nibenay_valley",
+      "why": [
+        "cyrodiil/nibenay_valley.L9.corrupt_clerk",
+        "cyrodiil/nibenay_valley.L10.skooma_dens"
+      ],
+      "consequence": {
+        "world_state": "dbc_night_mothers_crypt_resolved",
+        "flag": "conseq_dbc_night_mothers_crypt",
+        "summary": "I killed the traitor Mathieu Bellamont in the Night Mother's crypt, and she chose me as her Listener. Lucien Lachance's name is clear."
+      }
     }
   ]
 }

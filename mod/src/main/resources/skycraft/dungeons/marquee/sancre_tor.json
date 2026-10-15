@@ -1,5 +1,9 @@
 {
  "id": "sancre_tor",
+ "why": [
+  "jerall_mountains.L10.sancre_tor_barrow",
+  "jerall_mountains.L11.reman_fortresses"
+ ],
  "kit": "akaviri",
  "entry_depth": 14,
  "open_top": true,

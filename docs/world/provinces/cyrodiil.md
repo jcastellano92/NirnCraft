@@ -38,225 +38,222 @@ its lake island to nine walled cities, each with a chapel to one of the Nine and
 Oblivion Crisis has just ended: Kvatch lies burned, gate scars smoke in the hills, the throne is empty and the Elder
 Council, the guilds and the counts all reach for the power that is left.
 
-| Layer | Fields `id`: text [causes] |
+| Layer | Fields `id` (causes): text |
 | --- | --- |
 | L1 Geology | `jerall_wall`: granite range along the Skyrim border, one deep notch at the Pale Pass. `valus_ridge`: a second range on the Morrowind border, separate from the Velothi. `colovian_plateau`: broken limestone upland in the west with karst caves and deep stream valleys. `rumare_basin`: a shallow lake basin at the centre whose island carries the oldest stonework in Tamriel. `nibenay_alluvium`: deep river silt east and south of the lake. `gold_coast_cliffs`: low sea cliffs and coves on the Abecean. `topal_mudflats`: mud, peat and mangrove ground where the Niben meets Topal Bay. `ore_highlands`: iron and silver seams in the Jerall and Colovian rock, gold traces in the Valus foothills. `ayleid_foundations`: elven stone, glass and charged light-stones under every county |
-| L2 Climate | `temperate_core`: mild, four-season heartland. `west_dry`: Colovia lies in the lee of its own uplands; drier, brighter, cooler nights [L1.colovian_plateau]. `east_wet`: the Nibenay is humid and fertile [L1.nibenay_alluvium]. `jerall_cold`: snow above ~150 blocks, blizzards in winter [L1.jerall_wall]. `abecean_storms`: westerly gales and sea fog on the Gold Coast [L1.gold_coast_cliffs]. `topal_heat`: sub-tropical, steamy Blackwood with thunderstorms [L1.topal_mudflats]. `lake_mist`: morning fog on Lake Rumare and the Niben |
-| L3 Water | `lake_rumare`: the lake at the heart, one bridge to the capital [L1.rumare_basin]. `niben`: the great river south from the lake through Bravil to Topal Bay at Leyawiin, braided in its lower course [L1.nibenay_alluvium]. `tributaries`: the Corbolo from the Valus through Cheydinhal, the Silverfish west of the lake, the Panther in Blackwood, the Strid on the Valenwood border. `ayleid_wells`: about 35 elven wells along the roads that still restore the weary [L1.ayleid_foundations]. `who_holds_water`: the capital controls the lake crossing; counts toll the river ports; the wells are public and treated as sacred, so no lord may fence one |
-| L4 Ecology | `oak_beech_forest` (Great Forest) [L2.temperate_core]. `highland_pasture` with pine and elk [L2.west_dry]. `heath_and_grain` round the lake [L3.lake_rumare]. `vine_cypress` slopes in the West Weald [L2.west_dry]. `alpine_spruce` [L2.jerall_cold]. `mangrove_swamp` [L2.topal_heat]. `riverine_reeds` with nirnroot by running water [L3.niben]. Predators and monsters: wolves, bears, mountain lions, trolls on high ground, minotaurs in deep forest, ogres in the hills, land dreugh and mudcrabs on shores, goblin tribes in caves [L1.colovian_plateau], scorched ground and stray lesser Daedra round every gate scar [L9.gate_scars] |
-| L5 Economy | `grain_belt`: wheat, barley and cattle in the Heartlands and Nibenay [L3.niben, L4.heath_and_grain]. `wine`: rival estates on the Weald slopes [L4.vine_cypress]. `timber`: oak from the Great Forest [L4.oak_beech_forest]. `herding`: sheep and horses in Colovia [L4.highland_pasture]. `mining`: iron and silver [L1.ore_highlands]. `river_trade`: barges down the Niben [L3.niben]. `sea_trade`: Anvil's fleet to the west, Leyawiin's to Black Marsh and Elsweyr [L1.gold_coast_cliffs, L3.niben]. `skooma_smuggling`: up the Niben from Elsweyr [L3.niben, L9.border_pressure]. `empire_revenue`: tax, offices and the Arena keep the capital rich |
-| L6 Settlement | `nine_cities`: one capital and eight walled cities, each at a crossing, pass, port or river [L3, L1]. `radial_roads`: eight named roads from the lake [L3.lake_rumare]. `inn_chain`: a roadside inn every half-day [P.L6.radial_roads]. `busy_centres`: the Imperial City (every road, the Council, the Arena), Anvil (the western sea), Chorrol (highland market and the Fighters Guild hall), Leyawiin (the river mouth) [L5]. `poor_places`: Bravil (river slum on stilts), Kvatch (burned), closed villages in the hills [L5.skooma_smuggling, L9.gate_scars] |
-| L7 Society | `colovian_nibenese_split`: west is martial, plain and clannish; east is ornate, mercantile, tattooed and mystical [L2.west_dry, L2.east_wet]. `class_ladder`: Council families and counts, guild masters and merchants, craftsmen, farm tenants, river labourers, beggars. `rule_of_law`: city watch and Legion, bounties, a fine or a cell for every crime. `guilds_everywhere`: Mages and Fighters halls in every city, the Arcane University in the capital, a thieves' network among the poor, assassins in the dark [L6.nine_cities] |
-| L8 Belief | `the_nine`: each city's chapel is dedicated to one Divine (Akatosh at Kvatch, Arkay at Cheydinhal, Dibella at Anvil, Julianos at Skingrad, Mara at Bravil, Stendarr at Chorrol, Talos at Bruma, Zenithar at Leyawiin; the Temple of the One in the capital) [L6.nine_cities]. `wayshrines`: about 30 roadside shrines to the Nine [L6.radial_roads]. `daedric_shrines`: 15 Daedric statues in the wild, tended by small cults [L10]. `doomstones`: about 20 old standing stones that grant a sign's blessing [L11.ayleid_era]. `elf_ruin_fear`: people avoid the white ruins and tell stories about them [L1.ayleid_foundations]. `arena_glory`: blood sport as civic pride [L5.empire_revenue] |
-| L9 Politics | `throne_empty`: no emperor, the Dragonfires dark, the Elder Council and its chancellor rule [L11.oblivion_crisis]. `gate_scars`: dozens of closed gates leave burned rings that still leak [L11.oblivion_crisis]. `county_rivalry`: counts test how far the Council can reach. `guild_wars`: the Mages Guild against the necromancers; the Fighters Guild against a rival mercenary company based in Leyawiin [L7.guilds_everywhere]. `border_pressure`: skooma from Elsweyr, a newly confident Black Marsh, Dunmer settlers and their own politics in the east [L6.nine_cities] |
-| L10 Hidden | `ayleid_undercity`: 50-odd Ayleid ruins and a pre-Imperial reservoir under the cities, home to undead, necromancers, conjurers and treasure hunters [L1.ayleid_foundations]. `cult_remnants`: the doomsday cult's surviving cells hide in lake caves and old forts [L9.gate_scars]. `abandoned_forts`: about 50 ruined forts from older wars taken by bandits, marauders and vampires [L11.three_banner_war]. `road_bandits`: on the long legs (Gold Road, Yellow Road) far from city watches [L6.radial_roads]. `assassins_and_thieves`: a sanctuary under a quiet house in Cheydinhal, a guild among the Waterfront shacks [L7.guilds_everywhere] |
-| L11 History | `ayleid_era`: the elves built White-Gold Tower and ruled the heartland with human slaves. `alessian_revolt`: the slaves rose, took the tower and founded the Empire; the Alessian scroll-temples and gates are its relics. `reman_akaviri`: the Reman emperors and their Akaviri guard left Sancre Tor, the Pale Pass fort and Cloud Ruler. `three_banner_war`: keeps and forts from a Second Era war of three alliances for the Ruby Throne. `septim_empire`: the roads, chapels and Legion. `oblivion_crisis`: the emperor murdered, gates opened, Kvatch destroyed, the last heir's sacrifice ended it |
+| L2 Climate | `temperate_core` (L1.rumare_basin): mild, four-season heartland. `west_dry` (L1.colovian_plateau): Colovia lies in the lee of its own uplands with drier, brighter days and cooler nights. `east_wet` (L1.nibenay_alluvium): the Nibenay is humid and fertile. `jerall_cold` (L1.jerall_wall): snow above 150 blocks and blizzards in winter. `abecean_storms` (L1.gold_coast_cliffs): westerly gales and sea fog on the Gold Coast. `topal_heat` (L1.topal_mudflats): sub-tropical, steamy Blackwood with thunderstorms. `lake_mist` (L1.rumare_basin): morning fog on Lake Rumare and the Niben |
+| L3 Water | `lake_rumare` (L1.rumare_basin, L2.temperate_core): the lake at the heart, with one bridge to the capital. `niben` (L1.nibenay_alluvium, L2.east_wet): the great river south from the lake through Bravil to Topal Bay at Leyawiin, braided in its lower course. `tributaries` (L1.valus_ridge, L1.colovian_plateau): the Corbolo from the Valus through Cheydinhal, the Silverfish west of the lake, the Panther in Blackwood, the Strid on the Valenwood border. `ayleid_wells` (L1.ayleid_foundations): about 35 elven wells along the roads that still restore the weary. `who_holds_water` (L1.rumare_basin, L3.lake_rumare, L3.niben): the capital controls the lake crossing; counts toll the river ports; the wells are public and treated as sacred, so no lord may fence one |
+| L4 Ecology | `oak_beech_forest` (L2.temperate_core): the Great Forest canopy of oak and beech. `highland_pasture` (L1.colovian_plateau, L2.west_dry): upland pastures with pine and elk. `heath_and_grain` (L3.lake_rumare): open fields round the lake. `vine_cypress` (L1.colovian_plateau, L2.west_dry): warm slopes in the West Weald. `alpine_spruce` (L1.jerall_wall, L2.jerall_cold): northern mountain conifers. `mangrove_swamp` (L1.topal_mudflats, L2.topal_heat): southern coastal swamp. `riverine_reeds` (L3.niben): reedbanks with nirnroot by running water, while wolves, bears, mountain lions, minotaurs, ogres and cave goblins haunt the wilds |
+| L5 Economy | `grain_belt` (L3.niben, L4.heath_and_grain): wheat, barley and cattle in the Heartlands and Nibenay. `wine` (L4.vine_cypress): rival estates on the Weald slopes. `timber` (L4.oak_beech_forest): oak from the Great Forest. `herding` (L4.highland_pasture): sheep and horses in Colovia. `mining` (L1.ore_highlands): iron and silver shafts. `river_trade` (L3.niben): barges down the Niben. `sea_trade` (L1.gold_coast_cliffs, L3.niben): Anvil's fleet to the west, Leyawiin's to Black Marsh and Elsweyr. `skooma_smuggling` (L3.niben): contraband carried up the Niben from Elsweyr. `empire_revenue` (L3.lake_rumare, L5.grain_belt): tax, offices and the Arena keep the capital rich |
+| L6 Settlement | `nine_cities` (L1.rumare_basin, L3.niben): one capital and eight walled cities, each at a crossing, pass, port or river. `radial_roads` (L3.lake_rumare, L5.empire_revenue): eight named roads from the lake. `inn_chain` (L5.river_trade, L6.radial_roads): a roadside inn every half-day. `busy_centres` (L5.empire_revenue, L5.sea_trade, L6.nine_cities): the Imperial City, Anvil, Chorrol and Leyawiin. `poor_places` (L3.niben, L5.skooma_smuggling): Bravil on stilts, burned Kvatch, and closed villages in the hills |
+| L7 Society | `colovian_nibenese_split` (L2.west_dry, L2.east_wet): west is martial, plain and clannish; east is ornate, mercantile, tattooed and mystical. `class_ladder` (L5.empire_revenue, L6.nine_cities): Council families and counts, guild masters and merchants, craftsmen, farm tenants, river labourers, beggars. `rule_of_law` (L6.nine_cities, L6.radial_roads): city watch and Legion, bounties, a fine or a cell for every crime. `guilds_everywhere` (L6.nine_cities): Mages and Fighters halls in every city, the Arcane University in the capital, a thieves' network among the poor, assassins in the dark |
+| L8 Belief | `the_nine` (L6.nine_cities): each city's chapel is dedicated to one Divine (Akatosh at Kvatch, Arkay at Cheydinhal, Dibella at Anvil, Julianos at Skingrad, Mara at Bravil, Stendarr at Chorrol, Talos at Bruma, Zenithar at Leyawiin; the Temple of the One in the capital). `wayshrines` (L6.radial_roads): about 30 roadside shrines to the Nine. `daedric_shrines` (L4.oak_beech_forest, L7.colovian_nibenese_split): 15 Daedric statues in the wild, tended by small cults. `doomstones` (L1.ayleid_foundations): about 20 old standing stones that grant a sign's blessing. `elf_ruin_fear` (L1.ayleid_foundations): people avoid the white ruins and tell stories about them. `arena_glory` (L5.empire_revenue): blood sport as civic pride |
+| L9 Politics | `throne_empty` (L6.nine_cities, L7.class_ladder): no emperor, the Dragonfires dark, the Elder Council and its chancellor rule. `gate_scars` (L6.poor_places, L8.daedric_shrines): dozens of closed gates leave burned rings that still leak. `county_rivalry` (L7.colovian_nibenese_split, L7.class_ladder): counts test how far the Council can reach. `guild_wars` (L7.guilds_everywhere): the Mages Guild against the necromancers; the Fighters Guild against a rival mercenary company based in Leyawiin. `border_pressure` (L5.skooma_smuggling, L6.nine_cities): skooma from Elsweyr, a newly confident Black Marsh, Dunmer settlers and their own politics in the east |
+| L10 Hidden | `ayleid_undercity` (L1.ayleid_foundations, L8.elf_ruin_fear): 50-odd Ayleid ruins and a pre-Imperial reservoir under the cities, home to undead, necromancers, conjurers and treasure hunters. `cult_remnants` (L1.rumare_basin, L9.gate_scars): the doomsday cult's surviving cells hide in lake caves and old forts. `abandoned_forts` (L1.colovian_plateau, L9.county_rivalry): about 50 ruined forts from older wars taken by bandits, marauders and vampires. `road_bandits` (L4.oak_beech_forest, L6.radial_roads): highwaymen on the long legs far from city watches. `assassins_and_thieves` (L7.guilds_everywhere, L9.county_rivalry): a sanctuary under a quiet house in Cheydinhal, a guild among the Waterfront shacks |
+| L11 History | `ayleid_era` (L1.ayleid_foundations, L10.ayleid_undercity): the elves built White-Gold Tower and ruled the heartland with human slaves. `alessian_revolt` (L1.rumare_basin, L8.the_nine): the slaves rose, took the tower and founded the Empire; the Alessian scroll-temples and gates are its relics. `reman_akaviri` (L1.jerall_wall, L6.nine_cities): the Reman emperors and their Akaviri guard left Sancre Tor, the Pale Pass fort and Cloud Ruler. `three_banner_war` (L10.abandoned_forts): keeps and forts from a Second Era war of three alliances for the Ruby Throne. `septim_empire` (L6.radial_roads, L8.the_nine): the roads, chapels and Legion. `oblivion_crisis` (L9.throne_empty, L9.gate_scars): the emperor murdered, gates opened, Kvatch destroyed, and the last heir's sacrifice ended it |
 
-### 1.1 Region sub-sheets
+### 1.2 Jerall Mountains (`jerall_mountains`, 9.5 km², seat Bruma)
 
-Region areas are today's (`parity.py`); section 3 moves borders. Regions over 6 km² are planned as two hold-sized
-halves (DESIGN-PRINCIPLES 4.1).
-
-#### Jerall Mountains (`jerall_mountains`, 9.5 km², seat Bruma; halves: Bruma and the Pale Pass / the eastern Jerall and Sancre Tor)
-
-**World truth.** The cold northern rim where Cyrodiil meets Skyrim. Bruma is half Nord in blood and building, a
-snow-roofed city on the only good pass, its chapel to Talos the tallest spire in the province. Above it the Blades'
-cliff fortress watches the pass, and to the west the dead Reman fortress of Sancre Tor broods on its peak. Life is
-herding, mining, pass trade and smuggling. The mountains hold more caves and old Imperial family crypts than any
-county, and the cold keeps the dead in them restless.
+**World truth.** The Jerall Mountains form the cold northern rim where Cyrodiil meets Skyrim. Bruma is half Nord in
+blood and timber-and-stone building, a snow-roofed city guarding the only good pass, its Great Chapel of Talos raising
+the tallest spire in the county. Above it the Blades' cliff fortress of Cloud Ruler Temple watches the road, and to the
+west the dead Reman citadel of Sancre Tor broods on its peak. Life turns on herding, silver mining, pass trade and
+smuggling. The mountains hold more caves and old Imperial family crypts than any county, and the cold keeps the dead in
+them restless.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `pale_pass_notch` [P.L1.jerall_wall]. `granite_caves` with ice in the high ones. `silver_seams` [P.L1.ore_highlands] |
-| L2 | `snow_above_150`, `blizzard_winters` [P.L2.jerall_cold]. `valley_inversion`: clear peaks over fogged valleys |
-| L3 | `snowmelt_streams` feeding the Upper Niben and Lake Rumare [P.L3.niben]. `bruma_cisterns`: the city stores meltwater behind its walls [L2.blizzard_winters] |
-| L4 | `alpine_spruce`, `scree_heath`, `snowfield`, `hot_spring_hollow` [L1.granite_caves]. Trolls, snow wolves, bears, mountain lions |
-| L5 | `pass_trade` with Skyrim [L1.pale_pass_notch]. `silver_mines` [L1.silver_seams]. `goat_and_fur` [L4.alpine_spruce]. `smuggling` round the toll post [L9.pass_tolls] |
-| L6 | `bruma_on_the_pass` [L1.pale_pass_notch]. `foothill_villages` on the Silver and Orange roads (Bleaker's Way) [P.L6.radial_roads]. `mine_hamlets` [L5.silver_mines] |
-| L7 | `nord_imperial_mix`: Nord families and Imperial officers [L6.bruma_on_the_pass]. `miner_debt` [L5.silver_mines] |
-| L8 | `talos_first`: the Great Chapel of Talos [P.L8.the_nine]. `dragon_blood_lore` kept by the Blades [L11.reman_akaviri]. Daedric shrines in high hollows |
-| L9 | `pass_tolls`: Bruma's count and the Legion quarrel over who taxes the pass [P.L9.county_rivalry]. `blades_without_emperor` [P.L9.throne_empty] |
-| L10 | `family_crypts`: the most Imperial crypts of any county; cold keeps the dead walking [L2.snow_above_150]. `sancre_tor_barrow` [P.L11.reman_akaviri]. `mage_on_the_crag`: a lone tower (Frostcrag) |
-| L11 | `reman_fortresses`, `pass_battles`, `gate_at_bruma`: a gate opened at the walls in the Crisis [P.L11.oblivion_crisis] |
+| L1 | `pale_pass_notch`: the deep northern pass through the granite wall. `granite_caves`: high ice-rimmed caverns. `silver_seams`: rich mountain silver veins |
+| L2 | `snow_above_150` (cy.L2.jerall_cold, L1.pale_pass_notch): permanent snowpack on the high ridges. `blizzard_winters` (cy.L2.jerall_cold, L1.pale_pass_notch): winter whiteouts closing the pass. `valley_inversion` (L1.granite_caves): clear peaks over fogged valleys |
+| L3 | `snowmelt_streams` (cy.L3.niben, L2.snow_above_150): cold torrents feeding the Upper Niben and Lake Rumare. `bruma_cisterns` (L1.pale_pass_notch, L2.blizzard_winters): heated meltwater cisterns behind the city walls |
+| L4 | `alpine_spruce` (cy.L4.alpine_spruce, L2.snow_above_150): snow-laden spruce. `scree_heath` (L1.pale_pass_notch, L2.snow_above_150): wind-scoured rock. `snowfield` (L2.blizzard_winters): high snow wastes with frost trolls and snow wolves. `hot_spring_hollow` (L1.granite_caves): steamed fault hollows |
+| L5 | `pass_trade` (L1.pale_pass_notch): wagon caravans to and from Skyrim. `silver_mines` (L1.silver_seams): mountain shafts and stamp mills. `goat_and_fur` (L4.alpine_spruce): pelts and mountain cheeses. `smuggling` (L1.pale_pass_notch, L2.valley_inversion): untaxed goods carried round the toll post |
+| L6 | `bruma_on_the_pass` (L1.pale_pass_notch, L5.pass_trade): the Nord-Imperial seat overlooking the highway. `foothill_villages` (cy.L6.radial_roads, L3.snowmelt_streams): waystations on the Silver and Orange roads. `mine_hamlets` (L5.silver_mines): bunkhouse camps at the shaft heads |
+| L7 | `nord_imperial_mix` (L6.bruma_on_the_pass): Nord clans and Imperial magistrates sharing the watch. `miner_debt` (L5.silver_mines): company tallymen at the silver shafts |
+| L8 | `talos_first` (cy.L8.the_nine, L6.bruma_on_the_pass): the Great Chapel of Talos and Nord hearth-shrines. `dragon_blood_lore` (L6.bruma_on_the_pass): Akaviri oaths kept by the Blades at Cloud Ruler |
+| L9 | `pass_tolls` (cy.L9.county_rivalry, L5.pass_trade): Bruma's count and the Legion quarrelling over pass customs. `blades_without_emperor` (cy.L9.throne_empty, L8.dragon_blood_lore): the ancient guard waiting on its cliff without a Dragonborn |
+| L10 | `family_crypts` (L1.granite_caves, L2.snow_above_150): ancestral Imperial crypts where the cold keeps the dead walking. `sancre_tor_barrow` (L1.pale_pass_notch, L8.dragon_blood_lore): the haunted tomb-fortress of Reman. `mage_on_the_crag` (L1.pale_pass_notch, L4.snowfield): Frostcrag Spire on its icy peak |
+| L11 | `reman_fortresses` (cy.L11.reman_akaviri, L10.sancre_tor_barrow): the Pale Pass fort and Sancre Tor. `pass_battles` (cy.L11.reman_akaviri, L1.pale_pass_notch): the Akaviri surrender at the pass. `gate_at_bruma` (cy.L11.oblivion_crisis, L6.bruma_on_the_pass): the Great Gate fought before Bruma's walls |
 
-#### Colovian Highlands (`colovian_highlands`, 9.3 km², seat Chorrol; halves: Chorrol and the Black Road / the western highland to the High Rock gates)
+### 1.3 Colovian Highlands (`colovian_highlands`, 9.3 km², seat Chorrol)
 
-**World truth.** Proud, dry upland of sheep, horses and broken limestone valleys running west to the High Rock
-border. Chorrol grew round a giant oak at the end of the Black Road and is the highland's market and the Fighters
-Guild's home. The people are plain-spoken Colovians who distrust the capital's ornate politics. Its caves and karst
-hide goblin tribes, bandits and closed hill villages with secrets of their own, and the old keeps of a Second Era war
-stand on every ridge.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `karst_valleys`, `limestone_caves` [P.L1.colovian_plateau]. `iron_seams` [P.L1.ore_highlands] |
-| L2 | `dry_bright_summers`, `cold_clear_nights` [P.L2.west_dry]. `upland_wind` |
-| L3 | `sinking_streams`: rivers vanish into karst and return as springs [L1.karst_valleys]. `spring_villages`: villages sit on the springs |
-| L4 | `sheep_downs`, `pine_ridges`, `karst_scrub`, `spring_glen` [L3.sinking_streams]. Goblins, wolves, bears, ogres |
-| L5 | `wool_and_horses` [L4.sheep_downs]. `iron_mines` [L1.iron_seams]. `chorrol_market` [L6.chorrol_crossroads] |
-| L6 | `chorrol_crossroads` at the Black Road's end [P.L6.radial_roads]. `spring_hamlets` [L3.spring_villages]. `closed_villages` in side valleys (Hackdirt; Great Forest after the redraw) [L1.karst_valleys] |
-| L7 | `colovian_pride` [P.L7.colovian_nibenese_split]. `guild_town`: the Fighters Guild seat [P.L7.guilds_everywhere] |
-| L8 | `stendarr_chapel` [P.L8.the_nine]. `oak_reverence`: the town treats its tree as a living elder [L6.chorrol_crossroads]. Weynon Priory's monks |
-| L9 | `guild_rivalry`: the Fighters Guild losing contracts to the Leyawiin company [P.L9.guild_wars]. `herder_logger_feud` with the Great Forest |
-| L10 | `goblin_wars`: tribes fight each other for caves [L1.limestone_caves]. `deep_ones_below`: a hill village hides what lives in its tunnels [L6.closed_villages]. `ridge_keeps` held by marauders [P.L10.abandoned_forts] |
-| L11 | `high_rock_gates`: border keeps. `alessian_scroll_temples` (Alma Ruma, Ni-Mohk) [P.L11.alessian_revolt]. `battlehorn` |
-
-#### Heartlands (`heartlands`, 7.7 km², capital the Imperial City; halves: the lake and city / the Red Ring farmland)
-
-**World truth.** The lake country round the capital. The Imperial City stands on its island, a ring of walled wards
-round the elves' White-Gold Tower, reached by one great bridge. Around the shore lie the Red Ring Road, grain farms,
-fishing villages and the first inns of every highway. Wealth and power flow through here, and so does every rumour.
-Under the city run the sewers and older vaults; under the farms lie Ayleid ruins the farmers plough round. The
-Council's quarrels, the Arena's crowds and the Waterfront's thieves make this the busiest and most watched county.
+**World truth.** The Colovian Highlands are a proud, dry upland of sheep downs, horse paddocks and broken limestone
+valleys running west to the High Rock and Hammerfell borders. Chorrol grew round a giant oak at the head of the Black
+Road and serves as the highland's market and the Fighters Guild's provincial seat. The people are plain-spoken
+Colovians who distrust the capital's ornate politics. Its karst caves hide warring goblin tribes, bandits and closed
+hill villages with secrets of their own, while the stone keeps of a Second Era war stand on every ridge.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `island_bedrock` [P.L1.rumare_basin]. `lakeshore_clay`. `ayleid_footings` [P.L1.ayleid_foundations] |
-| L2 | `mild_lake_climate`, `lake_mist` [P.L2.lake_mist] |
-| L3 | `rumare_shore`, `city_sewers_and_cisterns`: the Watch controls the city's water and the ways beneath [P.L3.who_holds_water] |
-| L4 | `lake_reedbed`, `heath_and_grain`, `lakeshore_oakwood`, `urban_garden` (Arboretum) [L3.rumare_shore]. Mudcrabs, slaughterfish, deer, rats |
-| L5 | `capital_economy`: offices, Arena, market district [P.L5.empire_revenue]. `lakeside_grain_and_fish` [L4.heath_and_grain] |
-| L6 | `imperial_city` [P.L6.busy_centres]. `bridgehead_villages` (Weye, the bridge inn) [L3.rumare_shore]. `red_ring_villages` (Pell's Gate, Aleswell, Roxey Inn) [P.L6.inn_chain] |
-| L7 | `ward_ladder`: Elven Gardens and Talos Plaza at the top, Market and Temple in the middle, the Waterfront at the bottom [P.L7.class_ladder]. `beggar_eyes`: beggars watch for the thieves [L7.ward_ladder] |
-| L8 | `temple_of_the_one` [P.L8.the_nine]. `arena_cult` [P.L8.arena_glory]. `university_rationalism` |
-| L9 | `council_factions`: Colovian and Nibenese blocs [P.L9.throne_empty]. `watch_vs_guild`: a hard captain hunts the thieves [L7.beggar_eyes] |
-| L10 | `ring_beneath_the_rings`: pre-Imperial reservoir and vaults under every ward (lore web cyr_4) [L1.ayleid_footings]. `prison_tunnels`. `lake_cult_caves` [P.L10.cult_remnants] |
-| L11 | `white_gold_tower` [P.L11.ayleid_era]. `alessian_bridge`. `throne_room_murder` [P.L11.oblivion_crisis] |
+| L1 | `karst_valleys`: incised limestone valleys and sinkholes. `limestone_caves`: deep cavern systems. `iron_seams`: upland iron ore veins |
+| L2 | `dry_bright_summers` (cy.L2.west_dry, L1.karst_valleys): sunny upland summers. `cold_clear_nights` (cy.L2.west_dry, L1.karst_valleys): crisp night air. `upland_wind` (L1.karst_valleys): steady westerly breezes |
+| L3 | `sinking_streams` (L1.karst_valleys): rivers that vanish into karst and return as cold springs. `spring_villages` (L1.karst_valleys, L3.sinking_streams): upland water-points |
+| L4 | `sheep_downs` (cy.L4.highland_pasture, L2.dry_bright_summers): open limestone turf. `pine_ridges` (L1.karst_valleys, L2.upland_wind): dry pine crests. `karst_scrub` (L1.karst_valleys): rocky brush with wolves, bears and ogres. `spring_glen` (L3.sinking_streams): green watered hollows |
+| L5 | `wool_and_horses` (L4.sheep_downs): Colovian wool, mutton and cavalry mounts. `iron_mines` (L1.iron_seams): upland iron shafts and smithies. `chorrol_market` (L4.sheep_downs, L5.iron_mines): the western guild and livestock exchange |
+| L6 | `chorrol_crossroads` (cy.L6.radial_roads, L5.chorrol_market): the walled seat at the Black Road's end. `spring_hamlets` (L3.spring_villages): stone pastoral villages. `closed_villages` (L1.karst_valleys): isolated side-valley hamlets such as Hackdirt |
+| L7 | `colovian_pride` (cy.L7.colovian_nibenese_split, L6.chorrol_crossroads): martial, plain-spoken highland families. `guild_town` (cy.L7.guilds_everywhere, L6.chorrol_crossroads): the Fighters Guild headquarters |
+| L8 | `stendarr_chapel` (cy.L8.the_nine, L6.chorrol_crossroads): the Great Chapel of Stendarr. `oak_reverence` (L6.chorrol_crossroads): civic pride in the Great Oak and Weynon Priory's monks |
+| L9 | `guild_rivalry` (cy.L9.guild_wars, L7.guild_town): the Fighters Guild losing contracts to the Blackwood Company. `herder_logger_feud` (L5.wool_and_horses, L7.colovian_pride): boundary disputes with Great Forest timber camps |
+| L10 | `goblin_wars` (L1.limestone_caves, L4.karst_scrub): totem-tribes fighting each other for caves. `deep_ones_below` (L1.limestone_caves, L6.closed_villages): a hill village hiding what lives in its tunnels. `ridge_keeps` (cy.L10.abandoned_forts, L1.karst_valleys): ruined forts held by marauders |
+| L11 | `high_rock_gates` (cy.L11.three_banner_war, L10.ridge_keeps): border keeps on the northern road. `alessian_scroll_temples` (cy.L11.alessian_revolt, L1.karst_valleys): the ancient temples of Alma Ruma and Ni-Mohk. `battlehorn` (cy.L11.septim_empire, L1.karst_valleys): the knightly castle on the western crag |
 
-#### Great Forest (`great_forest`, 3.8 km² today; grows to ~7 km² after the county redraw, section 3)
+### 1.4 Heartlands (`heartlands`, 7.7 km², capital the Imperial City)
 
-**World truth.** The old oak and beech forest west and north-west of the lake, the densest ground for ruins in
-Cyrodiil: more caves and Ayleid sites per mile than anywhere. Few people live in it, and those who do are loggers,
-charcoal-burners, priory monks and hunters who keep to the roads. Minotaurs and wild things roam deep in, necromancers
-take the elven ruins, and the forest's shrines draw cultists. The forest is Cyrodiil's wild middle: beautiful by day,
-avoided at night, full of things the capital would rather forget.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `forest_loam_hills`, `ruin_dense_ridge` [P.L1.ayleid_foundations] |
-| L2 | `canopy_shade`, `forest_fog` [P.L2.temperate_core] |
-| L3 | `forest_brooks`, `silverfish_headwaters` [P.L3.tributaries] |
-| L4 | `old_oakwood`, `beech_hanger`, `fern_glade`, `charcoal_clearing` [L5.timber], `unicorn_grove` (a hidden grove) [L1.forest_loam_hills]. Minotaurs, bears, wisps |
-| L5 | `timber` and `charcoal` [P.L5.timber]. `hunting` |
-| L6 | `road_hamlets` only (Weye's forest edge, Wawnet Inn) [P.L6.radial_roads]. `priory` (Weynon) on the Black Road |
-| L7 | `woodfolk`: tenants of lowland lords [P.L7.class_ladder]. `outlaw_refuge` |
-| L8 | `forest_daedric_shrines`: several of the 15 statues stand here [P.L8.daedric_shrines]. `grove_spirits` |
-| L9 | `necromancer_war_front`: the Mages Guild loses members to forest ruins [P.L9.guild_wars] |
-| L10 | `lich_ruins` (Vindasel, Fanacasecul, Nornalhorst, Silorn, Ceyatatar) [L1.ruin_dense_ridge]. `minotaur_lairs` [L4.old_oakwood] |
-| L11 | `ayleid_heartwood`: the elves' sacred woods; `goblin_war_of_old` |
-
-#### Nibenay Basin (`nibenay_basin`, 8.5 km², seat Cheydinhal; halves: Cheydinhal and the Valus / the Blue Road and Lake Arrius)
-
-**World truth.** The fertile eastern basin between the Niben and the Valus range, where Nibenese tattoo-art, spice
-markets and mystic orders meet Dunmer settlers from over the mountains. Cheydinhal straddles the Corbolo with a Dunmer
-count in its castle and an assassins' sanctuary under one of its quiet houses. Farms and orchards fill the plain, the
-Knights of the Thorn play at chivalry, and the old Morrowind border keeps watch from the passes. A doomsday cult hid
-in the caves by Lake Arrius during the Crisis, and its last cells still do.
+**World truth.** The Heartlands are the lake country round the capital. The Imperial City stands on its central island,
+a wheel of six walled wards around the Ayleids' White-Gold Tower, reached by one monumental bridge. Around the shore
+run the Red Ring Road, rich grain farms, fishing villages and the first coaching inns of every highway. Wealth and power
+flow through here, and so does every rumour in Tamriel. Under the city run the sewers and pre-Imperial vaults; under
+the ploughed fields lie Ayleid ruins. The Elder Council's quarrels, the Arena's crowds and the Waterfront's thieves make
+this the busiest and most watched county.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `valus_foothills` [P.L1.valus_ridge]. `basin_silt` [P.L1.nibenay_alluvium]. `foothill_gold` [P.L1.ore_highlands] |
-| L2 | `humid_east`, `valus_rain` [P.L2.east_wet] |
-| L3 | `corbolo` [P.L3.tributaries]. `lake_arrius`. `mill_weirs` |
-| L4 | `orchard_plain`, `wet_meadow`, `valus_pine`, `lake_arrius_reeds` [L3.lake_arrius]. Bears, deer, minotaurs on the forest edge |
-| L5 | `orchards_and_grain` [L1.basin_silt]. `corbolo_mills` [L3.mill_weirs]. `morrowind_trade` over the Valus [L1.valus_foothills] |
-| L6 | `cheydinhal_on_the_corbolo` [L3.corbolo]. `blue_road_villages` (Cropsford, Harlun's Watch) [P.L6.radial_roads]. `border_keeps` [L5.morrowind_trade] |
-| L7 | `dunmer_quarter` [L5.morrowind_trade]. `nibenese_gentry` [P.L7.colovian_nibenese_split]. `knightly_dilettantes` (the Thorn lodge) |
-| L8 | `arkay_chapel` [P.L8.the_nine]. `dunmer_ancestor_rites` beside it |
-| L9 | `dunmer_count`: the castle's Dunmer lord and his Imperial-born courtiers [L7.dunmer_quarter]. `market_quarrel` between old merchants and Dunmer traders |
-| L10 | `sanctuary_under_the_house` [P.L10.assassins_and_thieves]. `arrius_cult_cells` [P.L10.cult_remnants]. `valus_keeps` |
-| L11 | `alessian_gates_chim_ghartok` [P.L11.alessian_revolt]. `border_wars_with_morrowind` |
+| L1 | `island_bedrock`: the central lake-island stone platform. `lakeshore_clay`: fertile basin clays. `ayleid_footings`: ancient white-stone foundations beneath city and shore |
+| L2 | `mild_lake_climate` (cy.L2.temperate_core, L1.lakeshore_clay): even, mild seasons moderated by the water. `lake_mist` (cy.L2.lake_mist, L1.lakeshore_clay): dawn mists over the bridges and reeds |
+| L3 | `rumare_shore` (cy.L3.lake_rumare, L1.lakeshore_clay): the ring-lake waters. `city_sewers_and_cisterns` (cy.L3.who_holds_water, L1.island_bedrock): the Imperial Watch controls the city's water and the brick ways beneath |
+| L4 | `lake_reedbed` (L3.rumare_shore): reed beds with mudcrabs and slaughterfish. `heath_and_grain` (cy.L4.heath_and_grain, L1.lakeshore_clay): ploughed wheat fields. `lakeshore_oakwood` (L2.mild_lake_climate): parklands and deer groves. `urban_garden` (L3.city_sewers_and_cisterns): the Arboretum and palace gardens |
+| L5 | `capital_economy` (cy.L5.empire_revenue, L3.rumare_shore): Imperial offices, the Arena, and the Market District. `lakeside_grain_and_fish` (L3.rumare_shore, L4.heath_and_grain): bread, ale and lake eels feeding the wards |
+| L6 | `imperial_city` (cy.L6.busy_centres, L1.island_bedrock): the wheel-city around White-Gold Tower. `bridgehead_villages` (L3.rumare_shore): Weye and the bridgehead docks. `red_ring_villages` (cy.L6.inn_chain, L4.heath_and_grain): Pell's Gate, Aleswell and Roxey Inn |
+| L7 | `ward_ladder` (cy.L7.class_ladder, L6.imperial_city): Elven Gardens and Talos Plaza at the top, Market and Temple in the middle, the Waterfront shacks at the bottom. `beggar_eyes` (L6.imperial_city, L7.ward_ladder): beggars watching every street for the Gray Fox |
+| L8 | `temple_of_the_one` (cy.L8.the_nine, L6.imperial_city): the Dragonfires shrine where emperors were crowned. `arena_cult` (cy.L8.arena_glory, L5.capital_economy): blood-sport celebrity. `university_rationalism` (cy.L7.guilds_everywhere, L6.imperial_city): the Arcane University's orthodoxy |
+| L9 | `council_factions` (cy.L9.throne_empty, L7.ward_ladder): Colovian and Nibenese blocs vying in the Elder Council. `watch_vs_guild` (L7.beggar_eyes): Captain Hieronymus Lex hunting the Thieves Guild on the Waterfront |
+| L10 | `ring_beneath_the_rings` (L1.ayleid_footings, L3.city_sewers_and_cisterns): pre-Imperial reservoir and Ayleid vaults under every ward. `prison_tunnels` (L1.island_bedrock, L3.city_sewers_and_cisterns): the escape ways beneath the Bastion. `lake_cult_caves` (cy.L10.cult_remnants, L1.lakeshore_clay, L9.council_factions): Mythic Dawn cells in the shore caverns |
+| L11 | `white_gold_tower` (cy.L11.ayleid_era, L1.ayleid_footings): the Merethic tower at the centre of the wheel. `alessian_bridge` (cy.L11.alessian_revolt, L6.imperial_city): the bridge of the slave-revolt triumph. `throne_room_murder` (cy.L11.oblivion_crisis, L8.temple_of_the_one): the lighting of the last Dragonfire |
 
-#### West Weald (`west_weald`, 4.1 km², seat Skingrad)
+### 1.5 Great Forest (`great_forest`, 3.8 km², Red Ring to Chorrol)
 
-**World truth.** Warm, sheltered vineyard country west of the Great Forest, on the Gold Road between the capital and
-the coast. Skingrad sits on its hill under a castle on a rock, its estates locked in an old rivalry over who makes the
-best wine. The count is almost never seen and the town prefers not to ask why. Elven ruins (Miscarcand among them)
-lie under the vines and orchards, and the Priory of the Nine, home of a knightly order of the Divines, stands in the
-hills. Mild, golden and wealthy, with cold things in its cellars.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `warm_limestone_slopes` [P.L1.colovian_plateau]. `deep_ayleid_vault` (Miscarcand) [P.L1.ayleid_foundations] |
-| L2 | `sheltered_warmth`, `harvest_haze` [P.L2.west_dry] |
-| L3 | `strid_headwaters`, `estate_cisterns`: estates hold the springs and sell water to tenants in dry years [P.L3.who_holds_water] |
-| L4 | `vine_terrace`, `cypress_line`, `oak_savanna`, `orchard` [P.L4.vine_cypress] |
-| L5 | `wine_estates` [L4.vine_terrace]. `tomato_and_grain` (Skingrad's famous produce). `gold_road_traffic` [P.L6.radial_roads] |
-| L6 | `skingrad_hill` on the Gold Road [L5.gold_road_traffic]. `estate_hamlets` [L5.wine_estates]. `priory_of_the_nine` |
-| L7 | `vintner_aristocracy` vs `field_hands` [L5.wine_estates] |
-| L8 | `julianos_chapel` [P.L8.the_nine]. `crusader_relic_cult`: pilgrims to the Priory [L6.priory_of_the_nine] |
-| L9 | `wine_feud` [L7.vintner_aristocracy]. `hidden_count`: the town shields its count from questions [L10.vampire_count] |
-| L10 | `vampire_count` (rumour, never said aloud). `name_vault_under_the_vines` (lore web cyr_1) [L1.deep_ayleid_vault] |
-| L11 | `knightly_order_of_the_nine`. `ayleid_name_vaults` |
-
-#### Gold Coast (`gold_coast`, 5.6 km², seats Anvil and Kvatch)
-
-**World truth.** The western shore of the Abecean and the hills behind it. Anvil is a bright harbour of white walls
-and blue tiles, its fleet and merchants rich on western trade. Up the Gold Road, Kvatch stood on its hill until a gate
-opened beneath it in the Crisis: the city burned and its survivors camp below while the rebuilding starts. Between
-them run the longest leg of the Gold Road, smugglers' coves, wreckers, a haunted manor and the vampire lairs that
-feed on lonely travellers.
+**World truth.** The Great Forest is the old oak and beech woodland west and north-west of Lake Rumare, the densest
+ground for ancient ruins in Cyrodiil with more caves and Ayleid sites per mile than any other county. Few people live
+under its boughs, and those who do are loggers, charcoal-burners, priory monks and hunters who keep close to the roads.
+Minotaurs and wild beasts roam the deep glades, necromancers fortify the elven vaults, and roadside Daedric statues draw
+secret cultists. It is Cyrodiil's wild middle: golden-green by day, avoided at night, full of things the capital would
+rather forget.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `low_sea_cliffs`, `sea_caves` [P.L1.gold_coast_cliffs]. `kvatch_hill` |
-| L2 | `sea_fog`, `westerly_gales` [P.L2.abecean_storms] |
-| L3 | `harbour_springs`, `kvatch_wells` (poisoned in the burning) [L11.kvatch_burned] |
-| L4 | `coastal_scrub`, `cliff_grass`, `cove_beach`, `burned_slope` [L11.kvatch_burned], `strid_riverine`. Land dreugh, mudcrabs, seabirds |
-| L5 | `anvil_shipping` [P.L5.sea_trade]. `fishing`. `rebuild_trade`: masons and timber flow to Kvatch [L11.kvatch_burned] |
-| L6 | `anvil_harbour` [L5.anvil_shipping]. `kvatch_on_the_hill` [L1.kvatch_hill]. `gold_road_inns` (Brina Cross, Gottshaw) [P.L6.inn_chain]. `refugee_camp` below Kvatch |
-| L7 | `merchant_wealth` vs `dock_labour` [L5.anvil_shipping]. `kvatch_refugees` [L6.refugee_camp] |
-| L8 | `dibella_chapel` (Anvil), `akatosh_chapel` (Kvatch, a field hospital now) [P.L8.the_nine] |
-| L9 | `kvatch_rebuild`: who pays and who owns the new wards [L11.kvatch_burned]. `wreckers` dim the lighthouse [L5.anvil_shipping] |
-| L10 | `smuggler_coves` [L1.sea_caves]. `haunted_manor`: a merchant house over a sealed crypt (Benirus) [L6.anvil_harbour]. `gate_remnant_under_kvatch` [P.L9.gate_scars] |
-| L11 | `kvatch_burned` [P.L11.oblivion_crisis]. `old_pirate_ages` |
+| L1 | `forest_loam_hills`: rolling hills of deep forest loam. `ruin_dense_ridge`: limestone ridges riddled with Ayleid vaults |
+| L2 | `canopy_shade` (cy.L2.temperate_core, L1.forest_loam_hills): cool, dappled light under the high boughs. `forest_fog` (cy.L2.lake_mist, L1.forest_loam_hills): thick autumn and morning mists |
+| L3 | `forest_brooks` (cy.L3.tributaries, L1.forest_loam_hills): clear pebble streams under alder banks. `silverfish_headwaters` (cy.L3.tributaries, L1.ruin_dense_ridge): springs feeding the lake |
+| L4 | `old_oakwood` (cy.L4.oak_beech_forest, L2.canopy_shade): ancient oaks, minotaurs and bears. `beech_hanger` (L1.ruin_dense_ridge, L2.canopy_shade): steep beech slopes. `fern_glade` (L3.forest_brooks): deer and wisps. `charcoal_clearing` (L1.forest_loam_hills): smoky coppiced rings. `unicorn_grove` (L1.forest_loam_hills, L3.forest_brooks): a warded glade where a last unicorn walks |
+| L5 | `timber` (cy.L5.timber, L4.old_oakwood): oak felling for the capital. `charcoal` (L4.charcoal_clearing): kiln-burning for city smithies. `hunting` (L4.fern_glade): venison and boar pelts |
+| L6 | `road_hamlets` (cy.L6.radial_roads, L5.timber): Wawnet Inn and logging hamlets on the forest edge. `priory` (cy.L6.radial_roads, L3.forest_brooks): Weynon Priory on the Black Road |
+| L7 | `woodfolk` (cy.L7.class_ladder, L5.charcoal): tenants, woodcutters and charcoal-burners. `outlaw_refuge` (L4.old_oakwood, L6.road_hamlets): highwaymen hiding two hundred paces off the road |
+| L8 | `forest_daedric_shrines` (cy.L8.daedric_shrines, L4.old_oakwood): hidden woodland statues tended by hedge-cults. `grove_spirits` (L4.unicorn_grove): old forester taboos against hunting the warded glades |
+| L9 | `necromancer_war_front` (cy.L9.guild_wars, L8.forest_daedric_shrines): Mages Guild battlemages clashing with worm-cults in the forest ruins |
+| L10 | `lich_ruins` (cy.L10.ayleid_undercity, L1.ruin_dense_ridge, L9.necromancer_war_front): Vindasel, Fanacasecul, Nornalhorst, Silorn and Ceyatatar. `minotaur_lairs` (L1.ruin_dense_ridge, L4.old_oakwood): horn-carved grove dens |
+| L11 | `ayleid_heartwood` (cy.L11.ayleid_era, L10.lich_ruins): the rival Ayleid city-states of the woodland. `goblin_war_of_old` (cy.L11.three_banner_war, L1.ruin_dense_ridge): abandoned siege-forts under the oaks |
 
-#### Nibenay Valley (`nibenay_valley`, 8.2 km², seat Bravil; halves: Bravil and the Lower Niben / the Green Road and the Elsweyr gates)
+### 1.6 Nibenay Basin (`nibenay_basin`, 8.5 km², seat Cheydinhal)
 
-**World truth.** The river country of the Lower Niben, flat, wet and poor. Bravil is a city of plank houses on mud
-and stilts beside the river, the poorest of the nine and the gateway for skooma coming up from Elsweyr. Its people
-trust luck more than law and rub the statue of their Lucky Old Lady for it. The valley's caves and riverside ruins
-shelter smugglers, necromancers and the crypt where an assassins' cult keeps its mother. The Green Road runs up to the
-capital past inns where nobody asks questions.
-
-| Layer | Fields |
-| --- | --- |
-| L1 | `river_flats` [P.L1.nibenay_alluvium]. `riverbank_caves` |
-| L2 | `humid_heat`, `river_fog` [P.L2.east_wet] |
-| L3 | `lower_niben_braids` [P.L3.niben]. `flood_meadows`. `bravil_mud`: the city has no clean well; the poor buy water by the bucket [P.L3.who_holds_water] |
-| L4 | `reed_marsh`, `flood_meadow`, `willow_carr`, `river_island` [L3.lower_niben_braids]. Mudcrabs, slaughterfish, rats |
-| L5 | `river_labour` [P.L5.river_trade]. `skooma` [P.L5.skooma_smuggling]. `eel_and_reed` |
-| L6 | `bravil_ferry_city` [L3.lower_niben_braids]. `green_road_inns` (Faregyl, Ill Omen) [P.L6.inn_chain] |
-| L7 | `slum_city` [L5.river_labour]. `addiction` [L5.skooma] |
-| L8 | `mara_chapel` [P.L8.the_nine]. `lucky_old_lady`: a statue of a saviour mother rubbed for luck. `night_mother_crypt` |
-| L9 | `corrupt_clerk`: the count's office is bought [L5.skooma]. `elsweyr_gates` |
-| L10 | `skooma_dens`, `smuggler_caves` [L1.riverbank_caves]. `assassins_mother_crypt` [P.L10.assassins_and_thieves] |
-| L11 | `alessian_gates_altadoon_mnem`. `river_wars` |
-
-#### Blackwood (`blackwood`, 4.5 km², seat Leyawiin)
-
-**World truth.** Hot, steaming swamp-forest where the Niben meets Topal Bay, Cyrodiil's border with Black Marsh and
-Elsweyr. Leyawiin is an Imperial river-mouth city with Argonian and Khajiit quarters outside its proper streets, and
-the home of a mercenary company that has made itself rich doing the Fighters Guild's work for less. Rumour says the
-company's men drink something stolen from the marsh. Ayleid ruins sink into the mud, vampire lairs and necromancers
-hide in the mangroves, and the border forts face a Black Marsh that is no longer afraid of the Empire.
+**World truth.** The Nibenay Basin is the fertile eastern valley between the Niben and the Valus Mountains, where
+Nibenese tattoo-art, silk and spice markets, and mystic orders meet Dunmer settlers from across the border passes.
+Cheydinhal straddles the Corbolo River under willow trees, with a Dunmer count in its castle and the Dark Brotherhood's
+sanctuary hidden beneath an abandoned house. Farms and orchards fill the plain, the Knights of the Thorn play at
+chivalry, and border keeps watch the Morrowind road while surviving Mythic Dawn cells lurk in the Lake Arrius caverns.
 
 | Layer | Fields |
 | --- | --- |
-| L1 | `mangrove_mud`, `peat` [P.L1.topal_mudflats]. `sinking_ruins` [P.L1.ayleid_foundations] |
-| L2 | `steam_heat`, `thunderstorms` [P.L2.topal_heat] |
-| L3 | `niben_mouth`, `panther_river` [P.L3.niben, P.L3.tributaries]. `brackish_tide` |
-| L4 | `mangrove`, `cypress_swamp`, `palm_hammock`, `brackish_flat` [L3.brackish_tide]. Mudcrabs, land dreugh, giant snakes, wisps |
-| L5 | `river_mouth_port` [P.L5.sea_trade]. `mercenary_trade` [L9.mercenary_company]. `rice_and_reed` |
-| L6 | `leyawiin_at_the_mouth` [L3.niben_mouth]. `border_villages` (Water's Edge, Border Watch, Blankenmarch) [L9.marsh_border] |
-| L7 | `imperial_core_vs_beastfolk_shanties` [L6.leyawiin_at_the_mouth]. `khajiit_border_village` (Border Watch) |
-| L8 | `zenithar_chapel` [P.L8.the_nine]. `argonian_hist_reverence` in the shanties [X: black_marsh.P.L8.hist] |
-| L9 | `mercenary_company`: the rival to the Fighters Guild [P.L9.guild_wars]. `marsh_border`: forts face an assertive Black Marsh [P.L9.border_pressure] |
-| L10 | `stolen_sap`: the company's men drink stolen Hist sap [L9.mercenary_company]. `mangrove_vampires` (Deepscorn Hollow, Redwater Slough) [L1.mangrove_mud]. `sunken_ayleid` (Nenalata, Malada) [L1.sinking_ruins] |
-| L11 | `blackwood_border_wars`. `ayleid_marsh_retreat` |
+| L1 | `valus_foothills`: steep eastern ridges rising to the Morrowind border. `basin_silt`: rich alluvial soils. `foothill_gold`: gold-bearing quartz seams in the eastern hills |
+| L2 | `humid_east` (cy.L2.east_wet, L1.basin_silt): warm, humid growing seasons. `valus_rain` (cy.L2.east_wet, L1.valus_foothills): heavy orographic rains off the Valus |
+| L3 | `corbolo` (cy.L3.tributaries, L2.valus_rain): the willow-lined river through Cheydinhal. `lake_arrius` (L1.valus_foothills, L2.valus_rain): a crater lake in the northern hills. `mill_weirs` (L1.basin_silt, L3.corbolo): stone weirs powering the basin's mills |
+| L4 | `orchard_plain` (L1.basin_silt, L2.humid_east): apple and pear orchards and dye-flax fields. `wet_meadow` (L3.corbolo): lush river meadows. `valus_pine` (L1.valus_foothills): mountain pine with bears and trolls. `lake_arrius_reeds` (L3.lake_arrius): reed-ringed caldera shore |
+| L5 | `orchards_and_grain` (L1.basin_silt, L4.orchard_plain): fruit, grain and Nibenese dye-flax. `corbolo_mills` (L3.mill_weirs): watermills and cloth fulling. `morrowind_trade` (L1.valus_foothills): pass caravans trading Ebonheart goods |
+| L6 | `cheydinhal_on_the_corbolo` (L3.corbolo, L5.morrowind_trade): the half-timbered willow city on two banks. `blue_road_villages` (cy.L6.radial_roads, L5.orchards_and_grain): Cropsford and Harlun's Watch. `border_keeps` (L1.valus_foothills, L5.morrowind_trade): watch-forts on the eastern passes |
+| L7 | `dunmer_quarter` (L5.morrowind_trade, L6.cheydinhal_on_the_corbolo): Hlaalu and Redoran emigres in Cheydinhal. `nibenese_gentry` (cy.L7.colovian_nibenese_split, L5.orchards_and_grain): silk-robed landowners. `knightly_dilettantes` (L6.cheydinhal_on_the_corbolo, L7.nibenese_gentry): the Count's son and his Knights of the Thorn lodge |
+| L8 | `arkay_chapel` (cy.L8.the_nine, L6.cheydinhal_on_the_corbolo): the Great Chapel of Arkay. `dunmer_ancestor_rites` (L7.dunmer_quarter): household ancestor ash-shrines kept quietly beside the chapel |
+| L9 | `dunmer_count` (L7.dunmer_quarter, L7.nibenese_gentry): Count Indarys balancing Imperial courtiers and Dunmer kin. `market_quarrel` (L5.morrowind_trade, L7.nibenese_gentry): guild friction over eastern caravan tariffs |
+| L10 | `sanctuary_under_the_house` (cy.L10.assassins_and_thieves, L1.basin_silt, L6.cheydinhal_on_the_corbolo): the Black Door beneath the abandoned eastern house. `arrius_cult_cells` (cy.L10.cult_remnants, L1.valus_foothills, L3.lake_arrius): the Mythic Dawn shrine in Lake Arrius Caverns. `valus_keeps` (cy.L10.abandoned_forts, L1.valus_foothills): bandit-held mountain forts |
+| L11 | `alessian_gates_chim_ghartok` (cy.L11.alessian_revolt, L1.basin_silt): ancient Alessian triumphal arches. `border_wars_with_morrowind` (cy.L11.reman_akaviri, L6.border_keeps): the Reman and Septim campaigns over the Valus passes |
 
-Cross-province cites (prefix `X:`) are allowed only to another province sheet's field; the lint resolves them across
-files (MS22 extension, section 8).
+### 1.7 West Weald (`west_weald`, 4.1 km², seat Skingrad)
+
+**World truth.** The West Weald is warm, sheltered vineyard country south-west of the Great Forest, straddling the Gold
+Road between the capital and the Abecean coast. Skingrad sits on its limestone hill between two sheer castle bridges,
+its vintner houses locked in a generational feud over whose cellar presses the finest vintage. Count Hassildor is
+almost never seen by daylight, and the townsfolk prefer not to ask why. Ayleid vaults—Miscarcand chief among them—lie
+under the vines, and the Priory of the Nine stands in the southern hills. It is golden and wealthy, with cold things in
+its cellars.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `warm_limestone_slopes`: south-facing limestone hills and dry gullies. `deep_ayleid_vault`: the subterranean white-stone halls of Miscarcand |
+| L2 | `sheltered_warmth` (cy.L2.west_dry, L1.warm_limestone_slopes): long, sunny ripening seasons. `harvest_haze` (cy.L2.west_dry, L1.warm_limestone_slopes): golden autumn mist in the valleys |
+| L3 | `strid_headwaters` (cy.L3.tributaries, L1.warm_limestone_slopes): upland streams running south toward Valenwood. `estate_cisterns` (cy.L3.who_holds_water, L1.warm_limestone_slopes): vintner estates hold the hill springs and ration water in dry years |
+| L4 | `vine_terrace` (cy.L4.vine_cypress, L2.sheltered_warmth): terraced grape vines on stone walls. `cypress_line` (L1.warm_limestone_slopes, L2.sheltered_warmth): cypress avenues along estate roads. `oak_savanna` (L2.sheltered_warmth): open sunny pasture. `orchard` (L3.estate_cisterns): tomato gardens and fruit trees |
+| L5 | `wine_estates` (cy.L5.wine, L4.vine_terrace): the Surilie and Tamika vineyards. `tomato_and_grain` (L4.orchard): Skingrad's prized produce and sheep cheeses. `gold_road_traffic` (cy.L6.radial_roads, L1.warm_limestone_slopes): merchant wagons between the capital and Anvil |
+| L6 | `skingrad_hill` (L1.warm_limestone_slopes, L5.gold_road_traffic): the twin-walled city bridged by its castle ravine. `estate_hamlets` (L5.wine_estates): vintner villas and press-houses. `priory_of_the_nine` (L3.strid_headwaters): the knightly priory in the southern woods |
+| L7 | `vintner_aristocracy` (cy.L7.class_ladder, L5.wine_estates): rival wine dynasties. `field_hands` (L5.wine_estates): seasonal pickers and cellar coopers |
+| L8 | `julianos_chapel` (cy.L8.the_nine, L6.skingrad_hill): the Great Chapel of Julianos. `crusader_relic_cult` (cy.L8.the_nine, L6.priory_of_the_nine): pilgrims seeking the Knights of the Nine |
+| L9 | `wine_feud` (L5.wine_estates, L7.vintner_aristocracy): sabotage and price wars between the two great cellars. `hidden_count` (L6.skingrad_hill, L7.vintner_aristocracy): the town shielding its nocturnal count from outsiders' questions |
+| L10 | `vampire_count` (L1.warm_limestone_slopes, L9.hidden_count): the secret pact between Castle Skingrad and the county's bloodlines. `name_vault_under_the_vines` (cy.L10.ayleid_undercity, L1.deep_ayleid_vault): Miscarcand and its Great Welkynd Stone |
+| L11 | `knightly_order_of_the_nine` (cy.L11.septim_empire, L8.crusader_relic_cult): the founding and fall of the Knights of the Nine. `ayleid_name_vaults` (cy.L11.ayleid_era, L10.name_vault_under_the_vines): the Ayleid kings buried under the vineyards |
+
+### 1.8 Gold Coast (`gold_coast`, 5.6 km², seats Anvil and Kvatch)
+
+**World truth.** The Gold Coast is Cyrodiil's western shore on the Abecean Sea and the dry hills behind it. Anvil is a
+bright harbour of white stone walls and blue roofs, its fleet and merchant houses rich on western sea trade. Up the
+Gold Road, Kvatch stood on its commanding hill until a Great Gate opened beneath it in the Oblivion Crisis: the city
+burned and its survivors camp below the walls while rebuilding begins. Between them run the longest leg of the Gold
+Road, smugglers' sea-caves, wreckers, a haunted manor and vampire lairs that prey on lonely travellers.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `low_sea_cliffs`: pale coastal bluffs and sandy coves. `sea_caves`: tidal caverns under the headlands. `kvatch_hill`: a steep 60-block plateau commanding the Gold Road |
+| L2 | `sea_fog` (cy.L2.abecean_storms, L1.low_sea_cliffs): salt mists rolling into the harbour. `westerly_gales` (cy.L2.abecean_storms, L1.low_sea_cliffs): Abecean squalls driving ships onto the rocks |
+| L3 | `harbour_springs` (L1.low_sea_cliffs): fresh springs feeding Anvil's docks and fountain. `kvatch_wells` (L1.kvatch_hill): rock-cut hilltop wells fouled by ash during the burning |
+| L4 | `coastal_scrub` (L1.low_sea_cliffs, L2.westerly_gales): wind-bent olive and scrub. `cliff_grass` (L1.low_sea_cliffs): golden coastal downs with mountain lions. `cove_beach` (L1.low_sea_cliffs): land dreugh and mudcrabs on the sand. `burned_slope` (L1.kvatch_hill): scorched earth round Kvatch. `strid_riverine` (cy.L3.tributaries, L1.low_sea_cliffs): the southern border gorge |
+| L5 | `anvil_shipping` (cy.L5.sea_trade, L3.harbour_springs): ocean trade with Hammerfell, Summerset and Yokuda. `fishing` (L4.cove_beach): coastal trawlers and wharves. `rebuild_trade` (L1.kvatch_hill, L4.burned_slope): masons, timber and stone hauled up to Kvatch |
+| L6 | `anvil_harbour` (L3.harbour_springs, L5.anvil_shipping): the white-walled port city and its great lighthouse. `kvatch_on_the_hill` (L1.kvatch_hill, L4.burned_slope): the ruined hilltop seat under scaffolding. `gold_road_inns` (cy.L6.inn_chain, L5.anvil_shipping): Brina Cross and Gottshaw. `refugee_camp` (L1.kvatch_hill, L5.rebuild_trade): the tent town at the foot of Kvatch's road |
+| L7 | `merchant_wealth` (L5.anvil_shipping, L6.anvil_harbour): shipping magnates and guild factors. `dock_labour` (L5.fishing, L6.anvil_harbour): sailors and stevedores on the quay. `kvatch_refugees` (L6.refugee_camp): displaced citizens led by Savlian Matius |
+| L8 | `dibella_chapel` (cy.L8.the_nine, L6.anvil_harbour): the Great Chapel of Dibella in Anvil. `akatosh_chapel` (cy.L8.the_nine, L6.kvatch_on_the_hill): the surviving dome of Akatosh serving as Kvatch's field hospital and shrine |
+| L9 | `kvatch_rebuild` (cy.L9.throne_empty, L7.kvatch_refugees): disputes over who funds the rebuilding and who holds the county signet. `wreckers` (L2.westerly_gales, L5.anvil_shipping): coastal gangs trying to douse Anvil's lighthouse |
+| L10 | `smuggler_coves` (L1.sea_caves, L9.wreckers): Dunbarrow Cove and pirate grottos under the cliffs. `haunted_manor` (L1.low_sea_cliffs, L6.anvil_harbour): Benirus Manor over its sealed lich-crypt. `gate_remnant_under_kvatch` (cy.L9.gate_scars, L1.kvatch_hill, L4.burned_slope): smoking Daedric fissures beneath the burned plaza |
+| L11 | `kvatch_burned` (cy.L11.oblivion_crisis, L10.gate_remnant_under_kvatch): the night the Great Gate broke the city. `old_pirate_ages` (cy.L11.three_banner_war, L10.smuggler_coves): the Gold Coast pirate kings and Red Sabre fleets |
+
+### 1.9 Nibenay Valley (`nibenay_valley`, 8.2 km², seat Bravil)
+
+**World truth.** The Nibenay Valley is the flat, wet and poor river country of the Lower Niben. Bravil is a crowded
+city of weathered plank houses built over mud canals and timber stilts beside the river, the poorest of the nine seats
+and the northern funnel for skooma smuggled up from Elsweyr. Its people trust luck more than the Watch and rub the
+statue of their Lucky Old Lady in the square for coin. The valley's riverbank caves and drowned Ayleid ruins shelter
+smugglers, necromancers and the sealed crypt where the Dark Brotherhood keeps its Night Mother.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `river_flats`: broad, low-gradient silt floodplains. `riverbank_caves`: wet mudstone and limestone caves cut by the river |
+| L2 | `humid_heat` (cy.L2.east_wet, L1.river_flats): oppressive summer humidity. `river_fog` (cy.L2.lake_mist, L1.river_flats): dense fog blanketing the braided channels |
+| L3 | `lower_niben_braids` (cy.L3.niben, L1.river_flats): wide river channels and shifting islands. `flood_meadows` (L1.river_flats, L3.lower_niben_braids): seasonally inundated banks. `bravil_mud` (L1.river_flats, cy.L3.who_holds_water, L3.lower_niben_braids): the city has no clean well, so the poor buy drinking water by the bucket |
+| L4 | `reed_marsh` (cy.L4.riverine_reeds, L3.lower_niben_braids): tall reeds, nirnroot, mudcrabs and slaughterfish. `flood_meadow` (L3.flood_meadows): wet sedge and willows. `willow_carr` (L2.river_fog, L3.lower_niben_braids): tangled river woods. `river_island` (L3.lower_niben_braids): wooded islets in the Niben |
+| L5 | `river_labour` (cy.L5.river_trade, L3.lower_niben_braids): barge hauling, timber rafting and ferrying. `skooma` (cy.L5.skooma_smuggling, L3.lower_niben_braids): illicit moon-sugar and skooma traffic. `eel_and_reed` (L4.reed_marsh): eel traps and reed thatch |
+| L6 | `bravil_ferry_city` (L3.lower_niben_braids, L5.river_labour): plank-and-stilt tenements crowded along dirty canals. `green_road_inns` (cy.L6.inn_chain, L1.river_flats): Faregyl and the Inn of Ill Omen along the highway |
+| L7 | `slum_city` (cy.L7.class_ladder, L5.river_labour, L6.bravil_ferry_city): impoverished dockhands, Khajiit and Argonian barge-crews. `addiction` (L5.skooma, L7.slum_city): skooma dens emptying pockets in the lower wards |
+| L8 | `mara_chapel` (cy.L8.the_nine, L6.bravil_ferry_city): the Great Chapel of Mara. `lucky_old_lady` (L6.bravil_ferry_city, L7.slum_city): the plaza statue rubbed for luck. `night_mother_crypt` (L6.bravil_ferry_city, L8.lucky_old_lady): the secret vault beneath the statue |
+| L9 | `corrupt_clerk` (L5.skooma, L7.addiction): harbour inspectors bribed to look away from night barges. `elsweyr_gates` (cy.L9.border_pressure, L5.skooma): smuggling trails across the Rimmen and Torval hills |
+| L10 | `skooma_dens` (L1.river_flats, L7.addiction, L9.corrupt_clerk): hidden boil-cellars and canal caches. `smuggler_caves` (L1.riverbank_caves, L9.corrupt_clerk): river-mouth caves with boat slips. `assassins_mother_crypt` (cy.L10.assassins_and_thieves, L1.river_flats, L8.night_mother_crypt): the Listener's sanctum under the Lucky Old Lady |
+| L11 | `alessian_gates_altadoon_mnem` (cy.L11.alessian_revolt, L1.river_flats): weathered Alessian stone gates in the reeds. `river_wars` (cy.L11.septim_empire, L3.lower_niben_braids): toll-chain wars between Bravil and Leyawiin |
+
+### 1.10 Blackwood (`blackwood`, 4.5 km², seat Leyawiin)
+
+**World truth.** Blackwood is hot, steaming swamp-forest where the Lower Niben meets Topal Bay on Cyrodiil's southern
+border with Black Marsh and Elsweyr. Leyawiin is a walled Imperial river-mouth city with Argonian and Khajiit shanties
+crowded outside its painted streets, and the home of the Blackwood Company, a mercenary outfit that has grown rich
+undercutting the Fighters Guild. Rumour says the company's men drink sap stolen from a marsh tree. Ayleid ruins sink
+into the peat, vampire covens and necromancers hide in the mangroves, and the border forts face an assertive Black
+Marsh.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `mangrove_mud`: coastal mudflats and brackish silt. `peat`: deep waterlogged peat bogs. `sinking_ruins`: Ayleid stone foundations subsiding into the mire |
+| L2 | `steam_heat` (cy.L2.topal_heat, L1.mangrove_mud): year-round sub-tropical heat and mist. `thunderstorms` (cy.L2.topal_heat, L1.peat): daily afternoon downpours off Topal Bay |
+| L3 | `niben_mouth` (cy.L3.niben, L1.mangrove_mud): the wide estuary at Leyawiin. `panther_river` (cy.L3.tributaries, L1.peat): dark eastern swamp river full of wrecks. `brackish_tide` (L1.mangrove_mud, L3.niben_mouth): salt tides pushing into the bayous |
+| L4 | `mangrove` (cy.L4.mangrove_swamp, L3.brackish_tide): stilt-root mangroves and land dreugh. `cypress_swamp` (L1.peat, L2.steam_heat): moss-hung cypress, giant snakes and wisps. `palm_hammock` (L1.mangrove_mud, L2.steam_heat): dry hummocks in the bog. `brackish_flat` (L3.brackish_tide): mudcrabs and marsh reeds |
+| L5 | `river_mouth_port` (cy.L5.sea_trade, L3.niben_mouth): Leyawiin's customs quay and coastal shipping. `mercenary_trade` (L3.niben_mouth, L5.river_mouth_port): contract arms and bounty gold. `rice_and_reed` (L1.peat, L4.brackish_flat): wet-field rice and marsh herbs |
+| L6 | `leyawiin_at_the_mouth` (L3.niben_mouth, L5.river_mouth_port): the brightly plastered river-fortress seat. `border_villages` (L1.peat, L4.palm_hammock): Water's Edge, Border Watch and Blankenmarch |
+| L7 | `imperial_core_vs_beastfolk_shanties` (cy.L7.class_ladder, L6.leyawiin_at_the_mouth): noble manors inside the walls, Argonian and Khajiit quarters in the damp lanes. `khajiit_border_village` (L6.border_villages): Border Watch on the western ridge |
+| L8 | `zenithar_chapel` (cy.L8.the_nine, L6.leyawiin_at_the_mouth): the Great Chapel of Zenithar. `argonian_hist_reverence` (L4.cypress_swamp, L7.imperial_core_vs_beastfolk_shanties): quiet Hist sap-veneration in the marsh villages |
+| L9 | `mercenary_company` (cy.L9.guild_wars, L5.mercenary_trade): the Blackwood Company rivalling the Fighters Guild. `marsh_border` (cy.L9.border_pressure, L6.border_villages): frontier forts facing An-Xileel scouts from Gideon |
+| L10 | `stolen_sap` (L4.cypress_swamp, L9.mercenary_company): the captured Hist tree in the Blackwood Company basement. `mangrove_vampires` (L1.mangrove_mud, L4.mangrove): Deepscorn Hollow and Redwater Slough. `sunken_ayleid` (cy.L10.ayleid_undercity, L1.sinking_ruins): Nenalata and Malada half-drowned in peat |
+| L11 | `blackwood_border_wars` (cy.L11.septim_empire, L9.marsh_border): centuries of legion marches into the outer swamp. `ayleid_marsh_retreat` (cy.L11.ayleid_era, L10.sunken_ayleid): the last Ayleid king crowned in Nenalata |
 
 ---
 

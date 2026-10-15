@@ -1,0 +1,841 @@
+{
+  "id": "hakoshae",
+  "why": [
+    "rimmen.L1.rimmen_cliff",
+    "rimmen.L5.artisan_trade",
+    "rimmen.L6.rimmen_seat"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:orange_terracotta",
+    "low": "minecraft:cut_sandstone",
+    "wood": "jungle",
+    "roof": "smooth_sandstone",
+    "accent": "orange"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:orange_terracotta",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:cut_sandstone",
+    "path": "minecraft:sandstone"
+  },
+  "style": {
+    "houseStyle": "khajiit",
+    "forms": {
+      "cluster": 5,
+      "ring": 4,
+      "canal": 3,
+      "grid": 3
+    },
+    "rules": {
+      "banners": 0.85,
+      "lanterns": 0.9,
+      "outsideStairs": 0.45,
+      "balcony": 0.5,
+      "awning": 0.65
+    },
+    "details": {
+      "trim": [
+        "minecraft:smooth_sandstone",
+        "minecraft:orange_terracotta",
+        "minecraft:cut_sandstone",
+        "minecraft:sandstone",
+        "sandstone",
+        "minecraft:smooth_sandstone"
+      ],
+      "lighting": [
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:shroomlight",
+        "minecraft:sea_lantern",
+        "minecraft:ochre_froglight",
+        "minecraft:pearlescent_froglight"
+      ],
+      "courtyard": [
+        "brazier",
+        "well",
+        "shrine",
+        "banner_post",
+        "fountain",
+        "totem_pole",
+        "incense_burner",
+        "cistern_basin",
+        "notice_cairn",
+        "ancestor_stela"
+      ],
+      "furnishings": [
+        "carpet",
+        "lectern",
+        "cauldron",
+        "chest",
+        "barrel",
+        "urn",
+        "tapestry",
+        "cresset",
+        "alchemy_stand",
+        "scroll_rack",
+        "prayer_cushion",
+        "weapon_stand"
+      ]
+    },
+    "district_palettes": {
+      "ward_1": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_1_0",
+          "prop_hakoshae_1_1",
+          "prop_hakoshae_1_2",
+          "prop_hakoshae_1_3",
+          "prop_hakoshae_1_4",
+          "prop_hakoshae_1_5",
+          "prop_hakoshae_1_6",
+          "prop_hakoshae_1_7",
+          "prop_hakoshae_1_8",
+          "prop_hakoshae_1_9",
+          "prop_hakoshae_1_10",
+          "prop_hakoshae_1_11"
+        ]
+      },
+      "ward_2": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_2_0",
+          "prop_hakoshae_2_1",
+          "prop_hakoshae_2_2",
+          "prop_hakoshae_2_3",
+          "prop_hakoshae_2_4",
+          "prop_hakoshae_2_5",
+          "prop_hakoshae_2_6",
+          "prop_hakoshae_2_7",
+          "prop_hakoshae_2_8",
+          "prop_hakoshae_2_9",
+          "prop_hakoshae_2_10",
+          "prop_hakoshae_2_11"
+        ]
+      },
+      "ward_3": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_3_0",
+          "prop_hakoshae_3_1",
+          "prop_hakoshae_3_2",
+          "prop_hakoshae_3_3",
+          "prop_hakoshae_3_4",
+          "prop_hakoshae_3_5",
+          "prop_hakoshae_3_6",
+          "prop_hakoshae_3_7",
+          "prop_hakoshae_3_8",
+          "prop_hakoshae_3_9",
+          "prop_hakoshae_3_10",
+          "prop_hakoshae_3_11"
+        ]
+      },
+      "ward_4": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_4_0",
+          "prop_hakoshae_4_1",
+          "prop_hakoshae_4_2",
+          "prop_hakoshae_4_3",
+          "prop_hakoshae_4_4",
+          "prop_hakoshae_4_5",
+          "prop_hakoshae_4_6",
+          "prop_hakoshae_4_7",
+          "prop_hakoshae_4_8",
+          "prop_hakoshae_4_9",
+          "prop_hakoshae_4_10",
+          "prop_hakoshae_4_11"
+        ]
+      },
+      "ward_5": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_5_0",
+          "prop_hakoshae_5_1",
+          "prop_hakoshae_5_2",
+          "prop_hakoshae_5_3",
+          "prop_hakoshae_5_4",
+          "prop_hakoshae_5_5",
+          "prop_hakoshae_5_6",
+          "prop_hakoshae_5_7",
+          "prop_hakoshae_5_8",
+          "prop_hakoshae_5_9",
+          "prop_hakoshae_5_10",
+          "prop_hakoshae_5_11"
+        ]
+      },
+      "ward_6": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_6_0",
+          "prop_hakoshae_6_1",
+          "prop_hakoshae_6_2",
+          "prop_hakoshae_6_3",
+          "prop_hakoshae_6_4",
+          "prop_hakoshae_6_5",
+          "prop_hakoshae_6_6",
+          "prop_hakoshae_6_7",
+          "prop_hakoshae_6_8",
+          "prop_hakoshae_6_9",
+          "prop_hakoshae_6_10",
+          "prop_hakoshae_6_11"
+        ]
+      },
+      "ward_7": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_7_0",
+          "prop_hakoshae_7_1",
+          "prop_hakoshae_7_2",
+          "prop_hakoshae_7_3",
+          "prop_hakoshae_7_4",
+          "prop_hakoshae_7_5",
+          "prop_hakoshae_7_6",
+          "prop_hakoshae_7_7",
+          "prop_hakoshae_7_8",
+          "prop_hakoshae_7_9",
+          "prop_hakoshae_7_10",
+          "prop_hakoshae_7_11"
+        ]
+      },
+      "ward_8": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_8_0",
+          "prop_hakoshae_8_1",
+          "prop_hakoshae_8_2",
+          "prop_hakoshae_8_3",
+          "prop_hakoshae_8_4",
+          "prop_hakoshae_8_5",
+          "prop_hakoshae_8_6",
+          "prop_hakoshae_8_7",
+          "prop_hakoshae_8_8",
+          "prop_hakoshae_8_9",
+          "prop_hakoshae_8_10",
+          "prop_hakoshae_8_11"
+        ]
+      },
+      "ward_9": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_9_0",
+          "prop_hakoshae_9_1",
+          "prop_hakoshae_9_2",
+          "prop_hakoshae_9_3",
+          "prop_hakoshae_9_4",
+          "prop_hakoshae_9_5",
+          "prop_hakoshae_9_6",
+          "prop_hakoshae_9_7",
+          "prop_hakoshae_9_8",
+          "prop_hakoshae_9_9",
+          "prop_hakoshae_9_10",
+          "prop_hakoshae_9_11"
+        ]
+      },
+      "ward_10": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_10_0",
+          "prop_hakoshae_10_1",
+          "prop_hakoshae_10_2",
+          "prop_hakoshae_10_3",
+          "prop_hakoshae_10_4",
+          "prop_hakoshae_10_5",
+          "prop_hakoshae_10_6",
+          "prop_hakoshae_10_7",
+          "prop_hakoshae_10_8",
+          "prop_hakoshae_10_9",
+          "prop_hakoshae_10_10",
+          "prop_hakoshae_10_11"
+        ]
+      },
+      "ward_11": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_11_0",
+          "prop_hakoshae_11_1",
+          "prop_hakoshae_11_2",
+          "prop_hakoshae_11_3",
+          "prop_hakoshae_11_4",
+          "prop_hakoshae_11_5",
+          "prop_hakoshae_11_6",
+          "prop_hakoshae_11_7",
+          "prop_hakoshae_11_8",
+          "prop_hakoshae_11_9",
+          "prop_hakoshae_11_10",
+          "prop_hakoshae_11_11"
+        ]
+      },
+      "ward_12": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_12_0",
+          "prop_hakoshae_12_1",
+          "prop_hakoshae_12_2",
+          "prop_hakoshae_12_3",
+          "prop_hakoshae_12_4",
+          "prop_hakoshae_12_5",
+          "prop_hakoshae_12_6",
+          "prop_hakoshae_12_7",
+          "prop_hakoshae_12_8",
+          "prop_hakoshae_12_9",
+          "prop_hakoshae_12_10",
+          "prop_hakoshae_12_11"
+        ]
+      },
+      "ward_13": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_13_0",
+          "prop_hakoshae_13_1",
+          "prop_hakoshae_13_2",
+          "prop_hakoshae_13_3",
+          "prop_hakoshae_13_4",
+          "prop_hakoshae_13_5",
+          "prop_hakoshae_13_6",
+          "prop_hakoshae_13_7",
+          "prop_hakoshae_13_8",
+          "prop_hakoshae_13_9",
+          "prop_hakoshae_13_10",
+          "prop_hakoshae_13_11"
+        ]
+      },
+      "ward_14": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_14_0",
+          "prop_hakoshae_14_1",
+          "prop_hakoshae_14_2",
+          "prop_hakoshae_14_3",
+          "prop_hakoshae_14_4",
+          "prop_hakoshae_14_5",
+          "prop_hakoshae_14_6",
+          "prop_hakoshae_14_7",
+          "prop_hakoshae_14_8",
+          "prop_hakoshae_14_9",
+          "prop_hakoshae_14_10",
+          "prop_hakoshae_14_11"
+        ]
+      },
+      "ward_15": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_15_0",
+          "prop_hakoshae_15_1",
+          "prop_hakoshae_15_2",
+          "prop_hakoshae_15_3",
+          "prop_hakoshae_15_4",
+          "prop_hakoshae_15_5",
+          "prop_hakoshae_15_6",
+          "prop_hakoshae_15_7",
+          "prop_hakoshae_15_8",
+          "prop_hakoshae_15_9",
+          "prop_hakoshae_15_10",
+          "prop_hakoshae_15_11"
+        ]
+      },
+      "ward_16": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_16_0",
+          "prop_hakoshae_16_1",
+          "prop_hakoshae_16_2",
+          "prop_hakoshae_16_3",
+          "prop_hakoshae_16_4",
+          "prop_hakoshae_16_5",
+          "prop_hakoshae_16_6",
+          "prop_hakoshae_16_7",
+          "prop_hakoshae_16_8",
+          "prop_hakoshae_16_9",
+          "prop_hakoshae_16_10",
+          "prop_hakoshae_16_11"
+        ]
+      },
+      "ward_17": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_17_0",
+          "prop_hakoshae_17_1",
+          "prop_hakoshae_17_2",
+          "prop_hakoshae_17_3",
+          "prop_hakoshae_17_4",
+          "prop_hakoshae_17_5",
+          "prop_hakoshae_17_6",
+          "prop_hakoshae_17_7",
+          "prop_hakoshae_17_8",
+          "prop_hakoshae_17_9",
+          "prop_hakoshae_17_10",
+          "prop_hakoshae_17_11"
+        ]
+      },
+      "ward_18": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_18_0",
+          "prop_hakoshae_18_1",
+          "prop_hakoshae_18_2",
+          "prop_hakoshae_18_3",
+          "prop_hakoshae_18_4",
+          "prop_hakoshae_18_5",
+          "prop_hakoshae_18_6",
+          "prop_hakoshae_18_7",
+          "prop_hakoshae_18_8",
+          "prop_hakoshae_18_9",
+          "prop_hakoshae_18_10",
+          "prop_hakoshae_18_11"
+        ]
+      },
+      "ward_19": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_19_0",
+          "prop_hakoshae_19_1",
+          "prop_hakoshae_19_2",
+          "prop_hakoshae_19_3",
+          "prop_hakoshae_19_4",
+          "prop_hakoshae_19_5",
+          "prop_hakoshae_19_6",
+          "prop_hakoshae_19_7",
+          "prop_hakoshae_19_8",
+          "prop_hakoshae_19_9",
+          "prop_hakoshae_19_10",
+          "prop_hakoshae_19_11"
+        ]
+      },
+      "ward_20": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_20_0",
+          "prop_hakoshae_20_1",
+          "prop_hakoshae_20_2",
+          "prop_hakoshae_20_3",
+          "prop_hakoshae_20_4",
+          "prop_hakoshae_20_5",
+          "prop_hakoshae_20_6",
+          "prop_hakoshae_20_7",
+          "prop_hakoshae_20_8",
+          "prop_hakoshae_20_9",
+          "prop_hakoshae_20_10",
+          "prop_hakoshae_20_11"
+        ]
+      },
+      "ward_21": {
+        "wall_primary": "minecraft:smooth_sandstone",
+        "wall_secondary": "minecraft:orange_terracotta",
+        "plinth": "minecraft:cut_sandstone",
+        "carpentry": "jungle",
+        "roofing": "smooth_sandstone",
+        "banner_dye": "orange",
+        "paving": [
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone",
+          "minecraft:cut_sandstone",
+          "sandstone"
+        ],
+        "trim_blocks": [
+          "minecraft:smooth_sandstone",
+          "minecraft:orange_terracotta",
+          "minecraft:cut_sandstone",
+          "sandstone",
+          "minecraft:smooth_sandstone",
+          "minecraft:sandstone"
+        ],
+        "props": [
+          "prop_hakoshae_21_0",
+          "prop_hakoshae_21_1",
+          "prop_hakoshae_21_2",
+          "prop_hakoshae_21_3",
+          "prop_hakoshae_21_4",
+          "prop_hakoshae_21_5",
+          "prop_hakoshae_21_6",
+          "prop_hakoshae_21_7",
+          "prop_hakoshae_21_8",
+          "prop_hakoshae_21_9",
+          "prop_hakoshae_21_10",
+          "prop_hakoshae_21_11"
+        ]
+      }
+    }
+  }
+}

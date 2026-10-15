@@ -373,14 +373,26 @@ public final class StoryData {
             RELICS.put(id, new RelicDef(id, new Txt("item.skycraft.relic." + id, str(o, "name", id)),
                     new Txt("item.skycraft.relic." + id + ".desc", str(o, "desc", "")), o.has("icon") ? o.get("icon").getAsInt() : 0));
         }
-        if (root.has("scenes")) {
+        if (root.has("scenes") && root.get("scenes").isJsonObject()) {
             for (Map.Entry<String, JsonElement> e : root.getAsJsonObject("scenes").entrySet()) {
+                if (!e.getValue().isJsonArray()) continue;
                 List<SceneLine> lines = new ArrayList<>();
                 int n = 0;
                 for (JsonElement l : e.getValue().getAsJsonArray()) {
-                    JsonArray pair = l.getAsJsonArray();
-                    lines.add(new SceneLine(pair.get(0).getAsString(),
-                            new Txt("story.skycraft.scene." + e.getKey() + "." + n++, pair.get(1).getAsString())));
+                    if (l.isJsonArray()) {
+                        JsonArray pair = l.getAsJsonArray();
+                        if (pair.size() >= 2) {
+                            lines.add(new SceneLine(pair.get(0).getAsString(),
+                                    new Txt("story.skycraft.scene." + e.getKey() + "." + n++, pair.get(1).getAsString())));
+                        }
+                    } else if (l.isJsonPrimitive()) {
+                        String raw = l.getAsString();
+                        int colon = raw.indexOf(':');
+                        String spk = colon > 0 ? raw.substring(0, colon).trim() : "narrator";
+                        String txt = colon > 0 ? raw.substring(colon + 1).trim() : raw.trim();
+                        lines.add(new SceneLine(spk,
+                                new Txt("story.skycraft.scene." + e.getKey() + "." + n++, txt)));
+                    }
                 }
                 SCENES.put(e.getKey(), lines);
             }

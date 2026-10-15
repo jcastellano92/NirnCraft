@@ -1,0 +1,405 @@
+{
+  "region": "hammerfell/sentinel",
+  "title": "The Candle-Vigil of Sentinel",
+  "summary": "Protect the royal necropolis of Tu'whacca's Throne and the cistern-vaults of Sentinel when Coven of the Tide necromancers conspire to profane the ancestral dead during a Crown-Forebear succession dispute.",
+  "why": [
+    "sentinel.L7.palace_crowns",
+    "sentinel.L7.quay_forebears",
+    "sentinel.L8.arkay_patron",
+    "sentinel.L9.court_rift",
+    "sentinel.L10.coven_of_the_tide"
+  ],
+  "hook": {
+    "place": "sentinel",
+    "places": [
+      "aswala_stables",
+      "faakir_lair",
+      "hundings_palatial_hall",
+      "kozanset",
+      "maud_den",
+      "rkhunzak",
+      "rkulftzel",
+      "saalaam_homestead",
+      "santaki",
+      "sentinel",
+      "shrine_namira_hammerfell",
+      "sulalaam_hollow"
+    ],
+    "npc": "story_sn_knight_talia",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_sn_knight_talia",
+      "name": "Dame Talia of the Candle",
+      "role": "knight",
+      "place": "sentinel",
+      "greet": "Peace of Tu'whacca upon your steps, traveller. Keep your blade loose—the brass funerary lamps at the palace gate were snuffed by salt-fog at midnight.",
+      "talk": [
+        "The Order of the Candle guards the royal dead and the palace cisterns of Sentinel, standing above the quarrels of Palace Crowns and Quay Forebears.",
+        "Yet someone stole the three Bronze Ash-Seals from Tu'whacca's Throne last night. Without them, neither Crown nor Forebear will trust the succession—and the Coven of the Tide can wake the honoured dead. Speak with Keeper Navid at Tu'whacca's Throne."
+      ]
+    },
+    {
+      "id": "story_sn_keeper_navid",
+      "name": "Keeper Navid",
+      "role": "priest",
+      "place": "tuwhaccas_throne",
+      "greet": "May my hand wither before I raise steel against an ancestor! Therefore I thank Tu'whacca that an unsworn traveller stands at this threshold.",
+      "talk": [
+        "Grave-robbers wearing dyed quay-cloth broke into the outer vaults and carried the Bronze Ash-Seals east toward Kozanset and Kaakir Cave.",
+        "Seek Factor Rashid at Zauun Docks near Kozanset; no boat moves along the northern shore without his tally-stick."
+      ]
+    },
+    {
+      "id": "story_sn_factor_rashid",
+      "name": "Factor Rashid of Zauun",
+      "role": "merchant",
+      "place": "zauun_docks",
+      "greet": "You think the Forebear guilds of the quay would rob Tu'whacca's Throne? Those seals were taken by corpse-traders who want our ships burned by the Palace Guard!",
+      "talk": [
+        "My fishermen saw Tide-Witch Azar's skiff row into Kaakir Cave with brass coffers from the necropolis.",
+        "Slay Azar in Kaakir Cave, then hunt Necromancer-Lord Vuren in Santaki before he uses the royal ash to animate the tomb-legions!"
+      ]
+    },
+    {
+      "id": "story_sn_marshal_khalil",
+      "name": "Marshal Khalil of Kozanset",
+      "role": "guard",
+      "place": "kozanset",
+      "greet": "Dame Talia's pigeon reached Kozanset an hour ago. My swordsmen have cordoned the dunes around Santaki.",
+      "talk": [
+        "Necromancer-Lord Vuren is inside Santaki right now, binding the stolen Ash-Seals to a bone-colossus.",
+        "Since our soldiers are forbidden by oath to strike the forms of our own ancestors, you must be our clean blade inside Santaki!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_sn_tide_witch_azar": {
+      "name": "Tide-Witch Azar of Selenu",
+      "rank": "boss",
+      "place": "kaakir_cave",
+      "weapon": "iron_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_sn_necromancer_vuren": {
+      "name": "Vuren the Salt-Binder",
+      "rank": "boss",
+      "place": "santaki",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_sn_tuwhacca_threshold": [
+      "Keeper Navid: See the Indigo-dyed fringe wedged in the crypt-hinge? Plucked deliberately so the Palace Crowns would blame the Dyers' Quarter on the quay.",
+      "Dame Talia of the Candle: And beneath the indigo, dried sea-kelp from the Coven of the Tide.",
+      "Keeper Navid: Follow the coast road past Berahim Arch to Zauun Docks before the Crowns and Forebears draw steel in the streets!"
+    ],
+    "story_sn_kaakir_cove": [
+      "Tide-Witch Azar: The kings of Sentinel sleep in dry gold while the sea-coves starve! Their ashes will row our galleys!",
+      "Dame Talia of the Candle: Return the first Ash-Seal to Tu'whacca's keeping, defiler!"
+    ],
+    "story_sn_santaki_ritual": [
+      "Vuren the Salt-Binder: Your pious swordsmen dare not strike a finger-bone of their grandfathers! Who in Hammerfell can stop my risen host?",
+      "Marshal Khalil of Kozanset: An unsworn hand that carries the Candle's light! Strike him down!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_sentinel_01_snuffed_lamps",
+      "region": "hammerfell/sentinel",
+      "category": "main",
+      "title": "The Stolen Ash-Seals",
+      "giver": "story_sn_knight_talia",
+      "start": "npc:story_sn_knight_talia",
+      "requires": [],
+      "why": [
+        "sentinel.L7.palace_crowns",
+        "sentinel.L8.arkay_patron",
+        "sentinel.L9.candle_order"
+      ],
+      "summary": "Inspect the robbed vault at Tu'whacca's Throne with Dame Talia and Keeper Navid.",
+      "intro": [
+        "Three Bronze Ash-Seals were stolen from the royal necropolis of Tu'whacca's Throne, threatening to spark riots between Sentinel's Palace Crowns and Quay Forebears.",
+        "Travel to Tu'whacca's Throne and examine the broken crypt-seal with Keeper Navid."
+      ],
+      "complete": [
+        "Keeper Navid and Dame Talia found sea-kelp of the Coven of the Tide planted alongside quay-dyed cloth to frame the Forebears."
+      ],
+      "journal": {
+        "start": "Dame Talia in Sentinel asked me to inspect the theft at Tu'whacca's Throne with Keeper Navid.",
+        "done": "We discovered that the Coven of the Tide stole the Ash-Seals and fled east toward Zauun Docks."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "tuwhaccas_throne",
+          "text": "Enter the precincts of Tu'whacca's Throne"
+        },
+        {
+          "type": "scene",
+          "place": "tuwhaccas_throne",
+          "target": "scene:story_sn_tuwhacca_threshold",
+          "text": "Inspect the broken crypt-hinge with Keeper Navid"
+        },
+        {
+          "type": "talk",
+          "place": "tuwhaccas_throne",
+          "npc": "story_sn_keeper_navid",
+          "text": "Speak with Keeper Navid at Tu'whacca's Throne"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "tuwhaccas_throne"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tuwhaccas_throne",
+          "objective": "Enter the precincts of Tu'whacca's Throne"
+        },
+        {
+          "id": 20,
+          "place": "tuwhaccas_throne",
+          "objective": "Inspect the broken crypt-hinge with Keeper Navid"
+        },
+        {
+          "id": 30,
+          "place": "tuwhaccas_throne",
+          "objective": "Speak with Keeper Navid at Tu'whacca's Throne"
+        }
+      ],
+      "consequence": "guard_banner:sentinel_stage_1"
+    },
+    {
+      "id": "ms1_sentinel_02_zauun_tally",
+      "region": "hammerfell/sentinel",
+      "category": "main",
+      "title": "Skiffs on the Selenu Shore",
+      "giver": "story_sn_keeper_navid",
+      "start": "auto",
+      "requires": [
+        "ms1_sentinel_01_snuffed_lamps"
+      ],
+      "why": [
+        "sentinel.L7.quay_forebears",
+        "sentinel.L10.coven_of_the_tide"
+      ],
+      "summary": "Question Factor Rashid at Zauun Docks and defeat Tide-Witch Azar inside Kaakir Cave.",
+      "intro": [
+        "The grave-robbers rowed east along the bay shore toward Zauun Docks and Kaakir Cave.",
+        "Speak with Factor Rashid at Zauun Docks, then enter Kaakir Cave and slay Tide-Witch Azar."
+      ],
+      "complete": [
+        "Tide-Witch Azar fell in Kaakir Cave, yielding the first Ash-Seal and revealing that Vuren the Salt-Binder holds the remaining seals in Santaki."
+      ],
+      "journal": {
+        "start": "I must question Factor Rashid at Zauun Docks and hunt Tide-Witch Azar in Kaakir Cave.",
+        "done": "I slew Tide-Witch Azar in Kaakir Cave and traced the remaining seals to Santaki."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "zauun_docks",
+          "npc": "story_sn_factor_rashid",
+          "text": "Question Factor Rashid at Zauun Docks"
+        },
+        {
+          "type": "scene",
+          "place": "kaakir_cave",
+          "target": "scene:story_sn_kaakir_cove",
+          "text": "Confront Tide-Witch Azar in Kaakir Cave"
+        },
+        {
+          "type": "boss",
+          "place": "kaakir_cave",
+          "target": "story_sn_tide_witch_azar",
+          "text": "Defeat Tide-Witch Azar of Selenu"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "zauun_docks",
+        "kaakir_cave"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "zauun_docks",
+          "objective": "Question Factor Rashid at Zauun Docks"
+        },
+        {
+          "id": 20,
+          "place": "kaakir_cave",
+          "objective": "Confront Tide-Witch Azar in Kaakir Cave"
+        },
+        {
+          "id": 30,
+          "place": "kaakir_cave",
+          "objective": "Defeat Tide-Witch Azar of Selenu"
+        }
+      ],
+      "consequence": "npc_schedule:sentinel_stage_2"
+    },
+    {
+      "id": "ms1_sentinel_03_kozanset_watch",
+      "region": "hammerfell/sentinel",
+      "category": "main",
+      "title": "The Cordon at Kozanset",
+      "giver": "story_sn_factor_rashid",
+      "start": "auto",
+      "requires": [
+        "ms1_sentinel_02_zauun_tally"
+      ],
+      "why": [
+        "sentinel.L7.dyers_quarter",
+        "sentinel.L9.court_rift"
+      ],
+      "summary": "Scout the desert road at Berahim Arch and coordinate with Marshal Khalil in Kozanset.",
+      "intro": [
+        "Before marching on Santaki, check the caravan road at Berahim Arch for necromancer lookouts and meet Marshal Khalil in Kozanset.",
+        "Visit Berahim Arch and speak with Marshal Khalil in Kozanset."
+      ],
+      "complete": [
+        "Marshal Khalil's guards sealed the dunes around Santaki so Vuren cannot escape with the royal relics."
+      ],
+      "journal": {
+        "start": "I must check Berahim Arch and report to Marshal Khalil in Kozanset.",
+        "done": "Marshal Khalil briefed me on Vuren's ritual inside Santaki."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "berahim_arch",
+          "text": "Scout the coast-road pass at Berahim Arch"
+        },
+        {
+          "type": "talk",
+          "place": "kozanset",
+          "npc": "story_sn_marshal_khalil",
+          "text": "Coordinate with Marshal Khalil in Kozanset"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "berahim_arch",
+        "kozanset"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "berahim_arch",
+          "objective": "Scout the coast-road pass at Berahim Arch"
+        },
+        {
+          "id": 20,
+          "place": "kozanset",
+          "objective": "Coordinate with Marshal Khalil in Kozanset"
+        }
+      ],
+      "consequence": "shrine_state:sentinel_stage_3"
+    },
+    {
+      "id": "ms1_sentinel_04_santaki_sanctum",
+      "region": "hammerfell/sentinel",
+      "category": "main",
+      "title": "The Candle Unbroken",
+      "giver": "story_sn_marshal_khalil",
+      "start": "auto",
+      "requires": [
+        "ms1_sentinel_03_kozanset_watch"
+      ],
+      "finale": true,
+      "why": [
+        "sentinel.L8.arkay_patron",
+        "sentinel.L9.candle_order",
+        "sentinel.L10.cistern_undercroft"
+      ],
+      "summary": "Descend into Santaki, destroy Vuren the Salt-Binder, and return all three Bronze Ash-Seals to Dame Talia in Sentinel.",
+      "intro": [
+        "Inside the ancient necropolis of Santaki, Vuren the Salt-Binder is using the stolen Ash-Seals to animate the honoured dead.",
+        "Enter Santaki, slay Vuren, and return the three seals to Dame Talia of the Candle in Sentinel."
+      ],
+      "complete": [
+        "Vuren the Salt-Binder is dead, the Bronze Ash-Seals rest once more in Tu'whacca's Throne, and the Order of the Candle has proclaimed peace between Palace and Quay."
+      ],
+      "journal": {
+        "start": "I must enter Santaki, defeat Vuren the Salt-Binder, and return the Ash-Seals to Dame Talia in Sentinel.",
+        "done": "I defeated Vuren in Santaki and restored the Bronze Ash-Seals to Sentinel."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "santaki",
+          "text": "Descend into the necropolis of Santaki"
+        },
+        {
+          "type": "scene",
+          "place": "santaki",
+          "target": "scene:story_sn_santaki_ritual",
+          "text": "Confront Vuren the Salt-Binder in the ritual chamber"
+        },
+        {
+          "type": "boss",
+          "place": "santaki",
+          "target": "story_sn_necromancer_vuren",
+          "text": "Defeat Vuren the Salt-Binder"
+        },
+        {
+          "type": "talk",
+          "place": "sentinel",
+          "npc": "story_sn_knight_talia",
+          "text": "Return the Bronze Ash-Seals to Dame Talia in Sentinel"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "santaki",
+        "sentinel"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "santaki",
+          "objective": "Descend into the necropolis of Santaki"
+        },
+        {
+          "id": 20,
+          "place": "santaki",
+          "objective": "Confront Vuren the Salt-Binder in the ritual chamber"
+        },
+        {
+          "id": 30,
+          "place": "santaki",
+          "objective": "Defeat Vuren the Salt-Binder"
+        },
+        {
+          "id": 40,
+          "place": "sentinel",
+          "objective": "Return the Bronze Ash-Seals to Dame Talia in Sentinel"
+        }
+      ],
+      "consequence": "settlement_prosperity:sentinel_stage_4"
+    }
+  ]
+}

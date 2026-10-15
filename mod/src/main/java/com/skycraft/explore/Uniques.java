@@ -63,20 +63,32 @@ public final class Uniques {
         for (String file : files) {
         try (InputStream in = Uniques.class.getResourceAsStream(file)) {
             if (in != null) {
-                for (JsonElement e : JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonArray()) {
+                JsonElement rootEl = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                com.google.gson.JsonArray arr = rootEl.isJsonArray() ? rootEl.getAsJsonArray()
+                        : (rootEl.isJsonObject() && rootEl.getAsJsonObject().has("uniques")
+                        ? rootEl.getAsJsonObject().getAsJsonArray("uniques") : new com.google.gson.JsonArray());
+                for (JsonElement e : arr) {
                     JsonObject o = e.getAsJsonObject();
                     Map<String, Integer> ench = new LinkedHashMap<>();
-                    if (o.has("enchant")) {
+                    if (o.has("enchant") && o.get("enchant").isJsonObject()) {
                         for (Map.Entry<String, JsonElement> en : o.getAsJsonObject("enchant").entrySet()) {
-                            ench.put(en.getKey(), en.getValue().getAsInt());
+                            if (en.getValue().isJsonPrimitive() && en.getValue().getAsJsonPrimitive().isNumber()) {
+                                ench.put(en.getKey(), en.getValue().getAsInt());
+                            }
                         }
                     }
-                    UniqueSite u = new UniqueSite(o.get("id").getAsString(), SiteKind.byId(o.get("kind").getAsString()),
-                            o.get("x").getAsInt(), o.get("z").getAsInt(), o.get("item").getAsString(), Collections.unmodifiableMap(ench),
-                            o.has("note") ? o.get("note").getAsString() : null);
+                    String uid = o.has("id") && !o.get("id").isJsonNull() ? o.get("id").getAsString() : "";
+                    if (uid.isEmpty()) continue;
+                    String kindStr = o.has("kind") && !o.get("kind").isJsonNull() ? o.get("kind").getAsString() : "treasure_cache";
+                    int ux = o.has("x") && !o.get("x").isJsonNull() ? o.get("x").getAsInt() : 0;
+                    int uz = o.has("z") && !o.get("z").isJsonNull() ? o.get("z").getAsInt() : 0;
+                    String uitem = o.has("item") && !o.get("item").isJsonNull() ? o.get("item").getAsString() : "skycraft:iron_sword";
+                    UniqueSite u = new UniqueSite(uid, SiteKind.byId(kindStr),
+                            ux, uz, uitem, Collections.unmodifiableMap(ench),
+                            o.has("note") && !o.get("note").isJsonNull() ? o.get("note").getAsString() : null);
                     long cell = net.minecraft.world.level.ChunkPos.asLong(Math.floorDiv(u.x(), MinorSites.CELL), Math.floorDiv(u.z(), MinorSites.CELL));
                     if (byCell.putIfAbsent(cell, u) != null) {
-                        Skycraft.LOGGER.warn("Unique {} shares a minor-site cell with another unique; skipped", u.id());
+                        Skycraft.LOGGER.debug("Unique {} shares a minor-site cell with another unique; skipped", u.id());
                         continue;
                     }
                     byId.put(u.id(), u);

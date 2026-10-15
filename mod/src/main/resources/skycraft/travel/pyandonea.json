@@ -1,0 +1,566 @@
+{
+  "province": "pyandonea",
+  "why": [
+    "maormer_isles.L1.volcanic_reef_isles",
+    "maormer_isles.L2.warm_mist_curtain"
+  ],
+  "modes": [
+    "boat",
+    "caravan",
+    "wayshrine"
+  ],
+  "nodes": [
+    {
+      "id": "mistveil_village",
+      "place": "mistveil_village",
+      "name": "place.skycraft.mistveil_village",
+      "region": "pyandonea/maormer_isles",
+      "x": -20171,
+      "z": 18649,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "pyandonean_fleet_anchorage",
+      "place": "pyandonean_fleet_anchorage",
+      "name": "place.skycraft.pyandonean_fleet_anchorage",
+      "region": "pyandonea/maormer_isles",
+      "x": -18200,
+      "z": 20812,
+      "mode": "boat",
+      "modes": [
+        "boat",
+        "wayshrine"
+      ],
+      "kind": "hub",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_01",
+      "name": "travel.skycraft.wayshrine.maormer_isles.01",
+      "region": "pyandonea/maormer_isles",
+      "x": -19800,
+      "z": 19600,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_02",
+      "name": "travel.skycraft.wayshrine.maormer_isles.02",
+      "region": "pyandonea/maormer_isles",
+      "x": -21200,
+      "z": 20000,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_03",
+      "name": "travel.skycraft.wayshrine.maormer_isles.03",
+      "region": "pyandonea/maormer_isles",
+      "x": -18270,
+      "z": 18927,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_04",
+      "name": "travel.skycraft.wayshrine.maormer_isles.04",
+      "region": "pyandonea/maormer_isles",
+      "x": -21152,
+      "z": 19952,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_05",
+      "name": "travel.skycraft.wayshrine.maormer_isles.05",
+      "region": "pyandonea/maormer_isles",
+      "x": -20219,
+      "z": 18625,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "id": "wayshrine_maormer_isles_06",
+      "name": "travel.skycraft.wayshrine.maormer_isles.06",
+      "region": "pyandonea/maormer_isles",
+      "x": -18224,
+      "z": 20788,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "discoveredOnArrival": true,
+      "free": true,
+      "hashed": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "from": "mistveil_village",
+      "to": "wayshrine_maormer_isles_05",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -20171,
+          18649
+        ],
+        [
+          -20219,
+          18625
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -20171,
+          18649
+        ],
+        [
+          -19800,
+          19600
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "wayshrine_maormer_isles_06",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -18200,
+          20812
+        ],
+        [
+          -18224,
+          20788
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "wayshrine_maormer_isles_03",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -18200,
+          20812
+        ],
+        [
+          -18270,
+          18927
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_01",
+      "to": "mistveil_village",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -19800,
+          19600
+        ],
+        [
+          -20171,
+          18649
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_01",
+      "to": "wayshrine_maormer_isles_05",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -19800,
+          19600
+        ],
+        [
+          -20219,
+          18625
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_02",
+      "to": "wayshrine_maormer_isles_04",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -21200,
+          20000
+        ],
+        [
+          -21152,
+          19952
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_02",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -21200,
+          20000
+        ],
+        [
+          -19800,
+          19600
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_03",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -18270,
+          18927
+        ],
+        [
+          -19800,
+          19600
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_03",
+      "to": "wayshrine_maormer_isles_06",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -18270,
+          18927
+        ],
+        [
+          -18224,
+          20788
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_04",
+      "to": "wayshrine_maormer_isles_02",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -21152,
+          19952
+        ],
+        [
+          -21200,
+          20000
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_04",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -21152,
+          19952
+        ],
+        [
+          -19800,
+          19600
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_05",
+      "to": "mistveil_village",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -20219,
+          18625
+        ],
+        [
+          -20171,
+          18649
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_05",
+      "to": "wayshrine_maormer_isles_01",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -20219,
+          18625
+        ],
+        [
+          -19800,
+          19600
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_06",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -18224,
+          20788
+        ],
+        [
+          -18200,
+          20812
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "wayshrine_maormer_isles_06",
+      "to": "wayshrine_maormer_isles_03",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": [
+        [
+          -18224,
+          20788
+        ],
+        [
+          -18270,
+          18927
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "mistveil_village",
+      "to": "pyandonean_fleet_anchorage",
+      "mode": "boat",
+      "fee": 95,
+      "duration": 110,
+      "path": [
+        [
+          -20171,
+          18649
+        ],
+        [
+          -18200,
+          20812
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    },
+    {
+      "from": "pyandonean_fleet_anchorage",
+      "to": "mistveil_village",
+      "mode": "boat",
+      "fee": 95,
+      "duration": 110,
+      "path": [
+        [
+          -18200,
+          20812
+        ],
+        [
+          -20171,
+          18649
+        ]
+      ],
+      "bidirectional": true,
+      "why": [
+        "maormer_isles.L1.volcanic_reef_isles",
+        "maormer_isles.L2.warm_mist_curtain"
+      ]
+    }
+  ]
+}

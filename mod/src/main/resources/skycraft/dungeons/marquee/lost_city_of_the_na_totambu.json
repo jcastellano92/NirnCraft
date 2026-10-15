@@ -1,5 +1,9 @@
 {
  "id": "lost_city_of_the_na_totambu",
+ "why": [
+  "alikr_desert.L10.na_totambu_city",
+  "bangkorai.L11.na_totambu_line"
+ ],
  "kit": "redguard",
  "entry_depth": 24,
  "palette": {

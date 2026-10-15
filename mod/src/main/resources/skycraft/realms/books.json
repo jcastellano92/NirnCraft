@@ -4,55 +4,87 @@
     "category": "DAEDRA",
     "cover": "RED",
     "weight": 2,
-    "value": 60
+    "value": 60,
+    "why": [
+      "cyrodiil.L11.oblivion_crisis",
+      "gold_coast.L10.gate_remnant_under_kvatch"
+    ]
   },
   {
     "id": "binding_a_sigil_stone",
     "category": "GUIDE",
     "cover": "BLACK",
     "weight": 2,
-    "value": 45
+    "value": 45,
+    "why": [
+      "cyrodiil.L11.oblivion_crisis",
+      "nibenay_basin.L5.morrowind_trade"
+    ]
   },
   {
     "id": "the_whalebone_bridge",
     "category": "POEM",
     "cover": "BLUE",
     "weight": 2,
-    "value": 30
+    "value": 30,
+    "why": [
+      "skyrim.L8.ancestor_barrows",
+      "whiterun.L8.honour_and_sovngarde"
+    ]
   },
   {
     "id": "letter_from_new_sheoth",
     "category": "LETTER",
     "cover": "SHEET",
     "weight": 2,
-    "value": 15
+    "value": 15,
+    "why": [
+      "cyrodiil.L8.daedric_shrines",
+      "nibenay_basin.L10.arrius_cult_cells"
+    ]
   },
   {
     "id": "mania_and_dementia",
     "category": "DAEDRA",
     "cover": "GREEN",
     "weight": 2,
-    "value": 50
+    "value": 50,
+    "why": [
+      "cyrodiil.L8.daedric_shrines",
+      "cyrodiil.L10.cult_remnants"
+    ]
   },
   {
     "id": "apocrypha_marginalia",
     "category": "NOTE",
     "cover": "SHEET",
     "weight": 1,
-    "value": 20
+    "value": 20,
+    "why": [
+      "solstheim.L10.black_book_altars",
+      "solstheim.L8.ink_dread"
+    ]
   },
   {
     "id": "the_ideal_masters",
     "category": "DAEDRA",
     "cover": "BLACK",
     "weight": 1,
-    "value": 55
+    "value": 55,
+    "why": [
+      "haafingar.L10.soul_cairn_gate",
+      "skyrim.L10.volkihar"
+    ]
   },
   {
     "id": "chains_of_coldharbour",
     "category": "DAEDRA",
     "cover": "BLACK",
     "weight": 1,
-    "value": 55
+    "value": 55,
+    "why": [
+      "cyrodiil.L11.three_banner_war",
+      "cyrodiil.L10.cult_remnants"
+    ]
   }
 ]

@@ -1,0 +1,23 @@
+{
+  "id": "jerall_mountains",
+  "why": [
+    "jerall_mountains.L1.granite_caves",
+    "jerall_mountains.L4.alpine_spruce",
+    "jerall_mountains.L6.foothill_villages"
+  ],
+  "tint": {
+    "wall": "minecraft:spruce_planks",
+    "wall2": "minecraft:cobblestone",
+    "low": "minecraft:stone_bricks",
+    "wood": "spruce",
+    "roof": "spruce",
+    "accent": "white"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:cobblestone",
+    "plaza": "minecraft:cobblestone",
+    "plaza2": "minecraft:gravel",
+    "path": "minecraft:gravel"
+  }
+}

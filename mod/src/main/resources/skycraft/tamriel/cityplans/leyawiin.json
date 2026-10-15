@@ -1,0 +1,318 @@
+{
+  "id": "leyawiin",
+  "why": [
+    "blackwood.L1.mangrove_mud",
+    "blackwood.L6.leyawiin_at_the_mouth",
+    "blackwood.L8.zenithar_chapel"
+  ],
+  "sil": "walled-estuary-island",
+  "base": "none",
+  "overlay": "leyawiin",
+  "radius": 98,
+  "reach": 114,
+  "innKey": "leyawiin_five_claws_lodge",
+  "names": {
+    "inn": "leyawiin_five_claws_lodge",
+    "store": "leyawiin_best_goods",
+    "smithy": "leyawiin_dividing_line"
+  },
+  "gates": [
+    [
+      -92,
+      0
+    ],
+    [
+      0,
+      -92
+    ],
+    [
+      88,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        40,
+        0
+      ],
+      "face": "south",
+      "name": "leyawiin_castle_leyawiin",
+      "overlay": "leyawiin"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        -18,
+        -18
+      ],
+      "face": "south",
+      "name": "leyawiin_chapel_spire",
+      "overlay": "leyawiin"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        98
+      ],
+      "overlay": "leyawiin"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_chapel_of_zenithar"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        21
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_mages_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        26,
+        52
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_blackwood_company_hall"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_five_claws_lodge"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -16,
+        56
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_three_sisters_inn"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_dividing_line"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -49,
+        31
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_best_goods"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_southern_books"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -57,
+        -11
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_rosentia_gallenus_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_margartes_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -35,
+        -46
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_weebam_na_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_mazogas_lodge"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        5,
+        -58
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_ahdarjis_house"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_dar_jees_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        43,
+        -39
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_cingors_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "leyawiin",
+      "name": "leyawiin_agatas_house"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "lily_lagoon",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "mangrove_court",
+      "count": 3
+    },
+    {
+      "type": "fountain",
+      "theme": "zenithar_plaza",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "estuary_lanterns",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "theme": "leyawiin_horse",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "leyawiin_castle_leyawiin": "Castle Leyawiin",
+    "leyawiin_chapel_spire": "Great Chapel of Zenithar Spire",
+    "leyawiin_chapel_of_zenithar": "Great Chapel of Zenithar",
+    "leyawiin_fighters_guild": "Leyawiin Fighters Guild",
+    "leyawiin_mages_guild": "Leyawiin Mages Guild",
+    "leyawiin_blackwood_company_hall": "Blackwood Company Hall",
+    "leyawiin_five_claws_lodge": "Five Claws Lodge",
+    "leyawiin_three_sisters_inn": "Three Sisters' Inn",
+    "leyawiin_dividing_line": "The Dividing Line",
+    "leyawiin_best_goods": "Best Goods and Guarantees",
+    "leyawiin_southern_books": "Southern Books",
+    "leyawiin_rosentia_gallenus_manor": "Rosentia Gallenus's Manor",
+    "leyawiin_margartes_house": "Margarte's Townhouse",
+    "leyawiin_weebam_na_house": "Weebam-Na's Hunter Lodge",
+    "leyawiin_mazogas_lodge": "Mazoga the Orc's Lodge",
+    "leyawiin_ahdarjis_house": "Ahdarji's House",
+    "leyawiin_dar_jees_house": "Dar Jee's Shanty",
+    "leyawiin_cingors_house": "Cingor's House",
+    "leyawiin_agatas_house": "Agata's House"
+  }
+}

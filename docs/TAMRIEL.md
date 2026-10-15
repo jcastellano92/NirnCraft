@@ -282,8 +282,8 @@ Region ids are `<province>/<region>`. Workstreams may add regions; none of the i
 | skyrim | haafingar, hjaalmarch, the_pale, winterhold, the_reach, whiterun, eastmarch, falkreath, the_rift |
 | morrowind | solstheim, vvardenfell_ashlands, red_mountain, bitter_coast, west_gash, ascadian_isles, grazelands, molag_amur, azuras_coast, sheogorad, telvannis, deshaan, stonefalls |
 | cyrodiil | jerall_mountains, colovian_highlands, gold_coast, west_weald, heartlands, great_forest, nibenay_basin, nibenay_valley, blackwood |
-| high_rock | glenumbra, stormhaven, rivenspire, wrothgar, wayrest, bjoulsae |
-| hammerfell | alikr_desert, bangkorai, craglorn, stros_mkai, hews_bane, dragontail |
+| high_rock | glenumbra, stormhaven, rivenspire, wrothgar, wayrest, bjoulsae, daggerfall, anticlere, dwynnen |
+| hammerfell | alikr_desert, bangkorai, craglorn, stros_mkai, hews_bane, dragontail, sentinel |
 | black_marsh | shadowfen, murkmire, gideon, stormhold, helstrom, lilmoth |
 | elsweyr | anequina, rimmen, torval, pellitine, senchal |
 | valenwood | grahtwood, greenshade, malabal_tor, reapers_march |
@@ -328,14 +328,15 @@ region, and the places file uses them as given.
 | Red Mountain | landmark | morrowind/red_mountain | 7100, −400 |
 | Raven Rock | town | morrowind/solstheim | 4300, −2900 (coast) |
 | Wayrest | capital | high_rock/wayrest | −5300, 3300 (Iliac Bay coast) |
-| Daggerfall | city | high_rock/glenumbra | −9300, 2600 (coast) |
+| Daggerfall | capital | high_rock/daggerfall | −9300, 2600 (coast) |
 | Camlorn | city | high_rock/glenumbra | −9000, −200 |
 | Shornhelm | city | high_rock/rivenspire | −7600, −1300 |
 | Evermor | city | high_rock/bjoulsae | −6600, 200 |
 | Orsinium | capital | high_rock/wrothgar | −4300, 300 |
-| Sentinel | capital | hammerfell/alikr_desert | −8200, 4900 (Iliac Bay coast) |
-| Elinhir | city | hammerfell/craglorn | −4200, 3700 |
+| Sentinel | capital | hammerfell/sentinel | −7976, 4900 (Iliac Bay coast) |
+| Elinhir | city | hammerfell/craglorn | −3950, 3800 |
 | Skaven | city | hammerfell/alikr_desert | −6400, 5700 |
+| Gilane | city | hammerfell/alikr_desert | −8650, 6850 (coast) |
 | Rihad | city | hammerfell/dragontail | −4800, 7200 |
 | Taneth | city | hammerfell/hews_bane | −6800, 8000 (coast) |
 | Stros M'Kai | town | hammerfell/stros_mkai | −10200, 7200 (island) |

@@ -15,43 +15,49 @@ Better Combat, Lootr and Controllable.
 ## Highlights
 
 * **Tamriel at real scale.** The whole continent, generated from a hand-drawn map. Skyrim is about 6,000 blocks
-  across, with Whiterun at block 0, 0, and you spawn on the road outside Helgen. Cyrodiil, Morrowind, High Rock,
-  Hammerfell, Black Marsh, Elsweyr, Valenwood and the Summerset Isles sit where they belong. Atmora, Akavir, Yokuda,
-  Pyandonea and Thras lie beyond the seas, and past them, endless generated lands.
-* **113 biomes** in 79 regions, from Whiterun's tundra and the Rift's autumn forests to Vvardenfell's ashlands,
-  Valenwood's Graht-oaks and Summerset's crystal coasts. Each region has its own weather, music and danger level.
-* **602 named places** at their real positions:
-  * the nine hold capitals and ten provincial capitals, each built to its own layout, plus 30 more cities;
-  * 266 named dungeons;
-  * Word Walls, Standing Stones and dragon mounds;
-  * shrines to all sixteen Daedric Princes in every province;
-  * High Hrothgar, Blackreach and more.
-
-  Generic towns, farms and culture ruins fill the gaps.
+  across, with Whiterun at block 0, 0, and you spawn in the prisoner cottage overlooking Helgen. Cyrodiil, Morrowind,
+  High Rock, Hammerfell (with the full Iliac Bay), Black Marsh, Elsweyr, Valenwood and the Summerset Isles sit where
+  they belong. Atmora, Akavir, Yokuda, Pyandonea and Thras lie beyond the seas, and past them, deterministic 4,096×4,096
+  endless generated lands (`TilePlanner`) with their own causal world-model sheets, towns, roads and dungeons.
+* **113 biomes and 533 micro-biomes** across **83 regions** (75 land regions and 8 seas), driven by 11-layer causal
+  world-model sheets (`3,019` fields across `99` province/region blocks), rainshadow and geothermal rasters. From
+  Whiterun's tundra and the Rift's autumn forests to Vvardenfell's ashlands, Valenwood's Graht-oaks and Summerset's
+  crystal coasts, each region has its own weather, music, festival calendar and danger level.
+* **7,546 named places** at their real positions:
+  * the nine hold capitals and ten provincial capitals, plus 64 cities, 222 towns, 487 villages and 154 farms (`354`
+    bespoke cityplans);
+  * **1,869 named dungeons** (including `118` bespoke marquee dungeon plans), `231` forts and `1,303` camps;
+  * Word Walls, Standing Stones, wayshrines and dragon mounds;
+  * shrines to all sixteen Daedric Princes and the Divines (`505` shrines and `172` sacred groves);
+  * High Hrothgar, Blackreach, the Adamantine Tower, the Imperial City, Vivec, Alinor and `2,521` landmarks.
 * **23 playable races**: Skyrim's ten, plus the Maormer, Reachmen, Ohmes-raht, Lilmothiit, Imga, the Akaviri
   Tsaesci, Ka Po' Tun and Tang Mo, and the lost Atmorans, Falmer, Dwemer, Ayleids and Kothringi.
-* **29 skills and 255 perks** on a starfield of constellations, using Skyrim's leveling formulas.
+* **29 skills and 255 perks** on a starfield of constellations, using Skyrim's leveling formulas, with Journeyman,
+  Expert and Master skill trainers across every town, city and capital.
 * **115 spells in six schools** (Mysticism is back), spellmaking, staff enchanting, **26 shouts** and dragon souls.
-* **98 story quests**: the full Dragonborn main quest, the Companions, the College, the Thieves Guild, the Dark
-  Brotherhood, the Civil War, the Bards College, Dawnguard, fifteen Daedric quests, Solstheim and the provinces. On
-  top of these come radiant favors, bounties and faction contracts.
+* **5,442 authored quests**: the full Dragonborn main quest, the Companions, the College, the Thieves Guild, the Dark
+  Brotherhood, the Civil War, the Bards College, Dawnguard, fifteen Daedric quests, Solstheim, **75 regional MS1
+  story chains** across every province (`3,817` multi-stage story quests), `1,625` regional side quests, and live
+  settlement notice boards refreshing every two days.
 * **A bestiary of about 80 creatures and foes**, rig-animated: dragons that shout, draugr, trolls, giants and
-  mammoths, Dwemer automatons, Daedra, and the beasts of every province.
-* **Townsfolk of every race**, with daily routines, relationships, followers and marriage, in settlements built by
-  culture.
-* **Combat and arms**: power attacks, blocking, sneak attacks and kill cams. There are 48 armour sets, 191 weapons,
-  polearms, crossbows, staves and artifacts.
-* **Crime and stealth**: witnesses, bounties per hold, guards, jail, lockpicking and pickpocketing.
-* **Economy and homes**: barter, Speech prices, five houses to buy, and Hearthfire-style homesteads.
+  mammoths, Dwemer automatons, Daedra, and the beasts of every province, plus 125+ regional road and wilderness
+  encounter scenes.
+* **Townsfolk of every race**, with daily routines, full noble courts, skill trainers, relationships, followers and
+  marriage, in multi-storey settlements built by culture.
+* **Combat, arms and leveled affixes**: power attacks, blocking, sneak attacks and kill cams. There are 48 armour sets,
+  191 weapons, polearms, crossbows, staves, **512 unique placed relics**, and Skyrim-style leveled prefix/suffix
+  enchantments (`of Embers` .. `of the Inferno`, `Vampiric`, `Staggering`) that can be disenchanted at the Arcane
+  Enchanter.
+* **Crime and stealth**: witnesses, bounties per hold, guards, Skyrim-style jail cells you can freely visit or break
+  out of, lockpicking and pickpocketing.
+* **Economy, travel and homes**: barter, Speech prices, carriages, ships and ferries, river boats, silt striders,
+  Mages Guild guides, Dunmer propylon chambers, Great Lifts, five houses to buy, and Hearthfire-style homesteads.
 * **Skyrim Survival Mode**: hunger, fatigue and cold. Also fishing (52 fish), camping, diseases, and your own corpse
   to recover.
 * **Sky and sound**: Masser and Secunda, auroras, regional weather, an original soundtrack for each province, an
   ambience engine, reverb, and a Skyrim-style HUD and menus.
 * **Onboarding**: every new player gets *The Traveler's Handbook*, and small one-time hints explain things the
   first time they happen.
-
-In progress, not yet in the pack: Skycraft's own vampirism and lycanthropy (these replace the Vampirism and Werewolves
-mods), sailing between ports, deeper economy and alchemy integration, and terrain polish.
 
 ## Install
 

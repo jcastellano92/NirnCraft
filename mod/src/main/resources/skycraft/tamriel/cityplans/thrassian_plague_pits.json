@@ -1,0 +1,199 @@
+{
+  "id": "thrassian_plague_pits",
+  "why": [
+    "coral_kingdom.L1.agonir_coral_caldera",
+    "coral_kingdom.L5.alchemical_sandbar_exchange",
+    "coral_kingdom.L6.quarantined_sandbar_camp"
+  ],
+  "sil": "thras-thrassian-plague-pits-plan",
+  "base": "none",
+  "overlay": "coral_kingdom",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "coral_kingdom",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "coral_kingdom",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "thrassian_plague_pits_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "stone_circle",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "thrassian_plague_pits_landmark",
+      "overlay": "coral_kingdom"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 18,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "coral_kingdom",
+      "name": "thrassian_plague_pits_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "thrassian_plague_pits_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "thrassian_plague_pits_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "thrassian_plague_pits_b_5",
+    "smithy": "thrassian_plague_pits_b_7"
+  },
+  "titles": {
+    "thrassian_plague_pits_b_1": "place.skycraft.thrassian_plague_pits Council & Seat Hall",
+    "thrassian_plague_pits_b_2": "place.skycraft.thrassian_plague_pits High Sanctuary",
+    "thrassian_plague_pits_b_3": "place.skycraft.thrassian_plague_pits Fighters & Wayfarers Hall",
+    "thrassian_plague_pits_b_4": "place.skycraft.thrassian_plague_pits Mages & Chroniclers Spire",
+    "thrassian_plague_pits_b_5": "place.skycraft.thrassian_plague_pits The Lantern & Hearth Inn",
+    "thrassian_plague_pits_b_6": "place.skycraft.thrassian_plague_pits The Traveler's Rest Tavern",
+    "thrassian_plague_pits_b_7": "place.skycraft.thrassian_plague_pits Master Forge & Armorer",
+    "thrassian_plague_pits_b_8": "place.skycraft.thrassian_plague_pits Botanicals & Remedies",
+    "thrassian_plague_pits_landmark": "High Seat of place.skycraft.thrassian_plague_pits",
+    "thrassian_plague_pits_plaza": "place.skycraft.thrassian_plague_pits Central Plaza"
+  },
+  "innKey": "thrassian_plague_pits_b_5"
+}

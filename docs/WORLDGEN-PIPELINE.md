@@ -531,3 +531,34 @@ with a purpose each, not clutter; making them seed-independent is a separate ste
 dense forest can still be refused at realisation (the plan cannot see seeded trees: registering scene footprints
 with `PlacementMask` would need a site-pad slot there); the slope probes of a prop read up to 2 blocks into a
 neighbour chunk (its ground height, which is generated before any feature runs).
+
+## 10. P7 result: endless lands per 4 km tile (S1–S6 beyond the authored map)
+
+Code: package `com.skycraft.worldplan.tile` (`TilePlan`, `TilePlanner`, `TileSheetGenerator`, `TilePlanData`,
+`TilePlanCommands`); composite fallback hooks in `RoadPlan.at` / `RoadPlan.bedHeight`, `StreetPlan.at` / `StreetPlan.pad`,
+and `ScenePlan.covers` / `ScenePlan.planFor` when `!TamrielMap.inTamriel(x, z)`; Tier 0 tests in `TilePlanTest`.
+
+**How it is made** (`TilePlanner.buildTilePlan`, ~15–60 ms per 4,096 x 4,096 block tile):
+1. **Procedural 11-layer world sheet (`TileSheetGenerator`):** samples an 8x8 macro grid across `[tileX << 12, (tileX + 1) << 12)`
+   via `TamrielMap.sample` (`Beyond`) to measure dry land fraction, mean/peak elevation, relief, wetland, and dune cover;
+   classifies latitude climate band (`polar`, `temperate`, `arid`, `tropical`) and nearest border/foreign culture (`skyrim`,
+   `high_rock`, `hammerfell`, `morrowind`, `cyrodiil`, `summerset`, `valenwood`, `elsweyr`, `black_marsh`, `akavir`,
+   `atmora`, `yokuda`, `pyandonea`); populates all 11 layers (`L1`..`L11`, 22 causal fields) with strict upstream citations
+   and `L1`/`L4`/`L9` sensory links on `L10`.
+2. **Symmetric boundary crossings (`TilePlanner.computeEdgePoints`):** crossing points on any shared tile edge are a pure
+   function of `(worldSeed, isHorizontal, borderLineCoord, spanIndex)`, so `EAST` of `(tx, tz)` and `WEST` of `(tx + 1, tz)`
+   (and `SOUTH`/`NORTH` vertically) produce identical `EdgePoint(x, z, height, kind, river)` lists without reading each
+   other or depending on tile generation order. Tiles touching the authored Tamriel border (`MIN_X`, `MAX_X`, `MIN_Z`, `MAX_Z`)
+   also discover authored `RoadPlan` border vertices (`computeAuthoredSeamPoints`) so Tamriel's roads continue across the
+   border at the exact vertex coordinate and height.
+3. **Tile-scale hydrology, places, roads, streets, and scenes:** traces watershed river segments from upland basins to
+   coast/edge crossings; places settlements, delves/ruins, camps, and shrines at half Tamriel density on dry benches with
+   resolving `why` citations into the tile's `TileSheet`; routes grade-capped road segments (`<= 1:8` road, `<= 1:5` lane,
+   `<= 1` block/step trail) with `BRIDGE` spans over all water crossings; builds a `StreetPlan` with reachable doors and
+   plot pads for each settlement; and builds a `ScenePlan` with causal `reason` citations into the tile sheet.
+4. **Off-thread execution & persistence (`TilePlanData`):** runtime queries call `TilePlanner.getIfReady(x, z)` which
+   never stalls the server thread (`0 ms` stall) and schedules the tile plus its 4 cardinal neighbours on a daemon pool;
+   `TilePlan.write()`/`read()` persists compressed tile plans in `data/skycraft_tile_plans.dat` (`SavedData`) so reloaded
+   tiles match recomputed bytes bit-for-bit.
+5. **Tools:** `/skycraft-tile plan <tileX> <tileZ> | sheet <tileX> <tileZ> | at <x> <z> | selftest`, autorun task `tileplan`.
+

@@ -1,0 +1,24 @@
+{
+  "id": "blackwood",
+  "why": [
+    "blackwood.L1.mangrove_mud",
+    "blackwood.L4.mangrove",
+    "blackwood.L6.border_villages"
+  ],
+  "tint": {
+    "wall": "minecraft:mud_bricks",
+    "wall2": "minecraft:mangrove_planks",
+    "low": "minecraft:mossy_stone_bricks",
+    "wood": "mangrove",
+    "roof": "mud_brick",
+    "thatch": "true",
+    "accent": "lime"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mud_bricks",
+    "plaza": "minecraft:mud_bricks",
+    "plaza2": "minecraft:packed_mud",
+    "path": "minecraft:packed_mud"
+  }
+}

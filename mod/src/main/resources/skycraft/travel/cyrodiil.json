@@ -1,0 +1,3169 @@
+{
+  "province": "cyrodiil",
+  "why": [
+    "cyrodiil.L3.rumare_and_niben",
+    "cyrodiil.L6.imperial_highways",
+    "cyrodiil.L6.niben_river_ports",
+    "cyrodiil.L8.eight_and_one"
+  ],
+  "modes": [
+    "carriage",
+    "river_boat",
+    "boat",
+    "guild_guide",
+    "wayshrine"
+  ],
+  "nodes": [
+    {
+      "id": "bruma",
+      "place": "bruma",
+      "name": "place.skycraft.bruma",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 1500,
+      "z": 3000,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "jerall_mountains.L1.pale_pass_notch",
+        "jerall_mountains.L2.snow_above_150"
+      ]
+    },
+    {
+      "id": "chorrol",
+      "place": "chorrol",
+      "name": "place.skycraft.chorrol",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -1300,
+      "z": 4400,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "colovian_highlands.L1.karst_valleys",
+        "colovian_highlands.L2.dry_bright_summers"
+      ]
+    },
+    {
+      "id": "imperial_city",
+      "place": "imperial_city",
+      "name": "place.skycraft.imperial_city",
+      "region": "cyrodiil/heartlands",
+      "x": 900,
+      "z": 5900,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine",
+        "river_boat",
+        "boat"
+      ],
+      "kind": "capital",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "heartlands.L1.island_bedrock",
+        "heartlands.L2.mild_lake_climate"
+      ]
+    },
+    {
+      "id": "weye",
+      "place": "weye",
+      "name": "place.skycraft.weye",
+      "region": "cyrodiil/great_forest",
+      "x": -8,
+      "z": 5650,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine",
+        "river_boat"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "great_forest.L1.forest_loam_hills",
+        "great_forest.L2.forest_fog"
+      ]
+    },
+    {
+      "id": "cheydinhal",
+      "place": "cheydinhal",
+      "name": "place.skycraft.cheydinhal",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3700,
+      "z": 5000,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_basin.L1.valus_foothills",
+        "nibenay_basin.L2.humid_east"
+      ]
+    },
+    {
+      "id": "skingrad",
+      "place": "skingrad",
+      "name": "place.skycraft.skingrad",
+      "region": "cyrodiil/west_weald",
+      "x": -1700,
+      "z": 6700,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "west_weald.L1.warm_limestone_slopes",
+        "west_weald.L2.harvest_haze"
+      ]
+    },
+    {
+      "id": "anvil",
+      "place": "anvil",
+      "name": "place.skycraft.anvil",
+      "region": "cyrodiil/gold_coast",
+      "x": -3900,
+      "z": 8700,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine",
+        "boat"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "gold_coast.L1.low_sea_cliffs",
+        "gold_coast.L2.sea_fog"
+      ]
+    },
+    {
+      "id": "bravil",
+      "place": "bravil",
+      "name": "place.skycraft.bravil",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 1800,
+      "z": 8700,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine",
+        "river_boat"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_valley.L1.river_flats",
+        "nibenay_valley.L2.river_fog"
+      ]
+    },
+    {
+      "id": "leyawiin",
+      "place": "leyawiin",
+      "name": "place.skycraft.leyawiin",
+      "region": "cyrodiil/blackwood",
+      "x": 3600,
+      "z": 9900,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "guild_guide",
+        "wayshrine",
+        "river_boat",
+        "boat"
+      ],
+      "kind": "city",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "blackwood.L1.mangrove_mud",
+        "blackwood.L2.steam_heat"
+      ]
+    },
+    {
+      "id": "aleswell",
+      "place": "aleswell",
+      "name": "place.skycraft.aleswell",
+      "region": "cyrodiil/heartlands",
+      "x": 765,
+      "z": 4501,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "heartlands.L1.lakeshore_clay",
+        "heartlands.L2.lake_mist"
+      ]
+    },
+    {
+      "id": "blankenmarch",
+      "place": "blankenmarch",
+      "name": "place.skycraft.blankenmarch",
+      "region": "cyrodiil/blackwood",
+      "x": 3805,
+      "z": 9638,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "blackwood.L1.peat",
+        "blackwood.L2.thunderstorms"
+      ]
+    },
+    {
+      "id": "bleakers_way",
+      "place": "bleakers_way",
+      "name": "place.skycraft.bleakers_way",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 1457,
+      "z": 3509,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "jerall_mountains.L1.granite_caves",
+        "jerall_mountains.L2.blizzard_winters"
+      ]
+    },
+    {
+      "id": "brina_cross_inn",
+      "place": "brina_cross_inn",
+      "name": "place.skycraft.brina_cross_inn",
+      "region": "cyrodiil/gold_coast",
+      "x": -3833,
+      "z": 8044,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "gold_coast.L1.sea_caves",
+        "gold_coast.L2.westerly_gales"
+      ]
+    },
+    {
+      "id": "brindle_home",
+      "place": "brindle_home",
+      "name": "place.skycraft.brindle_home",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -1397,
+      "z": 5811,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "colovian_highlands.L1.limestone_caves",
+        "colovian_highlands.L2.cold_clear_nights"
+      ]
+    },
+    {
+      "id": "cold_dale",
+      "place": "cold_dale",
+      "name": "place.skycraft.cold_dale",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 750,
+      "z": 8946,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_valley.L1.riverbank_caves",
+        "nibenay_valley.L3.lower_niben_braids"
+      ]
+    },
+    {
+      "id": "cropsford",
+      "place": "cropsford",
+      "name": "place.skycraft.cropsford",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 2885,
+      "z": 6693,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_basin.L1.basin_silt",
+        "nibenay_basin.L2.valus_rain"
+      ]
+    },
+    {
+      "id": "ember_hollow",
+      "place": "ember_hollow",
+      "name": "place.skycraft.ember_hollow",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 646,
+      "z": 2387,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "jerall_mountains.L1.granite_caves",
+        "jerall_mountains.L2.blizzard_winters"
+      ]
+    },
+    {
+      "id": "hackdirt",
+      "place": "hackdirt",
+      "name": "place.skycraft.hackdirt",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -1558,
+      "z": 5236,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "colovian_highlands.L1.limestone_caves",
+        "colovian_highlands.L2.cold_clear_nights"
+      ]
+    },
+    {
+      "id": "harluns_watch",
+      "place": "harluns_watch",
+      "name": "place.skycraft.harluns_watch",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3664,
+      "z": 5463,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_basin.L1.basin_silt",
+        "nibenay_basin.L2.valus_rain"
+      ]
+    },
+    {
+      "id": "ivy_shade",
+      "place": "ivy_shade",
+      "name": "place.skycraft.ivy_shade",
+      "region": "cyrodiil/west_weald",
+      "x": -3211,
+      "z": 7284,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "west_weald.L1.deep_ayleid_vault",
+        "west_weald.L3.strid_headwaters"
+      ]
+    },
+    {
+      "id": "kvatch",
+      "place": "kvatch",
+      "name": "place.skycraft.kvatch",
+      "region": "cyrodiil/gold_coast",
+      "x": -2700,
+      "z": 8000,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "gold_coast.L1.sea_caves",
+        "gold_coast.L2.westerly_gales"
+      ]
+    },
+    {
+      "id": "larkmarsh",
+      "place": "larkmarsh",
+      "name": "place.skycraft.larkmarsh",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3540,
+      "z": 3087,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_basin.L1.basin_silt",
+        "nibenay_basin.L2.valus_rain"
+      ]
+    },
+    {
+      "id": "lunar_fang_docks",
+      "place": "lunar_fang_docks",
+      "name": "place.skycraft.lunar_fang_docks",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 1630,
+      "z": 8105,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "nibenay_valley.L1.riverbank_caves",
+        "nibenay_valley.L3.lower_niben_braids"
+      ]
+    },
+    {
+      "id": "pells_gate",
+      "place": "pells_gate",
+      "name": "place.skycraft.pells_gate",
+      "region": "cyrodiil/heartlands",
+      "x": 467,
+      "z": 6968,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "heartlands.L1.lakeshore_clay",
+        "heartlands.L2.lake_mist"
+      ]
+    },
+    {
+      "id": "vlastarus",
+      "place": "vlastarus",
+      "name": "place.skycraft.vlastarus",
+      "region": "cyrodiil/great_forest",
+      "x": -435,
+      "z": 6646,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "great_forest.L1.ruin_dense_ridge",
+        "great_forest.L3.forest_brooks"
+      ]
+    },
+    {
+      "id": "waters_edge",
+      "place": "waters_edge",
+      "name": "place.skycraft.waters_edge",
+      "region": "cyrodiil/blackwood",
+      "x": 2980,
+      "z": 9614,
+      "mode": "carriage",
+      "modes": [
+        "carriage",
+        "wayshrine"
+      ],
+      "kind": "town",
+      "discoveredOnArrival": true,
+      "free": false,
+      "why": [
+        "blackwood.L1.peat",
+        "blackwood.L2.thunderstorms"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_1",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_1",
+      "region": "cyrodiil/jerall_mountains",
+      "x": -3280,
+      "z": 1584,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L1.silver_seams",
+        "jerall_mountains.L2.valley_inversion"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_2",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_2",
+      "region": "cyrodiil/jerall_mountains",
+      "x": -2448,
+      "z": 2160,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L2.snow_above_150",
+        "jerall_mountains.L3.snowmelt_streams"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_3",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_3",
+      "region": "cyrodiil/jerall_mountains",
+      "x": -464,
+      "z": 2320,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L2.blizzard_winters",
+        "jerall_mountains.L3.bruma_cisterns"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_4",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_4",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 1488,
+      "z": 2448,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L2.valley_inversion",
+        "jerall_mountains.L4.alpine_spruce"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_5",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_5",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 848,
+      "z": 2576,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L3.snowmelt_streams",
+        "jerall_mountains.L4.scree_heath"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_6",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_6",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 720,
+      "z": 2704,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "mara",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L3.bruma_cisterns",
+        "jerall_mountains.L4.snowfield"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_7",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_7",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 1584,
+      "z": 2832,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "stendarr",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L4.alpine_spruce",
+        "jerall_mountains.L4.hot_spring_hollow"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_8",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_8",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 2928,
+      "z": 2960,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "talos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L4.scree_heath",
+        "jerall_mountains.L5.pass_trade"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_9",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_9",
+      "region": "cyrodiil/jerall_mountains",
+      "x": -976,
+      "z": 3120,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "zenithar",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L4.snowfield",
+        "jerall_mountains.L5.silver_mines"
+      ]
+    },
+    {
+      "id": "wayshrine_jerall_mountains_10",
+      "name": "travel.skycraft.node.wayshrine_jerall_mountains_10",
+      "region": "cyrodiil/jerall_mountains",
+      "x": 1008,
+      "z": 3280,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "jerall_mountains.L4.hot_spring_hollow",
+        "jerall_mountains.L5.goat_and_fur"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_1",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_1",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -3600,
+      "z": 2992,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L1.iron_seams",
+        "colovian_highlands.L2.upland_wind"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_2",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_2",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -2928,
+      "z": 3536,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L2.dry_bright_summers",
+        "colovian_highlands.L3.sinking_streams"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_3",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_3",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -1360,
+      "z": 3792,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L2.cold_clear_nights",
+        "colovian_highlands.L3.spring_villages"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_4",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_4",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -3248,
+      "z": 4080,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L2.upland_wind",
+        "colovian_highlands.L4.sheep_downs"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_5",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_5",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -1232,
+      "z": 4336,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L3.sinking_streams",
+        "colovian_highlands.L4.pine_ridges"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_6",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_6",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -3440,
+      "z": 4624,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "mara",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L3.spring_villages",
+        "colovian_highlands.L4.karst_scrub"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_7",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_7",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -976,
+      "z": 4880,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "stendarr",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L4.sheep_downs",
+        "colovian_highlands.L4.spring_glen"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_8",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_8",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -1168,
+      "z": 5168,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "talos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L4.pine_ridges",
+        "colovian_highlands.L5.wool_and_horses"
+      ]
+    },
+    {
+      "id": "wayshrine_colovian_highlands_9",
+      "name": "travel.skycraft.node.wayshrine_colovian_highlands_9",
+      "region": "cyrodiil/colovian_highlands",
+      "x": -656,
+      "z": 5488,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "zenithar",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "colovian_highlands.L4.karst_scrub",
+        "colovian_highlands.L5.iron_mines"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_1",
+      "name": "travel.skycraft.node.wayshrine_heartlands_1",
+      "region": "cyrodiil/heartlands",
+      "x": 272,
+      "z": 3504,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L1.ayleid_footings",
+        "heartlands.L3.rumare_shore"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_2",
+      "name": "travel.skycraft.node.wayshrine_heartlands_2",
+      "region": "cyrodiil/heartlands",
+      "x": 1200,
+      "z": 4080,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L2.mild_lake_climate",
+        "heartlands.L3.city_sewers_and_cisterns"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_3",
+      "name": "travel.skycraft.node.wayshrine_heartlands_3",
+      "region": "cyrodiil/heartlands",
+      "x": 1904,
+      "z": 4464,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L2.lake_mist",
+        "heartlands.L4.lake_reedbed"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_4",
+      "name": "travel.skycraft.node.wayshrine_heartlands_4",
+      "region": "cyrodiil/heartlands",
+      "x": 176,
+      "z": 4880,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L3.rumare_shore",
+        "heartlands.L4.heath_and_grain"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_5",
+      "name": "travel.skycraft.node.wayshrine_heartlands_5",
+      "region": "cyrodiil/heartlands",
+      "x": 944,
+      "z": 5328,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L3.city_sewers_and_cisterns",
+        "heartlands.L4.lakeshore_oakwood"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_6",
+      "name": "travel.skycraft.node.wayshrine_heartlands_6",
+      "region": "cyrodiil/heartlands",
+      "x": 1712,
+      "z": 5776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "mara",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L4.lake_reedbed",
+        "heartlands.L4.urban_garden"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_7",
+      "name": "travel.skycraft.node.wayshrine_heartlands_7",
+      "region": "cyrodiil/heartlands",
+      "x": 624,
+      "z": 6256,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "stendarr",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L4.heath_and_grain",
+        "heartlands.L5.capital_economy"
+      ]
+    },
+    {
+      "id": "wayshrine_heartlands_8",
+      "name": "travel.skycraft.node.wayshrine_heartlands_8",
+      "region": "cyrodiil/heartlands",
+      "x": 2352,
+      "z": 6672,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "talos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "heartlands.L4.lakeshore_oakwood",
+        "heartlands.L5.lakeside_grain_and_fish"
+      ]
+    },
+    {
+      "id": "wayshrine_great_forest_1",
+      "name": "travel.skycraft.node.wayshrine_great_forest_1",
+      "region": "cyrodiil/great_forest",
+      "x": 240,
+      "z": 4848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "great_forest.L2.canopy_shade",
+        "great_forest.L3.silverfish_headwaters"
+      ]
+    },
+    {
+      "id": "wayshrine_great_forest_2",
+      "name": "travel.skycraft.node.wayshrine_great_forest_2",
+      "region": "cyrodiil/great_forest",
+      "x": 208,
+      "z": 5776,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "great_forest.L2.forest_fog",
+        "great_forest.L4.old_oakwood"
+      ]
+    },
+    {
+      "id": "wayshrine_great_forest_3",
+      "name": "travel.skycraft.node.wayshrine_great_forest_3",
+      "region": "cyrodiil/great_forest",
+      "x": 16,
+      "z": 6288,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "great_forest.L3.forest_brooks",
+        "great_forest.L4.beech_hanger"
+      ]
+    },
+    {
+      "id": "wayshrine_great_forest_4",
+      "name": "travel.skycraft.node.wayshrine_great_forest_4",
+      "region": "cyrodiil/great_forest",
+      "x": -48,
+      "z": 6800,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "great_forest.L3.silverfish_headwaters",
+        "great_forest.L4.fern_glade"
+      ]
+    },
+    {
+      "id": "wayshrine_great_forest_5",
+      "name": "travel.skycraft.node.wayshrine_great_forest_5",
+      "region": "cyrodiil/great_forest",
+      "x": -1136,
+      "z": 7408,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "great_forest.L4.old_oakwood",
+        "great_forest.L4.charcoal_clearing"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_1",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_1",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 4112,
+      "z": 2576,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L1.foothill_gold",
+        "nibenay_basin.L3.corbolo"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_2",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_2",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 4016,
+      "z": 3472,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L2.humid_east",
+        "nibenay_basin.L3.lake_arrius"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_3",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_3",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3600,
+      "z": 3920,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L2.valus_rain",
+        "nibenay_basin.L3.mill_weirs"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_4",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_4",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3152,
+      "z": 4368,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L3.corbolo",
+        "nibenay_basin.L4.orchard_plain"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_5",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_5",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 4112,
+      "z": 4816,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L3.lake_arrius",
+        "nibenay_basin.L4.wet_meadow"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_6",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_6",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3440,
+      "z": 5296,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "mara",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L3.mill_weirs",
+        "nibenay_basin.L4.valus_pine"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_7",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_7",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3440,
+      "z": 5744,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "stendarr",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L4.orchard_plain",
+        "nibenay_basin.L4.lake_arrius_reeds"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_8",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_8",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 3024,
+      "z": 6192,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "talos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L4.wet_meadow",
+        "nibenay_basin.L5.orchards_and_grain"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_basin_9",
+      "name": "travel.skycraft.node.wayshrine_nibenay_basin_9",
+      "region": "cyrodiil/nibenay_basin",
+      "x": 2672,
+      "z": 6672,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "zenithar",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_basin.L4.valus_pine",
+        "nibenay_basin.L5.corbolo_mills"
+      ]
+    },
+    {
+      "id": "wayshrine_west_weald_1",
+      "name": "travel.skycraft.node.wayshrine_west_weald_1",
+      "region": "cyrodiil/west_weald",
+      "x": -3472,
+      "z": 5744,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "west_weald.L2.sheltered_warmth",
+        "west_weald.L3.estate_cisterns"
+      ]
+    },
+    {
+      "id": "wayshrine_west_weald_2",
+      "name": "travel.skycraft.node.wayshrine_west_weald_2",
+      "region": "cyrodiil/west_weald",
+      "x": -1360,
+      "z": 6192,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "west_weald.L2.harvest_haze",
+        "west_weald.L4.vine_terrace"
+      ]
+    },
+    {
+      "id": "wayshrine_west_weald_3",
+      "name": "travel.skycraft.node.wayshrine_west_weald_3",
+      "region": "cyrodiil/west_weald",
+      "x": -3344,
+      "z": 6544,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "west_weald.L3.strid_headwaters",
+        "west_weald.L4.cypress_line"
+      ]
+    },
+    {
+      "id": "wayshrine_west_weald_4",
+      "name": "travel.skycraft.node.wayshrine_west_weald_4",
+      "region": "cyrodiil/west_weald",
+      "x": -3344,
+      "z": 6864,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "west_weald.L3.estate_cisterns",
+        "west_weald.L4.oak_savanna"
+      ]
+    },
+    {
+      "id": "wayshrine_west_weald_5",
+      "name": "travel.skycraft.node.wayshrine_west_weald_5",
+      "region": "cyrodiil/west_weald",
+      "x": -1072,
+      "z": 7152,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "west_weald.L4.vine_terrace",
+        "west_weald.L4.orchard"
+      ]
+    },
+    {
+      "id": "wayshrine_gold_coast_1",
+      "name": "travel.skycraft.node.wayshrine_gold_coast_1",
+      "region": "cyrodiil/gold_coast",
+      "x": -4336,
+      "z": 7152,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "gold_coast.L1.kvatch_hill",
+        "gold_coast.L3.harbour_springs"
+      ]
+    },
+    {
+      "id": "wayshrine_gold_coast_2",
+      "name": "travel.skycraft.node.wayshrine_gold_coast_2",
+      "region": "cyrodiil/gold_coast",
+      "x": -2352,
+      "z": 7728,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "gold_coast.L2.sea_fog",
+        "gold_coast.L3.kvatch_wells"
+      ]
+    },
+    {
+      "id": "wayshrine_gold_coast_3",
+      "name": "travel.skycraft.node.wayshrine_gold_coast_3",
+      "region": "cyrodiil/gold_coast",
+      "x": -1296,
+      "z": 8016,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "gold_coast.L2.westerly_gales",
+        "gold_coast.L4.coastal_scrub"
+      ]
+    },
+    {
+      "id": "wayshrine_gold_coast_4",
+      "name": "travel.skycraft.node.wayshrine_gold_coast_4",
+      "region": "cyrodiil/gold_coast",
+      "x": -4432,
+      "z": 8304,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "gold_coast.L3.harbour_springs",
+        "gold_coast.L4.cliff_grass"
+      ]
+    },
+    {
+      "id": "wayshrine_gold_coast_5",
+      "name": "travel.skycraft.node.wayshrine_gold_coast_5",
+      "region": "cyrodiil/gold_coast",
+      "x": -4112,
+      "z": 8560,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "gold_coast.L3.kvatch_wells",
+        "gold_coast.L4.cove_beach"
+      ]
+    },
+    {
+      "id": "wayshrine_gold_coast_6",
+      "name": "travel.skycraft.node.wayshrine_gold_coast_6",
+      "region": "cyrodiil/gold_coast",
+      "x": -2768,
+      "z": 8816,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "mara",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "gold_coast.L4.coastal_scrub",
+        "gold_coast.L4.burned_slope"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_1",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_1",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2512,
+      "z": 6864,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L2.humid_heat",
+        "nibenay_valley.L3.flood_meadows"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_2",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_2",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2000,
+      "z": 7440,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L2.river_fog",
+        "nibenay_valley.L3.bravil_mud"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_3",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_3",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2288,
+      "z": 7760,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L3.lower_niben_braids",
+        "nibenay_valley.L4.reed_marsh"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_4",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_4",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2672,
+      "z": 8048,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L3.flood_meadows",
+        "nibenay_valley.L4.flood_meadow"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_5",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_5",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2704,
+      "z": 8304,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L3.bravil_mud",
+        "nibenay_valley.L4.willow_carr"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_6",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_6",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2512,
+      "z": 8560,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "mara",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L4.reed_marsh",
+        "nibenay_valley.L4.river_island"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_7",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_7",
+      "region": "cyrodiil/nibenay_valley",
+      "x": -688,
+      "z": 8848,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "stendarr",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L4.flood_meadow",
+        "nibenay_valley.L5.river_labour"
+      ]
+    },
+    {
+      "id": "wayshrine_nibenay_valley_8",
+      "name": "travel.skycraft.node.wayshrine_nibenay_valley_8",
+      "region": "cyrodiil/nibenay_valley",
+      "x": 2064,
+      "z": 9104,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "talos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "nibenay_valley.L4.willow_carr",
+        "nibenay_valley.L5.skooma"
+      ]
+    },
+    {
+      "id": "wayshrine_blackwood_1",
+      "name": "travel.skycraft.node.wayshrine_blackwood_1",
+      "region": "cyrodiil/blackwood",
+      "x": 4368,
+      "z": 7024,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "akatosh",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "blackwood.L1.sinking_ruins",
+        "blackwood.L3.niben_mouth"
+      ]
+    },
+    {
+      "id": "wayshrine_blackwood_2",
+      "name": "travel.skycraft.node.wayshrine_blackwood_2",
+      "region": "cyrodiil/blackwood",
+      "x": 4208,
+      "z": 7792,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "arkay",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "blackwood.L2.steam_heat",
+        "blackwood.L3.panther_river"
+      ]
+    },
+    {
+      "id": "wayshrine_blackwood_3",
+      "name": "travel.skycraft.node.wayshrine_blackwood_3",
+      "region": "cyrodiil/blackwood",
+      "x": 4432,
+      "z": 8432,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "dibella",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "blackwood.L2.thunderstorms",
+        "blackwood.L3.brackish_tide"
+      ]
+    },
+    {
+      "id": "wayshrine_blackwood_4",
+      "name": "travel.skycraft.node.wayshrine_blackwood_4",
+      "region": "cyrodiil/blackwood",
+      "x": 3632,
+      "z": 9008,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "julianos",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "blackwood.L3.niben_mouth",
+        "blackwood.L4.mangrove"
+      ]
+    },
+    {
+      "id": "wayshrine_blackwood_5",
+      "name": "travel.skycraft.node.wayshrine_blackwood_5",
+      "region": "cyrodiil/blackwood",
+      "x": 3792,
+      "z": 9520,
+      "mode": "wayshrine",
+      "modes": [
+        "wayshrine"
+      ],
+      "kind": "wayshrine",
+      "deity": "kynareth",
+      "discoveredOnArrival": true,
+      "free": true,
+      "why": [
+        "blackwood.L3.panther_river",
+        "blackwood.L4.cypress_swamp"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "from": "wayshrine_jerall_mountains_1",
+      "to": "wayshrine_jerall_mountains_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L1.pale_pass_notch",
+        "jerall_mountains.L2.snow_above_150"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_1",
+      "to": "bruma",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L2.valley_inversion",
+        "jerall_mountains.L4.alpine_spruce"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_2",
+      "to": "wayshrine_jerall_mountains_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L1.granite_caves",
+        "jerall_mountains.L2.blizzard_winters"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_2",
+      "to": "bruma",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L3.snowmelt_streams",
+        "jerall_mountains.L4.scree_heath"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_3",
+      "to": "wayshrine_jerall_mountains_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L1.silver_seams",
+        "jerall_mountains.L2.valley_inversion"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_4",
+      "to": "wayshrine_jerall_mountains_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L2.snow_above_150",
+        "jerall_mountains.L3.snowmelt_streams"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_5",
+      "to": "wayshrine_jerall_mountains_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L2.blizzard_winters",
+        "jerall_mountains.L3.bruma_cisterns"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_6",
+      "to": "wayshrine_jerall_mountains_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L2.valley_inversion",
+        "jerall_mountains.L4.alpine_spruce"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_7",
+      "to": "wayshrine_jerall_mountains_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L3.snowmelt_streams",
+        "jerall_mountains.L4.scree_heath"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_8",
+      "to": "wayshrine_jerall_mountains_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L3.bruma_cisterns",
+        "jerall_mountains.L4.snowfield"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_9",
+      "to": "wayshrine_jerall_mountains_10",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L4.alpine_spruce",
+        "jerall_mountains.L4.hot_spring_hollow"
+      ]
+    },
+    {
+      "from": "wayshrine_jerall_mountains_10",
+      "to": "wayshrine_jerall_mountains_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "jerall_mountains_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "jerall_mountains.L4.scree_heath",
+        "jerall_mountains.L5.pass_trade"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_1",
+      "to": "wayshrine_colovian_highlands_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L1.karst_valleys",
+        "colovian_highlands.L2.dry_bright_summers"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_1",
+      "to": "chorrol",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L2.upland_wind",
+        "colovian_highlands.L4.sheep_downs"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_2",
+      "to": "wayshrine_colovian_highlands_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L1.limestone_caves",
+        "colovian_highlands.L2.cold_clear_nights"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_2",
+      "to": "chorrol",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L3.sinking_streams",
+        "colovian_highlands.L4.pine_ridges"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_3",
+      "to": "wayshrine_colovian_highlands_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L1.iron_seams",
+        "colovian_highlands.L2.upland_wind"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_4",
+      "to": "wayshrine_colovian_highlands_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L2.dry_bright_summers",
+        "colovian_highlands.L3.sinking_streams"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_5",
+      "to": "wayshrine_colovian_highlands_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L2.cold_clear_nights",
+        "colovian_highlands.L3.spring_villages"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_6",
+      "to": "wayshrine_colovian_highlands_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L2.upland_wind",
+        "colovian_highlands.L4.sheep_downs"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_7",
+      "to": "wayshrine_colovian_highlands_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L3.sinking_streams",
+        "colovian_highlands.L4.pine_ridges"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_8",
+      "to": "wayshrine_colovian_highlands_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L3.spring_villages",
+        "colovian_highlands.L4.karst_scrub"
+      ]
+    },
+    {
+      "from": "wayshrine_colovian_highlands_9",
+      "to": "wayshrine_colovian_highlands_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "colovian_highlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "colovian_highlands.L4.sheep_downs",
+        "colovian_highlands.L4.spring_glen"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_1",
+      "to": "wayshrine_heartlands_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L1.island_bedrock",
+        "heartlands.L2.mild_lake_climate"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_1",
+      "to": "imperial_city",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L3.rumare_shore",
+        "heartlands.L4.heath_and_grain"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_2",
+      "to": "wayshrine_heartlands_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L1.lakeshore_clay",
+        "heartlands.L2.lake_mist"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_2",
+      "to": "imperial_city",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L3.city_sewers_and_cisterns",
+        "heartlands.L4.lakeshore_oakwood"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_3",
+      "to": "wayshrine_heartlands_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L1.ayleid_footings",
+        "heartlands.L3.rumare_shore"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_4",
+      "to": "wayshrine_heartlands_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L2.mild_lake_climate",
+        "heartlands.L3.city_sewers_and_cisterns"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_5",
+      "to": "wayshrine_heartlands_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L2.lake_mist",
+        "heartlands.L4.lake_reedbed"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_6",
+      "to": "wayshrine_heartlands_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L3.rumare_shore",
+        "heartlands.L4.heath_and_grain"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_7",
+      "to": "wayshrine_heartlands_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L3.city_sewers_and_cisterns",
+        "heartlands.L4.lakeshore_oakwood"
+      ]
+    },
+    {
+      "from": "wayshrine_heartlands_8",
+      "to": "wayshrine_heartlands_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "heartlands_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "heartlands.L4.lake_reedbed",
+        "heartlands.L4.urban_garden"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_1",
+      "to": "wayshrine_great_forest_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L1.forest_loam_hills",
+        "great_forest.L2.forest_fog"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_1",
+      "to": "weye",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L3.silverfish_headwaters",
+        "great_forest.L4.fern_glade"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_2",
+      "to": "wayshrine_great_forest_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L1.ruin_dense_ridge",
+        "great_forest.L3.forest_brooks"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_2",
+      "to": "weye",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L4.old_oakwood",
+        "great_forest.L4.charcoal_clearing"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_3",
+      "to": "wayshrine_great_forest_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L2.canopy_shade",
+        "great_forest.L3.silverfish_headwaters"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_4",
+      "to": "wayshrine_great_forest_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L2.forest_fog",
+        "great_forest.L4.old_oakwood"
+      ]
+    },
+    {
+      "from": "wayshrine_great_forest_5",
+      "to": "wayshrine_great_forest_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "great_forest_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "great_forest.L3.forest_brooks",
+        "great_forest.L4.beech_hanger"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_1",
+      "to": "wayshrine_nibenay_basin_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L1.valus_foothills",
+        "nibenay_basin.L2.humid_east"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_1",
+      "to": "cheydinhal",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L3.corbolo",
+        "nibenay_basin.L4.orchard_plain"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_2",
+      "to": "wayshrine_nibenay_basin_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L1.basin_silt",
+        "nibenay_basin.L2.valus_rain"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_2",
+      "to": "cheydinhal",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L3.lake_arrius",
+        "nibenay_basin.L4.wet_meadow"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_3",
+      "to": "wayshrine_nibenay_basin_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L1.foothill_gold",
+        "nibenay_basin.L3.corbolo"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_4",
+      "to": "wayshrine_nibenay_basin_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L2.humid_east",
+        "nibenay_basin.L3.lake_arrius"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_5",
+      "to": "wayshrine_nibenay_basin_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L2.valus_rain",
+        "nibenay_basin.L3.mill_weirs"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_6",
+      "to": "wayshrine_nibenay_basin_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L3.corbolo",
+        "nibenay_basin.L4.orchard_plain"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_7",
+      "to": "wayshrine_nibenay_basin_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L3.lake_arrius",
+        "nibenay_basin.L4.wet_meadow"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_8",
+      "to": "wayshrine_nibenay_basin_9",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L3.mill_weirs",
+        "nibenay_basin.L4.valus_pine"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_basin_9",
+      "to": "wayshrine_nibenay_basin_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_basin_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_basin.L4.orchard_plain",
+        "nibenay_basin.L4.lake_arrius_reeds"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_1",
+      "to": "wayshrine_west_weald_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L1.warm_limestone_slopes",
+        "west_weald.L2.harvest_haze"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_1",
+      "to": "skingrad",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L3.estate_cisterns",
+        "west_weald.L4.oak_savanna"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_2",
+      "to": "wayshrine_west_weald_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L1.deep_ayleid_vault",
+        "west_weald.L3.strid_headwaters"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_2",
+      "to": "skingrad",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L4.vine_terrace",
+        "west_weald.L4.orchard"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_3",
+      "to": "wayshrine_west_weald_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L2.sheltered_warmth",
+        "west_weald.L3.estate_cisterns"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_4",
+      "to": "wayshrine_west_weald_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L2.harvest_haze",
+        "west_weald.L4.vine_terrace"
+      ]
+    },
+    {
+      "from": "wayshrine_west_weald_5",
+      "to": "wayshrine_west_weald_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "west_weald_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "west_weald.L3.strid_headwaters",
+        "west_weald.L4.cypress_line"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_1",
+      "to": "wayshrine_gold_coast_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L1.low_sea_cliffs",
+        "gold_coast.L2.sea_fog"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_1",
+      "to": "anvil",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L3.harbour_springs",
+        "gold_coast.L4.cliff_grass"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_2",
+      "to": "wayshrine_gold_coast_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L1.sea_caves",
+        "gold_coast.L2.westerly_gales"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_2",
+      "to": "anvil",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L3.kvatch_wells",
+        "gold_coast.L4.cove_beach"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_3",
+      "to": "wayshrine_gold_coast_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L1.kvatch_hill",
+        "gold_coast.L3.harbour_springs"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_4",
+      "to": "wayshrine_gold_coast_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L2.sea_fog",
+        "gold_coast.L3.kvatch_wells"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_5",
+      "to": "wayshrine_gold_coast_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L2.westerly_gales",
+        "gold_coast.L4.coastal_scrub"
+      ]
+    },
+    {
+      "from": "wayshrine_gold_coast_6",
+      "to": "wayshrine_gold_coast_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "gold_coast_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "gold_coast.L3.harbour_springs",
+        "gold_coast.L4.cliff_grass"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_1",
+      "to": "wayshrine_nibenay_valley_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L1.river_flats",
+        "nibenay_valley.L2.river_fog"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_1",
+      "to": "bravil",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L3.flood_meadows",
+        "nibenay_valley.L4.flood_meadow"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_2",
+      "to": "wayshrine_nibenay_valley_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L1.riverbank_caves",
+        "nibenay_valley.L3.lower_niben_braids"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_2",
+      "to": "bravil",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L3.bravil_mud",
+        "nibenay_valley.L4.willow_carr"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_3",
+      "to": "wayshrine_nibenay_valley_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L2.humid_heat",
+        "nibenay_valley.L3.flood_meadows"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_4",
+      "to": "wayshrine_nibenay_valley_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L2.river_fog",
+        "nibenay_valley.L3.bravil_mud"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_5",
+      "to": "wayshrine_nibenay_valley_6",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L3.lower_niben_braids",
+        "nibenay_valley.L4.reed_marsh"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_6",
+      "to": "wayshrine_nibenay_valley_7",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L3.flood_meadows",
+        "nibenay_valley.L4.flood_meadow"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_7",
+      "to": "wayshrine_nibenay_valley_8",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L3.bravil_mud",
+        "nibenay_valley.L4.willow_carr"
+      ]
+    },
+    {
+      "from": "wayshrine_nibenay_valley_8",
+      "to": "wayshrine_nibenay_valley_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "nibenay_valley_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "nibenay_valley.L4.reed_marsh",
+        "nibenay_valley.L4.river_island"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_1",
+      "to": "wayshrine_blackwood_2",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L1.mangrove_mud",
+        "blackwood.L2.steam_heat"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_1",
+      "to": "leyawiin",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L3.niben_mouth",
+        "blackwood.L4.mangrove"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_2",
+      "to": "wayshrine_blackwood_3",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L1.peat",
+        "blackwood.L2.thunderstorms"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_2",
+      "to": "leyawiin",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L3.panther_river",
+        "blackwood.L4.cypress_swamp"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_3",
+      "to": "wayshrine_blackwood_4",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L1.sinking_ruins",
+        "blackwood.L3.niben_mouth"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_4",
+      "to": "wayshrine_blackwood_5",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L2.steam_heat",
+        "blackwood.L3.panther_river"
+      ]
+    },
+    {
+      "from": "wayshrine_blackwood_5",
+      "to": "wayshrine_blackwood_1",
+      "mode": "wayshrine",
+      "fee": 0,
+      "duration": 6,
+      "path": "blackwood_pilgrim_way",
+      "bidirectional": true,
+      "why": [
+        "blackwood.L2.thunderstorms",
+        "blackwood.L3.brackish_tide"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "weye",
+      "mode": "carriage",
+      "fee": 10,
+      "duration": 18,
+      "path": "talos_bridge",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "weye",
+      "to": "chorrol",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 18,
+      "path": "black_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "chorrol",
+      "to": "bruma",
+      "mode": "carriage",
+      "fee": 35,
+      "duration": 18,
+      "path": "orange_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "bruma",
+      "mode": "carriage",
+      "fee": 35,
+      "duration": 18,
+      "path": "silver_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "cheydinhal",
+      "mode": "carriage",
+      "fee": 30,
+      "duration": 18,
+      "path": "blue_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "skingrad",
+      "mode": "carriage",
+      "fee": 30,
+      "duration": 18,
+      "path": "gold_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "skingrad",
+      "to": "kvatch",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 18,
+      "path": "gold_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "kvatch",
+      "to": "anvil",
+      "mode": "carriage",
+      "fee": 25,
+      "duration": 18,
+      "path": "gold_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "bravil",
+      "mode": "carriage",
+      "fee": 30,
+      "duration": 18,
+      "path": "green_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "bravil",
+      "to": "leyawiin",
+      "mode": "carriage",
+      "fee": 35,
+      "duration": 18,
+      "path": "yellow_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "cheydinhal",
+      "to": "bruma",
+      "mode": "carriage",
+      "fee": 40,
+      "duration": 18,
+      "path": "orange_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "skingrad",
+      "to": "bravil",
+      "mode": "carriage",
+      "fee": 35,
+      "duration": 18,
+      "path": "green_road",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L6.imperial_highways",
+        "cyrodiil.L5.heartland_breadbasket"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "bravil",
+      "mode": "river_boat",
+      "fee": 20,
+      "duration": 15,
+      "path": "niben_barge_channel",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L3.rumare_and_niben",
+        "cyrodiil.L6.niben_river_ports"
+      ]
+    },
+    {
+      "from": "bravil",
+      "to": "leyawiin",
+      "mode": "river_boat",
+      "fee": 20,
+      "duration": 15,
+      "path": "niben_barge_channel",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L3.rumare_and_niben",
+        "cyrodiil.L6.niben_river_ports"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "weye",
+      "mode": "river_boat",
+      "fee": 20,
+      "duration": 15,
+      "path": "niben_barge_channel",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L3.rumare_and_niben",
+        "cyrodiil.L6.niben_river_ports"
+      ]
+    },
+    {
+      "from": "imperial_city",
+      "to": "chorrol",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "chorrol",
+      "to": "bruma",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "bruma",
+      "to": "cheydinhal",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "cheydinhal",
+      "to": "skingrad",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "skingrad",
+      "to": "anvil",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "anvil",
+      "to": "bravil",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "bravil",
+      "to": "leyawiin",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    },
+    {
+      "from": "leyawiin",
+      "to": "imperial_city",
+      "mode": "guild_guide",
+      "fee": 45,
+      "duration": 4,
+      "path": "arcane_university_ley_network",
+      "bidirectional": true,
+      "why": [
+        "cyrodiil.L8.eight_and_one",
+        "heartlands.L8.university_rationalism"
+      ]
+    }
+  ]
+}

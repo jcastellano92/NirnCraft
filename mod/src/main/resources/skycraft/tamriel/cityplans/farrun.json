@@ -1,0 +1,446 @@
+{
+  "id": "farrun",
+  "sil": "sea-wall-frost-keep",
+  "base": "none",
+  "overlay": "bjoulsae",
+  "radius": 96,
+  "reach": 104,
+  "fill_gap": 2,
+  "inn_key": "farrun_frozen_hawser",
+  "names": {
+    "inn": "farrun_frozen_hawser",
+    "store": "farrun_pack_train_outfitter",
+    "smithy": "farrun_ice_axe_forge"
+  },
+  "titles": {
+    "farrun_landmark": "Farrun Sea-Wall Keep",
+    "farrun_frost_keep": "Castle Farrun Sea-Bastion",
+    "farrun_frozen_hawser": "The Frozen Hawser Inn",
+    "farrun_split_shield_hall": "The Split-Shield Meadhouse",
+    "farrun_pack_train_outfitter": "Wrothgar Pack-Train Outfitter",
+    "farrun_ice_axe_forge": "Ice-Axe & Anchor Smithy",
+    "farrun_pine_tar_apothecary": "Pine-Tar & Bear-Gall Apothecary",
+    "farrun_seal_pelt_yard": "Seal-Pelt & Wolf-Fur Yard",
+    "farrun_salt_whale_market": "Salt-Whale & Venison Hall",
+    "farrun_fighters_lodge": "Frost-Coast Fighters Lodge",
+    "farrun_shrine_of_stendarr": "Chapel of Stendarr on the Breakwater",
+    "farrun_frost_barrow_vault": "Frost-Vault of the Dual Rite",
+    "farrun_reeve_longhall": "Sea-Reeve's Half-Nord Longhall",
+    "farrun_longship_slip": "Nordic & Breton Longship Slipway",
+    "farrun_breakwater_tower": "Breakwater Ice-Watch Tower",
+    "farrun_sledge_stables": "Mountain Mule & Sledge Yard",
+    "farrun_market_plaza": "Farrun Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 92,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -40
+      ],
+      "face": "south",
+      "name": "farrun_landmark",
+      "overlay": "bjoulsae"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        -35
+      ],
+      "face": "south",
+      "name": "farrun_frost_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        55,
+        -38
+      ],
+      "face": "west",
+      "name": "farrun_frozen_hawser"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        42,
+        -11
+      ],
+      "face": "west",
+      "name": "farrun_split_shield_hall"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        67,
+        6
+      ],
+      "face": "west",
+      "name": "farrun_pack_train_outfitter"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        39,
+        18
+      ],
+      "face": "west",
+      "name": "farrun_ice_axe_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        47,
+        47
+      ],
+      "face": "north",
+      "name": "farrun_pine_tar_apothecary"
+    },
+    {
+      "kind": "store",
+      "use": "tannery",
+      "wealth": "common",
+      "at": [
+        18,
+        39
+      ],
+      "face": "north",
+      "name": "farrun_seal_pelt_yard"
+    },
+    {
+      "kind": "store",
+      "use": "butcher",
+      "wealth": "common",
+      "at": [
+        6,
+        67
+      ],
+      "face": "north",
+      "name": "farrun_salt_whale_market"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -11,
+        42
+      ],
+      "face": "north",
+      "name": "farrun_fighters_lodge"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -38,
+        55
+      ],
+      "face": "north",
+      "name": "farrun_shrine_of_stendarr"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -35,
+        25
+      ],
+      "face": "east",
+      "name": "farrun_frost_barrow_vault"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -64,
+        19
+      ],
+      "face": "east",
+      "name": "farrun_reeve_longhall"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -43,
+        -3
+      ],
+      "face": "east",
+      "name": "farrun_longship_slip"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -61,
+        -27
+      ],
+      "face": "east",
+      "name": "farrun_breakwater_tower"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -29
+      ],
+      "face": "east",
+      "name": "farrun_sledge_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -80
+      ],
+      "to": [
+        0,
+        80
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -80,
+        0
+      ],
+      "to": [
+        80,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -49,
+        -49
+      ],
+      "to": [
+        49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        -49
+      ],
+      "to": [
+        49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        49
+      ],
+      "to": [
+        -49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -49,
+        49
+      ],
+      "to": [
+        -49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        63
+      ],
+      "to": [
+        8,
+        63
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "farrun_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        48
+      ],
+      "overlay": "bjoulsae"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "bjoulsae"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:akatosh",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:arkay",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    }
+  ]
+}

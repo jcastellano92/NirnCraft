@@ -1,0 +1,446 @@
+{
+  "id": "gilane",
+  "sil": "covetous-bay-dyeworks-port",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 96,
+  "reach": 104,
+  "fill_gap": 2,
+  "inn_key": "gilane_purple_sail_inn",
+  "names": {
+    "inn": "gilane_purple_sail_inn",
+    "store": "gilane_bay_chandlery",
+    "smithy": "gilane_bronze_grapnel_forge"
+  },
+  "titles": {
+    "gilane_landmark": "Gilane Harbour Light-Minaret",
+    "gilane_bay_citadel": "Castle Gilane Harbour Citadel",
+    "gilane_purple_sail_inn": "The Purple Sail Inn",
+    "gilane_coral_anchor": "The Coral Anchor Tavern",
+    "gilane_bay_chandlery": "Covetous Bay Ship-Chandlery",
+    "gilane_bronze_grapnel_forge": "Grapnel & Cutlass Ironworks",
+    "gilane_murex_dye_works": "Royal Murex & Indigo Dye-Works",
+    "gilane_sail_and_silk_looms": "Crimson-Canvas & Silk Loom-House",
+    "gilane_red_coral_suq": "Red-Coral & Pearl Suq",
+    "gilane_shipwrights_hall": "Southern Shipwrights' Guildhall",
+    "gilane_tava_harbour_mosque": "Sea-Breeze Mosque of Tava",
+    "gilane_dune_ridge_tombs": "White-Limestone Cliff Tombs",
+    "gilane_syndics_courtyard": "Forebear Port-Syndic's Courtyard",
+    "gilane_sponge_divers_quay": "Sponge-Divers & Murex Quay",
+    "gilane_chain_mole_watch": "Harbour-Mole Watchhouse",
+    "gilane_coast_caravan_yard": "Taneth-Road Caravan Stables",
+    "gilane_market_plaza": "Gilane Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -92
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 92,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "minaret",
+      "at": [
+        0,
+        -40
+      ],
+      "face": "south",
+      "name": "gilane_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        25,
+        -35
+      ],
+      "face": "south",
+      "name": "gilane_bay_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        55,
+        -38
+      ],
+      "face": "west",
+      "name": "gilane_purple_sail_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        42,
+        -11
+      ],
+      "face": "west",
+      "name": "gilane_coral_anchor"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        67,
+        6
+      ],
+      "face": "west",
+      "name": "gilane_bay_chandlery"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        39,
+        18
+      ],
+      "face": "west",
+      "name": "gilane_bronze_grapnel_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        47,
+        47
+      ],
+      "face": "north",
+      "name": "gilane_murex_dye_works"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        18,
+        39
+      ],
+      "face": "north",
+      "name": "gilane_sail_and_silk_looms"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        6,
+        67
+      ],
+      "face": "north",
+      "name": "gilane_red_coral_suq"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -11,
+        42
+      ],
+      "face": "north",
+      "name": "gilane_shipwrights_hall"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -38,
+        55
+      ],
+      "face": "north",
+      "name": "gilane_tava_harbour_mosque"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -35,
+        25
+      ],
+      "face": "east",
+      "name": "gilane_dune_ridge_tombs"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -64,
+        19
+      ],
+      "face": "east",
+      "name": "gilane_syndics_courtyard"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -43,
+        -3
+      ],
+      "face": "east",
+      "name": "gilane_sponge_divers_quay"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -61,
+        -27
+      ],
+      "face": "east",
+      "name": "gilane_chain_mole_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -29
+      ],
+      "face": "east",
+      "name": "gilane_coast_caravan_yard"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -80
+      ],
+      "to": [
+        0,
+        80
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -80,
+        0
+      ],
+      "to": [
+        80,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -49,
+        -49
+      ],
+      "to": [
+        49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        -49
+      ],
+      "to": [
+        49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        49,
+        49
+      ],
+      "to": [
+        -49,
+        49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -49,
+        49
+      ],
+      "to": [
+        -49,
+        -49
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        63
+      ],
+      "to": [
+        8,
+        63
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "gilane_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        48
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 3
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:dibella",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "acacia",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    }
+  ]
+}

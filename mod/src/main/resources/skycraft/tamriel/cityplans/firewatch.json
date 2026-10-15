@@ -1,0 +1,289 @@
+{
+  "id": "firewatch",
+  "why": [
+    "telvannis.L1.peninsula_cliffs",
+    "telvannis.L5.sea_trade",
+    "morrowind.L9.imperial_occupation"
+  ],
+  "sil": "imperial-telvanni-port-fort",
+  "base": "none",
+  "overlay": "firewatch",
+  "radius": 84,
+  "reach": 102,
+  "innKey": "fw_spore_gale_tavern",
+  "names": {
+    "inn": "fw_spore_gale_tavern",
+    "store": "fw_eec_factor",
+    "smithy": "fw_legion_forge"
+  },
+  "gates": [
+    [
+      0,
+      78
+    ],
+    [
+      -78,
+      0
+    ],
+    [
+      78,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "name": "firewatch_citadel_keep",
+      "overlay": "firewatch"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        84
+      ],
+      "overlay": "firewatch"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_imperial_chapel"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        61,
+        25
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_mages_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_fighters_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        25,
+        61
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_spore_gale_tavern"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_emperors_anchor"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -25,
+        61
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_eec_factor"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_legion_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -61,
+        25
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_mycelium_apothecary"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_antiquary_office"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -61,
+        -25
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_governors_manor"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_telvanni_envoy_pod"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -25,
+        -61
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_seawall_garrison"
+    },
+    {
+      "kind": "tower",
+      "use": "watchtower",
+      "wealth": "common",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_beacon_lighthouse"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        25,
+        -61
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_customs_vault"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_harbourmaster_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        61,
+        -25
+      ],
+      "face": "south",
+      "overlay": "firewatch",
+      "name": "fw_pilot_cottage"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "firewatch_legion",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "harbour_oil_lamp",
+      "count": 4
+    },
+    {
+      "type": "fountain",
+      "theme": "charter_square",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "cliff_spring_well",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "firewatch_citadel_keep": "Imperial Citadel of Firewatch",
+    "fw_imperial_chapel": "Imperial Chapel of Mara & Zenithar",
+    "fw_mages_guild": "Firewatch Mages Guild Charterhouse",
+    "fw_fighters_guild": "Firewatch Fighters Guild",
+    "fw_spore_gale_tavern": "The Spore-Gale Tavern",
+    "fw_emperors_anchor": "The Emperor's Anchor",
+    "fw_eec_factor": "East Empire Telvannis Factor",
+    "fw_legion_forge": "Peninsula Legion Forge",
+    "fw_mycelium_apothecary": "Mycelium & Mortar Apothecary",
+    "fw_antiquary_office": "Imperial Antiquary Office",
+    "fw_governors_manor": "Governor's Cliff Manor",
+    "fw_telvanni_envoy_pod": "Telvanni Envoy Pod",
+    "fw_seawall_garrison": "Firewatch Sea-Wall Garrison",
+    "fw_beacon_lighthouse": "Telvannis Beacon Lighthouse",
+    "fw_customs_vault": "Harbour Customs Vault",
+    "fw_harbourmaster_house": "Harbourmaster's Stone House",
+    "fw_pilot_cottage": "Pilot's Cliff Cottage"
+  }
+}

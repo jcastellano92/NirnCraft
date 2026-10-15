@@ -1,0 +1,458 @@
+{
+  "id": "evermor",
+  "sil": "lake-causeway-island",
+  "base": "none",
+  "overlay": "bjoulsae",
+  "radius": 118,
+  "reach": 126,
+  "fill_gap": 2,
+  "inn_key": "evermor_anchors_rest",
+  "names": {
+    "inn": "evermor_anchors_rest",
+    "store": "evermor_barge_exchange",
+    "smithy": "evermor_white_iron_forge"
+  },
+  "titles": {
+    "evermor_landmark": "Evermor Island Cathedral",
+    "evermor_river_citadel": "Castle Evermor Island Keep",
+    "evermor_anchors_rest": "The River-Anchor Inn",
+    "evermor_causeway_lantern": "The Causeway Lantern",
+    "evermor_barge_exchange": "Bjoulsae Barge-Factors' Store",
+    "evermor_white_iron_forge": "Bangkorai Gate Ironworks",
+    "evermor_river_reed_apothecary": "River-Reed & Bog-Myrtle Apothecary",
+    "evermor_alluvial_gold": "Alluvial Gold & Silver Assay",
+    "evermor_tariff_rolls": "River-Compact Charter House",
+    "evermor_fighters_hall": "Pass-Escort Fighters Guildhall",
+    "evermor_mages_hall": "Evermor Mages Guildhall",
+    "evermor_island_cathedral": "Cathedral of the River-Saints",
+    "evermor_island_crypt": "Lake-Vault of Arkay",
+    "evermor_guimard_manor": "Ducal House Guimard Manor",
+    "evermor_fishers_quay_hall": "Fisher's Quay Weighing-Hall",
+    "evermor_causeway_toll_arch": "Causeway Toll-Arch Watchhouse",
+    "evermor_towpath_stables": "Towpath Draft-Horse Stables",
+    "evermor_market_plaza": "Evermor Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -114
+    ],
+    [
+      114,
+      0
+    ],
+    [
+      0,
+      114
+    ],
+    [
+      -114,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 114,
+      "sides": 12,
+      "h": 9,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -49
+      ],
+      "face": "south",
+      "name": "evermor_landmark",
+      "overlay": "bjoulsae"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        31,
+        -43
+      ],
+      "face": "south",
+      "name": "evermor_river_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        67,
+        -48
+      ],
+      "face": "west",
+      "name": "evermor_anchors_rest"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        51,
+        -15
+      ],
+      "face": "west",
+      "name": "evermor_causeway_lantern"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        82,
+        2
+      ],
+      "face": "west",
+      "name": "evermor_barge_exchange"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        50,
+        18
+      ],
+      "face": "west",
+      "name": "evermor_white_iron_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        64,
+        51
+      ],
+      "face": "west",
+      "name": "evermor_river_reed_apothecary"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        29,
+        45
+      ],
+      "face": "north",
+      "name": "evermor_alluvial_gold"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        20,
+        80
+      ],
+      "face": "north",
+      "name": "evermor_tariff_rolls"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -4,
+        53
+      ],
+      "face": "north",
+      "name": "evermor_fighters_hall"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -32,
+        75
+      ],
+      "face": "north",
+      "name": "evermor_mages_hall"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -35,
+        40
+      ],
+      "face": "north",
+      "name": "evermor_island_cathedral"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -71,
+        41
+      ],
+      "face": "east",
+      "name": "evermor_island_crypt"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -52,
+        10
+      ],
+      "face": "east",
+      "name": "evermor_guimard_manor"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -81,
+        -10
+      ],
+      "face": "east",
+      "name": "evermor_fishers_quay_hall"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -48,
+        -23
+      ],
+      "face": "east",
+      "name": "evermor_causeway_toll_arch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -59,
+        -57
+      ],
+      "face": "east",
+      "name": "evermor_towpath_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -100
+      ],
+      "to": [
+        0,
+        100
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -100,
+        0
+      ],
+      "to": [
+        100,
+        0
+      ],
+      "width": 5,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -61,
+        -61
+      ],
+      "to": [
+        61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        -61
+      ],
+      "to": [
+        61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        61,
+        61
+      ],
+      "to": [
+        -61,
+        61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -61,
+        61
+      ],
+      "to": [
+        -61,
+        -61
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        78
+      ],
+      "to": [
+        8,
+        78
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 12,
+      "stalls": 6,
+      "name": "evermor_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "count": 9,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 28,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 7,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        59
+      ],
+      "overlay": "bjoulsae"
+    },
+    {
+      "ring": [
+        59,
+        118
+      ],
+      "overlay": "bjoulsae"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 3
+    },
+    {
+      "type": "market",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "divine:julianos",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "dark_oak",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "count": 1
+    }
+  ]
+}

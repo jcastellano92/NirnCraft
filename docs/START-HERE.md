@@ -33,47 +33,17 @@ people ("world building is king").
 | Reference data from the owner's game installs | `.reference/` (gitignored; facts only; never committed) |
 | Release output | `dist/` (built by `tools/build_release.ps1`; not committed) |
 
-## Current state (2026-10-14)
+## Current state (2026-10-15)
 
-* Branch `tamriel-overhaul`, local only. The whole continent exists: 71 land regions, 4,914 places, 113+ biomes,
-  settlements with a building grammar, dungeons with identity in Skyrim, 1,072 quests, NPCs with homes, jobs and
-  schedules, creatures, magic, sailing, realms, music. `qa.ps1` passes (`OVERALL PASS`).
-* The plan-first generation pipeline is complete: P1 road plan, P2 terrain obeys it, P3 roads and crossings painted
-  from it, P4 vegetation masks, **P5 streets to every door (`e9a5ebe`, 0.38% unreachable doors)**, P6 planned scenes.
-  Since then: fire system and the destroyed-Helgen aftermath (`4ba41bb`), playtest rounds 4 and 5 (`15e46d7`,
-  `b738492`), landmark grounding and story lecterns (`7af4469`), and **playtest round 6 & multiplayer/gameplay
-  overhaul** (jail/party fast-travel & release grace, Sanies Lupinus & level-gated werewolves, crouch trap disarm &
-  filled dispensers, vanilla spawner strip, NPC busy cleanup, L/R hand dual-wield/spell/bound/favorite equip, Skyrim
-  XP curve & party XP/HUD bar, Helgen aftermath & contextual dialogue, weapon poisons & HUD meter, ally/companion
-  healing spells & staves, party inn booking & bed ownership, book-to-inventory state return & readable Journey book,
-  5-min per-item evidence decay, 48h merchant rotation & buyback decay). Release builds are deployed to Prism and
-  `dist/Skycraft-client-instance.zip`.
-* **All design and province planning documents are 100% complete:** the rulebook (`DESIGN-PRINCIPLES.md`), the scale
-  model (`SCALE-AND-GEOGRAPHY.md`), the Iliac Bay plan (`ILIAC-BAY.md`), the master roadmap (`WORLD-PLAN.md`), the
-  prompt library (`docs/prompts/`, including `R4a-town-overhaul.md`), and **all 11 province/island/expedition documents
-  in `docs/world/provinces/*.md` (`skyrim.md`, `high_rock.md`, `hammerfell.md`, `cyrodiil.md`, `morrowind.md`,
-  `solstheim.md`, `black_marsh.md`, `elsweyr.md`, `valenwood.md`, `summerset.md`, `foreign_lands.md`), each with all
-  ten sections (§1–§10) written**.
-* **Skyrim Uplift (`R4`) is complete:** Skyrim now scores `108` mean across all 11 parity categories (`SET = 119`,
-  `NPC = 143`, `QST = 110`, `DUN = 100`, `CRE = 100`, `FLO = 100`, `STY = 115`, `LND = 100`, `LOR = 100`, `MUS = 100`,
-  `ITM = 100`, with 0 hold cells below 80 and `SET >= 103` in every hold) and passes 27/27 FLW metrics across all 9
-  holds (`flow_audit.py --province skyrim`). **R4a (`docs/prompts/R4a-town-overhaul.md`)**, **R1
-  (`docs/prompts/R1-loose-ends.md`)**, **R2 (`docs/prompts/R2-testing-tiers.md`)**, **R3a
-  (`docs/prompts/R3a-world-sheets.md`)**, **R3b (`docs/prompts/R3b-micro-biomes.md`)**, **R3c
-  (`docs/prompts/R3c-measurement.md`)**, **R3d (`docs/prompts/R3d-town-services.md`)**, **R3e
-  (`docs/prompts/R3e-world-systems.md`)**, and **R4 (`docs/prompts/R4-skyrim-uplift.md`)** are all complete, rebaked,
-  and verified (`qa.ps1 -Server -Rebake` + `qa.ps1 -Unit -Flow` OVERALL PASS). Next up is R5 Iliac Bay (`IB-S`,
-  `IB1-IB9`, `IB-G`).
+* Branch `tamriel-overhaul`, local only. **The entire `tamriel-overhaul` roadmap (`R0`, `R1`, `R2`, `R3a`–`R3e`, `R4`, `R4a`, `R5`–`R15`) is 100% complete, rebaked, and verified (`qa.ps1 -Server -Rebake` and `qa.ps1 -Unit -Flow` `OVERALL PASS`).**
+* Across the continent and outer expeditions: **83 regions** (`75` land regions across all 9 provinces, Solstheim, and 5 Foreign lands + `8` sea regions), **11 province world-model sheets** (`99` blocks × `11` causal layers = `3,019` fields, `100.0%` `F-WHY` across all `30,391/30,391` content records with `0` legacy back-fill), **1,728 micro-biome rules** (`77.82` transitions/km of road), **7,546 named places** (`0` layout or settlement reach errors), **354 bespoke cityplans**, **1,869 dungeons** (`4,386` identity entries, `118` bespoke 15–30 room marquee dungeon plans), **5,442 quests** (`300` MS1 regional conflict quests across `75` regional story files + `3,817` playable quest definitions, `60,237` lang keys), **7,510 lore records**, **83 Tamrielic festivals**, **P7 4,096×4,096 endless-lands tile planner (`R13`)**, and **61 item affix definitions (`R14`)**.
+* **All-province parity gate (`parity.py --assert-floor`):** **`0` region × category cells below `80`** across all `75` land regions × `11` categories (`825/825` cells `>= 81`; province means: Skyrim `108`, High Rock `112`, Hammerfell `112`, Cyrodiil `122`, Morrowind `130+`, Black Marsh `128`, Elsweyr `129`, Valenwood `129`, Summerset `128`, Atmora/Akavir/Yokuda/Pyandonea/Thras `124–127`).
+* Release builds are deployed to PrismLauncher (`%APPDATA%\PrismLauncher\instances\Skycraft-client-instance\.minecraft\mods\skycraft-core.jar`) and `dist/Skycraft-client-instance.zip`.
 
 ## Next
 
-**Next: R5 Iliac Bay (`docs/prompts/R5-iliac-bay.md`, steps `IB-S`, `IB1-IB9`, `IB-G` in `docs/world/ILIAC-BAY.md`,
-`docs/world/provinces/high_rock.md`, and `docs/world/provinces/hammerfell.md`), followed by R6 Cyrodiil
-(`docs/prompts/R6-cyrodiil.md`).**
-All 11 province design documents are finished and ready for V1–V9 execution.
-
-To run the next phase, say: "Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run
-`docs/prompts/R5-iliac-bay.md`" (or whichever phase WORLD-PLAN section 7 shows as `next`).
+**All planned phases (`R0`–`R15` and `R4a`) are complete (`done` in `docs/world/WORLD-PLAN.md` section 7).**
+Next is the owner's in-game playtest of `dist/Skycraft-client-instance.zip` (using `docs/FIRST-PLAYTEST.md`) and, if desired by the owner, the optional post-roadmap `R-OPT` ESO-style layer (`docs/world/WORLD-PLAN.md` section 5).
 
 ## The rules (non-negotiable)
 

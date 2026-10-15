@@ -1,0 +1,6109 @@
+{
+  "province": "cyrodiil",
+  "truth": "Cyrodiil is the Empire's heart: a broad basin of farmland round a great lake, ringed by mountains on three sides and opening to the sea and swamp in the south. Its people descend from slaves who overthrew the Ayleid elves, and the elves' white ruins still riddle the ground under every county. Roads radiate from the Imperial City on its lake island to nine walled cities, each with a chapel to one of the Nine and halls of the great guilds. The Oblivion Crisis has just ended: Kvatch lies burned, gate scars smoke in the hills, the throne is empty and the Elder Council, the guilds and the counts all reach for the power that is left.",
+  "layers": {
+    "L1": [
+      {
+        "id": "jerall_wall",
+        "text": "granite range along the Skyrim border, one deep notch at the Pale Pass",
+        "cites": []
+      },
+      {
+        "id": "valus_ridge",
+        "text": "a second range on the Morrowind border, separate from the Velothi",
+        "cites": []
+      },
+      {
+        "id": "colovian_plateau",
+        "text": "broken limestone upland in the west with karst caves and deep stream valleys",
+        "cites": []
+      },
+      {
+        "id": "rumare_basin",
+        "text": "a shallow lake basin at the centre whose island carries the oldest stonework in Tamriel",
+        "cites": []
+      },
+      {
+        "id": "nibenay_alluvium",
+        "text": "deep river silt east and south of the lake",
+        "cites": []
+      },
+      {
+        "id": "gold_coast_cliffs",
+        "text": "low sea cliffs and coves on the Abecean",
+        "cites": []
+      },
+      {
+        "id": "topal_mudflats",
+        "text": "mud, peat and mangrove ground where the Niben meets Topal Bay",
+        "cites": []
+      },
+      {
+        "id": "ore_highlands",
+        "text": "iron and silver seams in the Jerall and Colovian rock, gold traces in the Valus foothills",
+        "cites": []
+      },
+      {
+        "id": "ayleid_foundations",
+        "text": "elven stone, glass and charged light-stones under every county",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "temperate_core",
+        "text": "mild, four-season heartland",
+        "cites": [
+          "cyrodiil.L1.rumare_basin"
+        ]
+      },
+      {
+        "id": "west_dry",
+        "text": "Colovia lies in the lee of its own uplands with drier, brighter days and cooler nights",
+        "cites": [
+          "cyrodiil.L1.colovian_plateau"
+        ]
+      },
+      {
+        "id": "east_wet",
+        "text": "the Nibenay is humid and fertile",
+        "cites": [
+          "cyrodiil.L1.nibenay_alluvium"
+        ]
+      },
+      {
+        "id": "jerall_cold",
+        "text": "snow above 150 blocks and blizzards in winter",
+        "cites": [
+          "cyrodiil.L1.jerall_wall"
+        ]
+      },
+      {
+        "id": "abecean_storms",
+        "text": "westerly gales and sea fog on the Gold Coast",
+        "cites": [
+          "cyrodiil.L1.gold_coast_cliffs"
+        ]
+      },
+      {
+        "id": "topal_heat",
+        "text": "sub-tropical, steamy Blackwood with thunderstorms",
+        "cites": [
+          "cyrodiil.L1.topal_mudflats"
+        ]
+      },
+      {
+        "id": "lake_mist",
+        "text": "morning fog on Lake Rumare and the Niben",
+        "cites": [
+          "cyrodiil.L1.rumare_basin"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "lake_rumare",
+        "text": "the lake at the heart, with one bridge to the capital",
+        "cites": [
+          "cyrodiil.L1.rumare_basin",
+          "cyrodiil.L2.temperate_core"
+        ]
+      },
+      {
+        "id": "niben",
+        "text": "the great river south from the lake through Bravil to Topal Bay at Leyawiin, braided in its lower course",
+        "cites": [
+          "cyrodiil.L1.nibenay_alluvium",
+          "cyrodiil.L2.east_wet"
+        ]
+      },
+      {
+        "id": "tributaries",
+        "text": "the Corbolo from the Valus through Cheydinhal, the Silverfish west of the lake, the Panther in Blackwood, the Strid on the Valenwood border",
+        "cites": [
+          "cyrodiil.L1.valus_ridge",
+          "cyrodiil.L1.colovian_plateau"
+        ]
+      },
+      {
+        "id": "ayleid_wells",
+        "text": "about 35 elven wells along the roads that still restore the weary",
+        "cites": [
+          "cyrodiil.L1.ayleid_foundations"
+        ]
+      },
+      {
+        "id": "who_holds_water",
+        "text": "the capital controls the lake crossing; counts toll the river ports; the wells are public and treated as sacred, so no lord may fence one",
+        "cites": [
+          "cyrodiil.L1.rumare_basin",
+          "cyrodiil.L3.lake_rumare",
+          "cyrodiil.L3.niben"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "oak_beech_forest",
+        "text": "the Great Forest canopy of oak and beech",
+        "cites": [
+          "cyrodiil.L2.temperate_core"
+        ]
+      },
+      {
+        "id": "highland_pasture",
+        "text": "upland pastures with pine and elk",
+        "cites": [
+          "cyrodiil.L1.colovian_plateau",
+          "cyrodiil.L2.west_dry"
+        ]
+      },
+      {
+        "id": "heath_and_grain",
+        "text": "open fields round the lake",
+        "cites": [
+          "cyrodiil.L3.lake_rumare"
+        ]
+      },
+      {
+        "id": "vine_cypress",
+        "text": "warm slopes in the West Weald",
+        "cites": [
+          "cyrodiil.L1.colovian_plateau",
+          "cyrodiil.L2.west_dry"
+        ]
+      },
+      {
+        "id": "alpine_spruce",
+        "text": "northern mountain conifers",
+        "cites": [
+          "cyrodiil.L1.jerall_wall",
+          "cyrodiil.L2.jerall_cold"
+        ]
+      },
+      {
+        "id": "mangrove_swamp",
+        "text": "southern coastal swamp",
+        "cites": [
+          "cyrodiil.L1.topal_mudflats",
+          "cyrodiil.L2.topal_heat"
+        ]
+      },
+      {
+        "id": "riverine_reeds",
+        "text": "reedbanks with nirnroot by running water, while wolves, bears, mountain lions, minotaurs, ogres and cave goblins haunt the wilds",
+        "cites": [
+          "cyrodiil.L3.niben"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "grain_belt",
+        "text": "wheat, barley and cattle in the Heartlands and Nibenay",
+        "cites": [
+          "cyrodiil.L3.niben",
+          "cyrodiil.L4.heath_and_grain"
+        ]
+      },
+      {
+        "id": "wine",
+        "text": "rival estates on the Weald slopes",
+        "cites": [
+          "cyrodiil.L4.vine_cypress"
+        ]
+      },
+      {
+        "id": "timber",
+        "text": "oak from the Great Forest",
+        "cites": [
+          "cyrodiil.L4.oak_beech_forest"
+        ]
+      },
+      {
+        "id": "herding",
+        "text": "sheep and horses in Colovia",
+        "cites": [
+          "cyrodiil.L4.highland_pasture"
+        ]
+      },
+      {
+        "id": "mining",
+        "text": "iron and silver shafts",
+        "cites": [
+          "cyrodiil.L1.ore_highlands"
+        ]
+      },
+      {
+        "id": "river_trade",
+        "text": "barges down the Niben",
+        "cites": [
+          "cyrodiil.L3.niben"
+        ]
+      },
+      {
+        "id": "sea_trade",
+        "text": "Anvil's fleet to the west, Leyawiin's to Black Marsh and Elsweyr",
+        "cites": [
+          "cyrodiil.L1.gold_coast_cliffs",
+          "cyrodiil.L3.niben"
+        ]
+      },
+      {
+        "id": "skooma_smuggling",
+        "text": "contraband carried up the Niben from Elsweyr",
+        "cites": [
+          "cyrodiil.L3.niben"
+        ]
+      },
+      {
+        "id": "empire_revenue",
+        "text": "tax, offices and the Arena keep the capital rich",
+        "cites": [
+          "cyrodiil.L3.lake_rumare",
+          "cyrodiil.L5.grain_belt"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "nine_cities",
+        "text": "one capital and eight walled cities, each at a crossing, pass, port or river",
+        "cites": [
+          "cyrodiil.L1.rumare_basin",
+          "cyrodiil.L3.niben"
+        ]
+      },
+      {
+        "id": "radial_roads",
+        "text": "eight named roads from the lake",
+        "cites": [
+          "cyrodiil.L3.lake_rumare",
+          "cyrodiil.L5.empire_revenue"
+        ]
+      },
+      {
+        "id": "inn_chain",
+        "text": "a roadside inn every half-day",
+        "cites": [
+          "cyrodiil.L5.river_trade",
+          "cyrodiil.L6.radial_roads"
+        ]
+      },
+      {
+        "id": "busy_centres",
+        "text": "the Imperial City, Anvil, Chorrol and Leyawiin",
+        "cites": [
+          "cyrodiil.L5.empire_revenue",
+          "cyrodiil.L5.sea_trade",
+          "cyrodiil.L6.nine_cities"
+        ]
+      },
+      {
+        "id": "poor_places",
+        "text": "Bravil on stilts, burned Kvatch, and closed villages in the hills",
+        "cites": [
+          "cyrodiil.L3.niben",
+          "cyrodiil.L5.skooma_smuggling"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "colovian_nibenese_split",
+        "text": "west is martial, plain and clannish; east is ornate, mercantile, tattooed and mystical",
+        "cites": [
+          "cyrodiil.L2.west_dry",
+          "cyrodiil.L2.east_wet"
+        ]
+      },
+      {
+        "id": "class_ladder",
+        "text": "Council families and counts, guild masters and merchants, craftsmen, farm tenants, river labourers, beggars",
+        "cites": [
+          "cyrodiil.L5.empire_revenue",
+          "cyrodiil.L6.nine_cities"
+        ]
+      },
+      {
+        "id": "rule_of_law",
+        "text": "city watch and Legion, bounties, a fine or a cell for every crime",
+        "cites": [
+          "cyrodiil.L6.nine_cities",
+          "cyrodiil.L6.radial_roads"
+        ]
+      },
+      {
+        "id": "guilds_everywhere",
+        "text": "Mages and Fighters halls in every city, the Arcane University in the capital, a thieves' network among the poor, assassins in the dark",
+        "cites": [
+          "cyrodiil.L6.nine_cities"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "the_nine",
+        "text": "each city's chapel is dedicated to one Divine (Akatosh at Kvatch, Arkay at Cheydinhal, Dibella at Anvil, Julianos at Skingrad, Mara at Bravil, Stendarr at Chorrol, Talos at Bruma, Zenithar at Leyawiin; the Temple of the One in the capital)",
+        "cites": [
+          "cyrodiil.L6.nine_cities"
+        ]
+      },
+      {
+        "id": "wayshrines",
+        "text": "about 30 roadside shrines to the Nine",
+        "cites": [
+          "cyrodiil.L6.radial_roads"
+        ]
+      },
+      {
+        "id": "daedric_shrines",
+        "text": "15 Daedric statues in the wild, tended by small cults",
+        "cites": [
+          "cyrodiil.L4.oak_beech_forest",
+          "cyrodiil.L7.colovian_nibenese_split"
+        ]
+      },
+      {
+        "id": "doomstones",
+        "text": "about 20 old standing stones that grant a sign's blessing",
+        "cites": [
+          "cyrodiil.L1.ayleid_foundations"
+        ]
+      },
+      {
+        "id": "elf_ruin_fear",
+        "text": "people avoid the white ruins and tell stories about them",
+        "cites": [
+          "cyrodiil.L1.ayleid_foundations"
+        ]
+      },
+      {
+        "id": "arena_glory",
+        "text": "blood sport as civic pride",
+        "cites": [
+          "cyrodiil.L5.empire_revenue"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "throne_empty",
+        "text": "no emperor, the Dragonfires dark, the Elder Council and its chancellor rule",
+        "cites": [
+          "cyrodiil.L6.nine_cities",
+          "cyrodiil.L7.class_ladder"
+        ]
+      },
+      {
+        "id": "gate_scars",
+        "text": "dozens of closed gates leave burned rings that still leak",
+        "cites": [
+          "cyrodiil.L6.poor_places",
+          "cyrodiil.L8.daedric_shrines"
+        ]
+      },
+      {
+        "id": "county_rivalry",
+        "text": "counts test how far the Council can reach",
+        "cites": [
+          "cyrodiil.L7.colovian_nibenese_split",
+          "cyrodiil.L7.class_ladder"
+        ]
+      },
+      {
+        "id": "guild_wars",
+        "text": "the Mages Guild against the necromancers; the Fighters Guild against a rival mercenary company based in Leyawiin",
+        "cites": [
+          "cyrodiil.L7.guilds_everywhere"
+        ]
+      },
+      {
+        "id": "border_pressure",
+        "text": "skooma from Elsweyr, a newly confident Black Marsh, Dunmer settlers and their own politics in the east",
+        "cites": [
+          "cyrodiil.L5.skooma_smuggling",
+          "cyrodiil.L6.nine_cities"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "ayleid_undercity",
+        "text": "50-odd Ayleid ruins and a pre-Imperial reservoir under the cities, home to undead, necromancers, conjurers and treasure hunters",
+        "cites": [
+          "cyrodiil.L1.ayleid_foundations",
+          "cyrodiil.L8.elf_ruin_fear"
+        ]
+      },
+      {
+        "id": "cult_remnants",
+        "text": "the doomsday cult's surviving cells hide in lake caves and old forts",
+        "cites": [
+          "cyrodiil.L1.rumare_basin",
+          "cyrodiil.L9.gate_scars"
+        ]
+      },
+      {
+        "id": "abandoned_forts",
+        "text": "about 50 ruined forts from older wars taken by bandits, marauders and vampires",
+        "cites": [
+          "cyrodiil.L1.colovian_plateau",
+          "cyrodiil.L9.county_rivalry"
+        ]
+      },
+      {
+        "id": "road_bandits",
+        "text": "highwaymen on the long legs far from city watches",
+        "cites": [
+          "cyrodiil.L4.oak_beech_forest",
+          "cyrodiil.L6.radial_roads"
+        ]
+      },
+      {
+        "id": "assassins_and_thieves",
+        "text": "a sanctuary under a quiet house in Cheydinhal, a guild among the Waterfront shacks",
+        "cites": [
+          "cyrodiil.L7.guilds_everywhere",
+          "cyrodiil.L9.county_rivalry"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "ayleid_era",
+        "text": "the elves built White-Gold Tower and ruled the heartland with human slaves",
+        "cites": [
+          "cyrodiil.L1.ayleid_foundations",
+          "cyrodiil.L10.ayleid_undercity"
+        ]
+      },
+      {
+        "id": "alessian_revolt",
+        "text": "the slaves rose, took the tower and founded the Empire; the Alessian scroll-temples and gates are its relics",
+        "cites": [
+          "cyrodiil.L1.rumare_basin",
+          "cyrodiil.L8.the_nine"
+        ]
+      },
+      {
+        "id": "reman_akaviri",
+        "text": "the Reman emperors and their Akaviri guard left Sancre Tor, the Pale Pass fort and Cloud Ruler",
+        "cites": [
+          "cyrodiil.L1.jerall_wall",
+          "cyrodiil.L6.nine_cities"
+        ]
+      },
+      {
+        "id": "three_banner_war",
+        "text": "keeps and forts from a Second Era war of three alliances for the Ruby Throne",
+        "cites": [
+          "cyrodiil.L10.abandoned_forts"
+        ]
+      },
+      {
+        "id": "septim_empire",
+        "text": "the roads, chapels and Legion",
+        "cites": [
+          "cyrodiil.L6.radial_roads",
+          "cyrodiil.L8.the_nine"
+        ]
+      },
+      {
+        "id": "oblivion_crisis",
+        "text": "the emperor murdered, gates opened, Kvatch destroyed, and the last heir's sacrifice ended it",
+        "cites": [
+          "cyrodiil.L9.throne_empty",
+          "cyrodiil.L9.gate_scars"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "jerall_mountains": {
+      "truth": "The Jerall Mountains form the cold northern rim where Cyrodiil meets Skyrim. Bruma is half Nord in blood and timber-and-stone building, a snow-roofed city guarding the only good pass, its Great Chapel of Talos raising the tallest spire in the county. Above it the Blades' cliff fortress of Cloud Ruler Temple watches the road, and to the west the dead Reman citadel of Sancre Tor broods on its peak. Life turns on herding, silver mining, pass trade and smuggling. The mountains hold more caves and old Imperial family crypts than any county, and the cold keeps the dead in them restless.",
+      "layers": {
+        "L1": [
+          {
+            "id": "pale_pass_notch",
+            "text": "the deep northern pass through the granite wall",
+            "cites": []
+          },
+          {
+            "id": "granite_caves",
+            "text": "high ice-rimmed caverns",
+            "cites": []
+          },
+          {
+            "id": "silver_seams",
+            "text": "rich mountain silver veins",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "snow_above_150",
+            "text": "permanent snowpack on the high ridges",
+            "cites": [
+              "cyrodiil.L2.jerall_cold",
+              "jerall_mountains.L1.pale_pass_notch"
+            ]
+          },
+          {
+            "id": "blizzard_winters",
+            "text": "winter whiteouts closing the pass",
+            "cites": [
+              "cyrodiil.L2.jerall_cold",
+              "jerall_mountains.L1.pale_pass_notch"
+            ]
+          },
+          {
+            "id": "valley_inversion",
+            "text": "clear peaks over fogged valleys",
+            "cites": [
+              "jerall_mountains.L1.granite_caves"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "snowmelt_streams",
+            "text": "cold torrents feeding the Upper Niben and Lake Rumare",
+            "cites": [
+              "cyrodiil.L3.niben",
+              "jerall_mountains.L2.snow_above_150"
+            ]
+          },
+          {
+            "id": "bruma_cisterns",
+            "text": "heated meltwater cisterns behind the city walls",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch",
+              "jerall_mountains.L2.blizzard_winters"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "alpine_spruce",
+            "text": "snow-laden spruce",
+            "cites": [
+              "cyrodiil.L4.alpine_spruce",
+              "jerall_mountains.L2.snow_above_150"
+            ]
+          },
+          {
+            "id": "scree_heath",
+            "text": "wind-scoured rock",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch",
+              "jerall_mountains.L2.snow_above_150"
+            ]
+          },
+          {
+            "id": "snowfield",
+            "text": "high snow wastes with frost trolls and snow wolves",
+            "cites": [
+              "jerall_mountains.L2.blizzard_winters"
+            ]
+          },
+          {
+            "id": "hot_spring_hollow",
+            "text": "steamed fault hollows",
+            "cites": [
+              "jerall_mountains.L1.granite_caves"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "pass_trade",
+            "text": "wagon caravans to and from Skyrim",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch"
+            ]
+          },
+          {
+            "id": "silver_mines",
+            "text": "mountain shafts and stamp mills",
+            "cites": [
+              "jerall_mountains.L1.silver_seams"
+            ]
+          },
+          {
+            "id": "goat_and_fur",
+            "text": "pelts and mountain cheeses",
+            "cites": [
+              "jerall_mountains.L4.alpine_spruce"
+            ]
+          },
+          {
+            "id": "smuggling",
+            "text": "untaxed goods carried round the toll post",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch",
+              "jerall_mountains.L2.valley_inversion"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "bruma_on_the_pass",
+            "text": "the Nord-Imperial seat overlooking the highway",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch",
+              "jerall_mountains.L5.pass_trade"
+            ]
+          },
+          {
+            "id": "foothill_villages",
+            "text": "waystations on the Silver and Orange roads",
+            "cites": [
+              "cyrodiil.L6.radial_roads",
+              "jerall_mountains.L3.snowmelt_streams"
+            ]
+          },
+          {
+            "id": "mine_hamlets",
+            "text": "bunkhouse camps at the shaft heads",
+            "cites": [
+              "jerall_mountains.L5.silver_mines"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "nord_imperial_mix",
+            "text": "Nord clans and Imperial magistrates sharing the watch",
+            "cites": [
+              "jerall_mountains.L6.bruma_on_the_pass"
+            ]
+          },
+          {
+            "id": "miner_debt",
+            "text": "company tallymen at the silver shafts",
+            "cites": [
+              "jerall_mountains.L5.silver_mines"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "talos_first",
+            "text": "the Great Chapel of Talos and Nord hearth-shrines",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "jerall_mountains.L6.bruma_on_the_pass"
+            ]
+          },
+          {
+            "id": "dragon_blood_lore",
+            "text": "Akaviri oaths kept by the Blades at Cloud Ruler",
+            "cites": [
+              "jerall_mountains.L6.bruma_on_the_pass"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "pass_tolls",
+            "text": "Bruma's count and the Legion quarrelling over pass customs",
+            "cites": [
+              "cyrodiil.L9.county_rivalry",
+              "jerall_mountains.L5.pass_trade"
+            ]
+          },
+          {
+            "id": "blades_without_emperor",
+            "text": "the ancient guard waiting on its cliff without a Dragonborn",
+            "cites": [
+              "cyrodiil.L9.throne_empty",
+              "jerall_mountains.L8.dragon_blood_lore"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "family_crypts",
+            "text": "ancestral Imperial crypts where the cold keeps the dead walking",
+            "cites": [
+              "jerall_mountains.L1.granite_caves",
+              "jerall_mountains.L2.snow_above_150"
+            ]
+          },
+          {
+            "id": "sancre_tor_barrow",
+            "text": "the haunted tomb-fortress of Reman",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch",
+              "jerall_mountains.L8.dragon_blood_lore"
+            ]
+          },
+          {
+            "id": "mage_on_the_crag",
+            "text": "Frostcrag Spire on its icy peak",
+            "cites": [
+              "jerall_mountains.L1.pale_pass_notch",
+              "jerall_mountains.L4.snowfield"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "reman_fortresses",
+            "text": "the Pale Pass fort and Sancre Tor",
+            "cites": [
+              "cyrodiil.L11.reman_akaviri",
+              "jerall_mountains.L10.sancre_tor_barrow"
+            ]
+          },
+          {
+            "id": "pass_battles",
+            "text": "the Akaviri surrender at the pass",
+            "cites": [
+              "cyrodiil.L11.reman_akaviri",
+              "jerall_mountains.L1.pale_pass_notch"
+            ]
+          },
+          {
+            "id": "gate_at_bruma",
+            "text": "the Great Gate fought before Bruma's walls",
+            "cites": [
+              "cyrodiil.L11.oblivion_crisis",
+              "jerall_mountains.L6.bruma_on_the_pass"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L5.silver_mines",
+            "jerall_mountains.L1.silver_seams"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.silver_mines"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.silver_mines"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L5.silver_mines",
+            "jerall_mountains.L4.alpine_spruce"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.silver_mines"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.silver_mines"
+          ]
+        },
+        "woodcutter": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L5.silver_mines",
+            "jerall_mountains.L4.alpine_spruce"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L3.snowmelt_streams"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.goat_and_fur"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L4.alpine_spruce"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L5.pass_trade",
+            "jerall_mountains.L6.foothill_villages"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass",
+            "jerall_mountains.L6.foothill_villages"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass",
+            "jerall_mountains.L6.foothill_villages"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L8.talos_first"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L7.nord_imperial_mix"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L8.talos_first"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L5.smuggling"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L7.miner_debt"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L7.nord_imperial_mix"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass",
+            "jerall_mountains.L6.foothill_villages",
+            "jerall_mountains.L7.nord_imperial_mix"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L6.bruma_on_the_pass"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L7.nord_imperial_mix"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L5.silver_mines",
+            "jerall_mountains.L7.miner_debt"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "jerall_mountains.L5.silver_mines",
+            "jerall_mountains.L7.miner_debt"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L7.nord_imperial_mix"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L7.nord_imperial_mix"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "jerall_mountains.L5.pass_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 2,
+          "why": [
+            "jerall_mountains.L9.blades_without_emperor"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "jerall_mountains.L10.sancre_tor_barrow"
+        ],
+        "ruin": [
+          "jerall_mountains.L10.sancre_tor_barrow",
+          "jerall_mountains.L8.talos_first",
+          "jerall_mountains.L8.dragon_blood_lore"
+        ],
+        "dwemer": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "falmer": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "bandit": [
+          "jerall_mountains.L5.smuggling"
+        ],
+        "fort": [
+          "jerall_mountains.L10.sancre_tor_barrow"
+        ],
+        "military": [
+          "jerall_mountains.L9.pass_tolls"
+        ],
+        "mage": [
+          "jerall_mountains.L10.mage_on_the_crag"
+        ],
+        "vampire": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "necromancer": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "hagraven": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "forsworn": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "beast": [
+          "jerall_mountains.L4.alpine_spruce",
+          "jerall_mountains.L4.snowfield"
+        ],
+        "ice": [
+          "jerall_mountains.L4.snowfield"
+        ],
+        "mine": [
+          "jerall_mountains.L5.silver_mines",
+          "jerall_mountains.L1.silver_seams"
+        ],
+        "grove": [
+          "jerall_mountains.L4.alpine_spruce"
+        ],
+        "smuggler": [
+          "jerall_mountains.L5.smuggling"
+        ],
+        "cave": [
+          "jerall_mountains.L1.granite_caves",
+          "jerall_mountains.L4.snowfield"
+        ],
+        "giant": [
+          "jerall_mountains.L4.scree_heath"
+        ],
+        "dragon": [
+          "jerall_mountains.L9.blades_without_emperor"
+        ],
+        "tower": [
+          "jerall_mountains.L10.family_crypts"
+        ],
+        "cabin": [
+          "jerall_mountains.L6.mine_hamlets",
+          "jerall_mountains.L5.silver_mines"
+        ],
+        "wreck": [
+          "jerall_mountains.L5.pass_trade"
+        ]
+      }
+    },
+    "colovian_highlands": {
+      "truth": "The Colovian Highlands are a proud, dry upland of sheep downs, horse paddocks and broken limestone valleys running west to the High Rock and Hammerfell borders. Chorrol grew round a giant oak at the head of the Black Road and serves as the highland's market and the Fighters Guild's provincial seat. The people are plain-spoken Colovians who distrust the capital's ornate politics. Its karst caves hide warring goblin tribes, bandits and closed hill villages with secrets of their own, while the stone keeps of a Second Era war stand on every ridge.",
+      "layers": {
+        "L1": [
+          {
+            "id": "karst_valleys",
+            "text": "incised limestone valleys and sinkholes",
+            "cites": []
+          },
+          {
+            "id": "limestone_caves",
+            "text": "deep cavern systems",
+            "cites": []
+          },
+          {
+            "id": "iron_seams",
+            "text": "upland iron ore veins",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "dry_bright_summers",
+            "text": "sunny upland summers",
+            "cites": [
+              "cyrodiil.L2.west_dry",
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          },
+          {
+            "id": "cold_clear_nights",
+            "text": "crisp night air",
+            "cites": [
+              "cyrodiil.L2.west_dry",
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          },
+          {
+            "id": "upland_wind",
+            "text": "steady westerly breezes",
+            "cites": [
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "sinking_streams",
+            "text": "rivers that vanish into karst and return as cold springs",
+            "cites": [
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          },
+          {
+            "id": "spring_villages",
+            "text": "upland water-points",
+            "cites": [
+              "colovian_highlands.L1.karst_valleys",
+              "colovian_highlands.L3.sinking_streams"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "sheep_downs",
+            "text": "open limestone turf",
+            "cites": [
+              "cyrodiil.L4.highland_pasture",
+              "colovian_highlands.L2.dry_bright_summers"
+            ]
+          },
+          {
+            "id": "pine_ridges",
+            "text": "dry pine crests",
+            "cites": [
+              "colovian_highlands.L1.karst_valleys",
+              "colovian_highlands.L2.upland_wind"
+            ]
+          },
+          {
+            "id": "karst_scrub",
+            "text": "rocky brush with wolves, bears and ogres",
+            "cites": [
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          },
+          {
+            "id": "spring_glen",
+            "text": "green watered hollows",
+            "cites": [
+              "colovian_highlands.L3.sinking_streams"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "wool_and_horses",
+            "text": "Colovian wool, mutton and cavalry mounts",
+            "cites": [
+              "colovian_highlands.L4.sheep_downs"
+            ]
+          },
+          {
+            "id": "iron_mines",
+            "text": "upland iron shafts and smithies",
+            "cites": [
+              "colovian_highlands.L1.iron_seams"
+            ]
+          },
+          {
+            "id": "chorrol_market",
+            "text": "the western guild and livestock exchange",
+            "cites": [
+              "colovian_highlands.L4.sheep_downs",
+              "colovian_highlands.L5.iron_mines"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "chorrol_crossroads",
+            "text": "the walled seat at the Black Road's end",
+            "cites": [
+              "cyrodiil.L6.radial_roads",
+              "colovian_highlands.L5.chorrol_market"
+            ]
+          },
+          {
+            "id": "spring_hamlets",
+            "text": "stone pastoral villages",
+            "cites": [
+              "colovian_highlands.L3.spring_villages"
+            ]
+          },
+          {
+            "id": "closed_villages",
+            "text": "isolated side-valley hamlets such as Hackdirt",
+            "cites": [
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "colovian_pride",
+            "text": "martial, plain-spoken highland families",
+            "cites": [
+              "cyrodiil.L7.colovian_nibenese_split",
+              "colovian_highlands.L6.chorrol_crossroads"
+            ]
+          },
+          {
+            "id": "guild_town",
+            "text": "the Fighters Guild headquarters",
+            "cites": [
+              "cyrodiil.L7.guilds_everywhere",
+              "colovian_highlands.L6.chorrol_crossroads"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "stendarr_chapel",
+            "text": "the Great Chapel of Stendarr",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "colovian_highlands.L6.chorrol_crossroads"
+            ]
+          },
+          {
+            "id": "oak_reverence",
+            "text": "civic pride in the Great Oak and Weynon Priory's monks",
+            "cites": [
+              "colovian_highlands.L6.chorrol_crossroads"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "guild_rivalry",
+            "text": "the Fighters Guild losing contracts to the Blackwood Company",
+            "cites": [
+              "cyrodiil.L9.guild_wars",
+              "colovian_highlands.L7.guild_town"
+            ]
+          },
+          {
+            "id": "herder_logger_feud",
+            "text": "boundary disputes with Great Forest timber camps",
+            "cites": [
+              "colovian_highlands.L5.wool_and_horses",
+              "colovian_highlands.L7.colovian_pride"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "goblin_wars",
+            "text": "totem-tribes fighting each other for caves",
+            "cites": [
+              "colovian_highlands.L1.limestone_caves",
+              "colovian_highlands.L4.karst_scrub"
+            ]
+          },
+          {
+            "id": "deep_ones_below",
+            "text": "a hill village hiding what lives in its tunnels",
+            "cites": [
+              "colovian_highlands.L1.limestone_caves",
+              "colovian_highlands.L6.closed_villages"
+            ]
+          },
+          {
+            "id": "ridge_keeps",
+            "text": "ruined forts held by marauders",
+            "cites": [
+              "cyrodiil.L10.abandoned_forts",
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "high_rock_gates",
+            "text": "border keeps on the northern road",
+            "cites": [
+              "cyrodiil.L11.three_banner_war",
+              "colovian_highlands.L10.ridge_keeps"
+            ]
+          },
+          {
+            "id": "alessian_scroll_temples",
+            "text": "the ancient temples of Alma Ruma and Ni-Mohk",
+            "cites": [
+              "cyrodiil.L11.alessian_revolt",
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          },
+          {
+            "id": "battlehorn",
+            "text": "the knightly castle on the western crag",
+            "cites": [
+              "cyrodiil.L11.septim_empire",
+              "colovian_highlands.L1.karst_valleys"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L5.iron_mines",
+            "colovian_highlands.L1.iron_seams"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L5.iron_mines"
+          ]
+        },
+        "jeweler": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L5.iron_mines",
+            "colovian_highlands.L5.chorrol_market"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L4.pine_ridges"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L4.pine_ridges"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L4.karst_scrub"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "fletcher": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L5.chorrol_market",
+            "colovian_highlands.L4.pine_ridges"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L5.chorrol_market",
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses",
+            "colovian_highlands.L5.chorrol_market"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L5.chorrol_market"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads",
+            "colovian_highlands.L6.spring_hamlets",
+            "colovian_highlands.L6.closed_villages"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L5.wool_and_horses"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L8.stendarr_chapel"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L7.colovian_pride"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L8.stendarr_chapel"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L5.chorrol_market"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L7.colovian_pride"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L7.colovian_pride"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "colovian_highlands.L6.chorrol_crossroads",
+            "colovian_highlands.L6.spring_hamlets",
+            "colovian_highlands.L6.closed_villages"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L7.guild_town",
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L7.guild_town",
+            "colovian_highlands.L6.chorrol_crossroads"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L7.colovian_pride"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L5.iron_mines"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L5.iron_mines"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L7.guild_town"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "colovian_highlands.L7.guild_town"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 3,
+          "why": [
+            "colovian_highlands.L5.chorrol_market",
+            "colovian_highlands.L7.guild_town"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "colovian_highlands.L9.guild_rivalry"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "ruin": [
+          "colovian_highlands.L10.ridge_keeps"
+        ],
+        "dwemer": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "falmer": [
+          "colovian_highlands.L10.deep_ones_below"
+        ],
+        "bandit": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "fort": [
+          "colovian_highlands.L10.ridge_keeps"
+        ],
+        "military": [
+          "colovian_highlands.L9.guild_rivalry"
+        ],
+        "mage": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "vampire": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "necromancer": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "hagraven": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "forsworn": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "beast": [
+          "colovian_highlands.L4.karst_scrub",
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "ice": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "mine": [
+          "colovian_highlands.L5.iron_mines",
+          "colovian_highlands.L1.iron_seams"
+        ],
+        "grove": [
+          "colovian_highlands.L4.pine_ridges",
+          "colovian_highlands.L4.spring_glen"
+        ],
+        "smuggler": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "cave": [
+          "colovian_highlands.L10.goblin_wars",
+          "colovian_highlands.L1.karst_valleys",
+          "colovian_highlands.L1.limestone_caves"
+        ],
+        "giant": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "dragon": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "tower": [
+          "colovian_highlands.L10.goblin_wars"
+        ],
+        "cabin": [
+          "colovian_highlands.L6.chorrol_crossroads"
+        ],
+        "wreck": [
+          "colovian_highlands.L5.wool_and_horses"
+        ]
+      }
+    },
+    "heartlands": {
+      "truth": "The Heartlands are the lake country round the capital. The Imperial City stands on its central island, a wheel of six walled wards around the Ayleids' White-Gold Tower, reached by one monumental bridge. Around the shore run the Red Ring Road, rich grain farms, fishing villages and the first coaching inns of every highway. Wealth and power flow through here, and so does every rumour in Tamriel. Under the city run the sewers and pre-Imperial vaults; under the ploughed fields lie Ayleid ruins. The Elder Council's quarrels, the Arena's crowds and the Waterfront's thieves make this the busiest and most watched county.",
+      "layers": {
+        "L1": [
+          {
+            "id": "island_bedrock",
+            "text": "the central lake-island stone platform",
+            "cites": []
+          },
+          {
+            "id": "lakeshore_clay",
+            "text": "fertile basin clays",
+            "cites": []
+          },
+          {
+            "id": "ayleid_footings",
+            "text": "ancient white-stone foundations beneath city and shore",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "mild_lake_climate",
+            "text": "even, mild seasons moderated by the water",
+            "cites": [
+              "cyrodiil.L2.temperate_core",
+              "heartlands.L1.lakeshore_clay"
+            ]
+          },
+          {
+            "id": "lake_mist",
+            "text": "dawn mists over the bridges and reeds",
+            "cites": [
+              "cyrodiil.L2.lake_mist",
+              "heartlands.L1.lakeshore_clay"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "rumare_shore",
+            "text": "the ring-lake waters",
+            "cites": [
+              "cyrodiil.L3.lake_rumare",
+              "heartlands.L1.lakeshore_clay"
+            ]
+          },
+          {
+            "id": "city_sewers_and_cisterns",
+            "text": "the Imperial Watch controls the city's water and the brick ways beneath",
+            "cites": [
+              "cyrodiil.L3.who_holds_water",
+              "heartlands.L1.island_bedrock"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "lake_reedbed",
+            "text": "reed beds with mudcrabs and slaughterfish",
+            "cites": [
+              "heartlands.L3.rumare_shore"
+            ]
+          },
+          {
+            "id": "heath_and_grain",
+            "text": "ploughed wheat fields",
+            "cites": [
+              "cyrodiil.L4.heath_and_grain",
+              "heartlands.L1.lakeshore_clay"
+            ]
+          },
+          {
+            "id": "lakeshore_oakwood",
+            "text": "parklands and deer groves",
+            "cites": [
+              "heartlands.L2.mild_lake_climate"
+            ]
+          },
+          {
+            "id": "urban_garden",
+            "text": "the Arboretum and palace gardens",
+            "cites": [
+              "heartlands.L3.city_sewers_and_cisterns"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "capital_economy",
+            "text": "Imperial offices, the Arena, and the Market District",
+            "cites": [
+              "cyrodiil.L5.empire_revenue",
+              "heartlands.L3.rumare_shore"
+            ]
+          },
+          {
+            "id": "lakeside_grain_and_fish",
+            "text": "bread, ale and lake eels feeding the wards",
+            "cites": [
+              "heartlands.L3.rumare_shore",
+              "heartlands.L4.heath_and_grain"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "imperial_city",
+            "text": "the wheel-city around White-Gold Tower",
+            "cites": [
+              "cyrodiil.L6.busy_centres",
+              "heartlands.L1.island_bedrock"
+            ]
+          },
+          {
+            "id": "bridgehead_villages",
+            "text": "Weye and the bridgehead docks",
+            "cites": [
+              "heartlands.L3.rumare_shore"
+            ]
+          },
+          {
+            "id": "red_ring_villages",
+            "text": "Pell's Gate, Aleswell and Roxey Inn",
+            "cites": [
+              "cyrodiil.L6.inn_chain",
+              "heartlands.L4.heath_and_grain"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "ward_ladder",
+            "text": "Elven Gardens and Talos Plaza at the top, Market and Temple in the middle, the Waterfront shacks at the bottom",
+            "cites": [
+              "cyrodiil.L7.class_ladder",
+              "heartlands.L6.imperial_city"
+            ]
+          },
+          {
+            "id": "beggar_eyes",
+            "text": "beggars watching every street for the Gray Fox",
+            "cites": [
+              "heartlands.L6.imperial_city",
+              "heartlands.L7.ward_ladder"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "temple_of_the_one",
+            "text": "the Dragonfires shrine where emperors were crowned",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "heartlands.L6.imperial_city"
+            ]
+          },
+          {
+            "id": "arena_cult",
+            "text": "blood-sport celebrity",
+            "cites": [
+              "cyrodiil.L8.arena_glory",
+              "heartlands.L5.capital_economy"
+            ]
+          },
+          {
+            "id": "university_rationalism",
+            "text": "the Arcane University's orthodoxy",
+            "cites": [
+              "cyrodiil.L7.guilds_everywhere",
+              "heartlands.L6.imperial_city"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "council_factions",
+            "text": "Colovian and Nibenese blocs vying in the Elder Council",
+            "cites": [
+              "cyrodiil.L9.throne_empty",
+              "heartlands.L7.ward_ladder"
+            ]
+          },
+          {
+            "id": "watch_vs_guild",
+            "text": "Captain Hieronymus Lex hunting the Thieves Guild on the Waterfront",
+            "cites": [
+              "heartlands.L7.beggar_eyes"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "ring_beneath_the_rings",
+            "text": "pre-Imperial reservoir and Ayleid vaults under every ward",
+            "cites": [
+              "heartlands.L1.ayleid_footings",
+              "heartlands.L3.city_sewers_and_cisterns"
+            ]
+          },
+          {
+            "id": "prison_tunnels",
+            "text": "the escape ways beneath the Bastion",
+            "cites": [
+              "heartlands.L1.island_bedrock",
+              "heartlands.L3.city_sewers_and_cisterns"
+            ]
+          },
+          {
+            "id": "lake_cult_caves",
+            "text": "Mythic Dawn cells in the shore caverns",
+            "cites": [
+              "cyrodiil.L10.cult_remnants",
+              "heartlands.L1.lakeshore_clay",
+              "heartlands.L9.council_factions"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "white_gold_tower",
+            "text": "the Merethic tower at the centre of the wheel",
+            "cites": [
+              "cyrodiil.L11.ayleid_era",
+              "heartlands.L1.ayleid_footings"
+            ]
+          },
+          {
+            "id": "alessian_bridge",
+            "text": "the bridge of the slave-revolt triumph",
+            "cites": [
+              "cyrodiil.L11.alessian_revolt",
+              "heartlands.L6.imperial_city"
+            ]
+          },
+          {
+            "id": "throne_room_murder",
+            "text": "the lighting of the last Dragonfire",
+            "cites": [
+              "cyrodiil.L11.oblivion_crisis",
+              "heartlands.L8.temple_of_the_one"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 3,
+          "why": [
+            "heartlands.L1.lakeshore_clay",
+            "heartlands.L1.ayleid_footings"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "heartlands.L5.lakeside_grain_and_fish"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "heartlands.L5.lakeside_grain_and_fish"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "heartlands.L4.lakeshore_oakwood"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "heartlands.L5.lakeside_grain_and_fish"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "heartlands.L5.lakeside_grain_and_fish",
+            "heartlands.L3.rumare_shore",
+            "heartlands.L4.lake_reedbed"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "heartlands.L4.lakeshore_oakwood"
+          ]
+        },
+        "butcher": {
+          "weight": 3,
+          "why": [
+            "heartlands.L5.lakeside_grain_and_fish",
+            "heartlands.L4.lake_reedbed"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "heartlands.L5.capital_economy",
+            "heartlands.L6.bridgehead_villages"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "heartlands.L5.capital_economy",
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "heartlands.L5.capital_economy",
+            "heartlands.L8.temple_of_the_one"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "heartlands.L6.bridgehead_villages",
+            "heartlands.L6.red_ring_villages"
+          ]
+        },
+        "cook": {
+          "weight": 3,
+          "why": [
+            "heartlands.L5.lakeside_grain_and_fish",
+            "heartlands.L6.red_ring_villages"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "heartlands.L6.red_ring_villages"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "heartlands.L8.temple_of_the_one"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "heartlands.L6.imperial_city"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "heartlands.L6.imperial_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "heartlands.L8.temple_of_the_one"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "heartlands.L9.watch_vs_guild",
+            "heartlands.L6.imperial_city",
+            "heartlands.L6.bridgehead_villages"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "heartlands.L10.ring_beneath_the_rings"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "heartlands.L10.prison_tunnels"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "heartlands.L7.beggar_eyes"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "heartlands.L6.bridgehead_villages",
+            "heartlands.L6.red_ring_villages",
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "heartlands.L11.white_gold_tower"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "heartlands.L5.capital_economy"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 3,
+          "why": [
+            "heartlands.L5.capital_economy",
+            "heartlands.L7.ward_ladder"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "heartlands.L9.council_factions"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "heartlands.L8.temple_of_the_one"
+        ],
+        "ruin": [
+          "heartlands.L8.temple_of_the_one"
+        ],
+        "dwemer": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "falmer": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "bandit": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "fort": [
+          "heartlands.L9.council_factions"
+        ],
+        "military": [
+          "heartlands.L9.council_factions"
+        ],
+        "mage": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "vampire": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "necromancer": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "hagraven": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "forsworn": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "beast": [
+          "heartlands.L4.urban_garden",
+          "heartlands.L10.lake_cult_caves"
+        ],
+        "ice": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "mine": [
+          "heartlands.L1.lakeshore_clay",
+          "heartlands.L1.ayleid_footings",
+          "heartlands.L10.lake_cult_caves"
+        ],
+        "grove": [
+          "heartlands.L4.lakeshore_oakwood"
+        ],
+        "smuggler": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "cave": [
+          "heartlands.L10.lake_cult_caves"
+        ],
+        "giant": [
+          "heartlands.L4.heath_and_grain"
+        ],
+        "dragon": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "tower": [
+          "heartlands.L10.ring_beneath_the_rings"
+        ],
+        "cabin": [
+          "heartlands.L6.imperial_city"
+        ],
+        "wreck": [
+          "heartlands.L5.capital_economy"
+        ]
+      }
+    },
+    "great_forest": {
+      "truth": "The Great Forest is the old oak and beech woodland west and north-west of Lake Rumare, the densest ground for ancient ruins in Cyrodiil with more caves and Ayleid sites per mile than any other county. Few people live under its boughs, and those who do are loggers, charcoal-burners, priory monks and hunters who keep close to the roads. Minotaurs and wild beasts roam the deep glades, necromancers fortify the elven vaults, and roadside Daedric statues draw secret cultists. It is Cyrodiil's wild middle: golden-green by day, avoided at night, full of things the capital would rather forget.",
+      "layers": {
+        "L1": [
+          {
+            "id": "forest_loam_hills",
+            "text": "rolling hills of deep forest loam",
+            "cites": []
+          },
+          {
+            "id": "ruin_dense_ridge",
+            "text": "limestone ridges riddled with Ayleid vaults",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "canopy_shade",
+            "text": "cool, dappled light under the high boughs",
+            "cites": [
+              "cyrodiil.L2.temperate_core",
+              "great_forest.L1.forest_loam_hills"
+            ]
+          },
+          {
+            "id": "forest_fog",
+            "text": "thick autumn and morning mists",
+            "cites": [
+              "cyrodiil.L2.lake_mist",
+              "great_forest.L1.forest_loam_hills"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "forest_brooks",
+            "text": "clear pebble streams under alder banks",
+            "cites": [
+              "cyrodiil.L3.tributaries",
+              "great_forest.L1.forest_loam_hills"
+            ]
+          },
+          {
+            "id": "silverfish_headwaters",
+            "text": "springs feeding the lake",
+            "cites": [
+              "cyrodiil.L3.tributaries",
+              "great_forest.L1.ruin_dense_ridge"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "old_oakwood",
+            "text": "ancient oaks, minotaurs and bears",
+            "cites": [
+              "cyrodiil.L4.oak_beech_forest",
+              "great_forest.L2.canopy_shade"
+            ]
+          },
+          {
+            "id": "beech_hanger",
+            "text": "steep beech slopes",
+            "cites": [
+              "great_forest.L1.ruin_dense_ridge",
+              "great_forest.L2.canopy_shade"
+            ]
+          },
+          {
+            "id": "fern_glade",
+            "text": "deer and wisps",
+            "cites": [
+              "great_forest.L3.forest_brooks"
+            ]
+          },
+          {
+            "id": "charcoal_clearing",
+            "text": "smoky coppiced rings",
+            "cites": [
+              "great_forest.L1.forest_loam_hills"
+            ]
+          },
+          {
+            "id": "unicorn_grove",
+            "text": "a warded glade where a last unicorn walks",
+            "cites": [
+              "great_forest.L1.forest_loam_hills",
+              "great_forest.L3.forest_brooks"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "timber",
+            "text": "oak felling for the capital",
+            "cites": [
+              "cyrodiil.L5.timber",
+              "great_forest.L4.old_oakwood"
+            ]
+          },
+          {
+            "id": "charcoal",
+            "text": "kiln-burning for city smithies",
+            "cites": [
+              "great_forest.L4.charcoal_clearing"
+            ]
+          },
+          {
+            "id": "hunting",
+            "text": "venison and boar pelts",
+            "cites": [
+              "great_forest.L4.fern_glade"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "road_hamlets",
+            "text": "Wawnet Inn and logging hamlets on the forest edge",
+            "cites": [
+              "cyrodiil.L6.radial_roads",
+              "great_forest.L5.timber"
+            ]
+          },
+          {
+            "id": "priory",
+            "text": "Weynon Priory on the Black Road",
+            "cites": [
+              "cyrodiil.L6.radial_roads",
+              "great_forest.L3.forest_brooks"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "woodfolk",
+            "text": "tenants, woodcutters and charcoal-burners",
+            "cites": [
+              "cyrodiil.L7.class_ladder",
+              "great_forest.L5.charcoal"
+            ]
+          },
+          {
+            "id": "outlaw_refuge",
+            "text": "highwaymen hiding two hundred paces off the road",
+            "cites": [
+              "great_forest.L4.old_oakwood",
+              "great_forest.L6.road_hamlets"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "forest_daedric_shrines",
+            "text": "hidden woodland statues tended by hedge-cults",
+            "cites": [
+              "cyrodiil.L8.daedric_shrines",
+              "great_forest.L4.old_oakwood"
+            ]
+          },
+          {
+            "id": "grove_spirits",
+            "text": "old forester taboos against hunting the warded glades",
+            "cites": [
+              "great_forest.L4.unicorn_grove"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "necromancer_war_front",
+            "text": "Mages Guild battlemages clashing with worm-cults in the forest ruins",
+            "cites": [
+              "cyrodiil.L9.guild_wars",
+              "great_forest.L8.forest_daedric_shrines"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "lich_ruins",
+            "text": "Vindasel, Fanacasecul, Nornalhorst, Silorn and Ceyatatar",
+            "cites": [
+              "cyrodiil.L10.ayleid_undercity",
+              "great_forest.L1.ruin_dense_ridge",
+              "great_forest.L9.necromancer_war_front"
+            ]
+          },
+          {
+            "id": "minotaur_lairs",
+            "text": "horn-carved grove dens",
+            "cites": [
+              "great_forest.L1.ruin_dense_ridge",
+              "great_forest.L4.old_oakwood"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "ayleid_heartwood",
+            "text": "the rival Ayleid city-states of the woodland",
+            "cites": [
+              "cyrodiil.L11.ayleid_era",
+              "great_forest.L10.lich_ruins"
+            ]
+          },
+          {
+            "id": "goblin_war_of_old",
+            "text": "abandoned siege-forts under the oaks",
+            "cites": [
+              "cyrodiil.L11.three_banner_war",
+              "great_forest.L1.ruin_dense_ridge"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "great_forest.L1.forest_loam_hills"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "great_forest.L5.charcoal"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "lumberjack": {
+          "weight": 3,
+          "why": [
+            "great_forest.L5.timber",
+            "great_forest.L4.old_oakwood"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "great_forest.L3.silverfish_headwaters"
+          ]
+        },
+        "hunter": {
+          "weight": 4,
+          "why": [
+            "great_forest.L5.hunting",
+            "great_forest.L4.old_oakwood",
+            "great_forest.L4.fern_glade"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "great_forest.L5.hunting"
+          ]
+        },
+        "fletcher": {
+          "weight": 3,
+          "why": [
+            "great_forest.L5.timber",
+            "great_forest.L5.hunting"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "great_forest.L6.road_hamlets",
+            "great_forest.L6.priory"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "great_forest.L6.road_hamlets",
+            "great_forest.L6.priory"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "great_forest.L6.road_hamlets"
+          ]
+        },
+        "server": {
+          "weight": 3,
+          "why": [
+            "great_forest.L6.road_hamlets",
+            "great_forest.L6.priory"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "great_forest.L8.forest_daedric_shrines"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "great_forest.L6.road_hamlets"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "great_forest.L6.road_hamlets"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "great_forest.L8.forest_daedric_shrines"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "great_forest.L9.necromancer_war_front"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "great_forest.L10.lich_ruins"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "great_forest.L6.road_hamlets"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "great_forest.L8.grove_spirits",
+            "great_forest.L11.goblin_war_of_old"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "great_forest.L7.woodfolk"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "great_forest.L5.timber"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "great_forest.L9.necromancer_war_front"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "ruin": [
+          "great_forest.L10.lich_ruins",
+          "great_forest.L8.forest_daedric_shrines"
+        ],
+        "dwemer": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "falmer": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "bandit": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "fort": [
+          "great_forest.L9.necromancer_war_front"
+        ],
+        "military": [
+          "great_forest.L9.necromancer_war_front"
+        ],
+        "mage": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "vampire": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "necromancer": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "hagraven": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "forsworn": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "beast": [
+          "great_forest.L4.old_oakwood",
+          "great_forest.L10.minotaur_lairs"
+        ],
+        "ice": [
+          "great_forest.L4.charcoal_clearing"
+        ],
+        "mine": [
+          "great_forest.L1.forest_loam_hills"
+        ],
+        "grove": [
+          "great_forest.L4.fern_glade",
+          "great_forest.L4.unicorn_grove",
+          "great_forest.L8.grove_spirits"
+        ],
+        "smuggler": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "cave": [
+          "great_forest.L4.old_oakwood"
+        ],
+        "giant": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "dragon": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "tower": [
+          "great_forest.L10.lich_ruins"
+        ],
+        "cabin": [
+          "great_forest.L6.road_hamlets"
+        ],
+        "wreck": [
+          "great_forest.L5.timber"
+        ]
+      }
+    },
+    "nibenay_basin": {
+      "truth": "The Nibenay Basin is the fertile eastern valley between the Niben and the Valus Mountains, where Nibenese tattoo-art, silk and spice markets, and mystic orders meet Dunmer settlers from across the border passes. Cheydinhal straddles the Corbolo River under willow trees, with a Dunmer count in its castle and the Dark Brotherhood's sanctuary hidden beneath an abandoned house. Farms and orchards fill the plain, the Knights of the Thorn play at chivalry, and border keeps watch the Morrowind road while surviving Mythic Dawn cells lurk in the Lake Arrius caverns.",
+      "layers": {
+        "L1": [
+          {
+            "id": "valus_foothills",
+            "text": "steep eastern ridges rising to the Morrowind border",
+            "cites": []
+          },
+          {
+            "id": "basin_silt",
+            "text": "rich alluvial soils",
+            "cites": []
+          },
+          {
+            "id": "foothill_gold",
+            "text": "gold-bearing quartz seams in the eastern hills",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "humid_east",
+            "text": "warm, humid growing seasons",
+            "cites": [
+              "cyrodiil.L2.east_wet",
+              "nibenay_basin.L1.basin_silt"
+            ]
+          },
+          {
+            "id": "valus_rain",
+            "text": "heavy orographic rains off the Valus",
+            "cites": [
+              "cyrodiil.L2.east_wet",
+              "nibenay_basin.L1.valus_foothills"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "corbolo",
+            "text": "the willow-lined river through Cheydinhal",
+            "cites": [
+              "cyrodiil.L3.tributaries",
+              "nibenay_basin.L2.valus_rain"
+            ]
+          },
+          {
+            "id": "lake_arrius",
+            "text": "a crater lake in the northern hills",
+            "cites": [
+              "nibenay_basin.L1.valus_foothills",
+              "nibenay_basin.L2.valus_rain"
+            ]
+          },
+          {
+            "id": "mill_weirs",
+            "text": "stone weirs powering the basin's mills",
+            "cites": [
+              "nibenay_basin.L1.basin_silt",
+              "nibenay_basin.L3.corbolo"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "orchard_plain",
+            "text": "apple and pear orchards and dye-flax fields",
+            "cites": [
+              "nibenay_basin.L1.basin_silt",
+              "nibenay_basin.L2.humid_east"
+            ]
+          },
+          {
+            "id": "wet_meadow",
+            "text": "lush river meadows",
+            "cites": [
+              "nibenay_basin.L3.corbolo"
+            ]
+          },
+          {
+            "id": "valus_pine",
+            "text": "mountain pine with bears and trolls",
+            "cites": [
+              "nibenay_basin.L1.valus_foothills"
+            ]
+          },
+          {
+            "id": "lake_arrius_reeds",
+            "text": "reed-ringed caldera shore",
+            "cites": [
+              "nibenay_basin.L3.lake_arrius"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "orchards_and_grain",
+            "text": "fruit, grain and Nibenese dye-flax",
+            "cites": [
+              "nibenay_basin.L1.basin_silt",
+              "nibenay_basin.L4.orchard_plain"
+            ]
+          },
+          {
+            "id": "corbolo_mills",
+            "text": "watermills and cloth fulling",
+            "cites": [
+              "nibenay_basin.L3.mill_weirs"
+            ]
+          },
+          {
+            "id": "morrowind_trade",
+            "text": "pass caravans trading Ebonheart goods",
+            "cites": [
+              "nibenay_basin.L1.valus_foothills"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "cheydinhal_on_the_corbolo",
+            "text": "the half-timbered willow city on two banks",
+            "cites": [
+              "nibenay_basin.L3.corbolo",
+              "nibenay_basin.L5.morrowind_trade"
+            ]
+          },
+          {
+            "id": "blue_road_villages",
+            "text": "Cropsford and Harlun's Watch",
+            "cites": [
+              "cyrodiil.L6.radial_roads",
+              "nibenay_basin.L5.orchards_and_grain"
+            ]
+          },
+          {
+            "id": "border_keeps",
+            "text": "watch-forts on the eastern passes",
+            "cites": [
+              "nibenay_basin.L1.valus_foothills",
+              "nibenay_basin.L5.morrowind_trade"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "dunmer_quarter",
+            "text": "Hlaalu and Redoran emigres in Cheydinhal",
+            "cites": [
+              "nibenay_basin.L5.morrowind_trade",
+              "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+            ]
+          },
+          {
+            "id": "nibenese_gentry",
+            "text": "silk-robed landowners",
+            "cites": [
+              "cyrodiil.L7.colovian_nibenese_split",
+              "nibenay_basin.L5.orchards_and_grain"
+            ]
+          },
+          {
+            "id": "knightly_dilettantes",
+            "text": "the Count's son and his Knights of the Thorn lodge",
+            "cites": [
+              "nibenay_basin.L6.cheydinhal_on_the_corbolo",
+              "nibenay_basin.L7.nibenese_gentry"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "arkay_chapel",
+            "text": "the Great Chapel of Arkay",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+            ]
+          },
+          {
+            "id": "dunmer_ancestor_rites",
+            "text": "household ancestor ash-shrines kept quietly beside the chapel",
+            "cites": [
+              "nibenay_basin.L7.dunmer_quarter"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "dunmer_count",
+            "text": "Count Indarys balancing Imperial courtiers and Dunmer kin",
+            "cites": [
+              "nibenay_basin.L7.dunmer_quarter",
+              "nibenay_basin.L7.nibenese_gentry"
+            ]
+          },
+          {
+            "id": "market_quarrel",
+            "text": "guild friction over eastern caravan tariffs",
+            "cites": [
+              "nibenay_basin.L5.morrowind_trade",
+              "nibenay_basin.L7.nibenese_gentry"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "sanctuary_under_the_house",
+            "text": "the Black Door beneath the abandoned eastern house",
+            "cites": [
+              "cyrodiil.L10.assassins_and_thieves",
+              "nibenay_basin.L1.basin_silt",
+              "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+            ]
+          },
+          {
+            "id": "arrius_cult_cells",
+            "text": "the Mythic Dawn shrine in Lake Arrius Caverns",
+            "cites": [
+              "cyrodiil.L10.cult_remnants",
+              "nibenay_basin.L1.valus_foothills",
+              "nibenay_basin.L3.lake_arrius"
+            ]
+          },
+          {
+            "id": "valus_keeps",
+            "text": "bandit-held mountain forts",
+            "cites": [
+              "cyrodiil.L10.abandoned_forts",
+              "nibenay_basin.L1.valus_foothills"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "alessian_gates_chim_ghartok",
+            "text": "ancient Alessian triumphal arches",
+            "cites": [
+              "cyrodiil.L11.alessian_revolt",
+              "nibenay_basin.L1.basin_silt"
+            ]
+          },
+          {
+            "id": "border_wars_with_morrowind",
+            "text": "the Reman and Septim campaigns over the Valus passes",
+            "cites": [
+              "cyrodiil.L11.reman_akaviri",
+              "nibenay_basin.L6.border_keeps"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "lumberjack": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L5.corbolo_mills",
+            "nibenay_basin.L4.valus_pine"
+          ]
+        },
+        "miller": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain",
+            "nibenay_basin.L5.corbolo_mills"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.corbolo_mills"
+          ]
+        },
+        "woodcutter": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L5.corbolo_mills",
+            "nibenay_basin.L4.valus_pine"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L3.lake_arrius",
+            "nibenay_basin.L4.lake_arrius_reeds"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L4.valus_pine"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L4.valus_pine"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L5.morrowind_trade",
+            "nibenay_basin.L6.blue_road_villages"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.morrowind_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.morrowind_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L6.blue_road_villages"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L6.blue_road_villages"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L8.arkay_chapel",
+            "nibenay_basin.L8.dunmer_ancestor_rites"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L9.dunmer_count"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L9.dunmer_count"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L7.dunmer_quarter"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L8.arkay_chapel"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "nibenay_basin.L9.dunmer_count",
+            "nibenay_basin.L6.blue_road_villages",
+            "nibenay_basin.L6.border_keeps"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L10.sanctuary_under_the_house"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L7.dunmer_quarter"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L7.dunmer_quarter"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "nibenay_basin.L6.blue_road_villages",
+            "nibenay_basin.L7.dunmer_quarter"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L7.dunmer_quarter"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L7.dunmer_quarter"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L8.dunmer_ancestor_rites"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.corbolo_mills"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L5.corbolo_mills"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L10.sanctuary_under_the_house"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "nibenay_basin.L10.sanctuary_under_the_house"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L5.orchards_and_grain"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "nibenay_basin.L9.dunmer_count"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "ruin": [
+          "nibenay_basin.L10.arrius_cult_cells",
+          "nibenay_basin.L8.dunmer_ancestor_rites"
+        ],
+        "dwemer": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "falmer": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "bandit": [
+          "nibenay_basin.L10.valus_keeps"
+        ],
+        "fort": [
+          "nibenay_basin.L10.valus_keeps",
+          "nibenay_basin.L6.border_keeps"
+        ],
+        "military": [
+          "nibenay_basin.L9.dunmer_count"
+        ],
+        "mage": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "vampire": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "necromancer": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "hagraven": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "forsworn": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "beast": [
+          "nibenay_basin.L4.valus_pine",
+          "nibenay_basin.L10.arrius_cult_cells"
+        ],
+        "ice": [
+          "nibenay_basin.L4.valus_pine"
+        ],
+        "mine": [
+          "nibenay_basin.L5.orchards_and_grain"
+        ],
+        "grove": [
+          "nibenay_basin.L4.valus_pine"
+        ],
+        "smuggler": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "cave": [
+          "nibenay_basin.L10.arrius_cult_cells",
+          "nibenay_basin.L10.valus_keeps",
+          "nibenay_basin.L1.foothill_gold"
+        ],
+        "giant": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "dragon": [
+          "nibenay_basin.L10.sanctuary_under_the_house"
+        ],
+        "tower": [
+          "nibenay_basin.L10.valus_keeps"
+        ],
+        "cabin": [
+          "nibenay_basin.L5.corbolo_mills"
+        ],
+        "wreck": [
+          "nibenay_basin.L5.orchards_and_grain"
+        ]
+      }
+    },
+    "west_weald": {
+      "truth": "The West Weald is warm, sheltered vineyard country south-west of the Great Forest, straddling the Gold Road between the capital and the Abecean coast. Skingrad sits on its limestone hill between two sheer castle bridges, its vintner houses locked in a generational feud over whose cellar presses the finest vintage. Count Hassildor is almost never seen by daylight, and the townsfolk prefer not to ask why. Ayleid vaults—Miscarcand chief among them—lie under the vines, and the Priory of the Nine stands in the southern hills. It is golden and wealthy, with cold things in its cellars.",
+      "layers": {
+        "L1": [
+          {
+            "id": "warm_limestone_slopes",
+            "text": "south-facing limestone hills and dry gullies",
+            "cites": []
+          },
+          {
+            "id": "deep_ayleid_vault",
+            "text": "the subterranean white-stone halls of Miscarcand",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sheltered_warmth",
+            "text": "long, sunny ripening seasons",
+            "cites": [
+              "cyrodiil.L2.west_dry",
+              "west_weald.L1.warm_limestone_slopes"
+            ]
+          },
+          {
+            "id": "harvest_haze",
+            "text": "golden autumn mist in the valleys",
+            "cites": [
+              "cyrodiil.L2.west_dry",
+              "west_weald.L1.warm_limestone_slopes"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "strid_headwaters",
+            "text": "upland streams running south toward Valenwood",
+            "cites": [
+              "cyrodiil.L3.tributaries",
+              "west_weald.L1.warm_limestone_slopes"
+            ]
+          },
+          {
+            "id": "estate_cisterns",
+            "text": "vintner estates hold the hill springs and ration water in dry years",
+            "cites": [
+              "cyrodiil.L3.who_holds_water",
+              "west_weald.L1.warm_limestone_slopes"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "vine_terrace",
+            "text": "terraced grape vines on stone walls",
+            "cites": [
+              "cyrodiil.L4.vine_cypress",
+              "west_weald.L2.sheltered_warmth"
+            ]
+          },
+          {
+            "id": "cypress_line",
+            "text": "cypress avenues along estate roads",
+            "cites": [
+              "west_weald.L1.warm_limestone_slopes",
+              "west_weald.L2.sheltered_warmth"
+            ]
+          },
+          {
+            "id": "oak_savanna",
+            "text": "open sunny pasture",
+            "cites": [
+              "west_weald.L2.sheltered_warmth"
+            ]
+          },
+          {
+            "id": "orchard",
+            "text": "tomato gardens and fruit trees",
+            "cites": [
+              "west_weald.L3.estate_cisterns"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "wine_estates",
+            "text": "the Surilie and Tamika vineyards",
+            "cites": [
+              "cyrodiil.L5.wine",
+              "west_weald.L4.vine_terrace"
+            ]
+          },
+          {
+            "id": "tomato_and_grain",
+            "text": "Skingrad's prized produce and sheep cheeses",
+            "cites": [
+              "west_weald.L4.orchard"
+            ]
+          },
+          {
+            "id": "gold_road_traffic",
+            "text": "merchant wagons between the capital and Anvil",
+            "cites": [
+              "cyrodiil.L6.radial_roads",
+              "west_weald.L1.warm_limestone_slopes"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "skingrad_hill",
+            "text": "the twin-walled city bridged by its castle ravine",
+            "cites": [
+              "west_weald.L1.warm_limestone_slopes",
+              "west_weald.L5.gold_road_traffic"
+            ]
+          },
+          {
+            "id": "estate_hamlets",
+            "text": "vintner villas and press-houses",
+            "cites": [
+              "west_weald.L5.wine_estates"
+            ]
+          },
+          {
+            "id": "priory_of_the_nine",
+            "text": "the knightly priory in the southern woods",
+            "cites": [
+              "west_weald.L3.strid_headwaters"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "vintner_aristocracy",
+            "text": "rival wine dynasties",
+            "cites": [
+              "cyrodiil.L7.class_ladder",
+              "west_weald.L5.wine_estates"
+            ]
+          },
+          {
+            "id": "field_hands",
+            "text": "seasonal pickers and cellar coopers",
+            "cites": [
+              "west_weald.L5.wine_estates"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "julianos_chapel",
+            "text": "the Great Chapel of Julianos",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "west_weald.L6.skingrad_hill"
+            ]
+          },
+          {
+            "id": "crusader_relic_cult",
+            "text": "pilgrims seeking the Knights of the Nine",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "west_weald.L6.priory_of_the_nine"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "wine_feud",
+            "text": "sabotage and price wars between the two great cellars",
+            "cites": [
+              "west_weald.L5.wine_estates",
+              "west_weald.L7.vintner_aristocracy"
+            ]
+          },
+          {
+            "id": "hidden_count",
+            "text": "the town shielding its nocturnal count from outsiders' questions",
+            "cites": [
+              "west_weald.L6.skingrad_hill",
+              "west_weald.L7.vintner_aristocracy"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "vampire_count",
+            "text": "the secret pact between Castle Skingrad and the county's bloodlines",
+            "cites": [
+              "west_weald.L1.warm_limestone_slopes",
+              "west_weald.L9.hidden_count"
+            ]
+          },
+          {
+            "id": "name_vault_under_the_vines",
+            "text": "Miscarcand and its Great Welkynd Stone",
+            "cites": [
+              "cyrodiil.L10.ayleid_undercity",
+              "west_weald.L1.deep_ayleid_vault"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "knightly_order_of_the_nine",
+            "text": "the founding and fall of the Knights of the Nine",
+            "cites": [
+              "cyrodiil.L11.septim_empire",
+              "west_weald.L8.crusader_relic_cult"
+            ]
+          },
+          {
+            "id": "ayleid_name_vaults",
+            "text": "the Ayleid kings buried under the vineyards",
+            "cites": [
+              "cyrodiil.L11.ayleid_era",
+              "west_weald.L10.name_vault_under_the_vines"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.gold_road_traffic"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.tomato_and_grain"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.tomato_and_grain"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.tomato_and_grain"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.gold_road_traffic"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.gold_road_traffic"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "west_weald.L5.gold_road_traffic"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "west_weald.L8.julianos_chapel"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "west_weald.L6.skingrad_hill"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "west_weald.L6.skingrad_hill"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "west_weald.L8.julianos_chapel"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "west_weald.L6.skingrad_hill"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "west_weald.L10.vampire_count"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "west_weald.L6.skingrad_hill"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "west_weald.L7.vintner_aristocracy"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "west_weald.L5.wine_estates"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "west_weald.L9.wine_feud"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "west_weald.L10.vampire_count"
+        ],
+        "ruin": [
+          "west_weald.L10.vampire_count"
+        ],
+        "dwemer": [
+          "west_weald.L10.vampire_count"
+        ],
+        "falmer": [
+          "west_weald.L10.vampire_count"
+        ],
+        "bandit": [
+          "west_weald.L5.gold_road_traffic"
+        ],
+        "fort": [
+          "west_weald.L9.wine_feud"
+        ],
+        "military": [
+          "west_weald.L9.wine_feud"
+        ],
+        "mage": [
+          "west_weald.L10.vampire_count"
+        ],
+        "vampire": [
+          "west_weald.L10.vampire_count"
+        ],
+        "necromancer": [
+          "west_weald.L10.vampire_count"
+        ],
+        "hagraven": [
+          "west_weald.L10.vampire_count"
+        ],
+        "forsworn": [
+          "west_weald.L10.vampire_count"
+        ],
+        "beast": [
+          "west_weald.L4.orchard"
+        ],
+        "ice": [
+          "west_weald.L10.vampire_count"
+        ],
+        "mine": [
+          "west_weald.L5.wine_estates"
+        ],
+        "grove": [
+          "west_weald.L4.vine_terrace"
+        ],
+        "smuggler": [
+          "west_weald.L10.vampire_count"
+        ],
+        "cave": [
+          "west_weald.L10.vampire_count"
+        ],
+        "giant": [
+          "west_weald.L10.vampire_count"
+        ],
+        "dragon": [
+          "west_weald.L10.vampire_count"
+        ],
+        "tower": [
+          "west_weald.L10.vampire_count"
+        ],
+        "cabin": [
+          "west_weald.L6.skingrad_hill"
+        ],
+        "wreck": [
+          "west_weald.L5.wine_estates"
+        ]
+      }
+    },
+    "gold_coast": {
+      "truth": "The Gold Coast is Cyrodiil's western shore on the Abecean Sea and the dry hills behind it. Anvil is a bright harbour of white stone walls and blue roofs, its fleet and merchant houses rich on western sea trade. Up the Gold Road, Kvatch stood on its commanding hill until a Great Gate opened beneath it in the Oblivion Crisis: the city burned and its survivors camp below the walls while rebuilding begins. Between them run the longest leg of the Gold Road, smugglers' sea-caves, wreckers, a haunted manor and vampire lairs that prey on lonely travellers.",
+      "layers": {
+        "L1": [
+          {
+            "id": "low_sea_cliffs",
+            "text": "pale coastal bluffs and sandy coves",
+            "cites": []
+          },
+          {
+            "id": "sea_caves",
+            "text": "tidal caverns under the headlands",
+            "cites": []
+          },
+          {
+            "id": "kvatch_hill",
+            "text": "a steep 60-block plateau commanding the Gold Road",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sea_fog",
+            "text": "salt mists rolling into the harbour",
+            "cites": [
+              "cyrodiil.L2.abecean_storms",
+              "gold_coast.L1.low_sea_cliffs"
+            ]
+          },
+          {
+            "id": "westerly_gales",
+            "text": "Abecean squalls driving ships onto the rocks",
+            "cites": [
+              "cyrodiil.L2.abecean_storms",
+              "gold_coast.L1.low_sea_cliffs"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "harbour_springs",
+            "text": "fresh springs feeding Anvil's docks and fountain",
+            "cites": [
+              "gold_coast.L1.low_sea_cliffs"
+            ]
+          },
+          {
+            "id": "kvatch_wells",
+            "text": "rock-cut hilltop wells fouled by ash during the burning",
+            "cites": [
+              "gold_coast.L1.kvatch_hill"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "coastal_scrub",
+            "text": "wind-bent olive and scrub",
+            "cites": [
+              "gold_coast.L1.low_sea_cliffs",
+              "gold_coast.L2.westerly_gales"
+            ]
+          },
+          {
+            "id": "cliff_grass",
+            "text": "golden coastal downs with mountain lions",
+            "cites": [
+              "gold_coast.L1.low_sea_cliffs"
+            ]
+          },
+          {
+            "id": "cove_beach",
+            "text": "land dreugh and mudcrabs on the sand",
+            "cites": [
+              "gold_coast.L1.low_sea_cliffs"
+            ]
+          },
+          {
+            "id": "burned_slope",
+            "text": "scorched earth round Kvatch",
+            "cites": [
+              "gold_coast.L1.kvatch_hill"
+            ]
+          },
+          {
+            "id": "strid_riverine",
+            "text": "the southern border gorge",
+            "cites": [
+              "cyrodiil.L3.tributaries",
+              "gold_coast.L1.low_sea_cliffs"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "anvil_shipping",
+            "text": "ocean trade with Hammerfell, Summerset and Yokuda",
+            "cites": [
+              "cyrodiil.L5.sea_trade",
+              "gold_coast.L3.harbour_springs"
+            ]
+          },
+          {
+            "id": "fishing",
+            "text": "coastal trawlers and wharves",
+            "cites": [
+              "gold_coast.L4.cove_beach"
+            ]
+          },
+          {
+            "id": "rebuild_trade",
+            "text": "masons, timber and stone hauled up to Kvatch",
+            "cites": [
+              "gold_coast.L1.kvatch_hill",
+              "gold_coast.L4.burned_slope"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "anvil_harbour",
+            "text": "the white-walled port city and its great lighthouse",
+            "cites": [
+              "gold_coast.L3.harbour_springs",
+              "gold_coast.L5.anvil_shipping"
+            ]
+          },
+          {
+            "id": "kvatch_on_the_hill",
+            "text": "the ruined hilltop seat under scaffolding",
+            "cites": [
+              "gold_coast.L1.kvatch_hill",
+              "gold_coast.L4.burned_slope"
+            ]
+          },
+          {
+            "id": "gold_road_inns",
+            "text": "Brina Cross and Gottshaw",
+            "cites": [
+              "cyrodiil.L6.inn_chain",
+              "gold_coast.L5.anvil_shipping"
+            ]
+          },
+          {
+            "id": "refugee_camp",
+            "text": "the tent town at the foot of Kvatch's road",
+            "cites": [
+              "gold_coast.L1.kvatch_hill",
+              "gold_coast.L5.rebuild_trade"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "merchant_wealth",
+            "text": "shipping magnates and guild factors",
+            "cites": [
+              "gold_coast.L5.anvil_shipping",
+              "gold_coast.L6.anvil_harbour"
+            ]
+          },
+          {
+            "id": "dock_labour",
+            "text": "sailors and stevedores on the quay",
+            "cites": [
+              "gold_coast.L5.fishing",
+              "gold_coast.L6.anvil_harbour"
+            ]
+          },
+          {
+            "id": "kvatch_refugees",
+            "text": "displaced citizens led by Savlian Matius",
+            "cites": [
+              "gold_coast.L6.refugee_camp"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "dibella_chapel",
+            "text": "the Great Chapel of Dibella in Anvil",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "gold_coast.L6.anvil_harbour"
+            ]
+          },
+          {
+            "id": "akatosh_chapel",
+            "text": "the surviving dome of Akatosh serving as Kvatch's field hospital and shrine",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "gold_coast.L6.kvatch_on_the_hill"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "kvatch_rebuild",
+            "text": "disputes over who funds the rebuilding and who holds the county signet",
+            "cites": [
+              "cyrodiil.L9.throne_empty",
+              "gold_coast.L7.kvatch_refugees"
+            ]
+          },
+          {
+            "id": "wreckers",
+            "text": "coastal gangs trying to douse Anvil's lighthouse",
+            "cites": [
+              "gold_coast.L2.westerly_gales",
+              "gold_coast.L5.anvil_shipping"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "smuggler_coves",
+            "text": "Dunbarrow Cove and pirate grottos under the cliffs",
+            "cites": [
+              "gold_coast.L1.sea_caves",
+              "gold_coast.L9.wreckers"
+            ]
+          },
+          {
+            "id": "haunted_manor",
+            "text": "Benirus Manor over its sealed lich-crypt",
+            "cites": [
+              "gold_coast.L1.low_sea_cliffs",
+              "gold_coast.L6.anvil_harbour"
+            ]
+          },
+          {
+            "id": "gate_remnant_under_kvatch",
+            "text": "smoking Daedric fissures beneath the burned plaza",
+            "cites": [
+              "cyrodiil.L9.gate_scars",
+              "gold_coast.L1.kvatch_hill",
+              "gold_coast.L4.burned_slope"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "kvatch_burned",
+            "text": "the night the Great Gate broke the city",
+            "cites": [
+              "cyrodiil.L11.oblivion_crisis",
+              "gold_coast.L10.gate_remnant_under_kvatch"
+            ]
+          },
+          {
+            "id": "old_pirate_ages",
+            "text": "the Gold Coast pirate kings and Red Sabre fleets",
+            "cites": [
+              "cyrodiil.L11.three_banner_war",
+              "gold_coast.L10.smuggler_coves"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "gold_coast.L5.fishing",
+            "gold_coast.L3.harbour_springs",
+            "gold_coast.L4.coastal_scrub"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L5.fishing"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "merchant": {
+          "weight": 4,
+          "why": [
+            "gold_coast.L5.anvil_shipping",
+            "gold_coast.L5.rebuild_trade",
+            "gold_coast.L6.anvil_harbour"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L5.anvil_shipping",
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L5.anvil_shipping",
+            "gold_coast.L5.rebuild_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "gold_coast.L6.anvil_harbour",
+            "gold_coast.L6.kvatch_on_the_hill",
+            "gold_coast.L6.gold_road_inns"
+          ]
+        },
+        "cook": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L5.fishing",
+            "gold_coast.L6.gold_road_inns"
+          ]
+        },
+        "server": {
+          "weight": 4,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill",
+            "gold_coast.L6.gold_road_inns",
+            "gold_coast.L6.refugee_camp"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L5.anvil_shipping"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L8.dibella_chapel",
+            "gold_coast.L8.akatosh_chapel"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L7.merchant_wealth"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L8.dibella_chapel"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L10.smuggler_coves"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L7.merchant_wealth"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L7.merchant_wealth"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill",
+            "gold_coast.L6.refugee_camp"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill",
+            "gold_coast.L6.refugee_camp"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "gold_coast.L6.kvatch_on_the_hill",
+            "gold_coast.L6.refugee_camp"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L11.old_pirate_ages"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L7.dock_labour"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L7.dock_labour"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L7.merchant_wealth"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L7.merchant_wealth"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "gold_coast.L7.merchant_wealth"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "gold_coast.L9.kvatch_rebuild"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "ruin": [
+          "gold_coast.L10.smuggler_coves",
+          "gold_coast.L8.akatosh_chapel"
+        ],
+        "dwemer": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "falmer": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "bandit": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "fort": [
+          "gold_coast.L9.kvatch_rebuild"
+        ],
+        "military": [
+          "gold_coast.L9.kvatch_rebuild"
+        ],
+        "mage": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "vampire": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "necromancer": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "hagraven": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "forsworn": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "beast": [
+          "gold_coast.L4.cliff_grass"
+        ],
+        "ice": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "mine": [
+          "gold_coast.L5.anvil_shipping"
+        ],
+        "grove": [
+          "gold_coast.L4.coastal_scrub"
+        ],
+        "smuggler": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "cave": [
+          "gold_coast.L10.smuggler_coves",
+          "gold_coast.L1.sea_caves"
+        ],
+        "giant": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "dragon": [
+          "gold_coast.L10.smuggler_coves"
+        ],
+        "tower": [
+          "gold_coast.L9.wreckers"
+        ],
+        "cabin": [
+          "gold_coast.L6.refugee_camp",
+          "gold_coast.L5.fishing"
+        ],
+        "wreck": [
+          "gold_coast.L1.low_sea_cliffs"
+        ]
+      }
+    },
+    "nibenay_valley": {
+      "truth": "The Nibenay Valley is the flat, wet and poor river country of the Lower Niben. Bravil is a crowded city of weathered plank houses built over mud canals and timber stilts beside the river, the poorest of the nine seats and the northern funnel for skooma smuggled up from Elsweyr. Its people trust luck more than the Watch and rub the statue of their Lucky Old Lady in the square for coin. The valley's riverbank caves and drowned Ayleid ruins shelter smugglers, necromancers and the sealed crypt where the Dark Brotherhood keeps its Night Mother.",
+      "layers": {
+        "L1": [
+          {
+            "id": "river_flats",
+            "text": "broad, low-gradient silt floodplains",
+            "cites": []
+          },
+          {
+            "id": "riverbank_caves",
+            "text": "wet mudstone and limestone caves cut by the river",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "humid_heat",
+            "text": "oppressive summer humidity",
+            "cites": [
+              "cyrodiil.L2.east_wet",
+              "nibenay_valley.L1.river_flats"
+            ]
+          },
+          {
+            "id": "river_fog",
+            "text": "dense fog blanketing the braided channels",
+            "cites": [
+              "cyrodiil.L2.lake_mist",
+              "nibenay_valley.L1.river_flats"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "lower_niben_braids",
+            "text": "wide river channels and shifting islands",
+            "cites": [
+              "cyrodiil.L3.niben",
+              "nibenay_valley.L1.river_flats"
+            ]
+          },
+          {
+            "id": "flood_meadows",
+            "text": "seasonally inundated banks",
+            "cites": [
+              "nibenay_valley.L1.river_flats",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          },
+          {
+            "id": "bravil_mud",
+            "text": "the city has no clean well, so the poor buy drinking water by the bucket",
+            "cites": [
+              "nibenay_valley.L1.river_flats",
+              "cyrodiil.L3.who_holds_water",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "reed_marsh",
+            "text": "tall reeds, nirnroot, mudcrabs and slaughterfish",
+            "cites": [
+              "cyrodiil.L4.riverine_reeds",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          },
+          {
+            "id": "flood_meadow",
+            "text": "wet sedge and willows",
+            "cites": [
+              "nibenay_valley.L3.flood_meadows"
+            ]
+          },
+          {
+            "id": "willow_carr",
+            "text": "tangled river woods",
+            "cites": [
+              "nibenay_valley.L2.river_fog",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          },
+          {
+            "id": "river_island",
+            "text": "wooded islets in the Niben",
+            "cites": [
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "river_labour",
+            "text": "barge hauling, timber rafting and ferrying",
+            "cites": [
+              "cyrodiil.L5.river_trade",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          },
+          {
+            "id": "skooma",
+            "text": "illicit moon-sugar and skooma traffic",
+            "cites": [
+              "cyrodiil.L5.skooma_smuggling",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          },
+          {
+            "id": "eel_and_reed",
+            "text": "eel traps and reed thatch",
+            "cites": [
+              "nibenay_valley.L4.reed_marsh"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "bravil_ferry_city",
+            "text": "plank-and-stilt tenements crowded along dirty canals",
+            "cites": [
+              "nibenay_valley.L3.lower_niben_braids",
+              "nibenay_valley.L5.river_labour"
+            ]
+          },
+          {
+            "id": "green_road_inns",
+            "text": "Faregyl and the Inn of Ill Omen along the highway",
+            "cites": [
+              "cyrodiil.L6.inn_chain",
+              "nibenay_valley.L1.river_flats"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "slum_city",
+            "text": "impoverished dockhands, Khajiit and Argonian barge-crews",
+            "cites": [
+              "cyrodiil.L7.class_ladder",
+              "nibenay_valley.L5.river_labour",
+              "nibenay_valley.L6.bravil_ferry_city"
+            ]
+          },
+          {
+            "id": "addiction",
+            "text": "skooma dens emptying pockets in the lower wards",
+            "cites": [
+              "nibenay_valley.L5.skooma",
+              "nibenay_valley.L7.slum_city"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "mara_chapel",
+            "text": "the Great Chapel of Mara",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "nibenay_valley.L6.bravil_ferry_city"
+            ]
+          },
+          {
+            "id": "lucky_old_lady",
+            "text": "the plaza statue rubbed for luck",
+            "cites": [
+              "nibenay_valley.L6.bravil_ferry_city",
+              "nibenay_valley.L7.slum_city"
+            ]
+          },
+          {
+            "id": "night_mother_crypt",
+            "text": "the secret vault beneath the statue",
+            "cites": [
+              "nibenay_valley.L6.bravil_ferry_city",
+              "nibenay_valley.L8.lucky_old_lady"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "corrupt_clerk",
+            "text": "harbour inspectors bribed to look away from night barges",
+            "cites": [
+              "nibenay_valley.L5.skooma",
+              "nibenay_valley.L7.addiction"
+            ]
+          },
+          {
+            "id": "elsweyr_gates",
+            "text": "smuggling trails across the Rimmen and Torval hills",
+            "cites": [
+              "cyrodiil.L9.border_pressure",
+              "nibenay_valley.L5.skooma"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "skooma_dens",
+            "text": "hidden boil-cellars and canal caches",
+            "cites": [
+              "nibenay_valley.L1.river_flats",
+              "nibenay_valley.L7.addiction",
+              "nibenay_valley.L9.corrupt_clerk"
+            ]
+          },
+          {
+            "id": "smuggler_caves",
+            "text": "river-mouth caves with boat slips",
+            "cites": [
+              "nibenay_valley.L1.riverbank_caves",
+              "nibenay_valley.L9.corrupt_clerk"
+            ]
+          },
+          {
+            "id": "assassins_mother_crypt",
+            "text": "the Listener's sanctum under the Lucky Old Lady",
+            "cites": [
+              "cyrodiil.L10.assassins_and_thieves",
+              "nibenay_valley.L1.river_flats",
+              "nibenay_valley.L8.night_mother_crypt"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "alessian_gates_altadoon_mnem",
+            "text": "weathered Alessian stone gates in the reeds",
+            "cites": [
+              "cyrodiil.L11.alessian_revolt",
+              "nibenay_valley.L1.river_flats"
+            ]
+          },
+          {
+            "id": "river_wars",
+            "text": "toll-chain wars between Bravil and Leyawiin",
+            "cites": [
+              "cyrodiil.L11.septim_empire",
+              "nibenay_valley.L3.lower_niben_braids"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L3.flood_meadows"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L3.flood_meadows"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "nibenay_valley.L5.river_labour",
+            "nibenay_valley.L4.willow_carr",
+            "nibenay_valley.L4.river_island"
+          ]
+        },
+        "miller": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "mill_hand": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "woodcutter": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "nibenay_valley.L3.flood_meadows",
+            "nibenay_valley.L4.reed_marsh"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L4.reed_marsh"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L4.reed_marsh"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L6.green_road_inns"
+          ]
+        },
+        "tailor": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L6.green_road_inns"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L6.green_road_inns"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L6.green_road_inns"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L8.mara_chapel"
+          ]
+        },
+        "jarl": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L6.bravil_ferry_city"
+          ]
+        },
+        "steward": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L6.bravil_ferry_city"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "court_wizard": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L8.mara_chapel"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L9.corrupt_clerk"
+          ]
+        },
+        "fence": {
+          "weight": 3,
+          "why": [
+            "nibenay_valley.L10.skooma_dens",
+            "nibenay_valley.L10.smuggler_caves"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "beggar": {
+          "weight": 3,
+          "why": [
+            "nibenay_valley.L7.slum_city",
+            "nibenay_valley.L6.bravil_ferry_city"
+          ]
+        },
+        "citizen": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L6.bravil_ferry_city"
+          ]
+        },
+        "housekeeper": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "nibenay_valley.L8.lucky_old_lady"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "nibenay_valley.L5.river_labour",
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "nibenay_valley.L5.river_labour",
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L7.slum_city"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L5.river_labour"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "nibenay_valley.L9.corrupt_clerk"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "ruin": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "dwemer": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "falmer": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "bandit": [
+          "nibenay_valley.L10.smuggler_caves"
+        ],
+        "fort": [
+          "nibenay_valley.L9.corrupt_clerk"
+        ],
+        "military": [
+          "nibenay_valley.L9.corrupt_clerk"
+        ],
+        "mage": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "vampire": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "necromancer": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "hagraven": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "forsworn": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "beast": [
+          "nibenay_valley.L10.skooma_dens",
+          "nibenay_valley.L10.smuggler_caves"
+        ],
+        "ice": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "mine": [
+          "nibenay_valley.L5.river_labour"
+        ],
+        "grove": [
+          "nibenay_valley.L4.reed_marsh"
+        ],
+        "smuggler": [
+          "nibenay_valley.L10.smuggler_caves"
+        ],
+        "cave": [
+          "nibenay_valley.L10.smuggler_caves",
+          "nibenay_valley.L1.riverbank_caves"
+        ],
+        "giant": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "dragon": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "tower": [
+          "nibenay_valley.L10.skooma_dens"
+        ],
+        "cabin": [
+          "nibenay_valley.L6.bravil_ferry_city"
+        ],
+        "wreck": [
+          "nibenay_valley.L5.river_labour"
+        ]
+      }
+    },
+    "blackwood": {
+      "truth": "Blackwood is hot, steaming swamp-forest where the Lower Niben meets Topal Bay on Cyrodiil's southern border with Black Marsh and Elsweyr. Leyawiin is a walled Imperial river-mouth city with Argonian and Khajiit shanties crowded outside its painted streets, and the home of the Blackwood Company, a mercenary outfit that has grown rich undercutting the Fighters Guild. Rumour says the company's men drink sap stolen from a marsh tree. Ayleid ruins sink into the peat, vampire covens and necromancers hide in the mangroves, and the border forts face an assertive Black Marsh.",
+      "layers": {
+        "L1": [
+          {
+            "id": "mangrove_mud",
+            "text": "coastal mudflats and brackish silt",
+            "cites": []
+          },
+          {
+            "id": "peat",
+            "text": "deep waterlogged peat bogs",
+            "cites": []
+          },
+          {
+            "id": "sinking_ruins",
+            "text": "Ayleid stone foundations subsiding into the mire",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "steam_heat",
+            "text": "year-round sub-tropical heat and mist",
+            "cites": [
+              "cyrodiil.L2.topal_heat",
+              "blackwood.L1.mangrove_mud"
+            ]
+          },
+          {
+            "id": "thunderstorms",
+            "text": "daily afternoon downpours off Topal Bay",
+            "cites": [
+              "cyrodiil.L2.topal_heat",
+              "blackwood.L1.peat"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "niben_mouth",
+            "text": "the wide estuary at Leyawiin",
+            "cites": [
+              "cyrodiil.L3.niben",
+              "blackwood.L1.mangrove_mud"
+            ]
+          },
+          {
+            "id": "panther_river",
+            "text": "dark eastern swamp river full of wrecks",
+            "cites": [
+              "cyrodiil.L3.tributaries",
+              "blackwood.L1.peat"
+            ]
+          },
+          {
+            "id": "brackish_tide",
+            "text": "salt tides pushing into the bayous",
+            "cites": [
+              "blackwood.L1.mangrove_mud",
+              "blackwood.L3.niben_mouth"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "mangrove",
+            "text": "stilt-root mangroves and land dreugh",
+            "cites": [
+              "cyrodiil.L4.mangrove_swamp",
+              "blackwood.L3.brackish_tide"
+            ]
+          },
+          {
+            "id": "cypress_swamp",
+            "text": "moss-hung cypress, giant snakes and wisps",
+            "cites": [
+              "blackwood.L1.peat",
+              "blackwood.L2.steam_heat"
+            ]
+          },
+          {
+            "id": "palm_hammock",
+            "text": "dry hummocks in the bog",
+            "cites": [
+              "blackwood.L1.mangrove_mud",
+              "blackwood.L2.steam_heat"
+            ]
+          },
+          {
+            "id": "brackish_flat",
+            "text": "mudcrabs and marsh reeds",
+            "cites": [
+              "blackwood.L3.brackish_tide"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "river_mouth_port",
+            "text": "Leyawiin's customs quay and coastal shipping",
+            "cites": [
+              "cyrodiil.L5.sea_trade",
+              "blackwood.L3.niben_mouth"
+            ]
+          },
+          {
+            "id": "mercenary_trade",
+            "text": "contract arms and bounty gold",
+            "cites": [
+              "blackwood.L3.niben_mouth",
+              "blackwood.L5.river_mouth_port"
+            ]
+          },
+          {
+            "id": "rice_and_reed",
+            "text": "wet-field rice and marsh herbs",
+            "cites": [
+              "blackwood.L1.peat",
+              "blackwood.L4.brackish_flat"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "leyawiin_at_the_mouth",
+            "text": "the brightly plastered river-fortress seat",
+            "cites": [
+              "blackwood.L3.niben_mouth",
+              "blackwood.L5.river_mouth_port"
+            ]
+          },
+          {
+            "id": "border_villages",
+            "text": "Water's Edge, Border Watch and Blankenmarch",
+            "cites": [
+              "blackwood.L1.peat",
+              "blackwood.L4.palm_hammock"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "imperial_core_vs_beastfolk_shanties",
+            "text": "noble manors inside the walls, Argonian and Khajiit quarters in the damp lanes",
+            "cites": [
+              "cyrodiil.L7.class_ladder",
+              "blackwood.L6.leyawiin_at_the_mouth"
+            ]
+          },
+          {
+            "id": "khajiit_border_village",
+            "text": "Border Watch on the western ridge",
+            "cites": [
+              "blackwood.L6.border_villages"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "zenithar_chapel",
+            "text": "the Great Chapel of Zenithar",
+            "cites": [
+              "cyrodiil.L8.the_nine",
+              "blackwood.L6.leyawiin_at_the_mouth"
+            ]
+          },
+          {
+            "id": "argonian_hist_reverence",
+            "text": "quiet Hist sap-veneration in the marsh villages",
+            "cites": [
+              "blackwood.L4.cypress_swamp",
+              "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "mercenary_company",
+            "text": "the Blackwood Company rivalling the Fighters Guild",
+            "cites": [
+              "cyrodiil.L9.guild_wars",
+              "blackwood.L5.mercenary_trade"
+            ]
+          },
+          {
+            "id": "marsh_border",
+            "text": "frontier forts facing An-Xileel scouts from Gideon",
+            "cites": [
+              "cyrodiil.L9.border_pressure",
+              "blackwood.L6.border_villages"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "stolen_sap",
+            "text": "the captured Hist tree in the Blackwood Company basement",
+            "cites": [
+              "blackwood.L4.cypress_swamp",
+              "blackwood.L9.mercenary_company"
+            ]
+          },
+          {
+            "id": "mangrove_vampires",
+            "text": "Deepscorn Hollow and Redwater Slough",
+            "cites": [
+              "blackwood.L1.mangrove_mud",
+              "blackwood.L4.mangrove"
+            ]
+          },
+          {
+            "id": "sunken_ayleid",
+            "text": "Nenalata and Malada half-drowned in peat",
+            "cites": [
+              "cyrodiil.L10.ayleid_undercity",
+              "blackwood.L1.sinking_ruins"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "blackwood_border_wars",
+            "text": "centuries of legion marches into the outer swamp",
+            "cites": [
+              "cyrodiil.L11.septim_empire",
+              "blackwood.L9.marsh_border"
+            ]
+          },
+          {
+            "id": "ayleid_marsh_retreat",
+            "text": "the last Ayleid king crowned in Nenalata",
+            "cites": [
+              "cyrodiil.L11.ayleid_era",
+              "blackwood.L10.sunken_ayleid"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "blackwood.L5.mercenary_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "fisher": {
+          "weight": 3,
+          "why": [
+            "blackwood.L5.river_mouth_port",
+            "blackwood.L4.brackish_flat"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "alchemist": {
+          "weight": 4,
+          "why": [
+            "blackwood.L5.rice_and_reed",
+            "blackwood.L4.cypress_swamp",
+            "blackwood.L4.brackish_flat"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "blackwood.L5.mercenary_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "blackwood.L5.mercenary_trade",
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "bookseller": {
+          "weight": 2,
+          "why": [
+            "blackwood.L5.mercenary_trade"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth",
+            "blackwood.L6.border_villages"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "priest": {
+          "weight": 1,
+          "why": [
+            "blackwood.L8.zenithar_chapel"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "blackwood.L8.zenithar_chapel"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "blackwood.L9.marsh_border",
+            "blackwood.L6.leyawiin_at_the_mouth",
+            "blackwood.L6.border_villages"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "blackwood.L10.stolen_sap"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth",
+            "blackwood.L6.border_villages",
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties",
+            "blackwood.L6.leyawiin_at_the_mouth"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "blackwood.L6.leyawiin_at_the_mouth"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "labourer": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "blackwood.L5.river_mouth_port"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "blackwood.L9.mercenary_company"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "blackwood.L11.ayleid_marsh_retreat"
+        ],
+        "ruin": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "dwemer": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "falmer": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "bandit": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "fort": [
+          "blackwood.L9.marsh_border",
+          "blackwood.L6.leyawiin_at_the_mouth",
+          "blackwood.L6.border_villages"
+        ],
+        "military": [
+          "blackwood.L9.marsh_border"
+        ],
+        "mage": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "vampire": [
+          "blackwood.L10.mangrove_vampires"
+        ],
+        "necromancer": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "hagraven": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "forsworn": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "beast": [
+          "blackwood.L4.mangrove"
+        ],
+        "ice": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "mine": [
+          "blackwood.L5.river_mouth_port"
+        ],
+        "grove": [
+          "blackwood.L4.mangrove"
+        ],
+        "smuggler": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "cave": [
+          "blackwood.L10.mangrove_vampires"
+        ],
+        "giant": [
+          "blackwood.L4.cypress_swamp"
+        ],
+        "dragon": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "tower": [
+          "blackwood.L10.stolen_sap"
+        ],
+        "cabin": [
+          "blackwood.L6.leyawiin_at_the_mouth"
+        ],
+        "wreck": [
+          "blackwood.L5.river_mouth_port"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "vineyard_terraces",
+      "b": "jerall_mountains.L4.snowfield",
+      "reason": "Permanent snowfields on the Jerall crest cannot sustain West Weald grape vines"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "ebony_mine_shaft",
+      "b": "blackwood.L1.mangrove_mud",
+      "reason": "Blackwood's coastal peat and mangrove mud have no hard-rock ebony seams"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "open_daedric_cathedral_in_city",
+      "b": "cyrodiil.L8.the_nine",
+      "reason": "Each of Cyrodiil's nine walled county seats centres on a cathedral of the Nine Divines; Daedric shrines stand only in the wild"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "dwemer_centurion",
+      "b": "cyrodiil.L10.ayleid_undercity",
+      "reason": "Cyrodiil's elder-race ruins are Ayleid white-stone vaults, not Dwemer steam-citadels"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L5.mining",
+        "cyrodiil.L1.ore_highlands"
+      ]
+    },
+    "smith": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L5.mining"
+      ]
+    },
+    "jeweler": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L5.mining"
+      ]
+    },
+    "farmer": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L5.grain_belt"
+      ]
+    },
+    "farmhand": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L5.grain_belt"
+      ]
+    },
+    "lumberjack": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L4.oak_beech_forest",
+        "cyrodiil.L4.highland_pasture"
+      ]
+    },
+    "miller": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L5.grain_belt",
+        "cyrodiil.L5.timber"
+      ]
+    },
+    "mill_hand": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L5.timber"
+      ]
+    },
+    "woodcutter": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L4.oak_beech_forest",
+        "cyrodiil.L4.highland_pasture"
+      ]
+    },
+    "fisher": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.sea_trade",
+        "cyrodiil.L3.lake_rumare",
+        "cyrodiil.L3.niben"
+      ]
+    },
+    "hunter": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L4.oak_beech_forest",
+        "cyrodiil.L4.highland_pasture"
+      ]
+    },
+    "butcher": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L5.grain_belt",
+        "cyrodiil.L5.herding"
+      ]
+    },
+    "fletcher": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.timber",
+        "cyrodiil.L4.highland_pasture",
+        "cyrodiil.L4.alpine_spruce"
+      ]
+    },
+    "alchemist": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L5.sea_trade"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.river_trade",
+        "cyrodiil.L5.sea_trade",
+        "cyrodiil.L6.radial_roads"
+      ]
+    },
+    "tailor": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L5.river_trade",
+        "cyrodiil.L5.sea_trade"
+      ]
+    },
+    "bookseller": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L5.river_trade",
+        "cyrodiil.L5.sea_trade",
+        "cyrodiil.L8.the_nine"
+      ]
+    },
+    "innkeeper": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L6.radial_roads",
+        "cyrodiil.L6.inn_chain",
+        "cyrodiil.L6.poor_places"
+      ]
+    },
+    "cook": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L6.inn_chain"
+      ]
+    },
+    "server": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L6.radial_roads",
+        "cyrodiil.L6.inn_chain"
+      ]
+    },
+    "bard": {
+      "weight": 1,
+      "why": [
+        "cyrodiil.L5.grain_belt"
+      ]
+    },
+    "priest": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L8.the_nine",
+        "cyrodiil.L8.wayshrines",
+        "cyrodiil.L8.daedric_shrines"
+      ]
+    },
+    "jarl": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L6.nine_cities",
+        "cyrodiil.L7.guilds_everywhere",
+        "cyrodiil.L9.throne_empty"
+      ]
+    },
+    "steward": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L6.nine_cities",
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere"
+      ]
+    },
+    "housecarl": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L7.guilds_everywhere"
+      ]
+    },
+    "court_wizard": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L7.guilds_everywhere"
+      ]
+    },
+    "mage": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L7.guilds_everywhere"
+      ]
+    },
+    "guard": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L9.border_pressure",
+        "cyrodiil.L6.busy_centres"
+      ]
+    },
+    "fence": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L10.assassins_and_thieves",
+        "cyrodiil.L5.skooma_smuggling"
+      ]
+    },
+    "prisoner": {
+      "weight": 2,
+      "why": [
+        "cyrodiil.L7.rule_of_law"
+      ]
+    },
+    "beggar": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere",
+        "cyrodiil.L6.poor_places"
+      ]
+    },
+    "citizen": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L6.poor_places",
+        "cyrodiil.L7.colovian_nibenese_split"
+      ]
+    },
+    "housekeeper": {
+      "weight": 1,
+      "why": [
+        "cyrodiil.L7.colovian_nibenese_split"
+      ]
+    },
+    "child": {
+      "weight": 1,
+      "why": [
+        "cyrodiil.L7.colovian_nibenese_split"
+      ]
+    },
+    "elder": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L7.colovian_nibenese_split",
+        "cyrodiil.L8.doomstones",
+        "cyrodiil.L11.ayleid_era"
+      ]
+    },
+    "labourer": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere"
+      ]
+    },
+    "worker": {
+      "weight": 3,
+      "why": [
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere"
+      ]
+    },
+    "guild_leader": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere",
+        "cyrodiil.L10.assassins_and_thieves"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere",
+        "cyrodiil.L10.assassins_and_thieves"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L7.class_ladder",
+        "cyrodiil.L7.guilds_everywhere",
+        "cyrodiil.L10.assassins_and_thieves"
+      ]
+    },
+    "survivor": {
+      "weight": 4,
+      "why": [
+        "cyrodiil.L9.throne_empty",
+        "cyrodiil.L9.gate_scars",
+        "cyrodiil.L6.poor_places"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "ruin": [
+      "cyrodiil.L10.ayleid_undercity",
+      "cyrodiil.L10.abandoned_forts",
+      "cyrodiil.L8.wayshrines"
+    ],
+    "dwemer": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "falmer": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "bandit": [
+      "cyrodiil.L10.abandoned_forts",
+      "cyrodiil.L10.road_bandits",
+      "cyrodiil.L5.skooma_smuggling"
+    ],
+    "fort": [
+      "cyrodiil.L9.border_pressure",
+      "cyrodiil.L10.cult_remnants",
+      "cyrodiil.L10.abandoned_forts"
+    ],
+    "military": [
+      "cyrodiil.L9.border_pressure"
+    ],
+    "mage": [
+      "cyrodiil.L10.ayleid_undercity",
+      "cyrodiil.L7.guilds_everywhere"
+    ],
+    "vampire": [
+      "cyrodiil.L10.abandoned_forts"
+    ],
+    "necromancer": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "hagraven": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "forsworn": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "beast": [
+      "cyrodiil.L4.riverine_reeds",
+      "cyrodiil.L10.cult_remnants"
+    ],
+    "ice": [
+      "cyrodiil.L10.ayleid_undercity"
+    ],
+    "mine": [
+      "cyrodiil.L5.timber",
+      "cyrodiil.L5.mining",
+      "cyrodiil.L1.ore_highlands"
+    ],
+    "grove": [
+      "cyrodiil.L4.highland_pasture",
+      "cyrodiil.L4.alpine_spruce",
+      "cyrodiil.L4.mangrove_swamp"
+    ],
+    "smuggler": [
+      "cyrodiil.L10.assassins_and_thieves",
+      "cyrodiil.L5.skooma_smuggling"
+    ],
+    "cave": [
+      "cyrodiil.L10.cult_remnants",
+      "cyrodiil.L10.abandoned_forts",
+      "cyrodiil.L10.road_bandits"
+    ],
+    "giant": [
+      "cyrodiil.L4.heath_and_grain"
+    ],
+    "dragon": [
+      "cyrodiil.L9.throne_empty"
+    ],
+    "tower": [
+      "cyrodiil.L10.abandoned_forts",
+      "cyrodiil.L10.road_bandits",
+      "cyrodiil.L3.who_holds_water"
+    ],
+    "cabin": [
+      "cyrodiil.L6.nine_cities"
+    ],
+    "wreck": [
+      "cyrodiil.L5.grain_belt"
+    ]
+  }
+}

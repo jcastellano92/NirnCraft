@@ -5,65 +5,756 @@
   "reach": 110,
   "radius": 110,
   "overlay": "wayrest",
-  "names": {"inn": "wayrest_silver_lantern", "store": "wayrest_quay_provisions", "smithy": "wayrest_anchor_and_hammer"},
+  "names": {
+    "inn": "wayrest_silver_lantern",
+    "store": "wayrest_quay_provisions",
+    "smithy": "wayrest_anchor_and_hammer"
+  },
   "innKey": "wayrest_silver_lantern",
-  "gates": [[0, 105], [105, 0], [-105, 0]],
-  "walls": [{"r": 105, "sides": 16, "h": 11, "gates": [0, 1.5708, -1.5708], "flags": ["major"]}],
+  "gates": [
+    [
+      0,
+      105
+    ],
+    [
+      105,
+      0
+    ],
+    [
+      -105,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 105,
+      "sides": 16,
+      "h": 11,
+      "gates": [
+        0,
+        1.5708,
+        -1.5708
+      ],
+      "flags": [
+        "major"
+      ]
+    }
+  ],
   "landmarks": [
-    {"id": "castle", "at": [0, -64], "size": [37, 29], "h": 34, "margin": 5},
-    {"id": "chain_tower", "at": [-66, 72], "size": [31, 11], "h": 28, "face": "S"}
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -64
+      ],
+      "size": [
+        37,
+        29
+      ],
+      "h": 34,
+      "margin": 5
+    },
+    {
+      "id": "chain_tower",
+      "at": [
+        -66,
+        72
+      ],
+      "size": [
+        31,
+        11
+      ],
+      "h": 28,
+      "face": "S"
+    }
   ],
   "buildings": [
-    {"kind": "tower", "at": [-28, -36], "size": [7, 7], "h": 26, "margin": 1},
-    {"kind": "tower", "at": [28, -36], "size": [7, 7], "h": 26, "margin": 1},
-    {"kind": "longhouse", "at": [-32, 62], "size": [13, 25], "face": "E", "name": "wayrest_merchant_guildhall", "flags": ["upper", "rich"]},
-    {"kind": "temple", "at": [42, -14], "size": [13, 19], "face": "W", "name": "wayrest_chapel_of_the_divines"},
-    {"kind": "barracks", "at": [-44, -22], "size": [9, 15], "face": "E"}
+    {
+      "kind": "tower",
+      "at": [
+        -28,
+        -36
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "h": 26,
+      "margin": 1,
+      "name": "wayrest_tower_1"
+    },
+    {
+      "kind": "tower",
+      "at": [
+        28,
+        -36
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "h": 26,
+      "margin": 1,
+      "name": "wayrest_tower_2"
+    },
+    {
+      "kind": "longhouse",
+      "at": [
+        -32,
+        62
+      ],
+      "size": [
+        13,
+        25
+      ],
+      "face": "E",
+      "name": "wayrest_merchant_guildhall",
+      "flags": [
+        "upper",
+        "rich"
+      ]
+    },
+    {
+      "kind": "temple",
+      "at": [
+        42,
+        -14
+      ],
+      "size": [
+        13,
+        19
+      ],
+      "face": "W",
+      "name": "wayrest_chapel_of_the_divines"
+    },
+    {
+      "kind": "barracks",
+      "at": [
+        -44,
+        -22
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "E",
+      "name": "wayrest_barracks_5"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        0,
+        -56
+      ],
+      "face": "south",
+      "name": "wayrest_castle_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "wealthy",
+      "at": [
+        -26,
+        22
+      ],
+      "face": "east",
+      "name": "wayrest_silver_lantern"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "wealthy",
+      "at": [
+        26,
+        22
+      ],
+      "face": "west",
+      "name": "wayrest_quay_provisions"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -34,
+        -12
+      ],
+      "face": "east",
+      "name": "wayrest_anchor_and_hammer"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -44,
+        -28
+      ],
+      "face": "east",
+      "name": "wayrest_mages_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        44,
+        -28
+      ],
+      "face": "west",
+      "name": "wayrest_fighters_guild"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -38,
+        -48
+      ],
+      "face": "south",
+      "name": "wayrest_gardner_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        38,
+        -48
+      ],
+      "face": "south",
+      "name": "wayrest_cumberland_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -54,
+        -18
+      ],
+      "face": "east",
+      "name": "wayrest_horley_townhouse"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        54,
+        -18
+      ],
+      "face": "west",
+      "name": "wayrest_morgiah_salon"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        18,
+        -22
+      ],
+      "face": "west",
+      "name": "wayrest_bjoulsae_bullion"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        -18,
+        -22
+      ],
+      "face": "east",
+      "name": "wayrest_chancery_scribes"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -48,
+        8
+      ],
+      "face": "east",
+      "name": "wayrest_fen_alembic"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "wealthy",
+      "at": [
+        48,
+        8
+      ],
+      "face": "west",
+      "name": "wayrest_velvet_and_vair"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "poor",
+      "at": [
+        -36,
+        48
+      ],
+      "face": "north",
+      "name": "wayrest_cloudy_dregs"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        36,
+        52
+      ],
+      "face": "north",
+      "name": "wayrest_customs_house"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "poor",
+      "at": [
+        -18,
+        62
+      ],
+      "face": "north",
+      "name": "wayrest_eel_pier"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        28,
+        -36
+      ],
+      "face": "west",
+      "name": "wayrest_zenithar_bourse"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -62,
+        -42
+      ],
+      "face": "east",
+      "name": "wayrest_necropolis_gate"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        0,
+        -82
+      ],
+      "face": "south",
+      "name": "wayrest_north_gate_mews"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        18,
+        62
+      ],
+      "face": "north",
+      "name": "wayrest_harbour_watch"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "at": [
+        -24,
+        -36
+      ],
+      "face": "east",
+      "name": "wayrest_corsair_factors"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 104], [-8, 86], [6, 66], [-4, 46], [0, 26], [0, -2], [0, -42]], "width": 5, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-104, 0], [-82, -8], [-60, 4], [-34, -6], [-12, 2], [0, -2]], "width": 5, "major": true, "tag": "cross"},
-    {"type": "path", "via": [[104, 0], [82, -8], [60, 4], [34, -6], [12, 2], [0, -2]], "width": 5, "major": true, "tag": "cross"},
-    {"type": "radial", "at": [0, 8], "spokes": 9, "r0": 24, "r1": 98, "wobble": 5, "offset": 0.17, "width": 3, "tag": "wheel",
-     "rings": [38, 64, 88], "ring_wobble": 4, "ring_width": 3, "ring_tag": "rim"},
-    {"type": "path", "via": [[-92, 84], [-60, 94], [-30, 86], [0, 92], [30, 86], [60, 94], [92, 84]], "width": 4, "major": true, "tag": "quay"},
-    {"type": "path", "via": [[-60, -50], [-44, -40], [-30, -46]], "width": 3, "tag": "rim"},
-    {"type": "path", "via": [[60, -50], [44, -40], [30, -46]], "width": 3, "tag": "rim"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          104
+        ],
+        [
+          -8,
+          86
+        ],
+        [
+          6,
+          66
+        ],
+        [
+          -4,
+          46
+        ],
+        [
+          0,
+          26
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -42
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -104,
+          0
+        ],
+        [
+          -82,
+          -8
+        ],
+        [
+          -60,
+          4
+        ],
+        [
+          -34,
+          -6
+        ],
+        [
+          -12,
+          2
+        ],
+        [
+          0,
+          -2
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          104,
+          0
+        ],
+        [
+          82,
+          -8
+        ],
+        [
+          60,
+          4
+        ],
+        [
+          34,
+          -6
+        ],
+        [
+          12,
+          2
+        ],
+        [
+          0,
+          -2
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "radial",
+      "at": [
+        0,
+        8
+      ],
+      "spokes": 9,
+      "r0": 24,
+      "r1": 98,
+      "wobble": 5,
+      "offset": 0.17,
+      "width": 3,
+      "tag": "wheel",
+      "rings": [
+        38,
+        64,
+        88
+      ],
+      "ring_wobble": 4,
+      "ring_width": 3,
+      "ring_tag": "rim"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -92,
+          84
+        ],
+        [
+          -60,
+          94
+        ],
+        [
+          -30,
+          86
+        ],
+        [
+          0,
+          92
+        ],
+        [
+          30,
+          86
+        ],
+        [
+          60,
+          94
+        ],
+        [
+          92,
+          84
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -60,
+          -50
+        ],
+        [
+          -44,
+          -40
+        ],
+        [
+          -30,
+          -46
+        ]
+      ],
+      "width": 3,
+      "tag": "rim"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          60,
+          -50
+        ],
+        [
+          44,
+          -40
+        ],
+        [
+          30,
+          -46
+        ]
+      ],
+      "width": 3,
+      "tag": "rim"
+    }
   ],
   "plazas": [
-    {"at": [0, 30], "size": 17, "variant": 1, "stalls": 6},
-    {"at": [60, 74], "size": 11, "variant": 3, "name": "wayrest_ward_quay"}
+    {
+      "at": [
+        0,
+        30
+      ],
+      "size": 17,
+      "variant": 1,
+      "stalls": 6
+    },
+    {
+      "at": [
+        60,
+        74
+      ],
+      "size": 11,
+      "variant": 3,
+      "name": "wayrest_ward_quay"
+    }
   ],
   "zones": [
-    {"at": [0, -62], "r": 36, "zone": "noble"},
-    {"at": [0, 30], "r": 26, "zone": "centre"},
-    {"at": [66, 64], "r": 26, "zone": "craft"},
-    {"at": [-72, 40], "r": 26, "zone": "poor"}
+    {
+      "at": [
+        0,
+        -62
+      ],
+      "r": 36,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        30
+      ],
+      "r": 26,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        66,
+        64
+      ],
+      "r": 26,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -72,
+        40
+      ],
+      "r": 26,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 100, "target": 0.6},
+  "fabric": {
+    "radius": 100,
+    "target": 0.6
+  },
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "wayrest_silver_lantern", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "wayrest_anchor_and_hammer", "on": "quay"},
-    {"kind": "store", "count": 3, "name": "wayrest_quay_provisions", "on": "quay"},
-    {"kind": "alchemist", "on": "cross"},
-    {"kind": "manor", "count": 4, "flags": ["upper", "rich"], "on": "rim"}
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "wayrest_silver_lantern",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "wayrest_anchor_and_hammer",
+      "on": "quay"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "name": "wayrest_quay_provisions",
+      "on": "quay"
+    },
+    {
+      "kind": "alchemist",
+      "on": "cross"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "rim"
+    }
   ],
   "features": [
-    {"type": "fountain", "where": "square"},
-    {"type": "great_tree", "theme": "oak", "where": "free"},
-    {"type": "great_tree", "theme": "birch", "where": "free"},
-    {"type": "basin", "where": "edge"},
-    {"type": "bell_tower", "where": "free"},
-    {"type": "statue", "theme": "divine:stendarr", "where": "square"},
-    {"type": "statue", "theme": "divine:julianos", "where": "free"},
-    {"type": "shrine", "theme": "divine:mara", "count": 2, "where": "street", "tag": "cross"},
-    {"type": "memorial", "count": 2, "where": "free"},
-    {"type": "banners", "count": 4, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
-    {"type": "market", "where": "free"},
-    {"type": "garden", "count": 2, "where": "free"},
-    {"type": "waterwheel", "where": "edge"},
-    {"type": "tree_row", "where": "street", "tag": "cross"}
+    {
+      "type": "fountain",
+      "where": "square"
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "birch",
+      "where": "free"
+    },
+    {
+      "type": "basin",
+      "where": "edge"
+    },
+    {
+      "type": "bell_tower",
+      "where": "free"
+    },
+    {
+      "type": "statue",
+      "theme": "divine:stendarr",
+      "where": "square"
+    },
+    {
+      "type": "statue",
+      "theme": "divine:julianos",
+      "where": "free"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "count": 2,
+      "where": "street",
+      "tag": "cross"
+    },
+    {
+      "type": "memorial",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 4,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "garden",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "waterwheel",
+      "where": "edge"
+    },
+    {
+      "type": "tree_row",
+      "where": "street",
+      "tag": "cross"
+    }
   ],
   "titles": {
     "wayrest_silver_lantern": "The Silver Lantern",
@@ -71,6 +762,28 @@
     "wayrest_anchor_and_hammer": "Anchor and Hammer",
     "wayrest_merchant_guildhall": "Merchants' Guildhall",
     "wayrest_chapel_of_the_divines": "Chapel of the Divines",
-    "wayrest_ward_quay": "Chain Quay"
+    "wayrest_ward_quay": "Chain Quay",
+    "wayrest_castle_keep": "Castle Wayrest Keep",
+    "wayrest_mages_guild": "Wayrest Mages Guildhall",
+    "wayrest_fighters_guild": "Wayrest Fighters Guildhall",
+    "wayrest_gardner_house": "House Gardner Counting-Hall",
+    "wayrest_cumberland_manor": "House Cumberland Manor",
+    "wayrest_horley_townhouse": "House Horley Townhouse",
+    "wayrest_morgiah_salon": "Lady Morgiah's Salon",
+    "wayrest_bjoulsae_bullion": "Bjoulsae Bullion Exchange",
+    "wayrest_chancery_scribes": "Wayrest Chancery & Folio House",
+    "wayrest_fen_alembic": "The Salt-Marsh Alembic",
+    "wayrest_velvet_and_vair": "Velvet and Vair Clothiers",
+    "wayrest_cloudy_dregs": "The Cloudy Dregs Inn",
+    "wayrest_customs_house": "Bjoulsae Customs & Bonded Vault",
+    "wayrest_eel_pier": "Bjoulsae Eel & Herring Wharf",
+    "wayrest_zenithar_bourse": "Chapel-Bourse of Zenithar",
+    "wayrest_necropolis_gate": "Wayrest Catacombs Chapel",
+    "wayrest_north_gate_mews": "Royal Post & Coach Mews",
+    "wayrest_harbour_watch": "Chain-Boom Admiralty Watch",
+    "wayrest_corsair_factors": "Pontanian Factor's House",
+    "wayrest_tower_1": "Wayrest Tower 1",
+    "wayrest_tower_2": "Wayrest Tower 2",
+    "wayrest_barracks_5": "Wayrest Barracks 5"
   }
 }

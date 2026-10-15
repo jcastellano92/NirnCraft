@@ -85,6 +85,8 @@ public final class SurvivalRegistry {
 
     public static final RegistryObject<BlockEntityType<DepletedOreBlockEntity>> DEPLETED_ORE_ENTITY = BLOCK_ENTITIES.register("depleted_ore",
             () -> BlockEntityType.Builder.of(DepletedOreBlockEntity::new, DEPLETED_ORE.get()).build(null));
+    public static final RegistryObject<BlockEntityType<BedrollBlock.Entity>> BEDROLL_ENTITY = BLOCK_ENTITIES.register("bedroll",
+            () -> BlockEntityType.Builder.of(BedrollBlock.Entity::new, BEDROLL.get()).build(null));
 
     public static final RegistryObject<MenuType<CookingMenu>> COOKING_MENU = MENUS.register("cooking_pot",
             () -> IForgeMenuType.create(CookingMenu::fromNetwork));

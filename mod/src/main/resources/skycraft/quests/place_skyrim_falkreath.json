@@ -1,536 +1,1597 @@
 {
- "line": "place_skyrim_falkreath",
- "category": "side",
- "npcs": [
-  {"id": "pln_skyrim_falkreath_ingrid", "name": "Ingrid Stonehand", "role": "citizen", "place": "falkreath", "offset": [6, -4],
-   "female": true, "greet": "Mind the fresh earth. Some of it's fresher than it ought to be."},
-  {"id": "pln_skyrim_falkreath_hilde", "name": "Sister Hilde", "role": "priest", "place": "falkreath", "offset": [-5, 6],
-   "female": true, "greet": "Arkay keep you. Have you come to light a candle, or to ask why so many are already lit?"},
-  {"id": "pln_skyrim_falkreath_eirik", "name": "Bailiff Eirik", "role": "steward", "place": "falkreath", "offset": [2, 7],
-   "female": false, "greet": "If it's about bandits, the Jarl knows. If it's about the graveyard, the Jarl knows. The Jarl knows everything and does nothing."},
-  {"id": "pln_skyrim_falkreath_bersi", "name": "Bersi the Carpenter", "role": "citizen", "place": "falkreath", "offset": [-7, -3],
-   "female": false, "greet": "Coffins, cradles, doors. Mostly coffins, this being Falkreath."},
-  {"id": "pln_skyrim_falkreath_calvus", "name": "Calvus Aterius", "role": "scholar", "place": "falkreath", "offset": [7, 2],
-   "female": false, "greet": "Ah, a traveller. Tell me, have you seen any large holes in the ground lately? Holes of a draconic character?"},
-  {"id": "pln_skyrim_falkreath_brynja", "name": "Brynja", "role": "lumberjack", "place": "half_moon_mill", "offset": [3, -2],
-   "female": true, "greet": "Mind the saw. It doesn't care who you are."},
-  {"id": "pln_skyrim_falkreath_ylva", "name": "Ylva of Helgen", "role": "citizen", "place": "riverwood", "offset": [4, 5],
-   "female": true, "greet": "You came up the Helgen road? Is there... is there anything left?"}
- ],
- "relics": [
-  {"id": "plr_falkreath_burial_ring", "name": "Hrofar's Silver Ring", "desc": "A plain silver band, worn thin on one side. Grave earth is still caught in the setting."},
-  {"id": "plr_helgen_strongbox", "name": "Torolf's Iron Strongbox", "desc": "A small, soot-blackened box with a smith's mark on the lid. Something inside clinks softly."},
-  {"id": "plr_lost_echo_cave_lute", "name": "Edda's Lute", "desc": "A fine lute with the crest of the Bards College inlaid in pale wood. One string is broken."},
-  {"id": "plr_darkshade_journal", "name": "Ardwen's Receipt Book", "desc": "A leather book of herbal receipts, its pages stained green and smelling strongly of nirnroot."},
-  {"id": "plr_arkngthamz_lens", "name": "Pell's Tonal Lens", "desc": "A disc of ground crystal set in brass. Held to the ear, it hums very faintly."},
-  {"id": "plr_sunderstone_gorge_seal", "name": "Seal-Stone of Arkay", "desc": "A cracked slab of grey stone carved with the circle of Arkay. It is heavier than it looks."},
-  {"id": "plr_bilegulch_mine_pick", "name": "Old Mother Bilek's Pick", "desc": "An Orcish mining pick with a haft worn smooth by generations of hands."},
-  {"id": "plr_moss_mother_cavern_bow", "name": "Hroa's Ash Bow", "desc": "A pale ash bow with a raven carved on the grip. Moss has begun to grow along its limbs."},
-  {"id": "plr_embershard_mine_paychest", "name": "Embershard Paychest", "desc": "A heavy iron chest stamped with the Embershard mark. The miners' wages are still inside."},
-  {"id": "plr_bannermist_tower_lamp", "name": "Bannermist Signal Lamp", "desc": "A shuttered lantern with a hinged hood, made for sending signals in the dark."},
-  {"id": "plr_knifepoint_ridge_knife", "name": "Hjolfrid's Knife", "desc": "A long hunting knife with a scorched pine handle. The blade has been kept very sharp."},
-  {"id": "plr_orphan_rock_charm", "name": "Birchwood Cradle Charm", "desc": "A tiny cradle carved from birch, hung on a cord darkened with age."},
-  {"id": "plr_south_shriekwind_bastion_beads", "name": "Asta's Prayer Beads", "desc": "A string of wooden beads carved with the circle of Arkay, worn smooth by worried fingers."},
-  {"id": "plr_pinewatch_lockbox", "name": "Gray Pine Lockbox", "desc": "A locked box from Gray Pine Goods. Inside, a ledger of debts that half of Falkreath would like to burn."},
-  {"id": "plr_greywater_grotto_satchel", "name": "Ragnhild's Herb Satchel", "desc": "A web-wrapped satchel full of pale white cap mushrooms, still faintly warm from the spring."},
-  {"id": "plr_fort_neugrad_coffer", "name": "Legion Payroll Coffer", "desc": "A sealed iron coffer bearing the Legion's stamp. It holds a garrison's wages."},
-  {"id": "plr_halldirs_cairn_pendant", "name": "Signy's Pendant", "desc": "A small bronze hammer of Zenithar on a leather thong, cold as ice to the touch."},
-  {"id": "plr_southfringe_sanctum_ledger", "name": "Velmira's Ledger of Names", "desc": "A black ledger listing the dead taken from the Falkreath graveyard, and what each was made to do."},
-  {"id": "plr_bloodlet_throne_roll", "name": "The Red Tithe Roll", "desc": "A long roll of vellum listing travellers taken on the Pale Pass road, in an elegant, unhurried hand."},
-  {"id": "plr_the_lady_stone_comb", "name": "Ingrun's Wedding Comb", "desc": "A bone comb inlaid with mother-of-pearl, green with lake weed but unbroken."},
-  {"id": "plr_dragon_mound_evergreen_grove_satchel", "name": "Ennis's Survey Satchel", "desc": "A scholar's satchel stuffed with drawings of dragon mounds, measurements, and an empty honey jar."}
- ],
- "quests": [
-  {
-   "id": "pl_falkreath",
-   "title": "Arkay's Short Count",
-   "region": "skyrim/falkreath",
-   "start": "npc:pln_skyrim_falkreath_ingrid",
-   "offer": "You look like you haven't slept in days.",
-   "pitch": "Three graves opened since Hearthfire, and two of them empty. The boot prints go northwest, up the old road to the Roadside Ruins. I've a shovel and a grudge, but you've a sword. Find who's taking them. And Hrofar's ring, if you can. His wife wants it back.",
-   "desc": "Ingrid, the gravedigger of Falkreath, says someone is stealing the dead from the town graveyard. Their tracks lead to the Roadside Ruins northwest of town.",
-   "objectives": [
-    {"type": "go", "place": "roadside_ruins", "text": "Follow the grave robber's trail to the Roadside Ruins"},
-    {"type": "kill", "place": "roadside_ruins", "placement": "structure", "text": "Stop the Lantern-Bearer",
-     "spawn": [{"type": "skycraft:necromancer", "name": "Corvus the Lantern-Bearer", "target": true, "boss": true, "hp": 1.3},
-               {"type": "minecraft:zombie", "count": 2}],
-     "journal": "The necromancer Corvus is dead. His journal speaks of a Mistress at a place called Southfringe Sanctum."},
-    {"type": "retrieve", "place": "roadside_ruins", "placement": "structure", "relic": "plr_falkreath_burial_ring", "text": "Recover Hrofar's silver ring"},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_ingrid", "relic": "plr_falkreath_burial_ring", "text": "Bring the ring to Ingrid in Falkreath",
-     "topic": "The grave robber is dead. Here is Hrofar's ring.",
-     "reply": "A necromancer. Of course. I'll put the ring back on Hrofar's hand myself, once I've found the rest of Hrofar. If there's a Mistress behind him, though... this isn't over, is it?"}
-   ],
-   "rewards": {"gold": 150, "items": ["skycraft:silver_ring"]},
-   "outro": "Ingrid sleeps with her shovel across her knees still, but now she sleeps."
-  },
-  {
-   "id": "pl_helgen",
-   "title": "What the Fire Left",
-   "region": "skyrim/falkreath",
-   "start": "npc:pln_skyrim_falkreath_ylva",
-   "offer": "You're from Helgen?",
-   "pitch": "My father was the smith by the north gate. He kept a strongbox under the forge floor with my mother's ring in it. I can't go back there. I've tried; I get as far as the bridge and my legs stop. Scavengers are picking the town clean. Please, before they find it.",
-   "desc": "Ylva, a refugee from Helgen living in Riverwood, asks you to recover her father's strongbox from beneath his forge before looters take it.",
-   "objectives": [
-    {"type": "go", "place": "helgen", "text": "Go to the ruins of Helgen"},
-    {"type": "retrieve", "place": "helgen", "relic": "plr_helgen_strongbox", "text": "Find Torolf's strongbox under the smithy by the north gate",
-     "spawn": [{"type": "skycraft:bandit", "name": "Karl the Scavenger", "count": 1}, {"type": "skycraft:skeever", "count": 3}],
-     "journal": "The scavengers were already prying at the forge stones. The box is heavy and still warm from the ash."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_ylva", "relic": "plr_helgen_strongbox", "text": "Bring the strongbox to Ylva in Riverwood",
-     "topic": "I found your father's strongbox.",
-     "reply": "It's his mark on the lid. He made the lock himself. Here's Mother's ring... and the wedding money. He saved it for years, and I'm not even promised to anyone. Take a share. He'd want you paid. He always paid his debts."}
-   ],
-   "rewards": {"gold": 120},
-   "outro": "Ylva wears her mother's ring on a cord around her neck, and she has stopped asking travellers about Helgen."
-  },
-  {
-   "id": "pl_lakeview",
-   "title": "Where Money Sleeps",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "The Lake-Holms left that hill plot in a hurry. Gunnar always said he didn't trust Gray Pine Goods with his savings. If he didn't keep it in the house, he kept it in the ground.",
-   "desc": "Gunnar Lake-Holm buried his family's savings under two leaning pines downhill of the Lakeview plot, toward the water, before he fled.",
-   "objectives": [
-    {"type": "retrieve", "place": "lakeview", "offset": [22, -16], "item": "skycraft:gold_ring", "text": "Dig under the two leaning pines downhill of Lakeview",
-     "journal": "The pot was where Gunnar said: two pines leaning together, the earth soft beneath them. Grandmother's gold ring lies on top of the coins."}
-   ],
-   "rewards": {"gold": 90},
-   "outro": "Gunnar never came back for it. Perhaps he knew he wouldn't."
-  },
-  {
-   "id": "pl_lost_echo_cave",
-   "title": "The Song That Came Back",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "requires": ["level:12"],
-   "pitch": "A student from the Bards College went into Lost Echo Cave to compose. Her lute's still down there, they say. The College would pay to have it home, and so would her mother.",
-   "desc": "Edda Fairvoice, a student bard, left her lute wedged in the rocks of Lost Echo Cave while hiding from blind hunters that track by sound.",
-   "objectives": [
-    {"type": "go", "place": "lost_echo_cave", "text": "Enter Lost Echo Cave"},
-    {"type": "retrieve", "place": "lost_echo_cave", "placement": "structure", "relic": "plr_lost_echo_cave_lute", "text": "Find Edda's lute",
-     "spawn": [{"type": "skycraft:falmer", "count": 3}],
-     "journal": "The lute was where Edda left it. Her last candle was beside it, burned down to nothing."},
-    {"type": "kill", "place": "lost_echo_cave", "placement": "structure", "text": "Silence the Listener",
-     "spawn": [{"type": "skycraft:falmer", "name": "The Listener", "target": true, "boss": true, "hp": 1.8}]}
-   ],
-   "rewards": {"gold": 240, "items": ["skycraft:elven_dagger"]},
-   "outro": "The cave is quieter now. Somewhere in Solitude, the Bards College will want Edda's lute back on its wall."
-  },
-  {
-   "id": "pl_robbers_gorge",
-   "title": "Cutting the Rope",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "The folk at Crabber's Shanty can't get their catch downriver without paying Brenna's toll in Robber's Gorge. One in five, and their boots if they argue. Somebody ought to cut that rope.",
-   "desc": "Bandits led by Brenna Toll-Taker have strung a rope across the river at Robber's Gorge and tax everyone who passes.",
-   "objectives": [
-    {"type": "go", "place": "robbers_gorge", "text": "Go to Robber's Gorge"},
-    {"type": "clear", "place": "robbers_gorge", "text": "Drive off the toll-takers",
-     "spawn": [{"type": "skycraft:bandit", "count": 4}]},
-    {"type": "kill", "place": "robbers_gorge", "text": "Defeat Brenna Toll-Taker",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Brenna Toll-Taker", "target": true, "boss": true, "hp": 1.4}],
-     "journal": "The toll rope is cut. Hroald of Crabber's Shanty can have his hat back."}
-   ],
-   "rewards": {"gold": 180, "items": ["minecraft:arrow*16"]},
-   "outro": "The river runs free again, and the fishers no longer cross barefoot."
-  },
-  {
-   "id": "pl_darkshade",
-   "title": "Receipts in the Moss",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "An herbalist ran out of Darkshade with spriggans on his heels and left his receipt book behind. Twenty years of potion-craft in that book. He'll pay, if you can face the thing with the antlers.",
-   "desc": "The herbalist Ardwen Leafwright fled Darkshade and left behind his book of alchemical receipts. An ancient spriggan guards the inner pool.",
-   "objectives": [
-    {"type": "go", "place": "darkshade", "text": "Enter Darkshade"},
-    {"type": "kill", "place": "darkshade", "placement": "structure", "text": "Face the Thornfather at the inner pool",
-     "spawn": [{"type": "skycraft:spriggan", "name": "The Thornfather", "target": true, "boss": true, "hp": 1.6},
-               {"type": "skycraft:spriggan", "count": 1}]},
-    {"type": "retrieve", "place": "darkshade", "placement": "structure", "relic": "plr_darkshade_journal", "text": "Recover Ardwen's receipt book",
-     "journal": "The receipt book was lying by the pool, open, as if something had been reading it."}
-   ],
-   "rewards": {"gold": 150, "items": ["skycraft:soul_gem_lesser"]},
-   "outro": "Ardwen's receipts include three new ones, written in a hand that is not his and in an ink that smells of sap."
-  },
-  {
-   "id": "pl_arkngthamz",
-   "title": "The Fourth Harmonic",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "requires": ["level:14"],
-   "pitch": "A scholar from Winterhold went down into Arkngthamz with a crystal lens to measure the ruin's singing. The Orcs of Dushnikh Yal brought his bones back up. The lens is still in the singing hall, and the College would pay well for it.",
-   "desc": "Magister Avidius Pell died in Arkngthamz. His Tonal Lens remains in the lower chamber, where the Dwemer machines wake when the stone sings.",
-   "objectives": [
-    {"type": "go", "place": "arkngthamz", "text": "Descend into Arkngthamz"},
-    {"type": "clear", "place": "arkngthamz", "placement": "structure", "text": "Destroy the machines guarding the singing hall",
-     "spawn": [{"type": "skycraft:dwarven_spider", "count": 3}, {"type": "skycraft:dwarven_sphere", "count": 1}]},
-    {"type": "retrieve", "place": "arkngthamz", "placement": "structure", "relic": "plr_arkngthamz_lens", "text": "Recover Pell's Tonal Lens",
-     "spawn": [{"type": "skycraft:dwarven_centurion", "name": "Tonal Warden", "count": 1, "hp": 1.2}],
-     "journal": "Through the lens, the ruin's song is clear: a single long note, rising. It sounds almost like a question."}
-   ],
-   "rewards": {"gold": 300, "items": ["skycraft:soul_gem_common"]},
-   "outro": "The Orcs of Dushnikh Yal say the stone sings softer since the lens left it. Their forge burns hotter for it."
-  },
-  {
-   "id": "pl_sunderstone_gorge",
-   "title": "Close the Door, and Close It Well",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Runil sent a young acolyte to bless the falls at Sunderstone Gorge. The boy found the barrow's seal broken and went in to set it right. He hasn't come back, and the water's still grey.",
-   "desc": "The seal of Arkay over the inner door of Sunderstone Gorge has been pried loose and carried inside. Acolyte Sigvar went in after it. Sunder Grey-Hand walks.",
-   "objectives": [
-    {"type": "go", "place": "sunderstone_gorge", "text": "Enter the barrow at Sunderstone Gorge"},
-    {"type": "kill", "place": "sunderstone_gorge", "placement": "structure", "text": "Put Sunder Grey-Hand back in his grave",
-     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Sunder Grey-Hand", "target": true, "boss": true, "hp": 1.5},
-               {"type": "skycraft:draugr", "count": 3}]},
-    {"type": "retrieve", "place": "sunderstone_gorge", "placement": "structure", "relic": "plr_sunderstone_gorge_seal", "text": "Recover the Seal-Stone of Arkay",
-     "journal": "Sigvar's body lay beside the seal-stone, his hand still on it. He had nearly made it to the door."}
-   ],
-   "rewards": {"gold": 200, "items": ["skycraft:silver_ring"]},
-   "outro": "Runil will have the seal-stone reset at the inner door, and Sigvar buried in the Falkreath yard with full rites."
-  },
-  {
-   "id": "pl_bilegulch_mine",
-   "title": "The Founder's Pick",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "The Orcs at Bilegulch lost their founder's pick to a troll in the deep shaft. Old Blackhide, they call it. Bring the pick back and they'll call you clan. That's worth more than gold, with Orcs.",
-   "desc": "A troll called Old Blackhide has taken over the lower shaft of Bilegulch Mine and stolen the clan's founding pick.",
-   "objectives": [
-    {"type": "go", "place": "bilegulch_mine", "text": "Go to Bilegulch Mine"},
-    {"type": "kill", "place": "bilegulch_mine", "placement": "structure", "text": "Kill Old Blackhide in the lower shaft",
-     "spawn": [{"type": "skycraft:troll", "name": "Old Blackhide", "target": true, "boss": true, "hp": 1.6}]},
-    {"type": "retrieve", "place": "bilegulch_mine", "placement": "structure", "relic": "plr_bilegulch_mine_pick", "text": "Recover Old Mother Bilek's pick",
-     "journal": "The pick was in the troll's nest, its haft gnawed but whole. It belongs on the hook by the shaft."}
-   ],
-   "rewards": {"gold": 160, "items": ["skycraft:orcish_war_axe"]},
-   "outro": "Shagrol hangs the pick back by the shaft and, after a long silence, offers you a place at the fire."
-  },
-  {
-   "id": "pl_moss_mother_cavern",
-   "title": "Keep the Fire Going",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Hroa of Hunter's Rest followed a wounded stag into Moss Mother Cavern. Her brother Asvald went in after her. Neither came out, and the hearth at the Rest has gone cold.",
-   "desc": "Hroa and her brother Asvald vanished into Moss Mother Cavern. Asvald asked that whoever finds Hroa's ash bow lay it on the hearth at Hunter's Rest.",
-   "objectives": [
-    {"type": "go", "place": "moss_mother_cavern", "text": "Enter Moss Mother Cavern"},
-    {"type": "kill", "place": "moss_mother_cavern", "placement": "structure", "text": "Destroy the Moss Mother",
-     "spawn": [{"type": "skycraft:spriggan", "name": "The Moss Mother", "target": true, "boss": true, "hp": 1.6},
-               {"type": "skycraft:spriggan", "count": 2}]},
-    {"type": "retrieve", "place": "moss_mother_cavern", "placement": "structure", "relic": "plr_moss_mother_cavern_bow", "text": "Find Hroa's ash bow",
-     "journal": "Brother and sister lie together under the roots at the back of the cavern. The bow was in Hroa's hands."},
-    {"type": "go", "place": "hunters_rest", "text": "Lay Hroa's bow on the hearth at Hunter's Rest", "actions": "take:plr_moss_mother_cavern_bow"}
-   ],
-   "rewards": {"gold": 160, "items": ["skycraft:fur_boots"]},
-   "outro": "The bow rests on the hearth. Someone will light the fire again; hunters always do."
-  },
-  {
-   "id": "pl_embershard_mine",
-   "title": "Pay Day at Embershard",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Bandits under Skarn Two-Pick ran the Embershard miners off the day after payday. Two hundred and forty septims of honest wages, sitting in a bandit's room. The miners will share it with whoever gets it back.",
-   "desc": "The foreman of Embershard Mine asks that someone recover the miners' paychest from the bandit Skarn Two-Pick.",
-   "objectives": [
-    {"type": "go", "place": "embershard_mine", "text": "Go to Embershard Mine"},
-    {"type": "clear", "place": "embershard_mine", "placement": "structure", "text": "Clear the bandits from the mine",
-     "spawn": [{"type": "skycraft:bandit", "count": 3}]},
-    {"type": "kill", "place": "embershard_mine", "placement": "structure", "text": "Defeat Skarn Two-Pick",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Skarn Two-Pick", "target": true, "boss": true, "hp": 1.2}]},
-    {"type": "retrieve", "place": "embershard_mine", "placement": "structure", "relic": "plr_embershard_mine_paychest", "text": "Take back the miners' paychest",
-     "journal": "The paychest is still sealed. Skarn kept his word about Fredas, at least."}
-   ],
-   "rewards": {"gold": 110, "items": ["skycraft:iron_sword"]},
-   "outro": "The miners of Embershard drift back to their shafts, and the foreman sends you a share and a promise of cheap ore."
-  },
-  {
-   "id": "pl_bannermist_tower",
-   "title": "Lights in the Mist",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Every time the lamps blink at Bannermist Tower, a cart goes missing on the mill road. Put those lamps out and the Knifepoint gang goes blind.",
-   "desc": "The bandits at Bannermist Tower signal passing carts to their gang on Knifepoint Ridge. Their signal lamp is the key to it all.",
-   "objectives": [
-    {"type": "go", "place": "bannermist_tower", "text": "Go to Bannermist Tower"},
-    {"type": "clear", "place": "bannermist_tower", "text": "Drive out the lookouts",
-     "spawn": [{"type": "skycraft:bandit", "count": 3}]},
-    {"type": "retrieve", "place": "bannermist_tower", "relic": "plr_bannermist_tower_lamp", "text": "Take the signal lamp",
-     "journal": "With the signal lamp gone, Knifepoint Ridge will be watching a dark tower and wondering why."}
-   ],
-   "rewards": {"gold": 110},
-   "outro": "Carts reach Half-Moon Mill again without being counted on the way."
-  },
-  {
-   "id": "pl_knifepoint_ridge",
-   "title": "Siddgeir's Bounty",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "The Jarl's put a price on Hjolfrid Ashpine, at last. She runs Knifepoint Ridge and she killed the carter Bolli and his son. Bailiff Eirik pays on proof.",
-   "desc": "Jarl Siddgeir has posted a bounty on the bandit leader Hjolfrid Ashpine of Knifepoint Ridge. Bailiff Eirik in Falkreath will pay on proof of her death.",
-   "objectives": [
-    {"type": "go", "place": "knifepoint_ridge", "text": "Go to Knifepoint Ridge"},
-    {"type": "kill", "place": "knifepoint_ridge", "text": "Kill Hjolfrid Ashpine",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Hjolfrid Ashpine", "target": true, "boss": true, "hp": 1.5},
-               {"type": "skycraft:bandit", "count": 3}],
-     "actions": "relic:plr_knifepoint_ridge_knife",
-     "journal": "Hjolfrid fought to the last. Her scorched-handled knife will serve as proof."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_eirik", "relic": "plr_knifepoint_ridge_knife", "text": "Bring proof to Bailiff Eirik in Falkreath",
-     "topic": "Hjolfrid Ashpine is dead. Here's her knife.",
-     "reply": "That's her knife, right enough. Bolli's widow will sleep tonight. The Jarl will claim the credit, naturally. Here's your purse, and here's my thanks, which is worth less but is at least sincere."}
-   ],
-   "rewards": {"gold": 250, "items": ["skycraft:steel_dagger"]},
-   "outro": "The Half-Moon road is quieter. Somewhere in Bruma, a man waits for a letter that will never come."
-  },
-  {
-   "id": "pl_orphan_rock",
-   "title": "The Lost Are Ours",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Ragna lights a beacon on North Skybound Watch every night for her brother. He went to the hagraven on Orphan Rock for a cure. Someone ought to go up there and find out what it cost him.",
-   "desc": "A hagraven called Mother Thornclaw holds Orphan Rock and keeps the old cradle charm that once protected lost children. Ragna's brother paid her price and never came home.",
-   "objectives": [
-    {"type": "go", "place": "orphan_rock", "text": "Climb to Orphan Rock"},
-    {"type": "kill", "place": "orphan_rock", "text": "Slay Mother Thornclaw",
-     "spawn": [{"type": "skycraft:hagraven", "name": "Mother Thornclaw", "target": true, "boss": true, "hp": 1.4},
-               {"type": "minecraft:witch", "count": 2}]},
-    {"type": "retrieve", "place": "orphan_rock", "relic": "plr_orphan_rock_charm", "text": "Take back the birchwood cradle charm",
-     "journal": "Ragna's brother lies at the foot of the rock, at peace. The cradle charm can go back where the foundling hung it."},
-    {"type": "go", "place": "north_skybound_watch", "text": "Tell Ragna at North Skybound Watch, and give the charm to her fire", "actions": "take:plr_orphan_rock_charm"}
-   ],
-   "rewards": {"gold": 200, "items": ["skycraft:amulet_of_mara"]},
-   "outro": "The beacon on North Skybound Watch burns one more night, and then Ragna lets it go out."
-  },
-  {
-   "id": "pl_north_shriekwind_bastion",
-   "title": "The Brother Who Shouts",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "The wind from North Shriekwind is calling a name, and the guard who heard it won't go back. Old Hjalti's woken up, Runil thinks, and means to fetch his brother from the south barrow.",
-   "desc": "The draugr chieftain Hjalti stirs in North Shriekwind Bastion and calls for his brother Eyvind. The barrow door stands open.",
-   "objectives": [
-    {"type": "go", "place": "north_shriekwind_bastion", "text": "Enter North Shriekwind Bastion"},
-    {"type": "clear", "place": "north_shriekwind_bastion", "placement": "structure", "text": "Cut down Hjalti's honour guard",
-     "spawn": [{"type": "skycraft:draugr", "count": 4}]},
-    {"type": "kill", "place": "north_shriekwind_bastion", "placement": "structure", "text": "Silence Hjalti Shriek-Tongue",
-     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Hjalti Shriek-Tongue", "target": true, "boss": true, "hp": 1.4}],
-     "journal": "Hjalti's last shout was his brother's name. The wind over Falkreath is only wind again."}
-   ],
-   "rewards": {"gold": 190, "items": ["skycraft:studded_helmet"]},
-   "outro": "Guardsman Leif takes the north road patrol again, and admits the wind sounds almost friendly now."
-  },
-  {
-   "id": "pl_south_shriekwind_bastion",
-   "title": "The Seventh Alcove",
-   "region": "skyrim/falkreath",
-   "start": "npc:pln_skyrim_falkreath_hilde",
-   "offer": "You look worried, Sister.",
-   "pitch": "Asta took her husband's ashes up to South Shriekwind to lay them with his family. Five days ago. I told her it wasn't safe. She told me a promise is a promise. Please, go and see. If she's lost, bring back something of hers so I can pray over it.",
-   "desc": "The widow Asta took her husband's ashes to the seventh alcove of South Shriekwind Bastion and has not returned. Sister Hilde of Falkreath fears the worst.",
-   "objectives": [
-    {"type": "go", "place": "south_shriekwind_bastion", "text": "Enter South Shriekwind Bastion"},
-    {"type": "clear", "place": "south_shriekwind_bastion", "placement": "structure", "text": "Clear the draugr from the long hall",
-     "spawn": [{"type": "skycraft:draugr", "count": 3}, {"type": "skycraft:draugr", "name": "Eyvind's Watcher", "count": 1, "hp": 1.3}]},
-    {"type": "retrieve", "place": "south_shriekwind_bastion", "placement": "structure", "relic": "plr_south_shriekwind_bastion_beads", "text": "Find what became of Asta",
-     "journal": "Asta reached the seventh alcove. The urn sits in it, as she promised. She lies just beneath, her prayer beads in her hand."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_hilde", "relic": "plr_south_shriekwind_bastion_beads", "text": "Bring Asta's prayer beads to Sister Hilde",
-     "topic": "Asta kept her promise. These were in her hand.",
-     "reply": "She made it, then. She put him where he wanted to be, and lay down beside him. The seventh alcove was waiting for someone, they always said. I suppose it was waiting for two. Thank you. I'll pray for them both."}
-   ],
-   "rewards": {"gold": 170, "items": ["skycraft:amulet_of_mara"]},
-   "outro": "Sister Hilde hangs Asta's beads over the altar of the Hall of the Dead, and lights two candles each Sundas."
-  },
-  {
-   "id": "pl_pinewatch",
-   "title": "Under the Floorboards",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Solaf at Gray Pine Goods lost a lockbox with his debt ledger in it, and he swears the thief ran to Pinewatch. Nice family there. Always wearing new boots. Bailiff Eirik will want that ledger before someone starts blackmailing the town.",
-   "desc": "The lockbox stolen from Gray Pine Goods holds a ledger of everyone in Falkreath who owes the shop money. The trail leads to the cabin at Pinewatch.",
-   "objectives": [
-    {"type": "go", "place": "pinewatch", "text": "Visit the family at Pinewatch"},
-    {"type": "clear", "place": "pinewatch", "placement": "structure", "text": "Deal with the thieves under the cabin",
-     "spawn": [{"type": "skycraft:bandit", "count": 3}, {"type": "skycraft:bandit_chief", "name": "Cousin Arngeir", "count": 1}]},
-    {"type": "retrieve", "place": "pinewatch", "placement": "structure", "relic": "plr_pinewatch_lockbox", "text": "Recover the Gray Pine lockbox"},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_eirik", "relic": "plr_pinewatch_lockbox", "text": "Bring the lockbox to Bailiff Eirik",
-     "topic": "Solaf's lockbox. The Pinewatch family were thieves.",
-     "reply": "Under the floor of a cabin I've had stew in. Gods. I'll return this to Solaf, and I'll make sure the ledger is all he gets back. Some of those debts are older than the people who owe them."}
-   ],
-   "rewards": {"gold": 160, "items": ["skycraft:lockpick*5"]},
-   "outro": "Gray Pine Goods has its ledger back, and Pinewatch has a new and very empty cellar."
-  },
-  {
-   "id": "pl_greywater_grotto",
-   "title": "White Cap for a Sick Boy",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "pitch": "Ragnhild the herb-wife went into Greywater Grotto for white cap mushrooms. Brynja's boy at the mill is sick and needs them. Ragnhild hasn't come back.",
-   "desc": "The herb-wife Ragnhild hid her satchel of white cap in Greywater Grotto before a great frostbite spider caught her. The mushrooms are meant for Brynja's sick son at Half-Moon Mill.",
-   "objectives": [
-    {"type": "go", "place": "greywater_grotto", "text": "Enter Greywater Grotto"},
-    {"type": "kill", "place": "greywater_grotto", "placement": "structure", "text": "Kill the Greywater Broodmother",
-     "spawn": [{"type": "skycraft:frostbite_spider", "name": "Greywater Broodmother", "target": true, "boss": true, "hp": 1.6},
-               {"type": "skycraft:frostbite_spider", "count": 2}]},
-    {"type": "retrieve", "place": "greywater_grotto", "placement": "structure", "relic": "plr_greywater_grotto_satchel", "text": "Find Ragnhild's satchel in the dry cleft"},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_brynja", "relic": "plr_greywater_grotto_satchel", "text": "Bring the white cap to Brynja at Half-Moon Mill",
-     "topic": "Ragnhild gathered these for your boy. She didn't make it out.",
-     "reply": "White cap. Boiled in milk, three days. She told me that a dozen times. Gods keep her. I'll put the pot on now. And I'll pay for her burial; she'd have hated that, so I'll do it twice as grand."}
-   ],
-   "rewards": {"gold": 140, "items": ["skycraft:soul_gem_lesser"]},
-   "outro": "Brynja's boy is up and about by Turdas, complaining about the taste of mushroom milk."
-  },
-  {
-   "id": "pl_fort_neugrad",
-   "title": "The Payroll Never Arrived",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "requires": ["level:10"],
-   "pitch": "When the Legion left Fort Neugrad, Captain Broadshield stayed behind with the garrison's payroll. Eight hundred septims. He calls his men the Free Company now. I call them thieves with good boots.",
-   "desc": "Captain Ulfgar Broadshield and his deserters hold Fort Neugrad and the Legion's payroll coffer, which lies under the third flagstone from the cellar stair.",
-   "objectives": [
-    {"type": "go", "place": "fort_neugrad", "text": "Go to Fort Neugrad"},
-    {"type": "clear", "place": "fort_neugrad", "placement": "structure", "text": "Break the Free Company",
-     "spawn": [{"type": "skycraft:bandit", "count": 4}]},
-    {"type": "kill", "place": "fort_neugrad", "placement": "structure", "text": "Defeat Captain Ulfgar Broadshield",
-     "spawn": [{"type": "skycraft:bandit_chief", "name": "Captain Ulfgar Broadshield", "target": true, "boss": true, "hp": 1.6}],
-     "actions": "relic:plr_fort_neugrad_coffer",
-     "journal": "Broadshield's key opened the coffer under the third flagstone. The Legion's eight hundred septims are all there."},
-    {"type": "talk", "npc": "pln_skyrim_falkreath_eirik", "text": "Decide what to do with the payroll",
-     "topic": "I've recovered the Legion's payroll from Fort Neugrad.",
-     "reply": "Eight hundred septims of Legion silver. The Legion will want it back. The Stormcloaks would find it very useful. And you, I imagine, could find a use for it too.",
-     "choices": [
-      {"label": "Return it to the Legion through the hold.", "reply": "Honest. I'll see it goes west to the camp under guard, and I'll see your name goes with it.", "actions": "take:plr_fort_neugrad_coffer;flag:fk_neugrad_returned"},
-      {"label": "I'm keeping it. They abandoned it.", "reply": "I didn't hear that. I didn't see the coffer. Get it out of my sight before I remember I'm a bailiff.", "actions": "flag:fk_neugrad_kept"}
-     ]}
-   ],
-   "rewards": {"gold": 220, "items": ["skycraft:steel_chestplate"]},
-   "outro": "A prisoner named Pell walks out of Fort Neugrad's cells into daylight for the first time in weeks, blinking."
-  },
-  {
-   "id": "pl_halldirs_cairn",
-   "title": "Signy's Pendant",
-   "region": "skyrim/falkreath",
-   "start": "npc:pln_skyrim_falkreath_bersi",
-   "offer": "You look like you haven't slept, carpenter.",
-   "pitch": "My boy Thorvi went into Halldir's Cairn on a dare. He came out, thank Arkay, but he left his mother's pendant behind. He says a dead man in an iron mask took it from his neck. He hasn't slept a night since. Please. Bring it back, and maybe the dreams will stop.",
-   "desc": "Bersi's son Thorvi lost his dead mother's pendant to the warden of Halldir's Cairn. Bersi believes the boy's nightmares will end only when it is returned.",
-   "objectives": [
-    {"type": "go", "place": "halldirs_cairn", "text": "Enter Halldir's Cairn"},
-    {"type": "kill", "place": "halldirs_cairn", "placement": "structure", "text": "Defeat the warden in the iron mask",
-     "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Warden of the Cairn", "target": true, "boss": true, "hp": 1.4},
-               {"type": "skycraft:draugr", "count": 2}]},
-    {"type": "retrieve", "place": "halldirs_cairn", "placement": "structure", "relic": "plr_halldirs_cairn_pendant", "text": "Take Signy's pendant from the warden",
-     "journal": "The warden wore a dozen trinkets taken from trespassers over the centuries. The little bronze hammer was the newest."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_bersi", "relic": "plr_halldirs_cairn_pendant", "text": "Return the pendant to Bersi in Falkreath",
-     "topic": "I have Signy's pendant.",
-     "reply": "That's hers. That's... Thorvi! Come here, son. No, it's all right, it's warm now, see? I'll make a box for it. A good box, with a lock. And I'll make you a bow, since you're so set on that archer girl in the hills."}
-   ],
-   "rewards": {"gold": 180, "items": ["skycraft:steel_war_axe"]},
-   "outro": "Thorvi sleeps through the night for the first time in a month, and wakes asking when he can start archery lessons."
-  },
-  {
-   "id": "pl_ancients_ascent",
-   "title": "The Dragon of the Ascent",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "requires": ["level:18"],
-   "pitch": "There's a dragon roosting on Ancient's Ascent. It came up out of the old mound below Greywater Grotto. Grimvar the hunter went up to kill it. His bow came down without him.",
-   "desc": "The dragon Sahlokvir, raised from the mound below Greywater Grotto, nests on Ancient's Ascent and preys on the southern roads of Falkreath.",
-   "objectives": [
-    {"type": "go", "place": "ancients_ascent", "text": "Climb Ancient's Ascent"},
-    {"type": "kill", "place": "ancients_ascent", "text": "Slay the dragon Sahlokvir",
-     "spawn": [{"type": "skycraft:dragon", "name": "Sahlokvir", "target": true, "boss": true, "hp": 1.0}],
-     "journal": "Sahlokvir is dead. Grimvar will not get his song at Dead Man's Drink, but someone will."}
-   ],
-   "rewards": {"gold": 400, "items": ["skycraft:soul_gem_greater"]},
-   "outro": "The shepherds south of Helgen bring their flocks back to the high pastures, and the Falkreath bards argue over who will write the song."
-  },
-  {
-   "id": "pl_southfringe_sanctum",
-   "title": "The Ledger of Names",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "requires": ["level:12"],
-   "pitch": "The necromancer who robbed the Falkreath graves worked for a Dunmer woman at Southfringe Sanctum. She keeps a ledger of every body she's taken. Ingrid the gravedigger would give a great deal to read it, and to bring her dead home.",
-   "desc": "Velmira Sarys, mistress of Southfringe Sanctum, has taken the dead of the Falkreath graveyard for some work in the sanctum's lower vault. Her ledger lists every name.",
-   "objectives": [
-    {"type": "go", "place": "southfringe_sanctum", "text": "Find Southfringe Sanctum"},
-    {"type": "clear", "place": "southfringe_sanctum", "placement": "structure", "text": "Put the stolen dead to rest",
-     "spawn": [{"type": "minecraft:zombie", "count": 3}, {"type": "skycraft:necromancer", "count": 1}]},
-    {"type": "kill", "place": "southfringe_sanctum", "placement": "structure", "text": "Defeat Velmira Sarys",
-     "spawn": [{"type": "skycraft:necromancer", "name": "Velmira Sarys", "target": true, "boss": true, "hp": 1.7, "dmg": 1.2}],
-     "actions": "relic:plr_southfringe_sanctum_ledger",
-     "journal": "Velmira is dead. Her ledger lists every body she took from Falkreath, and a child called Sigrid among them."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_ingrid", "relic": "plr_southfringe_sanctum_ledger", "text": "Bring the ledger of names to Ingrid in Falkreath",
-     "topic": "Velmira Sarys is dead. Here is her ledger of every grave she robbed.",
-     "reply": "Hrofar. Asgerd. The cooper's little one, Sigrid. I'll go down with a cart and Runil, and we'll bring them all home, every one. And I'll dig the holes myself, and I'll dig them deep. Thank you. The dead can't say it, so I will."}
-   ],
-   "rewards": {"gold": 300, "items": ["skycraft:spell_tome_lesser_ward"]},
-   "outro": "Falkreath holds a second funeral for its stolen dead. The whole town comes, and even the Jarl."
-  },
-  {
-   "id": "pl_bloodlet_throne",
-   "title": "The Red Tithe",
-   "region": "skyrim/falkreath",
-   "start": "manual",
-   "requires": ["level:15"],
-   "pitch": "Travellers vanish on the Pale Pass road below Bloodlet Throne. A pilgrim smuggled a letter out: vampires, a dozen of them, and their lady writes down every name. Bailiff Eirik needs that list, so the families at least know.",
-   "desc": "Lady Arnvor's vampire court at Bloodlet Throne takes a tithe of travellers from the Pale Pass road and records each one on the Red Tithe Roll.",
-   "objectives": [
-    {"type": "go", "place": "bloodlet_throne", "text": "Go to Bloodlet Throne, by day if you are wise"},
-    {"type": "clear", "place": "bloodlet_throne", "placement": "structure", "text": "Clear the vampire court",
-     "spawn": [{"type": "skycraft:vampire", "count": 3}]},
-    {"type": "kill", "place": "bloodlet_throne", "placement": "structure", "text": "Destroy Lady Arnvor",
-     "spawn": [{"type": "skycraft:vampire", "name": "Lady Arnvor of the Throne", "target": true, "boss": true, "hp": 2.0, "dmg": 1.3}],
-     "actions": "relic:plr_bloodlet_throne_roll",
-     "journal": "Lady Arnvor is ash. The Red Tithe Roll was on her table, beside a cup of something that was not wine."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_eirik", "relic": "plr_bloodlet_throne_roll", "text": "Bring the Red Tithe Roll to Bailiff Eirik",
-     "topic": "Bloodlet Throne is cleared. This is their list of the taken.",
-     "reply": "Hallvard the pilgrim. The Legion courier we wrote off as a deserter. The miller's boy who came home pale and won't say why. Gods. Every family on this list deserves to know. I'll read it out in the square myself, and the Jarl can stop me if he dares."}
-   ],
-   "rewards": {"gold": 350, "items": ["skycraft:amulet_of_talos"]},
-   "outro": "The names on the Red Tithe Roll are read aloud in Falkreath's square, and the Pale Pass road is a little less quiet at night."
-  },
-  {
-   "id": "pl_the_lady_stone",
-   "title": "A Comb in the Shallows",
-   "region": "skyrim/falkreath",
-   "start": "npc:pln_skyrim_falkreath_brynja",
-   "offer": "Who's the wreath for?",
-   "pitch": "My mother. She was wed at the Lady Stone and dropped her bone comb in the shallows there. Father swore he'd find it, every spring for thirty years. He never did. He's too old to row now, and I'm too busy to dive. If you're out on the lake... look, would you?",
-   "desc": "Brynja's mother Ingrun dropped her wedding comb in the shallows beside the Lady Stone. Her father Ottar searched for it every spring for thirty years.",
-   "objectives": [
-    {"type": "go", "place": "the_lady_stone", "text": "Row out to the Lady Stone"},
-    {"type": "retrieve", "place": "the_lady_stone", "offset": [6, 4], "relic": "plr_the_lady_stone_comb", "text": "Search the shallows for Ingrun's comb",
-     "spawn": [{"type": "skycraft:slaughterfish", "count": 2}],
-     "journal": "The comb was wedged between two stones under the water, right where a careless bride might drop it, and right where a searching husband might never think to look."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_brynja", "relic": "plr_the_lady_stone_comb", "text": "Bring the comb to Brynja at Half-Moon Mill",
-     "topic": "I found your mother's comb.",
-     "reply": "Thirty years. Thirty springs he rowed out there. Oh, he'll be furious it was you and not him. And then he'll cry, and then he'll pretend he didn't. Thank you. I'll put it on Mother's stone, so she has it back."}
-   ],
-   "rewards": {"gold": 90, "items": ["skycraft:gold_ring"]},
-   "outro": "Ottar the Wet rows out to the Lady Stone once more that year, this time with nothing to search for, and stays until the moons rise."
-  },
-  {
-   "id": "pl_dragon_mound_evergreen_grove",
-   "title": "Holes of a Draconic Character",
-   "region": "skyrim/falkreath",
-   "start": "npc:pln_skyrim_falkreath_calvus",
-   "offer": "Holes of a draconic character?",
-   "pitch": "Precisely! The dragon mounds of this hold have opened, from the inside, all in one season. I sent my assistant Ennis to survey the one above Bilegulch Mine, and he has not returned. Retrace his steps for me: the mound by Evergreen Grove, then Sunderstone, then Bilegulch. Bring back his satchel, and if possible, Ennis.",
-   "desc": "Calvus Aterius, an Imperial antiquarian staying in Falkreath, is studying the opened dragon mounds of the hold. His assistant Ennis Hollowgate disappeared while surveying the mound above Bilegulch Mine.",
-   "objectives": [
-    {"type": "go", "place": "dragon_mound_evergreen_grove", "text": "Examine the opened mound near Evergreen Grove"},
-    {"type": "go", "place": "dragon_mound_sunderstone_gorge", "text": "Follow Ennis's trail to the mound north of Sunderstone Gorge"},
-    {"type": "retrieve", "place": "dragon_mound_bilegulch_mine", "relic": "plr_dragon_mound_evergreen_grove_satchel", "text": "Recover Ennis's satchel from the Bilegulch mound",
-     "spawn": [{"type": "skycraft:draugr", "count": 3}],
-     "journal": "Ennis's satchel was hidden in the rocks by the pit. Of Ennis there is no sign but a set of tracks heading toward the orc mine, and an empty honey jar."},
-    {"type": "deliver", "npc": "pln_skyrim_falkreath_calvus", "relic": "plr_dragon_mound_evergreen_grove_satchel", "text": "Bring Ennis's satchel to Calvus in Falkreath",
-     "topic": "Ennis's satchel. His tracks led toward Bilegulch Mine.",
-     "reply": "The drawings! Splendid, splendid. And Ennis went to the orcs, did he? With honey? Then he is either their guest or their dinner, and either way he has finished the survey. Three mounds, one season, all opened from below. Something is waking them, friend. I must write to the Imperial Library at once."}
-   ],
-   "rewards": {"gold": 220, "items": ["skycraft:spell_tome_firebolt"]},
-   "outro": "Some days later, Ennis Hollowgate walks into Falkreath smelling strongly of Orc mead, with a story about how honey is, in fact, a universal language."
-  }
- ]
+  "line": "place_skyrim_falkreath",
+  "category": "side",
+  "npcs": [
+    {
+      "id": "pln_skyrim_falkreath_ingrid",
+      "name": "Ingrid Stonehand",
+      "role": "citizen",
+      "place": "falkreath",
+      "offset": [
+        6,
+        -4
+      ],
+      "female": true,
+      "greet": "Mind the fresh earth. Some of it's fresher than it ought to be."
+    },
+    {
+      "id": "pln_skyrim_falkreath_hilde",
+      "name": "Sister Hilde",
+      "role": "priest",
+      "place": "falkreath",
+      "offset": [
+        -5,
+        6
+      ],
+      "female": true,
+      "greet": "Arkay keep you. Have you come to light a candle, or to ask why so many are already lit?"
+    },
+    {
+      "id": "pln_skyrim_falkreath_eirik",
+      "name": "Bailiff Eirik",
+      "role": "steward",
+      "place": "falkreath",
+      "offset": [
+        2,
+        7
+      ],
+      "female": false,
+      "greet": "If it's about bandits, the Jarl knows. If it's about the graveyard, the Jarl knows. The Jarl knows everything and does nothing."
+    },
+    {
+      "id": "pln_skyrim_falkreath_bersi",
+      "name": "Bersi the Carpenter",
+      "role": "citizen",
+      "place": "falkreath",
+      "offset": [
+        -7,
+        -3
+      ],
+      "female": false,
+      "greet": "Coffins, cradles, doors. Mostly coffins, this being Falkreath."
+    },
+    {
+      "id": "pln_skyrim_falkreath_calvus",
+      "name": "Calvus Aterius",
+      "role": "scholar",
+      "place": "falkreath",
+      "offset": [
+        7,
+        2
+      ],
+      "female": false,
+      "greet": "Ah, a traveller. Tell me, have you seen any large holes in the ground lately? Holes of a draconic character?"
+    },
+    {
+      "id": "pln_skyrim_falkreath_brynja",
+      "name": "Brynja",
+      "role": "lumberjack",
+      "place": "half_moon_mill",
+      "offset": [
+        3,
+        -2
+      ],
+      "female": true,
+      "greet": "Mind the saw. It doesn't care who you are."
+    },
+    {
+      "id": "pln_skyrim_falkreath_ylva",
+      "name": "Ylva of Helgen",
+      "role": "citizen",
+      "place": "riverwood",
+      "offset": [
+        4,
+        5
+      ],
+      "female": true,
+      "greet": "You came up the Helgen road? Is there... is there anything left?"
+    }
+  ],
+  "relics": [
+    {
+      "id": "plr_falkreath_burial_ring",
+      "name": "Hrofar's Silver Ring",
+      "desc": "A plain silver band, worn thin on one side. Grave earth is still caught in the setting."
+    },
+    {
+      "id": "plr_helgen_strongbox",
+      "name": "Torolf's Iron Strongbox",
+      "desc": "A small, soot-blackened box with a smith's mark on the lid. Something inside clinks softly."
+    },
+    {
+      "id": "plr_lost_echo_cave_lute",
+      "name": "Edda's Lute",
+      "desc": "A fine lute with the crest of the Bards College inlaid in pale wood. One string is broken."
+    },
+    {
+      "id": "plr_darkshade_journal",
+      "name": "Ardwen's Receipt Book",
+      "desc": "A leather book of herbal receipts, its pages stained green and smelling strongly of nirnroot."
+    },
+    {
+      "id": "plr_arkngthamz_lens",
+      "name": "Pell's Tonal Lens",
+      "desc": "A disc of ground crystal set in brass. Held to the ear, it hums very faintly."
+    },
+    {
+      "id": "plr_sunderstone_gorge_seal",
+      "name": "Seal-Stone of Arkay",
+      "desc": "A cracked slab of grey stone carved with the circle of Arkay. It is heavier than it looks."
+    },
+    {
+      "id": "plr_bilegulch_mine_pick",
+      "name": "Old Mother Bilek's Pick",
+      "desc": "An Orcish mining pick with a haft worn smooth by generations of hands."
+    },
+    {
+      "id": "plr_moss_mother_cavern_bow",
+      "name": "Hroa's Ash Bow",
+      "desc": "A pale ash bow with a raven carved on the grip. Moss has begun to grow along its limbs."
+    },
+    {
+      "id": "plr_embershard_mine_paychest",
+      "name": "Embershard Paychest",
+      "desc": "A heavy iron chest stamped with the Embershard mark. The miners' wages are still inside."
+    },
+    {
+      "id": "plr_bannermist_tower_lamp",
+      "name": "Bannermist Signal Lamp",
+      "desc": "A shuttered lantern with a hinged hood, made for sending signals in the dark."
+    },
+    {
+      "id": "plr_knifepoint_ridge_knife",
+      "name": "Hjolfrid's Knife",
+      "desc": "A long hunting knife with a scorched pine handle. The blade has been kept very sharp."
+    },
+    {
+      "id": "plr_orphan_rock_charm",
+      "name": "Birchwood Cradle Charm",
+      "desc": "A tiny cradle carved from birch, hung on a cord darkened with age."
+    },
+    {
+      "id": "plr_south_shriekwind_bastion_beads",
+      "name": "Asta's Prayer Beads",
+      "desc": "A string of wooden beads carved with the circle of Arkay, worn smooth by worried fingers."
+    },
+    {
+      "id": "plr_pinewatch_lockbox",
+      "name": "Gray Pine Lockbox",
+      "desc": "A locked box from Gray Pine Goods. Inside, a ledger of debts that half of Falkreath would like to burn."
+    },
+    {
+      "id": "plr_greywater_grotto_satchel",
+      "name": "Ragnhild's Herb Satchel",
+      "desc": "A web-wrapped satchel full of pale white cap mushrooms, still faintly warm from the spring."
+    },
+    {
+      "id": "plr_fort_neugrad_coffer",
+      "name": "Legion Payroll Coffer",
+      "desc": "A sealed iron coffer bearing the Legion's stamp. It holds a garrison's wages."
+    },
+    {
+      "id": "plr_halldirs_cairn_pendant",
+      "name": "Signy's Pendant",
+      "desc": "A small bronze hammer of Zenithar on a leather thong, cold as ice to the touch."
+    },
+    {
+      "id": "plr_southfringe_sanctum_ledger",
+      "name": "Velmira's Ledger of Names",
+      "desc": "A black ledger listing the dead taken from the Falkreath graveyard, and what each was made to do."
+    },
+    {
+      "id": "plr_bloodlet_throne_roll",
+      "name": "The Red Tithe Roll",
+      "desc": "A long roll of vellum listing travellers taken on the Pale Pass road, in an elegant, unhurried hand."
+    },
+    {
+      "id": "plr_the_lady_stone_comb",
+      "name": "Ingrun's Wedding Comb",
+      "desc": "A bone comb inlaid with mother-of-pearl, green with lake weed but unbroken."
+    },
+    {
+      "id": "plr_dragon_mound_evergreen_grove_satchel",
+      "name": "Ennis's Survey Satchel",
+      "desc": "A scholar's satchel stuffed with drawings of dragon mounds, measurements, and an empty honey jar."
+    }
+  ],
+  "quests": [
+    {
+      "id": "pl_falkreath",
+      "title": "Arkay's Short Count",
+      "region": "skyrim/falkreath",
+      "start": "npc:pln_skyrim_falkreath_ingrid",
+      "offer": "You look like you haven't slept in days.",
+      "pitch": "Three graves opened since Hearthfire, and two of them empty. The boot prints go northwest, up the old road to the Roadside Ruins. I've a shovel and a grudge, but you've a sword. Find who's taking them. And Hrofar's ring, if you can. His wife wants it back.",
+      "desc": "Ingrid, the gravedigger of Falkreath, says someone is stealing the dead from the town graveyard. Their tracks lead to the Roadside Ruins northwest of town.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "roadside_ruins",
+          "text": "Follow the grave robber's trail to the Roadside Ruins"
+        },
+        {
+          "type": "kill",
+          "place": "roadside_ruins",
+          "placement": "structure",
+          "text": "Stop the Lantern-Bearer",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "name": "Corvus the Lantern-Bearer",
+              "target": true,
+              "boss": true,
+              "hp": 1.3
+            },
+            {
+              "type": "minecraft:zombie",
+              "count": 2
+            }
+          ],
+          "journal": "The necromancer Corvus is dead. His journal speaks of a Mistress at a place called Southfringe Sanctum."
+        },
+        {
+          "type": "retrieve",
+          "place": "roadside_ruins",
+          "placement": "structure",
+          "relic": "plr_falkreath_burial_ring",
+          "text": "Recover Hrofar's silver ring"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_ingrid",
+          "relic": "plr_falkreath_burial_ring",
+          "text": "Bring the ring to Ingrid in Falkreath",
+          "topic": "The grave robber is dead. Here is Hrofar's ring.",
+          "reply": "A necromancer. Of course. I'll put the ring back on Hrofar's hand myself, once I've found the rest of Hrofar. If there's a Mistress behind him, though... this isn't over, is it?"
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "skycraft:silver_ring"
+        ]
+      },
+      "outro": "Ingrid sleeps with her shovel across her knees still, but now she sleeps.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_helgen",
+      "title": "What the Fire Left",
+      "region": "skyrim/falkreath",
+      "start": "npc:pln_skyrim_falkreath_ylva",
+      "offer": "You're from Helgen?",
+      "pitch": "My father was the smith by the north gate. He kept a strongbox under the forge floor with my mother's ring in it. I can't go back there. I've tried; I get as far as the bridge and my legs stop. Scavengers are picking the town clean. Please, before they find it.",
+      "desc": "Ylva, a refugee from Helgen living in Riverwood, asks you to recover her father's strongbox from beneath his forge before looters take it.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "helgen",
+          "text": "Go to the ruins of Helgen"
+        },
+        {
+          "type": "retrieve",
+          "place": "helgen",
+          "relic": "plr_helgen_strongbox",
+          "text": "Find Torolf's strongbox under the smithy by the north gate",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "name": "Karl the Scavenger",
+              "count": 1
+            },
+            {
+              "type": "skycraft:skeever",
+              "count": 3
+            }
+          ],
+          "journal": "The scavengers were already prying at the forge stones. The box is heavy and still warm from the ash."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_ylva",
+          "relic": "plr_helgen_strongbox",
+          "text": "Bring the strongbox to Ylva in Riverwood",
+          "topic": "I found your father's strongbox.",
+          "reply": "It's his mark on the lid. He made the lock himself. Here's Mother's ring... and the wedding money. He saved it for years, and I'm not even promised to anyone. Take a share. He'd want you paid. He always paid his debts."
+        }
+      ],
+      "rewards": {
+        "gold": 120
+      },
+      "outro": "Ylva wears her mother's ring on a cord around her neck, and she has stopped asking travellers about Helgen.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_lakeview",
+      "title": "Where Money Sleeps",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "The Lake-Holms left that hill plot in a hurry. Gunnar always said he didn't trust Gray Pine Goods with his savings. If he didn't keep it in the house, he kept it in the ground.",
+      "desc": "Gunnar Lake-Holm buried his family's savings under two leaning pines downhill of the Lakeview plot, toward the water, before he fled.",
+      "objectives": [
+        {
+          "type": "retrieve",
+          "place": "lakeview",
+          "offset": [
+            22,
+            -16
+          ],
+          "item": "skycraft:gold_ring",
+          "text": "Dig under the two leaning pines downhill of Lakeview",
+          "journal": "The pot was where Gunnar said: two pines leaning together, the earth soft beneath them. Grandmother's gold ring lies on top of the coins."
+        }
+      ],
+      "rewards": {
+        "gold": 90
+      },
+      "outro": "Gunnar never came back for it. Perhaps he knew he wouldn't.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_lost_echo_cave",
+      "title": "The Song That Came Back",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "requires": [
+        "level:12"
+      ],
+      "pitch": "A student from the Bards College went into Lost Echo Cave to compose. Her lute's still down there, they say. The College would pay to have it home, and so would her mother.",
+      "desc": "Edda Fairvoice, a student bard, left her lute wedged in the rocks of Lost Echo Cave while hiding from blind hunters that track by sound.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "lost_echo_cave",
+          "text": "Enter Lost Echo Cave"
+        },
+        {
+          "type": "retrieve",
+          "place": "lost_echo_cave",
+          "placement": "structure",
+          "relic": "plr_lost_echo_cave_lute",
+          "text": "Find Edda's lute",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "count": 3
+            }
+          ],
+          "journal": "The lute was where Edda left it. Her last candle was beside it, burned down to nothing."
+        },
+        {
+          "type": "kill",
+          "place": "lost_echo_cave",
+          "placement": "structure",
+          "text": "Silence the Listener",
+          "spawn": [
+            {
+              "type": "skycraft:falmer",
+              "name": "The Listener",
+              "target": true,
+              "boss": true,
+              "hp": 1.8
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 240,
+        "items": [
+          "skycraft:elven_dagger"
+        ]
+      },
+      "outro": "The cave is quieter now. Somewhere in Solitude, the Bards College will want Edda's lute back on its wall.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_robbers_gorge",
+      "title": "Cutting the Rope",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "The folk at Crabber's Shanty can't get their catch downriver without paying Brenna's toll in Robber's Gorge. One in five, and their boots if they argue. Somebody ought to cut that rope.",
+      "desc": "Bandits led by Brenna Toll-Taker have strung a rope across the river at Robber's Gorge and tax everyone who passes.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "robbers_gorge",
+          "text": "Go to Robber's Gorge"
+        },
+        {
+          "type": "clear",
+          "place": "robbers_gorge",
+          "text": "Drive off the toll-takers",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "robbers_gorge",
+          "text": "Defeat Brenna Toll-Taker",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Brenna Toll-Taker",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            }
+          ],
+          "journal": "The toll rope is cut. Hroald of Crabber's Shanty can have his hat back."
+        }
+      ],
+      "rewards": {
+        "gold": 180,
+        "items": [
+          "minecraft:arrow*16"
+        ]
+      },
+      "outro": "The river runs free again, and the fishers no longer cross barefoot.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_darkshade",
+      "title": "Receipts in the Moss",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "An herbalist ran out of Darkshade with spriggans on his heels and left his receipt book behind. Twenty years of potion-craft in that book. He'll pay, if you can face the thing with the antlers.",
+      "desc": "The herbalist Ardwen Leafwright fled Darkshade and left behind his book of alchemical receipts. An ancient spriggan guards the inner pool.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "darkshade",
+          "text": "Enter Darkshade"
+        },
+        {
+          "type": "kill",
+          "place": "darkshade",
+          "placement": "structure",
+          "text": "Face the Thornfather at the inner pool",
+          "spawn": [
+            {
+              "type": "skycraft:spriggan",
+              "name": "The Thornfather",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            },
+            {
+              "type": "skycraft:spriggan",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "darkshade",
+          "placement": "structure",
+          "relic": "plr_darkshade_journal",
+          "text": "Recover Ardwen's receipt book",
+          "journal": "The receipt book was lying by the pool, open, as if something had been reading it."
+        }
+      ],
+      "rewards": {
+        "gold": 150,
+        "items": [
+          "skycraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "Ardwen's receipts include three new ones, written in a hand that is not his and in an ink that smells of sap.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_arkngthamz",
+      "title": "The Fourth Harmonic",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "requires": [
+        "level:14"
+      ],
+      "pitch": "A scholar from Winterhold went down into Arkngthamz with a crystal lens to measure the ruin's singing. The Orcs of Dushnikh Yal brought his bones back up. The lens is still in the singing hall, and the College would pay well for it.",
+      "desc": "Magister Avidius Pell died in Arkngthamz. His Tonal Lens remains in the lower chamber, where the Dwemer machines wake when the stone sings.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "arkngthamz",
+          "text": "Descend into Arkngthamz"
+        },
+        {
+          "type": "clear",
+          "place": "arkngthamz",
+          "placement": "structure",
+          "text": "Destroy the machines guarding the singing hall",
+          "spawn": [
+            {
+              "type": "skycraft:dwarven_spider",
+              "count": 3
+            },
+            {
+              "type": "skycraft:dwarven_sphere",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "arkngthamz",
+          "placement": "structure",
+          "relic": "plr_arkngthamz_lens",
+          "text": "Recover Pell's Tonal Lens",
+          "spawn": [
+            {
+              "type": "skycraft:dwarven_centurion",
+              "name": "Tonal Warden",
+              "count": 1,
+              "hp": 1.2
+            }
+          ],
+          "journal": "Through the lens, the ruin's song is clear: a single long note, rising. It sounds almost like a question."
+        }
+      ],
+      "rewards": {
+        "gold": 300,
+        "items": [
+          "skycraft:soul_gem_common"
+        ]
+      },
+      "outro": "The Orcs of Dushnikh Yal say the stone sings softer since the lens left it. Their forge burns hotter for it.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_sunderstone_gorge",
+      "title": "Close the Door, and Close It Well",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Runil sent a young acolyte to bless the falls at Sunderstone Gorge. The boy found the barrow's seal broken and went in to set it right. He hasn't come back, and the water's still grey.",
+      "desc": "The seal of Arkay over the inner door of Sunderstone Gorge has been pried loose and carried inside. Acolyte Sigvar went in after it. Sunder Grey-Hand walks.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "sunderstone_gorge",
+          "text": "Enter the barrow at Sunderstone Gorge"
+        },
+        {
+          "type": "kill",
+          "place": "sunderstone_gorge",
+          "placement": "structure",
+          "text": "Put Sunder Grey-Hand back in his grave",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Sunder Grey-Hand",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "sunderstone_gorge",
+          "placement": "structure",
+          "relic": "plr_sunderstone_gorge_seal",
+          "text": "Recover the Seal-Stone of Arkay",
+          "journal": "Sigvar's body lay beside the seal-stone, his hand still on it. He had nearly made it to the door."
+        }
+      ],
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:silver_ring"
+        ]
+      },
+      "outro": "Runil will have the seal-stone reset at the inner door, and Sigvar buried in the Falkreath yard with full rites.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_bilegulch_mine",
+      "title": "The Founder's Pick",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "The Orcs at Bilegulch lost their founder's pick to a troll in the deep shaft. Old Blackhide, they call it. Bring the pick back and they'll call you clan. That's worth more than gold, with Orcs.",
+      "desc": "A troll called Old Blackhide has taken over the lower shaft of Bilegulch Mine and stolen the clan's founding pick.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bilegulch_mine",
+          "text": "Go to Bilegulch Mine"
+        },
+        {
+          "type": "kill",
+          "place": "bilegulch_mine",
+          "placement": "structure",
+          "text": "Kill Old Blackhide in the lower shaft",
+          "spawn": [
+            {
+              "type": "skycraft:troll",
+              "name": "Old Blackhide",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "bilegulch_mine",
+          "placement": "structure",
+          "relic": "plr_bilegulch_mine_pick",
+          "text": "Recover Old Mother Bilek's pick",
+          "journal": "The pick was in the troll's nest, its haft gnawed but whole. It belongs on the hook by the shaft."
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "skycraft:orcish_war_axe"
+        ]
+      },
+      "outro": "Shagrol hangs the pick back by the shaft and, after a long silence, offers you a place at the fire.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_moss_mother_cavern",
+      "title": "Keep the Fire Going",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Hroa of Hunter's Rest followed a wounded stag into Moss Mother Cavern. Her brother Asvald went in after her. Neither came out, and the hearth at the Rest has gone cold.",
+      "desc": "Hroa and her brother Asvald vanished into Moss Mother Cavern. Asvald asked that whoever finds Hroa's ash bow lay it on the hearth at Hunter's Rest.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "moss_mother_cavern",
+          "text": "Enter Moss Mother Cavern"
+        },
+        {
+          "type": "kill",
+          "place": "moss_mother_cavern",
+          "placement": "structure",
+          "text": "Destroy the Moss Mother",
+          "spawn": [
+            {
+              "type": "skycraft:spriggan",
+              "name": "The Moss Mother",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            },
+            {
+              "type": "skycraft:spriggan",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "moss_mother_cavern",
+          "placement": "structure",
+          "relic": "plr_moss_mother_cavern_bow",
+          "text": "Find Hroa's ash bow",
+          "journal": "Brother and sister lie together under the roots at the back of the cavern. The bow was in Hroa's hands."
+        },
+        {
+          "type": "go",
+          "place": "hunters_rest",
+          "text": "Lay Hroa's bow on the hearth at Hunter's Rest",
+          "actions": "take:plr_moss_mother_cavern_bow"
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "skycraft:fur_boots"
+        ]
+      },
+      "outro": "The bow rests on the hearth. Someone will light the fire again; hunters always do.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_embershard_mine",
+      "title": "Pay Day at Embershard",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Bandits under Skarn Two-Pick ran the Embershard miners off the day after payday. Two hundred and forty septims of honest wages, sitting in a bandit's room. The miners will share it with whoever gets it back.",
+      "desc": "The foreman of Embershard Mine asks that someone recover the miners' paychest from the bandit Skarn Two-Pick.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "embershard_mine",
+          "text": "Go to Embershard Mine"
+        },
+        {
+          "type": "clear",
+          "place": "embershard_mine",
+          "placement": "structure",
+          "text": "Clear the bandits from the mine",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "embershard_mine",
+          "placement": "structure",
+          "text": "Defeat Skarn Two-Pick",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Skarn Two-Pick",
+              "target": true,
+              "boss": true,
+              "hp": 1.2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "embershard_mine",
+          "placement": "structure",
+          "relic": "plr_embershard_mine_paychest",
+          "text": "Take back the miners' paychest",
+          "journal": "The paychest is still sealed. Skarn kept his word about Fredas, at least."
+        }
+      ],
+      "rewards": {
+        "gold": 110,
+        "items": [
+          "skycraft:iron_sword"
+        ]
+      },
+      "outro": "The miners of Embershard drift back to their shafts, and the foreman sends you a share and a promise of cheap ore.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_bannermist_tower",
+      "title": "Lights in the Mist",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Every time the lamps blink at Bannermist Tower, a cart goes missing on the mill road. Put those lamps out and the Knifepoint gang goes blind.",
+      "desc": "The bandits at Bannermist Tower signal passing carts to their gang on Knifepoint Ridge. Their signal lamp is the key to it all.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bannermist_tower",
+          "text": "Go to Bannermist Tower"
+        },
+        {
+          "type": "clear",
+          "place": "bannermist_tower",
+          "text": "Drive out the lookouts",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "bannermist_tower",
+          "relic": "plr_bannermist_tower_lamp",
+          "text": "Take the signal lamp",
+          "journal": "With the signal lamp gone, Knifepoint Ridge will be watching a dark tower and wondering why."
+        }
+      ],
+      "rewards": {
+        "gold": 110
+      },
+      "outro": "Carts reach Half-Moon Mill again without being counted on the way.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_knifepoint_ridge",
+      "title": "Siddgeir's Bounty",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "The Jarl's put a price on Hjolfrid Ashpine, at last. She runs Knifepoint Ridge and she killed the carter Bolli and his son. Bailiff Eirik pays on proof.",
+      "desc": "Jarl Siddgeir has posted a bounty on the bandit leader Hjolfrid Ashpine of Knifepoint Ridge. Bailiff Eirik in Falkreath will pay on proof of her death.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "knifepoint_ridge",
+          "text": "Go to Knifepoint Ridge"
+        },
+        {
+          "type": "kill",
+          "place": "knifepoint_ridge",
+          "text": "Kill Hjolfrid Ashpine",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Hjolfrid Ashpine",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:bandit",
+              "count": 3
+            }
+          ],
+          "actions": "relic:plr_knifepoint_ridge_knife",
+          "journal": "Hjolfrid fought to the last. Her scorched-handled knife will serve as proof."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_eirik",
+          "relic": "plr_knifepoint_ridge_knife",
+          "text": "Bring proof to Bailiff Eirik in Falkreath",
+          "topic": "Hjolfrid Ashpine is dead. Here's her knife.",
+          "reply": "That's her knife, right enough. Bolli's widow will sleep tonight. The Jarl will claim the credit, naturally. Here's your purse, and here's my thanks, which is worth less but is at least sincere."
+        }
+      ],
+      "rewards": {
+        "gold": 250,
+        "items": [
+          "skycraft:steel_dagger"
+        ]
+      },
+      "outro": "The Half-Moon road is quieter. Somewhere in Bruma, a man waits for a letter that will never come.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_orphan_rock",
+      "title": "The Lost Are Ours",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Ragna lights a beacon on North Skybound Watch every night for her brother. He went to the hagraven on Orphan Rock for a cure. Someone ought to go up there and find out what it cost him.",
+      "desc": "A hagraven called Mother Thornclaw holds Orphan Rock and keeps the old cradle charm that once protected lost children. Ragna's brother paid her price and never came home.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "orphan_rock",
+          "text": "Climb to Orphan Rock"
+        },
+        {
+          "type": "kill",
+          "place": "orphan_rock",
+          "text": "Slay Mother Thornclaw",
+          "spawn": [
+            {
+              "type": "skycraft:hagraven",
+              "name": "Mother Thornclaw",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            },
+            {
+              "type": "minecraft:witch",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "orphan_rock",
+          "relic": "plr_orphan_rock_charm",
+          "text": "Take back the birchwood cradle charm",
+          "journal": "Ragna's brother lies at the foot of the rock, at peace. The cradle charm can go back where the foundling hung it."
+        },
+        {
+          "type": "go",
+          "place": "north_skybound_watch",
+          "text": "Tell Ragna at North Skybound Watch, and give the charm to her fire",
+          "actions": "take:plr_orphan_rock_charm"
+        }
+      ],
+      "rewards": {
+        "gold": 200,
+        "items": [
+          "skycraft:amulet_of_mara"
+        ]
+      },
+      "outro": "The beacon on North Skybound Watch burns one more night, and then Ragna lets it go out.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_north_shriekwind_bastion",
+      "title": "The Brother Who Shouts",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "The wind from North Shriekwind is calling a name, and the guard who heard it won't go back. Old Hjalti's woken up, Runil thinks, and means to fetch his brother from the south barrow.",
+      "desc": "The draugr chieftain Hjalti stirs in North Shriekwind Bastion and calls for his brother Eyvind. The barrow door stands open.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "north_shriekwind_bastion",
+          "text": "Enter North Shriekwind Bastion"
+        },
+        {
+          "type": "clear",
+          "place": "north_shriekwind_bastion",
+          "placement": "structure",
+          "text": "Cut down Hjalti's honour guard",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "north_shriekwind_bastion",
+          "placement": "structure",
+          "text": "Silence Hjalti Shriek-Tongue",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Hjalti Shriek-Tongue",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            }
+          ],
+          "journal": "Hjalti's last shout was his brother's name. The wind over Falkreath is only wind again."
+        }
+      ],
+      "rewards": {
+        "gold": 190,
+        "items": [
+          "skycraft:studded_helmet"
+        ]
+      },
+      "outro": "Guardsman Leif takes the north road patrol again, and admits the wind sounds almost friendly now.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_south_shriekwind_bastion",
+      "title": "The Seventh Alcove",
+      "region": "skyrim/falkreath",
+      "start": "npc:pln_skyrim_falkreath_hilde",
+      "offer": "You look worried, Sister.",
+      "pitch": "Asta took her husband's ashes up to South Shriekwind to lay them with his family. Five days ago. I told her it wasn't safe. She told me a promise is a promise. Please, go and see. If she's lost, bring back something of hers so I can pray over it.",
+      "desc": "The widow Asta took her husband's ashes to the seventh alcove of South Shriekwind Bastion and has not returned. Sister Hilde of Falkreath fears the worst.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "south_shriekwind_bastion",
+          "text": "Enter South Shriekwind Bastion"
+        },
+        {
+          "type": "clear",
+          "place": "south_shriekwind_bastion",
+          "placement": "structure",
+          "text": "Clear the draugr from the long hall",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            },
+            {
+              "type": "skycraft:draugr",
+              "name": "Eyvind's Watcher",
+              "count": 1,
+              "hp": 1.3
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "south_shriekwind_bastion",
+          "placement": "structure",
+          "relic": "plr_south_shriekwind_bastion_beads",
+          "text": "Find what became of Asta",
+          "journal": "Asta reached the seventh alcove. The urn sits in it, as she promised. She lies just beneath, her prayer beads in her hand."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_hilde",
+          "relic": "plr_south_shriekwind_bastion_beads",
+          "text": "Bring Asta's prayer beads to Sister Hilde",
+          "topic": "Asta kept her promise. These were in her hand.",
+          "reply": "She made it, then. She put him where he wanted to be, and lay down beside him. The seventh alcove was waiting for someone, they always said. I suppose it was waiting for two. Thank you. I'll pray for them both."
+        }
+      ],
+      "rewards": {
+        "gold": 170,
+        "items": [
+          "skycraft:amulet_of_mara"
+        ]
+      },
+      "outro": "Sister Hilde hangs Asta's beads over the altar of the Hall of the Dead, and lights two candles each Sundas.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_pinewatch",
+      "title": "Under the Floorboards",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Solaf at Gray Pine Goods lost a lockbox with his debt ledger in it, and he swears the thief ran to Pinewatch. Nice family there. Always wearing new boots. Bailiff Eirik will want that ledger before someone starts blackmailing the town.",
+      "desc": "The lockbox stolen from Gray Pine Goods holds a ledger of everyone in Falkreath who owes the shop money. The trail leads to the cabin at Pinewatch.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "pinewatch",
+          "text": "Visit the family at Pinewatch"
+        },
+        {
+          "type": "clear",
+          "place": "pinewatch",
+          "placement": "structure",
+          "text": "Deal with the thieves under the cabin",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 3
+            },
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Cousin Arngeir",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "pinewatch",
+          "placement": "structure",
+          "relic": "plr_pinewatch_lockbox",
+          "text": "Recover the Gray Pine lockbox"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_eirik",
+          "relic": "plr_pinewatch_lockbox",
+          "text": "Bring the lockbox to Bailiff Eirik",
+          "topic": "Solaf's lockbox. The Pinewatch family were thieves.",
+          "reply": "Under the floor of a cabin I've had stew in. Gods. I'll return this to Solaf, and I'll make sure the ledger is all he gets back. Some of those debts are older than the people who owe them."
+        }
+      ],
+      "rewards": {
+        "gold": 160,
+        "items": [
+          "skycraft:lockpick*5"
+        ]
+      },
+      "outro": "Gray Pine Goods has its ledger back, and Pinewatch has a new and very empty cellar.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_greywater_grotto",
+      "title": "White Cap for a Sick Boy",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "pitch": "Ragnhild the herb-wife went into Greywater Grotto for white cap mushrooms. Brynja's boy at the mill is sick and needs them. Ragnhild hasn't come back.",
+      "desc": "The herb-wife Ragnhild hid her satchel of white cap in Greywater Grotto before a great frostbite spider caught her. The mushrooms are meant for Brynja's sick son at Half-Moon Mill.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "greywater_grotto",
+          "text": "Enter Greywater Grotto"
+        },
+        {
+          "type": "kill",
+          "place": "greywater_grotto",
+          "placement": "structure",
+          "text": "Kill the Greywater Broodmother",
+          "spawn": [
+            {
+              "type": "skycraft:frostbite_spider",
+              "name": "Greywater Broodmother",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            },
+            {
+              "type": "skycraft:frostbite_spider",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "greywater_grotto",
+          "placement": "structure",
+          "relic": "plr_greywater_grotto_satchel",
+          "text": "Find Ragnhild's satchel in the dry cleft"
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_brynja",
+          "relic": "plr_greywater_grotto_satchel",
+          "text": "Bring the white cap to Brynja at Half-Moon Mill",
+          "topic": "Ragnhild gathered these for your boy. She didn't make it out.",
+          "reply": "White cap. Boiled in milk, three days. She told me that a dozen times. Gods keep her. I'll put the pot on now. And I'll pay for her burial; she'd have hated that, so I'll do it twice as grand."
+        }
+      ],
+      "rewards": {
+        "gold": 140,
+        "items": [
+          "skycraft:soul_gem_lesser"
+        ]
+      },
+      "outro": "Brynja's boy is up and about by Turdas, complaining about the taste of mushroom milk.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_fort_neugrad",
+      "title": "The Payroll Never Arrived",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "requires": [
+        "level:10"
+      ],
+      "pitch": "When the Legion left Fort Neugrad, Captain Broadshield stayed behind with the garrison's payroll. Eight hundred septims. He calls his men the Free Company now. I call them thieves with good boots.",
+      "desc": "Captain Ulfgar Broadshield and his deserters hold Fort Neugrad and the Legion's payroll coffer, which lies under the third flagstone from the cellar stair.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "fort_neugrad",
+          "text": "Go to Fort Neugrad"
+        },
+        {
+          "type": "clear",
+          "place": "fort_neugrad",
+          "placement": "structure",
+          "text": "Break the Free Company",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "fort_neugrad",
+          "placement": "structure",
+          "text": "Defeat Captain Ulfgar Broadshield",
+          "spawn": [
+            {
+              "type": "skycraft:bandit_chief",
+              "name": "Captain Ulfgar Broadshield",
+              "target": true,
+              "boss": true,
+              "hp": 1.6
+            }
+          ],
+          "actions": "relic:plr_fort_neugrad_coffer",
+          "journal": "Broadshield's key opened the coffer under the third flagstone. The Legion's eight hundred septims are all there."
+        },
+        {
+          "type": "talk",
+          "npc": "pln_skyrim_falkreath_eirik",
+          "text": "Decide what to do with the payroll",
+          "topic": "I've recovered the Legion's payroll from Fort Neugrad.",
+          "reply": "Eight hundred septims of Legion silver. The Legion will want it back. The Stormcloaks would find it very useful. And you, I imagine, could find a use for it too.",
+          "choices": [
+            {
+              "label": "Return it to the Legion through the hold.",
+              "reply": "Honest. I'll see it goes west to the camp under guard, and I'll see your name goes with it.",
+              "actions": "take:plr_fort_neugrad_coffer;flag:fk_neugrad_returned"
+            },
+            {
+              "label": "I'm keeping it. They abandoned it.",
+              "reply": "I didn't hear that. I didn't see the coffer. Get it out of my sight before I remember I'm a bailiff.",
+              "actions": "flag:fk_neugrad_kept"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:steel_chestplate"
+        ]
+      },
+      "outro": "A prisoner named Pell walks out of Fort Neugrad's cells into daylight for the first time in weeks, blinking.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_halldirs_cairn",
+      "title": "Signy's Pendant",
+      "region": "skyrim/falkreath",
+      "start": "npc:pln_skyrim_falkreath_bersi",
+      "offer": "You look like you haven't slept, carpenter.",
+      "pitch": "My boy Thorvi went into Halldir's Cairn on a dare. He came out, thank Arkay, but he left his mother's pendant behind. He says a dead man in an iron mask took it from his neck. He hasn't slept a night since. Please. Bring it back, and maybe the dreams will stop.",
+      "desc": "Bersi's son Thorvi lost his dead mother's pendant to the warden of Halldir's Cairn. Bersi believes the boy's nightmares will end only when it is returned.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "halldirs_cairn",
+          "text": "Enter Halldir's Cairn"
+        },
+        {
+          "type": "kill",
+          "place": "halldirs_cairn",
+          "placement": "structure",
+          "text": "Defeat the warden in the iron mask",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Warden of the Cairn",
+              "target": true,
+              "boss": true,
+              "hp": 1.4
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "halldirs_cairn",
+          "placement": "structure",
+          "relic": "plr_halldirs_cairn_pendant",
+          "text": "Take Signy's pendant from the warden",
+          "journal": "The warden wore a dozen trinkets taken from trespassers over the centuries. The little bronze hammer was the newest."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_bersi",
+          "relic": "plr_halldirs_cairn_pendant",
+          "text": "Return the pendant to Bersi in Falkreath",
+          "topic": "I have Signy's pendant.",
+          "reply": "That's hers. That's... Thorvi! Come here, son. No, it's all right, it's warm now, see? I'll make a box for it. A good box, with a lock. And I'll make you a bow, since you're so set on that archer girl in the hills."
+        }
+      ],
+      "rewards": {
+        "gold": 180,
+        "items": [
+          "skycraft:steel_war_axe"
+        ]
+      },
+      "outro": "Thorvi sleeps through the night for the first time in a month, and wakes asking when he can start archery lessons.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_ancients_ascent",
+      "title": "The Dragon of the Ascent",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "requires": [
+        "level:18"
+      ],
+      "pitch": "There's a dragon roosting on Ancient's Ascent. It came up out of the old mound below Greywater Grotto. Grimvar the hunter went up to kill it. His bow came down without him.",
+      "desc": "The dragon Sahlokvir, raised from the mound below Greywater Grotto, nests on Ancient's Ascent and preys on the southern roads of Falkreath.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "ancients_ascent",
+          "text": "Climb Ancient's Ascent"
+        },
+        {
+          "type": "kill",
+          "place": "ancients_ascent",
+          "text": "Slay the dragon Sahlokvir",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "name": "Sahlokvir",
+              "target": true,
+              "boss": true,
+              "hp": 1.0
+            }
+          ],
+          "journal": "Sahlokvir is dead. Grimvar will not get his song at Dead Man's Drink, but someone will."
+        }
+      ],
+      "rewards": {
+        "gold": 400,
+        "items": [
+          "skycraft:soul_gem_greater"
+        ]
+      },
+      "outro": "The shepherds south of Helgen bring their flocks back to the high pastures, and the Falkreath bards argue over who will write the song.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_southfringe_sanctum",
+      "title": "The Ledger of Names",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "requires": [
+        "level:12"
+      ],
+      "pitch": "The necromancer who robbed the Falkreath graves worked for a Dunmer woman at Southfringe Sanctum. She keeps a ledger of every body she's taken. Ingrid the gravedigger would give a great deal to read it, and to bring her dead home.",
+      "desc": "Velmira Sarys, mistress of Southfringe Sanctum, has taken the dead of the Falkreath graveyard for some work in the sanctum's lower vault. Her ledger lists every name.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "southfringe_sanctum",
+          "text": "Find Southfringe Sanctum"
+        },
+        {
+          "type": "clear",
+          "place": "southfringe_sanctum",
+          "placement": "structure",
+          "text": "Put the stolen dead to rest",
+          "spawn": [
+            {
+              "type": "minecraft:zombie",
+              "count": 3
+            },
+            {
+              "type": "skycraft:necromancer",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "southfringe_sanctum",
+          "placement": "structure",
+          "text": "Defeat Velmira Sarys",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "name": "Velmira Sarys",
+              "target": true,
+              "boss": true,
+              "hp": 1.7,
+              "dmg": 1.2
+            }
+          ],
+          "actions": "relic:plr_southfringe_sanctum_ledger",
+          "journal": "Velmira is dead. Her ledger lists every body she took from Falkreath, and a child called Sigrid among them."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_ingrid",
+          "relic": "plr_southfringe_sanctum_ledger",
+          "text": "Bring the ledger of names to Ingrid in Falkreath",
+          "topic": "Velmira Sarys is dead. Here is her ledger of every grave she robbed.",
+          "reply": "Hrofar. Asgerd. The cooper's little one, Sigrid. I'll go down with a cart and Runil, and we'll bring them all home, every one. And I'll dig the holes myself, and I'll dig them deep. Thank you. The dead can't say it, so I will."
+        }
+      ],
+      "rewards": {
+        "gold": 300,
+        "items": [
+          "skycraft:spell_tome_lesser_ward"
+        ]
+      },
+      "outro": "Falkreath holds a second funeral for its stolen dead. The whole town comes, and even the Jarl.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_bloodlet_throne",
+      "title": "The Red Tithe",
+      "region": "skyrim/falkreath",
+      "start": "manual",
+      "requires": [
+        "level:15"
+      ],
+      "pitch": "Travellers vanish on the Pale Pass road below Bloodlet Throne. A pilgrim smuggled a letter out: vampires, a dozen of them, and their lady writes down every name. Bailiff Eirik needs that list, so the families at least know.",
+      "desc": "Lady Arnvor's vampire court at Bloodlet Throne takes a tithe of travellers from the Pale Pass road and records each one on the Red Tithe Roll.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bloodlet_throne",
+          "text": "Go to Bloodlet Throne, by day if you are wise"
+        },
+        {
+          "type": "clear",
+          "place": "bloodlet_throne",
+          "placement": "structure",
+          "text": "Clear the vampire court",
+          "spawn": [
+            {
+              "type": "skycraft:vampire",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "bloodlet_throne",
+          "placement": "structure",
+          "text": "Destroy Lady Arnvor",
+          "spawn": [
+            {
+              "type": "skycraft:vampire",
+              "name": "Lady Arnvor of the Throne",
+              "target": true,
+              "boss": true,
+              "hp": 2.0,
+              "dmg": 1.3
+            }
+          ],
+          "actions": "relic:plr_bloodlet_throne_roll",
+          "journal": "Lady Arnvor is ash. The Red Tithe Roll was on her table, beside a cup of something that was not wine."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_eirik",
+          "relic": "plr_bloodlet_throne_roll",
+          "text": "Bring the Red Tithe Roll to Bailiff Eirik",
+          "topic": "Bloodlet Throne is cleared. This is their list of the taken.",
+          "reply": "Hallvard the pilgrim. The Legion courier we wrote off as a deserter. The miller's boy who came home pale and won't say why. Gods. Every family on this list deserves to know. I'll read it out in the square myself, and the Jarl can stop me if he dares."
+        }
+      ],
+      "rewards": {
+        "gold": 350,
+        "items": [
+          "skycraft:amulet_of_talos"
+        ]
+      },
+      "outro": "The names on the Red Tithe Roll are read aloud in Falkreath's square, and the Pale Pass road is a little less quiet at night.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_the_lady_stone",
+      "title": "A Comb in the Shallows",
+      "region": "skyrim/falkreath",
+      "start": "npc:pln_skyrim_falkreath_brynja",
+      "offer": "Who's the wreath for?",
+      "pitch": "My mother. She was wed at the Lady Stone and dropped her bone comb in the shallows there. Father swore he'd find it, every spring for thirty years. He never did. He's too old to row now, and I'm too busy to dive. If you're out on the lake... look, would you?",
+      "desc": "Brynja's mother Ingrun dropped her wedding comb in the shallows beside the Lady Stone. Her father Ottar searched for it every spring for thirty years.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_lady_stone",
+          "text": "Row out to the Lady Stone"
+        },
+        {
+          "type": "retrieve",
+          "place": "the_lady_stone",
+          "offset": [
+            6,
+            4
+          ],
+          "relic": "plr_the_lady_stone_comb",
+          "text": "Search the shallows for Ingrun's comb",
+          "spawn": [
+            {
+              "type": "skycraft:slaughterfish",
+              "count": 2
+            }
+          ],
+          "journal": "The comb was wedged between two stones under the water, right where a careless bride might drop it, and right where a searching husband might never think to look."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_brynja",
+          "relic": "plr_the_lady_stone_comb",
+          "text": "Bring the comb to Brynja at Half-Moon Mill",
+          "topic": "I found your mother's comb.",
+          "reply": "Thirty years. Thirty springs he rowed out there. Oh, he'll be furious it was you and not him. And then he'll cry, and then he'll pretend he didn't. Thank you. I'll put it on Mother's stone, so she has it back."
+        }
+      ],
+      "rewards": {
+        "gold": 90,
+        "items": [
+          "skycraft:gold_ring"
+        ]
+      },
+      "outro": "Ottar the Wet rows out to the Lady Stone once more that year, this time with nothing to search for, and stays until the moons rise.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    },
+    {
+      "id": "pl_dragon_mound_evergreen_grove",
+      "title": "Holes of a Draconic Character",
+      "region": "skyrim/falkreath",
+      "start": "npc:pln_skyrim_falkreath_calvus",
+      "offer": "Holes of a draconic character?",
+      "pitch": "Precisely! The dragon mounds of this hold have opened, from the inside, all in one season. I sent my assistant Ennis to survey the one above Bilegulch Mine, and he has not returned. Retrace his steps for me: the mound by Evergreen Grove, then Sunderstone, then Bilegulch. Bring back his satchel, and if possible, Ennis.",
+      "desc": "Calvus Aterius, an Imperial antiquarian staying in Falkreath, is studying the opened dragon mounds of the hold. His assistant Ennis Hollowgate disappeared while surveying the mound above Bilegulch Mine.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "dragon_mound_evergreen_grove",
+          "text": "Examine the opened mound near Evergreen Grove"
+        },
+        {
+          "type": "go",
+          "place": "dragon_mound_sunderstone_gorge",
+          "text": "Follow Ennis's trail to the mound north of Sunderstone Gorge"
+        },
+        {
+          "type": "retrieve",
+          "place": "dragon_mound_bilegulch_mine",
+          "relic": "plr_dragon_mound_evergreen_grove_satchel",
+          "text": "Recover Ennis's satchel from the Bilegulch mound",
+          "spawn": [
+            {
+              "type": "skycraft:draugr",
+              "count": 3
+            }
+          ],
+          "journal": "Ennis's satchel was hidden in the rocks by the pit. Of Ennis there is no sign but a set of tracks heading toward the orc mine, and an empty honey jar."
+        },
+        {
+          "type": "deliver",
+          "npc": "pln_skyrim_falkreath_calvus",
+          "relic": "plr_dragon_mound_evergreen_grove_satchel",
+          "text": "Bring Ennis's satchel to Calvus in Falkreath",
+          "topic": "Ennis's satchel. His tracks led toward Bilegulch Mine.",
+          "reply": "The drawings! Splendid, splendid. And Ennis went to the orcs, did he? With honey? Then he is either their guest or their dinner, and either way he has finished the survey. Three mounds, one season, all opened from below. Something is waking them, friend. I must write to the Imperial Library at once."
+        }
+      ],
+      "rewards": {
+        "gold": 220,
+        "items": [
+          "skycraft:spell_tome_firebolt"
+        ]
+      },
+      "outro": "Some days later, Ennis Hollowgate walks into Falkreath smelling strongly of Orc mead, with a story about how honey is, in fact, a universal language.",
+      "why": [
+        "falkreath.L9.imperial_border",
+        "falkreath.L8.arkay_priests"
+      ]
+    }
+  ]
 }

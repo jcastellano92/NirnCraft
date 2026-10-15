@@ -1,0 +1,186 @@
+{
+  "id": "vulkwasten",
+  "why": [
+    "malabal_tor.L1.xylo_gorge",
+    "malabal_tor.L4.jungle_understorey",
+    "malabal_tor.L6.silvenar_seat"
+  ],
+  "sil": "valenwood-vulkwasten-plan",
+  "base": "none",
+  "overlay": "malabal_tor",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "malabal_tor",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "vulkwasten_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "vulkwasten_landmark",
+      "overlay": "malabal_tor"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "malabal_tor",
+      "name": "vulkwasten_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "vulkwasten_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "vulkwasten_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "vulkwasten_b_5",
+    "smithy": "vulkwasten_b_7"
+  },
+  "titles": {
+    "vulkwasten_b_1": "place.skycraft.vulkwasten Council & Seat Hall",
+    "vulkwasten_b_2": "place.skycraft.vulkwasten High Sanctuary",
+    "vulkwasten_b_3": "place.skycraft.vulkwasten Fighters & Wayfarers Hall",
+    "vulkwasten_b_4": "place.skycraft.vulkwasten Mages & Chroniclers Spire",
+    "vulkwasten_b_5": "place.skycraft.vulkwasten The Lantern & Hearth Inn",
+    "vulkwasten_b_6": "place.skycraft.vulkwasten The Traveler's Rest Tavern",
+    "vulkwasten_b_7": "place.skycraft.vulkwasten Master Forge & Armorer",
+    "vulkwasten_landmark": "High Seat of place.skycraft.vulkwasten",
+    "vulkwasten_plaza": "place.skycraft.vulkwasten Central Plaza"
+  },
+  "innKey": "vulkwasten_b_5"
+}

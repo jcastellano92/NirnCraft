@@ -46,7 +46,9 @@ public enum Theme implements StringRepresentable {
     STEPS("steps", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     SKY_HAVEN("sky_haven", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
     LABYRINTHIAN("labyrinthian", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
-    BLACKREACH("blackreach", Style.SURFACE, 0, 0, 0, 0, 0, 0, false);
+    BLACKREACH("blackreach", Style.SURFACE, 0, 0, 0, 0, 0, 0, false),
+    BRETON_KEEP_RUIN("breton_keep_ruin", Style.BUILT, 6, 9, 18, 26, 5, 7, true),
+    SCORPION_DEN("scorpion_den", Style.NATURAL, 6, 9, 22, 30, 4, 6, false);
 
     public static final Codec<Theme> CODEC = StringRepresentable.fromEnum(Theme::values);
 
@@ -91,7 +93,7 @@ public enum Theme implements StringRepresentable {
 
     /** Surface sites with a cellar or crypt below them (built as surface + underground pieces). */
     public boolean hasUndercroft() {
-        return this == FORT;
+        return this == FORT || this == BRETON_KEEP_RUIN;
     }
 
     /** Surface sites placed on open water or the shore rather than dry land. */

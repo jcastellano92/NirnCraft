@@ -1,0 +1,686 @@
+{
+  "region": "black_marsh/gideon",
+  "province": "black_marsh",
+  "line": "story_gideon",
+  "category": "main",
+  "title": "The Two Seals of Gideon",
+  "summary": "In the walled Imperial-style seat of Gideon, Lukiul townsfolk and An-Xileel wardens clash over the Old Governor's Vaults when flood-levee sluice-keys and charter grants are forged.",
+  "why": [
+    "gideon.L7.lukiul_townsfolk",
+    "gideon.L8.chapel_and_root_shrine",
+    "gideon.L9.lukiul_and_an_xileel"
+  ],
+  "hook": {
+    "kind": "road_notice",
+    "place": "gideon",
+    "places": [
+      "gideon",
+      "oblivion_gate_99",
+      "black_tooth_ruins",
+      "soulrest",
+      "slow_marsh_hist_grove",
+      "tsatso_rice_paddy",
+      "rockgrove",
+      "root_branch_cave",
+      "elossis_hut",
+      "seitee",
+      "dead_pool_village",
+      "oblivion_gate_47",
+      "naka_jeesei",
+      "hissmir",
+      "murkwater",
+      "hutan_tzel",
+      "glenbridge",
+      "stonewastes",
+      "red_song_village"
+    ],
+    "npc": "story_gideon_hook_npc",
+    "max_road_blocks": 600,
+    "rumour": "Someone opened the old Imperial flood-sluices above Gideon's rice levees in the dead of night, and both the Lukiul merchants and An-Xileel wardens are blaming each other.",
+    "notice": "GIDEON COURTHOUSE & LEVEE WATCH: Investigators wanted to inspect the Old Governor's Vaults and recover the bronze sluice-wheel charter."
+  },
+  "npcs": [
+    {
+      "id": "story_gideon_hook_npc",
+      "name": "Warden of Gideon",
+      "role": "guard",
+      "place": "gideon",
+      "greet": "Someone opened the old Imperial flood-sluices above Gideon's rice levees in the dead of night, and both the Lukiul merchants and An-Xileel wardens are blaming each other.",
+      "talk": [
+        "The trouble across Gideon began when sealed dispatches started bypassing Gideon.",
+        "If you mean to help the Walled Seat of Gideon, start by checking the trail between Gideon and The Stable Steed."
+      ]
+    },
+    {
+      "id": "story_gideon_envoy_npc",
+      "name": "Chronicler of Gideon",
+      "role": "scholar",
+      "place": "the_stable_steed",
+      "greet": "Keep your voice low—everyone at The Stable Steed is watching who asks after the old seals.",
+      "talk": [
+        "We traced the couriers from The Stable Steed toward Twyllbek Ruins before they vanished into the brush.",
+        "Bring any ciphered tallies back to Gideon so Magistrate Keshu-Verrus can see the proof."
+      ]
+    },
+    {
+      "id": "story_gideon_scout_npc",
+      "name": "Outrider of Twyllbek Ruins",
+      "role": "scout",
+      "place": "twyllbek_ruins",
+      "greet": "You made good time from The Stable Steed. The saboteurs have fortified the approaches near Gideon Courthouse.",
+      "talk": [
+        "Their ringleader is holding the inner chamber at Gideon Courthouse with a picked guard.",
+        "Once Gideon Courthouse is cleared, return to Gideon to seal the regional compact."
+      ]
+    },
+    {
+      "id": "story_gideon_steward_npc",
+      "name": "Speaker of Gideon",
+      "role": "steward",
+      "place": "gideon",
+      "greet": "Magistrate Keshu-Verrus awaits word on whether the crisis in Gideon has been contained.",
+      "talk": [
+        "The elders of Gideon have prepared the concord table for your return.",
+        "All of Gideon owes you a debt for standing between Gideon and ruin."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_gideon_boss_01": {
+      "name": "Usurper-Captain of Gideon (1)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "gideon",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_02": {
+      "name": "Usurper-Captain of The Stable Steed (2)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "the_stable_steed",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_03": {
+      "name": "Usurper-Captain of Twyllbek Ruins (3)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "twyllbek_ruins",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_04": {
+      "name": "Usurper-Captain of Gideon Courthouse (4)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "gideon_courthouse",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_05": {
+      "name": "Usurper-Captain of Mire Song Burrow (5)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "mire_song_burrow",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_06": {
+      "name": "Usurper-Captain of Bog Scale Cave (6)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "bog_scale_cave",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_07": {
+      "name": "Usurper-Captain of Slow Claw Kwama Mine (7)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "slow_claw_kwama_mine",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    },
+    "story_gideon_boss_08": {
+      "name": "Usurper-Captain of Salvitto Estate (8)",
+      "rank": "boss",
+      "type": "skycraft:bandit_chief",
+      "place": "salvitto_estate",
+      "weapon": "iron_sword",
+      "hp_mult": 2.8,
+      "dmg_mult": 1.6
+    }
+  },
+  "scenes": {
+    "story_gideon_scene_01": [
+      "Warden of Gideon: Examine these marks recovered near Gideon—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Gideon and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Gideon, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_02": [
+      "Warden of Gideon: Examine these marks recovered near The Stable Steed—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between The Stable Steed and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at The Stable Steed, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_03": [
+      "Warden of Gideon: Examine these marks recovered near Twyllbek Ruins—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Twyllbek Ruins and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Twyllbek Ruins, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_04": [
+      "Warden of Gideon: Examine these marks recovered near Gideon Courthouse—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Gideon Courthouse and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Gideon Courthouse, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_05": [
+      "Warden of Gideon: Examine these marks recovered near Mire Song Burrow—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Mire Song Burrow and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Mire Song Burrow, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_06": [
+      "Warden of Gideon: Examine these marks recovered near Bog Scale Cave—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Bog Scale Cave and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Bog Scale Cave, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_07": [
+      "Warden of Gideon: Examine these marks recovered near Slow Claw Kwama Mine—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Slow Claw Kwama Mine and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Slow Claw Kwama Mine, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_08": [
+      "Warden of Gideon: Examine these marks recovered near Salvitto Estate—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Salvitto Estate and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Salvitto Estate, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_09": [
+      "Warden of Gideon: Examine these marks recovered near Hist Stride Camp—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Hist Stride Camp and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Hist Stride Camp, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_10": [
+      "Warden of Gideon: Examine these marks recovered near Otumi Ras Hut—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Otumi Ras Hut and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Otumi Ras Hut, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_11": [
+      "Warden of Gideon: Examine these marks recovered near Drift Tooth Grotto—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Drift Tooth Grotto and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Drift Tooth Grotto, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_12": [
+      "Warden of Gideon: Examine these marks recovered near Oblivion Gate 98—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Oblivion Gate 98 and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Oblivion Gate 98, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_13": [
+      "Warden of Gideon: Examine these marks recovered near Xal Irasotl—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Xal Irasotl and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Xal Irasotl, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_14": [
+      "Warden of Gideon: Examine these marks recovered near Castle Giovesse—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Castle Giovesse and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Castle Giovesse, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_15": [
+      "Warden of Gideon: Examine these marks recovered near Meikemei—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Meikemei and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Meikemei, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_16": [
+      "Warden of Gideon: Examine these marks recovered near Eazeis Hut—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Eazeis Hut and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Eazeis Hut, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_17": [
+      "Warden of Gideon: Examine these marks recovered near Sul Xan Ritual Site—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Sul Xan Ritual Site and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Sul Xan Ritual Site, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_18": [
+      "Warden of Gideon: Examine these marks recovered near Silt Stride Cave—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Silt Stride Cave and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Silt Stride Cave, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_19": [
+      "Warden of Gideon: Examine these marks recovered near Soft Fen Pit—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Soft Fen Pit and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Soft Fen Pit, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_20": [
+      "Warden of Gideon: Examine these marks recovered near Farmers Nook—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Farmers Nook and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Farmers Nook, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_21": [
+      "Warden of Gideon: Examine these marks recovered near The Silent Halls—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between The Silent Halls and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at The Silent Halls, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_22": [
+      "Warden of Gideon: Examine these marks recovered near Rellesel Retreat—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Rellesel Retreat and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Rellesel Retreat, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_23": [
+      "Warden of Gideon: Examine these marks recovered near Drift Scale Grotto—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Drift Scale Grotto and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Drift Scale Grotto, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_24": [
+      "Warden of Gideon: Examine these marks recovered near Plateau of the Traveler—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Plateau of the Traveler and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Plateau of the Traveler, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_25": [
+      "Warden of Gideon: Examine these marks recovered near Black Fang Clearing—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Black Fang Clearing and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Black Fang Clearing, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_26": [
+      "Warden of Gideon: Examine these marks recovered near Hist Scale Cave—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Hist Scale Cave and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Hist Scale Cave, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_27": [
+      "Warden of Gideon: Examine these marks recovered near Tur Jeens Hut—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Tur Jeens Hut and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Tur Jeens Hut, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_28": [
+      "Warden of Gideon: Examine these marks recovered near Gray Egg Ruins—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Gray Egg Ruins and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Gray Egg Ruins, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_29": [
+      "Warden of Gideon: Examine these marks recovered near Mud Whisper Pillar—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Mud Whisper Pillar and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Mud Whisper Pillar, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_30": [
+      "Warden of Gideon: Examine these marks recovered near Xi Tsei—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Xi Tsei and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Xi Tsei, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_31": [
+      "Warden of Gideon: Examine these marks recovered near Glenbridge—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Glenbridge and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Glenbridge, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_32": [
+      "Warden of Gideon: Examine these marks recovered near Stonewastes—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Stonewastes and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Stonewastes, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_33": [
+      "Warden of Gideon: Examine these marks recovered near Hutan Tzel—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Hutan Tzel and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Hutan Tzel, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_34": [
+      "Warden of Gideon: Examine these marks recovered near Glow Root Camp—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Glow Root Camp and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Glow Root Camp, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_35": [
+      "Warden of Gideon: Examine these marks recovered near Soft Leaf Hist Grove—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Soft Leaf Hist Grove and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Soft Leaf Hist Grove, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_36": [
+      "Warden of Gideon: Examine these marks recovered near Black Tree Hollow—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Black Tree Hollow and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Black Tree Hollow, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_37": [
+      "Warden of Gideon: Examine these marks recovered near Red Tail Burrow—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Red Tail Burrow and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Red Tail Burrow, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_38": [
+      "Warden of Gideon: Examine these marks recovered near Supo Giths Hut—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Supo Giths Hut and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Supo Giths Hut, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_39": [
+      "Warden of Gideon: Examine these marks recovered near Nahix Nushvu—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Nahix Nushvu and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Nahix Nushvu, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_40": [
+      "Warden of Gideon: Examine these marks recovered near Ushwa—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Ushwa and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Ushwa, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_41": [
+      "Warden of Gideon: Examine these marks recovered near Doomvault Porcixid—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Doomvault Porcixid and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Doomvault Porcixid, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_42": [
+      "Warden of Gideon: Examine these marks recovered near Fal Xocs Hut—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Fal Xocs Hut and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Fal Xocs Hut, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_43": [
+      "Warden of Gideon: Examine these marks recovered near Red Moon Grotto—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Red Moon Grotto and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Red Moon Grotto, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_44": [
+      "Warden of Gideon: Examine these marks recovered near Silt Pool Pit—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Silt Pool Pit and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Silt Pool Pit, then bring the recovered charter back to Gideon."
+    ],
+    "story_gideon_scene_45": [
+      "Warden of Gideon: Examine these marks recovered near Glenbridge Xanmeer—they match the cabal troubling Gideon.",
+      "Chronicler of Gideon: The seal impressions cite the old charters of the Walled Seat of Gideon word for word.",
+      "Outrider of Twyllbek Ruins: Our scouts spotted lantern-signals flashing between Glenbridge Xanmeer and Gideon Courthouse at dusk.",
+      "Speaker of Gideon: Strike swiftly at Glenbridge Xanmeer, then bring the recovered charter back to Gideon."
+    ]
+  },
+  "quests": [
+    {
+      "id": "story_gideon_01_opening",
+      "order": 1,
+      "title": "Floodwater on the Rice-Levees",
+      "region": "black_marsh/gideon",
+      "category": "main",
+      "giver": "story_gideon_hook_npc",
+      "start": "npc:story_gideon_hook_npc",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "gideon.L7.lukiul_townsfolk",
+        "gideon.L8.chapel_and_root_shrine"
+      ],
+      "summary": "Investigate the opening signs of the crisis between Gideon and The Stable Steed in Gideon.",
+      "places": [
+        "gideon",
+        "the_stable_steed"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "gideon",
+          "objective": "Speak with the Warden at Gideon and inspect the contested tallies"
+        },
+        {
+          "id": 20,
+          "place": "the_stable_steed",
+          "objective": "Examine the disturbed boundary markers at The Stable Steed"
+        },
+        {
+          "id": 30,
+          "place": "gideon",
+          "objective": "Return the recovered seal-impression to the Chronicler at Gideon"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "gideon",
+          "text": "Speak with the Warden at Gideon and inspect the contested tallies",
+          "scene": "story_gideon_scene_01"
+        },
+        {
+          "type": "go",
+          "place": "the_stable_steed",
+          "text": "Examine the disturbed boundary markers at The Stable Steed"
+        },
+        {
+          "type": "go",
+          "place": "gideon",
+          "text": "Return the recovered seal-impression to the Chronicler at Gideon"
+        }
+      ],
+      "consequence": "world_state:gideon_stage_1_exposed",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      }
+    },
+    {
+      "id": "story_gideon_02_trail",
+      "order": 2,
+      "title": "Chapel and Root-Shrine",
+      "region": "black_marsh/gideon",
+      "category": "main",
+      "giver": "story_gideon_envoy_npc",
+      "start": "auto",
+      "prereq": "story_gideon_01_opening",
+      "requires": [
+        "story_gideon_01_opening"
+      ],
+      "why": [
+        "gideon.L8.chapel_and_root_shrine",
+        "gideon.L9.lukiul_and_an_xileel"
+      ],
+      "summary": "Follow the conspirators' supply route from The Stable Steed to Twyllbek Ruins and seize their cipher-ledger.",
+      "places": [
+        "the_stable_steed",
+        "twyllbek_ruins"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "the_stable_steed",
+          "objective": "Track the night-couriers departing The Stable Steed"
+        },
+        {
+          "id": 20,
+          "place": "twyllbek_ruins",
+          "objective": "Drive off the cabal outriders at Twyllbek Ruins and seize their cipher-box"
+        },
+        {
+          "id": 30,
+          "place": "the_stable_steed",
+          "objective": "Deliver the cipher-box to the expedition chronicler at The Stable Steed"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "the_stable_steed",
+          "text": "Track the night-couriers departing The Stable Steed",
+          "scene": "story_gideon_scene_02"
+        },
+        {
+          "type": "clear",
+          "place": "twyllbek_ruins",
+          "text": "Drive off the cabal outriders at Twyllbek Ruins and seize their cipher-box",
+          "boss": "story_gideon_boss_01"
+        },
+        {
+          "type": "go",
+          "place": "the_stable_steed",
+          "text": "Deliver the cipher-box to the expedition chronicler at The Stable Steed"
+        }
+      ],
+      "consequence": "world_state:gideon_stage_2_cipher_seized",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      }
+    },
+    {
+      "id": "story_gideon_03_sanctum",
+      "order": 3,
+      "title": "The Old Governor's Key",
+      "region": "black_marsh/gideon",
+      "category": "main",
+      "giver": "story_gideon_scout_npc",
+      "start": "auto",
+      "prereq": "story_gideon_02_trail",
+      "requires": [
+        "story_gideon_02_trail"
+      ],
+      "why": [
+        "gideon.L9.lukiul_and_an_xileel",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "summary": "Secure the outer wards between Twyllbek Ruins and Gideon Courthouse to lay bare the cabal's stronghold.",
+      "places": [
+        "twyllbek_ruins",
+        "gideon_courthouse"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "twyllbek_ruins",
+          "objective": "Meet the outrider scout at Twyllbek Ruins to decode the sanctum approach"
+        },
+        {
+          "id": 20,
+          "place": "gideon_courthouse",
+          "objective": "Scout the fortified threshold at Gideon Courthouse and recover the ward-key"
+        },
+        {
+          "id": 30,
+          "place": "gideon",
+          "objective": "Carry the ward-key back to the council table at Gideon"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "twyllbek_ruins",
+          "text": "Meet the outrider scout at Twyllbek Ruins to decode the sanctum approach",
+          "scene": "story_gideon_scene_03"
+        },
+        {
+          "type": "go",
+          "place": "gideon_courthouse",
+          "text": "Scout the fortified threshold at Gideon Courthouse and recover the ward-key"
+        },
+        {
+          "type": "go",
+          "place": "gideon",
+          "text": "Carry the ward-key back to the council table at Gideon"
+        }
+      ],
+      "consequence": "world_state:gideon_stage_3_sanctum_located",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      }
+    },
+    {
+      "id": "story_gideon_04_finale",
+      "order": 4,
+      "title": "Concord of the Walled Seat",
+      "region": "black_marsh/gideon",
+      "category": "main",
+      "giver": "story_gideon_steward_npc",
+      "start": "auto",
+      "prereq": "story_gideon_03_sanctum",
+      "requires": [
+        "story_gideon_03_sanctum"
+      ],
+      "finale": true,
+      "why": [
+        "gideon.L7.lukiul_townsfolk",
+        "gideon.L10.old_governor_vaults"
+      ],
+      "summary": "Storm the cabal stronghold at Gideon Courthouse and witness Magistrate Keshu-Verrus seal the regional concord at Gideon.",
+      "places": [
+        "gideon_courthouse",
+        "gideon"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "gideon_courthouse",
+          "objective": "Storm the inner chamber at Gideon Courthouse and defeat the cabal ringleader"
+        },
+        {
+          "id": 20,
+          "place": "gideon_courthouse",
+          "objective": "Recover the stolen charter-seal of Gideon from Gideon Courthouse"
+        },
+        {
+          "id": 30,
+          "place": "gideon",
+          "objective": "Present the charter-seal at Gideon to restore peace across Gideon"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "gideon_courthouse",
+          "text": "Storm the inner chamber at Gideon Courthouse and defeat the cabal ringleader",
+          "boss": "story_gideon_boss_02"
+        },
+        {
+          "type": "go",
+          "place": "gideon_courthouse",
+          "text": "Recover the stolen charter-seal of Gideon from Gideon Courthouse"
+        },
+        {
+          "type": "go",
+          "place": "gideon",
+          "text": "Present the charter-seal at Gideon to restore peace across Gideon",
+          "scene": "story_gideon_scene_04"
+        }
+      ],
+      "consequence": "world_state:gideon_finale_concord_sealed",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Champion of Gideon"
+      }
+    }
+  ]
+}

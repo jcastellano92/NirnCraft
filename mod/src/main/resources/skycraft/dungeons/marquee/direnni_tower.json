@@ -1,0 +1,310 @@
+{
+ "id": "direnni_tower",
+ "why": [
+  "wayrest.L10.direnni_tower",
+  "high_rock.L11.direnni_hegemony"
+ ],
+ "kit": "altmer",
+ "entry_depth": 24,
+ "palette": {
+  "wall": [
+   "minecraft:smooth_quartz*5",
+   "minecraft:quartz_bricks*4",
+   "minecraft:calcite*3",
+   "minecraft:polished_diorite*3",
+   "minecraft:iron_block*1"
+  ],
+  "floor": [
+   "minecraft:smooth_quartz*5",
+   "minecraft:polished_diorite*3",
+   "minecraft:quartz_bricks*2"
+  ],
+  "ceiling": [
+   "minecraft:smooth_quartz*4",
+   "minecraft:calcite*3"
+  ],
+  "rock": "minecraft:calcite",
+  "trim": "minecraft:chiseled_quartz_block",
+  "pillar": "minecraft:quartz_pillar",
+  "cap": "minecraft:chiseled_quartz_block",
+  "light": "minecraft:sea_lantern",
+  "dim": "minecraft:redstone_lamp",
+  "rail": "minecraft:diorite_wall",
+  "stair": "minecraft:smooth_quartz_stairs"
+ },
+ "boss": {
+  "id": "skycraft:necromancer|minecraft:evoker",
+  "name": "Castellan Aiden Direnni's Simulacrum"
+ },
+ "books": {
+  "zero": {
+   "title": "Notes on the Zero Stone",
+   "author": "Magister Ryain Direnni",
+   "pages": [
+    "The metal of the lower cylinder takes no scratch from mithril or ebony, nor does it warm to mage-fire.\n\nWhen the tide rises in the Bay, the Zero Stone hums three octaves below hearing. Keep the wards sealed lest the older geometry wake."
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "balfiera_vestibule",
+   "name": "The Adamantine Vestibule",
+   "at": [0, 0],
+   "y": -8,
+   "half": [5, 6],
+   "h": 12,
+   "role": "start",
+   "doors": {"s": 8},
+   "ops": [
+    {"op": "landing", "y": 8, "depth": 3, "stairs": 3},
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:vex", "name": "Direnni Ward-Wisp", "mode": "awake", "n": 2},
+     {"id": "minecraft:skeleton", "name": "Aldmeri Sentinel", "mode": "sleep", "n": 1, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "seal_west",
+   "name": "West Ward Chamber",
+   "at": [-1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Balfiera Guardian", "mode": "sleep", "at": [[-3, -3], [-3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "skycraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "seal_east",
+   "name": "East Ward Chamber",
+   "at": [1, 0],
+   "y": -8,
+   "half": [4, 4],
+   "h": 6,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 3},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Balfiera Guardian", "mode": "ambush", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, -3], "table": "skycraft:chests/dungeon_minor", "face": "e"}
+   ]
+  },
+  {
+   "id": "convention_rotunda",
+   "name": "Rotunda of the Convention",
+   "at": [0, -1],
+   "y": -10,
+   "half": [5, 5],
+   "h": 10,
+   "ops": [
+    {"op": "bowl", "tiers": 2, "width": 2, "step": 1},
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Direnni Honor-Guard", "mode": "awake", "n": 2, "where": "ledge"},
+     {"id": "skycraft:storm_atronach|minecraft:blaze", "name": "Bound Atronach", "mode": "ambush", "n": 1, "where": "ledge"}
+    ]},
+    {"op": "feature", "id": "setpiece:convention_rotunda"}
+   ]
+  },
+  {
+   "id": "alembic_lab",
+   "name": "The Crystal Alembic Hall",
+   "at": [-1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [-3, -3, 0], "to": [-2, -3, 0], "block": "minecraft:brewing_stand"},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Alchemical Construct", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "skycraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "star_chart_gallery",
+   "name": "Gallery of Hegemony",
+   "at": [1, -1],
+   "y": -14,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Hegemony Arbiter", "mode": "sleep", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [-3, 3], "table": "skycraft:chests/dungeon_common", "face": "e"}
+   ]
+  },
+  {
+   "id": "cylinder_shaft",
+   "name": "The Argent Cylinder",
+   "at": [0, -2],
+   "y": -13,
+   "half": [5, 5],
+   "h": 12,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "fill", "from": [-1, -1, 0], "to": [1, 1, 2], "block": "minecraft:iron_block"},
+    {"op": "mobs", "list": [
+     {"id": "skycraft:storm_atronach|minecraft:blaze", "name": "Adamantine Custodian", "mode": "elite", "at": [[0, -3]]},
+     {"id": "minecraft:skeleton", "name": "Direnni Spell-Guard", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "feature", "id": "setpiece:argent_cylinder"}
+   ]
+  },
+  {
+   "id": "vault_west",
+   "name": "Merethic Archive West",
+   "at": [-1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Archive Sentinel", "mode": "sleep", "at": [[-3, -3], [-3, 0], [-3, 3], [3, 3]]}
+    ]},
+    {"op": "chest", "at": [3, -3], "table": "skycraft:chests/dungeon_common", "face": "w"}
+   ]
+  },
+  {
+   "id": "vault_east",
+   "name": "Merethic Archive East",
+   "at": [1, -2],
+   "y": -17,
+   "half": [4, 5],
+   "h": 9,
+   "ops": [
+    {"op": "pillars", "inset": 1, "every": 4},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Archive Sentinel", "mode": "ambush", "n": 3, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [3, 4], "table": "skycraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "conduit_west",
+   "name": "Aetheric Conduit",
+   "at": [-1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 8,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:vex", "name": "Arcane Spark", "mode": "awake", "n": 2, "where": "any"}
+    ]},
+    {"op": "chest", "at": [3, 3], "table": "skycraft:chests/dungeon_cache", "face": "w"}
+   ]
+  },
+  {
+   "id": "zero_stone_vault",
+   "name": "Foundation of the Zero Stone",
+   "at": [0, -3],
+   "y": -22,
+   "half": [6, 6],
+   "h": 16,
+   "role": "boss",
+   "ops": [
+    {"op": "pillars", "inset": 2, "every": 4, "light": true},
+    {"op": "walllights", "every": 4, "y": 5},
+    {"op": "walllights", "every": 4, "y": 10},
+    {"op": "boss", "at": [0, -2], "dais": 2},
+    {"op": "fill", "from": [-6, -6, 1], "to": [6, -6, 9], "block": "minecraft:chiseled_quartz_block"},
+    {"op": "chest", "at": [0, -5], "table": "skycraft:chests/dungeon_boss", "face": "s", "capstone": true},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Zero-Stone Guardian", "mode": "sleep", "at": [[-4, 3], [4, 3], [-4, 0], [4, 0]]}
+    ]}
+   ]
+  },
+  {
+   "id": "magister_study",
+   "name": "Magister's Scriptorium",
+   "at": [1, -3],
+   "y": -21,
+   "half": [4, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 4, "y": 4},
+    {"op": "fill", "from": [3, -3, 0], "to": [3, -3, 0], "block": "trim"},
+    {"op": "lectern", "at": [3, -3, 1], "book": "zero", "candle": true, "face": "w"},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Scriptorium Watcher", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "tidal_basin",
+   "name": "Balfiera Tidal Basin",
+   "at": [-2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "flood", "sink": 3, "margin": 1, "causeway": 3, "rails": false},
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Tidal Warden", "mode": "awake", "n": 1, "where": "lane"}
+    ]}
+   ]
+  },
+  {
+   "id": "reliquary_east",
+   "name": "Direnni Reliquary",
+   "at": [2, -1],
+   "y": -14,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "chest", "at": [0, -3], "table": "skycraft:chests/dungeon_cache", "face": "s"},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Reliquary Guard", "mode": "sleep", "n": 2, "where": "wall"}
+    ]}
+   ]
+  },
+  {
+   "id": "outer_ring_walk",
+   "name": "Outer Ring Walk",
+   "at": [-2, -2],
+   "y": -18,
+   "half": [3, 4],
+   "h": 7,
+   "ops": [
+    {"op": "walllights", "every": 3, "y": 4},
+    {"op": "mobs", "list": [
+     {"id": "minecraft:skeleton", "name": "Ring Sentinel", "mode": "sleep", "n": 2, "where": "wall"}
+    ]},
+    {"op": "chest", "at": [0, 3], "table": "skycraft:chests/dungeon_minor", "face": "n"}
+   ]
+  }
+ ],
+ "links": [
+  {"a": "balfiera_vestibule", "b": "seal_west"},
+  {"a": "balfiera_vestibule", "b": "seal_east"},
+  {"a": "balfiera_vestibule", "b": "convention_rotunda"},
+  {"a": "convention_rotunda", "b": "alembic_lab"},
+  {"a": "convention_rotunda", "b": "star_chart_gallery"},
+  {"a": "alembic_lab", "b": "tidal_basin"},
+  {"a": "star_chart_gallery", "b": "reliquary_east"},
+  {"a": "convention_rotunda", "b": "cylinder_shaft", "gate": "convention_rotunda"},
+  {"a": "cylinder_shaft", "b": "vault_west"},
+  {"a": "cylinder_shaft", "b": "vault_east"},
+  {"a": "vault_west", "b": "conduit_west"},
+  {"a": "vault_east", "b": "magister_study"},
+  {"a": "magister_study", "b": "zero_stone_vault", "gate": "magister_study", "trap": true},
+  {"a": "vault_west", "b": "outer_ring_walk"},
+  {"a": "tidal_basin", "b": "outer_ring_walk"}
+ ]
+}

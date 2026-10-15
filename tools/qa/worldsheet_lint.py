@@ -42,16 +42,33 @@ SCOPE_ALIASES = {
     "the_rift": "the_rift",
     "reach": "the_reach",
     "the_reach": "the_reach",
+    "alikr": "alikr_desert",
+    "alikr_desert": "alikr_desert",
+    "stros": "stros_mkai",
+    "stros_mkai": "stros_mkai",
     "hr": "high_rock",
+    "high_rock": "high_rock",
     "hf": "hammerfell",
+    "hammerfell": "hammerfell",
     "cy": "cyrodiil",
+    "cyrodiil": "cyrodiil",
     "mw": "morrowind",
+    "morrowind": "morrowind",
     "bm": "black_marsh",
+    "black_marsh": "black_marsh",
     "el": "elsweyr",
+    "ew": "elsweyr",
+    "elsweyr": "elsweyr",
     "vw": "valenwood",
+    "valenwood": "valenwood",
     "si": "summerset",
+    "su": "summerset",
+    "summerset": "summerset",
     "so": "solstheim",
+    "solstheim": "solstheim",
     "fl": "foreign",
+    "foreign": "foreign",
+    "foreign_lands": "foreign",
 }
 
 
@@ -85,16 +102,18 @@ def validate_sheets(province_filter: str | None, errors: list[str]) -> tuple[dic
         errors.append(f"ERR no world sheet files found matching {pattern}")
         return {}, {}
 
+    all_files = sorted(glob.glob(os.path.join(WORLD_DIR, "*.json")))
     sheets = {}
     all_fields = {}  # canonical_id -> {"scope", "layer", "num", "id", "text", "cites", "province"}
 
-    for path in files:
+    for path in all_files:
         data = load_json(path)
         prov = data.get("province", "")
         if not prov:
             errors.append(f"ERR {path}: missing 'province'")
             continue
-        sheets[prov] = data
+        if not province_filter or prov == province_filter:
+            sheets[prov] = data
 
         def register_block(scope: str, block: dict, is_prov: bool) -> None:
             truth = block.get("truth", "")

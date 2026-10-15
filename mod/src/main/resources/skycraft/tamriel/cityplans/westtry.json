@@ -1,0 +1,218 @@
+{
+  "id": "westtry",
+  "sil": "chalk-barrow-hollow-village",
+  "base": "none",
+  "overlay": "glenumbra",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "westtry_shuttered_lantern",
+  "names": {
+    "inn": "westtry_shuttered_lantern",
+    "store": "westtry_downland_store",
+    "smithy": "westtry_iron_hasp_smithy"
+  },
+  "titles": {
+    "westtry_landmark": "Westtry Chalk Menhirs",
+    "westtry_shuttered_lantern": "The Shuttered Lantern Inn",
+    "westtry_downland_store": "Westtry Salt & Candle Store",
+    "westtry_iron_hasp_smithy": "Iron-Hasp & Lock Smithy",
+    "westtry_rowan_and_salt": "Rowan-Twig & Warding Apothecary",
+    "westtry_barrow_watch_chapel": "Barrow-Watch Chapel of Arkay",
+    "westtry_bailiffs_cottage": "Reeve's Stone-Gabled Farmhouse",
+    "westtry_market_plaza": "Westtry Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "stone_circle",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "westtry_landmark",
+      "overlay": "glenumbra"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "westtry_shuttered_lantern"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "westtry_downland_store"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "westtry_iron_hasp_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "westtry_rowan_and_salt"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "westtry_barrow_watch_chapel"
+    },
+    {
+      "kind": "farmhouse",
+      "use": "farmhouse",
+      "wealth": "common",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "westtry_bailiffs_cottage"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "westtry_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "glenumbra"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "glenumbra"
+    }
+  ],
+  "features": [
+    {
+      "type": "basin",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:kynareth",
+      "count": 1
+    }
+  ]
+}

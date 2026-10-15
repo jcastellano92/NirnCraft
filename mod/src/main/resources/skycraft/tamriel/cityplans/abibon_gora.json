@@ -1,0 +1,369 @@
+{
+  "id": "abibon_gora",
+  "sil": "cove-cliffs-pearl-port",
+  "base": "none",
+  "overlay": "sentinel",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "abibon_gora_divers_bell",
+  "names": {
+    "inn": "abibon_gora_divers_bell",
+    "store": "abibon_gora_cordage_suq",
+    "smithy": "abibon_gora_bronze_anchor_forge"
+  },
+  "titles": {
+    "abibon_gora_landmark": "Abibon-Gora Cliff-Beacon",
+    "abibon_gora_sea_kasbah": "Kasbah of Abibon-Gora",
+    "abibon_gora_divers_bell": "The Diver's Bell Tavern",
+    "abibon_gora_cordage_suq": "Coir-Rope & Sailcloth Suq",
+    "abibon_gora_bronze_anchor_forge": "Bronze-Anchor & Diving-Weight Forge",
+    "abibon_gora_nacre_elixir": "Crushed-Nacre & Coral Apothecary",
+    "abibon_gora_pearl_exchange": "Southern Bight Pearl Exchange",
+    "abibon_gora_tava_cove_fane": "Cove-Wall Sanctuary of Tava",
+    "abibon_gora_oyster_stages": "Pearl-Oyster Sorting Stages",
+    "abibon_gora_headland_watch": "South-Cove Watchtower",
+    "abibon_gora_cliff_trail_mews": "Cliff-Trail Pack Mews",
+    "abibon_gora_market_plaza": "Abibon-Gora Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "minaret",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "abibon_gora_landmark",
+      "overlay": "sentinel"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "abibon_gora_sea_kasbah"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "abibon_gora_divers_bell"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "abibon_gora_cordage_suq"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "abibon_gora_bronze_anchor_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "abibon_gora_nacre_elixir"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "abibon_gora_pearl_exchange"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "abibon_gora_tava_cove_fane"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "abibon_gora_oyster_stages"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "abibon_gora_headland_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "abibon_gora_cliff_trail_mews"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        32
+      ],
+      "to": [
+        8,
+        32
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "abibon_gora_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 5,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 4,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "sentinel"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "sentinel"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:kynareth",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "jungle",
+      "count": 1
+    },
+    {
+      "type": "basin",
+      "count": 1
+    }
+  ]
+}

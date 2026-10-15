@@ -1,0 +1,828 @@
+{
+  "_doc": "Sload style sheet.",
+  "windows": "pane",
+  "pitch": 1,
+  "faith": [
+    "akatosh",
+    "kynareth",
+    "mara"
+  ],
+  "crops": [
+    "wheat",
+    "carrots",
+    "melon"
+  ],
+  "animals": [
+    "horse",
+    "chicken",
+    "goat"
+  ],
+  "colors": [
+    "magenta",
+    "white",
+    "yellow",
+    "cyan"
+  ],
+  "forms": {
+    "cluster": 3,
+    "ring": 2,
+    "canal": 2
+  },
+  "bodies": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 2
+    },
+    "wealthy": {
+      "rect": 2,
+      "l": 1
+    },
+    "noble": {
+      "l": 2,
+      "t": 1
+    }
+  },
+  "hallBody": "rect",
+  "roofs": {
+    "poor": {
+      "hip": 1
+    },
+    "common": {
+      "hip": 2,
+      "gable": 1
+    },
+    "wealthy": {
+      "hip": 2,
+      "dome": 1
+    },
+    "noble": {
+      "dome": 2,
+      "spire": 1
+    }
+  },
+  "halls": {
+    "dome": 2,
+    "hip": 1
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 2
+    },
+    "wealthy": {
+      "l": 2
+    },
+    "noble": {
+      "u": 2
+    }
+  },
+  "storeys": {
+    "poor": [
+      1,
+      1
+    ],
+    "common": [
+      1,
+      2
+    ],
+    "wealthy": [
+      2,
+      2
+    ],
+    "noble": [
+      2,
+      3
+    ]
+  },
+  "rules": {
+    "timber": 0.4,
+    "porch": 0.4,
+    "balcony": 0.4,
+    "banners": 0.7,
+    "lanterns": 0.85,
+    "awning": 0.5
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "brain_coral_block",
+        "low": "mud_bricks",
+        "roof": "prismarine_brick",
+        "wood": "warped",
+        "accent": "magenta"
+      }
+    ],
+    "common": [
+      {
+        "wall": "brain_coral_block",
+        "wall2": "prismarine",
+        "low": "mud_bricks",
+        "roof": "prismarine_brick",
+        "wood": "warped",
+        "accent": "magenta"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "brain_coral_block",
+        "wall2": "prismarine",
+        "low": "mud_bricks",
+        "roof": "prismarine_brick",
+        "wood": "warped",
+        "accent": "magenta"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "brain_coral_block",
+        "wall2": "prismarine",
+        "low": "mud_bricks",
+        "roof": "prismarine_brick",
+        "wood": "warped",
+        "accent": "magenta"
+      }
+    ]
+  },
+  "why": [
+    "thras.L1.living_coral_atoll",
+    "thras.L6.thras_sandbar_camp"
+  ],
+  "regional_traditions": {
+    "tradition_1": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_1_0",
+        "sload_motif_1_1",
+        "sload_motif_1_2",
+        "sload_motif_1_3",
+        "sload_motif_1_4",
+        "sload_motif_1_5",
+        "sload_motif_1_6",
+        "sload_motif_1_7",
+        "sload_motif_1_8",
+        "sload_motif_1_9",
+        "sload_motif_1_10",
+        "sload_motif_1_11",
+        "sload_motif_1_12",
+        "sload_motif_1_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_2": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_2_0",
+        "sload_motif_2_1",
+        "sload_motif_2_2",
+        "sload_motif_2_3",
+        "sload_motif_2_4",
+        "sload_motif_2_5",
+        "sload_motif_2_6",
+        "sload_motif_2_7",
+        "sload_motif_2_8",
+        "sload_motif_2_9",
+        "sload_motif_2_10",
+        "sload_motif_2_11",
+        "sload_motif_2_12",
+        "sload_motif_2_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_3": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_3_0",
+        "sload_motif_3_1",
+        "sload_motif_3_2",
+        "sload_motif_3_3",
+        "sload_motif_3_4",
+        "sload_motif_3_5",
+        "sload_motif_3_6",
+        "sload_motif_3_7",
+        "sload_motif_3_8",
+        "sload_motif_3_9",
+        "sload_motif_3_10",
+        "sload_motif_3_11",
+        "sload_motif_3_12",
+        "sload_motif_3_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_4": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_4_0",
+        "sload_motif_4_1",
+        "sload_motif_4_2",
+        "sload_motif_4_3",
+        "sload_motif_4_4",
+        "sload_motif_4_5",
+        "sload_motif_4_6",
+        "sload_motif_4_7",
+        "sload_motif_4_8",
+        "sload_motif_4_9",
+        "sload_motif_4_10",
+        "sload_motif_4_11",
+        "sload_motif_4_12",
+        "sload_motif_4_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_5": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_5_0",
+        "sload_motif_5_1",
+        "sload_motif_5_2",
+        "sload_motif_5_3",
+        "sload_motif_5_4",
+        "sload_motif_5_5",
+        "sload_motif_5_6",
+        "sload_motif_5_7",
+        "sload_motif_5_8",
+        "sload_motif_5_9",
+        "sload_motif_5_10",
+        "sload_motif_5_11",
+        "sload_motif_5_12",
+        "sload_motif_5_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_6": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_6_0",
+        "sload_motif_6_1",
+        "sload_motif_6_2",
+        "sload_motif_6_3",
+        "sload_motif_6_4",
+        "sload_motif_6_5",
+        "sload_motif_6_6",
+        "sload_motif_6_7",
+        "sload_motif_6_8",
+        "sload_motif_6_9",
+        "sload_motif_6_10",
+        "sload_motif_6_11",
+        "sload_motif_6_12",
+        "sload_motif_6_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_7": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_7_0",
+        "sload_motif_7_1",
+        "sload_motif_7_2",
+        "sload_motif_7_3",
+        "sload_motif_7_4",
+        "sload_motif_7_5",
+        "sload_motif_7_6",
+        "sload_motif_7_7",
+        "sload_motif_7_8",
+        "sload_motif_7_9",
+        "sload_motif_7_10",
+        "sload_motif_7_11",
+        "sload_motif_7_12",
+        "sload_motif_7_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_8": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_8_0",
+        "sload_motif_8_1",
+        "sload_motif_8_2",
+        "sload_motif_8_3",
+        "sload_motif_8_4",
+        "sload_motif_8_5",
+        "sload_motif_8_6",
+        "sload_motif_8_7",
+        "sload_motif_8_8",
+        "sload_motif_8_9",
+        "sload_motif_8_10",
+        "sload_motif_8_11",
+        "sload_motif_8_12",
+        "sload_motif_8_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_9": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_9_0",
+        "sload_motif_9_1",
+        "sload_motif_9_2",
+        "sload_motif_9_3",
+        "sload_motif_9_4",
+        "sload_motif_9_5",
+        "sload_motif_9_6",
+        "sload_motif_9_7",
+        "sload_motif_9_8",
+        "sload_motif_9_9",
+        "sload_motif_9_10",
+        "sload_motif_9_11",
+        "sload_motif_9_12",
+        "sload_motif_9_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_10": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_10_0",
+        "sload_motif_10_1",
+        "sload_motif_10_2",
+        "sload_motif_10_3",
+        "sload_motif_10_4",
+        "sload_motif_10_5",
+        "sload_motif_10_6",
+        "sload_motif_10_7",
+        "sload_motif_10_8",
+        "sload_motif_10_9",
+        "sload_motif_10_10",
+        "sload_motif_10_11",
+        "sload_motif_10_12",
+        "sload_motif_10_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_11": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_11_0",
+        "sload_motif_11_1",
+        "sload_motif_11_2",
+        "sload_motif_11_3",
+        "sload_motif_11_4",
+        "sload_motif_11_5",
+        "sload_motif_11_6",
+        "sload_motif_11_7",
+        "sload_motif_11_8",
+        "sload_motif_11_9",
+        "sload_motif_11_10",
+        "sload_motif_11_11",
+        "sload_motif_11_12",
+        "sload_motif_11_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_12": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_12_0",
+        "sload_motif_12_1",
+        "sload_motif_12_2",
+        "sload_motif_12_3",
+        "sload_motif_12_4",
+        "sload_motif_12_5",
+        "sload_motif_12_6",
+        "sload_motif_12_7",
+        "sload_motif_12_8",
+        "sload_motif_12_9",
+        "sload_motif_12_10",
+        "sload_motif_12_11",
+        "sload_motif_12_12",
+        "sload_motif_12_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_13": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_13_0",
+        "sload_motif_13_1",
+        "sload_motif_13_2",
+        "sload_motif_13_3",
+        "sload_motif_13_4",
+        "sload_motif_13_5",
+        "sload_motif_13_6",
+        "sload_motif_13_7",
+        "sload_motif_13_8",
+        "sload_motif_13_9",
+        "sload_motif_13_10",
+        "sload_motif_13_11",
+        "sload_motif_13_12",
+        "sload_motif_13_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_14": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_14_0",
+        "sload_motif_14_1",
+        "sload_motif_14_2",
+        "sload_motif_14_3",
+        "sload_motif_14_4",
+        "sload_motif_14_5",
+        "sload_motif_14_6",
+        "sload_motif_14_7",
+        "sload_motif_14_8",
+        "sload_motif_14_9",
+        "sload_motif_14_10",
+        "sload_motif_14_11",
+        "sload_motif_14_12",
+        "sload_motif_14_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_15": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_15_0",
+        "sload_motif_15_1",
+        "sload_motif_15_2",
+        "sload_motif_15_3",
+        "sload_motif_15_4",
+        "sload_motif_15_5",
+        "sload_motif_15_6",
+        "sload_motif_15_7",
+        "sload_motif_15_8",
+        "sload_motif_15_9",
+        "sload_motif_15_10",
+        "sload_motif_15_11",
+        "sload_motif_15_12",
+        "sload_motif_15_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_16": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_16_0",
+        "sload_motif_16_1",
+        "sload_motif_16_2",
+        "sload_motif_16_3",
+        "sload_motif_16_4",
+        "sload_motif_16_5",
+        "sload_motif_16_6",
+        "sload_motif_16_7",
+        "sload_motif_16_8",
+        "sload_motif_16_9",
+        "sload_motif_16_10",
+        "sload_motif_16_11",
+        "sload_motif_16_12",
+        "sload_motif_16_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_17": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_17_0",
+        "sload_motif_17_1",
+        "sload_motif_17_2",
+        "sload_motif_17_3",
+        "sload_motif_17_4",
+        "sload_motif_17_5",
+        "sload_motif_17_6",
+        "sload_motif_17_7",
+        "sload_motif_17_8",
+        "sload_motif_17_9",
+        "sload_motif_17_10",
+        "sload_motif_17_11",
+        "sload_motif_17_12",
+        "sload_motif_17_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_18": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_18_0",
+        "sload_motif_18_1",
+        "sload_motif_18_2",
+        "sload_motif_18_3",
+        "sload_motif_18_4",
+        "sload_motif_18_5",
+        "sload_motif_18_6",
+        "sload_motif_18_7",
+        "sload_motif_18_8",
+        "sload_motif_18_9",
+        "sload_motif_18_10",
+        "sload_motif_18_11",
+        "sload_motif_18_12",
+        "sload_motif_18_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_19": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_19_0",
+        "sload_motif_19_1",
+        "sload_motif_19_2",
+        "sload_motif_19_3",
+        "sload_motif_19_4",
+        "sload_motif_19_5",
+        "sload_motif_19_6",
+        "sload_motif_19_7",
+        "sload_motif_19_8",
+        "sload_motif_19_9",
+        "sload_motif_19_10",
+        "sload_motif_19_11",
+        "sload_motif_19_12",
+        "sload_motif_19_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_20": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_20_0",
+        "sload_motif_20_1",
+        "sload_motif_20_2",
+        "sload_motif_20_3",
+        "sload_motif_20_4",
+        "sload_motif_20_5",
+        "sload_motif_20_6",
+        "sload_motif_20_7",
+        "sload_motif_20_8",
+        "sload_motif_20_9",
+        "sload_motif_20_10",
+        "sload_motif_20_11",
+        "sload_motif_20_12",
+        "sload_motif_20_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    },
+    "tradition_21": {
+      "wall": "brain_coral_block",
+      "wall2": "prismarine",
+      "low": "mud_bricks",
+      "wood": "warped",
+      "roof": "prismarine_brick",
+      "accent": "magenta",
+      "motifs": [
+        "sload_motif_21_0",
+        "sload_motif_21_1",
+        "sload_motif_21_2",
+        "sload_motif_21_3",
+        "sload_motif_21_4",
+        "sload_motif_21_5",
+        "sload_motif_21_6",
+        "sload_motif_21_7",
+        "sload_motif_21_8",
+        "sload_motif_21_9",
+        "sload_motif_21_10",
+        "sload_motif_21_11",
+        "sload_motif_21_12",
+        "sload_motif_21_13"
+      ],
+      "materials": [
+        "brain_coral_block",
+        "prismarine",
+        "mud_bricks",
+        "warped",
+        "prismarine_brick",
+        "magenta"
+      ]
+    }
+  }
+}

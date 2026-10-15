@@ -1,0 +1,335 @@
+{
+  "id": "woodhearth",
+  "why": [
+    "greenshade.L1.drowned_coast",
+    "greenshade.L5.bridge_port",
+    "greenshade.L6.woodhearth_seat"
+  ],
+  "sil": "branch-bridge-web",
+  "base": "none",
+  "overlay": "woodhearth",
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "woodhearth",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "greenshade",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "woodhearth_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "woodhearth_landmark",
+      "overlay": "woodhearth"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 92,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        64,
+        25
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        26,
+        23
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        31,
+        62
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        34
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -19,
+        66
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -21,
+        28
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -59,
+        36
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -34,
+        6
+      ],
+      "face": "north",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -68,
+        -13
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -29,
+        -18
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -42,
+        -55
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -9,
+        -33
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        6,
+        -69
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        15,
+        -31
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        51,
+        -47
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        32,
+        -12
+      ],
+      "face": "south",
+      "overlay": "woodhearth",
+      "name": "woodhearth_b_17"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "woodhearth_great_tree",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "woodhearth_garden",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "woodhearth_lamps",
+      "count": 4
+    },
+    {
+      "type": "shrine",
+      "theme": "woodhearth_shrine",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "woodhearth_b_5",
+    "store": "woodhearth_b_10",
+    "smithy": "woodhearth_b_7"
+  },
+  "titles": {
+    "woodhearth_b_1": "place.skycraft.woodhearth Council & Seat Hall",
+    "woodhearth_b_2": "place.skycraft.woodhearth High Sanctuary",
+    "woodhearth_b_3": "place.skycraft.woodhearth Fighters & Wayfarers Hall",
+    "woodhearth_b_4": "place.skycraft.woodhearth Mages & Chroniclers Spire",
+    "woodhearth_b_5": "place.skycraft.woodhearth The Lantern & Hearth Inn",
+    "woodhearth_b_6": "place.skycraft.woodhearth The Traveler's Rest Tavern",
+    "woodhearth_b_7": "place.skycraft.woodhearth Master Forge & Armorer",
+    "woodhearth_b_8": "place.skycraft.woodhearth Botanicals & Remedies",
+    "woodhearth_b_9": "place.skycraft.woodhearth Scriptorium & Charts",
+    "woodhearth_b_10": "place.skycraft.woodhearth Grand Provisioner & Sundries",
+    "woodhearth_b_11": "place.skycraft.woodhearth Silk & Hide Clothier",
+    "woodhearth_b_12": "place.skycraft.woodhearth Lapidary & Signets",
+    "woodhearth_b_13": "place.skycraft.woodhearth Wayfarer Stables & Post",
+    "woodhearth_b_14": "place.skycraft.woodhearth Bonded Factor Warehouse",
+    "woodhearth_b_15": "place.skycraft.woodhearth Watch Garrison Barracks",
+    "woodhearth_b_16": "place.skycraft.woodhearth High Steward's Manor",
+    "woodhearth_b_17": "place.skycraft.woodhearth Merchant-Factor's Villa",
+    "woodhearth_landmark": "High Seat of place.skycraft.woodhearth",
+    "woodhearth_plaza": "place.skycraft.woodhearth Central Plaza"
+  },
+  "innKey": "woodhearth_b_5"
+}

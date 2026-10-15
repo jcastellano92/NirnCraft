@@ -3,35 +3,117 @@
   "category": "faction",
   "faction": "knights_of_the_dragon",
   "region": "high_rock/glenumbra",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "aldcroft": {"x": -9000, "z": 2100, "r": 50, "name": "Aldcroft"},
-    "baelborne_rock": {"x": -9600, "z": 1900, "r": 40, "name": "Baelborne Rock"},
-    "cath_bedraud": {"x": -9700, "z": 2200, "r": 36, "name": "Cath Bedraud"}
+    "aldcroft": {
+      "x": -9000,
+      "z": 2100,
+      "r": 50,
+      "name": "Aldcroft"
+    },
+    "baelborne_rock": {
+      "x": -9600,
+      "z": 1900,
+      "r": 40,
+      "name": "Baelborne Rock"
+    },
+    "cath_bedraud": {
+      "x": -9700,
+      "z": 2200,
+      "r": 36,
+      "name": "Cath Bedraud"
+    }
   },
   "npcs": [
-    {"id": "odric_hollenmoor", "name": "Lord Commander Odric Hollenmoor", "role": "adventurer", "place": "daggerfall", "offset": [4, -3], "hall": "knights_of_the_dragon",
-     "greet": "Daggerfall has been burned, besieged and betrayed, and the Dragon has stood at its gate through all of it. Kneel or stand as you like. Just don't waste my time."},
-    {"id": "dame_maelis_corbel", "name": "Dame Maelis Corbel", "role": "adventurer", "place": "daggerfall", "offset": [7, 1], "female": true, "hall": "knights_of_the_dragon",
-     "greet": "I train the squires. If you've come to be one, roll up your sleeves. If you've come to watch, there's a bench by the wall."},
-    {"id": "lady_ysolde_merrival", "name": "Lady Ysolde Merrival", "role": "steward", "place": "daggerfall", "offset": [-10, 12], "female": true,
-     "greet": "My family has held Aldcroft for six generations. I mean to hold it for a seventh, if I can get there alive."},
-    {"id": "rolan_dufresne", "name": "Sir Rolan Dufresne", "role": "adventurer", "place": "daggerfall", "offset": [-14, -8],
-     "greet": "Camlorn sends its best to the lists every year, and every year Daggerfall pretends to be surprised when we win."}
+    {
+      "id": "odric_hollenmoor",
+      "name": "Lord Commander Odric Hollenmoor",
+      "role": "adventurer",
+      "place": "daggerfall",
+      "offset": [
+        4,
+        -3
+      ],
+      "hall": "knights_of_the_dragon",
+      "greet": "Daggerfall has been burned, besieged and betrayed, and the Dragon has stood at its gate through all of it. Kneel or stand as you like. Just don't waste my time."
+    },
+    {
+      "id": "dame_maelis_corbel",
+      "name": "Dame Maelis Corbel",
+      "role": "adventurer",
+      "place": "daggerfall",
+      "offset": [
+        7,
+        1
+      ],
+      "female": true,
+      "hall": "knights_of_the_dragon",
+      "greet": "I train the squires. If you've come to be one, roll up your sleeves. If you've come to watch, there's a bench by the wall."
+    },
+    {
+      "id": "lady_ysolde_merrival",
+      "name": "Lady Ysolde Merrival",
+      "role": "steward",
+      "place": "daggerfall",
+      "offset": [
+        -10,
+        12
+      ],
+      "female": true,
+      "greet": "My family has held Aldcroft for six generations. I mean to hold it for a seventh, if I can get there alive."
+    },
+    {
+      "id": "rolan_dufresne",
+      "name": "Sir Rolan Dufresne",
+      "role": "adventurer",
+      "place": "daggerfall",
+      "offset": [
+        -14,
+        -8
+      ],
+      "greet": "Camlorn sends its best to the lists every year, and every year Daggerfall pretends to be surprised when we win."
+    }
   ],
   "relics": [
-    {"id": "kd_wyrm_tooth", "name": "Tooth of the Baelborne Wyrm", "desc": "As long as a forearm and still warm to the touch. Proof enough for any court in the Covenant.", "icon": 26},
-    {"id": "kd_red_wyrm_banner", "name": "Banner of the Red Wyrm", "desc": "The order's first standard: a red dragon on black. The cloth is sound after two hundred years in a tomb, which no one can quite explain.", "icon": 7}
+    {
+      "id": "kd_wyrm_tooth",
+      "name": "Tooth of the Baelborne Wyrm",
+      "desc": "As long as a forearm and still warm to the touch. Proof enough for any court in the Covenant.",
+      "icon": 26
+    },
+    {
+      "id": "kd_red_wyrm_banner",
+      "name": "Banner of the Red Wyrm",
+      "desc": "The order's first standard: a red dragon on black. The cloth is sound after two hundred years in a tomb, which no one can quite explain.",
+      "icon": 7
+    }
   ],
   "scenes": {
     "kd_banner_found": [
-      ["narrator", "The banner hangs above a stone bier in the deepest vault of Cath Bedraud, untouched by damp or moth. Beneath it lies a knight in red-lacquered mail, hands folded on a sword."],
-      ["dame_maelis_corbel", "Sir Aubert, who carried it at the order's founding. They told us he fell defending a crossing. They never said where they laid him."]
+      [
+        "narrator",
+        "The banner hangs above a stone bier in the deepest vault of Cath Bedraud, untouched by damp or moth. Beneath it lies a knight in red-lacquered mail, hands folded on a sword."
+      ],
+      [
+        "dame_maelis_corbel",
+        "Sir Aubert, who carried it at the order's founding. They told us he fell defending a crossing. They never said where they laid him."
+      ]
     ],
     "kd_knighthood": [
-      ["narrator", "The hall falls quiet. The Banner of the Red Wyrm hangs above the dais for the first time in two centuries."],
-      ["odric_hollenmoor", "You kept vigil, you carried a lady safe through Glenumbra, you killed a dragon and took the lists from Camlorn's best. And you brought our founding home."],
-      ["odric_hollenmoor", "Kneel. Rise a knight of the Dragon, and a captain of this order. Daggerfall's gate is yours to keep."]
+      [
+        "narrator",
+        "The hall falls quiet. The Banner of the Red Wyrm hangs above the dais for the first time in two centuries."
+      ],
+      [
+        "odric_hollenmoor",
+        "You kept vigil, you carried a lady safe through Glenumbra, you killed a dragon and took the lists from Camlorn's best. And you brought our founding home."
+      ],
+      [
+        "odric_hollenmoor",
+        "Kneel. Rise a knight of the Dragon, and a captain of this order. Daggerfall's gate is yours to keep."
+      ]
     ]
   },
   "quests": [
@@ -39,124 +121,391 @@
       "id": "kd_the_long_vigil",
       "title": "The Long Vigil",
       "start": "npc:odric_hollenmoor",
-      "requires": ["!faction:knights_of_the_dragon"],
+      "requires": [
+        "!faction:knights_of_the_dragon"
+      ],
       "offer": "I'd like to serve the Knights of the Dragon.",
       "pitch": "Everyone would like to. Few last the night. Every aspirant keeps vigil at the old dragon-stone in the courtyard until dawn, alone, without sleep. Then Dame Maelis will see whether you can do more than stand still.",
       "desc": "Lord Commander Odric Hollenmoor of the Knights of the Dragon agreed to consider me as an aspirant. I must keep the vigil at the dragon-stone and then pass Dame Maelis Corbel's trial.",
       "objectives": [
-        {"type": "wait", "hours": 3, "place": "daggerfall", "offset": [-6, 18], "radius": 10, "text": "Keep vigil at the dragon-stone in the courtyard",
-         "journal": "The stone is carved with a coiled dragon worn nearly smooth by centuries of hands. Around midnight the cold came up out of the ground, and I stayed where I was."},
-        {"type": "talk", "npc": "dame_maelis_corbel", "text": "Report to Dame Maelis Corbel",
-         "topic": "The vigil is kept.",
-         "reply": "Your eyes are red and your hands are steady. Good. Now the useful part. Wolves have been taking lambs from the farms outside the east gate. A knight serves the people before the crown. Go and serve them."},
-        {"type": "kill_type", "entity": "skycraft:wolf", "count": 4, "place": "daggerfall", "offset": [220, -140], "text": "Kill the wolves raiding the farms outside Daggerfall"},
-        {"type": "talk", "npc": "dame_maelis_corbel", "text": "Return to Dame Maelis",
-         "topic": "The wolves are dead.",
-         "reply": "And the farmers? Did you speak to them, or just leave carcasses in their fields? Never mind. One last thing before the Lord Commander. Every aspirant answers this."},
-        {"type": "talk", "npc": "dame_maelis_corbel", "text": "Tell Dame Maelis why you would be a knight",
-         "choices": [
-           {"label": "To guard those who can't guard themselves.", "reply": "The oldest answer, and still the right one. Hold on to it when the lords start giving you orders.", "actions": "flag:kd_answer_guardian"},
-           {"label": "For glory, and a name the bards remember.", "reply": "Honest, at least. Glory comes to knights who are too busy to look for it. You'll learn.", "actions": "flag:kd_answer_glory"},
-           {"label": "For Daggerfall, and for the Covenant.", "reply": "Spoken like a native. The Lord Commander will like that.", "actions": "flag:kd_answer_covenant"}
-         ]}
+        {
+          "type": "wait",
+          "hours": 3,
+          "place": "daggerfall",
+          "offset": [
+            -6,
+            18
+          ],
+          "radius": 10,
+          "text": "Keep vigil at the dragon-stone in the courtyard",
+          "journal": "The stone is carved with a coiled dragon worn nearly smooth by centuries of hands. Around midnight the cold came up out of the ground, and I stayed where I was."
+        },
+        {
+          "type": "talk",
+          "npc": "dame_maelis_corbel",
+          "text": "Report to Dame Maelis Corbel",
+          "topic": "The vigil is kept.",
+          "reply": "Your eyes are red and your hands are steady. Good. Now the useful part. Wolves have been taking lambs from the farms outside the east gate. A knight serves the people before the crown. Go and serve them."
+        },
+        {
+          "type": "kill_type",
+          "entity": "skycraft:wolf",
+          "count": 4,
+          "place": "daggerfall",
+          "offset": [
+            220,
+            -140
+          ],
+          "text": "Kill the wolves raiding the farms outside Daggerfall"
+        },
+        {
+          "type": "talk",
+          "npc": "dame_maelis_corbel",
+          "text": "Return to Dame Maelis",
+          "topic": "The wolves are dead.",
+          "reply": "And the farmers? Did you speak to them, or just leave carcasses in their fields? Never mind. One last thing before the Lord Commander. Every aspirant answers this."
+        },
+        {
+          "type": "talk",
+          "npc": "dame_maelis_corbel",
+          "text": "Tell Dame Maelis why you would be a knight",
+          "choices": [
+            {
+              "label": "To guard those who can't guard themselves.",
+              "reply": "The oldest answer, and still the right one. Hold on to it when the lords start giving you orders.",
+              "actions": "flag:kd_answer_guardian"
+            },
+            {
+              "label": "For glory, and a name the bards remember.",
+              "reply": "Honest, at least. Glory comes to knights who are too busy to look for it. You'll learn.",
+              "actions": "flag:kd_answer_glory"
+            },
+            {
+              "label": "For Daggerfall, and for the Covenant.",
+              "reply": "Spoken like a native. The Lord Commander will like that.",
+              "actions": "flag:kd_answer_covenant"
+            }
+          ]
+        }
       ],
       "outro": "I kept the vigil at the dragon-stone and passed Dame Maelis Corbel's trial. Lord Commander Hollenmoor accepted me as an aspirant of the Knights of the Dragon.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:steel_sword", "skycraft:breton_helmet"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:steel_sword",
+          "skycraft:breton_helmet"
+        ]
+      },
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
     },
     {
       "id": "kd_the_road_to_aldcroft",
       "title": "The Road to Aldcroft",
       "start": "npc:odric_hollenmoor",
-      "requires": ["quest:kd_the_long_vigil|faction:knights_of_the_dragon"],
+      "requires": [
+        "quest:kd_the_long_vigil|faction:knights_of_the_dragon"
+      ],
       "offer": "Do you have work for an aspirant?",
       "pitch": "Lady Ysolde Merrival must reach her estate at Aldcroft before the harvest court, and the road runs through country the Bloodthorn cult has been stirring up. She wants a whole company. She gets you. See that it's enough.",
       "desc": "Lord Commander Hollenmoor ordered me to escort Lady Ysolde Merrival from Daggerfall to her estate at Aldcroft. Bloodthorn cultists have been active along the road.",
       "objectives": [
-        {"type": "talk", "npc": "lady_ysolde_merrival", "text": "Present yourself to Lady Ysolde",
-         "topic": "The Lord Commander sent me to see you to Aldcroft.",
-         "reply": "One knight. Not even a knight, I'm told. Well, Hollenmoor has never yet wasted my time. Keep close, and if anything with thorns in its hair comes out of the woods, kill it before it reaches me."},
-        {"type": "escort", "npc": "lady_ysolde_merrival", "place": "aldcroft", "text": "Escort Lady Ysolde to Aldcroft"},
-        {"type": "clear", "place": "aldcroft", "offset": [40, -30], "text": "Fight off the Bloodthorn ambush at the village edge",
-         "spawn": [{"type": "npc:necromancer", "count": 2, "name": "Bloodthorn Cultist", "hostile": true},
-                   {"type": "skycraft:spriggan", "name": "Thorn-Bound Spriggan"}],
-         "journal": "The cultists had grown a hedge of black thorns across the lane overnight. When we cut through it, they were waiting on the other side."},
-        {"type": "talk", "npc": "lady_ysolde_merrival", "text": "Speak with Lady Ysolde",
-         "topic": "You're home, my lady.",
-         "reply": "So I am, and with my skin intact. I shall write to Hollenmoor that his aspirant fights like a knight and talks like a farmhand. He will understand both are compliments."}
+        {
+          "type": "talk",
+          "npc": "lady_ysolde_merrival",
+          "text": "Present yourself to Lady Ysolde",
+          "topic": "The Lord Commander sent me to see you to Aldcroft.",
+          "reply": "One knight. Not even a knight, I'm told. Well, Hollenmoor has never yet wasted my time. Keep close, and if anything with thorns in its hair comes out of the woods, kill it before it reaches me."
+        },
+        {
+          "type": "escort",
+          "npc": "lady_ysolde_merrival",
+          "place": "aldcroft",
+          "text": "Escort Lady Ysolde to Aldcroft"
+        },
+        {
+          "type": "clear",
+          "place": "aldcroft",
+          "offset": [
+            40,
+            -30
+          ],
+          "text": "Fight off the Bloodthorn ambush at the village edge",
+          "spawn": [
+            {
+              "type": "npc:necromancer",
+              "count": 2,
+              "name": "Bloodthorn Cultist",
+              "hostile": true
+            },
+            {
+              "type": "skycraft:spriggan",
+              "name": "Thorn-Bound Spriggan"
+            }
+          ],
+          "journal": "The cultists had grown a hedge of black thorns across the lane overnight. When we cut through it, they were waiting on the other side."
+        },
+        {
+          "type": "talk",
+          "npc": "lady_ysolde_merrival",
+          "text": "Speak with Lady Ysolde",
+          "topic": "You're home, my lady.",
+          "reply": "So I am, and with my skin intact. I shall write to Hollenmoor that his aspirant fights like a knight and talks like a farmhand. He will understand both are compliments."
+        }
       ],
       "outro": "I brought Lady Ysolde Merrival safely to Aldcroft through a Bloodthorn ambush. She has written to the Lord Commander on my behalf.",
-      "rewards": {"gold": 300, "faction_points": 2, "items": ["skycraft:breton_chestplate"]}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 2,
+        "items": [
+          "skycraft:breton_chestplate"
+        ]
+      },
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
     },
     {
       "id": "kd_the_wyrm_of_baelborne",
       "title": "The Wyrm of Baelborne Rock",
       "start": "auto",
-      "requires": ["quest:kd_the_road_to_aldcroft"],
+      "requires": [
+        "quest:kd_the_road_to_aldcroft"
+      ],
       "desc": "A dragon has made its lair on Baelborne Rock, west of Daggerfall, and has been burning farmsteads across Glenumbra. The Knights of the Dragon took their name from such a beast, and the Lord Commander wants it dead.",
       "objectives": [
-        {"type": "talk", "npc": "odric_hollenmoor", "text": "Speak with Lord Commander Hollenmoor",
-         "topic": "Lady Ysolde says you have a dragon problem.",
-         "reply": "Glenumbra has a dragon problem. This order has a dragon on every shield and banner, and I'll not have it said we hid behind the walls while a real one burned the countryside. It nests on Baelborne Rock. Bring me proof it's dead."},
-        {"type": "go", "place": "baelborne_rock", "text": "Climb Baelborne Rock"},
-        {"type": "kill", "place": "baelborne_rock", "text": "Slay the dragon of Baelborne Rock",
-         "spawn": [{"type": "skycraft:dragon", "name": "The Baelborne Wyrm", "target": true, "boss": true, "hp": 1.5}],
-         "journal": "It came down out of the cloud with a sound like a forge bellows the size of a church. When it fell, the rock shook under me for a long time."},
-        {"type": "retrieve", "place": "baelborne_rock", "relic": "kd_wyrm_tooth", "radius": 14, "text": "Take a tooth from the wyrm's jaw"},
-        {"type": "deliver", "npc": "odric_hollenmoor", "relic": "kd_wyrm_tooth", "text": "Bring the tooth to Lord Commander Hollenmoor",
-         "topic": "The dragon of Baelborne Rock is dead.",
-         "reply": "By the Eight. The first dragon this order has killed in a hundred years, and an aspirant did it. Squire, then, from today. And I'll have this tooth mounted over the hall door so the lords can admire it on their way in."}
+        {
+          "type": "talk",
+          "npc": "odric_hollenmoor",
+          "text": "Speak with Lord Commander Hollenmoor",
+          "topic": "Lady Ysolde says you have a dragon problem.",
+          "reply": "Glenumbra has a dragon problem. This order has a dragon on every shield and banner, and I'll not have it said we hid behind the walls while a real one burned the countryside. It nests on Baelborne Rock. Bring me proof it's dead."
+        },
+        {
+          "type": "go",
+          "place": "baelborne_rock",
+          "text": "Climb Baelborne Rock"
+        },
+        {
+          "type": "kill",
+          "place": "baelborne_rock",
+          "text": "Slay the dragon of Baelborne Rock",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "name": "The Baelborne Wyrm",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ],
+          "journal": "It came down out of the cloud with a sound like a forge bellows the size of a church. When it fell, the rock shook under me for a long time."
+        },
+        {
+          "type": "retrieve",
+          "place": "baelborne_rock",
+          "relic": "kd_wyrm_tooth",
+          "radius": 14,
+          "text": "Take a tooth from the wyrm's jaw"
+        },
+        {
+          "type": "deliver",
+          "npc": "odric_hollenmoor",
+          "relic": "kd_wyrm_tooth",
+          "text": "Bring the tooth to Lord Commander Hollenmoor",
+          "topic": "The dragon of Baelborne Rock is dead.",
+          "reply": "By the Eight. The first dragon this order has killed in a hundred years, and an aspirant did it. Squire, then, from today. And I'll have this tooth mounted over the hall door so the lords can admire it on their way in."
+        }
       ],
       "outro": "I killed the dragon of Baelborne Rock. Lord Commander Hollenmoor raised me to squire and hung its tooth above the hall door.",
-      "rewards": {"gold": 600, "faction_points": 3, "items": [{"item": "minecraft:shield", "name": "Wyrmscale Shield", "enchant": {"unbreaking": 3}}]}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 3,
+        "items": [
+          {
+            "item": "minecraft:shield",
+            "name": "Wyrmscale Shield",
+            "enchant": {
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
     },
     {
       "id": "kd_the_covenant_lists",
       "title": "The Covenant Lists",
       "start": "auto",
-      "requires": ["quest:kd_the_wyrm_of_baelborne"],
+      "requires": [
+        "quest:kd_the_wyrm_of_baelborne"
+      ],
       "desc": "Knights from every corner of the Daggerfall Covenant have come to the autumn lists outside Daggerfall. Dame Maelis has entered my name, and the favourite is Sir Rolan Dufresne of Camlorn.",
       "objectives": [
-        {"type": "talk", "npc": "dame_maelis_corbel", "text": "Speak with Dame Maelis about the tournament",
-         "topic": "You entered my name in the lists?",
-         "reply": "Someone had to. Half the Covenant heard about Baelborne Rock and wants to know if it's true. The other half wants to knock you down to prove it isn't. Sir Rolan of Camlorn is in the final. Go and introduce yourself."},
-        {"type": "talk", "npc": "rolan_dufresne", "text": "Meet Sir Rolan Dufresne",
-         "topic": "I hear we're to meet in the final.",
-         "reply": "The dragon-slayer. I'll try not to embarrass you too badly; Daggerfall needs its heroes. Blunted steel, first to yield. Unless you'd rather make it interesting."},
-        {"type": "kill", "place": "daggerfall", "offset": [30, -25], "radius": 20, "flee_at": 0.3, "text": "Defeat Sir Rolan in the final bout",
-         "spawn": [{"type": "npc:adventurer", "name": "Sir Rolan Dufresne", "target": true, "boss": true, "hp": 2.5, "dmg": 1.2, "hostile": true, "armor": "#4a5a8a", "weapon": "skycraft:steel_sword"}],
-         "journal": "Rolan was quicker than I expected and prouder than he should have been. When his shield arm finally dropped, he raised his visor and called the yield himself."},
-        {"type": "talk", "npc": "rolan_dufresne", "text": "Speak with Sir Rolan after the bout",
-         "topic": "A good fight.",
-         "reply": "A humbling one. Here, a winner's purse, and something worth more. My grandfather swore the Banner of the Red Wyrm lies in Cath Bedraud, with the knight who carried it. Daggerfall never went to look. Maybe its dragon-slayer should."}
+        {
+          "type": "talk",
+          "npc": "dame_maelis_corbel",
+          "text": "Speak with Dame Maelis about the tournament",
+          "topic": "You entered my name in the lists?",
+          "reply": "Someone had to. Half the Covenant heard about Baelborne Rock and wants to know if it's true. The other half wants to knock you down to prove it isn't. Sir Rolan of Camlorn is in the final. Go and introduce yourself."
+        },
+        {
+          "type": "talk",
+          "npc": "rolan_dufresne",
+          "text": "Meet Sir Rolan Dufresne",
+          "topic": "I hear we're to meet in the final.",
+          "reply": "The dragon-slayer. I'll try not to embarrass you too badly; Daggerfall needs its heroes. Blunted steel, first to yield. Unless you'd rather make it interesting."
+        },
+        {
+          "type": "kill",
+          "place": "daggerfall",
+          "offset": [
+            30,
+            -25
+          ],
+          "radius": 20,
+          "flee_at": 0.3,
+          "text": "Defeat Sir Rolan in the final bout",
+          "spawn": [
+            {
+              "type": "npc:adventurer",
+              "name": "Sir Rolan Dufresne",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.2,
+              "hostile": true,
+              "armor": "#4a5a8a",
+              "weapon": "skycraft:steel_sword"
+            }
+          ],
+          "journal": "Rolan was quicker than I expected and prouder than he should have been. When his shield arm finally dropped, he raised his visor and called the yield himself."
+        },
+        {
+          "type": "talk",
+          "npc": "rolan_dufresne",
+          "text": "Speak with Sir Rolan after the bout",
+          "topic": "A good fight.",
+          "reply": "A humbling one. Here, a winner's purse, and something worth more. My grandfather swore the Banner of the Red Wyrm lies in Cath Bedraud, with the knight who carried it. Daggerfall never went to look. Maybe its dragon-slayer should."
+        }
       ],
       "outro": "I won the Covenant lists against Sir Rolan Dufresne of Camlorn. In defeat he told me where the order's lost founding banner may lie: the old crypts of Cath Bedraud.",
-      "rewards": {"gold": 500, "faction_points": 3}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3
+      },
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
     },
     {
       "id": "kd_the_red_wyrm_banner",
       "title": "The Banner of the Red Wyrm",
       "start": "auto",
-      "requires": ["quest:kd_the_covenant_lists"],
+      "requires": [
+        "quest:kd_the_covenant_lists"
+      ],
       "desc": "The Banner of the Red Wyrm, the founding standard of the Knights of the Dragon, may lie in the crypts of Cath Bedraud. Dame Maelis will ride with me to bring it home.",
       "objectives": [
-        {"type": "go", "place": "cath_bedraud", "text": "Travel to Cath Bedraud", "actions": "summon:dame_maelis_corbel"},
-        {"type": "clear", "place": "cath_bedraud", "placement": "structure", "text": "Fight through the restless dead of Cath Bedraud",
-         "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Crypt Sentinel"},
-                   {"type": "skycraft:draugr", "count": 2}]},
-        {"type": "kill", "place": "cath_bedraud", "placement": "structure", "text": "Defeat Gravesinger Morvenne",
-         "spawn": [{"type": "skycraft:necromancer", "name": "Gravesinger Morvenne", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5}],
-         "journal": "A Bloodthorn necromancer had made the crypt her workshop and was singing the knights out of their graves to guard it. Her song ended in the middle of a verse."},
-        {"type": "retrieve", "place": "cath_bedraud", "placement": "structure", "relic": "kd_red_wyrm_banner", "radius": 10, "text": "Take down the Banner of the Red Wyrm",
-         "actions": "scene:kd_banner_found"},
-        {"type": "deliver", "npc": "odric_hollenmoor", "relic": "kd_red_wyrm_banner", "text": "Carry the banner home to Daggerfall",
-         "topic": "The Banner of the Red Wyrm, Lord Commander.",
-         "reply": "Two hundred years. Maelis, call the whole order into the hall. Every knight, every squire, every stable-hand who can stand. This one is going to be done properly.",
-         "actions": "scene:kd_knighthood;relocate:dame_maelis_corbel:daggerfall:7:1"}
+        {
+          "type": "go",
+          "place": "cath_bedraud",
+          "text": "Travel to Cath Bedraud",
+          "actions": "summon:dame_maelis_corbel"
+        },
+        {
+          "type": "clear",
+          "place": "cath_bedraud",
+          "placement": "structure",
+          "text": "Fight through the restless dead of Cath Bedraud",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "name": "Crypt Sentinel"
+            },
+            {
+              "type": "skycraft:draugr",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "cath_bedraud",
+          "placement": "structure",
+          "text": "Defeat Gravesinger Morvenne",
+          "spawn": [
+            {
+              "type": "skycraft:necromancer",
+              "name": "Gravesinger Morvenne",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5
+            }
+          ],
+          "journal": "A Bloodthorn necromancer had made the crypt her workshop and was singing the knights out of their graves to guard it. Her song ended in the middle of a verse."
+        },
+        {
+          "type": "retrieve",
+          "place": "cath_bedraud",
+          "placement": "structure",
+          "relic": "kd_red_wyrm_banner",
+          "radius": 10,
+          "text": "Take down the Banner of the Red Wyrm",
+          "actions": "scene:kd_banner_found"
+        },
+        {
+          "type": "deliver",
+          "npc": "odric_hollenmoor",
+          "relic": "kd_red_wyrm_banner",
+          "text": "Carry the banner home to Daggerfall",
+          "topic": "The Banner of the Red Wyrm, Lord Commander.",
+          "reply": "Two hundred years. Maelis, call the whole order into the hall. Every knight, every squire, every stable-hand who can stand. This one is going to be done properly.",
+          "actions": "scene:kd_knighthood;relocate:dame_maelis_corbel:daggerfall:7:1"
+        }
       ],
       "outro": "I recovered the Banner of the Red Wyrm from Cath Bedraud and carried it home. Lord Commander Hollenmoor knighted me before the whole order and gave me a captain's command.",
-      "rewards": {"gold": 1000, "faction_points": 6, "perks": 1, "flags": ["kd_knighted"],
-                  "items": [{"item": "skycraft:steel_greatsword", "name": "Wyrmfang", "enchant": {"sharpness": 4, "fire_aspect": 1, "unbreaking": 3}},
-                            {"item": "skycraft:steel_plate_chestplate", "name": "Red Wyrm Hauberk", "enchant": {"protection": 3, "fire_protection": 3}}]}
+      "rewards": {
+        "gold": 1000,
+        "faction_points": 6,
+        "perks": 1,
+        "flags": [
+          "kd_knighted"
+        ],
+        "items": [
+          {
+            "item": "skycraft:steel_greatsword",
+            "name": "Wyrmfang",
+            "enchant": {
+              "sharpness": 4,
+              "fire_aspect": 1,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:steel_plate_chestplate",
+            "name": "Red Wyrm Hauberk",
+            "enchant": {
+              "protection": 3,
+              "fire_protection": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "glenumbra.L9.wyrd_vs_clergy",
+        "glenumbra.L8.mara_cathedral"
+      ]
     }
   ]
 }

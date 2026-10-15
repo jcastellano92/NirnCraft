@@ -128,7 +128,7 @@ public class DungeonStructure extends Structure {
         if (!Cultures.allows(where, region, x, z)) return Optional.empty();
         if (!Places.overlapping(x - PLACE_MARGIN, z - PLACE_MARGIN, x + PLACE_MARGIN, z + PLACE_MARGIN).isEmpty()) return Optional.empty();
         // never in or right next to a town (surface sites keep a wider berth than buried ones)
-        boolean surfaceSite = !theme.underground() || theme == Theme.FORT;
+        boolean surfaceSite = !theme.underground() || theme.hasUndercroft();
         if (TownExclusion.nearTown(ctx, surfaceSite ? TOWN_RANGE_SURFACE : TOWN_RANGE_UNDERGROUND)) return Optional.empty();
         WorldgenRandom random = ctx.random();
         long seed = random.nextLong();
@@ -141,7 +141,7 @@ public class DungeonStructure extends Structure {
         int minY = ctx.heightAccessor().getMinBuildHeight();
         boolean pad = terrainAdaptation() != TerrainAdjustment.NONE;
 
-        if (!theme.underground() || theme == Theme.FORT) {
+        if (!theme.underground() || theme.hasUndercroft()) {
             int radius = Layout.surfaceRadius(site);
             int r = (int) (radius * 0.75f);
             int[] hs = {
@@ -151,10 +151,10 @@ public class DungeonStructure extends Structure {
             int[] sorted = hs.clone();
             Arrays.sort(sorted);
             if (sorted[0] == WATER || sorted[0] <= sea) return Optional.empty();
-            int tolerance = theme == Theme.DRAGON_LAIR ? 12 : theme == Theme.FORT ? 7 : pad ? 10 : 6;
+            int tolerance = theme == Theme.DRAGON_LAIR ? 12 : theme.hasUndercroft() ? 7 : pad ? 10 : 6;
             if (sorted[4] - sorted[0] > tolerance) return Optional.empty();
             int base = theme == Theme.DRAGON_LAIR ? sorted[1] : sorted[2];
-            if (theme == Theme.FORT) {
+            if (theme.hasUndercroft()) {
                 int depth = theme.minDepth + random.nextInt(theme.maxDepth - theme.minDepth + 1);
                 // the cellars stay under the hill even where it falls away from the walls
                 int fDepth = Math.min(44, coverDepth(ctx, x, z, out, base, depth));
@@ -185,6 +185,7 @@ public class DungeonStructure extends Structure {
 
     /** Sub-themes for random sites: caves pick among their rosters, everything else splits two ways. */
     private int randomFlavor(WorldgenRandom random) {
+        if (theme == Theme.SCORPION_DEN) return CaveRoster.SCORPION;
         return theme == Theme.CAVE ? CaveRoster.random(random.nextInt(CaveRoster.RANDOM_COUNT)) : random.nextInt(4);
     }
 
@@ -251,7 +252,7 @@ public class DungeonStructure extends Structure {
         Direction rolled = Direction.Plane.HORIZONTAL.getRandomDirection(random);
         // Labyrinthian's stair opens towards the city's main street
         // a dungeon's mouth opens downhill, never into the slope above it
-        int h0 = theme.underground() && theme != Theme.FORT && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
+        int h0 = theme.underground() && !theme.hasUndercroft() && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
         Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
         Kit placeKit = Kit.forCulture(pl.culture());
@@ -282,7 +283,7 @@ public class DungeonStructure extends Structure {
             return Optional.of(new GenerationStub(new BlockPos(x, base, z),
                     builder -> Layout.surface(builder, site, fx, base, fz, facing, seed, false)));
         }
-        if (theme == Theme.FORT) {
+        if (theme.hasUndercroft()) {
             int base = h;
             int depth = Math.max(4, Math.min(44, Math.min(coverDepth(ctx, x, z, out, base,
                     com.skycraft.dungeons.marquee.MarqueePlans.depth(pl.id(), theme.maxDepth)), base - (minY + 14))));

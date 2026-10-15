@@ -738,7 +738,7 @@
    "entrance": "courier_log",
    "entranceKind": "journal",
    "bossNote": "scrawled_theorem",
-   "story": "",
+   "story": "sk4_note_3",
    "why": [
     "winterhold.L10.listener_on_ice",
     "winterhold.L10.falmer_pit",
@@ -846,7 +846,7 @@
    "entrance": "hela_log",
    "entranceKind": "journal",
    "bossNote": "cache_scrap",
-   "story": "",
+   "story": "sk4_note_4",
    "why": [
     "winterhold.L5.wreck_salvage",
     "winterhold.L1.ice_floes"
@@ -932,7 +932,7 @@
    "entrance": "dare_journal",
    "entranceKind": "journal",
    "bossNote": "sky_inscription",
-   "story": "",
+   "story": "sk4_note_5",
    "why": [
     "winterhold.L10.saarthal_eye",
     "winterhold.L10.harbingers_tomb",
@@ -943,7 +943,7 @@
    "family": "barrow",
    "variant": "ysgramors_tomb",
    "boss": "Warchief Skeggi the Unburied",
-   "person": "",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Ysgramor's",
     "Tomb",
@@ -952,10 +952,10 @@
    ],
    "motif": "ossuary",
    "loot": "barrow",
-   "entrance": "pilgrim_prayer",
-   "entranceKind": "prayer",
-   "bossNote": "warden_warning",
-   "story": "",
+   "entrance": "sk4_note_6",
+   "entranceKind": "ledger",
+   "bossNote": "pilgrim_prayer",
+   "story": "warden_warning",
    "why": [
     "winterhold.L10.harbingers_tomb"
    ]
@@ -999,7 +999,7 @@
    "entrance": "brinehammer_manifest",
    "entranceKind": "ledger",
    "bossNote": "salvager_orders",
-   "story": "",
+   "story": "sk4_note_6",
    "why": [
     "the_pale.L5.two_mines"
    ]
@@ -1019,7 +1019,7 @@
    "loot": "wreck",
    "entrance": "pilgrim_letter",
    "entranceKind": "letter",
-   "bossNote": "",
+   "bossNote": "sk4_note_7",
    "story": "",
    "why": [
     "winterhold.L5.wreck_salvage",
@@ -1063,7 +1063,7 @@
    "entrance": "fisher_plea",
    "entranceKind": "letter",
    "bossNote": "host_journal",
-   "story": "",
+   "story": "sk4_note_9",
    "why": [
     "winterhold.L10.falmer_pit",
     "winterhold.L4.glacier_waste"
@@ -1195,7 +1195,7 @@
    "entrance": "refugee_diary",
    "entranceKind": "diary",
    "bossNote": "telvanni_manifest",
-   "story": "",
+   "story": "sk4_note_8",
    "why": [
     "winterhold.L5.wreck_salvage",
     "winterhold.L1.ice_floes"
@@ -1304,7 +1304,7 @@
    "entrance": "sealed_vigil",
    "entranceKind": "journal",
    "bossNote": "town_petition",
-   "story": "",
+   "story": "sk4_note_7",
    "why": [
     "the_pale.L10.nightmare_temple"
    ]
@@ -1325,7 +1325,7 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "quartermaster_report",
-   "story": "",
+   "story": "sk4_note_8",
    "why": [
     "the_pale.L9.rebel_jarl"
    ]
@@ -1367,7 +1367,7 @@
    "entrance": "expulsion_letter",
    "entranceKind": "letter",
    "bossNote": "vinicia_notes",
-   "story": "",
+   "story": "sk4_note_10",
    "why": [
     "winterhold.L10.saarthal_eye"
    ]
@@ -1388,7 +1388,7 @@
    "entrance": "soldier_diary",
    "entranceKind": "diary",
    "bossNote": "camp_orders",
-   "story": "",
+   "story": "sk4_note_11",
    "why": [
     "winterhold.L9.rebel_jarl"
    ]
@@ -1419,7 +1419,7 @@
    "family": "ruin",
    "variant": "nordic_ruin",
    "boss": "Warden Valdrek of the Broken Wall",
-   "person": "Brakk",
+   "person": "Bailiff's Office of The Pale",
    "sign": [
     "Windward Ruins",
     "",
@@ -1428,10 +1428,10 @@
    ],
    "motif": "rune_pillar",
    "loot": "ruin",
-   "entrance": "bandit_scrawl",
-   "entranceKind": "notes",
+   "entrance": "sk4_note_9",
+   "entranceKind": "report",
    "bossNote": "hawker_ledger",
-   "story": "",
+   "story": "bandit_scrawl",
    "why": [
     "the_pale.L11.jagged_crown"
    ]
@@ -1495,7 +1495,7 @@
    "entrance": "digger_journal",
    "entranceKind": "journal",
    "bossNote": "dig_notice",
-   "story": "",
+   "story": "sk4_note_12",
    "why": [
     "winterhold.L10.harbingers_tomb"
    ]
@@ -1538,7 +1538,7 @@
    "loot": "den",
    "entrance": "hunter_tally",
    "entranceKind": "journal",
-   "bossNote": "",
+   "bossNote": "sk4_note_13",
    "story": "",
    "why": [
     "winterhold.L4.glacier_waste",
@@ -1584,7 +1584,7 @@
    "entrance": "ship_complaint",
    "entranceKind": "letter",
    "bossNote": "keeper_log",
-   "story": "",
+   "story": "sk4_note_14",
    "why": [
     "winterhold.L10.falmer_pit"
    ]
@@ -1672,7 +1672,7 @@
    "entrance": "fathers_letter",
    "entranceKind": "letter",
    "bossNote": "briar_rite",
-   "story": "",
+   "story": "sk4_note_10",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -1683,7 +1683,7 @@
    "family": "ruin",
    "variant": "nordic_ruin",
    "boss": "Warden Orsolf Rune-Keeper",
-   "person": "Brynja Stormquill",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Journeyman's",
     "Nook",
@@ -1692,9 +1692,9 @@
    ],
    "motif": "offering_bowl",
    "loot": "ruin",
-   "entrance": "cartographer_note",
-   "entranceKind": "treasure",
-   "bossNote": "",
+   "entrance": "sk4_note_15",
+   "entranceKind": "report",
+   "bossNote": "cartographer_note",
    "story": "",
    "why": [
     "winterhold.L10.saarthal_eye",
@@ -1717,7 +1717,7 @@
    "loot": "giant",
    "entrance": "sled_report",
    "entranceKind": "report",
-   "bossNote": "",
+   "bossNote": "sk4_note_10",
    "story": "",
    "why": [
     "the_pale.L4.snowfield",
@@ -1728,19 +1728,19 @@
    "family": "fort",
    "variant": "fort",
    "boss": "Krev the Skinner",
-   "person": "",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Driftshade",
     "Refuge",
-    "Held by:",
-    "Krev the"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "trophy_wall",
    "loot": "bandit",
-   "entrance": "cell_scratching",
-   "entranceKind": "warning",
+   "entrance": "sk4_note_16",
+   "entranceKind": "ledger",
    "bossNote": "silver_orders",
-   "story": "",
+   "story": "cell_scratching",
    "why": [
     "winterhold.L6.college"
    ]
@@ -1782,7 +1782,7 @@
    "entrance": "miner_letter",
    "entranceKind": "letter",
    "bossNote": "falmer_study",
-   "story": "",
+   "story": "sk4_note_17",
    "why": [
     "winterhold.L10.falmer_pit",
     "winterhold.L4.blind_hunters"
@@ -1815,7 +1815,7 @@
    "family": "dwemer",
    "variant": "dwemer_ruin",
    "boss": "Warden-Engine Dz-9",
-   "person": "Brelas Indarys",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Alftand",
     "",
@@ -1824,10 +1824,10 @@
    ],
    "motif": "centurion_bay",
    "loot": "dwemer",
-   "entrance": "brelas_notebook",
-   "entranceKind": "notes",
-   "bossNote": "expedition_list",
-   "story": "",
+   "entrance": "sk4_note_19",
+   "entranceKind": "report",
+   "bossNote": "brelas_notebook",
+   "story": "expedition_list",
    "why": [
     "winterhold.L10.glacier_dwemer"
    ]
@@ -1870,7 +1870,7 @@
    "entrance": "foreman_notice",
    "entranceKind": "warning",
    "bossNote": "ore_tally",
-   "story": "",
+   "story": "sk4_note_20",
    "why": [
     "winterhold.L5.wreck_salvage",
     "winterhold.L5.whistling_mine"
@@ -1902,19 +1902,19 @@
    "family": "falmer",
    "variant": "falmer_cave",
    "boss": "Gloomwarden Nuum Spore-Warden",
-   "person": "Durz gro-Larak",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Darkfall Cave",
     "",
     "Last seen:",
-    "Durz gro-Larak"
+    "Bailiff's"
    ],
    "motif": "chaurus_nest",
    "loot": "falmer",
-   "entrance": "durz_marks",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_11",
+   "entranceKind": "report",
    "bossNote": "falmer_totem",
-   "story": "",
+   "story": "durz_marks",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -1946,7 +1946,7 @@
    "family": "barrow",
    "variant": "barrow",
    "boss": "Jarl Ragnhei the Bitter",
-   "person": "",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Snow Veil",
     "Sanctum",
@@ -1955,10 +1955,10 @@
    ],
    "motif": "urn_wall",
    "loot": "barrow",
-   "entrance": "thief_note",
-   "entranceKind": "notes",
+   "entrance": "sk4_note_21",
+   "entranceKind": "report",
    "bossNote": "priest_tablet",
-   "story": "",
+   "story": "thief_note",
    "why": [
     "winterhold.L10.harbingers_tomb"
    ]
@@ -1979,7 +1979,7 @@
    "entrance": "widow_letter",
    "entranceKind": "letter",
    "bossNote": "gang_rules",
-   "story": "",
+   "story": "sk4_note_11",
    "why": [
     "the_pale.L8.old_crown",
     "the_pale.L11.jagged_crown"
@@ -1989,19 +1989,19 @@
    "family": "fort",
    "variant": "fort",
    "boss": "Rolff Thin-Fingers",
-   "person": "Brynja Stormquill",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Fort",
     "Fellhammer",
     "Last seen:",
-    "Brynja"
+    "Bailiff's"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "fort_history",
-   "entranceKind": "book",
+   "entrance": "sk4_note_22",
+   "entranceKind": "ledger",
    "bossNote": "fence_ledger",
-   "story": "",
+   "story": "fort_history",
    "why": [
     "winterhold.L6.college"
    ]
@@ -2022,7 +2022,7 @@
    "entrance": "ulf_warning",
    "entranceKind": "warning",
    "bossNote": "beacon_log",
-   "story": "",
+   "story": "sk4_note_23",
    "why": [
     "winterhold.L10.falmer_pit"
    ]
@@ -2052,19 +2052,19 @@
    "family": "bandit",
    "variant": "bandit_camp",
    "boss": "Hrodvar Toll-Taker",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Dragon Bridge",
     "Overlook",
-    "Held by:",
-    "Hrodvar"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "prisoner_cage",
    "loot": "bandit",
-   "entrance": "lookout_note",
-   "entranceKind": "orders",
+   "entrance": "sk4_note_12",
+   "entranceKind": "ledger",
    "bossNote": "toll_ledger",
-   "story": "",
+   "story": "lookout_note",
    "why": [
     "the_reach.L5.border_trade"
    ]
@@ -2108,7 +2108,7 @@
    "entrance": "wall_rubbing",
    "entranceKind": "notes",
    "bossNote": "shepherd_count",
-   "story": "",
+   "story": "sk4_note_24",
    "why": [
     "winterhold.L10.saarthal_eye"
    ]
@@ -2129,7 +2129,7 @@
    "entrance": "vigilant_rota",
    "entranceKind": "list",
    "bossNote": "vigilant_creed",
-   "story": "",
+   "story": "sk4_note_12",
    "why": [
     "the_pale.L6.heath_farms",
     "the_pale.L5.fishing"
@@ -2151,7 +2151,7 @@
    "entrance": "deckhand_scrawl",
    "entranceKind": "warning",
    "bossNote": "ship_orders",
-   "story": "",
+   "story": "sk4_note_25",
    "why": [
     "winterhold.L5.wreck_salvage",
     "winterhold.L1.ice_floes"
@@ -2184,19 +2184,19 @@
    "family": "ice",
    "variant": "ice_cave",
    "boss": "Old Glasswing",
-   "person": "Gudrun Warm-Hands",
+   "person": "Bailiff's Office of Winterhold",
    "sign": [
     "Stillborn Cave",
     "",
     "Last seen:",
-    "Gudrun"
+    "Bailiff's"
    ],
    "motif": "ice_shrine",
    "loot": "ice",
-   "entrance": "midwife_prayer",
-   "entranceKind": "prayer",
-   "bossNote": "asta_legend",
-   "story": "",
+   "entrance": "sk4_note_26",
+   "entranceKind": "ledger",
+   "bossNote": "midwife_prayer",
+   "story": "asta_legend",
    "why": [
     "winterhold.L10.listener_on_ice",
     "winterhold.L10.falmer_pit",
@@ -2207,19 +2207,19 @@
    "family": "forsworn",
    "variant": "forsworn_cave",
    "boss": "Briarheart Edda Red-Feather",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Bruca's Leap",
     "Redoubt",
-    "Held by:",
-    "Briarheart"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "feather_totem",
    "loot": "forsworn",
-   "entrance": "captive_scratch",
-   "entranceKind": "warning",
+   "entrance": "sk4_note_13",
+   "entranceKind": "report",
    "bossNote": "river_watch",
-   "story": "",
+   "story": "captive_scratch",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -2242,7 +2242,7 @@
    "entrance": "commander_report",
    "entranceKind": "report",
    "bossNote": "fort_graffiti",
-   "story": "",
+   "story": "sk4_note_13",
    "why": [
     "the_pale.L9.rebel_jarl"
    ]
@@ -2251,18 +2251,18 @@
    "family": "falmer",
    "variant": "falmer_cave",
    "boss": "Hive-Warden Skree the Pale Chanter",
-   "person": "",
+   "person": "Bailiff's Office of The Pale",
    "sign": [
     "Duskglow",
     "Crevice",
-    "Held by:",
-    "Hive-Warden"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "fungus_garden",
    "loot": "falmer",
-   "entrance": "courier_last_words",
-   "entranceKind": "letter",
-   "bossNote": "",
+   "entrance": "sk4_note_14",
+   "entranceKind": "ledger",
+   "bossNote": "courier_last_words",
    "story": "",
    "why": [
     "the_pale.L10.nightmare_temple"
@@ -2272,19 +2272,19 @@
    "family": "forsworn",
    "variant": "forsworn_cave",
    "boss": "Varka Hollow-Drum",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Druadach",
     "Redoubt",
-    "Held by:",
-    "Varka"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "feather_totem",
    "loot": "forsworn",
-   "entrance": "healer_list",
-   "entranceKind": "list",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_15",
+   "entranceKind": "report",
+   "bossNote": "healer_list",
+   "story": "sk4_note_73",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -2307,7 +2307,7 @@
    "entrance": "orla_journal",
    "entranceKind": "journal",
    "bossNote": "bandit_warning",
-   "story": "",
+   "story": "sk4_note_66",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -2348,8 +2348,8 @@
    "loot": "cabin",
    "entrance": "hermit_diary",
    "entranceKind": "diary",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_16",
+   "story": "sk4_note_74",
    "why": [
     "the_reach.L5.river_farms"
    ]
@@ -2358,7 +2358,7 @@
    "family": "dwemer",
    "variant": "great_lift",
    "boss": "Overseer Unit Bt-30",
-   "person": "Quaestor Aurelian Vesk",
+   "person": "Bailiff's Office of The Pale",
    "sign": [
     "Great Lift at",
     "Alftand",
@@ -2367,9 +2367,9 @@
    ],
    "motif": "lens_array",
    "loot": "dwemer",
-   "entrance": "vesk_lift_notes",
-   "entranceKind": "notes",
-   "bossNote": "",
+   "entrance": "sk4_note_15",
+   "entranceKind": "report",
+   "bossNote": "vesk_lift_notes",
    "story": "",
    "why": [
     "the_pale.L10.great_lifts",
@@ -2393,7 +2393,7 @@
    "entrance": "shepherd_plea",
    "entranceKind": "letter",
    "bossNote": "breeding_notes",
-   "story": "",
+   "story": "sk4_note_17",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -2456,7 +2456,7 @@
    "entrance": "bard_letter",
    "entranceKind": "letter",
    "bossNote": "saga_fragment",
-   "story": "",
+   "story": "sk4_note_16",
    "why": [
     "the_pale.L8.old_crown",
     "the_pale.L11.jagged_crown"
@@ -2466,7 +2466,7 @@
    "family": "ruin",
    "variant": "nordic_ruin",
    "boss": "Warden Tormund the Watcher",
-   "person": "Saervi the Fox",
+   "person": "Bailiff's Office of The Pale",
    "sign": [
     "Yorgrim",
     "Overlook",
@@ -2475,9 +2475,9 @@
    ],
    "motif": "offering_bowl",
    "loot": "ruin",
-   "entrance": "smuggler_treasure",
-   "entranceKind": "treasure",
-   "bossNote": "",
+   "entrance": "sk4_note_17",
+   "entranceKind": "report",
+   "bossNote": "smuggler_treasure",
    "story": "",
    "why": [
     "the_pale.L11.jagged_crown"
@@ -2522,7 +2522,7 @@
    "entrance": "crew_orders",
    "entranceKind": "orders",
    "bossNote": "ottar_map",
-   "story": "",
+   "story": "sk4_note_18",
    "why": [
     "the_reach.L5.border_trade"
    ]
@@ -2565,7 +2565,7 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "camp_orders",
-   "story": "",
+   "story": "sk4_note_19",
    "why": [
     "the_reach.L9.imperial_jarl"
    ]
@@ -2585,8 +2585,8 @@
    "loot": "dragon",
    "entrance": "hunter_journal",
    "entranceKind": "journal",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_20",
+   "story": "sk4_note_75",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -2693,7 +2693,7 @@
    "entrance": "fennick_notes",
    "entranceKind": "journal",
    "bossNote": "afflicted_scrawl",
-   "story": "",
+   "story": "sk4_note_21",
    "why": [
     "the_reach.L10.dwemer_depths",
     "the_reach.L1.dwemer_city_rock",
@@ -2871,7 +2871,7 @@
    "entrance": "hrofi_letter",
    "entranceKind": "letter",
    "bossNote": "briarheart_boast",
-   "story": "",
+   "story": "sk4_note_22",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -2904,19 +2904,19 @@
    "family": "cabin",
    "variant": "cabin",
    "boss": "Brenna Tall-Tale",
-   "person": "Bjorlam Frost-Hand",
+   "person": "Bailiff's Office of Eastmarch",
    "sign": [
     "Traitor's Post",
     "",
     "Last seen:",
-    "Bjorlam"
+    "Bailiff's"
    ],
    "motif": "hearth_corner",
    "loot": "cabin",
-   "entrance": "deserters_pact",
-   "entranceKind": "contract",
+   "entrance": "sk4_note_9",
+   "entranceKind": "report",
    "bossNote": "bjorlam_unsent",
-   "story": "",
+   "story": "deserters_pact",
    "why": [
     "eastmarch.L6.darkwater_crossing",
     "eastmarch.L6.mills_and_farms",
@@ -2927,19 +2927,19 @@
    "family": "tower",
    "variant": "watchtower",
    "boss": "Keeper Ismara the Last Lamp",
-   "person": "",
+   "person": "Bailiff's Office of Eastmarch",
    "sign": [
     "Refugees' Rest",
     "",
-    "Held by:",
-    "Keeper Ismara"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "signal_beacon",
    "loot": "tower",
-   "entrance": "refugee_inscription",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_10",
+   "entranceKind": "ledger",
    "bossNote": "bandit_squat",
-   "story": "",
+   "story": "refugee_inscription",
    "why": [
     "eastmarch.L10.bandit_mine_camps",
     "eastmarch.L3.windhelm_bridge"
@@ -3003,7 +3003,7 @@
    "entrance": "legate_report",
    "entranceKind": "report",
    "bossNote": "quartermaster_list",
-   "story": "",
+   "story": "sk4_note_24",
    "why": [
     "the_reach.L9.imperial_jarl"
    ]
@@ -3122,19 +3122,19 @@
    "family": "forsworn",
    "variant": "forsworn_tower",
    "boss": "Vorald",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Sundered",
     "Towers",
-    "Held by:",
-    "Vorald"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "antler_totem",
    "loot": "forsworn",
-   "entrance": "forsworn_song",
-   "entranceKind": "poem",
+   "entrance": "sk4_note_25",
+   "entranceKind": "report",
    "bossNote": "double_ledger",
-   "story": "",
+   "story": "forsworn_song",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -3157,7 +3157,7 @@
    "entrance": "arcadia_letter",
    "entranceKind": "letter",
    "bossNote": "drelas_notes",
-   "story": "",
+   "story": "sk4_note_16",
    "why": [
     "whiterun.L6.riverwood",
     "whiterun.L6.rorikstead",
@@ -3180,7 +3180,7 @@
    "entrance": "eirik_journal",
    "entranceKind": "journal",
    "bossNote": "tithe_inscription",
-   "story": "",
+   "story": "sk4_note_26",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -3224,7 +3224,7 @@
    "entrance": "gray_mane_journal",
    "entranceKind": "journal",
    "bossNote": "rannveig_inscription",
-   "story": "",
+   "story": "sk4_note_17",
    "why": [
     "whiterun.L10.beast_blood",
     "whiterun.L10.dragon_mounds"
@@ -3246,7 +3246,7 @@
    "entrance": "aiwen_plea",
    "entranceKind": "letter",
    "bossNote": "becoming_rite",
-   "story": "",
+   "story": "sk4_note_27",
    "why": [
     "the_reach.L10.hagraven_covens",
     "the_reach.L10.dead_eaters",
@@ -3257,7 +3257,7 @@
    "family": "barrow",
    "variant": "barrow",
    "boss": "Warchief Valgrim Bone-Reaver",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Rebel's Cairn",
     "",
@@ -3266,10 +3266,10 @@
    ],
    "motif": "urn_wall",
    "loot": "barrow",
-   "entrance": "reach_lament",
-   "entranceKind": "poem",
+   "entrance": "sk4_note_28",
+   "entranceKind": "ledger",
    "bossNote": "necro_notes",
-   "story": "",
+   "story": "reach_lament",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -3290,7 +3290,7 @@
    "entrance": "paymaster_note",
    "entranceKind": "report",
    "bossNote": "seeker_scrawl",
-   "story": "",
+   "story": "sk4_note_29",
    "why": [
     "the_reach.L10.blades_temple"
    ]
@@ -3332,7 +3332,7 @@
    "entrance": "robber_notes",
    "entranceKind": "notes",
    "bossNote": "hamvir_epitaph",
-   "story": "",
+   "story": "sk4_note_18",
    "why": [
     "whiterun.L10.beast_blood",
     "whiterun.L10.dragon_mounds"
@@ -3354,7 +3354,7 @@
    "entrance": "two_coins_orders",
    "entranceKind": "orders",
    "bossNote": "captive_scratching",
-   "story": "",
+   "story": "sk4_note_12",
    "why": [
     "eastmarch.L10.bandit_mine_camps"
    ]
@@ -3404,20 +3404,20 @@
   "halted_stream_camp": {
    "family": "bandit",
    "variant": "bandit_camp",
-   "boss": "Captain Torvik Salt-Eye",
-   "person": "Brattvar Stone-Hand",
+   "boss": "Brattvar Stone-Hand",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Halted Stream",
     "Camp",
     "Last seen:",
-    "Brattvar"
+    "Bailiff's"
    ],
    "motif": "loot_heap",
    "loot": "bandit",
-   "entrance": "brattvar_orders",
-   "entranceKind": "orders",
-   "bossNote": "miner_scratching",
-   "story": "",
+   "entrance": "sk4_note_19",
+   "entranceKind": "report",
+   "bossNote": "brattvar_orders",
+   "story": "miner_scratching",
    "why": [
     "whiterun.L10.toll_bandits",
     "whiterun.L5.crossroads_trade"
@@ -3439,7 +3439,7 @@
    "entrance": "surveyor_notes",
    "entranceKind": "notes",
    "bossNote": "hamvir_scrap",
-   "story": "",
+   "story": "sk4_note_2",
    "why": [
     "whiterun.L10.beast_blood",
     "whiterun.L10.dragon_mounds"
@@ -3483,7 +3483,7 @@
    "loot": "cabin",
    "entrance": "lund_journal",
    "entranceKind": "journal",
-   "bossNote": "",
+   "bossNote": "sk4_note_20",
    "story": "",
    "why": [
     "whiterun.L6.riverwood",
@@ -3495,19 +3495,19 @@
    "family": "bandit",
    "variant": "bandit_camp",
    "boss": "Hrodna the Smith",
-   "person": "",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Silent Moons",
     "Camp",
-    "Held by:",
-    "Hrodna the"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bedroll_row",
    "loot": "bandit",
-   "entrance": "lunar_inscription",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_21",
+   "entranceKind": "report",
    "bossNote": "hrodna_notes",
-   "story": "",
+   "story": "lunar_inscription",
    "why": [
     "whiterun.L10.toll_bandits",
     "whiterun.L5.crossroads_trade"
@@ -3529,7 +3529,7 @@
    "entrance": "nord_spy",
    "entranceKind": "report",
    "bossNote": "keepers_oath",
-   "story": "",
+   "story": "sk4_note_30",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -3552,7 +3552,7 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "kynareth_prayer",
-   "story": "",
+   "story": "sk4_note_22",
    "why": [
     "whiterun.L4.throat_meadow",
     "whiterun.L8.kynareth_tree"
@@ -3562,19 +3562,19 @@
    "family": "forsworn",
    "variant": "forsworn_tower",
    "boss": "Hunt-Mother Kyrn Hollow-Drum",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Bleakwind",
     "Bluff",
-    "Held by:",
-    "Hunt-Mother"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "antler_totem",
    "loot": "forsworn",
-   "entrance": "guest_list",
-   "entranceKind": "list",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_31",
+   "entranceKind": "report",
+   "bossNote": "guest_list",
+   "story": "sk4_note_76",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -3597,7 +3597,7 @@
    "entrance": "gold_prospect",
    "entranceKind": "notes",
    "bossNote": "shift_roster",
-   "story": "",
+   "story": "sk4_note_32",
    "why": [
     "the_reach.L5.silver_mining",
     "the_reach.L5.small_mines",
@@ -3608,18 +3608,18 @@
    "family": "tower",
    "variant": "watchtower",
    "boss": "Joric Beacon-Keeper",
-   "person": "Red Ingjald",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Whitewatch",
     "Tower",
     "Last seen:",
-    "Red Ingjald"
+    "Bailiff's"
    ],
    "motif": "signal_beacon",
    "loot": "tower",
-   "entrance": "toll_tally",
-   "entranceKind": "ledger",
-   "bossNote": "",
+   "entrance": "sk4_note_23",
+   "entranceKind": "report",
+   "bossNote": "toll_tally",
    "story": "",
    "why": [
     "whiterun.L10.toll_bandits",
@@ -3643,7 +3643,7 @@
    "entrance": "brother_letter",
    "entranceKind": "letter",
    "bossNote": "falmer_scratches",
-   "story": "",
+   "story": "sk4_note_24",
    "why": [
     "whiterun.L10.beast_blood"
    ]
@@ -3652,19 +3652,19 @@
    "family": "forsworn",
    "variant": "forsworn_camp",
    "boss": "Hunt-Mother Varka Bone-Chanter",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Karthspire",
     "Camp",
-    "Held by:",
-    "Hunt-Mother"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "antler_totem",
    "loot": "forsworn",
-   "entrance": "sentry_orders",
-   "entranceKind": "orders",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_33",
+   "entranceKind": "report",
+   "bossNote": "sentry_orders",
+   "story": "sk4_note_77",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -3687,7 +3687,7 @@
    "entrance": "acolyte_letter",
    "entranceKind": "letter",
    "bossNote": "keep_rota",
-   "story": "",
+   "story": "sk4_note_25",
    "why": [
     "whiterun.L10.fire_mage_keep"
    ]
@@ -3696,19 +3696,19 @@
    "family": "bandit",
    "variant": "bandit_cave",
    "boss": "Astrid Half-Ear",
-   "person": "",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Redoran's",
     "Retreat",
-    "Held by:",
-    "Astrid"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "loot_heap",
    "loot": "bandit",
-   "entrance": "redoran_carving",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_26",
+   "entranceKind": "ledger",
    "bossNote": "chief_letter",
-   "story": "",
+   "story": "redoran_carving",
    "why": [
     "whiterun.L10.toll_bandits",
     "whiterun.L5.crossroads_trade"
@@ -3730,7 +3730,7 @@
    "entrance": "kjeld_daybook",
    "entranceKind": "diary",
    "bossNote": "kjeld_cache",
-   "story": "",
+   "story": "sk4_note_14",
    "why": [
     "eastmarch.L6.darkwater_crossing",
     "eastmarch.L6.mills_and_farms",
@@ -3741,19 +3741,19 @@
    "family": "forsworn",
    "variant": "forsworn_camp",
    "boss": "Briarheart Varka Red-Feather",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Karthspire",
     "",
-    "Held by:",
-    "Briarheart"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bone_fire",
    "loot": "forsworn",
-   "entrance": "blades_fragment",
-   "entranceKind": "book",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_34",
+   "entranceKind": "ledger",
+   "bossNote": "blades_fragment",
+   "story": "sk4_note_78",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -3776,7 +3776,7 @@
    "entrance": "ulmir_confession",
    "entranceKind": "letter",
    "bossNote": "hunt_captain_log",
-   "story": "",
+   "story": "sk4_note_15",
    "why": [
     "eastmarch.L9.rebel_capital"
    ]
@@ -3797,7 +3797,7 @@
    "entrance": "dushgar_last",
    "entranceKind": "notes",
    "bossNote": "ore_ledger",
-   "story": "",
+   "story": "sk4_note_16",
    "why": [
     "eastmarch.L5.mines",
     "eastmarch.L1.small_ores",
@@ -3820,7 +3820,7 @@
    "entrance": "shepherd_warning",
    "entranceKind": "warning",
    "bossNote": "draugr_inscription",
-   "story": "",
+   "story": "sk4_note_27",
    "why": [
     "whiterun.L10.beast_blood",
     "whiterun.L10.dragon_mounds"
@@ -3842,7 +3842,7 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "legion_orders",
-   "story": "",
+   "story": "sk4_note_28",
    "why": [
     "whiterun.L9.siege_point"
    ]
@@ -3851,19 +3851,19 @@
    "family": "bandit",
    "variant": "bandit_cave",
    "boss": "Grelka the Fence",
-   "person": "",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Swindler's Den",
     "",
-    "Held by:",
-    "Grelka the"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "loot_heap",
    "loot": "bandit",
-   "entrance": "swindle_rules",
-   "entranceKind": "list",
+   "entrance": "sk4_note_29",
+   "entranceKind": "report",
    "bossNote": "fence_ledger",
-   "story": "",
+   "story": "swindle_rules",
    "why": [
     "whiterun.L10.toll_bandits",
     "whiterun.L5.crossroads_trade"
@@ -3884,7 +3884,7 @@
    "loot": "giant",
    "entrance": "giant_watch",
    "entranceKind": "notes",
-   "bossNote": "",
+   "bossNote": "sk4_note_30",
    "story": "",
    "why": [
     "whiterun.L10.giant_camps",
@@ -3908,7 +3908,7 @@
    "entrance": "skaggi_notice",
    "entranceKind": "warning",
    "bossNote": "lucan_carving",
-   "story": "",
+   "story": "sk4_note_35",
    "why": [
     "the_reach.L5.silver_mining",
     "the_reach.L5.small_mines",
@@ -3931,7 +3931,7 @@
    "entrance": "merchant_plea",
    "entranceKind": "letter",
    "bossNote": "toll_schedule",
-   "story": "",
+   "story": "sk4_note_31",
    "why": [
     "whiterun.L10.toll_bandits",
     "whiterun.L3.valtheim_crossing",
@@ -3942,19 +3942,19 @@
    "family": "grove",
    "variant": "spriggan_cave",
    "boss": "Mother Barkhide",
-   "person": "Ardwen Leafwright",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Darkshade",
     "",
     "Last seen:",
-    "Ardwen"
+    "Bailiff's"
    ],
    "motif": "moss_shrine",
    "loot": "grove",
-   "entrance": "alchemist_notes",
-   "entranceKind": "notes",
-   "bossNote": "valtheim_scrap",
-   "story": "",
+   "entrance": "sk4_note_1",
+   "entranceKind": "report",
+   "bossNote": "alchemist_notes",
+   "story": "valtheim_scrap",
    "why": [
     "whiterun.L4.throat_meadow",
     "whiterun.L8.kynareth_tree"
@@ -3976,7 +3976,7 @@
    "entrance": "apprentice_doubt",
    "entranceKind": "letter",
    "bossNote": "necro_workbook",
-   "story": "",
+   "story": "sk4_note_17",
    "why": [
     "eastmarch.L10.old_city_killer"
    ]
@@ -3996,7 +3996,7 @@
    "loot": "den",
    "entrance": "hunter_warning",
    "entranceKind": "warning",
-   "bossNote": "",
+   "bossNote": "sk4_note_32",
    "story": "",
    "why": [
     "whiterun.L4.sabre_and_wolf",
@@ -4019,7 +4019,7 @@
    "entrance": "hunter_lodge_diary",
    "entranceKind": "diary",
    "bossNote": "grove_offering",
-   "story": "",
+   "story": "sk4_note_18",
    "why": [
     "eastmarch.L4.snow_pine",
     "eastmarch.L4.eldergleam"
@@ -4029,7 +4029,7 @@
    "family": "barrow",
    "variant": "barrow",
    "boss": "Warchief Ingrun the Long Dead",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Reachwater",
     "Rock",
@@ -4038,10 +4038,10 @@
    ],
    "motif": "offering_bowl",
    "loot": "barrow",
-   "entrance": "tomb_warning",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_36",
+   "entranceKind": "ledger",
    "bossNote": "robber_tally",
-   "story": "",
+   "story": "tomb_warning",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -4062,7 +4062,7 @@
    "entrance": "thrall_note",
    "entranceKind": "letter",
    "bossNote": "vampire_menu",
-   "story": "",
+   "story": "sk4_note_19",
    "why": [
     "eastmarch.L10.vampire_cave"
    ]
@@ -4083,7 +4083,7 @@
    "entrance": "hunter_tracks",
    "entranceKind": "report",
    "bossNote": "giant_cradle",
-   "story": "",
+   "story": "sk4_note_20",
    "why": [
     "eastmarch.L4.fumarole_tundra"
    ]
@@ -4104,7 +4104,7 @@
    "entrance": "captive_note",
    "entranceKind": "letter",
    "bossNote": "forsworn_carving",
-   "story": "",
+   "story": "sk4_note_67",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -4127,7 +4127,7 @@
    "entrance": "paymaster_letter",
    "entranceKind": "letter",
    "bossNote": "silver_scrawl",
-   "story": "",
+   "story": "sk4_note_33",
    "why": [
     "whiterun.L9.siege_point",
     "whiterun.L10.beast_blood"
@@ -4149,7 +4149,7 @@
    "entrance": "herder_account",
    "entranceKind": "letter",
    "bossNote": "spring_rules",
-   "story": "",
+   "story": "sk4_note_21",
    "why": [
     "eastmarch.L4.fumarole_tundra"
    ]
@@ -4169,7 +4169,7 @@
    "loot": "giant",
    "entrance": "caravan_note",
    "entranceKind": "notes",
-   "bossNote": "",
+   "bossNote": "sk4_note_34",
    "story": "",
    "why": [
     "whiterun.L10.giant_camps",
@@ -4181,7 +4181,7 @@
    "family": "barrow",
    "variant": "barrow",
    "boss": "Warchief Yrsa Black-Mantle",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Reachcliff",
     "Cave",
@@ -4190,10 +4190,10 @@
    ],
    "motif": "ossuary",
    "loot": "barrow",
-   "entrance": "missing_poster",
-   "entranceKind": "list",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_37",
+   "entranceKind": "report",
+   "bossNote": "missing_poster",
+   "story": "sk4_note_79",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -4202,7 +4202,7 @@
    "family": "dragon",
    "variant": "dragon_lair",
    "boss": "Nirkul of the High Perch",
-   "person": "",
+   "person": "Bailiff's Office of Eastmarch",
    "sign": [
     "Bonestrewn",
     "Crest",
@@ -4211,10 +4211,10 @@
    ],
    "motif": "offering_bowl",
    "loot": "dragon",
-   "entrance": "shout_marks",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_22",
+   "entranceKind": "ledger",
    "bossNote": "adventurer_journal",
-   "story": "",
+   "story": "shout_marks",
    "why": [
     "eastmarch.L10.old_city_killer"
    ]
@@ -4257,7 +4257,7 @@
    "entrance": "poachers_boast",
    "entranceKind": "letter",
    "bossNote": "calf_cairn",
-   "story": "",
+   "story": "sk4_note_23",
    "why": [
     "eastmarch.L4.fumarole_tundra"
    ]
@@ -4278,7 +4278,7 @@
    "entrance": "lookout_diary",
    "entranceKind": "diary",
    "bossNote": "bandit_orders",
-   "story": "",
+   "story": "sk4_note_35",
    "why": [
     "whiterun.L10.toll_bandits",
     "whiterun.L5.crossroads_trade"
@@ -4299,7 +4299,7 @@
    "loot": "tower",
    "entrance": "watch_report",
    "entranceKind": "report",
-   "bossNote": "",
+   "bossNote": "sk4_note_36",
    "story": "",
    "why": [
     "whiterun.L10.toll_bandits",
@@ -4310,7 +4310,7 @@
   "broken_fang_cave": {
    "family": "vampire",
    "variant": "vampire_lair",
-   "boss": "Lord Maelis the Patient",
+   "boss": "Bailiff's Office of Whiterun",
    "person": "Ingvild of Falkreath",
    "sign": [
     "Broken Fang",
@@ -4322,7 +4322,7 @@
    "loot": "vampire",
    "entrance": "traveller_diary",
    "entranceKind": "diary",
-   "bossNote": "",
+   "bossNote": "sk4_note_37",
    "story": "",
    "why": [
     "whiterun.L10.beast_blood"
@@ -4344,7 +4344,7 @@
    "entrance": "warden_last",
    "entranceKind": "report",
    "bossNote": "smuggler_tally",
-   "story": "",
+   "story": "sk4_note_24",
    "why": [
     "eastmarch.L10.bandit_mine_camps",
     "eastmarch.L3.windhelm_bridge"
@@ -4366,7 +4366,7 @@
    "entrance": "recruit_diary",
    "entranceKind": "diary",
    "bossNote": "stormcloak_orders",
-   "story": "",
+   "story": "sk4_note_38",
    "why": [
     "whiterun.L9.siege_point"
    ]
@@ -4375,19 +4375,19 @@
    "family": "forsworn",
    "variant": "forsworn_camp",
    "boss": "Edda the Briar-Sworn",
-   "person": "Steward of Understone Keep",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Hag Rock",
     "Redoubt",
     "Last seen:",
-    "Steward of"
+    "Bailiff's"
    ],
    "motif": "feather_totem",
    "loot": "forsworn",
-   "entrance": "markarth_bounty",
-   "entranceKind": "contract",
+   "entrance": "sk4_note_39",
+   "entranceKind": "report",
    "bossNote": "drumhide_scratches",
-   "story": "",
+   "story": "markarth_bounty",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -4419,18 +4419,18 @@
    "family": "giant",
    "variant": "giant_camp",
    "boss": "Bolgrum Cairn-Kicker",
-   "person": "Arcadia",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Sleeping Tree",
     "Camp",
     "Last seen:",
-    "Arcadia"
+    "Bailiff's"
    ],
    "motif": "mammoth_bones",
    "loot": "giant",
-   "entrance": "sap_notes",
-   "entranceKind": "notes",
-   "bossNote": "",
+   "entrance": "sk4_note_39",
+   "entranceKind": "report",
+   "bossNote": "sap_notes",
    "story": "",
    "why": [
     "whiterun.L10.giant_camps",
@@ -4454,7 +4454,7 @@
    "entrance": "climber_note",
    "entranceKind": "journal",
    "bossNote": "crone_song",
-   "story": "",
+   "story": "sk4_note_40",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -4477,7 +4477,7 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "camp_report",
-   "story": "",
+   "story": "sk4_note_25",
    "why": [
     "eastmarch.L9.rebel_capital"
    ]
@@ -4486,19 +4486,19 @@
    "family": "beast",
    "variant": "den",
    "boss": "Black Cragmaw",
-   "person": "Bryling",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Purewater Run",
     "",
     "Last seen:",
-    "Bryling"
+    "Bailiff's"
    ],
    "motif": "bone_heap",
    "loot": "den",
-   "entrance": "herbalist_notes",
-   "entranceKind": "notes",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_41",
+   "entranceKind": "report",
+   "bossNote": "herbalist_notes",
+   "story": "sk4_note_81",
    "why": [
     "the_reach.L4.cave_mouths"
    ]
@@ -4507,19 +4507,19 @@
    "family": "grove",
    "variant": "grove",
    "boss": "The Wispweaver",
-   "person": "",
+   "person": "Bailiff's Office of Eastmarch",
    "sign": [
     "Eldergleam",
     "Sanctuary",
-    "Held by:",
-    "The Wispweaver"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "moss_shrine",
    "loot": "grove",
-   "entrance": "druid_verse",
-   "entranceKind": "poem",
+   "entrance": "sk4_note_26",
+   "entranceKind": "ledger",
    "bossNote": "pilgrim_book",
-   "story": "",
+   "story": "druid_verse",
    "why": [
     "eastmarch.L4.snow_pine",
     "eastmarch.L4.eldergleam"
@@ -4529,19 +4529,19 @@
    "family": "fort",
    "variant": "fort",
    "boss": "Ulfgar the Unwashed",
-   "person": "Galmar Stone-Fist",
+   "person": "Bailiff's Office of Eastmarch",
    "sign": [
     "Fort Amol",
     "",
     "Last seen:",
-    "Galmar"
+    "Bailiff's"
    ],
    "motif": "armory_rack",
    "loot": "bandit",
-   "entrance": "withdrawal_order",
-   "entranceKind": "orders",
+   "entrance": "sk4_note_27",
+   "entranceKind": "report",
    "bossNote": "bandit_boast",
-   "story": "",
+   "story": "withdrawal_order",
    "why": [
     "eastmarch.L9.rebel_capital"
    ]
@@ -4562,7 +4562,7 @@
    "entrance": "merchant_complaint",
    "entranceKind": "letter",
    "bossNote": "deserter_journal",
-   "story": "",
+   "story": "sk4_note_65",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.helgen_burned",
@@ -4585,7 +4585,7 @@
    "entrance": "recruit_note",
    "entranceKind": "notes",
    "bossNote": "nazira_accounts",
-   "story": "",
+   "story": "sk4_note_28",
    "why": [
     "eastmarch.L10.bandit_mine_camps"
    ]
@@ -4606,7 +4606,7 @@
    "entrance": "gatherer_letter",
    "entranceKind": "letter",
    "bossNote": "falmer_garden",
-   "story": "",
+   "story": "sk4_note_42",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -4626,8 +4626,8 @@
    "loot": "giant",
    "entrance": "shepherd_complaint",
    "entranceKind": "letter",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_4",
+   "story": "sk4_note_66",
    "why": [
     "falkreath.L10.black_door"
    ]
@@ -4636,19 +4636,19 @@
    "family": "bandit",
    "variant": "bandit_cave",
    "boss": "Ysolde Knife-Tongue",
-   "person": "",
+   "person": "Bailiff's Office of Eastmarch",
    "sign": [
     "Lost Knife",
     "Hideout",
-    "Held by:",
-    "Ysolde"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "trophy_wall",
    "loot": "bandit",
-   "entrance": "initiation",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_29",
+   "entranceKind": "report",
    "bossNote": "ysolde_orders",
-   "story": "",
+   "story": "initiation",
    "why": [
     "eastmarch.L10.bandit_mine_camps"
    ]
@@ -4669,7 +4669,7 @@
    "entrance": "rope_log",
    "entranceKind": "report",
    "bossNote": "dwemer_plaque",
-   "story": "",
+   "story": "sk4_note_30",
    "why": [
     "eastmarch.L10.steam_ruin",
     "eastmarch.L1.dwemer_vents"
@@ -4691,7 +4691,7 @@
    "entrance": "ketil_letter",
    "entranceKind": "letter",
    "bossNote": "valthume_ward",
-   "story": "",
+   "story": "sk4_note_43",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine"
    ]
@@ -4723,19 +4723,19 @@
    "family": "forsworn",
    "variant": "forsworn_tower",
    "boss": "Briarheart Thrull Hollow-Drum",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Cradle Stone",
     "Tower",
-    "Held by:",
-    "Briarheart"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bone_fire",
    "loot": "forsworn",
-   "entrance": "sentry_complaint",
-   "entranceKind": "notes",
+   "entrance": "sk4_note_44",
+   "entranceKind": "ledger",
    "bossNote": "cradle_blessing",
-   "story": "",
+   "story": "sentry_complaint",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -4788,19 +4788,19 @@
    "family": "beast",
    "variant": "skeever_cave",
    "boss": "Old Bonecrusher",
-   "person": "Snorri Long-Trap",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "North",
     "Brittleshin",
     "Last seen:",
-    "Snorri"
+    "Bailiff's"
    ],
    "motif": "hide_rack",
    "loot": "den",
-   "entrance": "ratcatcher_notes",
-   "entranceKind": "notes",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_5",
+   "entranceKind": "report",
+   "bossNote": "ratcatcher_notes",
+   "story": "sk4_note_67",
    "why": [
     "falkreath.L4.bear_country"
    ]
@@ -4842,7 +4842,7 @@
    "entrance": "minstrel_scrawl",
    "entranceKind": "journal",
    "bossNote": "kerath_notes",
-   "story": "",
+   "story": "sk4_note_46",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -4865,7 +4865,7 @@
    "entrance": "hunter_journal",
    "entranceKind": "journal",
    "bossNote": "bosmer_prayer",
-   "story": "",
+   "story": "sk4_note_6",
    "why": [
     "falkreath.L4.old_pine",
     "falkreath.L4.spriggan_groves"
@@ -4887,7 +4887,7 @@
    "entrance": "acolyte_journal",
    "entranceKind": "journal",
    "bossNote": "barrow_epitaph",
-   "story": "",
+   "story": "sk4_note_7",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.bleak_falls"
@@ -4909,7 +4909,7 @@
    "entrance": "exile_letter",
    "entranceKind": "letter",
    "bossNote": "ore_ledger",
-   "story": "",
+   "story": "sk4_note_8",
    "why": [
     "falkreath.L1.forest_caves"
    ]
@@ -4930,7 +4930,7 @@
    "entrance": "robbers_letter",
    "entranceKind": "letter",
    "bossNote": "bandit_shift",
-   "story": "",
+   "story": "sk4_note_9",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.bleak_falls"
@@ -4952,7 +4952,7 @@
    "entrance": "grandson_note",
    "entranceKind": "letter",
    "bossNote": "foreman_notice",
-   "story": "",
+   "story": "sk4_note_31",
    "why": [
     "the_rift.L5.redbelly_iron"
    ]
@@ -4972,8 +4972,8 @@
    "loot": "falmer",
    "entrance": "surveyor_journal",
    "entranceKind": "journal",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_22",
+   "story": "sk4_note_72",
    "why": [
     "the_rift.L10.thieves_below",
     "the_rift.L10.falmer_pass",
@@ -4996,7 +4996,7 @@
    "entrance": "tolvald_last_entry",
    "entranceKind": "journal",
    "bossNote": "falmer_totem",
-   "story": "",
+   "story": "sk4_note_34",
    "why": [
     "the_rift.L10.thieves_below",
     "the_rift.L10.falmer_pass",
@@ -5019,7 +5019,7 @@
    "entrance": "garrison_log",
    "entranceKind": "report",
    "bossNote": "mage_notes",
-   "story": "",
+   "story": "sk4_note_10",
    "why": [
     "falkreath.L10.necromancers_and_vampires"
    ]
@@ -5028,19 +5028,19 @@
    "family": "grove",
    "variant": "spriggan_cave",
    "boss": "The Rootwarden",
-   "person": "Hroa",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Moss Mother",
     "Cavern",
     "Last seen:",
-    "Hroa"
+    "Bailiff's"
    ],
    "motif": "root_throne",
    "loot": "grove",
-   "entrance": "hroa_marks",
-   "entranceKind": "notes",
-   "bossNote": "arrow_warning",
-   "story": "",
+   "entrance": "sk4_note_11",
+   "entranceKind": "report",
+   "bossNote": "hroa_marks",
+   "story": "arrow_warning",
    "why": [
     "falkreath.L4.old_pine",
     "falkreath.L4.spriggan_groves"
@@ -5061,8 +5061,8 @@
    "loot": "den",
    "entrance": "trapper_debt",
    "entranceKind": "letter",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_12",
+   "story": "sk4_note_68",
    "why": [
     "falkreath.L4.bear_country"
    ]
@@ -5071,19 +5071,19 @@
    "family": "tower",
    "variant": "watchtower",
    "boss": "Warden Haldane the Last Lamp",
-   "person": "",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Shor's",
     "Watchtower",
-    "Held by:",
-    "Warden Haldane"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "signal_beacon",
    "loot": "tower",
-   "entrance": "watchtower_wager",
-   "entranceKind": "list",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_33",
+   "entranceKind": "report",
+   "bossNote": "watchtower_wager",
+   "story": "sk4_note_78",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -5104,7 +5104,7 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "legate_orders",
-   "story": "",
+   "story": "sk4_note_13",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.jarl_uncle"
@@ -5126,7 +5126,7 @@
    "entrance": "riverwood_complaint",
    "entranceKind": "letter",
    "bossNote": "anise_recipe",
-   "story": "",
+   "story": "sk4_note_14",
    "why": [
     "falkreath.L6.half_moon_mill",
     "falkreath.L6.hunters_camps",
@@ -5148,8 +5148,8 @@
    "loot": "dragon",
    "entrance": "carter_account",
    "entranceKind": "report",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_32",
+   "story": "sk4_note_77",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L10.dragon_heights"
@@ -5170,8 +5170,8 @@
    "loot": "den",
    "entrance": "hunter_journal",
    "entranceKind": "journal",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_15",
+   "story": "sk4_note_68",
    "why": [
     "the_rift.L4.birch_forest",
     "the_rift.L4.rift_grassland",
@@ -5194,7 +5194,7 @@
    "entrance": "asvald_journal",
    "entranceKind": "journal",
    "bossNote": "guest_rules",
-   "story": "",
+   "story": "sk4_note_15",
    "why": [
     "falkreath.L6.half_moon_mill",
     "falkreath.L6.hunters_camps",
@@ -5217,7 +5217,7 @@
    "entrance": "villager_bargain",
    "entranceKind": "letter",
    "bossNote": "coven_rule",
-   "story": "",
+   "story": "sk4_note_16",
    "why": [
     "falkreath.L10.coven",
     "falkreath.L8.huntsman_cult"
@@ -5239,7 +5239,7 @@
    "entrance": "orgnar_last",
    "entranceKind": "letter",
    "bossNote": "hagraven_recipe",
-   "story": "",
+   "story": "sk4_note_1",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -5260,7 +5260,7 @@
    "entrance": "foreman_letter",
    "entranceKind": "letter",
    "bossNote": "skarn_orders",
-   "story": "",
+   "story": "sk4_note_17",
    "why": [
     "falkreath.L1.forest_caves"
    ]
@@ -5269,19 +5269,19 @@
    "family": "tower",
    "variant": "nordic_tower",
    "boss": "Keeper Joric of the High Stair",
-   "person": "Oddvar",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Nilheim",
     "",
     "Last seen:",
-    "Oddvar"
+    "Bailiff's"
    ],
    "motif": "signal_beacon",
    "loot": "tower",
-   "entrance": "pilgrim_plea",
-   "entranceKind": "prayer",
+   "entrance": "sk4_note_17",
+   "entranceKind": "report",
    "bossNote": "nilheim_orders",
-   "story": "",
+   "story": "pilgrim_plea",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -5302,7 +5302,7 @@
    "entrance": "kolbjorn_scratch",
    "entranceKind": "warning",
    "bossNote": "necro_tally",
-   "story": "",
+   "story": "sk4_note_35",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -5323,7 +5323,7 @@
    "entrance": "beacon_keeper",
    "entranceKind": "diary",
    "bossNote": "old_stone",
-   "story": "",
+   "story": "sk4_note_18",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.sunderstone",
@@ -5346,7 +5346,7 @@
    "entrance": "lookout_grumble",
    "entranceKind": "journal",
    "bossNote": "signal_codes",
-   "story": "",
+   "story": "sk4_note_19",
    "why": [
     "falkreath.L10.pass_bandits"
    ]
@@ -5367,7 +5367,7 @@
    "entrance": "asvar_scrawl",
    "entranceKind": "journal",
    "bossNote": "hearth_inscription",
-   "story": "",
+   "story": "sk4_note_13",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L11.geirmund"
@@ -5389,7 +5389,7 @@
    "entrance": "scholar_survey",
    "entranceKind": "notes",
    "bossNote": "eydis_prayer",
-   "story": "",
+   "story": "sk4_note_14",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L11.geirmund"
@@ -5411,7 +5411,7 @@
    "entrance": "soldier_letter",
    "entranceKind": "letter",
    "bossNote": "camp_dispatch",
-   "story": "",
+   "story": "sk4_note_18",
    "why": [
     "the_rift.L9.rebel_leaning_jarl",
     "the_rift.L9.hunters_fort"
@@ -5432,8 +5432,8 @@
    "loot": "tower",
    "entrance": "tower_log",
    "entranceKind": "report",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_19",
+   "story": "sk4_note_70",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -5476,7 +5476,7 @@
    "entrance": "lumberjack_warning",
    "entranceKind": "warning",
    "bossNote": "druid_poem",
-   "story": "",
+   "story": "sk4_note_20",
    "why": [
     "falkreath.L4.old_pine",
     "falkreath.L4.spriggan_groves"
@@ -5498,7 +5498,7 @@
    "entrance": "apprentice_doubts",
    "entranceKind": "diary",
    "bossNote": "corpse_ledger",
-   "story": "",
+   "story": "sk4_note_36",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -5507,19 +5507,19 @@
    "family": "tower",
    "variant": "nordic_tower",
    "boss": "Merrick of the High Stair",
-   "person": "",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "South Skybound",
     "Watch",
-    "Held by:",
-    "Merrick of the"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "signal_beacon",
    "loot": "tower",
-   "entrance": "refugee_scratch",
-   "entranceKind": "warning",
+   "entrance": "sk4_note_21",
+   "entranceKind": "report",
    "bossNote": "karl_tally",
-   "story": "",
+   "story": "refugee_scratch",
    "why": [
     "falkreath.L10.pass_bandits"
    ]
@@ -5540,7 +5540,7 @@
    "entrance": "guard_report",
    "entranceKind": "report",
    "bossNote": "brothers_tale",
-   "story": "",
+   "story": "sk4_note_23",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.bleak_falls"
@@ -5562,7 +5562,7 @@
    "entrance": "prisoner_note",
    "entranceKind": "letter",
    "bossNote": "toll_rules",
-   "story": "",
+   "story": "sk4_note_37",
    "why": [
     "the_rift.L9.hunters_fort"
    ]
@@ -5583,7 +5583,7 @@
    "entrance": "squatter_journal",
    "entranceKind": "journal",
    "bossNote": "old_duty",
-   "story": "",
+   "story": "sk4_note_24",
    "why": [
     "falkreath.L10.pass_bandits"
    ]
@@ -5592,19 +5592,19 @@
    "family": "bandit",
    "variant": "bandit_camp",
    "boss": "Rorik Unbowed",
-   "person": "",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Last Vigil",
     "",
-    "Held by:",
-    "Rorik Unbowed"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "loot_heap",
    "loot": "bandit",
-   "entrance": "vigil_warning",
-   "entranceKind": "warning",
+   "entrance": "sk4_note_38",
+   "entranceKind": "ledger",
    "bossNote": "vigil_boast",
-   "story": "",
+   "story": "vigil_warning",
    "why": [
     "the_rift.L5.smuggling"
    ]
@@ -5625,7 +5625,7 @@
    "entrance": "dengeir_letter",
    "entranceKind": "letter",
    "bossNote": "camp_orders",
-   "story": "",
+   "story": "sk4_note_25",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.jarl_uncle"
@@ -5647,7 +5647,7 @@
    "entrance": "hjalmar_scratch",
    "entranceKind": "warning",
    "bossNote": "den_rules",
-   "story": "",
+   "story": "sk4_note_39",
    "why": [
     "the_rift.L6.heartwood_mill",
     "the_rift.L6.lake_farms",
@@ -5658,19 +5658,19 @@
    "family": "beast",
    "variant": "den",
    "boss": "Old Dreadpaw",
-   "person": "Rolf the Beekeeper",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Honeystrand",
     "Cave",
     "Last seen:",
-    "Rolf the"
+    "Bailiff's"
    ],
    "motif": "bone_heap",
    "loot": "den",
-   "entrance": "beekeeper_stash",
-   "entranceKind": "treasure",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_69",
+   "entranceKind": "report",
+   "bossNote": "beekeeper_stash",
+   "story": "sk4_note_16",
    "why": [
     "the_rift.L4.birch_forest",
     "the_rift.L4.rift_grassland",
@@ -5693,7 +5693,7 @@
    "entrance": "merchant_complaint",
    "entranceKind": "letter",
    "bossNote": "cellar_rules",
-   "story": "",
+   "story": "sk4_note_26",
    "why": [
     "falkreath.L6.half_moon_mill",
     "falkreath.L6.hunters_camps",
@@ -5738,7 +5738,7 @@
    "entrance": "velmira_letter",
    "entranceKind": "letter",
    "bossNote": "corvus_journal",
-   "story": "",
+   "story": "sk4_note_27",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.sunderstone",
@@ -5761,7 +5761,7 @@
    "entrance": "pilgrim_account",
    "entranceKind": "journal",
    "bossNote": "ward_prayer",
-   "story": "",
+   "story": "sk4_note_28",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.bleak_falls"
@@ -5771,19 +5771,19 @@
    "family": "vampire",
    "variant": "vampire_lair",
    "boss": "Count Aurelio the Courteous",
-   "person": "",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Haemar's Shame",
     "",
-    "Held by:",
-    "Count Aurelio"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "thrall_cells",
    "loot": "vampire",
-   "entrance": "vampire_journal",
-   "entranceKind": "journal",
-   "bossNote": "haemar_carving",
-   "story": "",
+   "entrance": "sk4_note_29",
+   "entranceKind": "report",
+   "bossNote": "vampire_journal",
+   "story": "haemar_carving",
    "why": [
     "falkreath.L10.necromancers_and_vampires"
    ]
@@ -5792,19 +5792,19 @@
    "family": "fort",
    "variant": "fort",
    "boss": "Hjolfrid Saltcheek",
-   "person": "",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Treva's Watch",
     "",
-    "Held by:",
-    "Hjolfrid"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "trophy_wall",
    "loot": "bandit",
-   "entrance": "treva_epitaph",
-   "entranceKind": "inscription",
+   "entrance": "sk4_note_24",
+   "entranceKind": "ledger",
    "bossNote": "saltcheek_tally",
-   "story": "",
+   "story": "treva_epitaph",
    "why": [
     "the_rift.L9.hunters_fort"
    ]
@@ -5824,7 +5824,7 @@
    "loot": "den",
    "entrance": "explorer_notes",
    "entranceKind": "journal",
-   "bossNote": "",
+   "bossNote": "sk4_note_42",
    "story": "",
    "why": [
     "the_rift.L4.birch_forest",
@@ -5848,7 +5848,7 @@
    "entrance": "unsent_order",
    "entranceKind": "letter",
    "bossNote": "alchemy_notes",
-   "story": "",
+   "story": "sk4_note_2",
    "why": [
     "the_rift.L6.heartwood_mill",
     "the_rift.L6.lake_farms",
@@ -5859,19 +5859,19 @@
    "family": "fort",
    "variant": "fort",
    "boss": "Kolgrim the Quartermaster",
-   "person": "",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Cracked Tusk",
     "Keep",
-    "Held by:",
-    "Kolgrim the"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "clan_history",
-   "entranceKind": "book",
+   "entrance": "sk4_note_30",
+   "entranceKind": "ledger",
    "bossNote": "bandit_orders",
-   "story": "",
+   "story": "clan_history",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.helgen_burned",
@@ -5894,7 +5894,7 @@
    "entrance": "lovers_letter",
    "entranceKind": "letter",
    "bossNote": "stormcloak_watch",
-   "story": "",
+   "story": "sk4_note_31",
    "why": [
     "falkreath.L10.pass_bandits"
    ]
@@ -5902,7 +5902,7 @@
   "rift_imperial_camp": {
    "family": "military",
    "variant": "imperial_camp",
-   "boss": "Commander Cassian the Veteran",
+   "boss": "Bailiff's Office of The Rift",
    "person": "Legate of the Rift Camp",
    "sign": [
     "Rift Imperial",
@@ -5914,8 +5914,8 @@
    "loot": "bandit",
    "entrance": "legate_report",
    "entranceKind": "report",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_20",
+   "story": "sk4_note_71",
    "why": [
     "the_rift.L9.rebel_leaning_jarl",
     "the_rift.L9.hunters_fort"
@@ -5925,19 +5925,19 @@
    "family": "mine",
    "variant": "mine",
    "boss": "Old Deepdelver",
-   "person": "Hrolfdir",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Lost Prospect",
     "Mine",
     "Last seen:",
-    "Hrolfdir"
+    "Bailiff's"
    ],
    "motif": "foreman_desk",
    "loot": "mine",
-   "entrance": "crate_manifest",
-   "entranceKind": "list",
-   "bossNote": "old_miner_mark",
-   "story": "",
+   "entrance": "sk4_note_43",
+   "entranceKind": "report",
+   "bossNote": "crate_manifest",
+   "story": "old_miner_mark",
    "why": [
     "the_rift.L5.redbelly_iron"
    ]
@@ -5958,7 +5958,7 @@
    "entrance": "herbalist_notes",
    "entranceKind": "notes",
    "bossNote": "web_scrap",
-   "story": "",
+   "story": "sk4_note_32",
    "why": [
     "falkreath.L4.bear_country"
    ]
@@ -5979,7 +5979,7 @@
    "entrance": "trapper_journal",
    "entranceKind": "journal",
    "bossNote": "miner_mark",
-   "story": "",
+   "story": "sk4_note_33",
    "why": [
     "falkreath.L10.black_door"
    ]
@@ -6011,19 +6011,19 @@
    "family": "fort",
    "variant": "fort",
    "boss": "Ottar Ashwood",
-   "person": "",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Faldar's Tooth",
     "",
-    "Held by:",
-    "Ottar Ashwood"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "faldar_legend",
-   "entranceKind": "book",
+   "entrance": "sk4_note_44",
+   "entranceKind": "ledger",
    "bossNote": "ottar_orders",
-   "story": "",
+   "story": "faldar_legend",
    "why": [
     "the_rift.L9.hunters_fort"
    ]
@@ -6032,19 +6032,19 @@
    "family": "grove",
    "variant": "grove",
    "boss": "Mother Rootwarden",
-   "person": "Runil",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Ancestor Glade",
     "",
     "Last seen:",
-    "Runil"
+    "Bailiff's"
    ],
    "motif": "root_throne",
    "loot": "grove",
-   "entrance": "mourners_custom",
-   "entranceKind": "book",
-   "bossNote": "child_poem",
-   "story": "",
+   "entrance": "sk4_note_34",
+   "entranceKind": "ledger",
+   "bossNote": "mourners_custom",
+   "story": "child_poem",
    "why": [
     "falkreath.L4.old_pine",
     "falkreath.L4.spriggan_groves"
@@ -6088,7 +6088,7 @@
    "entrance": "durz_marks",
    "entranceKind": "journal",
    "bossNote": "angarvunde_epitaph",
-   "story": "",
+   "story": "sk4_note_25",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L11.geirmund"
@@ -6110,7 +6110,7 @@
    "entrance": "grimvar_journal",
    "entranceKind": "journal",
    "bossNote": "legion_report",
-   "story": "",
+   "story": "sk4_note_35",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L9.helgen_burned"
@@ -6132,7 +6132,7 @@
    "entrance": "scout_report",
    "entranceKind": "report",
    "bossNote": "word_wall_rubbing",
-   "story": "",
+   "story": "sk4_note_28",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L10.dragon_heights"
@@ -6153,8 +6153,8 @@
    "loot": "dragon",
    "entrance": "tower_last_watch",
    "entranceKind": "journal",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_29",
+   "story": "sk4_note_75",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L10.dragon_heights"
@@ -6175,8 +6175,8 @@
    "loot": "cabin",
    "entrance": "froki_almanac",
    "entranceKind": "diary",
-   "bossNote": "",
-   "story": "",
+   "bossNote": "sk4_note_27",
+   "story": "sk4_note_74",
    "why": [
     "the_rift.L6.heartwood_mill",
     "the_rift.L6.lake_farms",
@@ -6199,7 +6199,7 @@
    "entrance": "falkreath_letter",
    "entranceKind": "letter",
    "bossNote": "target_tally",
-   "story": "",
+   "story": "sk4_note_36",
    "why": [
     "falkreath.L6.half_moon_mill",
     "falkreath.L6.hunters_camps",
@@ -6245,7 +6245,7 @@
    "entrance": "petronia_letter",
    "entranceKind": "letter",
    "bossNote": "expedition_journal",
-   "story": "",
+   "story": "sk4_note_26",
    "why": [
     "the_rift.L10.dwemer_valley_ruin"
    ]
@@ -6265,7 +6265,7 @@
    "loot": "cave",
    "entrance": "thief_musings",
    "entranceKind": "diary",
-   "bossNote": "",
+   "bossNote": "sk4_note_45",
    "story": "",
    "why": [
     "the_rift.L10.falmer_pass",
@@ -6289,7 +6289,7 @@
    "entrance": "guard_letter",
    "entranceKind": "letter",
    "bossNote": "helm_count",
-   "story": "",
+   "story": "sk4_note_46",
    "why": [
     "the_rift.L5.smuggling"
    ]
@@ -6331,7 +6331,7 @@
    "entrance": "temple_request",
    "entranceKind": "letter",
    "bossNote": "siege_captain_diary",
-   "story": "",
+   "story": "sk4_note_47",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L11.geirmund"
@@ -6353,7 +6353,7 @@
    "entrance": "witch_hunter_note",
    "entranceKind": "warning",
    "bossNote": "hagraven_bargain",
-   "story": "",
+   "story": "sk4_note_48",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -6374,7 +6374,7 @@
    "entrance": "vigilant_log",
    "entranceKind": "journal",
    "bossNote": "vigilant_creed",
-   "story": "",
+   "story": "sk4_note_49",
    "why": [
     "the_rift.L10.thieves_below"
    ]
@@ -6394,7 +6394,7 @@
    "loot": "ice",
    "entrance": "thief_treasure",
    "entranceKind": "treasure",
-   "bossNote": "",
+   "bossNote": "sk4_note_50",
    "story": "",
    "why": [
     "the_rift.L10.thieves_below"
@@ -6416,7 +6416,7 @@
    "entrance": "pilgrim_journal",
    "entranceKind": "journal",
    "bossNote": "cult_inscription",
-   "story": "",
+   "story": "sk4_note_51",
    "why": [
     "the_rift.L10.rahgot_barrow",
     "the_rift.L10.dragon_heights"
@@ -6426,18 +6426,18 @@
    "family": "giant",
    "variant": "giant_camp",
    "boss": "Old Haggarn Cairn-Kicker",
-   "person": "",
+   "person": "Bailiff's Office of Whiterun",
    "sign": [
     "Whiterun",
     "Mammoth",
-    "Held by:",
-    "Old Haggarn"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "mammoth_bones",
    "loot": "giant",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
+   "entrance": "sk4_note_45",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
    "story": "",
    "why": [
     "whiterun.L10.giant_camps",
@@ -6449,18 +6449,18 @@
    "family": "grove",
    "variant": "grove",
    "boss": "The Oldwood",
-   "person": "",
+   "person": "Arcadia's Supplier",
    "sign": [
     "Sleeping Tree",
     "Altar",
-    "Held by:",
-    "The Oldwood"
+    "Last seen:",
+    "Arcadia's"
    ],
    "motif": "root_throne",
    "loot": "grove",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
+   "bossNote": "sk4_note_46",
    "story": "",
    "why": [
     "whiterun.L4.throat_meadow",
@@ -6492,7 +6492,7 @@
    "family": "ruin",
    "variant": "nordic_ruin",
    "boss": "Warden Morthgar the Watcher",
-   "person": "",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Ilinalta",
     "Drowned Altar",
@@ -6501,10 +6501,10 @@
    ],
    "motif": "rune_pillar",
    "loot": "ruin",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_49",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_79",
    "why": [
     "falkreath.L10.barrow_above_riverwood",
     "falkreath.L11.sunderstone",
@@ -6515,19 +6515,19 @@
    "family": "cabin",
    "variant": "cabin",
    "boss": "Roskva the Trapper",
-   "person": "",
+   "person": "Sister Astrid of Falkreath",
    "sign": [
     "Talos Massacre",
     "Shrine",
-    "Held by:",
-    "Roskva the"
+    "Last seen:",
+    "Sister Astrid"
    ],
    "motif": "hunter_cache",
    "loot": "cabin",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
+   "bossNote": "sk4_note_50",
+   "story": "sk4_note_80",
    "why": [
     "falkreath.L6.half_moon_mill",
     "falkreath.L6.hunters_camps",
@@ -6538,19 +6538,19 @@
    "family": "cabin",
    "variant": "cabin",
    "boss": "Hargrim the Hermit",
-   "person": "",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Hunters Cliff",
     "Blind",
-    "Held by:",
-    "Hargrim the"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "hearth_corner",
    "loot": "cabin",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_51",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_81",
    "why": [
     "falkreath.L6.half_moon_mill",
     "falkreath.L6.hunters_camps",
@@ -6606,18 +6606,18 @@
    "family": "cabin",
    "variant": "cabin",
    "boss": "Hargrim Tall-Tale",
-   "person": "",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Autumnwatch",
     "Poacher Blind",
-    "Held by:",
-    "Hargrim"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "hearth_corner",
    "loot": "cabin",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
+   "entrance": "sk4_note_55",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
    "story": "",
    "why": [
     "the_rift.L6.heartwood_mill",
@@ -6629,18 +6629,18 @@
    "family": "beast",
    "variant": "spider_cave",
    "boss": "Old Bleakhowl",
-   "person": "",
+   "person": "Tormir Wood-Bailiff",
    "sign": [
     "Rift Frost",
     "Spider Hollow",
-    "Held by:",
-    "Old Bleakhowl"
+    "Last seen:",
+    "Tormir"
    ],
    "motif": "hide_rack",
    "loot": "den",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
+   "bossNote": "sk4_note_56",
    "story": "",
    "why": [
     "the_rift.L4.birch_forest",
@@ -6652,17 +6652,17 @@
    "family": "wreck",
    "variant": "shipwreck",
    "boss": "Old Barnacle",
-   "person": "",
+   "person": "Old Kolfinn",
    "sign": [
     "Pilgrims",
     "Trench Beacon",
-    "Held by:",
-    "Old Barnacle"
+    "Last seen:",
+    "Old Kolfinn"
    ],
    "motif": "driftwood_hoard",
    "loot": "wreck",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -6674,17 +6674,17 @@
    "family": "cabin",
    "variant": "cabin",
    "boss": "Sunniva the Hermit",
-   "person": "",
+   "person": "Hallbera the Soaker",
    "sign": [
     "Hot Spring",
     "Bathers Camp",
-    "Held by:",
-    "Sunniva the"
+    "Last seen:",
+    "Hallbera the"
    ],
    "motif": "hunter_cache",
    "loot": "cabin",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -6697,7 +6697,7 @@
    "family": "ruin",
    "variant": "nordic_ruin",
    "boss": "Ysolt the Shrine-Warden",
-   "person": "",
+   "person": "Serjo Indoril Tols",
    "sign": [
     "Velothi",
     "Refugee Cairn",
@@ -6706,8 +6706,8 @@
    ],
    "motif": "watch_brazier",
    "loot": "ruin",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -6719,20 +6719,20 @@
   "karth_gorge_sky_burial": {
    "family": "forsworn",
    "variant": "forsworn_camp",
-   "boss": "Varka Ash-Walker",
-   "person": "",
+   "boss": "Caelan the Watcher",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Karth Gorge",
     "Sky Burial",
-    "Held by:",
-    "Varka"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bone_fire",
    "loot": "forsworn",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_55",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_90",
    "why": [
     "the_reach.L10.conspiracy_in_the_mine",
     "the_reach.L10.hagraven_covens",
@@ -6743,7 +6743,7 @@
    "family": "ruin",
    "variant": "nordic_ruin",
    "boss": "Orsolf the Fallen Priest",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Reachwater",
     "Sealed Arch",
@@ -6752,10 +6752,10 @@
    ],
    "motif": "offering_bowl",
    "loot": "ruin",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_91",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_56",
    "why": [
     "the_reach.L10.blades_temple"
    ]
@@ -6764,7 +6764,7 @@
    "family": "dwemer",
    "variant": "great_lift",
    "boss": "Warden-Engine Ol-8",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Bthardamz",
     "Surface Vent",
@@ -6773,10 +6773,10 @@
    ],
    "motif": "centurion_bay",
    "loot": "dwemer",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_57",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_92",
    "why": [
     "the_reach.L10.dwemer_depths",
     "the_reach.L1.dwemer_city_rock",
@@ -6787,17 +6787,17 @@
    "family": "military",
    "variant": "stormcloak_camp",
    "boss": "Sergeant Brynjolf Hard-March",
-   "person": "",
+   "person": "Master-Wright Lodvar",
    "sign": [
     "Whiterun Siege",
     "Encampment",
-    "Held by:",
-    "Sergeant"
+    "Last seen:",
+    "Master-Wright"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -6829,20 +6829,20 @@
   "helgen_border_outpost": {
    "family": "military",
    "variant": "imperial_camp",
-   "boss": "Captain Fabius Hard-March",
-   "person": "",
+   "boss": "Bailiff's Office of Falkreath",
+   "person": "Optio Tullius Varro",
    "sign": [
     "Helgen Border",
     "Outpost",
-    "Held by:",
-    "Captain Fabius"
+    "Last seen:",
+    "Optio Tullius"
    ],
    "motif": "bedroll_row",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
+   "bossNote": "sk4_note_52",
+   "story": "sk4_note_82",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.jarl_uncle"
@@ -6851,20 +6851,20 @@
   "pale_pass_legion_camp": {
    "family": "military",
    "variant": "imperial_camp",
-   "boss": "Sergeant Eirik Hard-March",
-   "person": "",
+   "boss": "Legate Gracchus",
+   "person": "Bailiff's Office of Falkreath",
    "sign": [
     "Pale Pass",
     "Legion Camp",
-    "Held by:",
-    "Sergeant Eirik"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_53",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_83",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.jarl_uncle"
@@ -6874,19 +6874,19 @@
    "family": "military",
    "variant": "stormcloak_camp",
    "boss": "Sergeant Aurelian the Veteran",
-   "person": "",
+   "person": "Scout Briehl",
    "sign": [
     "Ilinalta Rebel",
     "Bivouac",
-    "Held by:",
-    "Sergeant"
+    "Last seen:",
+    "Scout Briehl"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
+   "bossNote": "sk4_note_54",
+   "story": "sk4_note_84",
    "why": [
     "falkreath.L9.imperial_border",
     "falkreath.L9.jarl_uncle"
@@ -6895,19 +6895,19 @@
   "shors_stone_watch_camp": {
    "family": "military",
    "variant": "stormcloak_camp",
-   "boss": "Commander Halla the Quartermaster",
-   "person": "",
+   "boss": "Filnjar Smith",
+   "person": "Bailiff's Office of The Rift",
    "sign": [
     "Shors Stone",
     "Watch Camp",
-    "Held by:",
-    "Commander"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
+   "entrance": "sk4_note_57",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
    "story": "",
    "why": [
     "the_rift.L9.rebel_leaning_jarl",
@@ -6918,18 +6918,18 @@
    "family": "military",
    "variant": "imperial_camp",
    "boss": "Captain Dagny the Veteran",
-   "person": "",
+   "person": "Optio Severus",
    "sign": [
     "Treva Crossing",
     "Camp",
-    "Held by:",
-    "Captain Dagny"
+    "Last seen:",
+    "Optio Severus"
    ],
    "motif": "bedroll_row",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
+   "bossNote": "sk4_note_58",
    "story": "",
    "why": [
     "the_rift.L9.rebel_leaning_jarl",
@@ -6940,17 +6940,17 @@
    "family": "military",
    "variant": "stormcloak_camp",
    "boss": "Sergeant Dagny the Veteran",
-   "person": "",
+   "person": "Quartermaster Torstein",
    "sign": [
     "Darkwater Ford",
     "Camp",
-    "Held by:",
-    "Sergeant Dagny"
+    "Last seen:",
+    "Quartermaster"
    ],
    "motif": "armory_rack",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -6961,17 +6961,17 @@
    "family": "military",
    "variant": "imperial_camp",
    "boss": "Captain Cassian Iron-Line",
-   "person": "",
+   "person": "Decurion Maro Vorenus",
    "sign": [
     "Velothi Border",
     "Picket",
-    "Held by:",
-    "Captain"
+    "Last seen:",
+    "Decurion Maro"
    ],
    "motif": "bedroll_row",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -6981,20 +6981,20 @@
   "karth_gorge_legion_camp": {
    "family": "military",
    "variant": "imperial_camp",
-   "boss": "Sergeant Halla Iron-Line",
-   "person": "",
+   "boss": "Centurion Gaius Bellienus",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Karth Gorge",
     "Legion Camp",
-    "Held by:",
-    "Sergeant Halla"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bedroll_row",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_93",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_58",
    "why": [
     "the_reach.L9.imperial_jarl"
    ]
@@ -7002,20 +7002,20 @@
   "druadach_rebel_camp": {
    "family": "military",
    "variant": "stormcloak_camp",
-   "boss": "Captain Brynjolf the Steadfast",
-   "person": "",
+   "boss": "Commander Halvar",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Druadach Rebel",
     "Camp",
-    "Held by:",
-    "Captain"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "war_table",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_59",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_94",
    "why": [
     "the_reach.L9.imperial_jarl"
    ]
@@ -7024,17 +7024,17 @@
    "family": "falmer",
    "variant": "falmer_cave",
    "boss": "Gloomwarden Thok of the Deep Hive",
-   "person": "",
+   "person": "Hodir Timber-Wright",
    "sign": [
     "White River",
     "Deep Sink",
-    "Held by:",
-    "Gloomwarden"
+    "Last seen:",
+    "Hodir"
    ],
    "motif": "fungus_garden",
    "loot": "falmer",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -7045,17 +7045,17 @@
    "family": "necromancer",
    "variant": "necromancer_lair",
    "boss": "Ritualist Caldus of the Ninth Candle",
-   "person": "",
+   "person": "Krag the Digger",
    "sign": [
     "Steppe Barrow",
     "Pit",
-    "Held by:",
-    "Ritualist"
+    "Last seen:",
+    "Krag the"
    ],
    "motif": "reagent_shelf",
    "loot": "necromancer",
-   "entrance": "",
-   "entranceKind": "",
+   "entrance": "warden_record",
+   "entranceKind": "notes",
    "bossNote": "",
    "story": "",
    "why": [
@@ -7409,19 +7409,19 @@
    "family": "beast",
    "variant": "spider_cave",
    "boss": "Great Wretchhide",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Karth Spider",
     "Cleft",
-    "Held by:",
-    "Great"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bone_heap",
    "loot": "den",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_97",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_62",
    "why": [
     "the_reach.L4.cave_mouths"
    ]
@@ -7430,19 +7430,19 @@
    "family": "beast",
    "variant": "troll_cave",
    "boss": "Old Scarflank",
-   "person": "",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Druadach Troll",
     "Hollow",
-    "Held by:",
-    "Old Scarflank"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bone_heap",
    "loot": "den",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_63",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_98",
    "why": [
     "the_reach.L4.cave_mouths"
    ]
@@ -7450,20 +7450,20 @@
   "silver_gorge_bandit_camp": {
    "family": "bandit",
    "variant": "bandit_camp",
-   "boss": "Boss Kolgrim Split-Lip",
-   "person": "",
+   "boss": "Haldor Six-Fingers",
+   "person": "Bailiff's Office of The Reach",
    "sign": [
     "Silver Gorge",
     "Bandit Camp",
-    "Held by:",
-    "Boss Kolgrim"
+    "Last seen:",
+    "Bailiff's"
    ],
    "motif": "bedroll_row",
    "loot": "bandit",
-   "entrance": "",
-   "entranceKind": "",
-   "bossNote": "",
-   "story": "",
+   "entrance": "sk4_note_99",
+   "entranceKind": "report",
+   "bossNote": "warden_record",
+   "story": "sk4_note_64",
    "why": [
     "the_reach.L5.border_trade"
    ]

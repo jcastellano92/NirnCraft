@@ -1,0 +1,19 @@
+{
+  "id": "anticlere",
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:sandstone",
+    "low": "minecraft:stone_bricks",
+    "roof": "brick",
+    "trim": "oak",
+    "wood": "oak",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:stone_bricks",
+    "path": "minecraft:gravel"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "id": "wolf_jarls_howe",
+  "why": [
+    "ice_waste.L1.glacial_shield",
+    "ice_waste.L5.stalhrim_salvage",
+    "ice_waste.L6.kjolvik_camp"
+  ],
+  "sil": "atmora-wolf-jarls-howe-plan",
+  "base": "none",
+  "overlay": "ice_waste",
+  "radius": 22,
+  "reach": 34,
+  "gates": [
+    [
+      0,
+      20
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        10
+      ],
+      "overlay": "ice_waste",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        10,
+        22
+      ],
+      "overlay": "ice_waste",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "wolf_jarls_howe_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "arch",
+      "at": [
+        0,
+        -6
+      ],
+      "name": "wolf_jarls_howe_landmark",
+      "overlay": "ice_waste"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 4,
+      "r1": 18,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        8
+      ],
+      "face": "north",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -11,
+        11
+      ],
+      "face": "north",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -8
+      ],
+      "face": "south",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        11,
+        -11
+      ],
+      "face": "south",
+      "overlay": "ice_waste",
+      "name": "wolf_jarls_howe_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "wolf_jarls_howe_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "wolf_jarls_howe_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "wolf_jarls_howe_b_5",
+    "smithy": "wolf_jarls_howe_b_7"
+  },
+  "titles": {
+    "wolf_jarls_howe_b_1": "place.skycraft.wolf_jarls_howe Council & Seat Hall",
+    "wolf_jarls_howe_b_2": "place.skycraft.wolf_jarls_howe High Sanctuary",
+    "wolf_jarls_howe_b_3": "place.skycraft.wolf_jarls_howe Fighters & Wayfarers Hall",
+    "wolf_jarls_howe_b_4": "place.skycraft.wolf_jarls_howe Mages & Chroniclers Spire",
+    "wolf_jarls_howe_b_5": "place.skycraft.wolf_jarls_howe The Lantern & Hearth Inn",
+    "wolf_jarls_howe_b_6": "place.skycraft.wolf_jarls_howe The Traveler's Rest Tavern",
+    "wolf_jarls_howe_b_7": "place.skycraft.wolf_jarls_howe Master Forge & Armorer",
+    "wolf_jarls_howe_b_8": "place.skycraft.wolf_jarls_howe Botanicals & Remedies",
+    "wolf_jarls_howe_landmark": "High Seat of place.skycraft.wolf_jarls_howe",
+    "wolf_jarls_howe_plaza": "place.skycraft.wolf_jarls_howe Central Plaza"
+  },
+  "innKey": "wolf_jarls_howe_b_5"
+}

@@ -1,63 +1,296 @@
 {
   "id": "bravil",
-  "base": "none",
+  "why": [
+    "nibenay_valley.L1.river_flats",
+    "nibenay_valley.L6.bravil_ferry_city",
+    "nibenay_valley.L8.lucky_old_lady"
+  ],
   "sil": "stacked-shanty-hill",
-  "reach": 115,
-  "radius": 115,
+  "base": "none",
   "overlay": "bravil",
-  "names": {"inn": "bravil_lonely_suitor_lodge", "store": "bravil_fishmarket_stalls", "smithy": "bravil_riverside_smithy"},
+  "radius": 94,
+  "reach": 110,
   "innKey": "bravil_lonely_suitor_lodge",
-  "gates": [[0, 71]],
-  "terraces": [
-    {"rect": [-30, -86, 30, -46], "level": 8, "parapet": 1}
+  "names": {
+    "inn": "bravil_lonely_suitor_lodge",
+    "store": "bravil_a_fair_deal",
+    "smithy": "bravil_archers_paradox"
+  },
+  "gates": [
+    [
+      0,
+      -88
+    ],
+    [
+      -88,
+      0
+    ]
   ],
   "landmarks": [
-    {"id": "lucky_lady", "at": [0, -64], "size": [15, 15], "h": 36, "raise": 8}
+    {
+      "id": "castle",
+      "at": [
+        28,
+        36
+      ],
+      "face": "south",
+      "name": "bravil_castle_bravil",
+      "overlay": "bravil"
+    },
+    {
+      "id": "lucky_lady",
+      "at": [
+        -10,
+        6
+      ],
+      "face": "south",
+      "name": "bravil_lucky_old_lady",
+      "overlay": "bravil"
+    }
   ],
-  "lines": [
-    {"kind": "bridge", "from": [-40, 4], "to": [40, 4], "width": 3, "lift": 5},
-    {"kind": "bridge", "from": [-34, -22], "to": [34, -22], "width": 3, "lift": 8}
+  "quarters": [
+    {
+      "ring": [
+        0,
+        94
+      ],
+      "overlay": "bravil"
+    }
   ],
   "buildings": [
-    {"kind": "shrine", "at": [-46, -40], "size": [5, 5], "face": "S", "name": "bravil_ratcatchers_shrine", "raise": 6}
-  ],
-  "nets": [
-    {"type": "switchback", "from": [0, 71], "to": [0, -40], "legs": 5, "amp": 26, "width": 5, "major": true, "tag": "climb"},
-    {"type": "contour", "from": [-60, 40], "len": 130, "dir": 0.1, "width": 3, "tag": "lane"},
-    {"type": "contour", "from": [-56, 14], "len": 130, "dir": 0.0, "width": 3, "tag": "lane"},
-    {"type": "contour", "from": [-52, -12], "len": 120, "dir": 0.0, "width": 3, "tag": "lane"},
-    {"type": "contour", "from": [-30, -38], "len": 100, "dir": 0.0, "width": 3, "tag": "lane"},
-    {"type": "contour", "from": [-80, 60], "len": 150, "dir": 0.05, "width": 3, "tag": "lane"},
-    {"type": "path", "via": [[-84, 70], [-60, 78], [-30, 84], [0, 86], [30, 84], [60, 78], [84, 70]], "width": 3, "tag": "quay"}
-  ],
-  "zones": [
-    {"at": [0, -50], "r": 32, "zone": "noble"},
-    {"at": [0, 40], "r": 24, "zone": "centre"},
-    {"at": [-60, 50], "r": 28, "zone": "poor"},
-    {"at": [64, 40], "r": 26, "zone": "craft"}
-  ],
-  "fabric": {"radius": 104, "target": 0.55},
-  "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "bravil_lonely_suitor_lodge", "on": "climb"},
-    {"kind": "store", "count": 2, "name": "bravil_fishmarket_stalls", "on": "quay"},
-    {"kind": "smithy", "size": [11, 9], "name": "bravil_riverside_smithy", "on": "lane"},
-    {"kind": "alchemist", "on": "climb"}
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_chapel_of_mara"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        22
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        22,
+        54
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_lonely_suitor_lodge"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_silverhome_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -22,
+        54
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_a_fair_deal"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_archers_paradox"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -54,
+        22
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_ardalines_annex"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_skooma_den"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -54,
+        -22
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_ungolims_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_henantiers_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -22,
+        -54
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_droshanjis_house"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_city_swimmer_shack"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        22,
+        -54
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_ranalines_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_luciana_galena_house"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        54,
+        -22
+      ],
+      "face": "south",
+      "overlay": "bravil",
+      "name": "bravil_carandials_house"
+    }
   ],
   "features": [
-    {"type": "shrine", "theme": "divine:mara", "where": "street", "tag": "climb"},
-    {"type": "pond", "where": "free"},
-    {"type": "great_tree", "theme": "willow", "where": "free"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "banners", "count": 1, "where": "gate"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "climb"},
-    {"type": "market", "where": "free"},
-    {"type": "memorial", "where": "free"},
-    {"type": "bench", "where": "street", "tag": "quay"}
+    {
+      "type": "statue",
+      "theme": "lucky_old_lady",
+      "count": 1
+    },
+    {
+      "type": "well",
+      "theme": "canal_cistern",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "tallow_cresset",
+      "count": 4
+    },
+    {
+      "type": "market",
+      "theme": "ferry_stalls",
+      "count": 2
+    }
   ],
   "titles": {
+    "bravil_castle_bravil": "Castle Bravil",
+    "bravil_lucky_old_lady": "Statue of the Lucky Old Lady",
+    "bravil_chapel_of_mara": "Great Chapel of Mara",
+    "bravil_fighters_guild": "Bravil Fighters Guild",
+    "bravil_mages_guild": "Bravil Mages Guild",
     "bravil_lonely_suitor_lodge": "The Lonely Suitor Lodge",
-    "bravil_fishmarket_stalls": "Bridgeside Fishmarket",
-    "bravil_riverside_smithy": "Riverside Smithy",
-    "bravil_ratcatchers_shrine": "Ratcatcher's Shrine"
+    "bravil_silverhome_inn": "Silverhome on the Water",
+    "bravil_a_fair_deal": "A Fair Deal",
+    "bravil_archers_paradox": "The Archer's Paradox",
+    "bravil_ardalines_annex": "Ardaline's Alchemy Annex",
+    "bravil_skooma_den": "Bravil Skooma Den",
+    "bravil_ungolims_house": "Ungolim's House",
+    "bravil_henantiers_house": "Henantier's House",
+    "bravil_droshanjis_house": "Dro'shanji's Canal House",
+    "bravil_city_swimmer_shack": "City-Swimmer's Shanty",
+    "bravil_ranalines_house": "Ranaline's Loft",
+    "bravil_luciana_galena_house": "Luciana Galena's Loft",
+    "bravil_carandials_house": "Carandial's Shanty"
   }
 }

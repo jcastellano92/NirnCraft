@@ -1,0 +1,19 @@
+{
+  "id": "camlorn",
+  "tint": {
+    "wall": "minecraft:diorite",
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:polished_deepslate",
+    "roof": "blackstone",
+    "trim": "dark_oak",
+    "wood": "dark_oak",
+    "accent": "purple"
+  },
+  "palette": {
+    "cityWall": "deepslate_bricks",
+    "cityWall2": "minecraft:polished_deepslate",
+    "plaza": "minecraft:polished_diorite",
+    "plaza2": "minecraft:deepslate_tiles",
+    "path": "minecraft:cobbled_deepslate"
+  }
+}

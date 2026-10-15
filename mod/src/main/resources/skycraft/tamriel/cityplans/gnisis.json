@@ -1,0 +1,162 @@
+{
+  "id": "gnisis",
+  "why": [
+    "vvardenfell_ashlands.L1.ash_plain",
+    "vvardenfell_ashlands.L1.velothi_strongholds"
+  ],
+  "sil": "eggmine-legion-garrison",
+  "base": "none",
+  "overlay": "vvardenfell_ashlands",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "gnisis_landmark",
+      "overlay": "vvardenfell_ashlands"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "vvardenfell_ashlands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_2"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_4"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_5"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_6"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "vvardenfell_ashlands",
+      "name": "gnisis_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "fort_darius_legion",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "gnisis_river_well",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "justice_stone",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "gnisis_landmark": "Fort Darius",
+    "gnisis_b_1": "Gnisis Temple (Ashmask Shrine)",
+    "gnisis_b_2": "Madach Tradehouse",
+    "gnisis_b_3": "Arvs-Drelen Tower",
+    "gnisis_b_4": "Legion Garrison Smithy",
+    "gnisis_b_5": "Hetman Abelmawia Hut",
+    "gnisis_b_6": "Talos Cult Barracks",
+    "gnisis_b_7": "Eggmine Kwama Depot"
+  },
+  "innKey": "gnisis_b_2",
+  "names": {
+    "inn": "gnisis_b_2",
+    "store": "gnisis_b_5",
+    "smithy": "gnisis_b_4"
+  }
+}

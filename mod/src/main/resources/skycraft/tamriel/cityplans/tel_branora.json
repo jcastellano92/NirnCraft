@@ -1,0 +1,112 @@
+{
+  "id": "tel_branora",
+  "why": [
+    "azuras_coast.L1.islet_maze",
+    "azuras_coast.L1.sea_cliffs"
+  ],
+  "sil": "southern-archipelago-pod-tower",
+  "base": "none",
+  "overlay": "azuras_coast",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "azuras_coast"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "azuras_coast",
+      "name": "tel_branora_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        29
+      ],
+      "face": "south",
+      "overlay": "azuras_coast",
+      "name": "tel_branora_b_2"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "azuras_coast",
+      "name": "tel_branora_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -24,
+        -18
+      ],
+      "face": "south",
+      "overlay": "azuras_coast",
+      "name": "tel_branora_b_4"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "azuras_coast",
+      "name": "tel_branora_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "tel_branora_stalk",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "branora_spore_lamp",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "tel_branora_b_1": "Upper Tower of Mistress Therana",
+    "tel_branora_b_2": "Sethan's Tradehouse",
+    "tel_branora_b_3": "Ferele Athram's Apothecary",
+    "tel_branora_b_4": "Galos Farethi's Armorer",
+    "tel_branora_b_5": "Fedris Tharen's Healer Pod"
+  },
+  "innKey": "tel_branora_b_2",
+  "names": {
+    "inn": "tel_branora_b_2"
+  }
+}

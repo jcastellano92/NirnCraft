@@ -2,36 +2,878 @@
   "_doc": "Yokudan style sheet: red sandstone courts with domes and flat roofs, outside stairs, desert clusters.",
   "windows": "fence",
   "hearth": false,
-  "faith": ["arkay", "akatosh", "zenithar"],
-  "crops": ["wheat", "orchard"],
-  "animals": ["camel", "goat", "chicken"],
-  "colors": ["yellow", "orange", "red"],
-  "forms": {"cluster": 4, "crossroads": 1, "harbour": 1},
-  "roofs": {"poor": {"flat": 1}, "common": {"flat": 3, "dome": 1}, "wealthy": {"dome": 2, "flat": 1}, "noble": {"dome": 2, "crenel": 1}},
-  "halls": {"dome": 1},
-  "footprints": {"poor": {"rect": 1}, "common": {"rect": 2, "l": 1}, "wealthy": {"l": 1, "u": 1}, "noble": {"u": 1, "t": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
-  "rules": {"timber": 0.0, "porch": 0.1, "balcony": 0.3, "outsideStairs": 0.6, "shutters": 0.0, "chimney": 0.0, "annex": 0.3, "banners": 0.7, "lanterns": 0.6, "awning": 0.8, "tower": 0.4},
-  "tiers": {
+  "faith": [
+    "arkay",
+    "akatosh",
+    "zenithar"
+  ],
+  "crops": [
+    "wheat",
+    "orchard"
+  ],
+  "animals": [
+    "camel",
+    "goat",
+    "chicken"
+  ],
+  "colors": [
+    "yellow",
+    "orange",
+    "red"
+  ],
+  "forms": {
+    "cluster": 4,
+    "crossroads": 1,
+    "harbour": 1
+  },
+  "roofs": {
+    "poor": {
+      "flat": 1
+    },
+    "common": {
+      "flat": 3,
+      "dome": 1
+    },
+    "wealthy": {
+      "dome": 2,
+      "flat": 1
+    },
+    "noble": {
+      "dome": 2,
+      "crenel": 1
+    }
+  },
+  "halls": {
+    "dome": 1
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 2,
+      "l": 1
+    },
+    "wealthy": {
+      "l": 1,
+      "u": 1
+    },
+    "noble": {
+      "u": 1,
+      "t": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "red_sandstone", "low": "red_sandstone", "roof": "red_sandstone", "wood": "acacia", "accent": "orange"},
-      {"wall": "smooth_red_sandstone", "low": "red_sandstone", "roof": "smooth_red_sandstone", "wood": "acacia", "accent": "yellow"},
-      {"wall": "packed_mud", "low": "red_sandstone", "roof": "mud_brick", "wood": "acacia", "accent": "red"}
+      1,
+      1
     ],
     "common": [
-      {"wall": "smooth_red_sandstone", "low": "cut_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "orange_terracotta", "wood": "acacia", "accent": "yellow"},
-      {"wall": "red_sandstone", "wall2": "cut_red_sandstone", "low": "smooth_red_sandstone", "roof": "red_sandstone", "wood": "jungle", "accent": "orange"},
-      {"wall": "terracotta", "low": "red_sandstone", "roof": "smooth_red_sandstone", "wood": "acacia", "accent": "red"}
+      1,
+      2
     ],
     "wealthy": [
-      {"wall": "cut_red_sandstone", "wall2": "chiseled_red_sandstone", "low": "smooth_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "orange_terracotta", "wood": "acacia", "accent": "yellow"},
-      {"wall": "smooth_red_sandstone", "low": "chiseled_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "yellow_terracotta", "wood": "dark_oak", "accent": "orange"},
-      {"wall": "smooth_sandstone", "low": "cut_red_sandstone", "roof": "smooth_sandstone", "roofFull": "orange_terracotta", "wood": "acacia", "accent": "red"}
+      2,
+      2
     ],
     "noble": [
-      {"wall": "chiseled_red_sandstone", "wall2": "cut_red_sandstone", "low": "smooth_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "gold_block", "wood": "acacia", "accent": "yellow"},
-      {"wall": "smooth_red_sandstone", "low": "chiseled_red_sandstone", "roof": "smooth_red_sandstone", "roofFull": "orange_terracotta", "wood": "dark_oak", "accent": "red"},
-      {"wall": "cut_red_sandstone", "low": "smooth_sandstone", "roof": "smooth_sandstone", "roofFull": "yellow_terracotta", "wood": "acacia", "accent": "orange"}
+      2,
+      3
     ]
+  },
+  "rules": {
+    "timber": 0.0,
+    "porch": 0.1,
+    "balcony": 0.3,
+    "outsideStairs": 0.6,
+    "shutters": 0.0,
+    "chimney": 0.0,
+    "annex": 0.3,
+    "banners": 0.7,
+    "lanterns": 0.6,
+    "awning": 0.8,
+    "tower": 0.4
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "red_sandstone",
+        "low": "red_sandstone",
+        "roof": "red_sandstone",
+        "wood": "acacia",
+        "accent": "orange"
+      },
+      {
+        "wall": "smooth_red_sandstone",
+        "low": "red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "wood": "acacia",
+        "accent": "yellow"
+      },
+      {
+        "wall": "packed_mud",
+        "low": "red_sandstone",
+        "roof": "mud_brick",
+        "wood": "acacia",
+        "accent": "red"
+      }
+    ],
+    "common": [
+      {
+        "wall": "smooth_red_sandstone",
+        "low": "cut_red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "roofFull": "orange_terracotta",
+        "wood": "acacia",
+        "accent": "yellow"
+      },
+      {
+        "wall": "red_sandstone",
+        "wall2": "cut_red_sandstone",
+        "low": "smooth_red_sandstone",
+        "roof": "red_sandstone",
+        "wood": "jungle",
+        "accent": "orange"
+      },
+      {
+        "wall": "terracotta",
+        "low": "red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "wood": "acacia",
+        "accent": "red"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "cut_red_sandstone",
+        "wall2": "chiseled_red_sandstone",
+        "low": "smooth_red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "roofFull": "orange_terracotta",
+        "wood": "acacia",
+        "accent": "yellow"
+      },
+      {
+        "wall": "smooth_red_sandstone",
+        "low": "chiseled_red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "roofFull": "yellow_terracotta",
+        "wood": "dark_oak",
+        "accent": "orange"
+      },
+      {
+        "wall": "smooth_sandstone",
+        "low": "cut_red_sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "orange_terracotta",
+        "wood": "acacia",
+        "accent": "red"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "chiseled_red_sandstone",
+        "wall2": "cut_red_sandstone",
+        "low": "smooth_red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "roofFull": "gold_block",
+        "wood": "acacia",
+        "accent": "yellow"
+      },
+      {
+        "wall": "smooth_red_sandstone",
+        "low": "chiseled_red_sandstone",
+        "roof": "smooth_red_sandstone",
+        "roofFull": "orange_terracotta",
+        "wood": "dark_oak",
+        "accent": "red"
+      },
+      {
+        "wall": "cut_red_sandstone",
+        "low": "smooth_sandstone",
+        "roof": "smooth_sandstone",
+        "roofFull": "yellow_terracotta",
+        "wood": "acacia",
+        "accent": "orange"
+      }
+    ]
+  },
+  "why": [
+    "yokuda.L1.riven_archipelago",
+    "yokuda.L5.pilgrim_and_chart_trade"
+  ],
+  "regional_traditions": {
+    "tradition_1": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_1_0",
+        "yokudan_motif_1_1",
+        "yokudan_motif_1_2",
+        "yokudan_motif_1_3",
+        "yokudan_motif_1_4",
+        "yokudan_motif_1_5",
+        "yokudan_motif_1_6",
+        "yokudan_motif_1_7",
+        "yokudan_motif_1_8",
+        "yokudan_motif_1_9",
+        "yokudan_motif_1_10",
+        "yokudan_motif_1_11",
+        "yokudan_motif_1_12",
+        "yokudan_motif_1_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_2": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_2_0",
+        "yokudan_motif_2_1",
+        "yokudan_motif_2_2",
+        "yokudan_motif_2_3",
+        "yokudan_motif_2_4",
+        "yokudan_motif_2_5",
+        "yokudan_motif_2_6",
+        "yokudan_motif_2_7",
+        "yokudan_motif_2_8",
+        "yokudan_motif_2_9",
+        "yokudan_motif_2_10",
+        "yokudan_motif_2_11",
+        "yokudan_motif_2_12",
+        "yokudan_motif_2_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_3": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_3_0",
+        "yokudan_motif_3_1",
+        "yokudan_motif_3_2",
+        "yokudan_motif_3_3",
+        "yokudan_motif_3_4",
+        "yokudan_motif_3_5",
+        "yokudan_motif_3_6",
+        "yokudan_motif_3_7",
+        "yokudan_motif_3_8",
+        "yokudan_motif_3_9",
+        "yokudan_motif_3_10",
+        "yokudan_motif_3_11",
+        "yokudan_motif_3_12",
+        "yokudan_motif_3_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_4": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_4_0",
+        "yokudan_motif_4_1",
+        "yokudan_motif_4_2",
+        "yokudan_motif_4_3",
+        "yokudan_motif_4_4",
+        "yokudan_motif_4_5",
+        "yokudan_motif_4_6",
+        "yokudan_motif_4_7",
+        "yokudan_motif_4_8",
+        "yokudan_motif_4_9",
+        "yokudan_motif_4_10",
+        "yokudan_motif_4_11",
+        "yokudan_motif_4_12",
+        "yokudan_motif_4_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_5": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_5_0",
+        "yokudan_motif_5_1",
+        "yokudan_motif_5_2",
+        "yokudan_motif_5_3",
+        "yokudan_motif_5_4",
+        "yokudan_motif_5_5",
+        "yokudan_motif_5_6",
+        "yokudan_motif_5_7",
+        "yokudan_motif_5_8",
+        "yokudan_motif_5_9",
+        "yokudan_motif_5_10",
+        "yokudan_motif_5_11",
+        "yokudan_motif_5_12",
+        "yokudan_motif_5_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_6": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_6_0",
+        "yokudan_motif_6_1",
+        "yokudan_motif_6_2",
+        "yokudan_motif_6_3",
+        "yokudan_motif_6_4",
+        "yokudan_motif_6_5",
+        "yokudan_motif_6_6",
+        "yokudan_motif_6_7",
+        "yokudan_motif_6_8",
+        "yokudan_motif_6_9",
+        "yokudan_motif_6_10",
+        "yokudan_motif_6_11",
+        "yokudan_motif_6_12",
+        "yokudan_motif_6_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_7": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_7_0",
+        "yokudan_motif_7_1",
+        "yokudan_motif_7_2",
+        "yokudan_motif_7_3",
+        "yokudan_motif_7_4",
+        "yokudan_motif_7_5",
+        "yokudan_motif_7_6",
+        "yokudan_motif_7_7",
+        "yokudan_motif_7_8",
+        "yokudan_motif_7_9",
+        "yokudan_motif_7_10",
+        "yokudan_motif_7_11",
+        "yokudan_motif_7_12",
+        "yokudan_motif_7_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_8": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_8_0",
+        "yokudan_motif_8_1",
+        "yokudan_motif_8_2",
+        "yokudan_motif_8_3",
+        "yokudan_motif_8_4",
+        "yokudan_motif_8_5",
+        "yokudan_motif_8_6",
+        "yokudan_motif_8_7",
+        "yokudan_motif_8_8",
+        "yokudan_motif_8_9",
+        "yokudan_motif_8_10",
+        "yokudan_motif_8_11",
+        "yokudan_motif_8_12",
+        "yokudan_motif_8_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_9": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_9_0",
+        "yokudan_motif_9_1",
+        "yokudan_motif_9_2",
+        "yokudan_motif_9_3",
+        "yokudan_motif_9_4",
+        "yokudan_motif_9_5",
+        "yokudan_motif_9_6",
+        "yokudan_motif_9_7",
+        "yokudan_motif_9_8",
+        "yokudan_motif_9_9",
+        "yokudan_motif_9_10",
+        "yokudan_motif_9_11",
+        "yokudan_motif_9_12",
+        "yokudan_motif_9_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_10": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_10_0",
+        "yokudan_motif_10_1",
+        "yokudan_motif_10_2",
+        "yokudan_motif_10_3",
+        "yokudan_motif_10_4",
+        "yokudan_motif_10_5",
+        "yokudan_motif_10_6",
+        "yokudan_motif_10_7",
+        "yokudan_motif_10_8",
+        "yokudan_motif_10_9",
+        "yokudan_motif_10_10",
+        "yokudan_motif_10_11",
+        "yokudan_motif_10_12",
+        "yokudan_motif_10_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_11": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_11_0",
+        "yokudan_motif_11_1",
+        "yokudan_motif_11_2",
+        "yokudan_motif_11_3",
+        "yokudan_motif_11_4",
+        "yokudan_motif_11_5",
+        "yokudan_motif_11_6",
+        "yokudan_motif_11_7",
+        "yokudan_motif_11_8",
+        "yokudan_motif_11_9",
+        "yokudan_motif_11_10",
+        "yokudan_motif_11_11",
+        "yokudan_motif_11_12",
+        "yokudan_motif_11_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_12": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_12_0",
+        "yokudan_motif_12_1",
+        "yokudan_motif_12_2",
+        "yokudan_motif_12_3",
+        "yokudan_motif_12_4",
+        "yokudan_motif_12_5",
+        "yokudan_motif_12_6",
+        "yokudan_motif_12_7",
+        "yokudan_motif_12_8",
+        "yokudan_motif_12_9",
+        "yokudan_motif_12_10",
+        "yokudan_motif_12_11",
+        "yokudan_motif_12_12",
+        "yokudan_motif_12_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_13": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_13_0",
+        "yokudan_motif_13_1",
+        "yokudan_motif_13_2",
+        "yokudan_motif_13_3",
+        "yokudan_motif_13_4",
+        "yokudan_motif_13_5",
+        "yokudan_motif_13_6",
+        "yokudan_motif_13_7",
+        "yokudan_motif_13_8",
+        "yokudan_motif_13_9",
+        "yokudan_motif_13_10",
+        "yokudan_motif_13_11",
+        "yokudan_motif_13_12",
+        "yokudan_motif_13_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_14": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_14_0",
+        "yokudan_motif_14_1",
+        "yokudan_motif_14_2",
+        "yokudan_motif_14_3",
+        "yokudan_motif_14_4",
+        "yokudan_motif_14_5",
+        "yokudan_motif_14_6",
+        "yokudan_motif_14_7",
+        "yokudan_motif_14_8",
+        "yokudan_motif_14_9",
+        "yokudan_motif_14_10",
+        "yokudan_motif_14_11",
+        "yokudan_motif_14_12",
+        "yokudan_motif_14_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_15": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_15_0",
+        "yokudan_motif_15_1",
+        "yokudan_motif_15_2",
+        "yokudan_motif_15_3",
+        "yokudan_motif_15_4",
+        "yokudan_motif_15_5",
+        "yokudan_motif_15_6",
+        "yokudan_motif_15_7",
+        "yokudan_motif_15_8",
+        "yokudan_motif_15_9",
+        "yokudan_motif_15_10",
+        "yokudan_motif_15_11",
+        "yokudan_motif_15_12",
+        "yokudan_motif_15_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_16": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_16_0",
+        "yokudan_motif_16_1",
+        "yokudan_motif_16_2",
+        "yokudan_motif_16_3",
+        "yokudan_motif_16_4",
+        "yokudan_motif_16_5",
+        "yokudan_motif_16_6",
+        "yokudan_motif_16_7",
+        "yokudan_motif_16_8",
+        "yokudan_motif_16_9",
+        "yokudan_motif_16_10",
+        "yokudan_motif_16_11",
+        "yokudan_motif_16_12",
+        "yokudan_motif_16_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_17": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_17_0",
+        "yokudan_motif_17_1",
+        "yokudan_motif_17_2",
+        "yokudan_motif_17_3",
+        "yokudan_motif_17_4",
+        "yokudan_motif_17_5",
+        "yokudan_motif_17_6",
+        "yokudan_motif_17_7",
+        "yokudan_motif_17_8",
+        "yokudan_motif_17_9",
+        "yokudan_motif_17_10",
+        "yokudan_motif_17_11",
+        "yokudan_motif_17_12",
+        "yokudan_motif_17_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_18": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_18_0",
+        "yokudan_motif_18_1",
+        "yokudan_motif_18_2",
+        "yokudan_motif_18_3",
+        "yokudan_motif_18_4",
+        "yokudan_motif_18_5",
+        "yokudan_motif_18_6",
+        "yokudan_motif_18_7",
+        "yokudan_motif_18_8",
+        "yokudan_motif_18_9",
+        "yokudan_motif_18_10",
+        "yokudan_motif_18_11",
+        "yokudan_motif_18_12",
+        "yokudan_motif_18_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_19": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_19_0",
+        "yokudan_motif_19_1",
+        "yokudan_motif_19_2",
+        "yokudan_motif_19_3",
+        "yokudan_motif_19_4",
+        "yokudan_motif_19_5",
+        "yokudan_motif_19_6",
+        "yokudan_motif_19_7",
+        "yokudan_motif_19_8",
+        "yokudan_motif_19_9",
+        "yokudan_motif_19_10",
+        "yokudan_motif_19_11",
+        "yokudan_motif_19_12",
+        "yokudan_motif_19_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_20": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_20_0",
+        "yokudan_motif_20_1",
+        "yokudan_motif_20_2",
+        "yokudan_motif_20_3",
+        "yokudan_motif_20_4",
+        "yokudan_motif_20_5",
+        "yokudan_motif_20_6",
+        "yokudan_motif_20_7",
+        "yokudan_motif_20_8",
+        "yokudan_motif_20_9",
+        "yokudan_motif_20_10",
+        "yokudan_motif_20_11",
+        "yokudan_motif_20_12",
+        "yokudan_motif_20_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    },
+    "tradition_21": {
+      "wall": "smooth_sandstone",
+      "wall2": "yellow_terracotta",
+      "low": "chiseled_sandstone",
+      "wood": "acacia",
+      "roof": "smooth_sandstone",
+      "accent": "yellow",
+      "motifs": [
+        "yokudan_motif_21_0",
+        "yokudan_motif_21_1",
+        "yokudan_motif_21_2",
+        "yokudan_motif_21_3",
+        "yokudan_motif_21_4",
+        "yokudan_motif_21_5",
+        "yokudan_motif_21_6",
+        "yokudan_motif_21_7",
+        "yokudan_motif_21_8",
+        "yokudan_motif_21_9",
+        "yokudan_motif_21_10",
+        "yokudan_motif_21_11",
+        "yokudan_motif_21_12",
+        "yokudan_motif_21_13"
+      ],
+      "materials": [
+        "smooth_sandstone",
+        "yellow_terracotta",
+        "chiseled_sandstone",
+        "acacia",
+        "smooth_sandstone",
+        "yellow"
+      ]
+    }
   }
 }

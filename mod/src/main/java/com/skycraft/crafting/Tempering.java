@@ -68,6 +68,7 @@ public final class Tempering {
         } else {
             stack.getOrCreateTag().putInt(TAG, Math.min(MAX, quality));
         }
+        com.skycraft.loot.affix.ItemAffixes.onTemper(stack);
     }
 
     public static Component qualityName(int quality) {

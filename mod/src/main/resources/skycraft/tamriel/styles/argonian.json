@@ -3,38 +3,896 @@
   "stilts": true,
   "hearth": false,
   "windows": "fence",
-  "faith": ["kynareth", "arkay", "mara"],
-  "crops": ["saltrice", "carrots", "beetroots"],
-  "animals": ["frog", "chicken", "turtle"],
-  "colors": ["green", "lime", "cyan", "brown"],
-  "forms": {"canal": 3, "ring": 3, "riverside": 3, "cluster": 1},
-  "bodies": {"poor": {"round": 1}, "common": {"round": 3, "rect": 1}, "wealthy": {"rect": 2, "round": 1}, "noble": {"rect": 1}},
+  "faith": [
+    "kynareth",
+    "arkay",
+    "mara"
+  ],
+  "crops": [
+    "saltrice",
+    "carrots",
+    "beetroots"
+  ],
+  "animals": [
+    "frog",
+    "chicken",
+    "turtle"
+  ],
+  "colors": [
+    "green",
+    "lime",
+    "cyan",
+    "brown"
+  ],
+  "forms": {
+    "canal": 3,
+    "ring": 3,
+    "riverside": 3,
+    "cluster": 1
+  },
+  "bodies": {
+    "poor": {
+      "round": 1
+    },
+    "common": {
+      "round": 3,
+      "rect": 1
+    },
+    "wealthy": {
+      "rect": 2,
+      "round": 1
+    },
+    "noble": {
+      "rect": 1
+    }
+  },
   "hallBody": "rect",
-  "roofs": {"poor": {"thatch": 1}, "common": {"thatch": 3, "steep": 1}, "wealthy": {"thatch": 2, "steep": 1}, "noble": {"steep": 2, "thatch": 1}},
-  "halls": {"thatch": 2, "steep": 1},
-  "footprints": {"poor": {"rect": 1}, "common": {"rect": 1}, "wealthy": {"rect": 2, "l": 1}, "noble": {"l": 1, "t": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 1], "wealthy": [1, 2], "noble": [2, 2]},
-  "rules": {"timber": 0.7, "porch": 0.5, "balcony": 0.1, "shutters": 0.0, "flowerBoxes": 0.0, "chimney": 0.0, "annex": 0.4, "banners": 0.3, "lanterns": 0.5, "awning": 0.2},
-  "tiers": {
+  "roofs": {
+    "poor": {
+      "thatch": 1
+    },
+    "common": {
+      "thatch": 3,
+      "steep": 1
+    },
+    "wealthy": {
+      "thatch": 2,
+      "steep": 1
+    },
+    "noble": {
+      "steep": 2,
+      "thatch": 1
+    }
+  },
+  "halls": {
+    "thatch": 2,
+    "steep": 1
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 1
+    },
+    "wealthy": {
+      "rect": 2,
+      "l": 1
+    },
+    "noble": {
+      "l": 1,
+      "t": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "bamboo_planks", "low": "mangrove_planks", "roofFull": "hay_block", "wood": "mangrove", "timber": false, "accent": "green"},
-      {"wall": "bamboo_mosaic", "low": "mangrove_planks", "roofFull": "hay_block", "wood": "bamboo", "timber": false, "accent": "brown"},
-      {"wall": "mangrove_roots", "low": "mud_bricks", "roofFull": "moss_block", "wood": "mangrove", "timber": false, "accent": "lime"}
+      1,
+      1
     ],
     "common": [
-      {"wall": "bamboo_planks", "wall2": "bamboo_mosaic", "low": "mangrove_planks", "roofFull": "hay_block", "wood": "mangrove", "accent": "green"},
-      {"wall": "mangrove_planks", "low": "mud_bricks", "roofFull": "hay_block", "wood": "mangrove", "accent": "cyan"},
-      {"wall": "stripped_mangrove_wood", "low": "mangrove_planks", "roofFull": "moss_block", "wood": "bamboo", "timber": false, "accent": "lime"}
+      1,
+      1
     ],
     "wealthy": [
-      {"wall": "mangrove_planks", "wall2": "bamboo_planks", "low": "mossy_stone_bricks", "roof": "bamboo_mosaic", "wood": "mangrove", "accent": "green"},
-      {"wall": "mud_bricks", "low": "mossy_stone_bricks", "roof": "mangrove", "wood": "mangrove", "accent": "cyan"},
-      {"wall": "bamboo_mosaic", "low": "mossy_cobblestone", "roof": "bamboo_mosaic", "wood": "bamboo", "accent": "lime"}
+      1,
+      2
     ],
     "noble": [
-      {"wall": "mossy_stone_bricks", "wall2": "cracked_stone_bricks", "low": "mossy_cobblestone", "roof": "mangrove", "wood": "mangrove", "accent": "green", "timber": false},
-      {"wall": "mangrove_planks", "low": "mossy_stone_bricks", "roof": "mossy_stone_brick", "wood": "mangrove", "accent": "cyan"},
-      {"wall": "mud_bricks", "wall2": "packed_mud", "low": "mossy_stone_bricks", "roof": "bamboo_mosaic", "wood": "bamboo", "accent": "lime"}
+      2,
+      2
     ]
+  },
+  "rules": {
+    "timber": 0.7,
+    "porch": 0.5,
+    "balcony": 0.1,
+    "shutters": 0.0,
+    "flowerBoxes": 0.0,
+    "chimney": 0.0,
+    "annex": 0.4,
+    "banners": 0.3,
+    "lanterns": 0.5,
+    "awning": 0.2
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "bamboo_planks",
+        "low": "mangrove_planks",
+        "roofFull": "hay_block",
+        "wood": "mangrove",
+        "timber": false,
+        "accent": "green"
+      },
+      {
+        "wall": "bamboo_mosaic",
+        "low": "mangrove_planks",
+        "roofFull": "hay_block",
+        "wood": "bamboo",
+        "timber": false,
+        "accent": "brown"
+      },
+      {
+        "wall": "mangrove_roots",
+        "low": "mud_bricks",
+        "roofFull": "moss_block",
+        "wood": "mangrove",
+        "timber": false,
+        "accent": "lime"
+      }
+    ],
+    "common": [
+      {
+        "wall": "bamboo_planks",
+        "wall2": "bamboo_mosaic",
+        "low": "mangrove_planks",
+        "roofFull": "hay_block",
+        "wood": "mangrove",
+        "accent": "green"
+      },
+      {
+        "wall": "mangrove_planks",
+        "low": "mud_bricks",
+        "roofFull": "hay_block",
+        "wood": "mangrove",
+        "accent": "cyan"
+      },
+      {
+        "wall": "stripped_mangrove_wood",
+        "low": "mangrove_planks",
+        "roofFull": "moss_block",
+        "wood": "bamboo",
+        "timber": false,
+        "accent": "lime"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "mangrove_planks",
+        "wall2": "bamboo_planks",
+        "low": "mossy_stone_bricks",
+        "roof": "bamboo_mosaic",
+        "wood": "mangrove",
+        "accent": "green"
+      },
+      {
+        "wall": "mud_bricks",
+        "low": "mossy_stone_bricks",
+        "roof": "mangrove",
+        "wood": "mangrove",
+        "accent": "cyan"
+      },
+      {
+        "wall": "bamboo_mosaic",
+        "low": "mossy_cobblestone",
+        "roof": "bamboo_mosaic",
+        "wood": "bamboo",
+        "accent": "lime"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "mossy_stone_bricks",
+        "wall2": "cracked_stone_bricks",
+        "low": "mossy_cobblestone",
+        "roof": "mangrove",
+        "wood": "mangrove",
+        "accent": "green",
+        "timber": false
+      },
+      {
+        "wall": "mangrove_planks",
+        "low": "mossy_stone_bricks",
+        "roof": "mossy_stone_brick",
+        "wood": "mangrove",
+        "accent": "cyan"
+      },
+      {
+        "wall": "mud_bricks",
+        "wall2": "packed_mud",
+        "low": "mossy_stone_bricks",
+        "roof": "bamboo_mosaic",
+        "wood": "bamboo",
+        "accent": "lime"
+      }
+    ]
+  },
+  "why": [
+    "black_marsh.L1.alluvial_basin",
+    "black_marsh.L5.reed_and_mud_craft"
+  ],
+  "regional_traditions": {
+    "tradition_1": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_1_0",
+        "argonian_motif_1_1",
+        "argonian_motif_1_2",
+        "argonian_motif_1_3",
+        "argonian_motif_1_4",
+        "argonian_motif_1_5",
+        "argonian_motif_1_6",
+        "argonian_motif_1_7",
+        "argonian_motif_1_8",
+        "argonian_motif_1_9",
+        "argonian_motif_1_10",
+        "argonian_motif_1_11",
+        "argonian_motif_1_12",
+        "argonian_motif_1_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_2": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_2_0",
+        "argonian_motif_2_1",
+        "argonian_motif_2_2",
+        "argonian_motif_2_3",
+        "argonian_motif_2_4",
+        "argonian_motif_2_5",
+        "argonian_motif_2_6",
+        "argonian_motif_2_7",
+        "argonian_motif_2_8",
+        "argonian_motif_2_9",
+        "argonian_motif_2_10",
+        "argonian_motif_2_11",
+        "argonian_motif_2_12",
+        "argonian_motif_2_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_3": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_3_0",
+        "argonian_motif_3_1",
+        "argonian_motif_3_2",
+        "argonian_motif_3_3",
+        "argonian_motif_3_4",
+        "argonian_motif_3_5",
+        "argonian_motif_3_6",
+        "argonian_motif_3_7",
+        "argonian_motif_3_8",
+        "argonian_motif_3_9",
+        "argonian_motif_3_10",
+        "argonian_motif_3_11",
+        "argonian_motif_3_12",
+        "argonian_motif_3_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_4": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_4_0",
+        "argonian_motif_4_1",
+        "argonian_motif_4_2",
+        "argonian_motif_4_3",
+        "argonian_motif_4_4",
+        "argonian_motif_4_5",
+        "argonian_motif_4_6",
+        "argonian_motif_4_7",
+        "argonian_motif_4_8",
+        "argonian_motif_4_9",
+        "argonian_motif_4_10",
+        "argonian_motif_4_11",
+        "argonian_motif_4_12",
+        "argonian_motif_4_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_5": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_5_0",
+        "argonian_motif_5_1",
+        "argonian_motif_5_2",
+        "argonian_motif_5_3",
+        "argonian_motif_5_4",
+        "argonian_motif_5_5",
+        "argonian_motif_5_6",
+        "argonian_motif_5_7",
+        "argonian_motif_5_8",
+        "argonian_motif_5_9",
+        "argonian_motif_5_10",
+        "argonian_motif_5_11",
+        "argonian_motif_5_12",
+        "argonian_motif_5_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_6": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_6_0",
+        "argonian_motif_6_1",
+        "argonian_motif_6_2",
+        "argonian_motif_6_3",
+        "argonian_motif_6_4",
+        "argonian_motif_6_5",
+        "argonian_motif_6_6",
+        "argonian_motif_6_7",
+        "argonian_motif_6_8",
+        "argonian_motif_6_9",
+        "argonian_motif_6_10",
+        "argonian_motif_6_11",
+        "argonian_motif_6_12",
+        "argonian_motif_6_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_7": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_7_0",
+        "argonian_motif_7_1",
+        "argonian_motif_7_2",
+        "argonian_motif_7_3",
+        "argonian_motif_7_4",
+        "argonian_motif_7_5",
+        "argonian_motif_7_6",
+        "argonian_motif_7_7",
+        "argonian_motif_7_8",
+        "argonian_motif_7_9",
+        "argonian_motif_7_10",
+        "argonian_motif_7_11",
+        "argonian_motif_7_12",
+        "argonian_motif_7_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_8": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_8_0",
+        "argonian_motif_8_1",
+        "argonian_motif_8_2",
+        "argonian_motif_8_3",
+        "argonian_motif_8_4",
+        "argonian_motif_8_5",
+        "argonian_motif_8_6",
+        "argonian_motif_8_7",
+        "argonian_motif_8_8",
+        "argonian_motif_8_9",
+        "argonian_motif_8_10",
+        "argonian_motif_8_11",
+        "argonian_motif_8_12",
+        "argonian_motif_8_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_9": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_9_0",
+        "argonian_motif_9_1",
+        "argonian_motif_9_2",
+        "argonian_motif_9_3",
+        "argonian_motif_9_4",
+        "argonian_motif_9_5",
+        "argonian_motif_9_6",
+        "argonian_motif_9_7",
+        "argonian_motif_9_8",
+        "argonian_motif_9_9",
+        "argonian_motif_9_10",
+        "argonian_motif_9_11",
+        "argonian_motif_9_12",
+        "argonian_motif_9_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_10": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_10_0",
+        "argonian_motif_10_1",
+        "argonian_motif_10_2",
+        "argonian_motif_10_3",
+        "argonian_motif_10_4",
+        "argonian_motif_10_5",
+        "argonian_motif_10_6",
+        "argonian_motif_10_7",
+        "argonian_motif_10_8",
+        "argonian_motif_10_9",
+        "argonian_motif_10_10",
+        "argonian_motif_10_11",
+        "argonian_motif_10_12",
+        "argonian_motif_10_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_11": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_11_0",
+        "argonian_motif_11_1",
+        "argonian_motif_11_2",
+        "argonian_motif_11_3",
+        "argonian_motif_11_4",
+        "argonian_motif_11_5",
+        "argonian_motif_11_6",
+        "argonian_motif_11_7",
+        "argonian_motif_11_8",
+        "argonian_motif_11_9",
+        "argonian_motif_11_10",
+        "argonian_motif_11_11",
+        "argonian_motif_11_12",
+        "argonian_motif_11_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_12": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_12_0",
+        "argonian_motif_12_1",
+        "argonian_motif_12_2",
+        "argonian_motif_12_3",
+        "argonian_motif_12_4",
+        "argonian_motif_12_5",
+        "argonian_motif_12_6",
+        "argonian_motif_12_7",
+        "argonian_motif_12_8",
+        "argonian_motif_12_9",
+        "argonian_motif_12_10",
+        "argonian_motif_12_11",
+        "argonian_motif_12_12",
+        "argonian_motif_12_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_13": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_13_0",
+        "argonian_motif_13_1",
+        "argonian_motif_13_2",
+        "argonian_motif_13_3",
+        "argonian_motif_13_4",
+        "argonian_motif_13_5",
+        "argonian_motif_13_6",
+        "argonian_motif_13_7",
+        "argonian_motif_13_8",
+        "argonian_motif_13_9",
+        "argonian_motif_13_10",
+        "argonian_motif_13_11",
+        "argonian_motif_13_12",
+        "argonian_motif_13_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_14": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_14_0",
+        "argonian_motif_14_1",
+        "argonian_motif_14_2",
+        "argonian_motif_14_3",
+        "argonian_motif_14_4",
+        "argonian_motif_14_5",
+        "argonian_motif_14_6",
+        "argonian_motif_14_7",
+        "argonian_motif_14_8",
+        "argonian_motif_14_9",
+        "argonian_motif_14_10",
+        "argonian_motif_14_11",
+        "argonian_motif_14_12",
+        "argonian_motif_14_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_15": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_15_0",
+        "argonian_motif_15_1",
+        "argonian_motif_15_2",
+        "argonian_motif_15_3",
+        "argonian_motif_15_4",
+        "argonian_motif_15_5",
+        "argonian_motif_15_6",
+        "argonian_motif_15_7",
+        "argonian_motif_15_8",
+        "argonian_motif_15_9",
+        "argonian_motif_15_10",
+        "argonian_motif_15_11",
+        "argonian_motif_15_12",
+        "argonian_motif_15_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_16": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_16_0",
+        "argonian_motif_16_1",
+        "argonian_motif_16_2",
+        "argonian_motif_16_3",
+        "argonian_motif_16_4",
+        "argonian_motif_16_5",
+        "argonian_motif_16_6",
+        "argonian_motif_16_7",
+        "argonian_motif_16_8",
+        "argonian_motif_16_9",
+        "argonian_motif_16_10",
+        "argonian_motif_16_11",
+        "argonian_motif_16_12",
+        "argonian_motif_16_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_17": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_17_0",
+        "argonian_motif_17_1",
+        "argonian_motif_17_2",
+        "argonian_motif_17_3",
+        "argonian_motif_17_4",
+        "argonian_motif_17_5",
+        "argonian_motif_17_6",
+        "argonian_motif_17_7",
+        "argonian_motif_17_8",
+        "argonian_motif_17_9",
+        "argonian_motif_17_10",
+        "argonian_motif_17_11",
+        "argonian_motif_17_12",
+        "argonian_motif_17_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_18": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_18_0",
+        "argonian_motif_18_1",
+        "argonian_motif_18_2",
+        "argonian_motif_18_3",
+        "argonian_motif_18_4",
+        "argonian_motif_18_5",
+        "argonian_motif_18_6",
+        "argonian_motif_18_7",
+        "argonian_motif_18_8",
+        "argonian_motif_18_9",
+        "argonian_motif_18_10",
+        "argonian_motif_18_11",
+        "argonian_motif_18_12",
+        "argonian_motif_18_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_19": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_19_0",
+        "argonian_motif_19_1",
+        "argonian_motif_19_2",
+        "argonian_motif_19_3",
+        "argonian_motif_19_4",
+        "argonian_motif_19_5",
+        "argonian_motif_19_6",
+        "argonian_motif_19_7",
+        "argonian_motif_19_8",
+        "argonian_motif_19_9",
+        "argonian_motif_19_10",
+        "argonian_motif_19_11",
+        "argonian_motif_19_12",
+        "argonian_motif_19_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_20": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_20_0",
+        "argonian_motif_20_1",
+        "argonian_motif_20_2",
+        "argonian_motif_20_3",
+        "argonian_motif_20_4",
+        "argonian_motif_20_5",
+        "argonian_motif_20_6",
+        "argonian_motif_20_7",
+        "argonian_motif_20_8",
+        "argonian_motif_20_9",
+        "argonian_motif_20_10",
+        "argonian_motif_20_11",
+        "argonian_motif_20_12",
+        "argonian_motif_20_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    },
+    "tradition_21": {
+      "wall": "mangrove_planks",
+      "wall2": "mud_bricks",
+      "low": "mossy_stone_bricks",
+      "wood": "mangrove",
+      "roof": "bamboo_mosaic",
+      "accent": "green",
+      "motifs": [
+        "argonian_motif_21_0",
+        "argonian_motif_21_1",
+        "argonian_motif_21_2",
+        "argonian_motif_21_3",
+        "argonian_motif_21_4",
+        "argonian_motif_21_5",
+        "argonian_motif_21_6",
+        "argonian_motif_21_7",
+        "argonian_motif_21_8",
+        "argonian_motif_21_9",
+        "argonian_motif_21_10",
+        "argonian_motif_21_11",
+        "argonian_motif_21_12",
+        "argonian_motif_21_13"
+      ],
+      "materials": [
+        "mangrove_planks",
+        "mud_bricks",
+        "mossy_stone_bricks",
+        "mangrove",
+        "bamboo_mosaic",
+        "green"
+      ]
+    }
   }
 }

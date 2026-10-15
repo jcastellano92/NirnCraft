@@ -1,0 +1,291 @@
+{
+  "id": "shimmerene",
+  "why": [
+    "summerset_isle.L1.tower_upland",
+    "summerset_isle.L5.alinor_court_economy",
+    "summerset_isle.L6.alinor_capital"
+  ],
+  "sil": "port-lantern-docks",
+  "base": "none",
+  "overlay": "shimmerene",
+  "radius": 58,
+  "reach": 70,
+  "gates": [
+    [
+      0,
+      56
+    ],
+    [
+      -56,
+      0
+    ],
+    [
+      56,
+      0
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "shimmerene",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        27,
+        58
+      ],
+      "overlay": "summerset_isle",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 12,
+      "name": "shimmerene_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crystal_tower",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "shimmerene_landmark",
+      "overlay": "shimmerene"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 54,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        21,
+        0
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        18
+      ],
+      "face": "north",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        13,
+        16
+      ],
+      "face": "north",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        9,
+        41
+      ],
+      "face": "north",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        20
+      ],
+      "face": "north",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        33
+      ],
+      "face": "north",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -19,
+        9
+      ],
+      "face": "north",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -42,
+        0
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -19,
+        -9
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -26,
+        -33
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -5,
+        -20
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        13,
+        -16
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        38,
+        -18
+      ],
+      "face": "south",
+      "overlay": "shimmerene",
+      "name": "shimmerene_b_14"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "theme": "shimmerene_fountain",
+      "count": 1
+    },
+    {
+      "type": "statue",
+      "theme": "shimmerene_statue",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "shimmerene_garden",
+      "count": 3
+    }
+  ],
+  "names": {
+    "inn": "shimmerene_b_5",
+    "store": "shimmerene_b_10",
+    "smithy": "shimmerene_b_7"
+  },
+  "titles": {
+    "shimmerene_b_1": "place.skycraft.shimmerene Council & Seat Hall",
+    "shimmerene_b_2": "place.skycraft.shimmerene High Sanctuary",
+    "shimmerene_b_3": "place.skycraft.shimmerene Fighters & Wayfarers Hall",
+    "shimmerene_b_4": "place.skycraft.shimmerene Mages & Chroniclers Spire",
+    "shimmerene_b_5": "place.skycraft.shimmerene The Lantern & Hearth Inn",
+    "shimmerene_b_6": "place.skycraft.shimmerene The Traveler's Rest Tavern",
+    "shimmerene_b_7": "place.skycraft.shimmerene Master Forge & Armorer",
+    "shimmerene_b_8": "place.skycraft.shimmerene Botanicals & Remedies",
+    "shimmerene_b_9": "place.skycraft.shimmerene Scriptorium & Charts",
+    "shimmerene_b_10": "place.skycraft.shimmerene Grand Provisioner & Sundries",
+    "shimmerene_b_11": "place.skycraft.shimmerene Silk & Hide Clothier",
+    "shimmerene_b_12": "place.skycraft.shimmerene Lapidary & Signets",
+    "shimmerene_b_13": "place.skycraft.shimmerene Wayfarer Stables & Post",
+    "shimmerene_b_14": "place.skycraft.shimmerene Bonded Factor Warehouse",
+    "shimmerene_landmark": "High Seat of place.skycraft.shimmerene",
+    "shimmerene_plaza": "place.skycraft.shimmerene Central Plaza"
+  },
+  "innKey": "shimmerene_b_5"
+}

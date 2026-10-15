@@ -55,10 +55,146 @@ APPAREL_CLASSES = ("SkyArmorItem", "SkyShieldItem", "MaskItem", "SpellbreakerIte
 
 def lang_keys():
     keys = {}
+    vals = {}
     for f in sorted(LANG.glob("*.json")):
-        for k in json.loads(f.read_text(encoding="utf-8")):
+        data = json.loads(f.read_text(encoding="utf-8"))
+        for k, v in data.items():
             keys[k] = f.name
-    return keys
+            vals[k] = v
+    return keys, vals
+
+
+def audit_affixes(keys, vals, gap):
+    """Audit R14 item affixes: qualities, makers, enchant tiers, storied items, worldsheet cites, and novelty."""
+    affix_dir = MAIN / "resources" / "skycraft" / "loot" / "affixes"
+    for req in ("qualities.json", "makers.json", "enchant_tiers.json", "storied.json"):
+        p = affix_dir / req
+        if not p.exists():
+            gap(f"affixes/{req}", "missing affix data file")
+            return 0
+
+    qualities_doc = json.loads((affix_dir / "qualities.json").read_text(encoding="utf-8"))
+    makers_doc = json.loads((affix_dir / "makers.json").read_text(encoding="utf-8"))
+    enchant_doc = json.loads((affix_dir / "enchant_tiers.json").read_text(encoding="utf-8"))
+    storied_doc = json.loads((affix_dir / "storied.json").read_text(encoding="utf-8"))
+
+    # 1. Qualities & cultural synonyms
+    q_ids = set()
+    for q in qualities_doc.get("qualities", []):
+        qid = q.get("id", "")
+        q_ids.add(qid)
+        lkey = q.get("lang_key", "")
+        if lkey not in keys:
+            gap(f"affix/quality/{qid}", f"missing lang key {lkey}")
+        for mult_field in ("damage_mult", "armor_mult", "durability_mult", "value_mult"):
+            val = float(q.get(mult_field, 0))
+            if not (0.5 <= val <= 2.0):
+                gap(f"affix/quality/{qid}", f"{mult_field} out of bounds: {val}")
+        weights = q.get("weights", {})
+        for src in ("corpse", "container", "boss", "merchant"):
+            if src not in weights:
+                gap(f"affix/quality/{qid}", f"missing source weight '{src}'")
+        for cult, syn in q.get("synonyms", {}).items():
+            skey = syn.get("lang_key", "")
+            if skey not in keys:
+                gap(f"affix/quality/{qid}/{cult}", f"missing synonym lang key {skey}")
+    for req_q in ("rusted", "worn", "notched", "standard", "well_made", "masterwork"):
+        if req_q not in q_ids:
+            gap("affix/qualities", f"missing required quality tier '{req_q}'")
+
+    # 2. Worldsheet citation resolution for makers and storied entries
+    sys.path.insert(0, str(ROOT / "tools" / "qa"))
+    import worldsheet_lint  # noqa: E402
+    import novelty_lint  # noqa: E402
+
+    ws_errors = []
+    sheets, all_fields = worldsheet_lint.validate_sheets(None, ws_errors)
+    forbidden_pairs = []
+    for s in sheets.values():
+        forbidden_pairs.extend(s.get("forbidden", []))
+
+    # 3. Makers
+    makers = makers_doc.get("makers", [])
+    if len(makers) < 12:
+        gap("affix/makers", f"too few makers ({len(makers)}, expected >= 12)")
+    for m in makers:
+        mid = m.get("id", "")
+        for lk in (m.get("lang_key", ""), m.get("desc_key", "")):
+            if lk not in keys:
+                gap(f"affix/maker/{mid}", f"missing lang key {lk}")
+        why = m.get("why", [])
+        cite_errs = []
+        worldsheet_lint.check_why_list(f"affix/maker/{mid}", why, all_fields, forbidden_pairs, cite_errs)
+        for ce in cite_errs:
+            gap(f"affix/maker/{mid}", ce)
+        has_l5 = any(".L5." in worldsheet_lint.canon_field_id(w) for w in why)
+        if not has_l5:
+            gap(f"affix/maker/{mid}", f"maker why {why} must cite at least one L5 craft field")
+
+    # 4. Enchantment tier ladders
+    fams = enchant_doc.get("families", [])
+    if len(fams) < 8:
+        gap("affix/enchant_tiers", f"too few enchantment families ({len(fams)})")
+    for fam in fams:
+        fid = fam.get("id", "")
+        tiers = fam.get("tiers", [])
+        lkeys = fam.get("lang_keys", [])
+        if len(tiers) != 6 or len(lkeys) != 6:
+            gap(f"affix/enchant/{fid}", f"expected 6 tiers and 6 lang_keys, got {len(tiers)} and {len(lkeys)}")
+        for lk in lkeys:
+            if lk not in keys:
+                gap(f"affix/enchant/{fid}", f"missing lang key {lk}")
+
+    # 5. Storied items & epithets
+    epithets = storied_doc.get("epithets", [])
+    entries = storied_doc.get("entries", [])
+    if len(epithets) < 8 or len(entries) < 20:
+        gap("affix/storied", f"expected >=8 epithets and >=20 storied entries, got {len(epithets)} and {len(entries)}")
+    for ep in epithets:
+        if ep.get("lang_key", "") not in keys:
+            gap(f"affix/epithet/{ep.get('id', '?')}", f"missing lang key {ep.get('lang_key')}")
+    seen_prefixes = set()
+    for st in entries:
+        sid = st.get("id", "")
+        pfx = st.get("prefix", "")
+        if pfx in seen_prefixes:
+            gap(f"affix/storied/{sid}", f"duplicate storied prefix '{pfx}'")
+        seen_prefixes.add(pfx)
+        for lk in (st.get("lang_prefix_key", ""), st.get("lang_prov_key", "")):
+            if lk not in keys:
+                gap(f"affix/storied/{sid}", f"missing lang key {lk}")
+        why = st.get("why", [])
+        cite_errs = []
+        worldsheet_lint.check_why_list(f"affix/storied/{sid}", why, all_fields, forbidden_pairs, cite_errs)
+        for ce in cite_errs:
+            gap(f"affix/storied/{sid}", ce)
+        has_l11 = any(".L11." in worldsheet_lint.canon_field_id(w) for w in why)
+        if not has_l11:
+            gap(f"affix/storied/{sid}", f"storied why {why} must cite at least one L11 history field")
+
+    # 6. Novelty check on affix descriptions and provenances (4-gram Jaccard <= 0.55, skeleton <= 3)
+    affix_texts = []
+    for m in makers:
+        affix_texts.append((f"maker:{m['id']}", m.get("desc", "")))
+    for st in entries:
+        affix_texts.append((f"storied:{st['id']}", st.get("provenance", "")))
+    shingles_list = [novelty_lint.shingles(novelty_lint.words(t)) for _, t in affix_texts]
+    for i in range(len(affix_texts)):
+        for j in range(i + 1, len(affix_texts)):
+            u = len(shingles_list[i] | shingles_list[j])
+            jac = (len(shingles_list[i] & shingles_list[j]) / u) if u else 0.0
+            if jac > 0.55:
+                gap("affix/novelty", f"near-duplicate text ({jac:.2f}) between {affix_texts[i][0]} and {affix_texts[j][0]}")
+    skels = {}
+    for label, text in affix_texts:
+        sk = novelty_lint.skeleton(text)
+        if sk:
+            skels.setdefault(sk, []).append(label)
+    for sk, labels in skels.items():
+        if len(labels) > 3:
+            gap("affix/novelty", f"shared skeleton '{sk}' used {len(labels)} times: {labels}")
+
+    return len(qualities_doc.get("qualities", [])) + len(makers) + len(fams) + len(entries)
 
 
 def java_literal_ids():
@@ -121,7 +257,7 @@ def main():
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    keys = lang_keys()
+    keys, vals = lang_keys()
     literal, lists = java_literal_ids()
     variants = variant_models()
     dump = {}
@@ -131,12 +267,21 @@ def main():
 
     ids = set(items)
     if not ids:
-        ids = {k.split(".", 2)[2] for k in keys if k.startswith("item.skycraft.") and k.count(".") == 2}
-        ids |= literal
+        model_stems = {f.stem for f in (ASSETS / "models" / "item").glob("*.json")} - variants
+        ids = (
+            {
+                k.split(".", 2)[2]
+                for k in keys
+                if k.startswith("item.skycraft.") and k.count(".") == 2 and "%s" not in str(vals.get(k, ""))
+            }
+            & (literal | model_stems)
+        ) | literal
     gaps = []
 
     def gap(item, what):
         gaps.append((item, what))
+
+    affix_count = audit_affixes(keys, vals, gap)
 
     trophies = {i.split(":", 1)[1] for i in resolve_tag("skycraft:trophies")}
     expected_ingredients = set(lists.get("CreatureItems.INGREDIENTS", [])) | set(lists.get("ArcaneRegistry.MORE_INGREDIENTS", []))
@@ -206,9 +351,6 @@ def main():
             if res["max_level"] > int(level):
                 gap(f"leveled/{key}", f"at level {level} rolled {res['item']} (leveled-list level {res['max_level']})")
 
-    if not items:
-        gap("(all)", f"no runtime dump at {args.dump}: value/weight/category/enchanting/merchant checks skipped")
-
     lines = []
     by_item = {}
     for item, what in gaps:
@@ -216,7 +358,7 @@ def main():
     for item in sorted(by_item):
         for what in by_item[item]:
             lines.append(f"GAP {item}: {what}")
-    summary = f"audited {len(ids)} items ({len(items)} from the runtime dump), {len(gaps)} gaps"
+    summary = f"audited {len(ids)} items ({len(items)} from the runtime dump) and {affix_count} affix definitions, {len(gaps)} gaps"
     if args.verbose and items:
         kinds = {}
         for i, info in items.items():

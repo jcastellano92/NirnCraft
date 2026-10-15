@@ -1,0 +1,186 @@
+{
+  "id": "hissmir",
+  "why": [
+    "gideon.L1.western_levee_plain",
+    "gideon.L5.levee_rice_and_punt_trade",
+    "gideon.L6.gideon_walled_seat"
+  ],
+  "sil": "black-marsh-hissmir-plan",
+  "base": "none",
+  "overlay": "gideon",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "gideon",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "gideon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "hissmir_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "hissmir_landmark",
+      "overlay": "gideon"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hissmir_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "hissmir_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "hissmir_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "hissmir_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hissmir_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hissmir_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "hissmir_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "hissmir_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "hissmir_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "hissmir_b_5",
+    "smithy": "hissmir_b_7"
+  },
+  "titles": {
+    "hissmir_b_1": "place.skycraft.hissmir Council & Seat Hall",
+    "hissmir_b_2": "place.skycraft.hissmir High Sanctuary",
+    "hissmir_b_3": "place.skycraft.hissmir Fighters & Wayfarers Hall",
+    "hissmir_b_4": "place.skycraft.hissmir Mages & Chroniclers Spire",
+    "hissmir_b_5": "place.skycraft.hissmir The Lantern & Hearth Inn",
+    "hissmir_b_6": "place.skycraft.hissmir The Traveler's Rest Tavern",
+    "hissmir_b_7": "place.skycraft.hissmir Master Forge & Armorer",
+    "hissmir_landmark": "High Seat of place.skycraft.hissmir",
+    "hissmir_plaza": "place.skycraft.hissmir Central Plaza"
+  },
+  "innKey": "hissmir_b_5"
+}

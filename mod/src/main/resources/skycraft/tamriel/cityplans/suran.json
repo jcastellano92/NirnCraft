@@ -1,0 +1,162 @@
+{
+  "id": "suran",
+  "why": [
+    "ascadian_isles.L1.lake_basins",
+    "ascadian_isles.L4.saltrice_paddy"
+  ],
+  "sil": "lakeside-hlaalu-terraces",
+  "base": "none",
+  "overlay": "ascadian_isles",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "suran_landmark",
+      "overlay": "ascadian_isles"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "ascadian_isles"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_2"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_4"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_5"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_6"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "ascadian_isles",
+      "name": "suran_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "lamps",
+      "theme": "suran_lake_lantern",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "theme": "suran_hlaalu",
+      "count": 2
+    },
+    {
+      "type": "fountain",
+      "theme": "masque_plaza",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "suran_landmark": "Suran Temple",
+    "suran_b_1": "Desele's House of Earthly Delights",
+    "suran_b_2": "Suran Tradehouse",
+    "suran_b_3": "Oran Manor",
+    "suran_b_4": "Garothmuk gro-Muzgub's Smithy",
+    "suran_b_5": "Goldyn Belaram's Pawnbroker",
+    "suran_b_6": "Ranosa Gilvayn's Outfitter",
+    "suran_b_7": "Suran Watch Tower"
+  },
+  "innKey": "suran_b_1",
+  "names": {
+    "inn": "suran_b_1",
+    "store": "suran_b_5",
+    "smithy": "suran_b_4"
+  }
+}

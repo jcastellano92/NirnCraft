@@ -1,0 +1,19 @@
+{
+  "id": "wrothgar",
+  "tint": {
+    "wall": "minecraft:cobblestone",
+    "wall2": "minecraft:stone",
+    "low": "minecraft:cobbled_deepslate",
+    "roof": "spruce",
+    "trim": "spruce",
+    "wood": "spruce",
+    "accent": "brown"
+  },
+  "palette": {
+    "cityWall": "cobblestone",
+    "cityWall2": "minecraft:cobbled_deepslate",
+    "plaza": "minecraft:cobblestone",
+    "plaza2": "minecraft:gravel",
+    "path": "minecraft:coarse_dirt"
+  }
+}

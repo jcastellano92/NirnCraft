@@ -1,0 +1,95 @@
+{
+  "id": "thirsk_mead_hall",
+  "why": [
+    "felsaad.L1.mortrag_glacier",
+    "skaal.L2.lake_ice"
+  ],
+  "sil": "single-long-hall-fort",
+  "base": "none",
+  "overlay": "thirsk",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "thirsk"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "thirsk",
+      "name": "thirsk_mead_hall_b_1"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        20
+      ],
+      "face": "south",
+      "overlay": "thirsk",
+      "name": "thirsk_mead_hall_b_2"
+    },
+    {
+      "kind": "farmhouse",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        -9,
+        0
+      ],
+      "face": "south",
+      "overlay": "thirsk",
+      "name": "thirsk_mead_hall_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -20
+      ],
+      "face": "south",
+      "overlay": "thirsk",
+      "name": "thirsk_mead_hall_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "memorial",
+      "theme": "hrothmunds_axe_barrows",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "mead_hall_torch",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "thirsk_mead_hall_b_1": "Thirsk Mead Hall",
+    "thirsk_mead_hall_b_2": "Fjalding Shore Forge",
+    "thirsk_mead_hall_b_3": "Horker Meat Smokehouse",
+    "thirsk_mead_hall_b_4": "Chieftain's Mead Loft"
+  }
+}

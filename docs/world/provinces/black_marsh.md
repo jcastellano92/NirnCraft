@@ -39,35 +39,161 @@ Data home: `skycraft/tamriel/world/black_marsh.json` (MS22): one province block 
 **World truth paragraph.** Black Marsh—Argonia to its people—is a vast subtropical basin of slow rivers, tidal deltas,
 peat domes, and flooded root-tangles fed by the Niben's spill and the warm rains of the Padomaic Ocean. Only its
 north-western rim rises into firm basalt and limestone; everywhere else dry ground consists of natural levees, shell
-middens, ancient stone `xanmeer` platforms, and clay mounds raised around sentient Hist trees. Before the Duskfall,
+middens, ancient stone xanmeer platforms, and clay mounds raised around sentient Hist trees. Before the Duskfall,
 Saxhleel priest-kings built calendar pyramids and stone canals; after the Duskfall they abandoned stone for reed, mud,
 and living root, listening to the Hist sap while empires and Dunmer slavers broke their teeth on the outer border and
 never reached Helstrom at the centre.
 
 | Layer | Fields (id: what, cites) |
 | --- | --- |
-| L1 Geology and landform | `alluvial_basin`: a 38 km2 low-gradient basin of silt, peat, and drowned limestone karst. `nw_border_uplands` (L1.alluvial_basin): basalt and sandstone ridges (30-80 blocks) along the Cyrodiil and Morrowind frontier. `hist_clay_rises` (L1.alluvial_basin): natural and artificial mounds (8-20 blocks) that stay above flood stage. `xanmeer_foundations` (L1.alluvial_basin): pre-Duskfall stepped stone platforms half-sunk in peat. `east_barrier_spits`: sandy barrier islands, coral shoals, and tidal coves on the Padomaic coast. `lilmoth_delta`: a multi-mouth silt fan emptying into Topal Bay |
-| L2 Climate | `monsoon_humidity` (L1.alluvial_basin): warm, wet, mist-heavy air year-round with afternoon downpours. `spore_and_marsh_haze` (L2.monsoon_humidity): luminous night fog and heavy pollen over stagnant backwaters. `padomaic_squalls` (L1.east_barrier_spits): coastal gales that push salt water up the eastern estuaries. `upland_breeze` (L1.nw_border_uplands): drier air on the Stormhold and Gideon border hills |
-| L3 Water | `braided_channels` (L1.alluvial_basin, L2.monsoon_humidity): slow, interconnected river arms, oxbows, and root-tunnels navigable by flatboat. `root_water_network` (L3.braided_channels): submerged hollow root-tubes through which native swimmers move between pools. `hist_sap_springs` (L1.hist_clay_rises): amber sap-fed pools around the roots of elder Hist trees. `brackish_estuaries` (L1.lilmoth_delta, L2.padomaic_squalls): salt-and-fresh mixing zones along the south and east coasts. `blackwood_spill` (L1.nw_border_uplands; X:cy.L3.lower_niben): Niben overflow entering the western reed beds |
+| L1 Geology and landform | `alluvial_basin`: a 38 km2 low-gradient basin of silt, peat, and drowned limestone karst. `nw_border_uplands`: basalt and sandstone ridges (30-80 blocks) along the Cyrodiil and Morrowind frontier. `hist_clay_rises`: natural and artificial mounds (8-20 blocks) that stay above flood stage. `xanmeer_foundations`: pre-Duskfall stepped stone platforms half-sunk in peat. `east_barrier_spits`: sandy barrier islands, coral shoals, and tidal coves on the Padomaic coast. `lilmoth_delta`: a multi-mouth silt fan emptying into Topal Bay |
+| L2 Climate | `monsoon_humidity` (L1.alluvial_basin): warm, wet, mist-heavy air year-round with afternoon downpours. `spore_and_marsh_haze` (L1.alluvial_basin, L2.monsoon_humidity): luminous night fog and heavy pollen over stagnant backwaters. `padomaic_squalls` (L1.east_barrier_spits): coastal gales that push salt water up the eastern estuaries. `upland_breeze` (L1.nw_border_uplands): drier air on the Stormhold and Gideon border hills |
+| L3 Water | `braided_channels` (L1.alluvial_basin, L2.monsoon_humidity): slow, interconnected river arms, oxbows, and root-tunnels navigable by flatboat. `root_water_network` (L1.hist_clay_rises, L3.braided_channels): submerged hollow root-tubes through which native swimmers move between pools. `hist_sap_springs` (L1.hist_clay_rises): amber sap-fed pools around the roots of elder Hist trees. `brackish_estuaries` (L1.lilmoth_delta, L2.padomaic_squalls): salt-and-fresh mixing zones along the south and east coasts. `blackwood_spill` (L1.nw_border_uplands): Niben overflow entering the western reed beds |
 | L4 Ecology and micro-biomes | `hist_grove` (L1.hist_clay_rises, L3.hist_sap_springs): giant buttressed Hist trees, bioluminescent fungi, sacred silence. `mangrove_tangle` (L3.brackish_estuaries): stilt-rooted mangroves, mudskippers, haj mota, swamp jellyfish. `cypress_mire` (L3.braided_channels, L2.spore_and_marsh_haze): knees of bald cypress, hanging moss, wamasu, hackwings, fleshflies. `reed_savanna` (L3.blackwood_spill): tall sawgrass, lily mats, kagouti, bog dogs. `sinkhole_fen` (L1.alluvial_basin): acid peat pools, carnivorous pitcher flora, Voriplasm oozes. `upland_fern_wood` (L1.nw_border_uplands, L2.upland_breeze): drier fern-and-stone wood on the northern rim |
-| L5 Resources and economy | `reed_and_mud_craft` (L4.reed_savanna, L4.cypress_mire): woven reed, shell-lime, bone, andcured hide replacing iron that rusts in a season. `alchemical_reagents` (L4.sinkhole_fen, L4.hist_grove): rare marsh toxins, luminous spores, hackwing plumes, wamasu scales. `river_barge_and_punt` (L3.braided_channels): flatboat transport, reed rafts, and guide fees. `border_timber_and_rice` (L4.upland_fern_wood, L3.blackwood_spill): bog-iron, wetland grain, and timber traded at Gideon and Stormhold. `coastal_smuggling` (L1.east_barrier_spits, L1.lilmoth_delta): spice, contraband, and salvaged Imperial cargo at Lilmoth and Archon |
+| L5 Resources and economy | `reed_and_mud_craft` (L4.reed_savanna, L4.cypress_mire): woven reed, shell-lime, bone, and cured hide replacing iron that rusts in a season. `alchemical_reagents` (L4.sinkhole_fen, L4.hist_grove): rare marsh toxins, luminous spores, hackwing plumes, wamasu scales. `river_barge_and_punt` (L3.braided_channels): flatboat transport, reed rafts, and guide fees. `border_timber_and_rice` (L4.upland_fern_wood, L3.blackwood_spill): bog-iron, wetland grain, and timber traded at Gideon and Stormhold. `coastal_smuggling` (L1.east_barrier_spits, L1.lilmoth_delta): spice, contraband, and salvaged Imperial cargo at Lilmoth and Archon |
 | L6 Settlement pattern | `outer_ring_ports` (L1.nw_border_uplands, L1.lilmoth_delta, L5.coastal_smuggling): stone-and-timber hybrid towns (Stormhold, Gideon, Lilmoth, Thorn, Archon, Soulrest) sit on the outer border and coast where foreigners can reach them. `inner_hist_villages` (L1.hist_clay_rises, L4.hist_grove): inside the mire, every village is a ring of mud-and-reed huts and stilt walkways around a central Hist tree. `helstrom_sanctuary` (L3.braided_channels, L4.cypress_mire): the sacred interior capital reachable only by water and causeway. `raised_causeways` (L1.xanmeer_foundations, L3.braided_channels): ancient stone causeways and log corduroy bridges linking the outer seats |
-| L7 Society | `hist_communion` (L4.hist_grove, L6.inner_hist_villages): every tribe takes its speech, craft, and role from its Hist tree; the Tree-Minder interprets the sap. `outer_vs_inner_tribes` (L6.outer_ring_ports, L6.inner_hist_villages): assimilated "Lukiul" Argonians in the border towns vs traditional Saxhleel tribes (Bright-Throat, Dead-Water, Kota-Vimleel, Naga) in the interior. `shadowscale_order` (L7.hist_communion): those hatched under the Shadow sign, trained in silence and bound to both Sithis and the Dark Brotherhood. `freed_and_scarred` (X:mw.L7.slavery): former captives of House Dres holding the northern marches |
-| L8 Culture and belief | `the_hist_and_sithis` (L7.hist_communion, L1.xanmeer_foundations): the Hist is the living memory of the tribe; Sithis is change, honoured by letting stone ruins sink back into the mud rather than rebuilding them (`Duskfall`). `sap_rites_and_naming` (L3.hist_sap_springs): naming day at the tree, sap-licking festivals, and reincarnation through the roots. `xanmeer_taboo` (L1.xanmeer_foundations, L8.the_hist_and_sithis): old stone pyramids are respected as reminders of hubris, entered only when the Tree-Minder bids |
-| L9 Politics and conflict | `an_xileel_and_imperial_border` (L6.outer_ring_ports, L7.outer_vs_inner_tribes): traditionalist An-Xileel wardens vs Imperial charter-factors and Lukiul merchants in Gideon and Lilmoth. `dres_slaver_remnants` (L7.freed_and_scarred; X:mw.L9.slavery): rogue slaver rings, smuggling stockades, and border raids in Shadowfen and Thornmarsh. `sickening_hist` (L3.hist_sap_springs): a rogue mining/alchemical syndicate tapping a deep Hist root-vein for black sap. `tribal_water_feuds` (L7.outer_vs_inner_tribes): Dead-Water warriors and Bright-Throat singers contesting a sunken calendar stone |
-| L10 The hidden and the underground | `sunken_xanmeer` (L1.xanmeer_foundations, L8.xanmeer_taboo): flooded multi-tier step-pyramids with water-gate puzzles, stone vipers, and pre-Duskfall relics. `root_caverns` (L3.root_water_network, L4.hist_grove): amber-lit caverns beneath elder Hist trees guarded by sap-bound constructs and wamasu. `ayleid_barsaebic_ruins` (L1.nw_border_uplands): Barsaebic Ayleid vaults under Stormhold and Gideon. `slaver_stockades_and_pens` (L9.dres_slaver_remnants): hidden subterranean and mangrove-camouflaged holding pens. `kothringi_ghost_ships` (L11.knahaten_flu): silver-skinned undead and plague-era hulks in the southern estuaries |
-| L11 History layers | `pre_duskfall_empire`: the era of stone `xanmeer`, astronomy, and blood-oracles before the Hist called the Saxhleel back to simplicity. `barsaebic_exile`: Ayleids who fled Cyrodiil into northern Black Marsh and built Stormhold's under-works. `imperial_blackwater_war`: Reman and Septim legions burning roads into the outer swamp and building border forts that sank a foot a decade. `knahaten_flu` (2E 560): the plague that wiped out the silver-skinned Kothringi and closed the ports to outsiders. `dres_slave_raids`: centuries of border raiding across Shadowfen and Thornmarsh |
+| L7 Society | `hist_communion` (L4.hist_grove, L6.inner_hist_villages): every tribe takes its speech, craft, and role from its Hist tree; the Tree-Minder interprets the sap. `outer_vs_inner_tribes` (L6.outer_ring_ports, L6.inner_hist_villages): assimilated Lukiul Argonians in the border towns vs traditional Saxhleel tribes (Bright-Throat, Dead-Water, Kota-Vimleel, Naga) in the interior. `shadowscale_order` (L4.hist_grove, L7.hist_communion): those hatched under the Shadow sign, trained in silence and bound to both Sithis and the Dark Brotherhood. `freed_and_scarred` (L1.nw_border_uplands, L6.outer_ring_ports): former captives of House Dres holding the northern marches |
+| L8 Culture and belief | `the_hist_and_sithis` (L7.hist_communion, L1.xanmeer_foundations): the Hist is the living memory of the tribe; Sithis is change, honoured by letting stone ruins sink back into the mud rather than rebuilding them after Duskfall. `hist_communion` (L3.hist_sap_springs, L7.hist_communion): sap-communion rites binding each clutch to its tree. `sap_rites_and_naming` (L3.hist_sap_springs): naming day at the tree, sap-licking festivals, and reincarnation through the roots. `xanmeer_taboo` (L1.xanmeer_foundations, L8.the_hist_and_sithis): old stone pyramids are respected as reminders of hubris, entered only when the Tree-Minder bids |
+| L9 Politics and conflict | `an_xileel_and_imperial_border` (L6.outer_ring_ports, L7.outer_vs_inner_tribes): traditionalist An-Xileel wardens vs Imperial charter-factors and Lukiul merchants in Gideon and Lilmoth. `dres_slaver_remnants` (L7.freed_and_scarred, L6.outer_ring_ports): rogue slaver rings, smuggling stockades, and border raids in Shadowfen and Thornmarsh. `sickening_hist` (L3.hist_sap_springs): a rogue mining/alchemical syndicate tapping a deep Hist root-vein for black sap. `tribal_water_feuds` (L7.outer_vs_inner_tribes): Dead-Water warriors and Bright-Throat singers contesting a sunken calendar stone |
+| L10 The hidden and the underground | `sunken_xanmeer` (L1.xanmeer_foundations, L8.xanmeer_taboo): flooded multi-tier step-pyramids with water-gate puzzles, stone vipers, and pre-Duskfall relics. `root_caverns` (L3.root_water_network, L4.hist_grove): amber-lit caverns beneath elder Hist trees guarded by sap-bound constructs and wamasu. `ayleid_barsaebic_ruins` (L1.nw_border_uplands): Barsaebic Ayleid vaults under Stormhold and Gideon. `slaver_stockades_and_pens` (L9.dres_slaver_remnants): hidden subterranean and mangrove-camouflaged holding pens. `kothringi_ghost_ships` (L1.lilmoth_delta, L3.brackish_estuaries): silver-skinned undead and plague-era hulks in the southern estuaries |
+| L11 History layers | `pre_duskfall_empire` (L1.xanmeer_foundations, L10.sunken_xanmeer): the era of stone xanmeer, astronomy, and blood-oracles before the Hist called the Saxhleel back to simplicity. `barsaebic_exile` (L1.nw_border_uplands, L10.ayleid_barsaebic_ruins): Ayleids who fled Cyrodiil into northern Black Marsh and built Stormhold's under-works. `imperial_blackwater_war` (L6.raised_causeways, L9.an_xileel_and_imperial_border): Reman and Septim legions burning roads into the outer swamp and building border forts that sank a foot a decade. `knahaten_flu` (L1.lilmoth_delta, L10.kothringi_ghost_ships): the 2E 560 plague that wiped out the silver-skinned Kothringi and closed the ports to outsiders. `dres_slave_raids` (L7.freed_and_scarred, L9.dres_slaver_remnants): centuries of border raiding across Shadowfen and Thornmarsh |
 
-### 1.2 Region sub-sheets (`shadowfen`, `stormhold`, `gideon`, `helstrom`, `lilmoth`, `murkmire`)
+### 1.2 Shadowfen (`shadowfen`, 6.4 km2, levels 15-30)
 
-| Region | World truth | Key regional L1–L11 fields (citing `bm.*`) |
-| --- | --- | --- |
-| **Shadowfen** (`shadowfen`, 6.4 km2, 15-30) | The north-west borderland where Morrowind's ash-runoff meets Argonia's peat: a scarred frontier of broken slaver chains, mud-stilt villages, sunken step-pyramids, and vigilant border-tribes watching every road from Deshaan. | L1 `border_karst` (`bm.L1.nw_border_uplands`), L3 `ash_stained_fen` (`bm.L3.braided_channels`), L4 `pitcher_bog` (`bm.L4.sinkhole_fen`), L6 `percolating_mire_posts` (`bm.L6.inner_hist_villages`), L9 `broken_chain_watch` (`bm.L9.dres_slaver_remnants`), L10 `ten_maur_wolk_xanmeer` (`bm.L10.sunken_xanmeer`) |
-| **Stormhold** (`stormhold`, 6.8 km2, 16-32) | Built atop the only high basalt shelf in the north, Stormhold wraps Argonian mud-and-timber compounds around a sunken Barsaebic Ayleid citadel; it is the northern gateway where caravans trade iron for marsh reagents. | L1 `stormhold_shelf` (`bm.L1.nw_border_uplands`), L3 `upper_causeway_falls` (`bm.L3.braided_channels`), L5 `border_caravan_exchange` (`bm.L5.border_timber_and_rice`), L6 `stormhold_ring_over_ruin` (`bm.L6.outer_ring_ports`), L10 `barsaebic_undercity` (`bm.L10.ayleid_barsaebic_ruins`), L11 `ayleid_foundation` (`bm.L11.barsaebic_exile`) |
-| **Gideon** (`gideon`, 6.2 km2, 14-28) | The western reed-plain bordering Cyrodiil's Blackwood: half-drowned Imperial causeways, fortified stone manors from the Colovian occupation, and Lukiul townsfolk caught between Imperial trade and An-Xileel resurgence. | L1 `western_levee_plain` (`bm.L1.alluvial_basin`), L3 `niben_overflow_marshes` (`bm.L3.blackwood_spill`), L4 `sawgrass_prairie` (`bm.L4.reed_savanna`), L6 `gideon_walled_seat` (`bm.L6.outer_ring_ports`), L9 `lukiul_and_an_xileel` (`bm.L9.an_xileel_and_imperial_border`), L10 `old_governor_vaults` (`bm.L10.ayleid_barsaebic_ruins`) |
-| **Thornmarsh / Helstrom** (`helstrom`, 7.9 km2, 20-38) | Two worlds in one region: along the eastern sea-spits stand Thorn and Archon, ports of call for traders and former slavers; inland lies the impenetrable root-labyrinth surrounding Helstrom, the sacred city no outsider army has ever taken. | L1 `helstrom_root_dome` (`bm.L1.hist_clay_rises`), L3 `labyrinth_channels` (`bm.L3.root_water_network`), L4 `elder_hist_canopy` (`bm.L4.hist_grove`), L6 `helstrom_ring_and_thorn_port` (`bm.L6.helstrom_sanctuary`, `bm.L6.outer_ring_ports`), L9 `elder_tree_council` (`bm.L9.sickening_hist`), L10 `elder_root_sanctum` (`bm.L10.root_caverns`) |
-| **Lilmoth** (`lilmoth`, 5.6 km2, 15-30) | Where the southern channels fan into Topal Bay: a bustling, half-sunken port of rotting Imperial warehouses, smuggling wharves, Kothringi ghost-hulks in the fog, and a customhouse that taxes everything that floats. | L1 `topal_silt_delta` (`bm.L1.lilmoth_delta`), L3 `tidal_bayous` (`bm.L3.brackish_estuaries`), L5 `smuggler_and_spice_quays` (`bm.L5.coastal_smuggling`), L6 `lilmoth_harbour` (`bm.L6.outer_ring_ports`), L10 `drowned_customs_and_hulks` (`bm.L10.kothringi_ghost_ships`), L11 `flu_quarantine_wharves` (`bm.L11.knahaten_flu`) |
-| **Murkmire** (`murkmire`, 5.1 km2, 18-35) | The deep south-eastern shelf from Soulrest's bay to the mangrove archipelagos: a vertical jungle of stilt-roots, bright-painted tribal villages, and the grandest pre-Duskfall `xanmeer` pyramids rising out of the mist. | L1 `mangrove_shelf` (`bm.L1.xanmeer_foundations`), L3 `soulrest_sound` (`bm.L3.brackish_estuaries`), L4 `coastal_mangrove_dome` (`bm.L4.mangrove_tangle`), L6 `soulrest_and_stilt_villages` (`bm.L6.inner_hist_villages`), L8 `sithis_calendar_stones` (`bm.L8.the_hist_and_sithis`), L10 `grand_calendar_xanmeer` (`bm.L10.sunken_xanmeer`) |
+**World truth.** Shadowfen is the north-western border mire where Morrowind's ash-runoff meets Argonia's deep peat: a
+scarred frontier of broken slaver chains, mud-stilt villages, sunken step-pyramids, and vigilant border-tribes watching
+every road down from Deshaan. Here former Dres captives and Tree-Minders guard the Percolating Mire and Alten Corimont
+against smuggling rings that still try to spirit hatchlings north across the hills. Beneath the pitcher bogs and
+cypress knees lie Barsaebic Ayleid ruins and the twin-peaked xanmeer of Ten-Maur-Wolk, where water-locks still answer
+the old calendar.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `border_karst`: limestone sinkholes and low basalt spurs along the Morrowind march. `mire_peat_domes`: raised acid peat beds between the channels |
+| L2 | `ash_tinged_mist` (bm.L2.spore_and_marsh_haze, L1.border_karst): warm marsh fog carrying fine grey ash from the northern hills |
+| L3 | `ash_stained_fen` (bm.L3.braided_channels, L1.border_karst): slow dark channels draining the northern border. `percolating_springs` (bm.L3.hist_sap_springs, L1.mire_peat_domes): warm bubbling mire pools |
+| L4 | `pitcher_bog` (bm.L4.sinkhole_fen, L1.mire_peat_domes): carnivorous flora, fleshflies, and bog dogs. `border_cypress` (bm.L4.cypress_mire, L3.ash_stained_fen): moss-hung cypress and wamasu lairs |
+| L5 | `toxin_and_reed_harvest` (bm.L5.alchemical_reagents, L4.pitcher_bog): marsh reagents, reed basketry, and bog-iron spears |
+| L6 | `percolating_mire_posts` (bm.L6.inner_hist_villages, L3.percolating_springs): mud-and-stilt villages around border Hist trees, led by Alten Corimont and Forsaken Hamlet |
+| L7 | `chain_breaker_clans` (bm.L7.freed_and_scarred, L6.percolating_mire_posts): freed slave families and vigilant marsh scouts |
+| L8 | `shackle_cairns` (bm.L8.the_hist_and_sithis, L7.chain_breaker_clans): rusted slaver irons hung on boundary trees as a warning and memorial |
+| L9 | `broken_chain_watch` (bm.L9.dres_slaver_remnants, L7.chain_breaker_clans): border wardens hunting rogue slaver factors and informants |
+| L10 | `ten_maur_wolk_xanmeer` (bm.L10.sunken_xanmeer, L1.border_karst): sunken step-pyramids and the Loriasel Ayleid-Hist vault. `slaver_hideouts` (bm.L10.slaver_stockades_and_pens, L9.broken_chain_watch): concealed caves in the northern karst |
+| L11 | `liberation_marches` (bm.L11.dres_slave_raids, L8.shackle_cairns): the border uprisings that burned the northern slave pens |
+
+### 1.3 Stormhold (`stormhold`, 6.8 km2, levels 16-32)
+
+**World truth.** Built atop the only high basalt and limestone shelf on the northern frontier, Stormhold wraps Argonian
+mud-and-timber compounds around the half-sunken white-stone spires of a Barsaebic Ayleid citadel. It is the northern
+gateway of Black Marsh, where raised stone causeways meet the Morrowind and Cyrodiil roads and where caravans trade
+northern iron and wetland grain for marsh reagents, bog-timber and cured hides. Tree-Minders share the market ring with
+Dunmer and Imperial factors, while beneath the city's guildhalls and plazas, flooded Ayleid crystal vaults and
+Shadowscale training sanctums run deep into the living rock.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `stormhold_shelf`: a firm basalt and limestone ridge rising above the northern fens. `sunken_plinths`: Ayleid white-stone foundations subsiding into the clay |
+| L2 | `northern_scarp_breeze` (bm.L2.upland_breeze, L1.stormhold_shelf): clearer upland air above the marsh haze |
+| L3 | `upper_causeway_falls` (bm.L3.braided_channels, L1.stormhold_shelf): stepped cascades where upland streams drop into the mire |
+| L4 | `basalt_fern_wood` (bm.L4.upland_fern_wood, L2.northern_scarp_breeze): tree-ferns, kagouti, and durzogs along the northern rocks |
+| L5 | `border_caravan_exchange` (bm.L5.border_timber_and_rice, L3.upper_causeway_falls): iron imports traded for marsh herbs, hides, and bog-timber |
+| L6 | `stormhold_ring_over_ruin` (bm.L6.outer_ring_ports, L1.sunken_plinths): Argonian timber-and-mud compounds crowning Ayleid stone walls |
+| L7 | `tree_minders_and_factors` (bm.L7.outer_vs_inner_tribes, L5.border_caravan_exchange): Saxhleel elders sharing the market ring with Dunmer and Imperial factors |
+| L8 | `shadow_sign_vigil` (bm.L8.the_hist_and_sithis, bm.L7.shadowscale_order): shrines to Sithis and the Hist in the under-plaza |
+| L9 | `caravan_toll_dispute` (bm.L9.an_xileel_and_imperial_border, L5.border_caravan_exchange): tension over foreign charter privileges and relic smuggling |
+| L10 | `barsaebic_undercity` (bm.L10.ayleid_barsaebic_ruins, L1.sunken_plinths): the Sunken Stormhold Vaults and crystal-lit Ayleid labyrinths |
+| L11 | `ayleid_foundation` (bm.L11.barsaebic_exile, L10.barsaebic_undercity): the Barsaebic Ayleid flight from Cyrodiil and the old Imperial prison-keep |
+
+### 1.4 Gideon (`gideon`, 6.2 km2, levels 14-28)
+
+**World truth.** Gideon is the western reed-plain bordering Cyrodiil's Blackwood: a country of wide sawgrass prairies,
+Niben overflow marshes, half-drowned Imperial causeways, and fortified stone manors left from the Colovian and Septim
+occupations. Its walled seat of Gideon and the ruined penal fortress of Blackrose stand on the last firm silt levees
+before the deep interior swamp begins. Here assimilated Lukiul townsfolk, Imperial charter-traders, and An-Xileel
+traditionalists contest every bridge, punt-ferry and warehouse, while weathered chapels stand beside living Hist pools
+and blood-root cults and bog hounds haunt the sunken estates.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `western_levee_plain`: broad silt levees and low clay islands along the Blackwood frontier. `blackrose_basin`: a subsided marsh depression in the south-west |
+| L2 | `niben_valley_warmth` (bm.L2.monsoon_humidity, L1.western_levee_plain): warm river-valley rains and summer thunderheads |
+| L3 | `niben_overflow_marshes` (bm.L3.blackwood_spill, L1.western_levee_plain): seasonal flood sheets and reed-choked bayous |
+| L4 | `sawgrass_prairie` (bm.L4.reed_savanna, L3.niben_overflow_marshes): tall sawgrass, bog dogs, and marsh nix |
+| L5 | `levee_rice_and_punt_trade` (bm.L5.border_timber_and_rice, bm.L5.river_barge_and_punt, L3.niben_overflow_marshes): wetland rice, reed rafts, and Blackwood border trade |
+| L6 | `gideon_walled_seat` (bm.L6.outer_ring_ports, bm.L6.raised_causeways, L1.western_levee_plain): Imperial stone lower walls topped with Argonian stilt-galleries |
+| L7 | `lukiul_townsfolk` (bm.L7.outer_vs_inner_tribes, L6.gideon_walled_seat): Imperialised Argonians, Colovian factor descendants, and marsh guides |
+| L8 | `chapel_and_root_shrine` (bm.L8.sap_rites_and_naming, L7.lukiul_townsfolk): weathered Imperial chapels standing beside living Hist sap-pools |
+| L9 | `lukiul_and_an_xileel` (bm.L9.an_xileel_and_imperial_border, L7.lukiul_townsfolk): An-Xileel wardens pushing to close the western charter houses |
+| L10 | `old_governor_vaults` (bm.L10.ayleid_barsaebic_ruins, L1.blackrose_basin, L9.lukiul_and_an_xileel): Blackrose Prison's flooded dungeons and drowned Colovian estates |
+| L11 | `blackwater_forts` (bm.L11.imperial_blackwater_war, L6.gideon_walled_seat): the Second and Third Era legion campaigns that built the western causeway |
+
+### 1.5 Thornmarsh and Helstrom (`helstrom`, 7.9 km2, levels 20-38)
+
+**World truth.** Two worlds share this central and eastern region: along the Padomaic barrier spits stand Thorn and
+Archon, hybrid ports of call for coastal traders and former slaver houses; inland lies the impenetrable root-labyrinth
+surrounding Helstrom, the sacred capital no outsider army has ever taken. In Helstrom, giant interlocking Hist roots
+form living bridges over dark water, and the eldest Tree-Minders commune with the root-heart of Argonia. When a rogue
+syndicate taps a deep root-vein in the east, the central trees stir and summon the interior tribes.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `helstrom_root_dome`: the raised clay-and-root core of the interior basin. `thorn_coastal_spits`: eastern barrier beaches and limestone bluffs |
+| L2 | `interior_twilight_haze` (bm.L2.spore_and_marsh_haze, L1.helstrom_root_dome): perpetual golden spore-mist under the high canopy |
+| L3 | `labyrinth_channels` (bm.L3.root_water_network, L1.helstrom_root_dome): shifting root-tunnels and dark rivers that turn back unguided boats |
+| L4 | `elder_hist_canopy` (bm.L4.hist_grove, bm.L4.cypress_mire, L2.interior_twilight_haze): 65-block Elder Hist domes, Naga patrols, and wamasu |
+| L5 | `sacred_sap_and_east_port_trade` (bm.L5.alchemical_reagents, bm.L5.coastal_smuggling, L1.thorn_coastal_spits): coastal shipping at Thorn and Archon; pure reed-and-bone craft inland |
+| L6 | `helstrom_ring_and_thorn_port` (bm.L6.helstrom_sanctuary, bm.L6.outer_ring_ports, L3.labyrinth_channels): Helstrom's concentric mud-dome rings and the eastern harbour towns |
+| L7 | `root_heart_tribes` (bm.L7.hist_communion, L6.helstrom_ring_and_thorn_port): elder Tree-Minders, Naga-Kur guardians, and Kota-Vimleel speakers |
+| L8 | `sap_naming_rite` (bm.L8.sap_rites_and_naming, L4.elder_hist_canopy): the grand communion around the Elder Hist of Helstrom |
+| L9 | `elder_tree_council` (bm.L9.sickening_hist, L7.root_heart_tribes): the interior council mobilising against black-sap poachers and eastern slaver remnants |
+| L10 | `elder_root_sanctum` (bm.L10.root_caverns, bm.L10.sunken_xanmeer, L1.helstrom_root_dome): Hissmir's sunken calendar pyramid and the living root-caverns beneath Helstrom |
+| L11 | `unconquered_core` (bm.L11.pre_duskfall_empire, bm.L11.imperial_blackwater_war, L3.labyrinth_channels): every foreign legion lost in the root-ways since the First Era |
+
+### 1.6 Lilmoth (`lilmoth`, 5.6 km2, levels 15-30)
+
+**World truth.** Where the southern river channels fan out into Topal Bay stands Lilmoth: a bustling, half-sunken delta
+port of rotting Imperial stone warehouses, cypress stilt-quays, smuggling wharves, and a customhouse that taxes
+everything that floats. In the surrounding tidal mangrove bayous, silver-hulled Kothringi plague-ships from the Second
+Era Knahaten Flu still drift through the warm salt fog, and pre-Duskfall xanmeer steps lie just beneath the brackish
+tide. Saxhleel punt-men, Khajiit smugglers, Padomaic spice factors, and An-Xileel dock-wardens share the lantern-lit
+boardwalks at night.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `topal_silt_delta`: shifting mudbanks, shell islands, and drowned stone quays at the bay mouth |
+| L2 | `topal_sea_fog` (bm.L2.padomaic_squalls, L1.topal_silt_delta): warm salt fog and summer squalls off Topal Bay |
+| L3 | `tidal_bayous` (bm.L3.brackish_estuaries, L1.topal_silt_delta): twice-daily tides reversing the flow of the lower channels |
+| L4 | `delta_mangroves` (bm.L4.mangrove_tangle, L3.tidal_bayous): stilt-root mangroves, haj mota, and swamp jellyfish |
+| L5 | `smuggler_and_spice_quays` (bm.L5.coastal_smuggling, bm.L5.river_barge_and_punt, L3.tidal_bayous): Padomaic spice, pearls, shell-lime, and untaxed cargo |
+| L6 | `lilmoth_harbour` (bm.L6.outer_ring_ports, L5.smuggler_and_spice_quays): twin harbour-cranes, boardwalk markets, and half-sunken stone warehouses |
+| L7 | `dock_syndicates_and_boatmen` (bm.L7.outer_vs_inner_tribes, L6.lilmoth_harbour): Saxhleel punt-men, Khajiit and Imperial captains, and harbour factors |
+| L8 | `kothringi_quarantine_shrines` (bm.L8.the_hist_and_sithis, L2.topal_sea_fog): mirror-posts set on the shoals to turn back plague spirits |
+| L9 | `customhouse_struggle` (bm.L9.an_xileel_and_imperial_border, L5.smuggler_and_spice_quays): An-Xileel dock-wardens seizing contraband from foreign charter ships |
+| L10 | `drowned_customs_and_hulks` (bm.L10.kothringi_ghost_ships, bm.L10.sunken_xanmeer, L1.topal_silt_delta): Crimson Cove's Kothringi silver-ship and flooded wharf vaults |
+| L11 | `flu_quarantine_wharves` (bm.L11.knahaten_flu, L10.drowned_customs_and_hulks): the burning of the old port during the Knahaten Flu of 2E 560 |
+
+### 1.7 Murkmire (`murkmire`, 5.1 km2, levels 18-35)
+
+**World truth.** Murkmire is the deep south-eastern coastal shelf stretching from Soulrest's sheltered sound to the
+outer mangrove archipelagos: a vertical jungle of stilt-roots, bright-painted tribal villages, acid sinkhole fens, and
+the grandest pre-Duskfall xanmeer pyramids rising out of the warm equatorial mist. Here the welcoming Bright-Throat
+artisan clans and the fierce Dead-Water hunter-warriors keep the old Saxhleel ways untouched by Imperial law, carving
+root-canoes, mixing rare marsh venoms, and reading the stone calendars of Xul-Thuxis and the Teeth of Sithis while
+Shadowscale initiates undergo their silent trials in the flooded depths.
+
+| Layer | Fields |
+| --- | --- |
+| L1 | `mangrove_shelf`: drowned limestone karst and stepped xanmeer foundations along the southern shelf |
+| L2 | `equatorial_downpour` (bm.L2.monsoon_humidity, L1.mangrove_shelf): heavy warm rains and luminous night spore-mist |
+| L3 | `soulrest_sound` (bm.L3.brackish_estuaries, bm.L3.root_water_network, L1.mangrove_shelf): calm lagoon channels and submerged root-ways |
+| L4 | `coastal_mangrove_dome` (bm.L4.mangrove_tangle, bm.L4.hist_grove, L3.soulrest_sound): towering mangrove arches, hackwings, and Voriplasm fens |
+| L5 | `reed_canoe_and_reagent_craft` (bm.L5.reed_and_mud_craft, bm.L5.alchemical_reagents, L4.coastal_mangrove_dome): shell-lime pottery, Bright-Throat carvings, and rare venoms |
+| L6 | `soulrest_and_stilt_villages` (bm.L6.inner_hist_villages, bm.L6.outer_ring_ports, L3.soulrest_sound): Soulrest's stilt-harbour and painted tribal rings around Hist mounds |
+| L7 | `bright_throat_and_dead_water` (bm.L7.hist_communion, bm.L7.shadowscale_order, L6.soulrest_and_stilt_villages): rival hunter and singer tribes plus Shadowscale mentors |
+| L8 | `sithis_calendar_stones` (bm.L8.the_hist_and_sithis, bm.L8.xanmeer_taboo, L1.mangrove_shelf): honoring Duskfall and the seasonal turning of change |
+| L9 | `calendar_stone_feud` (bm.L9.tribal_water_feuds, L7.bright_throat_and_dead_water): tribal contest over a waking pre-Duskfall blood-oracle |
+| L10 | `grand_calendar_xanmeer` (bm.L10.sunken_xanmeer, L1.mangrove_shelf, L9.calendar_stone_feud): the Teeth of Sithis and Xul-Thuxis stepped pyramids descending into subterranean seas |
+| L11 | `duskfall_abandonment` (bm.L11.pre_duskfall_empire, L8.sithis_calendar_stones): the day the priest-kings laid down their obsidian knives and walked into the mud |
 
 ---
 

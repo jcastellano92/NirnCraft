@@ -1,0 +1,231 @@
+{
+  "id": "thrall_cove",
+  "sil": "smugglers-limestone-sea-cave-cove",
+  "base": "none",
+  "overlay": "hews_bane",
+  "radius": 24,
+  "reach": 32,
+  "fill_gap": 2,
+  "inn_key": "thrall_cove_muffled_oar",
+  "names": {
+    "inn": "thrall_cove_muffled_oar",
+    "store": "thrall_cove_prize_goods",
+    "smithy": "thrall_cove_shackle_and_file"
+  },
+  "titles": {
+    "thrall_cove_landmark": "Thrall Cove Winch-Tower",
+    "thrall_cove_muffled_oar": "The Muffled Oar Taproom",
+    "thrall_cove_prize_goods": "Unmarked-Cask & Cordage Store",
+    "thrall_cove_shackle_and_file": "Cold-Chisel & Grappling Smithy",
+    "thrall_cove_sea_cave_vault": "Tide-Gate Smugglers' Store-Cave",
+    "thrall_cove_night_bloom_hut": "Moon-Sugar & Coral-Dust Mixer",
+    "thrall_cove_cliff_lookout": "Headland Signal-Lantern Lookout",
+    "thrall_cove_market_plaza": "Thrall Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -20
+    ],
+    [
+      0,
+      20
+    ]
+  ],
+  "walls": [],
+  "landmarks": [
+    {
+      "id": "chain_tower",
+      "at": [
+        0,
+        -10
+      ],
+      "face": "south",
+      "name": "thrall_cove_landmark",
+      "overlay": "hews_bane"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        6,
+        -8
+      ],
+      "face": "south",
+      "name": "thrall_cove_muffled_oar"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        16,
+        -1
+      ],
+      "face": "west",
+      "name": "thrall_cove_prize_goods"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        7,
+        7
+      ],
+      "face": "north",
+      "name": "thrall_cove_shackle_and_file"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -1,
+        16
+      ],
+      "face": "north",
+      "name": "thrall_cove_sea_cave_vault"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -8,
+        6
+      ],
+      "face": "east",
+      "name": "thrall_cove_night_bloom_hut"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -16,
+        -4
+      ],
+      "face": "east",
+      "name": "thrall_cove_cliff_lookout"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -17
+      ],
+      "to": [
+        0,
+        17
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -17,
+        0
+      ],
+      "to": [
+        17,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -8,
+        11
+      ],
+      "to": [
+        8,
+        11
+      ],
+      "width": 4
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "thrall_cove_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        12
+      ],
+      "overlay": "hews_bane"
+    },
+    {
+      "ring": [
+        12,
+        24
+      ],
+      "overlay": "hews_bane"
+    }
+  ],
+  "features": [
+    {
+      "type": "fountain",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:arkay",
+      "count": 1
+    }
+  ]
+}

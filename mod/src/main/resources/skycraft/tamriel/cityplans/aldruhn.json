@@ -1,69 +1,309 @@
 {
   "id": "aldruhn",
-  "base": "none",
+  "why": [
+    "vvardenfell_ashlands.L1.ash_plain",
+    "vvardenfell_ashlands.L1.crab_shell_rock",
+    "vvardenfell_ashlands.L2.ash_storm_track"
+  ],
   "sil": "shell-spine-fort",
-  "reach": 125,
-  "radius": 125,
-  "kit": "redoran",
+  "base": "none",
   "overlay": "aldruhn",
-  "names": {"inn": "aldruhn_rat_walk_inn", "store": "aldruhn_ashlander_goods", "smithy": "aldruhn_chitin_forge"},
-  "innKey": "aldruhn_rat_walk_inn",
-  "gates": [[0, 118]],
-  "walls": [{"r": 112, "sides": 12, "h": 10, "gates": [0], "flags": ["major"]}],
+  "radius": 96,
+  "reach": 114,
+  "innKey": "ar_ald_skar_inn",
+  "names": {
+    "inn": "ar_ald_skar_inn",
+    "store": "ar_tiras_trader",
+    "smithy": "ar_dandera_smithy"
+  },
+  "gates": [
+    [
+      0,
+      90
+    ],
+    [
+      -90,
+      0
+    ],
+    [
+      90,
+      0
+    ]
+  ],
   "landmarks": [
-    {"id": "shell", "at": [0, -26], "size": [41, 17], "h": 28, "margin": 2, "face": "E", "flags": ["no_beard"]}
+    {
+      "id": "shell",
+      "at": [
+        0,
+        -24
+      ],
+      "face": "south",
+      "name": "aldruhn_under_skar",
+      "overlay": "aldruhn"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "aldruhn"
+    },
+    {
+      "ring": [
+        48,
+        96
+      ],
+      "overlay": "vvardenfell_ashlands"
+    }
   ],
   "buildings": [
-    {"kind": "tower", "at": [-60, -70], "size": [7, 7], "h": 26, "margin": 1},
-    {"kind": "tower", "at": [60, -70], "size": [7, 7], "h": 26, "margin": 1},
-    {"kind": "barracks", "at": [-52, 30], "size": [9, 15], "face": "E", "name": "aldruhn_redoran_barracks"},
-    {"kind": "inn", "at": [38, 8], "size": [13, 17], "face": "W", "flags": ["upper"], "name": "aldruhn_rat_walk_inn"},
-    {"kind": "manor", "at": [0, -78], "size": [15, 17], "face": "S", "flags": ["upper", "rich", "seat"], "name": "aldruhn_council_manor"}
-  ],
-  "nets": [
-    {"type": "path", "via": [[0, 118], [9, 98], [-6, 78], [5, 58], [0, 40], [0, 12]], "width": 5, "major": true, "tag": "gate"},
-    {"type": "loop", "at": [0, -26], "rx": 54, "rz": 38, "wobble": 4, "lobes": 3, "phase": 0.6, "width": 4, "rank": 0, "tag": "inner"},
-    {"type": "loop", "at": [0, 2], "rx": 90, "rz": 68, "wobble": 7, "lobes": 4, "phase": 1.1, "width": 3, "rank": 1, "tag": "outer"},
-    {"type": "radial", "at": [0, -26], "spokes": 6, "r0": 56, "r1": 100, "wobble": 6, "offset": 0.52, "width": 3, "tag": "spoke"},
-    {"type": "path", "via": [[-104, 46], [-72, 56], [-36, 66], [0, 64], [36, 66], [72, 56], [104, 46]], "width": 3, "tag": "market"},
-    {"type": "path", "via": [[-84, -62], [-48, -84], [-14, -94], [16, -94], [48, -84], [84, -62]], "width": 3, "tag": "back"}
-  ],
-  "plazas": [
-    {"at": [0, 18], "size": 15, "variant": 3, "name": "aldruhn_skar_plaza"},
-    {"at": [0, 84], "size": 13, "stalls": 5}
-  ],
-  "zones": [
-    {"at": [0, -72], "r": 40, "zone": "noble"},
-    {"at": [0, 34], "r": 26, "zone": "centre"},
-    {"at": [64, 40], "r": 26, "zone": "craft"},
-    {"at": [-72, 66], "r": 30, "zone": "poor"}
-  ],
-  "fabric": {"radius": 112, "target": 0.55},
-  "queue": [
-    {"kind": "store", "count": 2, "name": "aldruhn_ashlander_goods", "on": "market"},
-    {"kind": "smithy", "size": [11, 9], "name": "aldruhn_chitin_forge", "on": "market"},
-    {"kind": "alchemist", "on": "market"},
-    {"kind": "manor", "count": 2, "flags": ["upper", "rich"], "on": "back"}
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_sarethi_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        63,
+        25
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_venim_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_arobar_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        30,
+        61
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_llethri_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_ramoran_manor"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        -19,
+        65
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_redoran_council"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_tribunal_temple"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -58,
+        36
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -67,
+        -12
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_ald_skar_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_rat_in_the_pot"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -41,
+        -54
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_dandera_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_cienne_alchemist"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        6,
+        -68
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_codus_books"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_tiras_trader"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        50,
+        -46
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_bivale_clothier"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "aldruhn",
+      "name": "ar_gildans_house"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "tribunal:almalexia", "at": [0, 36]},
-    {"type": "shrine", "theme": "tribunal:vivec", "where": "street", "tag": "gate"},
-    {"type": "fountain", "where": "square"},
-    {"type": "memorial", "where": "free"},
-    {"type": "banners", "count": 2, "where": "gate"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "inner"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "pond", "where": "edge"},
-    {"type": "garden", "where": "free"},
-    {"type": "market", "where": "free"},
-    {"type": "great_tree", "theme": "dark_oak", "where": "free"}
+    {
+      "type": "banners",
+      "theme": "house_redoran_scarab",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "ash_wind_cresset",
+      "count": 4
+    },
+    {
+      "type": "shrine",
+      "theme": "tribunal_alcove",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "ash_cistern",
+      "count": 2
+    }
   ],
   "titles": {
-    "aldruhn_rat_walk_inn": "The Rat-Walk Inn",
-    "aldruhn_ashlander_goods": "Ashlander Goods",
-    "aldruhn_chitin_forge": "The Chitin Forge",
-    "aldruhn_redoran_barracks": "Redoran Barracks",
-    "aldruhn_council_manor": "Redoran Council Manor",
-    "aldruhn_skar_plaza": "Skar Plaza"
+    "aldruhn_under_skar": "Manor District Under-Skar",
+    "ar_sarethi_manor": "Sarethi Manor",
+    "ar_venim_manor": "Venim Manor",
+    "ar_arobar_manor": "Arobar Manor",
+    "ar_llethri_manor": "Llethri Manor",
+    "ar_ramoran_manor": "Ramoran Manor",
+    "ar_redoran_council": "Redoran Council Hall",
+    "ar_tribunal_temple": "Ald-ruhn Tribunal Temple",
+    "ar_fighters_guild": "Ald-ruhn Fighters Guild",
+    "ar_mages_guild": "Ald-ruhn Mages Guild",
+    "ar_ald_skar_inn": "Ald Skar Inn",
+    "ar_rat_in_the_pot": "The Rat in the Pot",
+    "ar_dandera_smithy": "Dandera Selaro's Smithy",
+    "ar_cienne_alchemist": "Cienne Sintieve's Alchemist",
+    "ar_codus_books": "Codus Callonus's Books",
+    "ar_tiras_trader": "Tiras Sadus's General Goods",
+    "ar_bivale_clothier": "Bivale Teneran's Clothier",
+    "ar_gildans_house": "Gildan's Shell House"
   }
 }

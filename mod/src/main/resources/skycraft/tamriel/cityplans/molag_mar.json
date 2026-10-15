@@ -1,0 +1,162 @@
+{
+  "id": "molag_mar",
+  "why": [
+    "molag_amur.L1.lava_field",
+    "molag_amur.L3.pilgrim_cisterns"
+  ],
+  "sil": "cliff-grotto-lavafall",
+  "base": "none",
+  "overlay": "molag_amur",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "canton",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "molag_mar_landmark",
+      "overlay": "molag_amur"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "molag_amur"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_2"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_3"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_4"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_5"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_6"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "molag_amur",
+      "name": "molag_mar_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "buoyant_armigers",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "molag_lava_brazier",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "mt_kand_pilgrim",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "molag_mar_landmark": "Molag Mar Fortress Canton",
+    "molag_mar_b_1": "Molag Mar Pilgrim Temple",
+    "molag_mar_b_2": "The Pilgrim's Rest",
+    "molag_mar_b_3": "Armigers' Stronghold Forge",
+    "molag_mar_b_4": "Vasesius Viciulus's Trader",
+    "molag_mar_b_5": "Saras Orelu's Healer Hall",
+    "molag_mar_b_6": "Buoyant Armigers Garrison",
+    "molag_mar_b_7": "Silt Strider & Boat Landing"
+  },
+  "innKey": "molag_mar_b_2",
+  "names": {
+    "inn": "molag_mar_b_2",
+    "store": "molag_mar_b_4",
+    "smithy": "molag_mar_b_3"
+  }
+}

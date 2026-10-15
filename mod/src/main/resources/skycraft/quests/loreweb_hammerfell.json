@@ -1,363 +1,403 @@
 {
- "line": "loreweb_hammerfell",
- "category": "side",
- "bosses": {
-  "lw_ham_1_boss": {
-   "name": "Herald of the Dune-King",
-   "type": "skycraft:sand_serpent",
-   "hp": 3.4,
-   "dmg": 1.5,
-   "level": 28,
-   "drop": "loot:major",
-   "glow": false
-  },
-  "lw_ham_2_boss": {
-   "name": "The Last Panel",
-   "type": "skycraft:gargoyle",
-   "hp": 3.2,
-   "dmg": 1.5,
-   "level": 28,
-   "drop": "loot:standard",
-   "glow": false
-  },
-  "lw_ham_3_boss": {
-   "name": "Lord Hubalajad's Steward",
-   "type": "skycraft:necromancer",
-   "hp": 3,
-   "dmg": 1.4,
-   "level": 24,
-   "drop": "loot:standard",
-   "glow": false
-  },
-  "lw_ham_4_boss": {
-   "name": "The Prow-Keeper",
-   "type": "skycraft:wamasu",
-   "hp": 3.2,
-   "dmg": 1.4,
-   "level": 24,
-   "drop": "loot:standard",
-   "glow": false
-  }
- },
- "quests": [
-  {
-   "id": "lw_ham_1_a",
-   "title": "The Thirst of the Buried City",
-   "region": "hammerfell/dragontail",
-   "start": "find",
-   "find": {
-    "place": "the_silver_pilgrim",
-    "offset": [
-     6,
-     3
-    ],
-    "radius": 4,
-    "clue": "lectern",
-    "text": "A roadhouse tally-board: caravans listed with a tithe column. At the bottom, in a dead man's hand: 'Water owed: thirty-one wells. Paid: nine. Ask the goat.'"
-   },
-   "requires": [
-    "level:20"
-   ],
-   "desc": "A roadhouse tally-board lists wells owed and wells paid to someone called 'the Herald', and tells me to ask the goat.",
-   "pitch": "The Silver Pilgrim's keeper says the caravan masters all pay a tithe in water to a man nobody has met.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "goats_head_oasis",
-     "text": "Open the older well under the goat statue and take the shaft-map to Sentinel."
+  "line": "loreweb_hammerfell",
+  "category": "side",
+  "bosses": {
+    "lw_ham_1_boss": {
+      "name": "Herald of the Dune-King",
+      "type": "skycraft:sand_serpent",
+      "hp": 3.4,
+      "dmg": 1.5,
+      "level": 28,
+      "drop": "loot:major",
+      "glow": false
     },
-    {
-     "type": "go",
-     "place": "sentinel",
-     "text": "Take the water-merchant's debt-roll from Sentinel's harbour warehouse."
+    "lw_ham_2_boss": {
+      "name": "The Last Panel",
+      "type": "skycraft:gargoyle",
+      "hp": 3.2,
+      "dmg": 1.5,
+      "level": 28,
+      "drop": "loot:standard",
+      "glow": false
     },
-    {
-     "type": "go",
-     "place": "volenfell",
-     "text": "Find the pump under Volenfell's sand and recover its stop-key."
+    "lw_ham_3_boss": {
+      "name": "Lord Hubalajad's Steward",
+      "type": "skycraft:necromancer",
+      "hp": 3,
+      "dmg": 1.4,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
+    },
+    "lw_ham_4_boss": {
+      "name": "The Prow-Keeper",
+      "type": "skycraft:wamasu",
+      "hp": 3.2,
+      "dmg": 1.4,
+      "level": 24,
+      "drop": "loot:standard",
+      "glow": false
     }
-   ],
-   "rewards": {
-    "gold": 260,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The water-tithe trail crosses Sentinel's harbour and three desert tombs to the glass-roofed shaft of a lost city."
   },
-  {
-   "id": "lw_ham_1_b",
-   "title": "The Thirst of the Buried City (II)",
-   "region": "hammerfell/dragontail",
-   "start": "auto",
-   "requires": [
-    "quest:lw_ham_1_a"
-   ],
-   "desc": "The water-tithe trail crosses Sentinel's harbour and three desert tombs to the glass-roofed shaft of a lost city.",
-   "pitch": "The Silver Pilgrim's keeper says the caravan masters all pay a tithe in water to a man nobody has met.",
-   "objectives": [
+  "quests": [
     {
-     "type": "go",
-     "place": "motalion_necropolis",
-     "text": "Take the herald's seal from the Motalion niche and carry it to the throne-hall."
+      "id": "lw_ham_1_a",
+      "title": "The Thirst of the Buried City",
+      "region": "hammerfell/dragontail",
+      "start": "find",
+      "find": {
+        "place": "the_silver_pilgrim",
+        "offset": [
+          6,
+          3
+        ],
+        "radius": 4,
+        "clue": "lectern",
+        "text": "A roadhouse tally-board: caravans listed with a tithe column. At the bottom, in a dead man's hand: 'Water owed: thirty-one wells. Paid: nine. Ask the goat.'"
+      },
+      "requires": [
+        "level:20"
+      ],
+      "desc": "A roadhouse tally-board lists wells owed and wells paid to someone called 'the Herald', and tells me to ask the goat.",
+      "pitch": "The Silver Pilgrim's keeper says the caravan masters all pay a tithe in water to a man nobody has met.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "goats_head_oasis",
+          "text": "Open the older well under the goat statue and take the shaft-map to Sentinel."
+        },
+        {
+          "type": "go",
+          "place": "sentinel",
+          "text": "Take the water-merchant's debt-roll from Sentinel's harbour warehouse."
+        },
+        {
+          "type": "go",
+          "place": "volenfell",
+          "text": "Find the pump under Volenfell's sand and recover its stop-key."
+        }
+      ],
+      "rewards": {
+        "gold": 260,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The water-tithe trail crosses Sentinel's harbour and three desert tombs to the glass-roofed shaft of a lost city.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
     },
     {
-     "type": "go",
-     "place": "tuwhaccas_throne",
-     "text": "Press the herald's seal to the decree and open the sand door."
+      "id": "lw_ham_1_b",
+      "title": "The Thirst of the Buried City (II)",
+      "region": "hammerfell/dragontail",
+      "start": "auto",
+      "requires": [
+        "quest:lw_ham_1_a"
+      ],
+      "desc": "The water-tithe trail crosses Sentinel's harbour and three desert tombs to the glass-roofed shaft of a lost city.",
+      "pitch": "The Silver Pilgrim's keeper says the caravan masters all pay a tithe in water to a man nobody has met.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "motalion_necropolis",
+          "text": "Take the herald's seal from the Motalion niche and carry it to the throne-hall."
+        },
+        {
+          "type": "go",
+          "place": "tuwhaccas_throne",
+          "text": "Press the herald's seal to the decree and open the sand door."
+        },
+        {
+          "type": "kill",
+          "place": "lost_city_of_the_na_totambu",
+          "text": "Reach the great cistern of the lost city and settle the water-tithe.",
+          "spawn": [
+            {
+              "boss_id": "lw_ham_1_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 640,
+        "loot": "legendary",
+        "flags": [
+          "lw_ham_1_done"
+        ],
+        "unique": "hews_bane_scimitar"
+      },
+      "outro": "The lost city's great cistern drank deep for a moment and then, slowly, began to give. In the far oases the wells rose a hand's breadth. The dune-king's herald is a shadow now, and the account is closed.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
     },
     {
-     "type": "kill",
-     "place": "lost_city_of_the_na_totambu",
-     "text": "Reach the great cistern of the lost city and settle the water-tithe.",
-     "spawn": [
-      {
-       "boss_id": "lw_ham_1_boss"
-      }
-     ],
-     "placement": "structure"
+      "id": "lw_ham_2_a",
+      "title": "Reliefs That Remember Forward",
+      "region": "hammerfell/craglorn",
+      "start": "find",
+      "find": {
+        "place": "valley_of_scars",
+        "offset": [
+          4,
+          10
+        ],
+        "radius": 4,
+        "clue": "stone",
+        "text": "A relief panel at the canyon mouth shows a scene half-carved: a dozen travellers on a staircase. The carving is fresh, and one of the faces looks very like yours."
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A relief at the Valley of Scars shows a dozen travellers on a staircase, one of whom looks like me.",
+      "pitch": "A guide says the wall at the canyon mouth is being carved by nobody.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "elinhir",
+          "text": "Compare the Valley of Scars rubbing with Elinhir's blank constellation."
+        },
+        {
+          "type": "go",
+          "place": "dragonstar",
+          "text": "Steal the arena-master's schedule from Dragonstar and see which panels remain."
+        }
+      ],
+      "rewards": {
+        "gold": 250,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The panel leads through a star-watchers' city, an arena and a sealed sphere to the stair of the spire.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
+    },
+    {
+      "id": "lw_ham_2_b",
+      "title": "Reliefs That Remember Forward (II)",
+      "region": "hammerfell/craglorn",
+      "start": "auto",
+      "requires": [
+        "quest:lw_ham_2_a"
+      ],
+      "desc": "The panel leads through a star-watchers' city, an arena and a sealed sphere to the stair of the spire.",
+      "pitch": "A guide says the wall at the canyon mouth is being carved by nobody.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "aetherian_archive",
+          "text": "Open the archive's dusk seam and read the complete panel-roll."
+        },
+        {
+          "type": "go",
+          "place": "sanctum_ophidia",
+          "text": "Take the cult's key from the mirror-pool and climb the pinnacle."
+        },
+        {
+          "type": "kill",
+          "place": "skyreach_pinnacle",
+          "text": "Stand on the platform at dusk and decide what the last panel means.",
+          "spawn": [
+            {
+              "boss_id": "lw_ham_2_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 620,
+        "loot": "major",
+        "flags": [
+          "lw_ham_2_done"
+        ]
+      },
+      "outro": "At the top of the spire I stood on the last panel and understood it. It was not an ending but a stairway. I did not carve my own face; I stepped off it.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
+    },
+    {
+      "id": "lw_ham_3_a",
+      "title": "The Gardener of Ahaleb",
+      "region": "hammerfell/hews_bane",
+      "start": "find",
+      "find": {
+        "place": "thrall_cove",
+        "offset": [
+          10,
+          -4
+        ],
+        "radius": 4,
+        "clue": "grave",
+        "text": "A rusted shackle lies on a sand-grave at the old slaver's cove. Scratched on the stone: 'Paid for, not freed. Ask who buys the debts.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A shackle on a grave at Thrall Cove, with a note that a freedman's debts were bought rather than cancelled.",
+      "pitch": "A freedman at Thrall Cove says someone paid his debt and then asked him to plant a palm.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "abahs_landing",
+          "text": "Trace the seed-jar manifest from Abah's Landing to Taneth."
+        },
+        {
+          "type": "go",
+          "place": "taneth",
+          "text": "Take the physician's unsigned certificates from Taneth to the lord's palace."
+        }
+      ],
+      "rewards": {
+        "gold": 210,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The debt-buyer's trail passes a palace and a walled bazaar and ends beneath a necropolis.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
+    },
+    {
+      "id": "lw_ham_3_b",
+      "title": "The Gardener of Ahaleb (II)",
+      "region": "hammerfell/hews_bane",
+      "start": "auto",
+      "requires": [
+        "quest:lw_ham_3_a"
+      ],
+      "desc": "The debt-buyer's trail passes a palace and a walled bazaar and ends beneath a necropolis.",
+      "pitch": "A freedman at Thrall Cove says someone paid his debt and then asked him to plant a palm.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "hubalajad_palace",
+          "text": "Take the steward's ledger from the Hubalajad conservatory to the walled bazaar-city."
+        },
+        {
+          "type": "go",
+          "place": "rihad",
+          "text": "Trace the palm-bloom tincture from Rihad's spice gate to its source."
+        },
+        {
+          "type": "kill",
+          "place": "ahaleb_necropolis",
+          "text": "Enter the hidden oasis chamber and wake the gardeners.",
+          "spawn": [
+            {
+              "boss_id": "lw_ham_3_boss"
+            }
+          ],
+          "placement": "structure"
+        }
+      ],
+      "rewards": {
+        "gold": 520,
+        "loot": "major",
+        "flags": [
+          "lw_ham_3_done"
+        ]
+      },
+      "outro": "In the garden under the skylights the palms bent towards me. I carried out one seed and left the gardener's ledger where his heirs could find it. The dead have waited long enough.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
+    },
+    {
+      "id": "lw_ham_4_a",
+      "title": "The Sunken Clause",
+      "region": "hammerfell/stros_mkai",
+      "start": "find",
+      "find": {
+        "place": "port_hunding",
+        "offset": [
+          3,
+          5
+        ],
+        "radius": 4,
+        "clue": "lever",
+        "text": "A lever behind a harbour crate opens a small cabinet. Inside, a ship's manifest for a sailing in the fifth year: 'Cargo: sealed. Destination: not recorded. Return: not expected.'"
+      },
+      "requires": [
+        "level:12"
+      ],
+      "desc": "A hidden cabinet at the harbour gate holds a manifest for a ship that was never expected to return.",
+      "pitch": "The port clerk says every fifth year a ship leaves with a sealed cargo and nobody asks.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "saintsport",
+          "text": "Take the shrine-token from Saintsport to the inn with the dragon's tail."
+        },
+        {
+          "type": "go",
+          "place": "draggin_tale_inn",
+          "text": "Win the lot at the Draggin Tale and take passage to the old harbour."
+        }
+      ],
+      "rewards": {
+        "gold": 200,
+        "loot": "minor"
+      },
+      "outro": "One thread of the trail ends here and the next begins. The ship's descendants gather at an inn with a dragon's tail over the door, and the cargo's trail ends at a ring of wind-carved arches.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
+    },
+    {
+      "id": "lw_ham_4_b",
+      "title": "The Sunken Clause (II)",
+      "region": "hammerfell/stros_mkai",
+      "start": "auto",
+      "requires": [
+        "quest:lw_ham_4_a"
+      ],
+      "desc": "The ship's descendants gather at an inn with a dragon's tail over the door, and the cargo's trail ends at a ring of wind-carved arches.",
+      "pitch": "The port clerk says every fifth year a ship leaves with a sealed cargo and nobody asks.",
+      "objectives": [
+        {
+          "type": "go",
+          "place": "stros_mkai",
+          "text": "Read the sealed clause in the Stros M'Kai lighthouse and follow the fifth-year ship."
+        },
+        {
+          "type": "kill",
+          "place": "onsis_breath",
+          "text": "Open the niche in the great arch and take the torn page of the ledger.",
+          "spawn": [
+            {
+              "boss_id": "lw_ham_4_boss"
+            }
+          ]
+        }
+      ],
+      "rewards": {
+        "gold": 500,
+        "loot": "major",
+        "flags": [
+          "lw_ham_4_done"
+        ]
+      },
+      "outro": "The wind sang through the arches and the torn page lay in my hands, a map of tides with a missing corner. The fifth-year ship is no longer owed. Someone, somewhere, will have to fill the corner.",
+      "why": [
+        "hammerfell.L8.yokudan_gods",
+        "hammerfell.L10.necropolises",
+        "hammerfell.L9.crown_forebear_rift"
+      ]
     }
-   ],
-   "rewards": {
-    "gold": 640,
-    "loot": "legendary",
-    "flags": [
-     "lw_ham_1_done"
-    ],
-    "unique": "hews_bane_scimitar"
-   },
-   "outro": "The lost city's great cistern drank deep for a moment and then, slowly, began to give. In the far oases the wells rose a hand's breadth. The dune-king's herald is a shadow now, and the account is closed."
-  },
-  {
-   "id": "lw_ham_2_a",
-   "title": "Reliefs That Remember Forward",
-   "region": "hammerfell/craglorn",
-   "start": "find",
-   "find": {
-    "place": "valley_of_scars",
-    "offset": [
-     4,
-     10
-    ],
-    "radius": 4,
-    "clue": "stone",
-    "text": "A relief panel at the canyon mouth shows a scene half-carved: a dozen travellers on a staircase. The carving is fresh, and one of the faces looks very like yours."
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A relief at the Valley of Scars shows a dozen travellers on a staircase, one of whom looks like me.",
-   "pitch": "A guide says the wall at the canyon mouth is being carved by nobody.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "elinhir",
-     "text": "Compare the Valley of Scars rubbing with Elinhir's blank constellation."
-    },
-    {
-     "type": "go",
-     "place": "dragonstar",
-     "text": "Steal the arena-master's schedule from Dragonstar and see which panels remain."
-    }
-   ],
-   "rewards": {
-    "gold": 250,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The panel leads through a star-watchers' city, an arena and a sealed sphere to the stair of the spire."
-  },
-  {
-   "id": "lw_ham_2_b",
-   "title": "Reliefs That Remember Forward (II)",
-   "region": "hammerfell/craglorn",
-   "start": "auto",
-   "requires": [
-    "quest:lw_ham_2_a"
-   ],
-   "desc": "The panel leads through a star-watchers' city, an arena and a sealed sphere to the stair of the spire.",
-   "pitch": "A guide says the wall at the canyon mouth is being carved by nobody.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "aetherian_archive",
-     "text": "Open the archive's dusk seam and read the complete panel-roll."
-    },
-    {
-     "type": "go",
-     "place": "sanctum_ophidia",
-     "text": "Take the cult's key from the mirror-pool and climb the pinnacle."
-    },
-    {
-     "type": "kill",
-     "place": "skyreach_pinnacle",
-     "text": "Stand on the platform at dusk and decide what the last panel means.",
-     "spawn": [
-      {
-       "boss_id": "lw_ham_2_boss"
-      }
-     ]
-    }
-   ],
-   "rewards": {
-    "gold": 620,
-    "loot": "major",
-    "flags": [
-     "lw_ham_2_done"
-    ]
-   },
-   "outro": "At the top of the spire I stood on the last panel and understood it. It was not an ending but a stairway. I did not carve my own face; I stepped off it."
-  },
-  {
-   "id": "lw_ham_3_a",
-   "title": "The Gardener of Ahaleb",
-   "region": "hammerfell/hews_bane",
-   "start": "find",
-   "find": {
-    "place": "thrall_cove",
-    "offset": [
-     10,
-     -4
-    ],
-    "radius": 4,
-    "clue": "grave",
-    "text": "A rusted shackle lies on a sand-grave at the old slaver's cove. Scratched on the stone: 'Paid for, not freed. Ask who buys the debts.'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A shackle on a grave at Thrall Cove, with a note that a freedman's debts were bought rather than cancelled.",
-   "pitch": "A freedman at Thrall Cove says someone paid his debt and then asked him to plant a palm.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "abahs_landing",
-     "text": "Trace the seed-jar manifest from Abah's Landing to Taneth."
-    },
-    {
-     "type": "go",
-     "place": "taneth",
-     "text": "Take the physician's unsigned certificates from Taneth to the lord's palace."
-    }
-   ],
-   "rewards": {
-    "gold": 210,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The debt-buyer's trail passes a palace and a walled bazaar and ends beneath a necropolis."
-  },
-  {
-   "id": "lw_ham_3_b",
-   "title": "The Gardener of Ahaleb (II)",
-   "region": "hammerfell/hews_bane",
-   "start": "auto",
-   "requires": [
-    "quest:lw_ham_3_a"
-   ],
-   "desc": "The debt-buyer's trail passes a palace and a walled bazaar and ends beneath a necropolis.",
-   "pitch": "A freedman at Thrall Cove says someone paid his debt and then asked him to plant a palm.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "hubalajad_palace",
-     "text": "Take the steward's ledger from the Hubalajad conservatory to the walled bazaar-city."
-    },
-    {
-     "type": "go",
-     "place": "rihad",
-     "text": "Trace the palm-bloom tincture from Rihad's spice gate to its source."
-    },
-    {
-     "type": "kill",
-     "place": "ahaleb_necropolis",
-     "text": "Enter the hidden oasis chamber and wake the gardeners.",
-     "spawn": [
-      {
-       "boss_id": "lw_ham_3_boss"
-      }
-     ],
-     "placement": "structure"
-    }
-   ],
-   "rewards": {
-    "gold": 520,
-    "loot": "major",
-    "flags": [
-     "lw_ham_3_done"
-    ]
-   },
-   "outro": "In the garden under the skylights the palms bent towards me. I carried out one seed and left the gardener's ledger where his heirs could find it. The dead have waited long enough."
-  },
-  {
-   "id": "lw_ham_4_a",
-   "title": "The Sunken Clause",
-   "region": "hammerfell/stros_mkai",
-   "start": "find",
-   "find": {
-    "place": "port_hunding",
-    "offset": [
-     3,
-     5
-    ],
-    "radius": 4,
-    "clue": "lever",
-    "text": "A lever behind a harbour crate opens a small cabinet. Inside, a ship's manifest for a sailing in the fifth year: 'Cargo: sealed. Destination: not recorded. Return: not expected.'"
-   },
-   "requires": [
-    "level:12"
-   ],
-   "desc": "A hidden cabinet at the harbour gate holds a manifest for a ship that was never expected to return.",
-   "pitch": "The port clerk says every fifth year a ship leaves with a sealed cargo and nobody asks.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "saintsport",
-     "text": "Take the shrine-token from Saintsport to the inn with the dragon's tail."
-    },
-    {
-     "type": "go",
-     "place": "draggin_tale_inn",
-     "text": "Win the lot at the Draggin Tale and take passage to the old harbour."
-    }
-   ],
-   "rewards": {
-    "gold": 200,
-    "loot": "minor"
-   },
-   "outro": "One thread of the trail ends here and the next begins. The ship's descendants gather at an inn with a dragon's tail over the door, and the cargo's trail ends at a ring of wind-carved arches."
-  },
-  {
-   "id": "lw_ham_4_b",
-   "title": "The Sunken Clause (II)",
-   "region": "hammerfell/stros_mkai",
-   "start": "auto",
-   "requires": [
-    "quest:lw_ham_4_a"
-   ],
-   "desc": "The ship's descendants gather at an inn with a dragon's tail over the door, and the cargo's trail ends at a ring of wind-carved arches.",
-   "pitch": "The port clerk says every fifth year a ship leaves with a sealed cargo and nobody asks.",
-   "objectives": [
-    {
-     "type": "go",
-     "place": "stros_mkai",
-     "text": "Read the sealed clause in the Stros M'Kai lighthouse and follow the fifth-year ship."
-    },
-    {
-     "type": "kill",
-     "place": "onsis_breath",
-     "text": "Open the niche in the great arch and take the torn page of the ledger.",
-     "spawn": [
-      {
-       "boss_id": "lw_ham_4_boss"
-      }
-     ]
-    }
-   ],
-   "rewards": {
-    "gold": 500,
-    "loot": "major",
-    "flags": [
-     "lw_ham_4_done"
-    ]
-   },
-   "outro": "The wind sang through the arches and the torn page lay in my hands, a map of tides with a missing corner. The fifth-year ship is no longer owed. Someone, somewhere, will have to fill the corner."
-  }
- ]
+  ]
 }

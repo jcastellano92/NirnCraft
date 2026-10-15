@@ -1,0 +1,23 @@
+{
+  "id": "great_forest",
+  "why": [
+    "great_forest.L1.forest_loam_hills",
+    "great_forest.L4.old_oakwood",
+    "great_forest.L6.road_hamlets"
+  ],
+  "tint": {
+    "wall": "minecraft:oak_planks",
+    "wall2": "minecraft:mossy_cobblestone",
+    "low": "minecraft:mossy_stone_bricks",
+    "wood": "oak",
+    "roof": "dark_oak",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "mossy_stone_bricks",
+    "cityWall2": "minecraft:mossy_cobblestone",
+    "plaza": "minecraft:mossy_cobblestone",
+    "plaza2": "minecraft:cobblestone",
+    "path": "minecraft:coarse_dirt"
+  }
+}

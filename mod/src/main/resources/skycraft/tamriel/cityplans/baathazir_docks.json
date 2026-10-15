@@ -1,0 +1,186 @@
+{
+  "id": "baathazir_docks",
+  "why": [
+    "senchal.L1.harbour_bay",
+    "senchal.L5.sugar_export",
+    "senchal.L6.senchal_seat"
+  ],
+  "sil": "elsweyr-baathazir-docks-plan",
+  "base": "none",
+  "overlay": "senchal",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        18
+      ],
+      "overlay": "senchal",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        18,
+        38
+      ],
+      "overlay": "senchal",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "baathazir_docks_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "twin_domes",
+      "at": [
+        0,
+        -10
+      ],
+      "name": "baathazir_docks_landmark",
+      "overlay": "senchal"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 7,
+      "r1": 34,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        17,
+        21
+      ],
+      "face": "north",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        13
+      ],
+      "face": "north",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -25,
+        12
+      ],
+      "face": "north",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -12,
+        -6
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -27
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "senchal",
+      "name": "baathazir_docks_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "market",
+      "theme": "baathazir_docks_market",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "baathazir_docks_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "baathazir_docks_b_5",
+    "smithy": "baathazir_docks_b_7"
+  },
+  "titles": {
+    "baathazir_docks_b_1": "place.skycraft.baathazir_docks Council & Seat Hall",
+    "baathazir_docks_b_2": "place.skycraft.baathazir_docks High Sanctuary",
+    "baathazir_docks_b_3": "place.skycraft.baathazir_docks Fighters & Wayfarers Hall",
+    "baathazir_docks_b_4": "place.skycraft.baathazir_docks Mages & Chroniclers Spire",
+    "baathazir_docks_b_5": "place.skycraft.baathazir_docks The Lantern & Hearth Inn",
+    "baathazir_docks_b_6": "place.skycraft.baathazir_docks The Traveler's Rest Tavern",
+    "baathazir_docks_b_7": "place.skycraft.baathazir_docks Master Forge & Armorer",
+    "baathazir_docks_landmark": "High Seat of place.skycraft.baathazir_docks",
+    "baathazir_docks_plaza": "place.skycraft.baathazir_docks Central Plaza"
+  },
+  "innKey": "baathazir_docks_b_5"
+}

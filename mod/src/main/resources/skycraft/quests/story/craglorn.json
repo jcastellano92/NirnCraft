@@ -1,0 +1,403 @@
+{
+  "region": "hammerfell/craglorn",
+  "title": "The Star-Astrolabe of Elinhir",
+  "summary": "Unmask a Scaled Court serpent-cult conspiracy that is rigging gladiatorial bouts in Dragonstar Arena and stealing Nede star-lenses from Elinhir to awaken the Sanctum Ophidia.",
+  "why": [
+    "craglorn.L7.mage_patrons",
+    "craglorn.L7.arena_promoters_and_fighters",
+    "craglorn.L8.star_watching",
+    "craglorn.L9.serpent_cult_rising",
+    "craglorn.L10.sanctum_ophidia"
+  ],
+  "hook": {
+    "place": "elinhir",
+    "places": [
+      "cradlecrush",
+      "elinhir",
+      "haddocks_market",
+      "kailah_burrow",
+      "skyreach_pinnacle",
+      "taorra_oasis",
+      "yasar_farm",
+      "zoahim"
+    ],
+    "npc": "story_cg_astromancer_nadia",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_cg_astromancer_nadia",
+      "name": "Astromancer Nadia of Elinhir",
+      "role": "mage",
+      "place": "elinhir",
+      "greet": "Look to the apex of the wizard-towers, traveller! Someone shattered the Nede bronze astrolabe of Elinhir and carried off the Serpent-Lens.",
+      "talk": [
+        "For centuries Elinhir's mage-patrons have kept the Nede star-lenses sealed to prevent the Scaled Court from aligning the vaults of Sanctum Ophidia.",
+        "The thief wore the bronze baldric of a Dragonstar Arena promoter. Travel to Belkarth and speak with Caravan-Master Jibril."
+      ]
+    },
+    {
+      "id": "story_cg_caravan_master_jibril",
+      "name": "Caravan-Master Jibril",
+      "role": "merchant",
+      "place": "belkarth",
+      "greet": "Between the Colovian border-guards, the Nord squatters in West Dragonstar, and the snake-cultists in the hills, a caravan needs six swords per mule!",
+      "talk": [
+        "Promoter Volus at Dragonstar Arena has been drugging champion fighters with serpent-venom and sending their bodies south toward Sanctum Ophidia.",
+        "Go to Dragonstar and speak with Arena-Champion Korra before Volus fixes the noon bout!"
+      ]
+    },
+    {
+      "id": "story_cg_champion_korra",
+      "name": "Arena-Champion Korra",
+      "role": "warrior",
+      "place": "dragonstar",
+      "greet": "You've got the look of a fighter who doesn't take dive-gold! Promoter Volus locked my shield-mates in the arena vaults when we refused his poisoned salve.",
+      "talk": [
+        "Volus is a secret fang of the Scaled Court! He's hiding the stolen Elinhir Star-Lens under the sands of Dragonstar Arena.",
+        "Defeat Volus in Dragonstar Arena, then track Exarch Vipir to Skyreach Pinnacle and Sanctum Ophidia!"
+      ]
+    },
+    {
+      "id": "story_cg_star_warden_cassian",
+      "name": "Star-Warden Cassian",
+      "role": "knight",
+      "place": "skyreach_pinnacle",
+      "greet": "Hold your ground against the cliff-wind! Exarch Vipir aligned the upper mirror at Skyreach Pinnacle and descended into Sanctum Ophidia.",
+      "talk": [
+        "If Vipir focuses the starlight into the serpent-basin of Sanctum Ophidia, the Scaled Court will flood every pass from Belkarth to Elinhir.",
+        "Descend into Sanctum Ophidia and shatter his ritual!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_cg_promoter_volus": {
+      "name": "Promoter Volus the Fang-Broker",
+      "rank": "boss",
+      "place": "dragonstar_arena",
+      "weapon": "steel_sword",
+      "helmet": "iron_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.5,
+      "dmg_mult": 1.6
+    },
+    "story_cg_exarch_vipir": {
+      "name": "Exarch Vipir of the Scaled Court",
+      "rank": "boss",
+      "place": "sanctum_ophidia",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.4,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_cg_belkarth_waystation": [
+      "Caravan-Master Jibril: Look at this broken crate dropped by Volus's outriders—lined with shed viper-skins and Nede star-brass from Elinhir!",
+      "Astromancer Nadia of Elinhir: He is smuggling the Star-Lens north to Dragonstar Arena under cover of the gladiator wagons.",
+      "Caravan-Master Jibril: Ride to Dragonstar and find Champion Korra before the gates close!"
+    ],
+    "story_cg_arena_pit": [
+      "Promoter Volus: Every drop of blood spilled on Dragonstar's sand feeds the Serpent's constellation! And the crowd pays silver to watch!",
+      "Arena-Champion Korra: Today the pit drinks a promoter's blood, Volus! Draw!"
+    ],
+    "story_cg_ophidia_basin": [
+      "Exarch Vipir: Look upward, mortals! The Serpent coils across the Nede zenith, and the old stars wake in Sanctum Ophidia!",
+      "Star-Warden Cassian: Smash the lens-cradle and cut down the Exarch!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_craglorn_01_shattered_astrolabe",
+      "region": "hammerfell/craglorn",
+      "category": "main",
+      "title": "The Stolen Lens of Elinhir",
+      "giver": "story_cg_astromancer_nadia",
+      "start": "npc:story_cg_astromancer_nadia",
+      "requires": [],
+      "why": [
+        "craglorn.L7.mage_patrons",
+        "craglorn.L8.star_watching",
+        "craglorn.L9.serpent_cult_rising"
+      ],
+      "summary": "Trace the stolen Nede Star-Lens from Elinhir to Caravan-Master Jibril in Belkarth.",
+      "intro": [
+        "Thieves broke into the wizard-towers of Elinhir and stole the Nede Serpent-Lens from the great astrolabe.",
+        "Speak with Astromancer Nadia in Elinhir and follow the gladiator wagons to Caravan-Master Jibril in Belkarth."
+      ],
+      "complete": [
+        "In Belkarth, Jibril showed you viper-skin packing crates linking the theft to Promoter Volus of Dragonstar Arena."
+      ],
+      "journal": {
+        "start": "Astromancer Nadia in Elinhir asked me to track the stolen Star-Lens to Caravan-Master Jibril in Belkarth.",
+        "done": "Caravan-Master Jibril linked the stolen Star-Lens to Promoter Volus at Dragonstar Arena."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "elinhir",
+          "text": "Inspect the broken astrolabe tower in Elinhir"
+        },
+        {
+          "type": "scene",
+          "place": "belkarth",
+          "target": "scene:story_cg_belkarth_waystation",
+          "text": "Examine the viper-skin crate in Belkarth"
+        },
+        {
+          "type": "talk",
+          "place": "belkarth",
+          "npc": "story_cg_caravan_master_jibril",
+          "text": "Speak with Caravan-Master Jibril in Belkarth"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "elinhir",
+        "belkarth"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "elinhir",
+          "objective": "Inspect the broken astrolabe tower in Elinhir"
+        },
+        {
+          "id": 20,
+          "place": "belkarth",
+          "objective": "Examine the viper-skin crate in Belkarth"
+        },
+        {
+          "id": 30,
+          "place": "belkarth",
+          "objective": "Speak with Caravan-Master Jibril in Belkarth"
+        }
+      ],
+      "consequence": "guard_banner:craglorn_stage_1"
+    },
+    {
+      "id": "ms1_craglorn_02_fixed_bouts",
+      "region": "hammerfell/craglorn",
+      "category": "main",
+      "title": "Venom on the Arena Sand",
+      "giver": "story_cg_caravan_master_jibril",
+      "start": "auto",
+      "requires": [
+        "ms1_craglorn_01_shattered_astrolabe"
+      ],
+      "why": [
+        "craglorn.L7.arena_promoters_and_fighters",
+        "craglorn.L8.arena_glory",
+        "craglorn.L9.fixed_bouts"
+      ],
+      "summary": "Rally Arena-Champion Korra in Dragonstar and defeat Promoter Volus inside Dragonstar Arena.",
+      "intro": [
+        "Promoter Volus is rigging gladiator bouts in Dragonstar Arena with Scaled Court venom to harvest sacrifices.",
+        "Meet Arena-Champion Korra in Dragonstar, then enter Dragonstar Arena and defeat Promoter Volus."
+      ],
+      "complete": [
+        "Promoter Volus fell on the arena sand, and his star-charts revealed that Exarch Vipir carried the lens to Skyreach Pinnacle and Sanctum Ophidia."
+      ],
+      "journal": {
+        "start": "I must meet Arena-Champion Korra in Dragonstar and defeat Promoter Volus in Dragonstar Arena.",
+        "done": "I defeated Promoter Volus in Dragonstar Arena and learned Exarch Vipir is at Skyreach Pinnacle and Sanctum Ophidia."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "dragonstar",
+          "npc": "story_cg_champion_korra",
+          "text": "Speak with Arena-Champion Korra in Dragonstar"
+        },
+        {
+          "type": "scene",
+          "place": "dragonstar_arena",
+          "target": "scene:story_cg_arena_pit",
+          "text": "Confront Promoter Volus in Dragonstar Arena"
+        },
+        {
+          "type": "boss",
+          "place": "dragonstar_arena",
+          "target": "story_cg_promoter_volus",
+          "text": "Defeat Promoter Volus the Fang-Broker"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "dragonstar",
+        "dragonstar_arena"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dragonstar",
+          "objective": "Speak with Arena-Champion Korra in Dragonstar"
+        },
+        {
+          "id": 20,
+          "place": "dragonstar_arena",
+          "objective": "Confront Promoter Volus in Dragonstar Arena"
+        },
+        {
+          "id": 30,
+          "place": "dragonstar_arena",
+          "objective": "Defeat Promoter Volus the Fang-Broker"
+        }
+      ],
+      "consequence": "npc_schedule:craglorn_stage_2"
+    },
+    {
+      "id": "ms1_craglorn_03_skyreach_mirror",
+      "region": "hammerfell/craglorn",
+      "category": "main",
+      "title": "The Mirror of Skyreach Pinnacle",
+      "giver": "story_cg_champion_korra",
+      "start": "auto",
+      "requires": [
+        "ms1_craglorn_02_fixed_bouts"
+      ],
+      "why": [
+        "craglorn.L8.celestial_reverence",
+        "craglorn.L10.skyreach_pinnacle"
+      ],
+      "summary": "Pass the anomaly at the Spellscar and meet Star-Warden Cassian at Skyreach Pinnacle.",
+      "intro": [
+        "Exarch Vipir aligned the ancient Nede relay mirrors between the Spellscar and Skyreach Pinnacle.",
+        "Inspect the mirror-stone by the Spellscar and ascend to Skyreach Pinnacle to speak with Star-Warden Cassian."
+      ],
+      "complete": [
+        "Star-Warden Cassian turned the upper mirror at Skyreach Pinnacle and directed you to the Scaled Court's seat in Sanctum Ophidia."
+      ],
+      "journal": {
+        "start": "I must check the relay stone at the Spellscar and meet Star-Warden Cassian at Skyreach Pinnacle.",
+        "done": "Star-Warden Cassian pinpointed Exarch Vipir's ritual inside Sanctum Ophidia."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "spellscar",
+          "text": "Check the Nede relay stone near the Spellscar"
+        },
+        {
+          "type": "talk",
+          "place": "skyreach_pinnacle",
+          "npc": "story_cg_star_warden_cassian",
+          "text": "Meet Star-Warden Cassian at Skyreach Pinnacle"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "spellscar",
+        "skyreach_pinnacle"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "spellscar",
+          "objective": "Check the Nede relay stone near the Spellscar"
+        },
+        {
+          "id": 20,
+          "place": "skyreach_pinnacle",
+          "objective": "Meet Star-Warden Cassian at Skyreach Pinnacle"
+        }
+      ],
+      "consequence": "shrine_state:craglorn_stage_3"
+    },
+    {
+      "id": "ms1_craglorn_04_sanctum_ophidia",
+      "region": "hammerfell/craglorn",
+      "category": "main",
+      "title": "Coils of Sanctum Ophidia",
+      "giver": "story_cg_star_warden_cassian",
+      "start": "auto",
+      "requires": [
+        "ms1_craglorn_03_skyreach_mirror"
+      ],
+      "finale": true,
+      "why": [
+        "craglorn.L8.star_watching",
+        "craglorn.L9.serpent_cult_rising",
+        "craglorn.L10.sanctum_ophidia"
+      ],
+      "summary": "Enter Sanctum Ophidia, defeat Exarch Vipir of the Scaled Court, and return the Nede Star-Lens to Astromancer Nadia in Elinhir.",
+      "intro": [
+        "Deep within Sanctum Ophidia, Exarch Vipir is focusing the stolen Star-Lens over the serpent-basin.",
+        "Storm Sanctum Ophidia, slay Exarch Vipir, and return the Star-Lens to Astromancer Nadia in Elinhir."
+      ],
+      "complete": [
+        "Exarch Vipir has fallen, the Scaled Court's alignment is broken, and the Nede Star-Lens gleams once more in the high tower of Elinhir."
+      ],
+      "journal": {
+        "start": "I must enter Sanctum Ophidia, defeat Exarch Vipir, and return the Star-Lens to Astromancer Nadia in Elinhir.",
+        "done": "I slew Exarch Vipir in Sanctum Ophidia and restored the Star-Lens to Elinhir."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "sanctum_ophidia",
+          "text": "Enter Sanctum Ophidia"
+        },
+        {
+          "type": "scene",
+          "place": "sanctum_ophidia",
+          "target": "scene:story_cg_ophidia_basin",
+          "text": "Confront Exarch Vipir at the serpent-basin"
+        },
+        {
+          "type": "boss",
+          "place": "sanctum_ophidia",
+          "target": "story_cg_exarch_vipir",
+          "text": "Defeat Exarch Vipir of the Scaled Court"
+        },
+        {
+          "type": "talk",
+          "place": "elinhir",
+          "npc": "story_cg_astromancer_nadia",
+          "text": "Return the Nede Star-Lens to Astromancer Nadia in Elinhir"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "sanctum_ophidia",
+        "elinhir"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "sanctum_ophidia",
+          "objective": "Enter Sanctum Ophidia"
+        },
+        {
+          "id": 20,
+          "place": "sanctum_ophidia",
+          "objective": "Confront Exarch Vipir at the serpent-basin"
+        },
+        {
+          "id": 30,
+          "place": "sanctum_ophidia",
+          "objective": "Defeat Exarch Vipir of the Scaled Court"
+        },
+        {
+          "id": 40,
+          "place": "elinhir",
+          "objective": "Return the Nede Star-Lens to Astromancer Nadia in Elinhir"
+        }
+      ],
+      "consequence": "settlement_prosperity:craglorn_stage_4"
+    }
+  ]
+}

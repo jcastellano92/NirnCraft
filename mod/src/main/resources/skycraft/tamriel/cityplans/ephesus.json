@@ -1,0 +1,356 @@
+{
+  "id": "ephesus",
+  "sil": "scrub-mesa-observatory-town",
+  "base": "none",
+  "overlay": "alikr_desert",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "ephesus_brass_sextant_inn",
+  "names": {
+    "inn": "ephesus_brass_sextant_inn",
+    "store": "ephesus_mesa_provisioner",
+    "smithy": "ephesus_bronze_ring_smithy"
+  },
+  "titles": {
+    "ephesus_landmark": "Ephesus Mesa Star-Dome",
+    "ephesus_mesa_citadel": "Mesa-Crown Citadel of Ephesus",
+    "ephesus_brass_sextant_inn": "The Brass Sextant Inn",
+    "ephesus_mesa_provisioner": "High-Mesa Caravan Provisioners",
+    "ephesus_bronze_ring_smithy": "Astrolabe-Ring & Blade Smithy",
+    "ephesus_star_thistle_still": "Star-Thistle & Salt-Crystal Still",
+    "ephesus_sky_table_library": "Library of the Night-Tables",
+    "ephesus_tall_papa_dome": "Star-Pierced Dome of Tall Papa",
+    "ephesus_astronomer_house": "Chief Astronomer's Terrace House",
+    "ephesus_stair_gate_watch": "Mesa-Stair Gate Watchhouse",
+    "ephesus_pack_mule_corrals": "Mesa-Foot Mule Corrals",
+    "ephesus_market_plaza": "Ephesus Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "orrery",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "ephesus_landmark",
+      "overlay": "alikr_desert"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "ephesus_mesa_citadel"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "ephesus_brass_sextant_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "ephesus_mesa_provisioner"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "ephesus_bronze_ring_smithy"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "ephesus_star_thistle_still"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "ephesus_sky_table_library"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "ephesus_tall_papa_dome"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "ephesus_astronomer_house"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "ephesus_stair_gate_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "ephesus_pack_mule_corrals"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "ephesus_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "alikr_desert"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "alikr_desert"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:julianos",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "count": 1
+    }
+  ]
+}

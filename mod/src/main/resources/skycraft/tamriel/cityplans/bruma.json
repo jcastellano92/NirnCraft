@@ -1,63 +1,313 @@
 {
   "id": "bruma",
-  "base": "none",
+  "why": [
+    "jerall_mountains.L1.granite_caves",
+    "jerall_mountains.L6.bruma_on_the_pass",
+    "jerall_mountains.L8.talos_first"
+  ],
   "sil": "switchback-alpine",
-  "reach": 115,
-  "radius": 115,
+  "base": "none",
   "overlay": "bruma",
-  "names": {"inn": "bruma_jerall_view_inn", "store": "bruma_candle_and_wick", "smithy": "bruma_mountain_smithy"},
-  "innKey": "bruma_jerall_view_inn",
-  "gates": [[0, 71]],
-  "terraces": [
-    {"rect": [-40, -78, 40, -34], "level": 6, "parapet": 1}
+  "radius": 96,
+  "reach": 112,
+  "innKey": "bruma_olavs_tap",
+  "names": {
+    "inn": "bruma_olavs_tap",
+    "store": "bruma_novaroma",
+    "smithy": "bruma_nord_winds"
+  },
+  "gates": [
+    [
+      0,
+      -90
+    ],
+    [
+      90,
+      0
+    ],
+    [
+      0,
+      90
+    ]
   ],
   "landmarks": [
-    {"id": "chapel_spire", "at": [0, -56], "size": [17, 25], "h": 50, "margin": 3, "raise": 6, "face": "S"}
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -44
+      ],
+      "face": "south",
+      "name": "bruma_castle_bruma",
+      "overlay": "bruma"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        18,
+        -12
+      ],
+      "face": "south",
+      "name": "bruma_chapel_spire",
+      "overlay": "bruma"
+    }
   ],
-  "nets": [
-    {"type": "wall", "via": [[0, 72], [-26, 70], [-52, 56], [-72, 30], [-80, -6], [-72, -46], [-50, -80], [-16, -98], [20, -98], [52, -78], [74, -44], [80, -6], [72, 30], [52, 56], [26, 70]], "closed": true, "h": 9, "gates": [[0, 71]], "flags": ["major"]},
-    {"type": "switchback", "from": [0, 70], "to": [0, -30], "legs": 4, "amp": 24, "width": 5, "major": true, "tag": "climb"},
-    {"type": "contour", "from": [-30, 40], "len": 110, "dir": 0, "width": 3, "tag": "terrace"},
-    {"type": "contour", "from": [-20, 6], "len": 110, "dir": 0, "width": 3, "tag": "terrace"},
-    {"type": "contour", "from": [-16, -22], "len": 100, "dir": 0, "width": 3, "tag": "terrace"},
-    {"type": "contour", "from": [-30, 56], "len": 90, "dir": 0, "width": 3, "tag": "terrace"},
-    {"type": "path", "via": [[-70, 20], [-50, 24], [-30, 10]], "width": 3, "tag": "terrace"},
-    {"type": "path", "via": [[70, 20], [50, 24], [30, 10]], "width": 3, "tag": "terrace"},
-    {"type": "path", "via": [[-60, -30], [-36, -42], [-20, -60]], "width": 3, "tag": "terrace"},
-    {"type": "path", "via": [[60, -30], [36, -42], [20, -60]], "width": 3, "tag": "terrace"}
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "bruma"
+    }
   ],
-  "plazas": [
-    {"at": [0, 4], "size": 13, "variant": 3, "name": "bruma_chapel_steps"}
-  ],
-  "zones": [
-    {"at": [0, -60], "r": 28, "zone": "noble"},
-    {"at": [0, 6], "r": 22, "zone": "centre"},
-    {"at": [-46, 36], "r": 24, "zone": "craft"},
-    {"at": [48, 40], "r": 24, "zone": "poor"}
-  ],
-  "fabric": {"radius": 100, "target": 0.6},
-  "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "bruma_jerall_view_inn", "on": "climb"},
-    {"kind": "store", "count": 2, "name": "bruma_candle_and_wick", "on": "climb"},
-    {"kind": "smithy", "size": [11, 9], "name": "bruma_mountain_smithy", "on": "terrace"},
-    {"kind": "alchemist", "on": "terrace"},
-    {"kind": "temple", "size": [11, 17], "on": "climb"}
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_chapel_of_talos"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        21
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        52
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_olavs_tap"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_jerall_view_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -16,
+        56
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_novaroma"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_nord_winds"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -49,
+        31
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_hammer_and_axe"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_warlocks_luck"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -57,
+        -11
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_baenlins_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_lyra_rosentia_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -35,
+        -46
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_ongars_house"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_captain_burd_barracks"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        5,
+        -58
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_jghastas_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_arnoras_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        43,
+        -39
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_honmunds_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "bruma",
+      "name": "bruma_regners_house"
+    }
   ],
   "features": [
-    {"type": "bell_tower", "where": "square"},
-    {"type": "great_tree", "theme": "spruce", "where": "free"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "shrine", "theme": "divine:akatosh", "where": "street", "tag": "climb"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "climb"},
-    {"type": "banners", "where": "gate"},
-    {"type": "memorial", "where": "free"},
-    {"type": "market", "where": "free"},
-    {"type": "gatehouse", "where": "gate"}
+    {
+      "type": "statue",
+      "theme": "divine:talos",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "theme": "bruma_nord",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "jerall_brazier",
+      "count": 4
+    },
+    {
+      "type": "well",
+      "theme": "bruma_heated",
+      "count": 2
+    }
   ],
   "titles": {
-    "bruma_jerall_view_inn": "The Jerall View Inn",
-    "bruma_candle_and_wick": "Candle and Wick",
-    "bruma_mountain_smithy": "Mountain Smithy",
-    "bruma_chapel_steps": "Chapel Steps"
+    "bruma_castle_bruma": "Castle Bruma",
+    "bruma_chapel_spire": "Great Chapel of Talos Spire",
+    "bruma_chapel_of_talos": "Great Chapel of Talos",
+    "bruma_fighters_guild": "Bruma Fighters Guild",
+    "bruma_mages_guild": "Bruma Mages Guild",
+    "bruma_olavs_tap": "Olav's Tap and Tack",
+    "bruma_jerall_view_inn": "Jerall View Inn",
+    "bruma_novaroma": "Novaroma Fine Goods",
+    "bruma_nord_winds": "Nord Winds Apparel & Arms",
+    "bruma_hammer_and_axe": "Hammer and Axe",
+    "bruma_warlocks_luck": "A Warlock's Luck",
+    "bruma_baenlins_manor": "Baenlin's Manor",
+    "bruma_lyra_rosentia_house": "Lyra Rosentia's Manor",
+    "bruma_ongars_house": "Ongar the World-Weary's Lodge",
+    "bruma_captain_burd_barracks": "Captain Burd's Barracks",
+    "bruma_jghastas_house": "J'Ghasta's Training House",
+    "bruma_arnoras_house": "Arnora Auria's Cottage",
+    "bruma_honmunds_house": "Honmund's Timber Lodge",
+    "bruma_regners_house": "Regner's Hearth House"
   }
 }

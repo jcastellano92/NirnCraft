@@ -1,0 +1,236 @@
+{
+  "id": "morkul_stronghold_high_rock",
+  "sil": "orc-forge-cliff-palisade",
+  "base": "none",
+  "overlay": "orsinium",
+  "radius": 34,
+  "reach": 42,
+  "fill_gap": 2,
+  "inn_key": "",
+  "names": {
+    "inn": "",
+    "store": "",
+    "smithy": "morkul_hand_anvil"
+  },
+  "titles": {
+    "morkul_stronghold_high_rock_landmark": "Morkul Forge-Anvil Gate",
+    "morkul_chieftains_hall": "Clan Morkul Chieftain's Hall",
+    "morkul_hand_anvil": "The Fist-of-Malacath Forge",
+    "morkul_deep_slag_furnace": "Crag-Vein Blast Smelter",
+    "morkul_blood_root_hutch": "Hearth-Wife's Blood-Root Hutch",
+    "morkul_plate_racks": "Morkul Heavy-Plate Quartermaster",
+    "morkul_malacath_brazier": "Slag-Stone Brazier of Malacath",
+    "morkul_stronghold_high_rock_market_plaza": "Morkul Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      30
+    ]
+  ],
+  "walls": [
+    {
+      "r": 30,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        3.14
+      ],
+      "towers": true,
+      "flags": [
+        "palisade"
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "gate_hammer",
+      "at": [
+        0,
+        -14
+      ],
+      "face": "south",
+      "name": "morkul_stronghold_high_rock_landmark",
+      "overlay": "orsinium"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "common",
+      "at": [
+        9,
+        -12
+      ],
+      "face": "south",
+      "name": "morkul_chieftains_hall"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        23,
+        -2
+      ],
+      "face": "west",
+      "name": "morkul_hand_anvil"
+    },
+    {
+      "kind": "smithy",
+      "use": "smelter",
+      "wealth": "common",
+      "at": [
+        11,
+        11
+      ],
+      "face": "north",
+      "name": "morkul_deep_slag_furnace"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -2,
+        23
+      ],
+      "face": "north",
+      "name": "morkul_blood_root_hutch"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -12,
+        9
+      ],
+      "face": "east",
+      "name": "morkul_plate_racks"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -22,
+        -5
+      ],
+      "face": "east",
+      "name": "morkul_malacath_brazier"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -26
+      ],
+      "to": [
+        0,
+        26
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -26,
+        0
+      ],
+      "to": [
+        26,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "morkul_stronghold_high_rock_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 4,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 8,
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 3,
+      "on": "main",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        17
+      ],
+      "overlay": "orsinium"
+    },
+    {
+      "ring": [
+        17,
+        34
+      ],
+      "overlay": "orsinium"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "garden",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:zenithar",
+      "count": 1
+    },
+    {
+      "type": "bench",
+      "count": 1
+    }
+  ]
+}

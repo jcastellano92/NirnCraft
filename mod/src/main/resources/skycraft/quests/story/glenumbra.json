@@ -1,0 +1,413 @@
+{
+  "region": "high_rock/glenumbra",
+  "title": "The Hound-Bell of Camlorn",
+  "summary": "Stop a werewolf pack and briar-heart cultists from shattering the ancient Wyrd-stones that keep the moor-dead of Cath Bedraud and Camlorn asleep.",
+  "why": [
+    "glenumbra.L7.camlorn_court",
+    "glenumbra.L7.wyrd_sisters",
+    "glenumbra.L8.wyrd_rites",
+    "glenumbra.L9.wyrd_vs_clergy",
+    "glenumbra.L10.werewolf_packs"
+  ],
+  "hook": {
+    "place": "camlorn",
+    "places": [
+      "bad_mans_hallows",
+      "camlorn",
+      "camwick_grotto",
+      "castle_valois",
+      "crestshade",
+      "fells_run",
+      "fontaine_farm",
+      "frostham_keep",
+      "goldholt_burrow",
+      "goldley",
+      "highwold_pit",
+      "keep_fontaine",
+      "lincombe_encampment",
+      "millcliff_mill",
+      "perrin_homestead",
+      "sheephaven_hole",
+      "wreck_of_the_drowsy_crown",
+      "yarpoint_camp"
+    ],
+    "npc": "story_gl_canon_alain",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_gl_canon_alain",
+      "name": "Canon Alain of Camlorn",
+      "role": "priest",
+      "place": "camlorn",
+      "greet": "Bar your shutters when the moor-fog rolls in, traveller! The bronze Hound-Bell of Camlorn rang three times last night with no hand on the rope.",
+      "talk": [
+        "Whenever the Hound-Bell tolls of its own accord, the skin-changers of the northern moors are hunting near the barrows.",
+        "Worse still, overzealous cathedral wardens pulled down the Beldama Wyrd's root-charms at Crosswych, and now the cairn-dead are stirring. Speak with Wyrd-Sister Morwen in Eagles Brook."
+      ]
+    },
+    {
+      "id": "story_gl_sister_morwen",
+      "name": "Wyrd-Sister Morwen",
+      "role": "scholar",
+      "place": "eagles_brook",
+      "greet": "The town-priests call our root-knots pagan superstition—until the bog-water turns red and the wolves walk on two legs.",
+      "talk": [
+        "Pack-Leader Vargau has allied with grave-diggers in Enduum to uproot the three Anchor-Stones of Wynbrook.",
+        "Meet Commander Sebastien at Lion Guard Redoubt; his rangers saw Vargau's pack dragging iron cages toward Ravenford Hollow."
+      ]
+    },
+    {
+      "id": "story_gl_commander_sebastien",
+      "name": "Commander Sebastien",
+      "role": "guard",
+      "place": "lion_guard_redoubt",
+      "greet": "Silver-tipped bolts are worth their weight in gold today, friend. My sentries took three werewolf rushes before dawn.",
+      "talk": [
+        "The pack's huntsman, Garnier the Red-Pelt, has kenneled his beasts inside Ravenford Hollow to ambush pilgrims on the Crosswych road.",
+        "Slay Garnier in Ravenford Hollow, then join Wyrd-Sister Morwen at Enduum where Vargau is digging up the king-cairns."
+      ]
+    },
+    {
+      "id": "story_gl_ward_keeper_loic",
+      "name": "Ward-Keeper Loic",
+      "role": "knight",
+      "place": "cryptwatch_fort",
+      "greet": "Hold the Torch of Arkay high! The barrow-mists from Enduum are creeping right up to the walls of Cryptwatch Fort.",
+      "talk": [
+        "Alpha Vargau is inside Enduum right now, soaking the Wyrd-root in werewolf blood to wake the barrow-kings.",
+        "Go in and sever his head before the last seal cracks!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_gl_huntsman_garnier": {
+      "name": "Garnier the Red-Pelt",
+      "rank": "boss",
+      "place": "ravenford_hollow",
+      "weapon": "steel_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_gl_alpha_vargau": {
+      "name": "Alpha Vargau the Moor-Stalker",
+      "rank": "boss",
+      "place": "enduum",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_gl_wynbrook_cairn": [
+      "Wyrd-Sister Morwen: Look at the Wynbrook menhir—claw-gouges across the elven spiral, and cathedral lime splashed over the root-knot.",
+      "Canon Alain of Camlorn: My wardens were fools to deface the Wyrd-stones. Without the green-ward, the dead beneath the peat hear the wolves howling.",
+      "Wyrd-Sister Morwen: Go to Lion Guard Redoubt and Ravenford Hollow; we must draw the pack's fangs before moonrise."
+    ],
+    "story_gl_ravenford_kennel": [
+      "Garnier the Red-Pelt: Smell that, brothers? Town-bread and cathedral incense! Camlorn's sheep have walked into the den!",
+      "Commander Sebastien: Loose silver bolts! Do not let them close the distance!",
+      "Garnier the Red-Pelt: Silver only makes the blood hotter!"
+    ],
+    "story_gl_enduum_barrow": [
+      "Alpha Vargau: When the old kings of Enduum rise from the peat, Camlorn's stone walls will crumble like dry bark!",
+      "Wyrd-Sister Morwen: The earth remembers older oaths than yours, beast! Strike him down!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_glenumbra_01_hound_bell",
+      "region": "high_rock/glenumbra",
+      "category": "main",
+      "title": "When the Hound-Bell Tolls",
+      "giver": "story_gl_canon_alain",
+      "start": "npc:story_gl_canon_alain",
+      "requires": [],
+      "why": [
+        "glenumbra.L7.camlorn_court",
+        "glenumbra.L8.mara_cathedral",
+        "glenumbra.L9.wyrd_vs_clergy"
+      ],
+      "summary": "Speak with Wyrd-Sister Morwen in Eagles Brook and inspect the defaced ward-stones at Wynbrook Stones.",
+      "intro": [
+        "The Hound-Bell of Camlorn has tolled a warning of werewolf packs on the moors, while a dispute between cathedral wardens and the Beldama Wyrd has weakened the barrow-wards.",
+        "Travel to Eagles Brook to consult Wyrd-Sister Morwen and inspect the menhirs at Wynbrook Stones."
+      ],
+      "complete": [
+        "At Wynbrook Stones, Morwen and Canon Alain discovered that werewolf claws and broken root-wards have unsealed the ancient cairns."
+      ],
+      "journal": {
+        "start": "Canon Alain in Camlorn asked me to meet Wyrd-Sister Morwen in Eagles Brook and check Wynbrook Stones.",
+        "done": "We confirmed that werewolf packs are intentionally breaking the Wyrd-wards across the Glenumbra moors."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "eagles_brook",
+          "npc": "story_gl_sister_morwen",
+          "text": "Speak with Wyrd-Sister Morwen in Eagles Brook"
+        },
+        {
+          "type": "visit",
+          "place": "wynbrook_stones",
+          "text": "Travel to Wynbrook Stones"
+        },
+        {
+          "type": "scene",
+          "place": "wynbrook_stones",
+          "target": "scene:story_gl_wynbrook_cairn",
+          "text": "Inspect the defaced menhir with Wyrd-Sister Morwen"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "eagles_brook",
+        "wynbrook_stones"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "eagles_brook",
+          "objective": "Speak with Wyrd-Sister Morwen in Eagles Brook"
+        },
+        {
+          "id": 20,
+          "place": "wynbrook_stones",
+          "objective": "Travel to Wynbrook Stones"
+        },
+        {
+          "id": 30,
+          "place": "wynbrook_stones",
+          "objective": "Inspect the defaced menhir with Wyrd-Sister Morwen"
+        }
+      ],
+      "consequence": "guard_banner:glenumbra_stage_1"
+    },
+    {
+      "id": "ms1_glenumbra_02_silver_redoubt",
+      "region": "high_rock/glenumbra",
+      "category": "main",
+      "title": "The Red-Pelt's Kennel",
+      "giver": "story_gl_sister_morwen",
+      "start": "auto",
+      "requires": [
+        "ms1_glenumbra_01_hound_bell"
+      ],
+      "why": [
+        "glenumbra.L7.bog_tenants",
+        "glenumbra.L10.werewolf_packs"
+      ],
+      "summary": "Report to Commander Sebastien at Lion Guard Redoubt and slay Garnier the Red-Pelt inside Ravenford Hollow.",
+      "intro": [
+        "Commander Sebastien's rangers at Lion Guard Redoubt have tracked half the werewolf pack to Ravenford Hollow.",
+        "Meet Commander Sebastien at Lion Guard Redoubt, then enter Ravenford Hollow and kill Garnier the Red-Pelt."
+      ],
+      "complete": [
+        "Garnier the Red-Pelt was slain in Ravenford Hollow, revealing that Alpha Vargau has marched south to Cryptwatch Fort and Enduum."
+      ],
+      "journal": {
+        "start": "I must report to Commander Sebastien at Lion Guard Redoubt and clear Garnier's pack from Ravenford Hollow.",
+        "done": "I slew Garnier the Red-Pelt in Ravenford Hollow and learned Alpha Vargau is inside the barrows of Enduum."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "lion_guard_redoubt",
+          "npc": "story_gl_commander_sebastien",
+          "text": "Consult Commander Sebastien at Lion Guard Redoubt"
+        },
+        {
+          "type": "scene",
+          "place": "ravenford_hollow",
+          "target": "scene:story_gl_ravenford_kennel",
+          "text": "Spring the ambush in Ravenford Hollow"
+        },
+        {
+          "type": "boss",
+          "place": "ravenford_hollow",
+          "target": "story_gl_huntsman_garnier",
+          "text": "Defeat Garnier the Red-Pelt"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "lion_guard_redoubt",
+        "ravenford_hollow"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "lion_guard_redoubt",
+          "objective": "Consult Commander Sebastien at Lion Guard Redoubt"
+        },
+        {
+          "id": 20,
+          "place": "ravenford_hollow",
+          "objective": "Spring the ambush in Ravenford Hollow"
+        },
+        {
+          "id": 30,
+          "place": "ravenford_hollow",
+          "objective": "Defeat Garnier the Red-Pelt"
+        }
+      ],
+      "consequence": "npc_schedule:glenumbra_stage_2"
+    },
+    {
+      "id": "ms1_glenumbra_03_cryptwatch_line",
+      "region": "high_rock/glenumbra",
+      "category": "main",
+      "title": "Mist Over Cryptwatch",
+      "giver": "story_gl_commander_sebastien",
+      "start": "auto",
+      "requires": [
+        "ms1_glenumbra_02_silver_redoubt"
+      ],
+      "why": [
+        "glenumbra.L8.moor_cairns",
+        "glenumbra.L9.northern_pride"
+      ],
+      "summary": "Check the northern road at Crosswych and bolster Ward-Keeper Loic at Cryptwatch Fort.",
+      "intro": [
+        "Barrow-mist is pouring from the southern cairns while Crosswych's miners barricade their shafts.",
+        "Pass through Crosswych to secure silver-salt torches and bring them to Ward-Keeper Loic at Cryptwatch Fort."
+      ],
+      "complete": [
+        "Ward-Keeper Loic used the silver-salt to hold the outer wall of Cryptwatch Fort while you prepare to enter Enduum."
+      ],
+      "journal": {
+        "start": "I must collect silver-salt at Crosswych and report to Ward-Keeper Loic at Cryptwatch Fort.",
+        "done": "Ward-Keeper Loic secured the perimeter around Enduum."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "crosswych",
+          "text": "Collect silver-salt torches at Crosswych"
+        },
+        {
+          "type": "talk",
+          "place": "cryptwatch_fort",
+          "npc": "story_gl_ward_keeper_loic",
+          "text": "Deliver the torches to Ward-Keeper Loic at Cryptwatch Fort"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "crosswych",
+        "cryptwatch_fort"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "crosswych",
+          "objective": "Collect silver-salt torches at Crosswych"
+        },
+        {
+          "id": 20,
+          "place": "cryptwatch_fort",
+          "objective": "Deliver the torches to Ward-Keeper Loic at Cryptwatch Fort"
+        }
+      ],
+      "consequence": "shrine_state:glenumbra_stage_3"
+    },
+    {
+      "id": "ms1_glenumbra_04_enduum_seal",
+      "region": "high_rock/glenumbra",
+      "category": "main",
+      "title": "The Barrow-Kings of Enduum",
+      "giver": "story_gl_ward_keeper_loic",
+      "start": "auto",
+      "requires": [
+        "ms1_glenumbra_03_cryptwatch_line"
+      ],
+      "finale": true,
+      "why": [
+        "glenumbra.L8.wyrd_rites",
+        "glenumbra.L10.tomb_of_lost_kings",
+        "glenumbra.L10.werewolf_packs"
+      ],
+      "summary": "Descend into Enduum, slay Alpha Vargau the Moor-Stalker, and restore the Wyrd-seal with Canon Alain in Camlorn.",
+      "intro": [
+        "Deep inside Enduum, Alpha Vargau is drenching the heart-root of the Wyrd in blood to raise the ancient kings of the moor.",
+        "Enter Enduum, slay Alpha Vargau, and bring word of the restored concord back to Canon Alain in Camlorn."
+      ],
+      "complete": [
+        "Alpha Vargau is dead, the Wyrd-sisters have re-woven the barrow-wards of Enduum, and Camlorn's cathedral has sworn never again to disturb the green-stones."
+      ],
+      "journal": {
+        "start": "I must enter Enduum, defeat Alpha Vargau, and return to Canon Alain in Camlorn.",
+        "done": "I defeated Alpha Vargau in Enduum and restored peace between Camlorn's clergy and the Wyrd."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "enduum",
+          "text": "Descend into the barrows of Enduum"
+        },
+        {
+          "type": "scene",
+          "place": "enduum",
+          "target": "scene:story_gl_enduum_barrow",
+          "text": "Confront Alpha Vargau at the heart-root"
+        },
+        {
+          "type": "boss",
+          "place": "enduum",
+          "target": "story_gl_alpha_vargau",
+          "text": "Defeat Alpha Vargau the Moor-Stalker"
+        },
+        {
+          "type": "talk",
+          "place": "camlorn",
+          "npc": "story_gl_canon_alain",
+          "text": "Report the restored seal to Canon Alain in Camlorn"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "enduum",
+        "camlorn"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "enduum",
+          "objective": "Descend into the barrows of Enduum"
+        },
+        {
+          "id": 20,
+          "place": "enduum",
+          "objective": "Confront Alpha Vargau at the heart-root"
+        },
+        {
+          "id": 30,
+          "place": "enduum",
+          "objective": "Defeat Alpha Vargau the Moor-Stalker"
+        },
+        {
+          "id": 40,
+          "place": "camlorn",
+          "objective": "Report the restored seal to Canon Alain in Camlorn"
+        }
+      ],
+      "consequence": "settlement_prosperity:glenumbra_stage_4"
+    }
+  ]
+}

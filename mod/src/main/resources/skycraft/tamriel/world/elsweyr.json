@@ -1,0 +1,3939 @@
+{
+  "province": "elsweyr",
+  "truth": "Elsweyr is two old kingdoms sewn together under two moons and pulled apart again. Northern Anequina is a high plateau of red mesas, badland gullies and dry steppe, where clans live by wells, herds and caravans. Southern Pellitine is river valley, sugar-cane floodplain and the Tenmar jungle, rich from plantations and the port trade of Senchal. The Mane at Torval keeps the faith of the moons' path while two kings rule the halves. Since the Void Nights, the Thalmor claim credit for the moons' return and sit in both courts. Moon-sugar enriches the south, feeds the skooma trade, and funds the Renrijra Krin above ancient moon-temples, dragon scours and a necropolis city.",
+  "layers": {
+    "L1": [
+      {
+        "id": "anequina_plateau",
+        "text": "a red sandstone and mudstone tableland cut into mesas, buttes and badland gullies",
+        "cites": []
+      },
+      {
+        "id": "central_escarpment",
+        "text": "a scarp of 60 to 120 blocks between the plateau and the southern lowland",
+        "cites": []
+      },
+      {
+        "id": "pellitine_alluvium",
+        "text": "deep river silts on the southern plain",
+        "cites": []
+      },
+      {
+        "id": "tenmar_karst",
+        "text": "limestone under the Tenmar forest with sinkholes and caves",
+        "cites": []
+      },
+      {
+        "id": "topal_coast",
+        "text": "a low coast of coves and bluffs on Topal Bay",
+        "cites": []
+      },
+      {
+        "id": "moonstone_seams",
+        "text": "moonstone in the quartz seams of the plateau",
+        "cites": []
+      },
+      {
+        "id": "dwemer_seam",
+        "text": "one deep Dwemer delve in the escarpment rock",
+        "cites": []
+      }
+    ],
+    "L2": [
+      {
+        "id": "rain_shadow_north",
+        "text": "the escarpment strips the bay wind of rain, so Anequina is arid",
+        "cites": [
+          "elsweyr.L1.central_escarpment"
+        ]
+      },
+      {
+        "id": "bay_monsoon",
+        "text": "wet summer winds off Topal Bay soak Pellitine and flood its rivers",
+        "cites": [
+          "elsweyr.L1.topal_coast"
+        ]
+      },
+      {
+        "id": "dust_season",
+        "text": "spring dust storms on the plateau",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L2.rain_shadow_north"
+        ]
+      },
+      {
+        "id": "clear_nights",
+        "text": "dry air and few clouds make the two moons the brightest thing in the sky",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L2.rain_shadow_north"
+        ]
+      },
+      {
+        "id": "lunar_lattice",
+        "text": "the moons' phases mark the calendar, the tides on the bay and, in Khajiit belief, the form a child is born into",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L2.clear_nights"
+        ]
+      }
+    ],
+    "L3": [
+      {
+        "id": "plateau_wells",
+        "text": "Anequina drinks from deep wells, oases and cisterns at mesa feet",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L2.rain_shadow_north"
+        ]
+      },
+      {
+        "id": "scarp_springs",
+        "text": "a line of springs where the plateau's water seeps out of the escarpment",
+        "cites": [
+          "elsweyr.L1.central_escarpment"
+        ]
+      },
+      {
+        "id": "pellitine_rivers",
+        "text": "braided rivers that flood each summer across the sugar plain to the bay",
+        "cites": [
+          "elsweyr.L1.pellitine_alluvium",
+          "elsweyr.L2.bay_monsoon"
+        ]
+      },
+      {
+        "id": "old_aqueduct",
+        "text": "an arched aqueduct carries spring water across a gorge toward Torval",
+        "cites": [
+          "elsweyr.L1.central_escarpment",
+          "elsweyr.L3.scarp_springs"
+        ]
+      },
+      {
+        "id": "water_power",
+        "text": "in the north whoever holds a well holds a clan; in the south planters own the river frontage and the floodgates",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L3.plateau_wells",
+          "elsweyr.L3.pellitine_rivers"
+        ]
+      }
+    ],
+    "L4": [
+      {
+        "id": "steppe_grazers",
+        "text": "nix-oxen, goats and wild herds on the dry grass",
+        "cites": [
+          "elsweyr.L2.rain_shadow_north"
+        ]
+      },
+      {
+        "id": "canyon_hunters",
+        "text": "big cats, scorpions and carrion birds in the gullies",
+        "cites": [
+          "elsweyr.L1.anequina_plateau"
+        ]
+      },
+      {
+        "id": "jungle_life",
+        "text": "serpents, giant wasps, apes and jungle cats in the Tenmar",
+        "cites": [
+          "elsweyr.L1.tenmar_karst",
+          "elsweyr.L2.bay_monsoon"
+        ]
+      },
+      {
+        "id": "cane_plain",
+        "text": "sugar cane needs the flood silts, so it grows only on the southern plain",
+        "cites": [
+          "elsweyr.L1.pellitine_alluvium",
+          "elsweyr.L3.pellitine_rivers"
+        ]
+      },
+      {
+        "id": "moon_sugar_bloom",
+        "text": "on the richest cane silts a glowing variety ripens only under full moons",
+        "cites": [
+          "elsweyr.L2.lunar_lattice",
+          "elsweyr.L4.cane_plain"
+        ]
+      }
+    ],
+    "L5": [
+      {
+        "id": "moon_sugar",
+        "text": "cane grown, boiled and crystallised in the south, sold as sweetener and sacrament",
+        "cites": [
+          "elsweyr.L4.cane_plain",
+          "elsweyr.L4.moon_sugar_bloom"
+        ]
+      },
+      {
+        "id": "skooma",
+        "text": "the refined drug, illegal abroad and taxed or hidden at home",
+        "cites": [
+          "elsweyr.L4.cane_plain",
+          "elsweyr.L5.moon_sugar"
+        ]
+      },
+      {
+        "id": "caravans",
+        "text": "Anequina's wealth is carrying goods from well to well",
+        "cites": [
+          "elsweyr.L3.plateau_wells",
+          "elsweyr.L4.steppe_grazers"
+        ]
+      },
+      {
+        "id": "herding_hides",
+        "text": "hides, wool and milk from the steppe",
+        "cites": [
+          "elsweyr.L4.steppe_grazers"
+        ]
+      },
+      {
+        "id": "moonstone",
+        "text": "mined and cut on the plateau",
+        "cites": [
+          "elsweyr.L1.moonstone_seams"
+        ]
+      },
+      {
+        "id": "senchal_port",
+        "text": "sugar out, grain, timber and iron in",
+        "cites": [
+          "elsweyr.L1.topal_coast",
+          "elsweyr.L5.moon_sugar"
+        ]
+      },
+      {
+        "id": "rimmen_crafts",
+        "text": "carpets, glass and jewellery of Rimmen's artisans for the Cyrodiil trade",
+        "cites": [
+          "elsweyr.L1.moonstone_seams",
+          "elsweyr.L5.caravans",
+          "elsweyr.L5.moonstone"
+        ]
+      }
+    ],
+    "L6": [
+      {
+        "id": "towns_on_wells",
+        "text": "northern towns stand on wells, oases and mesa cisterns, never on rivers",
+        "cites": [
+          "elsweyr.L3.plateau_wells"
+        ]
+      },
+      {
+        "id": "towns_on_rivers",
+        "text": "southern towns stand on river terraces, fords and the coast",
+        "cites": [
+          "elsweyr.L1.topal_coast",
+          "elsweyr.L3.pellitine_rivers"
+        ]
+      },
+      {
+        "id": "torval_seat",
+        "text": "the Mane's city sits where the aqueduct water meets the sugar plain",
+        "cites": [
+          "elsweyr.L3.old_aqueduct",
+          "elsweyr.L5.moon_sugar"
+        ]
+      },
+      {
+        "id": "busy_centres",
+        "text": "Senchal (the sugar port), Dune (the caravan wheel), Torval (court and pilgrims), Rimmen (the Cyrodiil border market)",
+        "cites": [
+          "elsweyr.L5.senchal_port",
+          "elsweyr.L5.caravans",
+          "elsweyr.L5.rimmen_crafts"
+        ]
+      },
+      {
+        "id": "failing_places",
+        "text": "plateau hamlets whose wells fail, cane villages sunk in debt, Knahaten-emptied villages left as ruins",
+        "cites": [
+          "elsweyr.L3.plateau_wells",
+          "elsweyr.L5.moon_sugar"
+        ]
+      }
+    ],
+    "L7": [
+      {
+        "id": "clan_mothers",
+        "text": "kin-groups led by Clan Mothers who settle disputes and hold wells",
+        "cites": [
+          "elsweyr.L3.water_power"
+        ]
+      },
+      {
+        "id": "furstock_roles",
+        "text": "the many Khajiit forms take different work, from small quick messengers to large warriors and near-elven envoys",
+        "cites": [
+          "elsweyr.L2.lunar_lattice"
+        ]
+      },
+      {
+        "id": "planters_and_cutters",
+        "text": "plantation families own the land; cane-cutters and boilers work off debts",
+        "cites": [
+          "elsweyr.L3.water_power",
+          "elsweyr.L5.moon_sugar"
+        ]
+      },
+      {
+        "id": "baandari",
+        "text": "wandering peddler families, welcome as traders, suspected as thieves",
+        "cites": [
+          "elsweyr.L5.caravans"
+        ]
+      },
+      {
+        "id": "skooma_poor",
+        "text": "addicts and dealers in the port slums",
+        "cites": [
+          "elsweyr.L5.skooma",
+          "elsweyr.L5.senchal_port"
+        ]
+      },
+      {
+        "id": "imperial_descendants",
+        "text": "families of Septim-era planters and garrison men, still in the plantation towns",
+        "cites": [
+          "elsweyr.L6.busy_centres"
+        ]
+      }
+    ],
+    "L8": [
+      {
+        "id": "moons_path",
+        "text": "the faith of the Riddle'Thar, the order the moons dance in, kept by the Mane and the moon priests",
+        "cites": [
+          "elsweyr.L2.lunar_lattice"
+        ]
+      },
+      {
+        "id": "khajiit_gods",
+        "text": "Alkosh, Khenarthi, Jone and Jode, Azurah, S'rendarr, Rajhin and the other aspects; shrines at wells and crossroads",
+        "cites": [
+          "elsweyr.L3.plateau_wells",
+          "elsweyr.L8.moons_path"
+        ]
+      },
+      {
+        "id": "dark_spirits",
+        "text": "Namiira's darkness and the dro-m'Athra, souls fallen from the path, feared in ruins and on moonless nights",
+        "cites": [
+          "elsweyr.L2.lunar_lattice",
+          "elsweyr.L8.moons_path"
+        ]
+      },
+      {
+        "id": "sugar_sacred",
+        "text": "moon-sugar is the moons' gift in rite and a sin in excess",
+        "cites": [
+          "elsweyr.L5.moon_sugar",
+          "elsweyr.L8.moons_path"
+        ]
+      },
+      {
+        "id": "night_life",
+        "text": "markets, rites and departures happen at moonrise",
+        "cites": [
+          "elsweyr.L2.clear_nights",
+          "elsweyr.L8.moons_path"
+        ]
+      },
+      {
+        "id": "masked_dead",
+        "text": "honoured dead are laid in necropolis cities wearing burial masks",
+        "cites": [
+          "elsweyr.L1.central_escarpment",
+          "elsweyr.L8.moons_path"
+        ]
+      },
+      {
+        "id": "outsiders",
+        "text": "polite to buyers, wary of Imperials over Rimmen, bitter at the Thalmor's claim on the moons",
+        "cites": [
+          "elsweyr.L5.rimmen_crafts",
+          "elsweyr.L8.moons_path"
+        ]
+      }
+    ],
+    "L9": [
+      {
+        "id": "two_crowns",
+        "text": "Anequina and Pellitine are separate client kingdoms of the Aldmeri Dominion",
+        "cites": [
+          "elsweyr.L6.towns_on_wells",
+          "elsweyr.L6.towns_on_rivers",
+          "elsweyr.L7.clan_mothers"
+        ]
+      },
+      {
+        "id": "thalmor_in_court",
+        "text": "Thalmor advisers in both courts, credited with bringing back the moons",
+        "cites": [
+          "elsweyr.L8.moons_path",
+          "elsweyr.L9.two_crowns"
+        ]
+      },
+      {
+        "id": "renrijra_krin",
+        "text": "outlaw bands who fight the Thalmor and the crowns that bow to them, paid by smuggled sugar",
+        "cites": [
+          "elsweyr.L5.skooma",
+          "elsweyr.L9.thalmor_in_court"
+        ]
+      },
+      {
+        "id": "sugar_tax",
+        "text": "the crowns, the Mane and the Thalmor all want a share of the sugar",
+        "cites": [
+          "elsweyr.L5.moon_sugar",
+          "elsweyr.L9.two_crowns"
+        ]
+      },
+      {
+        "id": "rimmen_border",
+        "text": "Rimmen faces Cyrodiil's Nibenay; old claims and new smuggling",
+        "cites": [
+          "elsweyr.L5.rimmen_crafts",
+          "elsweyr.L6.busy_centres"
+        ]
+      },
+      {
+        "id": "two_moons_procession",
+        "text": "annual festival at the first double full moon from Torval to the moon-temples",
+        "cites": [
+          "elsweyr.L8.moons_path",
+          "elsweyr.L8.night_life"
+        ]
+      }
+    ],
+    "L10": [
+      {
+        "id": "moon_temples",
+        "text": "ruined and living temples on outcrops and ridges, aligned to moonrise",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L8.moons_path"
+        ]
+      },
+      {
+        "id": "necropolis_cities",
+        "text": "whole cities of the masked dead under Rimmen and in the escarpment",
+        "cites": [
+          "elsweyr.L1.central_escarpment",
+          "elsweyr.L8.masked_dead"
+        ]
+      },
+      {
+        "id": "dragon_scours",
+        "text": "bone fields and lairs on mesa tops",
+        "cites": [
+          "elsweyr.L1.anequina_plateau"
+        ]
+      },
+      {
+        "id": "renrijra_camps",
+        "text": "camps in canyons and caves along the caravan roads",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L5.caravans",
+          "elsweyr.L9.renrijra_krin"
+        ]
+      },
+      {
+        "id": "skooma_dens",
+        "text": "hidden boil-rooms and dens in caves near plantations and under Senchal",
+        "cites": [
+          "elsweyr.L4.cane_plain",
+          "elsweyr.L5.skooma"
+        ]
+      },
+      {
+        "id": "smuggler_coves",
+        "text": "hidden coves and wrecks on the bay",
+        "cites": [
+          "elsweyr.L1.topal_coast",
+          "elsweyr.L5.skooma"
+        ]
+      },
+      {
+        "id": "dro_mathra_haunts",
+        "text": "fallen spirits in abandoned temples",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L8.dark_spirits",
+          "elsweyr.L10.moon_temples"
+        ]
+      },
+      {
+        "id": "colossus_hall",
+        "text": "the Dwemer delve and its unfinished giant",
+        "cites": [
+          "elsweyr.L1.dwemer_seam"
+        ]
+      },
+      {
+        "id": "daedric_cults",
+        "text": "hidden cults of the darker Daedra",
+        "cites": [
+          "elsweyr.L1.tenmar_karst",
+          "elsweyr.L8.dark_spirits"
+        ]
+      }
+    ],
+    "L11": [
+      {
+        "id": "old_kingdoms",
+        "text": "Anequina and Pellitine as rival realms with a plateau city older than both, Ne Quin-al",
+        "cites": [
+          "elsweyr.L1.anequina_plateau",
+          "elsweyr.L6.towns_on_wells"
+        ]
+      },
+      {
+        "id": "union_by_marriage",
+        "text": "the two crowns joined by a royal marriage in the Second Era to make Elsweyr",
+        "cites": [
+          "elsweyr.L9.two_crowns"
+        ]
+      },
+      {
+        "id": "knahaten_flu",
+        "text": "a Second Era plague that emptied villages",
+        "cites": [
+          "elsweyr.L6.failing_places"
+        ]
+      },
+      {
+        "id": "dragon_war",
+        "text": "dragons loosed over Elsweyr late in the Second Era, leaving the scours",
+        "cites": [
+          "elsweyr.L10.dragon_scours"
+        ]
+      },
+      {
+        "id": "septim_plantations",
+        "text": "Imperial planters and garrisons settled the south and the Rimmen road",
+        "cites": [
+          "elsweyr.L7.imperial_descendants"
+        ]
+      },
+      {
+        "id": "void_nights",
+        "text": "in the early Fourth Era the moons vanished for two years; the Thalmor claim they brought them back and Elsweyr split into two client kingdoms afterwards",
+        "cites": [
+          "elsweyr.L2.lunar_lattice",
+          "elsweyr.L9.thalmor_in_court"
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "anequina": {
+      "truth": "Anequina is the high plateau of the north: red sandstone mesas over dry steppe, cut by badland gullies where the Renrijra Krin hide. Clans gather at deep wells; Dune's market wheel turns on caravan traffic; Orcrest guards the high mesa road; Riverhold, at the head of the only steady stream, keeps the northern crown's court. Ancient moon-temples stand on the ridges, and the dragon war left a scour of bleached bones on Prowl's Edge. The Thalmor resident counts the wells for the crown's tax, and the rebels poison the ones he counts.",
+      "layers": {
+        "L1": [
+          {
+            "id": "mesa_field",
+            "text": "mesas and buttes up to 150 blocks",
+            "cites": []
+          },
+          {
+            "id": "badland_gullies",
+            "text": "banded clay canyons",
+            "cites": []
+          },
+          {
+            "id": "small_erg",
+            "text": "a small dune field in the far west",
+            "cites": []
+          },
+          {
+            "id": "moonstone_quarries",
+            "text": "quartz and moonstone seams",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "dust_storms",
+            "text": "spring dust gales across the tableland",
+            "cites": [
+              "elsweyr.L2.dust_season",
+              "anequina.L1.mesa_field"
+            ]
+          },
+          {
+            "id": "hot_days_cold_nights",
+            "text": "sharp desert temperature swings",
+            "cites": [
+              "elsweyr.L2.rain_shadow_north",
+              "anequina.L1.mesa_field"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "riverhold_stream",
+            "text": "the one perennial stream, fed by seepage",
+            "cites": [
+              "elsweyr.L3.scarp_springs",
+              "anequina.L1.mesa_field"
+            ]
+          },
+          {
+            "id": "oasis_chain",
+            "text": "Nevoe, Temar and Kojanar oases on the caravan line",
+            "cites": [
+              "elsweyr.L3.plateau_wells",
+              "anequina.L1.mesa_field"
+            ]
+          },
+          {
+            "id": "cisterns_of_orcrest",
+            "text": "rock-cut mesa reservoirs",
+            "cites": [
+              "elsweyr.L3.plateau_wells",
+              "anequina.L1.mesa_field"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "steppe",
+            "text": "short gold grass and scattered acacia",
+            "cites": [
+              "elsweyr.L4.steppe_grazers",
+              "anequina.L2.hot_days_cold_nights"
+            ]
+          },
+          {
+            "id": "mesa_top",
+            "text": "bare red rock and lone thorn trees",
+            "cites": [
+              "anequina.L1.mesa_field",
+              "anequina.L2.dust_storms"
+            ]
+          },
+          {
+            "id": "gully_shade",
+            "text": "dry brush in canyon bottoms",
+            "cites": [
+              "anequina.L1.badland_gullies"
+            ]
+          },
+          {
+            "id": "oasis_ring",
+            "text": "palms and green turf round wells",
+            "cites": [
+              "anequina.L3.oasis_chain"
+            ]
+          },
+          {
+            "id": "dune_edge",
+            "text": "rippled western sands",
+            "cites": [
+              "anequina.L1.small_erg"
+            ]
+          },
+          {
+            "id": "scorpion_gullies",
+            "text": "scorpions and big cats in the ravines",
+            "cites": [
+              "elsweyr.L4.canyon_hunters",
+              "anequina.L1.badland_gullies"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "caravan_trade",
+            "text": "well-to-well pack trains",
+            "cites": [
+              "elsweyr.L5.caravans",
+              "anequina.L3.oasis_chain"
+            ]
+          },
+          {
+            "id": "herds",
+            "text": "nix-oxen and goat herding",
+            "cites": [
+              "elsweyr.L4.steppe_grazers",
+              "anequina.L4.steppe"
+            ]
+          },
+          {
+            "id": "moonstone_cutting",
+            "text": "plateau gem and ore quarries",
+            "cites": [
+              "elsweyr.L5.moonstone",
+              "anequina.L1.moonstone_quarries"
+            ]
+          },
+          {
+            "id": "well_tolls",
+            "text": "water fees collected by clan holders",
+            "cites": [
+              "anequina.L3.oasis_chain"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "riverhold_seat",
+            "text": "the northern seat on its stream",
+            "cites": [
+              "anequina.L3.riverhold_stream"
+            ]
+          },
+          {
+            "id": "dune_wheel",
+            "text": "market city where five caravan routes meet",
+            "cites": [
+              "anequina.L3.oasis_chain",
+              "anequina.L5.caravan_trade"
+            ]
+          },
+          {
+            "id": "orcrest_mesa",
+            "text": "fortified city on a mesa with cisterns",
+            "cites": [
+              "anequina.L1.mesa_field",
+              "anequina.L3.cisterns_of_orcrest"
+            ]
+          },
+          {
+            "id": "seaplace",
+            "text": "an old Imperial waystation town",
+            "cites": [
+              "elsweyr.L7.imperial_descendants",
+              "anequina.L3.oasis_chain"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "well_clans",
+            "text": "northern kin-groups holding the oases",
+            "cites": [
+              "elsweyr.L7.clan_mothers",
+              "anequina.L5.well_tolls"
+            ]
+          },
+          {
+            "id": "caravan_masters_rich",
+            "text": "wealthy factors of Dune and Riverhold",
+            "cites": [
+              "anequina.L5.caravan_trade"
+            ]
+          },
+          {
+            "id": "herders_poor",
+            "text": "steppe nomads",
+            "cites": [
+              "anequina.L5.herds"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "ridge_temples",
+            "text": "high moon-shrines watching the sky",
+            "cites": [
+              "elsweyr.L8.moons_path",
+              "anequina.L1.mesa_field"
+            ]
+          },
+          {
+            "id": "scour_taboo",
+            "text": "the dragon bone fields are not walked at night",
+            "cites": [
+              "elsweyr.L8.dark_spirits",
+              "anequina.L1.mesa_field"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "northern_crown",
+            "text": "the royal court at Riverhold",
+            "cites": [
+              "elsweyr.L9.two_crowns",
+              "anequina.L6.riverhold_seat"
+            ]
+          },
+          {
+            "id": "well_counting",
+            "text": "the resented Thalmor census of wells",
+            "cites": [
+              "elsweyr.L9.thalmor_in_court",
+              "anequina.L5.well_tolls"
+            ]
+          },
+          {
+            "id": "canyon_rebels",
+            "text": "insurgents striking the tax roads",
+            "cites": [
+              "elsweyr.L9.renrijra_krin",
+              "anequina.L1.badland_gullies"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "renrijra_canyons",
+            "text": "hidden rebel redoubts",
+            "cites": [
+              "elsweyr.L10.renrijra_camps",
+              "anequina.L1.badland_gullies",
+              "anequina.L9.canyon_rebels"
+            ]
+          },
+          {
+            "id": "prowls_edge_scour",
+            "text": "scorched dragon bone field",
+            "cites": [
+              "elsweyr.L10.dragon_scours",
+              "anequina.L1.mesa_field"
+            ]
+          },
+          {
+            "id": "vault_of_the_heavenly_scourge",
+            "text": "sealed lunar sanctuary",
+            "cites": [
+              "elsweyr.L10.moon_temples",
+              "anequina.L1.mesa_field",
+              "anequina.L8.ridge_temples"
+            ]
+          },
+          {
+            "id": "tomb_of_the_moon_singers",
+            "text": "cliff-cut cantor crypts",
+            "cites": [
+              "elsweyr.L10.moon_temples",
+              "anequina.L1.mesa_field",
+              "anequina.L8.ridge_temples"
+            ]
+          },
+          {
+            "id": "moonstone_mines",
+            "text": "shafts abandoned when seams thinned",
+            "cites": [
+              "anequina.L1.moonstone_quarries",
+              "anequina.L5.moonstone_cutting"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "ne_quin_al",
+            "text": "the plateau city older than the kingdoms",
+            "cites": [
+              "elsweyr.L11.old_kingdoms",
+              "anequina.L1.mesa_field"
+            ]
+          },
+          {
+            "id": "hill_of_swords",
+            "text": "a battlefield of the old wars where blades still stand planted",
+            "cites": [
+              "elsweyr.L11.old_kingdoms",
+              "anequina.L9.northern_crown"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "anequina.L5.moonstone_cutting"
+          ]
+        },
+        "smith": {
+          "weight": 2,
+          "why": [
+            "anequina.L5.moonstone_cutting"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "anequina.L5.moonstone_cutting"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "anequina.L5.herds"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "anequina.L5.caravan_trade",
+            "anequina.L6.dune_wheel"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 4,
+          "why": [
+            "anequina.L5.caravan_trade",
+            "anequina.L6.dune_wheel",
+            "anequina.L8.ridge_temples"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "anequina.L6.riverhold_seat"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "anequina.L6.riverhold_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "anequina.L8.ridge_temples"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "anequina.L6.riverhold_seat",
+            "anequina.L9.northern_crown"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "anequina.L6.riverhold_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "anequina.L9.northern_crown"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "anequina.L6.riverhold_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "anequina.L8.ridge_temples"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "anequina.L9.canyon_rebels",
+            "anequina.L6.riverhold_seat",
+            "anequina.L6.seaplace"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "anequina.L10.renrijra_canyons"
+          ]
+        },
+        "prisoner": {
+          "weight": 2,
+          "why": [
+            "anequina.L10.moonstone_mines"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "anequina.L7.herders_poor"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "anequina.L6.riverhold_seat",
+            "anequina.L6.seaplace",
+            "anequina.L7.well_clans"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "anequina.L6.riverhold_seat",
+            "anequina.L6.seaplace"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "anequina.L6.riverhold_seat",
+            "anequina.L6.seaplace"
+          ]
+        },
+        "elder": {
+          "weight": 4,
+          "why": [
+            "anequina.L7.well_clans",
+            "anequina.L7.caravan_masters_rich",
+            "anequina.L11.ne_quin_al"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "anequina.L7.herders_poor"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "anequina.L10.vault_of_the_heavenly_scourge"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "anequina.L10.vault_of_the_heavenly_scourge"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "anequina.L5.caravan_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "anequina.L9.northern_crown"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "anequina.L10.tomb_of_the_moon_singers"
+        ],
+        "ruin": [
+          "anequina.L10.tomb_of_the_moon_singers",
+          "anequina.L11.hill_of_swords",
+          "anequina.L8.ridge_temples"
+        ],
+        "dwemer": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "falmer": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "bandit": [
+          "anequina.L5.well_tolls"
+        ],
+        "fort": [
+          "anequina.L6.orcrest_mesa"
+        ],
+        "military": [
+          "anequina.L9.canyon_rebels"
+        ],
+        "mage": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "vampire": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "necromancer": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "hagraven": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "forsworn": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "beast": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "ice": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "mine": [
+          "anequina.L5.moonstone_cutting",
+          "anequina.L10.moonstone_mines"
+        ],
+        "grove": [
+          "anequina.L4.steppe"
+        ],
+        "smuggler": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "cave": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "giant": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "dragon": [
+          "anequina.L10.prowls_edge_scour"
+        ],
+        "tower": [
+          "anequina.L10.renrijra_canyons"
+        ],
+        "cabin": [
+          "anequina.L6.riverhold_seat"
+        ],
+        "wreck": [
+          "anequina.L5.caravan_trade"
+        ]
+      }
+    },
+    "rimmen": {
+      "truth": "Rimmen is the eastern march facing Cyrodiil, where the plateau breaks into sandstone cliffs above the Nibenay border. Rimmen is a city of artisans built on a cliff directly over its own necropolis; Alabaster quarries the pale gypsum stone that dresses the southern temples. Border trade, Imperial grudges and Thalmor customs men make the market rich and nervous. The Baandari peddlers camp at the city's edge, Hakoshae keeps the masked tombs of the old magnates, and every caravan crossing to Cyrodiil pays someone twice.",
+      "layers": {
+        "L1": [
+          {
+            "id": "rimmen_cliff",
+            "text": "a sandstone cliff with tomb galleries cut in its base",
+            "cites": []
+          },
+          {
+            "id": "alabaster_beds",
+            "text": "pale gypsum stone beds",
+            "cites": []
+          },
+          {
+            "id": "eastern_canyons",
+            "text": "red border canyons",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "border_winds",
+            "text": "drier than Cyrodiil, wetter than central Anequina",
+            "cites": [
+              "elsweyr.L2.rain_shadow_north",
+              "rimmen.L1.rimmen_cliff"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "cliff_springs",
+            "text": "perennial springs under the city cliff",
+            "cites": [
+              "elsweyr.L3.scarp_springs",
+              "rimmen.L1.rimmen_cliff"
+            ]
+          },
+          {
+            "id": "border_creek",
+            "text": "a creek along the Nibenay line",
+            "cites": [
+              "elsweyr.L3.scarp_springs",
+              "rimmen.L1.eastern_canyons"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "savanna_edge",
+            "text": "tall grass and acacia",
+            "cites": [
+              "rimmen.L2.border_winds"
+            ]
+          },
+          {
+            "id": "canyon_floor",
+            "text": "cottonwood and red sand",
+            "cites": [
+              "rimmen.L1.eastern_canyons",
+              "rimmen.L3.border_creek"
+            ]
+          },
+          {
+            "id": "quarry_scar",
+            "text": "white stone dust and bare terraces",
+            "cites": [
+              "rimmen.L1.alabaster_beds"
+            ]
+          },
+          {
+            "id": "cliff_spring_garden",
+            "text": "hanging vines and palms",
+            "cites": [
+              "rimmen.L1.rimmen_cliff",
+              "rimmen.L3.cliff_springs"
+            ]
+          },
+          {
+            "id": "sugar_patch",
+            "text": "small wet-pocket cane plots",
+            "cites": [
+              "rimmen.L3.border_creek"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "artisan_trade",
+            "text": "carpets, glass and metalwork",
+            "cites": [
+              "elsweyr.L5.rimmen_crafts",
+              "rimmen.L3.cliff_springs"
+            ]
+          },
+          {
+            "id": "alabaster_quarry",
+            "text": "dressed white stone for temples",
+            "cites": [
+              "rimmen.L1.alabaster_beds"
+            ]
+          },
+          {
+            "id": "border_market",
+            "text": "Nibenay-Elsweyr caravan exchange",
+            "cites": [
+              "elsweyr.L5.caravans",
+              "rimmen.L3.border_creek"
+            ]
+          },
+          {
+            "id": "customs",
+            "text": "border tariffs and inspections",
+            "cites": [
+              "elsweyr.L5.rimmen_crafts",
+              "rimmen.L2.border_winds"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "rimmen_seat",
+            "text": "the cliff city over springs and tombs",
+            "cites": [
+              "rimmen.L1.rimmen_cliff",
+              "rimmen.L3.cliff_springs"
+            ]
+          },
+          {
+            "id": "alabaster_town",
+            "text": "quarry town",
+            "cites": [
+              "rimmen.L1.alabaster_beds",
+              "rimmen.L5.alabaster_quarry"
+            ]
+          },
+          {
+            "id": "hakoshae_tombs",
+            "text": "village of tomb-keepers",
+            "cites": [
+              "elsweyr.L8.masked_dead",
+              "rimmen.L1.rimmen_cliff"
+            ]
+          },
+          {
+            "id": "meir_lynmount",
+            "text": "border waystation town",
+            "cites": [
+              "rimmen.L5.border_market"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "master_artisans",
+            "text": "hereditary guild families",
+            "cites": [
+              "rimmen.L5.artisan_trade",
+              "rimmen.L6.rimmen_seat"
+            ]
+          },
+          {
+            "id": "quarry_labourers",
+            "text": "stonecutters of Alabaster",
+            "cites": [
+              "rimmen.L5.alabaster_quarry"
+            ]
+          },
+          {
+            "id": "baandari_camp",
+            "text": "peddler tents outside the gate",
+            "cites": [
+              "elsweyr.L7.baandari",
+              "rimmen.L5.border_market"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "mask_makers",
+            "text": "carvers of funerary masks for the necropolis",
+            "cites": [
+              "elsweyr.L8.masked_dead",
+              "rimmen.L7.master_artisans"
+            ]
+          },
+          {
+            "id": "imperial_grudge",
+            "text": "long memory of Septim and potentate garrisons",
+            "cites": [
+              "elsweyr.L8.outsiders",
+              "rimmen.L6.rimmen_seat"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "customs_war",
+            "text": "Thalmor customs officers against Imperial and Baandari smugglers",
+            "cites": [
+              "elsweyr.L9.thalmor_in_court",
+              "rimmen.L5.customs",
+              "rimmen.L5.border_market"
+            ]
+          },
+          {
+            "id": "rimmen_claim",
+            "text": "old Cyrodiil border claims",
+            "cites": [
+              "elsweyr.L9.rimmen_border",
+              "rimmen.L6.rimmen_seat"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "rimmen_necropolis",
+            "text": "the vast city of the masked dead beneath Rimmen",
+            "cites": [
+              "elsweyr.L10.necropolis_cities",
+              "rimmen.L1.rimmen_cliff",
+              "rimmen.L8.mask_makers"
+            ]
+          },
+          {
+            "id": "mask_thieves",
+            "text": "grave robbers selling ancestral masks abroad",
+            "cites": [
+              "rimmen.L1.rimmen_cliff",
+              "rimmen.L8.mask_makers",
+              "rimmen.L9.customs_war"
+            ]
+          },
+          {
+            "id": "quarry_undercuts",
+            "text": "collapsed galleries under Alabaster",
+            "cites": [
+              "rimmen.L1.alabaster_beds",
+              "rimmen.L5.alabaster_quarry"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "rimmen_traded_hands",
+            "text": "the city passed between crowns, Empire and potentates",
+            "cites": [
+              "elsweyr.L11.old_kingdoms",
+              "elsweyr.L11.septim_plantations",
+              "rimmen.L6.rimmen_seat"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 2,
+          "why": [
+            "rimmen.L5.alabaster_quarry"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 2,
+          "why": [
+            "rimmen.L5.border_market"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 2,
+          "why": [
+            "rimmen.L4.canyon_floor"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "rimmen.L5.border_market"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "rimmen.L5.artisan_trade",
+            "rimmen.L5.border_market"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "rimmen.L5.artisan_trade",
+            "rimmen.L5.border_market"
+          ]
+        },
+        "bookseller": {
+          "weight": 4,
+          "why": [
+            "rimmen.L5.artisan_trade",
+            "rimmen.L5.alabaster_quarry",
+            "rimmen.L5.border_market"
+          ]
+        },
+        "innkeeper": {
+          "weight": 3,
+          "why": [
+            "rimmen.L6.rimmen_seat",
+            "rimmen.L6.hakoshae_tombs"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "rimmen.L6.rimmen_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "rimmen.L5.artisan_trade"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "rimmen.L5.alabaster_quarry"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "rimmen.L6.rimmen_seat"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "rimmen.L6.rimmen_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "rimmen.L7.master_artisans"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "rimmen.L6.rimmen_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "rimmen.L8.mask_makers"
+          ]
+        },
+        "guard": {
+          "weight": 4,
+          "why": [
+            "rimmen.L9.customs_war",
+            "rimmen.L9.rimmen_claim",
+            "rimmen.L6.rimmen_seat"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "rimmen.L10.mask_thieves"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "rimmen.L7.master_artisans"
+          ]
+        },
+        "beggar": {
+          "weight": 1,
+          "why": [
+            "rimmen.L7.master_artisans"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "rimmen.L6.rimmen_seat",
+            "rimmen.L6.alabaster_town",
+            "rimmen.L6.hakoshae_tombs"
+          ]
+        },
+        "housekeeper": {
+          "weight": 4,
+          "why": [
+            "rimmen.L6.rimmen_seat",
+            "rimmen.L6.alabaster_town",
+            "rimmen.L6.meir_lynmount"
+          ]
+        },
+        "child": {
+          "weight": 4,
+          "why": [
+            "rimmen.L6.rimmen_seat",
+            "rimmen.L6.alabaster_town",
+            "rimmen.L6.meir_lynmount"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "rimmen.L7.master_artisans"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "rimmen.L5.artisan_trade",
+            "rimmen.L7.quarry_labourers"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "rimmen.L5.artisan_trade",
+            "rimmen.L7.quarry_labourers"
+          ]
+        },
+        "guild_leader": {
+          "weight": 3,
+          "why": [
+            "rimmen.L7.master_artisans",
+            "rimmen.L10.mask_thieves"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 3,
+          "why": [
+            "rimmen.L7.master_artisans",
+            "rimmen.L10.mask_thieves"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 4,
+          "why": [
+            "rimmen.L5.border_market",
+            "rimmen.L7.master_artisans",
+            "rimmen.L10.mask_thieves"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "rimmen.L9.customs_war"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "rimmen.L11.rimmen_traded_hands"
+        ],
+        "ruin": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "dwemer": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "falmer": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "bandit": [
+          "rimmen.L10.mask_thieves"
+        ],
+        "fort": [
+          "rimmen.L9.rimmen_claim",
+          "rimmen.L6.meir_lynmount"
+        ],
+        "military": [
+          "rimmen.L9.customs_war",
+          "rimmen.L9.rimmen_claim"
+        ],
+        "mage": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "vampire": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "necromancer": [
+          "rimmen.L10.rimmen_necropolis",
+          "rimmen.L10.mask_thieves"
+        ],
+        "hagraven": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "forsworn": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "beast": [
+          "rimmen.L4.cliff_spring_garden"
+        ],
+        "ice": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "mine": [
+          "rimmen.L5.artisan_trade"
+        ],
+        "grove": [
+          "rimmen.L4.savanna_edge"
+        ],
+        "smuggler": [
+          "rimmen.L10.mask_thieves"
+        ],
+        "cave": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "giant": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "dragon": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "tower": [
+          "rimmen.L10.rimmen_necropolis"
+        ],
+        "cabin": [
+          "rimmen.L6.rimmen_seat"
+        ],
+        "wreck": [
+          "rimmen.L5.artisan_trade"
+        ]
+      }
+    },
+    "torval": {
+      "truth": "Torval is the heart of the Khajiit faith, where arched aqueduct water from the escarpment springs meets the first cane fields of the south. Torval is the Mane's city of concentric rings and twin golden domes, where pilgrims climb the processional road at moonrise. Temples of the moons stand on every sandstone knoll around it, the oldest abandoned to dro-m'Athra spirits. The southern crown courts the Mane, the Thalmor court both, and the sugar exchange duty keeps the city fed. It is the place every Khajiit means when they say home.",
+      "layers": {
+        "L1": [
+          {
+            "id": "scarp_foot",
+            "text": "the central escarpment's southern foot",
+            "cites": []
+          },
+          {
+            "id": "temple_outcrops",
+            "text": "sandstone knolls rising out of the plain",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "moon_sky",
+            "text": "crystalline night skies over the knolls",
+            "cites": [
+              "elsweyr.L2.clear_nights",
+              "torval.L1.temple_outcrops"
+            ]
+          },
+          {
+            "id": "wet_season_edge",
+            "text": "the northern reach of the summer rains",
+            "cites": [
+              "elsweyr.L2.bay_monsoon",
+              "torval.L1.scarp_foot"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "aqueduct_water",
+            "text": "spring water carried on stone arches",
+            "cites": [
+              "elsweyr.L3.old_aqueduct",
+              "torval.L1.scarp_foot"
+            ]
+          },
+          {
+            "id": "torval_cisterns",
+            "text": "the palace and temple fountains",
+            "cites": [
+              "torval.L1.scarp_foot",
+              "torval.L3.aqueduct_water"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "aqueduct_green",
+            "text": "green strip of palms and grass under the arches",
+            "cites": [
+              "torval.L3.aqueduct_water"
+            ]
+          },
+          {
+            "id": "temple_knoll",
+            "text": "incense trees and stone terraces",
+            "cites": [
+              "torval.L1.temple_outcrops",
+              "torval.L2.moon_sky"
+            ]
+          },
+          {
+            "id": "first_cane",
+            "text": "northernmost moon-sugar rows",
+            "cites": [
+              "elsweyr.L4.cane_plain",
+              "torval.L2.wet_season_edge"
+            ]
+          },
+          {
+            "id": "palm_court_gardens",
+            "text": "ornamental pools inside the city ring",
+            "cites": [
+              "torval.L3.torval_cisterns"
+            ]
+          },
+          {
+            "id": "savanna_park",
+            "text": "open lowland grass",
+            "cites": [
+              "torval.L1.scarp_foot",
+              "torval.L2.wet_season_edge"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "pilgrim_trade",
+            "text": "hostels, offerings and guides",
+            "cites": [
+              "torval.L3.torval_cisterns",
+              "torval.L4.temple_knoll"
+            ]
+          },
+          {
+            "id": "sugar_exchange",
+            "text": "the round exchange that fixes province sugar prices",
+            "cites": [
+              "elsweyr.L5.moon_sugar",
+              "torval.L4.first_cane"
+            ]
+          },
+          {
+            "id": "temple_crafts",
+            "text": "brass lamps, masks and incense",
+            "cites": [
+              "torval.L4.temple_knoll"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "torval_capital",
+            "text": "the Mane's city of rings",
+            "cites": [
+              "elsweyr.L6.torval_seat",
+              "torval.L3.torval_cisterns"
+            ]
+          },
+          {
+            "id": "pilgrim_villages",
+            "text": "waystations along the processional road",
+            "cites": [
+              "torval.L4.aqueduct_green",
+              "torval.L5.pilgrim_trade"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "priestly_quarter",
+            "text": "moon-priests and clan speakers",
+            "cites": [
+              "elsweyr.L8.moons_path",
+              "torval.L6.torval_capital"
+            ]
+          },
+          {
+            "id": "court_ohmes",
+            "text": "near-elven courtiers and scribes",
+            "cites": [
+              "elsweyr.L7.furstock_roles",
+              "torval.L6.torval_capital"
+            ]
+          },
+          {
+            "id": "pilgrim_poor",
+            "text": "supplicants camped by the outer arches",
+            "cites": [
+              "torval.L5.pilgrim_trade"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "mane_seat",
+            "text": "the spiritual centre of the Lunar Lattice",
+            "cites": [
+              "elsweyr.L8.moons_path",
+              "torval.L6.torval_capital"
+            ]
+          },
+          {
+            "id": "two_moons_procession",
+            "text": "the double-full-moon pilgrimage",
+            "cites": [
+              "torval.L2.moon_sky",
+              "elsweyr.L8.night_life",
+              "torval.L8.mane_seat"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "mane_succession",
+            "text": "an ageing Mane and rival claimants",
+            "cites": [
+              "torval.L8.mane_seat"
+            ]
+          },
+          {
+            "id": "southern_crown_pressure",
+            "text": "royal leverage over the exchange",
+            "cites": [
+              "elsweyr.L9.two_crowns",
+              "torval.L5.sugar_exchange"
+            ]
+          },
+          {
+            "id": "thalmor_moon_claim",
+            "text": "envoys claiming credit for ending the Void Nights",
+            "cites": [
+              "elsweyr.L9.thalmor_in_court",
+              "torval.L8.mane_seat"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "old_temples",
+            "text": "ancient lunar sanctuaries on the knolls",
+            "cites": [
+              "elsweyr.L10.moon_temples",
+              "torval.L1.temple_outcrops"
+            ]
+          },
+          {
+            "id": "dro_mathra_in_old_temples",
+            "text": "bent spirits haunting the sealed shrines",
+            "cites": [
+              "elsweyr.L10.dro_mathra_haunts",
+              "torval.L1.temple_outcrops",
+              "torval.L9.mane_succession"
+            ]
+          },
+          {
+            "id": "sugar_slingers",
+            "text": "illicit dealers beneath the exchange",
+            "cites": [
+              "elsweyr.L5.skooma",
+              "torval.L4.first_cane",
+              "torval.L5.sugar_exchange"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "void_nights_memory",
+            "text": "the two years without moons, when temple bells were rung at the hour they vanished",
+            "cites": [
+              "elsweyr.L11.void_nights",
+              "torval.L8.mane_seat"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "fisher": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "merchant": {
+          "weight": 3,
+          "why": [
+            "torval.L5.pilgrim_trade",
+            "torval.L6.pilgrim_villages"
+          ]
+        },
+        "tailor": {
+          "weight": 3,
+          "why": [
+            "torval.L5.pilgrim_trade",
+            "torval.L7.court_ohmes"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "torval.L5.pilgrim_trade",
+            "torval.L5.temple_crafts"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "torval.L6.pilgrim_villages"
+          ]
+        },
+        "cook": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "torval.L6.pilgrim_villages"
+          ]
+        },
+        "bard": {
+          "weight": 2,
+          "why": [
+            "torval.L8.mane_seat"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "torval.L5.temple_crafts"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "torval.L6.torval_capital",
+            "torval.L7.court_ohmes"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "torval.L6.torval_capital",
+            "torval.L7.court_ohmes"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "torval.L7.court_ohmes"
+          ]
+        },
+        "court_wizard": {
+          "weight": 4,
+          "why": [
+            "torval.L7.court_ohmes",
+            "torval.L8.mane_seat",
+            "torval.L8.two_moons_procession"
+          ]
+        },
+        "mage": {
+          "weight": 2,
+          "why": [
+            "torval.L8.two_moons_procession"
+          ]
+        },
+        "guard": {
+          "weight": 1,
+          "why": [
+            "torval.L9.mane_succession"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "torval.L10.old_temples"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "torval.L7.priestly_quarter"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "torval.L7.pilgrim_poor"
+          ]
+        },
+        "citizen": {
+          "weight": 3,
+          "why": [
+            "torval.L6.pilgrim_villages",
+            "torval.L7.priestly_quarter"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "torval.L7.priestly_quarter"
+          ]
+        },
+        "child": {
+          "weight": 1,
+          "why": [
+            "torval.L7.priestly_quarter"
+          ]
+        },
+        "elder": {
+          "weight": 3,
+          "why": [
+            "torval.L7.priestly_quarter",
+            "torval.L8.mane_seat"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "torval.L7.pilgrim_poor"
+          ]
+        },
+        "worker": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "torval.L7.priestly_quarter"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "torval.L7.priestly_quarter"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "torval.L5.pilgrim_trade"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "torval.L9.mane_succession"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "torval.L10.old_temples"
+        ],
+        "ruin": [
+          "torval.L10.dro_mathra_in_old_temples"
+        ],
+        "dwemer": [
+          "torval.L10.old_temples"
+        ],
+        "falmer": [
+          "torval.L10.old_temples"
+        ],
+        "bandit": [
+          "torval.L10.old_temples"
+        ],
+        "fort": [
+          "torval.L9.mane_succession"
+        ],
+        "military": [
+          "torval.L9.mane_succession"
+        ],
+        "mage": [
+          "torval.L8.two_moons_procession"
+        ],
+        "vampire": [
+          "torval.L10.old_temples"
+        ],
+        "necromancer": [
+          "torval.L10.old_temples"
+        ],
+        "hagraven": [
+          "torval.L10.old_temples"
+        ],
+        "forsworn": [
+          "torval.L10.old_temples"
+        ],
+        "beast": [
+          "torval.L4.palm_court_gardens"
+        ],
+        "ice": [
+          "torval.L10.old_temples"
+        ],
+        "mine": [
+          "torval.L5.pilgrim_trade"
+        ],
+        "grove": [
+          "torval.L4.aqueduct_green"
+        ],
+        "smuggler": [
+          "torval.L10.old_temples"
+        ],
+        "cave": [
+          "torval.L10.old_temples"
+        ],
+        "giant": [
+          "torval.L10.old_temples"
+        ],
+        "dragon": [
+          "torval.L10.old_temples"
+        ],
+        "tower": [
+          "torval.L10.old_temples"
+        ],
+        "cabin": [
+          "torval.L6.torval_capital"
+        ],
+        "wreck": [
+          "torval.L5.pilgrim_trade"
+        ]
+      }
+    },
+    "pellitine": {
+      "truth": "Pellitine is the wet south-west: river terraces and floodplain cane fields running into the Tenmar jungle and the Valenwood gate. Corinthe is the garden city of canals; the plantation towns with Imperial names are Septim-era foundations where Khajiit cutters work for old families. The Tenmar's limestone karst hides moon-temples, the Halls of Colossus and the Temple of Agamanus. Summer floods bring wealth and marsh fever. Smugglers take the sugar downriver by night, and the Green Pact border means Bosmer buy their grain and timber here.",
+      "layers": {
+        "L1": [
+          {
+            "id": "river_terraces",
+            "text": "deep alluvial silts along the southern rivers",
+            "cites": []
+          },
+          {
+            "id": "tenmar_sinkholes",
+            "text": "limestone karst and caves under the jungle",
+            "cites": []
+          },
+          {
+            "id": "colossus_scarp",
+            "text": "the Dwemer delve's rock face",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "flood_summers",
+            "text": "monsoon deluges that swell the rivers",
+            "cites": [
+              "elsweyr.L2.bay_monsoon",
+              "pellitine.L1.river_terraces"
+            ]
+          },
+          {
+            "id": "jungle_fog",
+            "text": "steaming morning mists under the canopy",
+            "cites": [
+              "elsweyr.L2.bay_monsoon",
+              "pellitine.L1.tenmar_sinkholes"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "three_rivers",
+            "text": "the braided sugar rivers",
+            "cites": [
+              "elsweyr.L3.pellitine_rivers",
+              "pellitine.L1.river_terraces"
+            ]
+          },
+          {
+            "id": "canal_city_water",
+            "text": "Corinthe's stepped canals",
+            "cites": [
+              "pellitine.L1.river_terraces",
+              "pellitine.L3.three_rivers"
+            ]
+          },
+          {
+            "id": "cenotes",
+            "text": "deep limestone sinkhole pools",
+            "cites": [
+              "pellitine.L1.tenmar_sinkholes"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "cane_floodplain",
+            "text": "rich silt cane fields",
+            "cites": [
+              "elsweyr.L4.cane_plain",
+              "pellitine.L3.three_rivers"
+            ]
+          },
+          {
+            "id": "gallery_forest",
+            "text": "riverside trees",
+            "cites": [
+              "pellitine.L3.three_rivers"
+            ]
+          },
+          {
+            "id": "tenmar_canopy",
+            "text": "dense jungle of apes, wasps and serpents",
+            "cites": [
+              "elsweyr.L4.jungle_life",
+              "pellitine.L2.jungle_fog"
+            ]
+          },
+          {
+            "id": "cenote_glade",
+            "text": "fern-ringed sinkholes",
+            "cites": [
+              "pellitine.L3.cenotes"
+            ]
+          },
+          {
+            "id": "terraced_gardens",
+            "text": "Corinthe's flower and spice terraces",
+            "cites": [
+              "pellitine.L3.canal_city_water"
+            ]
+          },
+          {
+            "id": "moon_sugar_meadow",
+            "text": "glowing full-moon cane beds",
+            "cites": [
+              "pellitine.L3.three_rivers",
+              "elsweyr.L4.moon_sugar_bloom",
+              "pellitine.L4.cane_floodplain"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "plantations",
+            "text": "great sugar estates",
+            "cites": [
+              "elsweyr.L5.moon_sugar",
+              "pellitine.L4.cane_floodplain"
+            ]
+          },
+          {
+            "id": "boil_houses",
+            "text": "cane-crushing and crystallising mills",
+            "cites": [
+              "pellitine.L4.cane_floodplain",
+              "pellitine.L5.plantations"
+            ]
+          },
+          {
+            "id": "pact_trade",
+            "text": "grain and timber sold to Valenwood across the border",
+            "cites": [
+              "elsweyr.L5.senchal_port",
+              "pellitine.L4.gallery_forest"
+            ]
+          },
+          {
+            "id": "river_fishing",
+            "text": "barge and net fisheries",
+            "cites": [
+              "pellitine.L3.three_rivers"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "corinthe_seat",
+            "text": "the southern garden-and-canal seat; Ein Meirvale, Greenhall and Portneu View as plantation towns; Tenmar Forest and Darvulk Haven at the jungle edge",
+            "cites": [
+              "pellitine.L3.canal_city_water",
+              "pellitine.L5.plantations"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "planter_houses",
+            "text": "old estate dynasties",
+            "cites": [
+              "elsweyr.L7.planters_and_cutters",
+              "elsweyr.L7.imperial_descendants",
+              "pellitine.L5.plantations"
+            ]
+          },
+          {
+            "id": "cutter_debt",
+            "text": "cane-cutters bound by seasonal tallies",
+            "cites": [
+              "pellitine.L5.boil_houses"
+            ]
+          },
+          {
+            "id": "pact_merchants",
+            "text": "border factors trading with Bosmer",
+            "cites": [
+              "pellitine.L5.pact_trade"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "garden_priests",
+            "text": "Corinthe's garden temple liturgy",
+            "cites": [
+              "elsweyr.L8.khajiit_gods",
+              "pellitine.L6.corinthe_seat"
+            ]
+          },
+          {
+            "id": "fever_shrines",
+            "text": "riverside shrines to S'rendarr against summer marsh fever",
+            "cites": [
+              "elsweyr.L8.khajiit_gods",
+              "pellitine.L2.flood_summers"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "planter_vs_crown",
+            "text": "planters resisting the southern crown's sugar duty",
+            "cites": [
+              "elsweyr.L9.sugar_tax",
+              "pellitine.L7.planter_houses"
+            ]
+          },
+          {
+            "id": "cutter_unrest",
+            "text": "strikes and cane-burnings in the boil-houses",
+            "cites": [
+              "pellitine.L7.cutter_debt"
+            ]
+          },
+          {
+            "id": "valenwood_gate",
+            "text": "border fort and customs tension",
+            "cites": [
+              "pellitine.L5.pact_trade"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "halls_of_colossus",
+            "text": "the Dwemer delve and its giant frame",
+            "cites": [
+              "elsweyr.L10.colossus_hall",
+              "pellitine.L1.colossus_scarp"
+            ]
+          },
+          {
+            "id": "temple_of_agamanus",
+            "text": "jungle-swallowed lunar temple",
+            "cites": [
+              "elsweyr.L10.moon_temples",
+              "pellitine.L1.tenmar_sinkholes"
+            ]
+          },
+          {
+            "id": "plantation_dens",
+            "text": "hidden skooma boil-caves",
+            "cites": [
+              "elsweyr.L10.skooma_dens",
+              "pellitine.L4.cane_floodplain",
+              "pellitine.L9.cutter_unrest"
+            ]
+          },
+          {
+            "id": "river_wrecks",
+            "text": "sunken sugar barges",
+            "cites": [
+              "pellitine.L1.river_terraces",
+              "pellitine.L3.three_rivers"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "septim_towns",
+            "text": "Imperial-named plantation foundations",
+            "cites": [
+              "elsweyr.L11.septim_plantations",
+              "pellitine.L6.corinthe_seat"
+            ]
+          },
+          {
+            "id": "flu_villages",
+            "text": "overgrown Second Era villages emptied by plague",
+            "cites": [
+              "elsweyr.L11.knahaten_flu",
+              "pellitine.L1.tenmar_sinkholes"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "pellitine.L5.plantations"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "pellitine.L5.plantations"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "pellitine.L5.plantations"
+          ]
+        },
+        "farmer": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "farmhand": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "lumberjack": {
+          "weight": 4,
+          "why": [
+            "pellitine.L5.boil_houses",
+            "pellitine.L5.pact_trade",
+            "pellitine.L4.gallery_forest"
+          ]
+        },
+        "miller": {
+          "weight": 3,
+          "why": [
+            "pellitine.L5.boil_houses",
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "mill_hand": {
+          "weight": 3,
+          "why": [
+            "pellitine.L5.boil_houses",
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "woodcutter": {
+          "weight": 4,
+          "why": [
+            "pellitine.L5.boil_houses",
+            "pellitine.L5.pact_trade",
+            "pellitine.L4.gallery_forest"
+          ]
+        },
+        "fisher": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.river_fishing"
+          ]
+        },
+        "hunter": {
+          "weight": 2,
+          "why": [
+            "pellitine.L4.gallery_forest"
+          ]
+        },
+        "butcher": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.river_fishing"
+          ]
+        },
+        "fletcher": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "alchemist": {
+          "weight": 2,
+          "why": [
+            "pellitine.L4.terraced_gardens"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.pact_trade"
+          ]
+        },
+        "bookseller": {
+          "weight": 3,
+          "why": [
+            "pellitine.L5.pact_trade",
+            "pellitine.L8.garden_priests"
+          ]
+        },
+        "innkeeper": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.river_fishing"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "pellitine.L5.plantations"
+          ]
+        },
+        "priest": {
+          "weight": 3,
+          "why": [
+            "pellitine.L8.garden_priests",
+            "pellitine.L8.fever_shrines"
+          ]
+        },
+        "jarl": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "steward": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "housecarl": {
+          "weight": 1,
+          "why": [
+            "pellitine.L7.planter_houses"
+          ]
+        },
+        "court_wizard": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "pellitine.L8.garden_priests"
+          ]
+        },
+        "guard": {
+          "weight": 3,
+          "why": [
+            "pellitine.L9.valenwood_gate",
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "fence": {
+          "weight": 1,
+          "why": [
+            "pellitine.L10.halls_of_colossus"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "pellitine.L7.planter_houses"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "citizen": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "housekeeper": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "child": {
+          "weight": 2,
+          "why": [
+            "pellitine.L6.corinthe_seat"
+          ]
+        },
+        "elder": {
+          "weight": 2,
+          "why": [
+            "pellitine.L7.planter_houses"
+          ]
+        },
+        "labourer": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.boil_houses"
+          ]
+        },
+        "worker": {
+          "weight": 2,
+          "why": [
+            "pellitine.L5.boil_houses"
+          ]
+        },
+        "guild_leader": {
+          "weight": 1,
+          "why": [
+            "pellitine.L7.planter_houses"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 1,
+          "why": [
+            "pellitine.L7.planter_houses"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 1,
+          "why": [
+            "pellitine.L5.plantations"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "pellitine.L9.planter_vs_crown"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "ruin": [
+          "pellitine.L8.fever_shrines"
+        ],
+        "dwemer": [
+          "pellitine.L10.halls_of_colossus",
+          "pellitine.L1.colossus_scarp"
+        ],
+        "falmer": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "bandit": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "fort": [
+          "pellitine.L9.valenwood_gate"
+        ],
+        "military": [
+          "pellitine.L9.valenwood_gate"
+        ],
+        "mage": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "vampire": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "necromancer": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "hagraven": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "forsworn": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "beast": [
+          "pellitine.L4.tenmar_canopy",
+          "pellitine.L4.terraced_gardens",
+          "pellitine.L10.plantation_dens"
+        ],
+        "ice": [
+          "pellitine.L10.river_wrecks",
+          "pellitine.L4.terraced_gardens"
+        ],
+        "mine": [
+          "pellitine.L5.plantations"
+        ],
+        "grove": [
+          "pellitine.L4.cenote_glade"
+        ],
+        "smuggler": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "cave": [
+          "pellitine.L10.plantation_dens",
+          "pellitine.L1.tenmar_sinkholes"
+        ],
+        "giant": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "dragon": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "tower": [
+          "pellitine.L10.halls_of_colossus"
+        ],
+        "cabin": [
+          "pellitine.L5.boil_houses",
+          "pellitine.L5.river_fishing"
+        ],
+        "wreck": [
+          "pellitine.L10.river_wrecks"
+        ]
+      }
+    },
+    "senchal": {
+      "truth": "Senchal is the sugar coast on Topal Bay: a loud, sweet-smelling port stepping down from a hill palace through tiered warehouses to a wide stone quay where everything Elsweyr grows leaves by ship and everything it lacks arrives. Customs men, sugar boilers, sailors, skooma lords and Thalmor envoys share the same crowded streets. Coves along the headlands hide smugglers and wrecks; dragonscours on the bluffs recall the Second Era dragon war. It is rich, crowded and the least trusted city in Elsweyr.",
+      "layers": {
+        "L1": [
+          {
+            "id": "harbour_bay",
+            "text": "a deep sheltered bay on Topal Bay south of Torval",
+            "cites": []
+          },
+          {
+            "id": "headlands",
+            "text": "limestone and sandstone coastal bluffs",
+            "cites": []
+          }
+        ],
+        "L2": [
+          {
+            "id": "sea_breeze",
+            "text": "warm salt winds into the port",
+            "cites": [
+              "elsweyr.L2.bay_monsoon",
+              "senchal.L1.harbour_bay"
+            ]
+          },
+          {
+            "id": "storm_season",
+            "text": "late-summer bay typhoons",
+            "cites": [
+              "elsweyr.L2.bay_monsoon",
+              "senchal.L1.headlands"
+            ]
+          }
+        ],
+        "L3": [
+          {
+            "id": "harbour_wells",
+            "text": "brackish lower wells and palace rain cisterns",
+            "cites": [
+              "senchal.L1.harbour_bay"
+            ]
+          },
+          {
+            "id": "river_mouth",
+            "text": "the sugar river estuary",
+            "cites": [
+              "elsweyr.L3.pellitine_rivers",
+              "senchal.L1.harbour_bay"
+            ]
+          }
+        ],
+        "L4": [
+          {
+            "id": "cove_beach",
+            "text": "sandy smuggler coves",
+            "cites": [
+              "senchal.L1.harbour_bay"
+            ]
+          },
+          {
+            "id": "headland_scrub",
+            "text": "wind-bent coastal brush",
+            "cites": [
+              "senchal.L1.headlands",
+              "senchal.L2.sea_breeze"
+            ]
+          },
+          {
+            "id": "coastal_cane",
+            "text": "estuary cane flats",
+            "cites": [
+              "elsweyr.L4.cane_plain",
+              "senchal.L3.river_mouth"
+            ]
+          },
+          {
+            "id": "mangrove_mouth",
+            "text": "brackish mangrove shallows",
+            "cites": [
+              "senchal.L3.river_mouth"
+            ]
+          },
+          {
+            "id": "reef_shallows",
+            "text": "warm bay reefs",
+            "cites": [
+              "senchal.L1.harbour_bay"
+            ]
+          }
+        ],
+        "L5": [
+          {
+            "id": "sugar_export",
+            "text": "the great sugar warehouses and quays",
+            "cites": [
+              "elsweyr.L5.senchal_port",
+              "senchal.L4.coastal_cane"
+            ]
+          },
+          {
+            "id": "customs_house",
+            "text": "harbour tariffs",
+            "cites": [
+              "senchal.L1.harbour_bay",
+              "senchal.L5.sugar_export"
+            ]
+          },
+          {
+            "id": "shipwrights",
+            "text": "cove shipyards and ropewalks",
+            "cites": [
+              "senchal.L1.harbour_bay"
+            ]
+          }
+        ],
+        "L6": [
+          {
+            "id": "senchal_seat",
+            "text": "the tiered port capital",
+            "cites": [
+              "senchal.L1.harbour_bay",
+              "senchal.L5.sugar_export"
+            ]
+          },
+          {
+            "id": "cove_villages",
+            "text": "fishing and landing villages",
+            "cites": [
+              "senchal.L1.headlands",
+              "senchal.L4.cove_beach"
+            ]
+          },
+          {
+            "id": "potentates_retreat",
+            "text": "the old governor's cliffside estate",
+            "cites": [
+              "elsweyr.L7.imperial_descendants",
+              "senchal.L1.headlands"
+            ]
+          }
+        ],
+        "L7": [
+          {
+            "id": "palace_hill",
+            "text": "merchant princes and court factors on the upper terraces",
+            "cites": [
+              "senchal.L5.sugar_export",
+              "senchal.L6.senchal_seat"
+            ]
+          },
+          {
+            "id": "lower_sweet",
+            "text": "the boil-district slum by the docks",
+            "cites": [
+              "elsweyr.L7.skooma_poor",
+              "senchal.L5.sugar_export"
+            ]
+          },
+          {
+            "id": "sailors_and_boilers",
+            "text": "dock guilds and stokers",
+            "cites": [
+              "senchal.L5.shipwrights",
+              "senchal.L6.senchal_seat"
+            ]
+          }
+        ],
+        "L8": [
+          {
+            "id": "khenarthi_winds",
+            "text": "sailors' cliff shrines to the wind goddess",
+            "cites": [
+              "elsweyr.L8.khajiit_gods",
+              "senchal.L2.sea_breeze"
+            ]
+          }
+        ],
+        "L9": [
+          {
+            "id": "skooma_lords",
+            "text": "syndicate bosses running the night docks",
+            "cites": [
+              "elsweyr.L5.skooma",
+              "senchal.L7.lower_sweet"
+            ]
+          },
+          {
+            "id": "thalmor_embassy",
+            "text": "Dominion naval inspectors",
+            "cites": [
+              "elsweyr.L9.thalmor_in_court",
+              "senchal.L7.palace_hill"
+            ]
+          },
+          {
+            "id": "customs_corruption",
+            "text": "bribed manifests and night lighters",
+            "cites": [
+              "elsweyr.L9.sugar_tax",
+              "senchal.L5.customs_house"
+            ]
+          }
+        ],
+        "L10": [
+          {
+            "id": "the_tangle",
+            "text": "the undercity of old sugar tunnels beneath Senchal",
+            "cites": [
+              "senchal.L1.harbour_bay",
+              "senchal.L9.skooma_lords"
+            ]
+          },
+          {
+            "id": "smuggler_coves",
+            "text": "sea-caves and wrecks along the bluffs",
+            "cites": [
+              "elsweyr.L10.smuggler_coves",
+              "senchal.L1.headlands",
+              "senchal.L9.customs_corruption"
+            ]
+          },
+          {
+            "id": "twin_scours",
+            "text": "north and south headland dragon bone-fields",
+            "cites": [
+              "elsweyr.L10.dragon_scours",
+              "senchal.L1.headlands"
+            ]
+          }
+        ],
+        "L11": [
+          {
+            "id": "south_guard",
+            "text": "a ruined Imperial coastal fort overlooking the bay",
+            "cites": [
+              "elsweyr.L11.septim_plantations",
+              "senchal.L1.headlands"
+            ]
+          }
+        ]
+      },
+      "jobs": {
+        "miner": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "smith": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "jeweler": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "farmer": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "farmhand": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "lumberjack": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "miller": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "mill_hand": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "woodcutter": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "fisher": {
+          "weight": 4,
+          "why": [
+            "senchal.L5.customs_house",
+            "senchal.L5.shipwrights",
+            "senchal.L3.harbour_wells"
+          ]
+        },
+        "hunter": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "butcher": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "fletcher": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "alchemist": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "merchant": {
+          "weight": 2,
+          "why": [
+            "senchal.L5.customs_house"
+          ]
+        },
+        "tailor": {
+          "weight": 2,
+          "why": [
+            "senchal.L7.palace_hill"
+          ]
+        },
+        "bookseller": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "innkeeper": {
+          "weight": 4,
+          "why": [
+            "senchal.L5.customs_house",
+            "senchal.L6.senchal_seat",
+            "senchal.L6.cove_villages"
+          ]
+        },
+        "cook": {
+          "weight": 2,
+          "why": [
+            "senchal.L6.cove_villages"
+          ]
+        },
+        "server": {
+          "weight": 2,
+          "why": [
+            "senchal.L6.senchal_seat"
+          ]
+        },
+        "bard": {
+          "weight": 1,
+          "why": [
+            "senchal.L5.sugar_export"
+          ]
+        },
+        "priest": {
+          "weight": 2,
+          "why": [
+            "senchal.L8.khenarthi_winds"
+          ]
+        },
+        "jarl": {
+          "weight": 3,
+          "why": [
+            "senchal.L6.senchal_seat",
+            "senchal.L7.palace_hill"
+          ]
+        },
+        "steward": {
+          "weight": 3,
+          "why": [
+            "senchal.L6.senchal_seat",
+            "senchal.L7.palace_hill"
+          ]
+        },
+        "housecarl": {
+          "weight": 2,
+          "why": [
+            "senchal.L7.palace_hill"
+          ]
+        },
+        "court_wizard": {
+          "weight": 3,
+          "why": [
+            "senchal.L7.palace_hill",
+            "senchal.L6.senchal_seat"
+          ]
+        },
+        "mage": {
+          "weight": 1,
+          "why": [
+            "senchal.L8.khenarthi_winds"
+          ]
+        },
+        "guard": {
+          "weight": 2,
+          "why": [
+            "senchal.L6.senchal_seat"
+          ]
+        },
+        "fence": {
+          "weight": 2,
+          "why": [
+            "senchal.L10.smuggler_coves"
+          ]
+        },
+        "prisoner": {
+          "weight": 1,
+          "why": [
+            "senchal.L7.palace_hill"
+          ]
+        },
+        "beggar": {
+          "weight": 2,
+          "why": [
+            "senchal.L7.lower_sweet"
+          ]
+        },
+        "citizen": {
+          "weight": 4,
+          "why": [
+            "senchal.L6.senchal_seat",
+            "senchal.L6.cove_villages",
+            "senchal.L7.lower_sweet"
+          ]
+        },
+        "housekeeper": {
+          "weight": 3,
+          "why": [
+            "senchal.L7.lower_sweet",
+            "senchal.L6.senchal_seat"
+          ]
+        },
+        "child": {
+          "weight": 3,
+          "why": [
+            "senchal.L7.lower_sweet",
+            "senchal.L6.senchal_seat"
+          ]
+        },
+        "elder": {
+          "weight": 1,
+          "why": [
+            "senchal.L7.palace_hill"
+          ]
+        },
+        "labourer": {
+          "weight": 3,
+          "why": [
+            "senchal.L7.lower_sweet",
+            "senchal.L7.sailors_and_boilers"
+          ]
+        },
+        "worker": {
+          "weight": 3,
+          "why": [
+            "senchal.L7.lower_sweet",
+            "senchal.L7.sailors_and_boilers"
+          ]
+        },
+        "guild_leader": {
+          "weight": 2,
+          "why": [
+            "senchal.L7.sailors_and_boilers"
+          ]
+        },
+        "guild_trainer": {
+          "weight": 2,
+          "why": [
+            "senchal.L7.sailors_and_boilers"
+          ]
+        },
+        "guild_vendor": {
+          "weight": 2,
+          "why": [
+            "senchal.L7.sailors_and_boilers"
+          ]
+        },
+        "survivor": {
+          "weight": 1,
+          "why": [
+            "senchal.L9.skooma_lords"
+          ]
+        }
+      },
+      "dungeon_themes": {
+        "barrow": [
+          "senchal.L10.the_tangle"
+        ],
+        "ruin": [
+          "senchal.L11.south_guard",
+          "senchal.L8.khenarthi_winds"
+        ],
+        "dwemer": [
+          "senchal.L10.the_tangle"
+        ],
+        "falmer": [
+          "senchal.L10.the_tangle"
+        ],
+        "bandit": [
+          "senchal.L10.smuggler_coves"
+        ],
+        "fort": [
+          "senchal.L9.skooma_lords"
+        ],
+        "military": [
+          "senchal.L9.thalmor_embassy"
+        ],
+        "mage": [
+          "senchal.L10.the_tangle"
+        ],
+        "vampire": [
+          "senchal.L10.the_tangle"
+        ],
+        "necromancer": [
+          "senchal.L10.the_tangle"
+        ],
+        "hagraven": [
+          "senchal.L10.the_tangle"
+        ],
+        "forsworn": [
+          "senchal.L10.the_tangle"
+        ],
+        "beast": [
+          "senchal.L10.smuggler_coves"
+        ],
+        "ice": [
+          "senchal.L10.smuggler_coves"
+        ],
+        "mine": [
+          "senchal.L5.sugar_export"
+        ],
+        "grove": [
+          "senchal.L4.mangrove_mouth"
+        ],
+        "smuggler": [
+          "senchal.L10.smuggler_coves",
+          "senchal.L5.customs_house",
+          "senchal.L5.shipwrights"
+        ],
+        "cave": [
+          "senchal.L10.smuggler_coves"
+        ],
+        "giant": [
+          "senchal.L10.the_tangle"
+        ],
+        "dragon": [
+          "senchal.L10.twin_scours"
+        ],
+        "tower": [
+          "senchal.L10.the_tangle"
+        ],
+        "cabin": [
+          "senchal.L6.cove_villages"
+        ],
+        "wreck": [
+          "senchal.L10.smuggler_coves"
+        ]
+      }
+    }
+  },
+  "forbidden": [
+    {
+      "kind": "crop_on_micro",
+      "a": "moon_sugar_plantation",
+      "b": "anequina.L1.badland_gullies",
+      "reason": "Moon-sugar cane requires Pellitine's monsoon flood silts and cannot grow in Anequina's arid badland gullies"
+    },
+    {
+      "kind": "industry_without_resource",
+      "a": "timber_sawmill",
+      "b": "anequina.L1.small_erg",
+      "reason": "Anequina's western sand erg has no forest canopy for timber milling"
+    },
+    {
+      "kind": "shrine_without_faith",
+      "a": "imperial_talos_shrine",
+      "b": "torval.L8.mane_seat",
+      "reason": "Torval's sacred rings honour the Lunar Lattice and Riddle'Thar under the Mane, not Imperial Talos worship"
+    },
+    {
+      "kind": "inhabitant_without_l10",
+      "a": "nordic_draugr",
+      "b": "elsweyr.L10.moon_temples",
+      "reason": "Ancient Khajiit moon-temples are haunted by dro-m'Athra and masked dead, not Nordic draugr"
+    }
+  ],
+  "jobs": {
+    "miner": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.moonstone",
+        "elsweyr.L5.senchal_port",
+        "elsweyr.L1.tenmar_karst"
+      ]
+    },
+    "smith": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L5.moonstone",
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "jeweler": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L5.moonstone",
+        "elsweyr.L5.rimmen_crafts"
+      ]
+    },
+    "farmer": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "farmhand": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "lumberjack": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "miller": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "mill_hand": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "woodcutter": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L5.senchal_port"
+      ]
+    },
+    "fisher": {
+      "weight": 1,
+      "why": [
+        "elsweyr.L5.moon_sugar"
+      ]
+    },
+    "hunter": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L4.canyon_hunters"
+      ]
+    },
+    "butcher": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.herding_hides",
+        "elsweyr.L4.steppe_grazers",
+        "elsweyr.L4.canyon_hunters"
+      ]
+    },
+    "fletcher": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L5.senchal_port",
+        "elsweyr.L4.canyon_hunters"
+      ]
+    },
+    "alchemist": {
+      "weight": 1,
+      "why": [
+        "elsweyr.L5.moon_sugar"
+      ]
+    },
+    "merchant": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.skooma",
+        "elsweyr.L5.caravans",
+        "elsweyr.L5.rimmen_crafts"
+      ]
+    },
+    "tailor": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.herding_hides",
+        "elsweyr.L5.rimmen_crafts",
+        "elsweyr.L7.baandari"
+      ]
+    },
+    "bookseller": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.rimmen_crafts",
+        "elsweyr.L6.busy_centres",
+        "elsweyr.L8.night_life"
+      ]
+    },
+    "innkeeper": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.skooma",
+        "elsweyr.L6.torval_seat",
+        "elsweyr.L6.failing_places"
+      ]
+    },
+    "cook": {
+      "weight": 1,
+      "why": [
+        "elsweyr.L5.moon_sugar"
+      ]
+    },
+    "server": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L5.skooma",
+        "elsweyr.L6.torval_seat"
+      ]
+    },
+    "bard": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L8.masked_dead"
+      ]
+    },
+    "priest": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L8.khajiit_gods",
+        "elsweyr.L8.masked_dead"
+      ]
+    },
+    "jarl": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L6.torval_seat",
+        "elsweyr.L6.busy_centres",
+        "elsweyr.L9.thalmor_in_court"
+      ]
+    },
+    "steward": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L6.torval_seat",
+        "elsweyr.L6.busy_centres"
+      ]
+    },
+    "housecarl": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L7.furstock_roles",
+        "elsweyr.L9.thalmor_in_court"
+      ]
+    },
+    "court_wizard": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L6.torval_seat",
+        "elsweyr.L6.busy_centres"
+      ]
+    },
+    "mage": {
+      "weight": 1,
+      "why": [
+        "elsweyr.L8.moons_path"
+      ]
+    },
+    "guard": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L9.rimmen_border",
+        "elsweyr.L6.torval_seat",
+        "elsweyr.L6.busy_centres"
+      ]
+    },
+    "fence": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L10.smuggler_coves"
+      ]
+    },
+    "prisoner": {
+      "weight": 1,
+      "why": [
+        "elsweyr.L7.clan_mothers"
+      ]
+    },
+    "beggar": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L7.skooma_poor",
+        "elsweyr.L6.failing_places"
+      ]
+    },
+    "citizen": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L6.towns_on_wells",
+        "elsweyr.L6.towns_on_rivers",
+        "elsweyr.L6.torval_seat"
+      ]
+    },
+    "housekeeper": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L7.imperial_descendants",
+        "elsweyr.L6.towns_on_wells",
+        "elsweyr.L6.towns_on_rivers"
+      ]
+    },
+    "child": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L7.imperial_descendants",
+        "elsweyr.L6.towns_on_wells",
+        "elsweyr.L6.towns_on_rivers"
+      ]
+    },
+    "elder": {
+      "weight": 3,
+      "why": [
+        "elsweyr.L7.clan_mothers",
+        "elsweyr.L11.old_kingdoms"
+      ]
+    },
+    "labourer": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.moonstone",
+        "elsweyr.L7.furstock_roles",
+        "elsweyr.L7.planters_and_cutters"
+      ]
+    },
+    "worker": {
+      "weight": 4,
+      "why": [
+        "elsweyr.L5.moonstone",
+        "elsweyr.L7.furstock_roles",
+        "elsweyr.L7.planters_and_cutters"
+      ]
+    },
+    "guild_leader": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L7.baandari"
+      ]
+    },
+    "guild_trainer": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L7.baandari"
+      ]
+    },
+    "guild_vendor": {
+      "weight": 2,
+      "why": [
+        "elsweyr.L7.baandari"
+      ]
+    },
+    "survivor": {
+      "weight": 1,
+      "why": [
+        "elsweyr.L9.two_crowns"
+      ]
+    }
+  },
+  "dungeon_themes": {
+    "barrow": [
+      "elsweyr.L11.union_by_marriage"
+    ],
+    "ruin": [
+      "elsweyr.L10.moon_temples",
+      "elsweyr.L8.khajiit_gods",
+      "elsweyr.L8.dark_spirits"
+    ],
+    "dwemer": [
+      "elsweyr.L10.colossus_hall",
+      "elsweyr.L1.dwemer_seam"
+    ],
+    "falmer": [
+      "elsweyr.L10.moon_temples"
+    ],
+    "bandit": [
+      "elsweyr.L10.renrijra_camps",
+      "elsweyr.L10.smuggler_coves",
+      "elsweyr.L5.skooma"
+    ],
+    "fort": [
+      "elsweyr.L9.rimmen_border",
+      "elsweyr.L6.busy_centres"
+    ],
+    "military": [
+      "elsweyr.L9.rimmen_border"
+    ],
+    "mage": [
+      "elsweyr.L10.moon_temples"
+    ],
+    "vampire": [
+      "elsweyr.L10.moon_temples"
+    ],
+    "necromancer": [
+      "elsweyr.L10.necropolis_cities",
+      "elsweyr.L8.masked_dead"
+    ],
+    "hagraven": [
+      "elsweyr.L10.moon_temples"
+    ],
+    "forsworn": [
+      "elsweyr.L10.moon_temples"
+    ],
+    "beast": [
+      "elsweyr.L10.renrijra_camps",
+      "elsweyr.L10.skooma_dens",
+      "elsweyr.L10.smuggler_coves"
+    ],
+    "ice": [
+      "elsweyr.L10.smuggler_coves",
+      "elsweyr.L2.lunar_lattice"
+    ],
+    "mine": [
+      "elsweyr.L5.moonstone",
+      "elsweyr.L5.senchal_port",
+      "elsweyr.L1.tenmar_karst"
+    ],
+    "grove": [
+      "elsweyr.L4.steppe_grazers"
+    ],
+    "smuggler": [
+      "elsweyr.L10.smuggler_coves"
+    ],
+    "cave": [
+      "elsweyr.L10.renrijra_camps",
+      "elsweyr.L10.skooma_dens",
+      "elsweyr.L1.tenmar_karst"
+    ],
+    "giant": [
+      "elsweyr.L10.colossus_hall",
+      "elsweyr.L4.jungle_life"
+    ],
+    "dragon": [
+      "elsweyr.L10.dragon_scours"
+    ],
+    "tower": [
+      "elsweyr.L10.moon_temples"
+    ],
+    "cabin": [
+      "elsweyr.L6.towns_on_wells"
+    ],
+    "wreck": [
+      "elsweyr.L10.smuggler_coves"
+    ]
+  }
+}

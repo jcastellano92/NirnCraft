@@ -1,46 +1,122 @@
 {
   "id": "skaal_village",
-  "base": "none",
+  "why": [
+    "skaal.L1.east_shore",
+    "skaal.L3.lake_fjalding_shore"
+  ],
   "sil": "yurt-ring-totem",
-  "reach": 45,
-  "radius": 45,
-  "overlay": "skaal",
-  "gates": [[0, 42]],
-  "landmarks": [
-    {"id": "stone_circle", "at": [0, 0], "size": [27, 27], "h": 10}
+  "base": "none",
+  "overlay": "skaal_village",
+  "radius": 42,
+  "reach": 54,
+  "gates": [
+    [
+      0,
+      40
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        42
+      ],
+      "overlay": "skaal_village"
+    },
+    {
+      "ring": [
+        21,
+        42
+      ],
+      "overlay": "skaal"
+    },
+    {
+      "ring": [
+        21,
+        42
+      ],
+      "overlay": "solstheim"
+    }
   ],
   "buildings": [
-    {"kind": "tent", "at": [0, -25], "face": "S", "size": [5, 7]},
-    {"kind": "tent", "at": [18, -18], "face": "W", "size": [5, 7]},
-    {"kind": "tent", "at": [25, 0], "face": "W", "size": [5, 7]},
-    {"kind": "tent", "at": [18, 18], "face": "W", "size": [5, 7]},
-    {"kind": "tent", "at": [0, 25], "face": "N", "size": [5, 7]},
-    {"kind": "tent", "at": [-18, 18], "face": "E", "size": [5, 7]},
-    {"kind": "tent", "at": [-25, 0], "face": "E", "size": [5, 7]},
-    {"kind": "tent", "at": [-18, -18], "face": "E", "size": [5, 7]},
-    {"kind": "longhouse", "at": [0, -38], "size": [13, 11], "face": "S", "flags": ["seat"], "name": "skaal_elders_firehouse"},
-    {"kind": "temple", "at": [-37, -20], "size": [9, 13], "face": "E", "name": "skaal_totem_hall"},
-    {"kind": "lumber", "at": [37, -24], "size": [7, 5], "face": "W", "name": "skaal_skinning_racks"}
+    {
+      "kind": "longhouse",
+      "use": "longhouse",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "skaal_village",
+      "name": "skaal_village_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        11,
+        32
+      ],
+      "face": "south",
+      "overlay": "skaal_village",
+      "name": "skaal_village_b_2"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "skaal_village",
+      "name": "skaal_village_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -28,
+        -20
+      ],
+      "face": "south",
+      "overlay": "skaal_village",
+      "name": "skaal_village_b_4"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "skaal_village",
+      "name": "skaal_village_b_5"
+    }
   ],
-  "nets": [
-    {"type": "path", "via": [[0, 44], [4, 36], [-3, 30], [0, 18]], "width": 3, "major": true, "tag": "gate"},
-    {"type": "loop", "at": [0, 0], "rx": 18, "rz": 18, "wobble": 1, "lobes": 3, "phase": 0.2, "width": 2, "rank": 1, "tag": "ring"},
-    {"type": "loop", "at": [0, 0], "rx": 34, "rz": 32, "wobble": 3, "lobes": 4, "phase": 0.8, "width": 2, "rank": 1, "tag": "ring"}
-  ],
-  "zones": [
-    {"at": [0, -34], "r": 12, "zone": "noble"},
-    {"at": [0, 0], "r": 24, "zone": "centre"}
-  ],
-  "fabric": {"radius": 42, "target": 0.4, "tier": 1},
   "features": [
-    {"type": "great_tree", "theme": "spruce", "at": [-28, 30]},
-    {"type": "memorial", "at": [28, 30]},
-    {"type": "well", "at": [-30, -34]},
-    {"type": "banners", "where": "gate"}
+    {
+      "type": "shrine",
+      "theme": "all_maker_wind_stone",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "skaal_hearth_brazier",
+      "count": 2
+    }
   ],
   "titles": {
-    "skaal_elders_firehouse": "The Elder's Firehouse",
-    "skaal_totem_hall": "Totem Hall",
-    "skaal_skinning_racks": "Skinning Racks"
+    "skaal_village_b_1": "The Greathall of the Skaal",
+    "skaal_village_b_2": "Shaman Storn's Hut",
+    "skaal_village_b_3": "Baldret's Nordic Forge",
+    "skaal_village_b_4": "Wulf Wild-Blood's Lodge",
+    "skaal_village_b_5": "Morwen's Hunter Cabin"
   }
 }

@@ -1,5 +1,10 @@
 {
   "id": "bruma",
+  "why": [
+    "jerall_mountains.L1.granite_caves",
+    "jerall_mountains.L2.snow_above_150",
+    "jerall_mountains.L6.bruma_on_the_pass"
+  ],
   "tint": {
     "wall": "minecraft:calcite",
     "wall2": "minecraft:white_terracotta",

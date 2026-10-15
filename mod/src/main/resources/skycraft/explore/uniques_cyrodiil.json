@@ -1,0 +1,4285 @@
+[
+  {
+    "id": "cyrodiil_heartlands_unique_1",
+    "name": "Crown-Guard Blade of Culanwe",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L1.ayleid_footings",
+      "heartlands.L11.white_gold_tower"
+    ],
+    "place": "aleswell",
+    "x": 771,
+    "z": 4495,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Left on a white marble plinth where the Rumare mist pools over Ayleid footings."
+  },
+  {
+    "id": "cyrodiil_heartlands_unique_2",
+    "name": "Chironasium Staff of Embers",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L1.ayleid_footings",
+      "heartlands.L11.white_gold_tower"
+    ],
+    "place": "pells_gate",
+    "x": 473,
+    "z": 6962,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Sealed in a brass case by an Arcane University proctor during the Oblivion Crisis."
+  },
+  {
+    "id": "cyrodiil_heartlands_unique_3",
+    "name": "Pelinal's Bridge-Vow Signet",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L1.ayleid_footings",
+      "heartlands.L11.white_gold_tower"
+    ],
+    "place": "roxey_inn",
+    "x": 1762,
+    "z": 4633,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Worn by an Imperial Watch captain who held the western bridgehead."
+  },
+  {
+    "id": "cyrodiil_heartlands_unique_4",
+    "name": "Red Ring Cohort Gladius",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L1.ayleid_footings",
+      "heartlands.L11.white_gold_tower"
+    ],
+    "place": "harms_folly",
+    "x": 2553,
+    "z": 4530,
+    "kind": "corpse",
+    "item": "skycraft:steel_greatsword",
+    "enchant": {
+      "sharpness": 3
+    },
+    "note": "Notched against Daedric iron along the sunken causeway of Lake Rumare."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_unique_1",
+    "name": "Battlehorn Castellan's Greatsword",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L11.battlehorn"
+    ],
+    "place": "brindle_home",
+    "x": -1391,
+    "z": 5805,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_mace",
+    "enchant": {
+      "smite": 3
+    },
+    "note": "Forged from Colovian karst-iron to hold the northwestern passes."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_unique_2",
+    "name": "Stendarr's Crosier of Chorrol",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L11.battlehorn"
+    ],
+    "place": "hackdirt",
+    "x": -1552,
+    "z": 5230,
+    "kind": "corpse",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Blessed beneath the Great Oak for the highland circuit healers."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_unique_3",
+    "name": "Wendir Crown-Seeker's Bow",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L11.battlehorn"
+    ],
+    "place": "odiil_farm",
+    "x": -1009,
+    "z": 4778,
+    "kind": "pedestal",
+    "item": "skycraft:iron_bow",
+    "enchant": {
+      "power": 3
+    },
+    "note": "Carved from ridge-pine by a scout mapping the ten ancestral Ayleid vaults."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_unique_4",
+    "name": "Hackdirt Watchman's Lantern-Blade",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L1.karst_valleys",
+      "colovian_highlands.L11.battlehorn"
+    ],
+    "place": "weatherleah",
+    "x": -1777,
+    "z": 5484,
+    "kind": "corpse",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Found beside a collapsed limestone sinkhole outside Hackdirt."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_unique_1",
+    "name": "Akaviri Oath-Blade of Pale Pass",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.sancre_tor_barrow",
+      "jerall_mountains.L11.reman_fortresses"
+    ],
+    "place": "bleakers_way",
+    "x": 1463,
+    "z": 3503,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_war_axe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Preserved in permafrost grease since Reman's Dragonguard sealed the pass."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_unique_2",
+    "name": "Sancre Tor Barrow-Cleaver",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.sancre_tor_barrow",
+      "jerall_mountains.L11.reman_fortresses"
+    ],
+    "place": "applewatch",
+    "x": 994,
+    "z": 2915,
+    "kind": "corpse",
+    "item": "skycraft:orcish_warhammer",
+    "enchant": {
+      "knockback": 2
+    },
+    "note": "Etched with the names of the northern pass-wardens who fell in the siege."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_unique_3",
+    "name": "Talos Standard-Bearer's Talisman",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.sancre_tor_barrow",
+      "jerall_mountains.L11.reman_fortresses"
+    ],
+    "place": "wildeye_stables",
+    "x": 1710,
+    "z": 2991,
+    "kind": "pedestal",
+    "item": "skycraft:steel_shield",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Carried from Bruma's ramparts to the Great Gate scar."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_unique_4",
+    "name": "Frostcrag Conduit Staff",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.sancre_tor_barrow",
+      "jerall_mountains.L11.reman_fortresses"
+    ],
+    "place": "cloud_ruler_temple",
+    "x": 1267,
+    "z": 2622,
+    "kind": "corpse",
+    "item": "skycraft:ancient_nord_greatsword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Charged by the high-altitude storms that break over the Jerall crest."
+  },
+  {
+    "id": "cyrodiil_great_forest_unique_1",
+    "name": "Vindasel Soul-Tethered Edge",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L1.ruin_dense_ridge",
+      "great_forest.L11.ayleid_heartwood"
+    ],
+    "place": "weye",
+    "x": -2,
+    "z": 5644,
+    "kind": "pedestal",
+    "item": "skycraft:staff_of_flames",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Resting on an Ayleid altar surrounded by shattered welkynd glass."
+  },
+  {
+    "id": "cyrodiil_great_forest_unique_2",
+    "name": "Weynon Priory Reliquary Amulet",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L1.ruin_dense_ridge",
+      "great_forest.L11.ayleid_heartwood"
+    ],
+    "place": "vlastarus",
+    "x": -429,
+    "z": 6640,
+    "kind": "corpse",
+    "item": "skycraft:staff_of_frostbite",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Hidden under the chapel flagstones when the Mythic Dawn raided the road."
+  },
+  {
+    "id": "cyrodiil_great_forest_unique_3",
+    "name": "Harcane Unicorn-Watcher's Bow",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L1.ruin_dense_ridge",
+      "great_forest.L11.ayleid_heartwood"
+    ],
+    "place": "priory_of_the_nine",
+    "x": -450,
+    "z": 7671,
+    "kind": "pedestal",
+    "item": "skycraft:staff_of_sparks",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Seasoned in Great Forest beech-smoke by an old forester."
+  },
+  {
+    "id": "cyrodiil_great_forest_unique_4",
+    "name": "Ceyatatar Worm-Hunter's Mace",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L1.ruin_dense_ridge",
+      "great_forest.L11.ayleid_heartwood"
+    ],
+    "place": "abandoned_orchard",
+    "x": -161,
+    "z": 6781,
+    "kind": "corpse",
+    "item": "skycraft:amulet_of_talos",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Carried by a Mages Guild battlemage into the forest necromancer war."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_unique_1",
+    "name": "Vahtacen Pillar-Key Staff",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L11.alessian_gates_chim_ghartok"
+    ],
+    "place": "cropsford",
+    "x": 2891,
+    "z": 6687,
+    "kind": "pedestal",
+    "item": "skycraft:amulet_of_talos",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Inscribed with the four elemental Ayleid verses of the sealed chamber."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_unique_2",
+    "name": "Corbolo Knight-of-the-Thorn Blade",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L11.alessian_gates_chim_ghartok"
+    ],
+    "place": "harluns_watch",
+    "x": 3670,
+    "z": 5457,
+    "kind": "corpse",
+    "item": "skycraft:amulet_of_talos",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Polished to a mirror shine for Count Indarys's chivalric order."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_unique_3",
+    "name": "Lake Arrius Cinder-Ward Amulet",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L11.alessian_gates_chim_ghartok"
+    ],
+    "place": "shurgak_clan_estate",
+    "x": 4097,
+    "z": 4205,
+    "kind": "pedestal",
+    "item": "skycraft:amulet_of_mara",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Recovered from the red volcanic caverns above the Corbolo headwaters."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_unique_4",
+    "name": "Shurgak Clan Honor-Hammer",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L1.valus_foothills",
+      "nibenay_basin.L11.alessian_gates_chim_ghartok"
+    ],
+    "place": "knights_of_the_thorn_lodge",
+    "x": 3498,
+    "z": 4963,
+    "kind": "corpse",
+    "item": "skycraft:amulet_of_mara",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Tempered in Valus foothill ore at Lord Rugdumph's estate forge."
+  },
+  {
+    "id": "cyrodiil_west_weald_unique_1",
+    "name": "Miscarcand Welkynd-Forged Dagger",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L1.deep_ayleid_vault",
+      "west_weald.L11.knightly_order_of_the_nine"
+    ],
+    "place": "shardrock",
+    "x": -2296,
+    "z": 6680,
+    "kind": "pedestal",
+    "item": "skycraft:amulet_of_talos",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Cooled in the subterranean springs beneath the King of Miscarcand's vault."
+  },
+  {
+    "id": "cyrodiil_west_weald_unique_2",
+    "name": "Priory of the Nine Reliquary Shield",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L1.deep_ayleid_vault",
+      "west_weald.L11.knightly_order_of_the_nine"
+    ],
+    "place": "linchal_grand_manor",
+    "x": -2619,
+    "z": 7370,
+    "kind": "corpse",
+    "item": "skycraft:amulet_of_talos",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Bears the eight-spoked star of the old knights in the southern woods."
+  },
+  {
+    "id": "cyrodiil_west_weald_unique_3",
+    "name": "Hassildor's Midnight Signet",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L1.deep_ayleid_vault",
+      "west_weald.L11.knightly_order_of_the_nine"
+    ],
+    "place": "grateful_pass_stables",
+    "x": -1874,
+    "z": 6794,
+    "kind": "pedestal",
+    "item": "skycraft:amulet_of_mara",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Found in a locked limestone cellar beneath Skingrad's vineyard terraces."
+  },
+  {
+    "id": "cyrodiil_west_weald_unique_4",
+    "name": "Julianos Scriptorium Rod",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L1.deep_ayleid_vault",
+      "west_weald.L11.knightly_order_of_the_nine"
+    ],
+    "place": "fort_hastrel",
+    "x": -3268,
+    "z": 6565,
+    "kind": "corpse",
+    "item": "skycraft:amulet_of_mara",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Bound in West Weald calfskin and tipped with meteoric glass."
+  },
+  {
+    "id": "cyrodiil_gold_coast_unique_1",
+    "name": "Kvatch Siege-Breaker's Broadsword",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L1.kvatch_hill",
+      "gold_coast.L11.kvatch_burned"
+    ],
+    "place": "brina_cross_inn",
+    "x": -3827,
+    "z": 8038,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Still darkened by Oblivion soot from the barricades of Castle Kvatch."
+  },
+  {
+    "id": "cyrodiil_gold_coast_unique_2",
+    "name": "Garlas Malatar Meridian Bow",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L1.kvatch_hill",
+      "gold_coast.L11.kvatch_burned"
+    ],
+    "place": "gottshaw_inn",
+    "x": -3143,
+    "z": 7889,
+    "kind": "corpse",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Gilded in seaside Ayleid bronze that never tarnishes in Abecean salt-spray."
+  },
+  {
+    "id": "cyrodiil_gold_coast_unique_3",
+    "name": "Anvil Lighthouse Keeper's Talisman",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L1.kvatch_hill",
+      "gold_coast.L11.kvatch_burned"
+    ],
+    "place": "the_withered_rose",
+    "x": -4145,
+    "z": 8511,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Blessed at the Great Chapel of Dibella for ships rounding the headland."
+  },
+  {
+    "id": "cyrodiil_gold_coast_unique_4",
+    "name": "Crowhaven Blood-Hunter's Silver Blade",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L1.kvatch_hill",
+      "gold_coast.L11.kvatch_burned"
+    ],
+    "place": "marjas_mill",
+    "x": -2620,
+    "z": 7668,
+    "kind": "corpse",
+    "item": "skycraft:steel_greatsword",
+    "enchant": {
+      "sharpness": 3
+    },
+    "note": "Left on the parapet overlooking the Gold Coast cliffs."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_unique_1",
+    "name": "Wenyandawik Crown-Guard Mace",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L1.riverbank_caves",
+      "nibenay_valley.L11.alessian_gates_altadoon_mnem"
+    ],
+    "place": "faregyl_inn",
+    "x": 459,
+    "z": 7579,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_mace",
+    "enchant": {
+      "smite": 3
+    },
+    "note": "Pulled from the willow-silt of an Ayleid vault north of Bravil."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_unique_2",
+    "name": "Fort Grief Challenger's Axe",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L1.riverbank_caves",
+      "nibenay_valley.L11.alessian_gates_altadoon_mnem"
+    ],
+    "place": "inn_of_ill_omen",
+    "x": 687,
+    "z": 7754,
+    "kind": "corpse",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Won in a grim manhunt across the island battlements of Fort Grief."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_unique_3",
+    "name": "Lucky Old Lady's Copper Token",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L1.riverbank_caves",
+      "nibenay_valley.L11.alessian_gates_altadoon_mnem"
+    ],
+    "place": "lunar_fang_docks",
+    "x": 1636,
+    "z": 8099,
+    "kind": "pedestal",
+    "item": "skycraft:iron_bow",
+    "enchant": {
+      "power": 3
+    },
+    "note": "Tucked beneath the canal-steps where Bravil's ferrymen pray for fair water."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_unique_4",
+    "name": "Harcane Reed-Fletched Longbow",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L1.riverbank_caves",
+      "nibenay_valley.L11.alessian_gates_altadoon_mnem"
+    ],
+    "place": "abbey_of_the_eight",
+    "x": 472,
+    "z": 8259,
+    "kind": "corpse",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Strung with waxed river-sinew for the Nibenay Valley mist."
+  },
+  {
+    "id": "cyrodiil_blackwood_unique_1",
+    "name": "Nenalata Last-King's Scepter",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L1.sinking_ruins",
+      "blackwood.L10.sunken_ayleid"
+    ],
+    "place": "blankenmarch",
+    "x": 3811,
+    "z": 9632,
+    "kind": "pedestal",
+    "item": "skycraft:ebony_war_axe",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Rests upon the half-sunken marble dais of the last Ayleid king."
+  },
+  {
+    "id": "cyrodiil_blackwood_unique_2",
+    "name": "Telepe Highwayman's Cutlass",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L1.sinking_ruins",
+      "blackwood.L10.sunken_ayleid"
+    ],
+    "place": "border_watch",
+    "x": 2699,
+    "z": 9638,
+    "kind": "corpse",
+    "item": "skycraft:orcish_warhammer",
+    "enchant": {
+      "knockback": 2
+    },
+    "note": "Hidden in Black-Brugo's counting-room before the midnight split."
+  },
+  {
+    "id": "cyrodiil_blackwood_unique_3",
+    "name": "White Stallion Knight's Lance-Blade",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L1.sinking_ruins",
+      "blackwood.L10.sunken_ayleid"
+    ],
+    "place": "waters_edge",
+    "x": 2986,
+    "z": 9608,
+    "kind": "pedestal",
+    "item": "skycraft:steel_shield",
+    "enchant": {
+      "unbreaking": 3
+    },
+    "note": "Awarded by Count Marius Caro for clearing the Blackwood river roads."
+  },
+  {
+    "id": "cyrodiil_blackwood_unique_4",
+    "name": "Malada Sun-Bird Amulet",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L1.sinking_ruins",
+      "blackwood.L10.sunken_ayleid"
+    ],
+    "place": "imperial_bridge_inn",
+    "x": 3872,
+    "z": 8175,
+    "kind": "corpse",
+    "item": "skycraft:ancient_nord_greatsword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Pried from the vine-choked keystone wall in the eastern fens."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_1",
+    "name": "Jerall Mountains Relic #1",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L2.valley_inversion",
+      "jerall_mountains.L4.alpine_spruce"
+    ],
+    "place": "jerall_mountains_delve_1_hagraven_lair",
+    "x": -3280,
+    "z": 1584,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 1 Hagraven Lair in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_2",
+    "name": "Jerall Mountains Relic #2",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L3.snowmelt_streams",
+      "jerall_mountains.L4.scree_heath"
+    ],
+    "place": "jerall_mountains_delve_2_sixth_house_base",
+    "x": -1872,
+    "z": 2000,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 2 Sixth House Base in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_3",
+    "name": "Jerall Mountains Relic #3",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L3.bruma_cisterns",
+      "jerall_mountains.L4.snowfield"
+    ],
+    "place": "jerall_mountains_delve_3_barrow",
+    "x": -2512,
+    "z": 2096,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 3 Barrow in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_4",
+    "name": "Jerall Mountains Relic #4",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L4.alpine_spruce",
+      "jerall_mountains.L4.hot_spring_hollow"
+    ],
+    "place": "jerall_mountains_delve_4_dwemer_ruin",
+    "x": -1424,
+    "z": 2160,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 4 Dwemer Ruin in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_5",
+    "name": "Jerall Mountains Relic #5",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L4.scree_heath",
+      "jerall_mountains.L5.pass_trade"
+    ],
+    "place": "jerall_mountains_delve_5_shipwreck",
+    "x": -1616,
+    "z": 2224,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 5 Shipwreck in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_6",
+    "name": "Jerall Mountains Relic #6",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L4.snowfield",
+      "jerall_mountains.L5.silver_mines"
+    ],
+    "place": "jerall_mountains_delve_6_lighthouse",
+    "x": -2608,
+    "z": 2288,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Jerall Mountains Delve 6 Lighthouse in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_7",
+    "name": "Jerall Mountains Relic #7",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L4.hot_spring_hollow",
+      "jerall_mountains.L5.goat_and_fur"
+    ],
+    "place": "jerall_mountains_delve_7_giant_camp",
+    "x": 2544,
+    "z": 2320,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 7 Giant Camp in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_8",
+    "name": "Jerall Mountains Relic #8",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L5.pass_trade",
+      "jerall_mountains.L5.smuggling"
+    ],
+    "place": "jerall_mountains_delve_8_dragon_lair",
+    "x": -1104,
+    "z": 2384,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Jerall Mountains Delve 8 Dragon Lair in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_9",
+    "name": "Jerall Mountains Relic #9",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L5.silver_mines",
+      "jerall_mountains.L6.bruma_on_the_pass"
+    ],
+    "place": "jerall_mountains_delve_9_kolskeggr_mine",
+    "x": 1776,
+    "z": 2416,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 9 Kolskeggr Mine in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_10",
+    "name": "Jerall Mountains Relic #10",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L5.goat_and_fur",
+      "jerall_mountains.L6.foothill_villages"
+    ],
+    "place": "jerall_mountains_delve_10_bleak_falls_barrow",
+    "x": -2960,
+    "z": 2480,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 10 Bleak Falls Barrow in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_11",
+    "name": "Jerall Mountains Relic #11",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L5.smuggling",
+      "jerall_mountains.L6.mine_hamlets"
+    ],
+    "place": "jerall_mountains_delve_11_ice_cave",
+    "x": -304,
+    "z": 2512,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 11 Ice Cave in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_12",
+    "name": "Jerall Mountains Relic #12",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L6.bruma_on_the_pass",
+      "jerall_mountains.L7.nord_imperial_mix"
+    ],
+    "place": "jerall_mountains_delve_12_sixth_house_base",
+    "x": 2320,
+    "z": 2544,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 12 Sixth House Base in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_13",
+    "name": "Jerall Mountains Relic #13",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L6.foothill_villages",
+      "jerall_mountains.L7.miner_debt"
+    ],
+    "place": "jerall_mountains_delve_13_barrow",
+    "x": -2608,
+    "z": 2608,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 13 Barrow in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_14",
+    "name": "Jerall Mountains Relic #14",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L6.mine_hamlets",
+      "jerall_mountains.L8.talos_first"
+    ],
+    "place": "jerall_mountains_delve_14_dwemer_ruin",
+    "x": 112,
+    "z": 2640,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 14 Dwemer Ruin in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_15",
+    "name": "Jerall Mountains Relic #15",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L7.nord_imperial_mix",
+      "jerall_mountains.L8.dragon_blood_lore"
+    ],
+    "place": "jerall_mountains_delve_15_bandit_camp",
+    "x": 2960,
+    "z": 2672,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 15 Bandit Camp in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_16",
+    "name": "Jerall Mountains Relic #16",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L7.miner_debt",
+      "jerall_mountains.L9.pass_tolls"
+    ],
+    "place": "jerall_mountains_delve_16_imperial_camp",
+    "x": -1424,
+    "z": 2736,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Jerall Mountains Delve 16 Imperial Camp in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_17",
+    "name": "Jerall Mountains Relic #17",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L8.talos_first",
+      "jerall_mountains.L9.blades_without_emperor"
+    ],
+    "place": "jerall_mountains_delve_17_watchtower",
+    "x": 1584,
+    "z": 2768,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 17 Watchtower in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_18",
+    "name": "Jerall Mountains Relic #18",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L8.dragon_blood_lore",
+      "jerall_mountains.L10.family_crypts"
+    ],
+    "place": "jerall_mountains_delve_18_mage_tower",
+    "x": -2512,
+    "z": 2832,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Jerall Mountains Delve 18 Mage Tower in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_19",
+    "name": "Jerall Mountains Relic #19",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L9.pass_tolls",
+      "jerall_mountains.L10.sancre_tor_barrow"
+    ],
+    "place": "jerall_mountains_delve_19_grove",
+    "x": 592,
+    "z": 2864,
+    "kind": "shrine_offering",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 19 Grove in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_20",
+    "name": "Jerall Mountains Relic #20",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L9.blades_without_emperor",
+      "jerall_mountains.L10.mage_on_the_crag"
+    ],
+    "place": "jerall_mountains_delve_20_cabin",
+    "x": -3344,
+    "z": 2928,
+    "kind": "locked_coffer",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 20 Cabin in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_21",
+    "name": "Jerall Mountains Relic #21",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.family_crypts",
+      "jerall_mountains.L11.reman_fortresses"
+    ],
+    "place": "jerall_mountains_delve_21_shipwreck",
+    "x": -144,
+    "z": 2960,
+    "kind": "weapon_rack",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 21 Shipwreck in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_22",
+    "name": "Jerall Mountains Relic #22",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.sancre_tor_barrow",
+      "jerall_mountains.L11.pass_battles"
+    ],
+    "place": "jerall_mountains_delve_22_lighthouse",
+    "x": 3120,
+    "z": 2992,
+    "kind": "sarcophagus",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Jerall Mountains Delve 22 Lighthouse in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_23",
+    "name": "Jerall Mountains Relic #23",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L10.mage_on_the_crag",
+      "jerall_mountains.L11.gate_at_bruma"
+    ],
+    "place": "jerall_mountains_delve_23_giant_camp",
+    "x": -272,
+    "z": 3056,
+    "kind": "scholar_satchel",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 23 Giant Camp in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_24",
+    "name": "Jerall Mountains Relic #24",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L11.reman_fortresses",
+      "cyrodiil.L1.jerall_wall"
+    ],
+    "place": "jerall_mountains_delve_24_dragon_lair",
+    "x": -3024,
+    "z": 3120,
+    "kind": "legion_strongbox",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 24 Dragon Lair in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_jerall_mountains_relic_25",
+    "name": "Jerall Mountains Relic #25",
+    "region": "jerall_mountains",
+    "why": [
+      "jerall_mountains.L11.pass_battles",
+      "cyrodiil.L1.valus_ridge"
+    ],
+    "place": "jerall_mountains_delve_25_kolskeggr_mine",
+    "x": 912,
+    "z": 3152,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Jerall Mountains Delve 25 Kolskeggr Mine in Jerall Mountains."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_1",
+    "name": "Colovian Highlands Relic #1",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L2.upland_wind",
+      "colovian_highlands.L4.sheep_downs"
+    ],
+    "place": "colovian_highlands_delve_1_akaviri_fort",
+    "x": -3600,
+    "z": 2992,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 1 Akaviri Fort in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_2",
+    "name": "Colovian Highlands Relic #2",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L3.sinking_streams",
+      "colovian_highlands.L4.pine_ridges"
+    ],
+    "place": "colovian_highlands_delve_2_hagraven_lair",
+    "x": -1712,
+    "z": 3344,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 2 Hagraven Lair in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_3",
+    "name": "Colovian Highlands Relic #3",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L3.spring_villages",
+      "colovian_highlands.L4.karst_scrub"
+    ],
+    "place": "colovian_highlands_delve_3_ice_cave",
+    "x": -304,
+    "z": 3440,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 3 Ice Cave in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_4",
+    "name": "Colovian Highlands Relic #4",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L4.sheep_downs",
+      "colovian_highlands.L4.spring_glen"
+    ],
+    "place": "colovian_highlands_delve_4_sixth_house_base",
+    "x": -432,
+    "z": 3536,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 4 Sixth House Base in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_5",
+    "name": "Colovian Highlands Relic #5",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L4.pine_ridges",
+      "colovian_highlands.L5.wool_and_horses"
+    ],
+    "place": "colovian_highlands_delve_5_barrow",
+    "x": -560,
+    "z": 3632,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 5 Barrow in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_6",
+    "name": "Colovian Highlands Relic #6",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L4.karst_scrub",
+      "colovian_highlands.L5.iron_mines"
+    ],
+    "place": "colovian_highlands_delve_6_dwemer_ruin",
+    "x": -336,
+    "z": 3728,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Colovian Highlands Delve 6 Dwemer Ruin in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_7",
+    "name": "Colovian Highlands Relic #7",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L4.spring_glen",
+      "colovian_highlands.L5.chorrol_market"
+    ],
+    "place": "colovian_highlands_delve_7_imperial_camp",
+    "x": -112,
+    "z": 3824,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 7 Imperial Camp in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_8",
+    "name": "Colovian Highlands Relic #8",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L5.wool_and_horses",
+      "colovian_highlands.L6.chorrol_crossroads"
+    ],
+    "place": "colovian_highlands_delve_8_mage_tower",
+    "x": 48,
+    "z": 3920,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Colovian Highlands Delve 8 Mage Tower in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_9",
+    "name": "Colovian Highlands Relic #9",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L5.iron_mines",
+      "colovian_highlands.L6.spring_hamlets"
+    ],
+    "place": "colovian_highlands_delve_9_grove",
+    "x": -3472,
+    "z": 4048,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 9 Grove in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_10",
+    "name": "Colovian Highlands Relic #10",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L5.chorrol_market",
+      "colovian_highlands.L6.closed_villages"
+    ],
+    "place": "colovian_highlands_delve_10_shipwreck",
+    "x": -3216,
+    "z": 4144,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 10 Shipwreck in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_11",
+    "name": "Colovian Highlands Relic #11",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L6.chorrol_crossroads",
+      "colovian_highlands.L7.colovian_pride"
+    ],
+    "place": "colovian_highlands_delve_11_lighthouse",
+    "x": -2928,
+    "z": 4240,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 11 Lighthouse in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_12",
+    "name": "Colovian Highlands Relic #12",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L6.spring_hamlets",
+      "colovian_highlands.L7.guild_town"
+    ],
+    "place": "colovian_highlands_delve_12_giant_camp",
+    "x": -2704,
+    "z": 4336,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 12 Giant Camp in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_13",
+    "name": "Colovian Highlands Relic #13",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L6.closed_villages",
+      "colovian_highlands.L8.stendarr_chapel"
+    ],
+    "place": "colovian_highlands_delve_13_dragon_lair",
+    "x": -2544,
+    "z": 4432,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 13 Dragon Lair in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_14",
+    "name": "Colovian Highlands Relic #14",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L7.colovian_pride",
+      "colovian_highlands.L8.oak_reverence"
+    ],
+    "place": "colovian_highlands_delve_14_kolskeggr_mine",
+    "x": -2416,
+    "z": 4528,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 14 Kolskeggr Mine in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_15",
+    "name": "Colovian Highlands Relic #15",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L7.guild_town",
+      "colovian_highlands.L9.guild_rivalry"
+    ],
+    "place": "colovian_highlands_delve_15_bleak_falls_barrow",
+    "x": -2416,
+    "z": 4624,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 15 Bleak Falls Barrow in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_16",
+    "name": "Colovian Highlands Relic #16",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L8.stendarr_chapel",
+      "colovian_highlands.L9.herder_logger_feud"
+    ],
+    "place": "colovian_highlands_delve_16_imperial_camp",
+    "x": -2192,
+    "z": 4720,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Colovian Highlands Delve 16 Imperial Camp in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_17",
+    "name": "Colovian Highlands Relic #17",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L8.oak_reverence",
+      "colovian_highlands.L10.goblin_wars"
+    ],
+    "place": "colovian_highlands_delve_17_watchtower",
+    "x": -1584,
+    "z": 4816,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 17 Watchtower in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_18",
+    "name": "Colovian Highlands Relic #18",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L9.guild_rivalry",
+      "colovian_highlands.L10.deep_ones_below"
+    ],
+    "place": "colovian_highlands_delve_18_mage_tower",
+    "x": -1136,
+    "z": 4912,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Colovian Highlands Delve 18 Mage Tower in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_19",
+    "name": "Colovian Highlands Relic #19",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L9.herder_logger_feud",
+      "colovian_highlands.L10.ridge_keeps"
+    ],
+    "place": "colovian_highlands_delve_19_grove",
+    "x": -656,
+    "z": 5008,
+    "kind": "shrine_offering",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 19 Grove in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_20",
+    "name": "Colovian Highlands Relic #20",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L10.goblin_wars",
+      "colovian_highlands.L11.high_rock_gates"
+    ],
+    "place": "colovian_highlands_delve_20_cabin",
+    "x": -3216,
+    "z": 5136,
+    "kind": "locked_coffer",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Colovian Highlands Delve 20 Cabin in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_colovian_highlands_relic_21",
+    "name": "Colovian Highlands Relic #21",
+    "region": "colovian_highlands",
+    "why": [
+      "colovian_highlands.L10.deep_ones_below",
+      "colovian_highlands.L11.alessian_scroll_temples"
+    ],
+    "place": "colovian_highlands_delve_21_shipwreck",
+    "x": -1808,
+    "z": 5232,
+    "kind": "weapon_rack",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Colovian Highlands Delve 21 Shipwreck in Colovian Highlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_1",
+    "name": "Heartlands Relic #1",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L3.rumare_shore",
+      "heartlands.L4.heath_and_grain"
+    ],
+    "place": "heartlands_delve_1_akaviri_fort",
+    "x": 272,
+    "z": 3504,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Heartlands Delve 1 Akaviri Fort in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_2",
+    "name": "Heartlands Relic #2",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L3.city_sewers_and_cisterns",
+      "heartlands.L4.lakeshore_oakwood"
+    ],
+    "place": "heartlands_delve_2_hagraven_lair",
+    "x": 1136,
+    "z": 3760,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Heartlands Delve 2 Hagraven Lair in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_3",
+    "name": "Heartlands Relic #3",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L4.lake_reedbed",
+      "heartlands.L4.urban_garden"
+    ],
+    "place": "heartlands_delve_3_ice_cave",
+    "x": 1520,
+    "z": 3856,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Heartlands Delve 3 Ice Cave in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_4",
+    "name": "Heartlands Relic #4",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L4.heath_and_grain",
+      "heartlands.L5.capital_economy"
+    ],
+    "place": "heartlands_delve_4_sixth_house_base",
+    "x": 1264,
+    "z": 3952,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Heartlands Delve 4 Sixth House Base in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_5",
+    "name": "Heartlands Relic #5",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L4.lakeshore_oakwood",
+      "heartlands.L5.lakeside_grain_and_fish"
+    ],
+    "place": "heartlands_delve_5_barrow",
+    "x": 912,
+    "z": 4048,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Heartlands Delve 5 Barrow in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_6",
+    "name": "Heartlands Relic #6",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L4.urban_garden",
+      "heartlands.L6.imperial_city"
+    ],
+    "place": "heartlands_delve_6_dwemer_ruin",
+    "x": 464,
+    "z": 4144,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Heartlands Delve 6 Dwemer Ruin in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_7",
+    "name": "Heartlands Relic #7",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L5.capital_economy",
+      "heartlands.L6.bridgehead_villages"
+    ],
+    "place": "heartlands_delve_7_mage_tower",
+    "x": 2416,
+    "z": 4208,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Heartlands Delve 7 Mage Tower in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_8",
+    "name": "Heartlands Relic #8",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L5.lakeside_grain_and_fish",
+      "heartlands.L6.red_ring_villages"
+    ],
+    "place": "heartlands_delve_8_grove",
+    "x": 1904,
+    "z": 4304,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Heartlands Delve 8 Grove in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_9",
+    "name": "Heartlands Relic #9",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L6.imperial_city",
+      "heartlands.L7.ward_ladder"
+    ],
+    "place": "heartlands_delve_9_shipwreck",
+    "x": 1424,
+    "z": 4400,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Heartlands Delve 9 Shipwreck in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_10",
+    "name": "Heartlands Relic #10",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L6.bridgehead_villages",
+      "heartlands.L7.beggar_eyes"
+    ],
+    "place": "heartlands_delve_10_lighthouse",
+    "x": 944,
+    "z": 4496,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Heartlands Delve 10 Lighthouse in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_11",
+    "name": "Heartlands Relic #11",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L6.red_ring_villages",
+      "heartlands.L8.temple_of_the_one"
+    ],
+    "place": "heartlands_delve_11_giant_camp",
+    "x": 432,
+    "z": 4592,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Heartlands Delve 11 Giant Camp in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_12",
+    "name": "Heartlands Relic #12",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L7.ward_ladder",
+      "heartlands.L8.arena_cult"
+    ],
+    "place": "heartlands_delve_12_dragon_lair",
+    "x": 2384,
+    "z": 4656,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Heartlands Delve 12 Dragon Lair in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_13",
+    "name": "Heartlands Relic #13",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L7.beggar_eyes",
+      "heartlands.L8.university_rationalism"
+    ],
+    "place": "heartlands_delve_13_kolskeggr_mine",
+    "x": 1904,
+    "z": 4752,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Heartlands Delve 13 Kolskeggr Mine in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_14",
+    "name": "Heartlands Relic #14",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L8.temple_of_the_one",
+      "heartlands.L9.council_factions"
+    ],
+    "place": "heartlands_delve_14_bleak_falls_barrow",
+    "x": 1456,
+    "z": 4848,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Heartlands Delve 14 Bleak Falls Barrow in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_15",
+    "name": "Heartlands Relic #15",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L8.arena_cult",
+      "heartlands.L9.watch_vs_guild"
+    ],
+    "place": "heartlands_delve_15_bandit_camp",
+    "x": 1424,
+    "z": 4944,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Heartlands Delve 15 Bandit Camp in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_16",
+    "name": "Heartlands Relic #16",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L8.university_rationalism",
+      "heartlands.L10.ring_beneath_the_rings"
+    ],
+    "place": "heartlands_delve_16_imperial_camp",
+    "x": 1808,
+    "z": 5040,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Heartlands Delve 16 Imperial Camp in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_17",
+    "name": "Heartlands Relic #17",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L9.council_factions",
+      "heartlands.L10.prison_tunnels"
+    ],
+    "place": "heartlands_delve_17_watchtower",
+    "x": 2480,
+    "z": 5136,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Heartlands Delve 17 Watchtower in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_18",
+    "name": "Heartlands Relic #18",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L9.watch_vs_guild",
+      "heartlands.L10.lake_cult_caves"
+    ],
+    "place": "heartlands_delve_18_mage_tower",
+    "x": 1200,
+    "z": 5264,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Heartlands Delve 18 Mage Tower in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_19",
+    "name": "Heartlands Relic #19",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L10.ring_beneath_the_rings",
+      "heartlands.L11.white_gold_tower"
+    ],
+    "place": "heartlands_delve_19_grove",
+    "x": 1840,
+    "z": 5360,
+    "kind": "shrine_offering",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Heartlands Delve 19 Grove in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_20",
+    "name": "Heartlands Relic #20",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L10.prison_tunnels",
+      "heartlands.L11.alessian_bridge"
+    ],
+    "place": "heartlands_delve_20_cabin",
+    "x": 2448,
+    "z": 5456,
+    "kind": "locked_coffer",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Heartlands Delve 20 Cabin in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_21",
+    "name": "Heartlands Relic #21",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L10.lake_cult_caves",
+      "heartlands.L11.throne_room_murder"
+    ],
+    "place": "heartlands_delve_21_shipwreck",
+    "x": 752,
+    "z": 5584,
+    "kind": "weapon_rack",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Heartlands Delve 21 Shipwreck in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_22",
+    "name": "Heartlands Relic #22",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L11.white_gold_tower",
+      "cyrodiil.L1.jerall_wall"
+    ],
+    "place": "heartlands_delve_22_lighthouse",
+    "x": 1392,
+    "z": 5680,
+    "kind": "sarcophagus",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Heartlands Delve 22 Lighthouse in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_23",
+    "name": "Heartlands Relic #23",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L11.alessian_bridge",
+      "cyrodiil.L1.valus_ridge"
+    ],
+    "place": "heartlands_delve_23_giant_camp",
+    "x": 2032,
+    "z": 5776,
+    "kind": "scholar_satchel",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Heartlands Delve 23 Giant Camp in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_24",
+    "name": "Heartlands Relic #24",
+    "region": "heartlands",
+    "why": [
+      "heartlands.L11.throne_room_murder",
+      "cyrodiil.L1.colovian_plateau"
+    ],
+    "place": "heartlands_delve_24_dragon_lair",
+    "x": 592,
+    "z": 5904,
+    "kind": "legion_strongbox",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Heartlands Delve 24 Dragon Lair in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_25",
+    "name": "Heartlands Relic #25",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.jerall_wall",
+      "cyrodiil.L1.rumare_basin"
+    ],
+    "place": "heartlands_delve_25_kolskeggr_mine",
+    "x": 1328,
+    "z": 6000,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Heartlands Delve 25 Kolskeggr Mine in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_26",
+    "name": "Heartlands Relic #26",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.valus_ridge",
+      "cyrodiil.L1.nibenay_alluvium"
+    ],
+    "place": "heartlands_delve_26_bleak_falls_barrow",
+    "x": 2064,
+    "z": 6096,
+    "kind": "corpse",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Heartlands Delve 26 Bleak Falls Barrow in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_27",
+    "name": "Heartlands Relic #27",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.colovian_plateau",
+      "cyrodiil.L1.gold_coast_cliffs"
+    ],
+    "place": "heartlands_delve_27_ayleid_ruin",
+    "x": 2544,
+    "z": 6192,
+    "kind": "shrine_offering",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Heartlands Delve 27 Ayleid Ruin in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_28",
+    "name": "Heartlands Relic #28",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.rumare_basin",
+      "cyrodiil.L1.topal_mudflats"
+    ],
+    "place": "heartlands_delve_28_imperial_crypt",
+    "x": 880,
+    "z": 6320,
+    "kind": "locked_coffer",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Heartlands Delve 28 Imperial Crypt in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_29",
+    "name": "Heartlands Relic #29",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.nibenay_alluvium",
+      "cyrodiil.L1.ore_highlands"
+    ],
+    "place": "heartlands_delve_29_fort",
+    "x": 1136,
+    "z": 6416,
+    "kind": "weapon_rack",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Heartlands Delve 29 Fort in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_30",
+    "name": "Heartlands Relic #30",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.gold_coast_cliffs",
+      "cyrodiil.L1.ayleid_foundations"
+    ],
+    "place": "heartlands_delve_30_akaviri_fort",
+    "x": 1456,
+    "z": 6512,
+    "kind": "sarcophagus",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Heartlands Delve 30 Akaviri Fort in Heartlands."
+  },
+  {
+    "id": "cyrodiil_heartlands_relic_31",
+    "name": "Heartlands Relic #31",
+    "region": "heartlands",
+    "why": [
+      "cyrodiil.L1.topal_mudflats",
+      "cyrodiil.L2.temperate_core"
+    ],
+    "place": "heartlands_delve_31_cave",
+    "x": 1712,
+    "z": 6608,
+    "kind": "scholar_satchel",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Heartlands Delve 31 Cave in Heartlands."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_1",
+    "name": "Great Forest Relic #1",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L3.silverfish_headwaters",
+      "great_forest.L4.fern_glade"
+    ],
+    "place": "great_forest_delve_1_akaviri_fort",
+    "x": 240,
+    "z": 4848,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Great Forest Delve 1 Akaviri Fort in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_2",
+    "name": "Great Forest Relic #2",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L4.old_oakwood",
+      "great_forest.L4.charcoal_clearing"
+    ],
+    "place": "great_forest_delve_2_hagraven_lair",
+    "x": 272,
+    "z": 5232,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Great Forest Delve 2 Hagraven Lair in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_3",
+    "name": "Great Forest Relic #3",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L4.beech_hanger",
+      "great_forest.L4.unicorn_grove"
+    ],
+    "place": "great_forest_delve_3_ice_cave",
+    "x": 400,
+    "z": 5424,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Great Forest Delve 3 Ice Cave in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_4",
+    "name": "Great Forest Relic #4",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L4.fern_glade",
+      "great_forest.L5.timber"
+    ],
+    "place": "great_forest_delve_4_sixth_house_base",
+    "x": -496,
+    "z": 5616,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Great Forest Delve 4 Sixth House Base in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_5",
+    "name": "Great Forest Relic #5",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L4.charcoal_clearing",
+      "great_forest.L5.charcoal"
+    ],
+    "place": "great_forest_delve_5_barrow",
+    "x": 272,
+    "z": 5744,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Great Forest Delve 5 Barrow in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_6",
+    "name": "Great Forest Relic #6",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L4.unicorn_grove",
+      "great_forest.L5.hunting"
+    ],
+    "place": "great_forest_delve_6_dwemer_ruin",
+    "x": -912,
+    "z": 5904,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Great Forest Delve 6 Dwemer Ruin in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_7",
+    "name": "Great Forest Relic #7",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L5.timber",
+      "great_forest.L6.road_hamlets"
+    ],
+    "place": "great_forest_delve_7_imperial_camp",
+    "x": 368,
+    "z": 6000,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Great Forest Delve 7 Imperial Camp in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_8",
+    "name": "Great Forest Relic #8",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L5.charcoal",
+      "great_forest.L6.priory"
+    ],
+    "place": "great_forest_delve_8_watchtower",
+    "x": -208,
+    "z": 6128,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Great Forest Delve 8 Watchtower in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_9",
+    "name": "Great Forest Relic #9",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L5.hunting",
+      "great_forest.L7.woodfolk"
+    ],
+    "place": "great_forest_delve_9_mage_tower",
+    "x": -848,
+    "z": 6256,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Great Forest Delve 9 Mage Tower in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_10",
+    "name": "Great Forest Relic #10",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L6.road_hamlets",
+      "great_forest.L7.outlaw_refuge"
+    ],
+    "place": "great_forest_delve_10_grove",
+    "x": -48,
+    "z": 6352,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Great Forest Delve 10 Grove in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_11",
+    "name": "Great Forest Relic #11",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L6.priory",
+      "great_forest.L8.forest_daedric_shrines"
+    ],
+    "place": "great_forest_delve_11_shipwreck",
+    "x": -528,
+    "z": 6480,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Great Forest Delve 11 Shipwreck in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_12",
+    "name": "Great Forest Relic #12",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L7.woodfolk",
+      "great_forest.L8.grove_spirits"
+    ],
+    "place": "great_forest_delve_12_lighthouse",
+    "x": -912,
+    "z": 6608,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Great Forest Delve 12 Lighthouse in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_13",
+    "name": "Great Forest Relic #13",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L7.outlaw_refuge",
+      "great_forest.L9.necromancer_war_front"
+    ],
+    "place": "great_forest_delve_13_giant_camp",
+    "x": -976,
+    "z": 6736,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Great Forest Delve 13 Giant Camp in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_14",
+    "name": "Great Forest Relic #14",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L8.forest_daedric_shrines",
+      "great_forest.L10.lich_ruins"
+    ],
+    "place": "great_forest_delve_14_dragon_lair",
+    "x": -944,
+    "z": 6864,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Great Forest Delve 14 Dragon Lair in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_15",
+    "name": "Great Forest Relic #15",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L8.grove_spirits",
+      "great_forest.L10.minotaur_lairs"
+    ],
+    "place": "great_forest_delve_15_kolskeggr_mine",
+    "x": -976,
+    "z": 6992,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Great Forest Delve 15 Kolskeggr Mine in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_16",
+    "name": "Great Forest Relic #16",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L9.necromancer_war_front",
+      "great_forest.L11.ayleid_heartwood"
+    ],
+    "place": "great_forest_delve_16_bleak_falls_barrow",
+    "x": -848,
+    "z": 7120,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Great Forest Delve 16 Bleak Falls Barrow in Great Forest."
+  },
+  {
+    "id": "cyrodiil_great_forest_relic_17",
+    "name": "Great Forest Relic #17",
+    "region": "great_forest",
+    "why": [
+      "great_forest.L10.lich_ruins",
+      "great_forest.L11.goblin_war_of_old"
+    ],
+    "place": "great_forest_delve_17_watchtower",
+    "x": -48,
+    "z": 7248,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Great Forest Delve 17 Watchtower in Great Forest."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_1",
+    "name": "Nibenay Basin Relic #1",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L3.corbolo",
+      "nibenay_basin.L4.orchard_plain"
+    ],
+    "place": "nibenay_basin_delve_1_akaviri_fort",
+    "x": 4112,
+    "z": 2576,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 1 Akaviri Fort in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_2",
+    "name": "Nibenay Basin Relic #2",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L3.lake_arrius",
+      "nibenay_basin.L4.wet_meadow"
+    ],
+    "place": "nibenay_basin_delve_2_hagraven_lair",
+    "x": 4144,
+    "z": 3056,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 2 Hagraven Lair in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_3",
+    "name": "Nibenay Basin Relic #3",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L3.mill_weirs",
+      "nibenay_basin.L4.valus_pine"
+    ],
+    "place": "nibenay_basin_delve_3_ice_cave",
+    "x": 2832,
+    "z": 3280,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 3 Ice Cave in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_4",
+    "name": "Nibenay Basin Relic #4",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L4.orchard_plain",
+      "nibenay_basin.L4.lake_arrius_reeds"
+    ],
+    "place": "nibenay_basin_delve_4_sixth_house_base",
+    "x": 3536,
+    "z": 3408,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 4 Sixth House Base in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_5",
+    "name": "Nibenay Basin Relic #5",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L4.wet_meadow",
+      "nibenay_basin.L5.orchards_and_grain"
+    ],
+    "place": "nibenay_basin_delve_5_barrow",
+    "x": 3408,
+    "z": 3536,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 5 Barrow in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_6",
+    "name": "Nibenay Basin Relic #6",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L4.valus_pine",
+      "nibenay_basin.L5.corbolo_mills"
+    ],
+    "place": "nibenay_basin_delve_6_dwemer_ruin",
+    "x": 2832,
+    "z": 3664,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Nibenay Basin Delve 6 Dwemer Ruin in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_7",
+    "name": "Nibenay Basin Relic #7",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L4.lake_arrius_reeds",
+      "nibenay_basin.L5.morrowind_trade"
+    ],
+    "place": "nibenay_basin_delve_7_grove",
+    "x": 2704,
+    "z": 3792,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 7 Grove in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_8",
+    "name": "Nibenay Basin Relic #8",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L5.orchards_and_grain",
+      "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+    ],
+    "place": "nibenay_basin_delve_8_shipwreck",
+    "x": 2576,
+    "z": 3920,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Nibenay Basin Delve 8 Shipwreck in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_9",
+    "name": "Nibenay Basin Relic #9",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L5.corbolo_mills",
+      "nibenay_basin.L6.blue_road_villages"
+    ],
+    "place": "nibenay_basin_delve_9_lighthouse",
+    "x": 4496,
+    "z": 4016,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 9 Lighthouse in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_10",
+    "name": "Nibenay Basin Relic #10",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L5.morrowind_trade",
+      "nibenay_basin.L6.border_keeps"
+    ],
+    "place": "nibenay_basin_delve_10_giant_camp",
+    "x": 4144,
+    "z": 4144,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 10 Giant Camp in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_11",
+    "name": "Nibenay Basin Relic #11",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L6.cheydinhal_on_the_corbolo",
+      "nibenay_basin.L7.dunmer_quarter"
+    ],
+    "place": "nibenay_basin_delve_11_dragon_lair",
+    "x": 3824,
+    "z": 4272,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 11 Dragon Lair in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_12",
+    "name": "Nibenay Basin Relic #12",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L6.blue_road_villages",
+      "nibenay_basin.L7.nibenese_gentry"
+    ],
+    "place": "nibenay_basin_delve_12_kolskeggr_mine",
+    "x": 3664,
+    "z": 4400,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 12 Kolskeggr Mine in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_13",
+    "name": "Nibenay Basin Relic #13",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L6.border_keeps",
+      "nibenay_basin.L7.knightly_dilettantes"
+    ],
+    "place": "nibenay_basin_delve_13_bleak_falls_barrow",
+    "x": 3792,
+    "z": 4528,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 13 Bleak Falls Barrow in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_14",
+    "name": "Nibenay Basin Relic #14",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L7.dunmer_quarter",
+      "nibenay_basin.L8.arkay_chapel"
+    ],
+    "place": "nibenay_basin_delve_14_dwemer_ruin",
+    "x": 4016,
+    "z": 4656,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 14 Dwemer Ruin in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_15",
+    "name": "Nibenay Basin Relic #15",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L7.nibenese_gentry",
+      "nibenay_basin.L8.dunmer_ancestor_rites"
+    ],
+    "place": "nibenay_basin_delve_15_bandit_camp",
+    "x": 4112,
+    "z": 4784,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 15 Bandit Camp in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_16",
+    "name": "Nibenay Basin Relic #16",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L7.knightly_dilettantes",
+      "nibenay_basin.L9.dunmer_count"
+    ],
+    "place": "nibenay_basin_delve_16_imperial_camp",
+    "x": 4272,
+    "z": 4912,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Nibenay Basin Delve 16 Imperial Camp in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_17",
+    "name": "Nibenay Basin Relic #17",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L8.arkay_chapel",
+      "nibenay_basin.L9.market_quarrel"
+    ],
+    "place": "nibenay_basin_delve_17_watchtower",
+    "x": 4464,
+    "z": 5040,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 17 Watchtower in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_18",
+    "name": "Nibenay Basin Relic #18",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L8.dunmer_ancestor_rites",
+      "nibenay_basin.L10.sanctuary_under_the_house"
+    ],
+    "place": "nibenay_basin_delve_18_mage_tower",
+    "x": 2768,
+    "z": 5200,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Nibenay Basin Delve 18 Mage Tower in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_19",
+    "name": "Nibenay Basin Relic #19",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L9.dunmer_count",
+      "nibenay_basin.L10.arrius_cult_cells"
+    ],
+    "place": "nibenay_basin_delve_19_grove",
+    "x": 2992,
+    "z": 5328,
+    "kind": "shrine_offering",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 19 Grove in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_20",
+    "name": "Nibenay Basin Relic #20",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L9.market_quarrel",
+      "nibenay_basin.L10.valus_keeps"
+    ],
+    "place": "nibenay_basin_delve_20_cabin",
+    "x": 3056,
+    "z": 5456,
+    "kind": "locked_coffer",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 20 Cabin in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_21",
+    "name": "Nibenay Basin Relic #21",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L10.sanctuary_under_the_house",
+      "nibenay_basin.L11.alessian_gates_chim_ghartok"
+    ],
+    "place": "nibenay_basin_delve_21_shipwreck",
+    "x": 2992,
+    "z": 5584,
+    "kind": "weapon_rack",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 21 Shipwreck in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_22",
+    "name": "Nibenay Basin Relic #22",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L10.arrius_cult_cells",
+      "nibenay_basin.L11.border_wars_with_morrowind"
+    ],
+    "place": "nibenay_basin_delve_22_lighthouse",
+    "x": 2544,
+    "z": 5712,
+    "kind": "sarcophagus",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 22 Lighthouse in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_23",
+    "name": "Nibenay Basin Relic #23",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L10.valus_keeps",
+      "cyrodiil.L1.jerall_wall"
+    ],
+    "place": "nibenay_basin_delve_23_giant_camp",
+    "x": 4272,
+    "z": 5808,
+    "kind": "scholar_satchel",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 23 Giant Camp in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_24",
+    "name": "Nibenay Basin Relic #24",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L11.alessian_gates_chim_ghartok",
+      "cyrodiil.L1.valus_ridge"
+    ],
+    "place": "nibenay_basin_delve_24_dragon_lair",
+    "x": 3792,
+    "z": 5936,
+    "kind": "legion_strongbox",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 24 Dragon Lair in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_25",
+    "name": "Nibenay Basin Relic #25",
+    "region": "nibenay_basin",
+    "why": [
+      "nibenay_basin.L11.border_wars_with_morrowind",
+      "cyrodiil.L1.colovian_plateau"
+    ],
+    "place": "nibenay_basin_delve_25_kolskeggr_mine",
+    "x": 3440,
+    "z": 6064,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Basin Delve 25 Kolskeggr Mine in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_26",
+    "name": "Nibenay Basin Relic #26",
+    "region": "nibenay_basin",
+    "why": [
+      "cyrodiil.L1.jerall_wall",
+      "cyrodiil.L1.rumare_basin"
+    ],
+    "place": "nibenay_basin_delve_26_bleak_falls_barrow",
+    "x": 3568,
+    "z": 6192,
+    "kind": "corpse",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Nibenay Basin Delve 26 Bleak Falls Barrow in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_27",
+    "name": "Nibenay Basin Relic #27",
+    "region": "nibenay_basin",
+    "why": [
+      "cyrodiil.L1.valus_ridge",
+      "cyrodiil.L1.nibenay_alluvium"
+    ],
+    "place": "nibenay_basin_delve_27_ayleid_ruin",
+    "x": 3792,
+    "z": 6320,
+    "kind": "shrine_offering",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Nibenay Basin Delve 27 Ayleid Ruin in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_nibenay_basin_relic_28",
+    "name": "Nibenay Basin Relic #28",
+    "region": "nibenay_basin",
+    "why": [
+      "cyrodiil.L1.colovian_plateau",
+      "cyrodiil.L1.gold_coast_cliffs"
+    ],
+    "place": "nibenay_basin_delve_28_imperial_crypt",
+    "x": 4112,
+    "z": 6448,
+    "kind": "locked_coffer",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Nibenay Basin Delve 28 Imperial Crypt in Nibenay Basin."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_1",
+    "name": "West Weald Relic #1",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L3.estate_cisterns",
+      "west_weald.L4.oak_savanna"
+    ],
+    "place": "west_weald_delve_1_fort",
+    "x": -3472,
+    "z": 5744,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from West Weald Delve 1 Fort in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_2",
+    "name": "West Weald Relic #2",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L4.vine_terrace",
+      "west_weald.L4.orchard"
+    ],
+    "place": "west_weald_delve_2_akaviri_fort",
+    "x": -3216,
+    "z": 5968,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from West Weald Delve 2 Akaviri Fort in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_3",
+    "name": "West Weald Relic #3",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L4.cypress_line",
+      "west_weald.L5.wine_estates"
+    ],
+    "place": "west_weald_delve_3_necromancer_lair",
+    "x": -2192,
+    "z": 6032,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from West Weald Delve 3 Necromancer Lair in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_4",
+    "name": "West Weald Relic #4",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L4.oak_savanna",
+      "west_weald.L5.tomato_and_grain"
+    ],
+    "place": "west_weald_delve_4_hagraven_lair",
+    "x": -1200,
+    "z": 6096,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from West Weald Delve 4 Hagraven Lair in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_5",
+    "name": "West Weald Relic #5",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L4.orchard",
+      "west_weald.L5.gold_road_traffic"
+    ],
+    "place": "west_weald_delve_5_ice_cave",
+    "x": -2640,
+    "z": 6192,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from West Weald Delve 5 Ice Cave in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_6",
+    "name": "West Weald Relic #6",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L5.wine_estates",
+      "west_weald.L6.skingrad_hill"
+    ],
+    "place": "west_weald_delve_6_sixth_house_base",
+    "x": -1584,
+    "z": 6256,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from West Weald Delve 6 Sixth House Base in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_7",
+    "name": "West Weald Relic #7",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L5.tomato_and_grain",
+      "west_weald.L6.estate_hamlets"
+    ],
+    "place": "west_weald_delve_7_barrow",
+    "x": -2928,
+    "z": 6352,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from West Weald Delve 7 Barrow in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_8",
+    "name": "West Weald Relic #8",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L5.gold_road_traffic",
+      "west_weald.L6.priory_of_the_nine"
+    ],
+    "place": "west_weald_delve_8_dwemer_ruin",
+    "x": -1904,
+    "z": 6416,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from West Weald Delve 8 Dwemer Ruin in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_9",
+    "name": "West Weald Relic #9",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L6.skingrad_hill",
+      "west_weald.L7.vintner_aristocracy"
+    ],
+    "place": "west_weald_delve_9_imperial_camp",
+    "x": -3408,
+    "z": 6512,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from West Weald Delve 9 Imperial Camp in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_10",
+    "name": "West Weald Relic #10",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L6.estate_hamlets",
+      "west_weald.L7.field_hands"
+    ],
+    "place": "west_weald_delve_10_watchtower",
+    "x": -2416,
+    "z": 6576,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from West Weald Delve 10 Watchtower in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_11",
+    "name": "West Weald Relic #11",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L6.priory_of_the_nine",
+      "west_weald.L8.julianos_chapel"
+    ],
+    "place": "west_weald_delve_11_mage_tower",
+    "x": -1456,
+    "z": 6640,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from West Weald Delve 11 Mage Tower in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_12",
+    "name": "West Weald Relic #12",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L7.vintner_aristocracy",
+      "west_weald.L8.crusader_relic_cult"
+    ],
+    "place": "west_weald_delve_12_shipwreck",
+    "x": -3056,
+    "z": 6736,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from West Weald Delve 12 Shipwreck in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_13",
+    "name": "West Weald Relic #13",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L7.field_hands",
+      "west_weald.L9.wine_feud"
+    ],
+    "place": "west_weald_delve_13_lighthouse",
+    "x": -2128,
+    "z": 6800,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from West Weald Delve 13 Lighthouse in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_14",
+    "name": "West Weald Relic #14",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L8.julianos_chapel",
+      "west_weald.L9.hidden_count"
+    ],
+    "place": "west_weald_delve_14_giant_camp",
+    "x": -1200,
+    "z": 6864,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from West Weald Delve 14 Giant Camp in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_15",
+    "name": "West Weald Relic #15",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L8.crusader_relic_cult",
+      "west_weald.L10.vampire_count"
+    ],
+    "place": "west_weald_delve_15_dragon_lair",
+    "x": -2800,
+    "z": 6960,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from West Weald Delve 15 Dragon Lair in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_16",
+    "name": "West Weald Relic #16",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L9.wine_feud",
+      "west_weald.L10.name_vault_under_the_vines"
+    ],
+    "place": "west_weald_delve_16_kolskeggr_mine",
+    "x": -1936,
+    "z": 7024,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from West Weald Delve 16 Kolskeggr Mine in West Weald."
+  },
+  {
+    "id": "cyrodiil_west_weald_relic_17",
+    "name": "West Weald Relic #17",
+    "region": "west_weald",
+    "why": [
+      "west_weald.L9.hidden_count",
+      "west_weald.L11.knightly_order_of_the_nine"
+    ],
+    "place": "west_weald_delve_17_bleak_falls_barrow",
+    "x": -1072,
+    "z": 7088,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from West Weald Delve 17 Bleak Falls Barrow in West Weald."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_1",
+    "name": "Gold Coast Relic #1",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L3.harbour_springs",
+      "gold_coast.L4.cliff_grass"
+    ],
+    "place": "gold_coast_delve_1_akaviri_fort",
+    "x": -4336,
+    "z": 7152,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Gold Coast Delve 1 Akaviri Fort in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_2",
+    "name": "Gold Coast Relic #2",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L3.kvatch_wells",
+      "gold_coast.L4.cove_beach"
+    ],
+    "place": "gold_coast_delve_2_hagraven_lair",
+    "x": -4112,
+    "z": 7504,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Gold Coast Delve 2 Hagraven Lair in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_3",
+    "name": "Gold Coast Relic #3",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L4.coastal_scrub",
+      "gold_coast.L4.burned_slope"
+    ],
+    "place": "gold_coast_delve_3_ice_cave",
+    "x": -3920,
+    "z": 7632,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Gold Coast Delve 3 Ice Cave in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_4",
+    "name": "Gold Coast Relic #4",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L4.cliff_grass",
+      "gold_coast.L4.strid_riverine"
+    ],
+    "place": "gold_coast_delve_4_sixth_house_base",
+    "x": -2384,
+    "z": 7728,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Gold Coast Delve 4 Sixth House Base in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_5",
+    "name": "Gold Coast Relic #5",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L4.cove_beach",
+      "gold_coast.L5.anvil_shipping"
+    ],
+    "place": "gold_coast_delve_5_barrow",
+    "x": -4272,
+    "z": 7856,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Gold Coast Delve 5 Barrow in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_6",
+    "name": "Gold Coast Relic #6",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L4.burned_slope",
+      "gold_coast.L5.fishing"
+    ],
+    "place": "gold_coast_delve_6_dwemer_ruin",
+    "x": -4272,
+    "z": 7952,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Gold Coast Delve 6 Dwemer Ruin in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_7",
+    "name": "Gold Coast Relic #7",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L4.strid_riverine",
+      "gold_coast.L5.rebuild_trade"
+    ],
+    "place": "gold_coast_delve_7_imperial_camp",
+    "x": -1360,
+    "z": 8016,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Gold Coast Delve 7 Imperial Camp in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_8",
+    "name": "Gold Coast Relic #8",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L5.anvil_shipping",
+      "gold_coast.L6.anvil_harbour"
+    ],
+    "place": "gold_coast_delve_8_mage_tower",
+    "x": -2224,
+    "z": 8112,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Gold Coast Delve 8 Mage Tower in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_9",
+    "name": "Gold Coast Relic #9",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L5.fishing",
+      "gold_coast.L6.kvatch_on_the_hill"
+    ],
+    "place": "gold_coast_delve_9_grove",
+    "x": -3280,
+    "z": 8208,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Gold Coast Delve 9 Grove in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_10",
+    "name": "Gold Coast Relic #10",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L5.rebuild_trade",
+      "gold_coast.L6.gold_road_inns"
+    ],
+    "place": "gold_coast_delve_10_shipwreck",
+    "x": -4528,
+    "z": 8304,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Gold Coast Delve 10 Shipwreck in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_11",
+    "name": "Gold Coast Relic #11",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L6.anvil_harbour",
+      "gold_coast.L6.refugee_camp"
+    ],
+    "place": "gold_coast_delve_11_giant_camp",
+    "x": -2096,
+    "z": 8368,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Gold Coast Delve 11 Giant Camp in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_12",
+    "name": "Gold Coast Relic #12",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L6.kvatch_on_the_hill",
+      "gold_coast.L7.merchant_wealth"
+    ],
+    "place": "gold_coast_delve_12_dragon_lair",
+    "x": -3184,
+    "z": 8464,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Gold Coast Delve 12 Dragon Lair in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_13",
+    "name": "Gold Coast Relic #13",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L6.gold_road_inns",
+      "gold_coast.L7.dock_labour"
+    ],
+    "place": "gold_coast_delve_13_kolskeggr_mine",
+    "x": -4240,
+    "z": 8560,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Gold Coast Delve 13 Kolskeggr Mine in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_gold_coast_relic_14",
+    "name": "Gold Coast Relic #14",
+    "region": "gold_coast",
+    "why": [
+      "gold_coast.L6.refugee_camp",
+      "gold_coast.L7.kvatch_refugees"
+    ],
+    "place": "gold_coast_delve_14_bleak_falls_barrow",
+    "x": -1744,
+    "z": 8624,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Gold Coast Delve 14 Bleak Falls Barrow in Gold Coast."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_1",
+    "name": "Nibenay Valley Relic #1",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L3.flood_meadows",
+      "nibenay_valley.L4.flood_meadow"
+    ],
+    "place": "nibenay_valley_delve_1_akaviri_fort",
+    "x": 2512,
+    "z": 6864,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 1 Akaviri Fort in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_2",
+    "name": "Nibenay Valley Relic #2",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L3.bravil_mud",
+      "nibenay_valley.L4.willow_carr"
+    ],
+    "place": "nibenay_valley_delve_2_hagraven_lair",
+    "x": 976,
+    "z": 7184,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 2 Hagraven Lair in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_3",
+    "name": "Nibenay Valley Relic #3",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L4.reed_marsh",
+      "nibenay_valley.L4.river_island"
+    ],
+    "place": "nibenay_valley_delve_3_ice_cave",
+    "x": 1040,
+    "z": 7280,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 3 Ice Cave in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_4",
+    "name": "Nibenay Valley Relic #4",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L4.flood_meadow",
+      "nibenay_valley.L5.river_labour"
+    ],
+    "place": "nibenay_valley_delve_4_sixth_house_base",
+    "x": 48,
+    "z": 7376,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 4 Sixth House Base in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_5",
+    "name": "Nibenay Valley Relic #5",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L4.willow_carr",
+      "nibenay_valley.L5.skooma"
+    ],
+    "place": "nibenay_valley_delve_5_barrow",
+    "x": 2000,
+    "z": 7440,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 5 Barrow in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_6",
+    "name": "Nibenay Valley Relic #6",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L4.river_island",
+      "nibenay_valley.L5.eel_and_reed"
+    ],
+    "place": "nibenay_valley_delve_6_dwemer_ruin",
+    "x": 720,
+    "z": 7536,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Nibenay Valley Delve 6 Dwemer Ruin in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_7",
+    "name": "Nibenay Valley Relic #7",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L5.river_labour",
+      "nibenay_valley.L6.bravil_ferry_city"
+    ],
+    "place": "nibenay_valley_delve_7_imperial_camp",
+    "x": 2416,
+    "z": 7600,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 7 Imperial Camp in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_8",
+    "name": "Nibenay Valley Relic #8",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L5.skooma",
+      "nibenay_valley.L6.green_road_inns"
+    ],
+    "place": "nibenay_valley_delve_8_cabin",
+    "x": 816,
+    "z": 7696,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Nibenay Valley Delve 8 Cabin in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_9",
+    "name": "Nibenay Valley Relic #9",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L5.eel_and_reed",
+      "nibenay_valley.L7.slum_city"
+    ],
+    "place": "nibenay_valley_delve_9_shipwreck",
+    "x": 2288,
+    "z": 7760,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 9 Shipwreck in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_10",
+    "name": "Nibenay Valley Relic #10",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L6.bravil_ferry_city",
+      "nibenay_valley.L7.addiction"
+    ],
+    "place": "nibenay_valley_delve_10_lighthouse",
+    "x": 144,
+    "z": 7856,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 10 Lighthouse in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_11",
+    "name": "Nibenay Valley Relic #11",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L6.green_road_inns",
+      "nibenay_valley.L8.mara_chapel"
+    ],
+    "place": "nibenay_valley_delve_11_giant_camp",
+    "x": 1232,
+    "z": 7920,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 11 Giant Camp in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_12",
+    "name": "Nibenay Valley Relic #12",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L7.slum_city",
+      "nibenay_valley.L8.lucky_old_lady"
+    ],
+    "place": "nibenay_valley_delve_12_dragon_lair",
+    "x": 2096,
+    "z": 7984,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 12 Dragon Lair in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_13",
+    "name": "Nibenay Valley Relic #13",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L7.addiction",
+      "nibenay_valley.L8.night_mother_crypt"
+    ],
+    "place": "nibenay_valley_delve_13_kolskeggr_mine",
+    "x": 2672,
+    "z": 8048,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 13 Kolskeggr Mine in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_14",
+    "name": "Nibenay Valley Relic #14",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L8.mara_chapel",
+      "nibenay_valley.L9.corrupt_clerk"
+    ],
+    "place": "nibenay_valley_delve_14_bleak_falls_barrow",
+    "x": 2928,
+    "z": 8112,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 14 Bleak Falls Barrow in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_15",
+    "name": "Nibenay Valley Relic #15",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L8.lucky_old_lady",
+      "nibenay_valley.L9.elsweyr_gates"
+    ],
+    "place": "nibenay_valley_delve_15_bandit_camp",
+    "x": 2960,
+    "z": 8176,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 15 Bandit Camp in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_16",
+    "name": "Nibenay Valley Relic #16",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L8.night_mother_crypt",
+      "nibenay_valley.L10.skooma_dens"
+    ],
+    "place": "nibenay_valley_delve_16_imperial_camp",
+    "x": 2896,
+    "z": 8240,
+    "kind": "legion_strongbox",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Nibenay Valley Delve 16 Imperial Camp in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_17",
+    "name": "Nibenay Valley Relic #17",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L9.corrupt_clerk",
+      "nibenay_valley.L10.smuggler_caves"
+    ],
+    "place": "nibenay_valley_delve_17_watchtower",
+    "x": 2704,
+    "z": 8304,
+    "kind": "pedestal",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 17 Watchtower in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_18",
+    "name": "Nibenay Valley Relic #18",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L9.elsweyr_gates",
+      "nibenay_valley.L10.assassins_mother_crypt"
+    ],
+    "place": "nibenay_valley_delve_18_mage_tower",
+    "x": 2544,
+    "z": 8368,
+    "kind": "corpse",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Nibenay Valley Delve 18 Mage Tower in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_19",
+    "name": "Nibenay Valley Relic #19",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L10.skooma_dens",
+      "nibenay_valley.L11.alessian_gates_altadoon_mnem"
+    ],
+    "place": "nibenay_valley_delve_19_grove",
+    "x": 2512,
+    "z": 8432,
+    "kind": "shrine_offering",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 19 Grove in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_20",
+    "name": "Nibenay Valley Relic #20",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L10.smuggler_caves",
+      "nibenay_valley.L11.river_wars"
+    ],
+    "place": "nibenay_valley_delve_20_cabin",
+    "x": 2480,
+    "z": 8496,
+    "kind": "locked_coffer",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 20 Cabin in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_21",
+    "name": "Nibenay Valley Relic #21",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L10.assassins_mother_crypt",
+      "cyrodiil.L1.jerall_wall"
+    ],
+    "place": "nibenay_valley_delve_21_shipwreck",
+    "x": 2512,
+    "z": 8560,
+    "kind": "weapon_rack",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 21 Shipwreck in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_22",
+    "name": "Nibenay Valley Relic #22",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L11.alessian_gates_altadoon_mnem",
+      "cyrodiil.L1.valus_ridge"
+    ],
+    "place": "nibenay_valley_delve_22_lighthouse",
+    "x": 2640,
+    "z": 8624,
+    "kind": "sarcophagus",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 22 Lighthouse in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_23",
+    "name": "Nibenay Valley Relic #23",
+    "region": "nibenay_valley",
+    "why": [
+      "nibenay_valley.L11.river_wars",
+      "cyrodiil.L1.colovian_plateau"
+    ],
+    "place": "nibenay_valley_delve_23_giant_camp",
+    "x": 2768,
+    "z": 8688,
+    "kind": "scholar_satchel",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 23 Giant Camp in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_24",
+    "name": "Nibenay Valley Relic #24",
+    "region": "nibenay_valley",
+    "why": [
+      "cyrodiil.L1.jerall_wall",
+      "cyrodiil.L1.rumare_basin"
+    ],
+    "place": "nibenay_valley_delve_24_dragon_lair",
+    "x": 2928,
+    "z": 8752,
+    "kind": "legion_strongbox",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 24 Dragon Lair in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_25",
+    "name": "Nibenay Valley Relic #25",
+    "region": "nibenay_valley",
+    "why": [
+      "cyrodiil.L1.valus_ridge",
+      "cyrodiil.L1.nibenay_alluvium"
+    ],
+    "place": "nibenay_valley_delve_25_kolskeggr_mine",
+    "x": -688,
+    "z": 8848,
+    "kind": "pedestal",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Nibenay Valley Delve 25 Kolskeggr Mine in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_26",
+    "name": "Nibenay Valley Relic #26",
+    "region": "nibenay_valley",
+    "why": [
+      "cyrodiil.L1.colovian_plateau",
+      "cyrodiil.L1.gold_coast_cliffs"
+    ],
+    "place": "nibenay_valley_delve_26_bleak_falls_barrow",
+    "x": -304,
+    "z": 8912,
+    "kind": "corpse",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Nibenay Valley Delve 26 Bleak Falls Barrow in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_27",
+    "name": "Nibenay Valley Relic #27",
+    "region": "nibenay_valley",
+    "why": [
+      "cyrodiil.L1.rumare_basin",
+      "cyrodiil.L1.topal_mudflats"
+    ],
+    "place": "nibenay_valley_delve_27_ayleid_ruin",
+    "x": 176,
+    "z": 8976,
+    "kind": "shrine_offering",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Nibenay Valley Delve 27 Ayleid Ruin in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_nibenay_valley_relic_28",
+    "name": "Nibenay Valley Relic #28",
+    "region": "nibenay_valley",
+    "why": [
+      "cyrodiil.L1.nibenay_alluvium",
+      "cyrodiil.L1.ore_highlands"
+    ],
+    "place": "nibenay_valley_delve_28_imperial_crypt",
+    "x": 944,
+    "z": 9040,
+    "kind": "locked_coffer",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Nibenay Valley Delve 28 Imperial Crypt in Nibenay Valley."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_1",
+    "name": "Blackwood Relic #1",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L3.niben_mouth",
+      "blackwood.L4.mangrove"
+    ],
+    "place": "blackwood_delve_1_akaviri_fort",
+    "x": 4368,
+    "z": 7024,
+    "kind": "pedestal",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Blackwood Delve 1 Akaviri Fort in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_2",
+    "name": "Blackwood Relic #2",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L3.panther_river",
+      "blackwood.L4.cypress_swamp"
+    ],
+    "place": "blackwood_delve_2_hagraven_lair",
+    "x": 3792,
+    "z": 7344,
+    "kind": "corpse",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Blackwood Delve 2 Hagraven Lair in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_3",
+    "name": "Blackwood Relic #3",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L3.brackish_tide",
+      "blackwood.L4.palm_hammock"
+    ],
+    "place": "blackwood_delve_3_ice_cave",
+    "x": 3536,
+    "z": 7504,
+    "kind": "shrine_offering",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Blackwood Delve 3 Ice Cave in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_4",
+    "name": "Blackwood Relic #4",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L4.mangrove",
+      "blackwood.L4.brackish_flat"
+    ],
+    "place": "blackwood_delve_4_sixth_house_base",
+    "x": 3728,
+    "z": 7664,
+    "kind": "locked_coffer",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Blackwood Delve 4 Sixth House Base in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_5",
+    "name": "Blackwood Relic #5",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L4.cypress_swamp",
+      "blackwood.L5.river_mouth_port"
+    ],
+    "place": "blackwood_delve_5_barrow",
+    "x": 4240,
+    "z": 7824,
+    "kind": "weapon_rack",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Blackwood Delve 5 Barrow in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_6",
+    "name": "Blackwood Relic #6",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L4.palm_hammock",
+      "blackwood.L5.mercenary_trade"
+    ],
+    "place": "blackwood_delve_6_dwemer_ruin",
+    "x": 3536,
+    "z": 8016,
+    "kind": "sarcophagus",
+    "item": "skycraft:silver_mace",
+    "enchant": {
+      "smite": 4,
+      "knockback": 1
+    },
+    "note": "Recovered from Blackwood Delve 6 Dwemer Ruin in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_7",
+    "name": "Blackwood Relic #7",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L4.brackish_flat",
+      "blackwood.L5.rice_and_reed"
+    ],
+    "place": "blackwood_delve_7_imperial_camp",
+    "x": 4176,
+    "z": 8176,
+    "kind": "scholar_satchel",
+    "item": "skycraft:glass_dagger",
+    "enchant": {
+      "sharpness": 3,
+      "looting": 2
+    },
+    "note": "Recovered from Blackwood Delve 7 Imperial Camp in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_8",
+    "name": "Blackwood Relic #8",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L5.river_mouth_port",
+      "blackwood.L6.leyawiin_at_the_mouth"
+    ],
+    "place": "blackwood_delve_8_mage_tower",
+    "x": 4368,
+    "z": 8336,
+    "kind": "legion_strongbox",
+    "item": "skycraft:ebony_sword",
+    "enchant": {
+      "sharpness": 4,
+      "fire_aspect": 1
+    },
+    "note": "Recovered from Blackwood Delve 8 Mage Tower in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_9",
+    "name": "Blackwood Relic #9",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L5.mercenary_trade",
+      "blackwood.L6.border_villages"
+    ],
+    "place": "blackwood_delve_9_grove",
+    "x": 4144,
+    "z": 8496,
+    "kind": "pedestal",
+    "item": "skycraft:dwarven_warhammer",
+    "enchant": {
+      "smite": 3,
+      "knockback": 2
+    },
+    "note": "Recovered from Blackwood Delve 9 Grove in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_10",
+    "name": "Blackwood Relic #10",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L5.rice_and_reed",
+      "blackwood.L7.imperial_core_vs_beastfolk_shanties"
+    ],
+    "place": "blackwood_delve_10_cabin",
+    "x": 3664,
+    "z": 8656,
+    "kind": "corpse",
+    "item": "skycraft:akaviri_sword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Blackwood Delve 10 Cabin in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_11",
+    "name": "Blackwood Relic #11",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L6.leyawiin_at_the_mouth",
+      "blackwood.L7.khajiit_border_village"
+    ],
+    "place": "blackwood_delve_11_lighthouse",
+    "x": 2960,
+    "z": 8816,
+    "kind": "shrine_offering",
+    "item": "skycraft:imperial_sword",
+    "enchant": {
+      "sharpness": 4
+    },
+    "note": "Recovered from Blackwood Delve 11 Lighthouse in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_12",
+    "name": "Blackwood Relic #12",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L6.border_villages",
+      "blackwood.L8.zenithar_chapel"
+    ],
+    "place": "blackwood_delve_12_giant_camp",
+    "x": 3760,
+    "z": 8944,
+    "kind": "locked_coffer",
+    "item": "skycraft:imperial_greatsword",
+    "enchant": {
+      "sharpness": 4,
+      "sweeping": 2
+    },
+    "note": "Recovered from Blackwood Delve 12 Giant Camp in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_13",
+    "name": "Blackwood Relic #13",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L7.imperial_core_vs_beastfolk_shanties",
+      "blackwood.L8.argonian_hist_reverence"
+    ],
+    "place": "blackwood_delve_13_dragon_lair",
+    "x": 4432,
+    "z": 9072,
+    "kind": "weapon_rack",
+    "item": "skycraft:elven_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Blackwood Delve 13 Dragon Lair in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_14",
+    "name": "Blackwood Relic #14",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L7.khajiit_border_village",
+      "blackwood.L9.mercenary_company"
+    ],
+    "place": "blackwood_delve_14_kolskeggr_mine",
+    "x": 3184,
+    "z": 9232,
+    "kind": "sarcophagus",
+    "item": "skycraft:elven_bow",
+    "enchant": {
+      "power": 4
+    },
+    "note": "Recovered from Blackwood Delve 14 Kolskeggr Mine in Blackwood."
+  },
+  {
+    "id": "cyrodiil_blackwood_relic_15",
+    "name": "Blackwood Relic #15",
+    "region": "blackwood",
+    "why": [
+      "blackwood.L8.zenithar_chapel",
+      "blackwood.L9.marsh_border"
+    ],
+    "place": "blackwood_delve_15_bleak_falls_barrow",
+    "x": 3504,
+    "z": 9360,
+    "kind": "scholar_satchel",
+    "item": "skycraft:silver_sword",
+    "enchant": {
+      "smite": 4
+    },
+    "note": "Recovered from Blackwood Delve 15 Bleak Falls Barrow in Blackwood."
+  }
+]

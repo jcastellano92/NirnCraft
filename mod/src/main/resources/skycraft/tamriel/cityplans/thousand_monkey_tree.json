@@ -1,0 +1,199 @@
+{
+  "id": "thousand_monkey_tree",
+  "why": [
+    "tang_mo.L1.karst_spire_isles",
+    "tang_mo.L5.open_charter_spice_trade",
+    "tang_mo.L6.tang_mo_treaty_harbor"
+  ],
+  "sil": "akavir-thousand-monkey-tree-plan",
+  "base": "none",
+  "overlay": "tang_mo",
+  "radius": 14,
+  "reach": 26,
+  "gates": [
+    [
+      0,
+      12
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        6
+      ],
+      "overlay": "tang_mo",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        6,
+        14
+      ],
+      "overlay": "tang_mo",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 6,
+      "name": "thousand_monkey_tree_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -3
+      ],
+      "name": "thousand_monkey_tree_landmark",
+      "overlay": "tang_mo"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 2,
+      "r1": 12,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        5,
+        0
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        7,
+        7
+      ],
+      "face": "north",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        0,
+        5
+      ],
+      "face": "north",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -7,
+        7
+      ],
+      "face": "north",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -5,
+        0
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -7,
+        -7
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        -5
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        7,
+        -7
+      ],
+      "face": "south",
+      "overlay": "tang_mo",
+      "name": "thousand_monkey_tree_b_8"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "thousand_monkey_tree_shrine",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "thousand_monkey_tree_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "thousand_monkey_tree_b_5",
+    "smithy": "thousand_monkey_tree_b_7"
+  },
+  "titles": {
+    "thousand_monkey_tree_b_1": "place.skycraft.thousand_monkey_tree Council & Seat Hall",
+    "thousand_monkey_tree_b_2": "place.skycraft.thousand_monkey_tree High Sanctuary",
+    "thousand_monkey_tree_b_3": "place.skycraft.thousand_monkey_tree Fighters & Wayfarers Hall",
+    "thousand_monkey_tree_b_4": "place.skycraft.thousand_monkey_tree Mages & Chroniclers Spire",
+    "thousand_monkey_tree_b_5": "place.skycraft.thousand_monkey_tree The Lantern & Hearth Inn",
+    "thousand_monkey_tree_b_6": "place.skycraft.thousand_monkey_tree The Traveler's Rest Tavern",
+    "thousand_monkey_tree_b_7": "place.skycraft.thousand_monkey_tree Master Forge & Armorer",
+    "thousand_monkey_tree_b_8": "place.skycraft.thousand_monkey_tree Botanicals & Remedies",
+    "thousand_monkey_tree_landmark": "High Seat of place.skycraft.thousand_monkey_tree",
+    "thousand_monkey_tree_plaza": "place.skycraft.thousand_monkey_tree Central Plaza"
+  },
+  "innKey": "thousand_monkey_tree_b_5"
+}

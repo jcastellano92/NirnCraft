@@ -1,0 +1,112 @@
+{
+  "id": "aleswell",
+  "why": [
+    "heartlands.L4.heath_and_grain",
+    "heartlands.L6.red_ring_villages"
+  ],
+  "sil": "hilltop-garden-inn",
+  "base": "none",
+  "overlay": "heartlands",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        40
+      ],
+      "overlay": "heartlands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "heartlands",
+      "name": "aleswell_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        5,
+        14
+      ],
+      "face": "south",
+      "overlay": "heartlands",
+      "name": "aleswell_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -6,
+        5
+      ],
+      "face": "south",
+      "overlay": "heartlands",
+      "name": "aleswell_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -12,
+        -9
+      ],
+      "face": "south",
+      "overlay": "heartlands",
+      "name": "aleswell_b_4"
+    },
+    {
+      "kind": "farmhouse",
+      "use": "barn",
+      "wealth": "common",
+      "at": [
+        2,
+        -8
+      ],
+      "face": "south",
+      "overlay": "heartlands",
+      "name": "aleswell_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "aleswell_rows",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "aleswell_hill",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "aleswell_b_1": "Aleswell Inn",
+    "aleswell_b_2": "Diram Serethi's Farmstead",
+    "aleswell_b_3": "Adosi Serethi's Cottage",
+    "aleswell_b_4": "Urnsi Serethi's House",
+    "aleswell_b_5": "Aleswell Apple Barn"
+  },
+  "innKey": "aleswell_b_1",
+  "names": {
+    "inn": "aleswell_b_1"
+  }
+}

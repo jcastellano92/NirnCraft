@@ -17,6 +17,7 @@ public final class Mobs {
     public static final String DWARVEN_SPIDER = "skycraft:dwarven_spider";
     public static final String DWARVEN_SPHERE = "skycraft:dwarven_sphere";
     public static final String DWARVEN_CENTURION = "skycraft:dwarven_centurion";
+    public static final String GIANT_SCORPION = "skycraft:giant_scorpion";
 
     public static String draugr() {
         return orElse(DRAUGR, "minecraft:zombie");
@@ -40,6 +41,10 @@ public final class Mobs {
 
     public static String spider() {
         return orElse("skycraft:frostbite_spider", "minecraft:cave_spider");
+    }
+
+    public static String giantScorpion() {
+        return orElse(GIANT_SCORPION, "skycraft:frostbite_spider", "minecraft:cave_spider");
     }
 
     public static String vampire() {

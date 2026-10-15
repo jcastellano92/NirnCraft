@@ -263,8 +263,15 @@ public final class StreetPlan {
      */
     public boolean at(double x, double z, Hit out) {
         out.clear();
-        int k = bucketOf.get(key((int) Math.floor(x) >> BUCKET_SHIFT, (int) Math.floor(z) >> BUCKET_SHIFT));
-        if (k < 0) return false;
+        int ix = (int) Math.floor(x), iz = (int) Math.floor(z);
+        int k = bucketOf.get(key(ix >> BUCKET_SHIFT, iz >> BUCKET_SHIFT));
+        if (k < 0) {
+            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+                StreetPlan tp = com.skycraft.worldplan.tile.TilePlanner.streetPlanAt(ix, iz);
+                if (tp != null && tp != this) return tp.at(x, z, out);
+            }
+            return false;
+        }
         float px = (float) x, pz = (float) z, best = REACH * REACH;
         int bestE = -1;
         float bestT = 0;
@@ -282,7 +289,13 @@ public final class StreetPlan {
                 bestT = t;
             }
         }
-        if (bestE < 0) return false;
+        if (bestE < 0) {
+            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+                StreetPlan tp = com.skycraft.worldplan.tile.TilePlanner.streetPlanAt(ix, iz);
+                if (tp != null && tp != this) return tp.at(x, z, out);
+            }
+            return false;
+        }
         out.edge = bestE;
         out.settlement = edgeSettlement[bestE];
         out.cls = eClass[bestE];
@@ -380,7 +393,13 @@ public final class StreetPlan {
         b.plotWeight = 0f;
         b.plotHeight = Float.NaN;
         int k = bucketOf.get(key(x >> BUCKET_SHIFT, z >> BUCKET_SHIFT));
-        if (k < 0) return false;
+        if (k < 0) {
+            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(x, z)) {
+                StreetPlan tp = com.skycraft.worldplan.tile.TilePlanner.streetPlanAt(x, z);
+                if (tp != null && tp != this) return tp.pad(x, z, b);
+            }
+            return false;
+        }
         float bestW = 0f, h = Float.NaN;
         for (int j = bucketPlotOff[k], end = bucketPlotOff[k + 1]; j < end; j++) {
             int p = bucketPlots[j];

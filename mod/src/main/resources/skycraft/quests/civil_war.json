@@ -2,34 +2,117 @@
   "line": "civil_war",
   "category": "faction",
   "region": "skyrim/haafingar",
-  "speakers": {"legate": "Legion Officer", "storm_officer": "Stormcloak Officer"},
+  "speakers": {
+    "legate": "Legion Officer",
+    "storm_officer": "Stormcloak Officer"
+  },
   "npcs": [
-    {"id": "tullius", "name": "General Tullius", "role": "imperial_soldier", "place": "castle_dour", "offset": [0, 0], "greet": "I have a war to win and a province full of people who'd rather I lost it. Make it quick."},
-    {"id": "rikke", "name": "Legate Rikke", "role": "imperial_soldier", "place": "castle_dour", "offset": [3, 2], "female": true, "greet": "Skyrim is my home too, whatever Ulfric says. The Legion is how we keep it whole."},
-    {"id": "ulfric", "name": "Ulfric Stormcloak", "role": "stormcloak_soldier", "place": "palace_of_the_kings", "offset": [0, 0], "greet": "Skyrim belongs to the Nords. Speak, if you have something worth my time."},
-    {"id": "galmar", "name": "Galmar Stone-Fist", "role": "stormcloak_soldier", "place": "palace_of_the_kings", "offset": [3, 2], "greet": "You want to fight for Skyrim? Good. Let's see if you can."}
+    {
+      "id": "tullius",
+      "name": "General Tullius",
+      "role": "imperial_soldier",
+      "place": "castle_dour",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "I have a war to win and a province full of people who'd rather I lost it. Make it quick."
+    },
+    {
+      "id": "rikke",
+      "name": "Legate Rikke",
+      "role": "imperial_soldier",
+      "place": "castle_dour",
+      "offset": [
+        3,
+        2
+      ],
+      "female": true,
+      "greet": "Skyrim is my home too, whatever Ulfric says. The Legion is how we keep it whole."
+    },
+    {
+      "id": "ulfric",
+      "name": "Ulfric Stormcloak",
+      "role": "stormcloak_soldier",
+      "place": "palace_of_the_kings",
+      "offset": [
+        0,
+        0
+      ],
+      "greet": "Skyrim belongs to the Nords. Speak, if you have something worth my time."
+    },
+    {
+      "id": "galmar",
+      "name": "Galmar Stone-Fist",
+      "role": "stormcloak_soldier",
+      "place": "palace_of_the_kings",
+      "offset": [
+        3,
+        2
+      ],
+      "greet": "You want to fight for Skyrim? Good. Let's see if you can."
+    }
   ],
   "relics": [
-    {"id": "jagged_crown", "name": "The Jagged Crown", "desc": "The ancient crown of Skyrim's High Kings, made of dragon teeth and bone.", "icon": 5},
-    {"id": "legion_orders", "name": "General Tullius's Letter to Whiterun", "desc": "A demand that Whiterun admit a Legion garrison.", "icon": 11},
-    {"id": "stormcloak_axe", "name": "Ulfric's Axe", "desc": "A war axe, sent as a message: choose a side.", "icon": 21}
+    {
+      "id": "jagged_crown",
+      "name": "The Jagged Crown",
+      "desc": "The ancient crown of Skyrim's High Kings, made of dragon teeth and bone.",
+      "icon": 5
+    },
+    {
+      "id": "legion_orders",
+      "name": "General Tullius's Letter to Whiterun",
+      "desc": "A demand that Whiterun admit a Legion garrison.",
+      "icon": 11
+    },
+    {
+      "id": "stormcloak_axe",
+      "name": "Ulfric's Axe",
+      "desc": "A war axe, sent as a message: choose a side.",
+      "icon": 21
+    }
   ],
   "scenes": {
     "whiterun_falls_legion": [
-      ["legate", "The rebels are breaking! Hold the gate! Whiterun stands with the Empire!"],
-      ["balgruuf", "So be it. Whiterun has chosen. Gods help us all."]
+      [
+        "legate",
+        "The rebels are breaking! Hold the gate! Whiterun stands with the Empire!"
+      ],
+      [
+        "balgruuf",
+        "So be it. Whiterun has chosen. Gods help us all."
+      ]
     ],
     "whiterun_falls_storm": [
-      ["storm_officer", "The gate's down! For Skyrim! Whiterun is free!"],
-      ["balgruuf", "Enough. Whiterun yields. Tell Ulfric he has his city."]
+      [
+        "storm_officer",
+        "The gate's down! For Skyrim! Whiterun is free!"
+      ],
+      [
+        "balgruuf",
+        "Enough. Whiterun yields. Tell Ulfric he has his city."
+      ]
     ],
     "windhelm_falls": [
-      ["narrator", "The Palace of the Kings is quiet. Ulfric Stormcloak kneels in his own throne room and does not ask for mercy."],
-      ["tullius", "It's over. Skyrim stays in the Empire. Make sure the soldiers know who won this for them."]
+      [
+        "narrator",
+        "The Palace of the Kings is quiet. Ulfric Stormcloak kneels in his own throne room and does not ask for mercy."
+      ],
+      [
+        "tullius",
+        "It's over. Skyrim stays in the Empire. Make sure the soldiers know who won this for them."
+      ]
     ],
     "solitude_falls": [
-      ["narrator", "Castle Dour's gate falls in. General Tullius stands alone in his war room, sword drawn, his officers dead around him."],
-      ["ulfric", "It's done. Skyrim is ours. Sovngarde will sing of this day."]
+      [
+        "narrator",
+        "Castle Dour's gate falls in. General Tullius stands alone in his war room, sword drawn, his officers dead around him."
+      ],
+      [
+        "ulfric",
+        "It's done. Skyrim is ours. Sovngarde will sing of this day."
+      ]
     ]
   },
   "quests": [
@@ -38,71 +121,218 @@
       "title": "Joining the Legion",
       "faction": "imperial_legion",
       "start": "npc:rikke",
-      "requires": ["!faction:stormcloaks", "!faction:imperial_legion"],
+      "requires": [
+        "!faction:stormcloaks",
+        "!faction:imperial_legion"
+      ],
       "offer": "I want to join the Legion.",
       "pitch": "Good. Before I sign you up: Fort Hraggstad has been taken over by bandits, and we need it back. Clear it out, and come back.",
       "desc": "Legate Rikke will enlist me in the Imperial Legion once I've cleared bandits out of Fort Hraggstad.",
       "objectives": [
-        {"type": "go", "place": "fort_hraggstad", "text": "Travel to Fort Hraggstad"},
-        {"type": "clear", "place": "fort_hraggstad", "text": "Clear the bandits out of Fort Hraggstad",
-         "spawn": [{"type": "skycraft:bandit", "count": 4}, {"type": "skycraft:bandit_chief", "count": 1}]},
-        {"type": "talk", "npc": "rikke", "text": "Report to Legate Rikke", "topic": "Fort Hraggstad is clear.",
-         "reply": "Then raise your hand and swear it. Welcome to the Imperial Legion, soldier. Here's your kit. Don't get blood on the collar."}
+        {
+          "type": "go",
+          "place": "fort_hraggstad",
+          "text": "Travel to Fort Hraggstad"
+        },
+        {
+          "type": "clear",
+          "place": "fort_hraggstad",
+          "text": "Clear the bandits out of Fort Hraggstad",
+          "spawn": [
+            {
+              "type": "skycraft:bandit",
+              "count": 4
+            },
+            {
+              "type": "skycraft:bandit_chief",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "rikke",
+          "text": "Report to Legate Rikke",
+          "topic": "Fort Hraggstad is clear.",
+          "reply": "Then raise your hand and swear it. Welcome to the Imperial Legion, soldier. Here's your kit. Don't get blood on the collar."
+        }
       ],
-      "rewards": {"gold": 150, "join": true, "flags": ["cw_legion"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "flags": [
+          "cw_legion"
+        ]
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_legion_jagged_crown",
       "title": "The Jagged Crown",
       "faction": "imperial_legion",
       "start": "auto",
-      "requires": ["quest:cw_legion_join|faction:imperial_legion", "!quest:cw_storm_jagged_crown"],
+      "requires": [
+        "quest:cw_legion_join|faction:imperial_legion",
+        "!quest:cw_storm_jagged_crown"
+      ],
       "desc": "The Jagged Crown of the ancient High Kings lies in Korvanjund. If Ulfric gets it, he'll be crowned High King. Legate Rikke wants it first.",
       "objectives": [
-        {"type": "go", "place": "korvanjund", "text": "Travel to Korvanjund"},
-        {"type": "clear", "place": "korvanjund", "text": "Drive the Stormcloaks out of Korvanjund",
-         "spawn": [{"type": "npc:stormcloak_soldier", "count": 4, "name": "Stormcloak Soldier", "hostile": true}, {"type": "npc:imperial_soldier", "count": 2, "name": "Legionnaire", "decor": true}]},
-        {"type": "kill", "place": "korvanjund", "placement": "structure", "text": "Defeat the crown's guardian",
-         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Korvanjund Warlord", "target": true, "boss": true}]},
-        {"type": "retrieve", "place": "korvanjund", "relic": "jagged_crown", "radius": 10, "text": "Take the Jagged Crown"},
-        {"type": "deliver", "npc": "tullius", "relic": "jagged_crown", "text": "Bring the crown to General Tullius",
-         "topic": "The Jagged Crown, General.",
-         "reply": "Ugly thing. Priceless, though, to the right fools. Ulfric won't be wearing it. Now, Whiterun. Balgruuf has sat on the fence long enough."}
+        {
+          "type": "go",
+          "place": "korvanjund",
+          "text": "Travel to Korvanjund"
+        },
+        {
+          "type": "clear",
+          "place": "korvanjund",
+          "text": "Drive the Stormcloaks out of Korvanjund",
+          "spawn": [
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 4,
+              "name": "Stormcloak Soldier",
+              "hostile": true
+            },
+            {
+              "type": "npc:imperial_soldier",
+              "count": 2,
+              "name": "Legionnaire",
+              "decor": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "korvanjund",
+          "placement": "structure",
+          "text": "Defeat the crown's guardian",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Korvanjund Warlord",
+              "target": true,
+              "boss": true
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "korvanjund",
+          "relic": "jagged_crown",
+          "radius": 10,
+          "text": "Take the Jagged Crown"
+        },
+        {
+          "type": "deliver",
+          "npc": "tullius",
+          "relic": "jagged_crown",
+          "text": "Bring the crown to General Tullius",
+          "topic": "The Jagged Crown, General.",
+          "reply": "Ugly thing. Priceless, though, to the right fools. Ulfric won't be wearing it. Now, Whiterun. Balgruuf has sat on the fence long enough."
+        }
       ],
-      "rewards": {"gold": 500, "faction_points": 3}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_legion_message",
       "title": "Message to Whiterun",
       "faction": "imperial_legion",
       "start": "auto",
-      "requires": ["quest:cw_legion_jagged_crown"],
+      "requires": [
+        "quest:cw_legion_jagged_crown"
+      ],
       "on_start": "relic:legion_orders",
       "desc": "General Tullius wants Jarl Balgruuf to accept a Legion garrison in Whiterun. I'm to deliver the demand.",
       "objectives": [
-        {"type": "deliver", "npc": "balgruuf", "relic": "legion_orders", "text": "Deliver General Tullius's letter to Jarl Balgruuf",
-         "topic": "A letter from General Tullius.",
-         "reply": "A garrison. And if I refuse, the Stormcloaks march on me anyway. Very well. Whiterun stands with the Empire. Tell Tullius to send his soldiers quickly; Ulfric's are already coming."}
+        {
+          "type": "deliver",
+          "npc": "balgruuf",
+          "relic": "legion_orders",
+          "text": "Deliver General Tullius's letter to Jarl Balgruuf",
+          "topic": "A letter from General Tullius.",
+          "reply": "A garrison. And if I refuse, the Stormcloaks march on me anyway. Very well. Whiterun stands with the Empire. Tell Tullius to send his soldiers quickly; Ulfric's are already coming."
+        }
       ],
-      "rewards": {"gold": 300, "faction_points": 2}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 2
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_legion_battle_whiterun",
       "title": "The Battle for Whiterun",
       "faction": "imperial_legion",
       "start": "auto",
-      "requires": ["quest:cw_legion_message"],
+      "requires": [
+        "quest:cw_legion_message"
+      ],
       "desc": "The Stormcloaks are attacking Whiterun. The Legion holds the walls.",
       "objectives": [
-        {"type": "go", "place": "whiterun", "offset": [0, 140], "radius": 30, "text": "Join the defenders at Whiterun's gate"},
-        {"type": "clear", "place": "whiterun", "offset": [0, 160], "radius": 48, "text": "Break the Stormcloak assault",
-         "spawn": [{"type": "npc:stormcloak_soldier", "count": 6, "name": "Stormcloak Attacker", "hostile": true},
-                   {"type": "npc:imperial_soldier", "count": 3, "name": "Whiterun Defender", "decor": true}],
-         "actions": "scene:whiterun_falls_legion;control:skyrim/whiterun:imperial"},
-        {"type": "talk", "npc": "rikke", "text": "Report to Legate Rikke", "topic": "Whiterun held.",
-         "reply": "It did, and so did you. Now we take the fight to them, fort by fort. Come to me when you're ready to march."}
+        {
+          "type": "go",
+          "place": "whiterun",
+          "offset": [
+            0,
+            140
+          ],
+          "radius": 30,
+          "text": "Join the defenders at Whiterun's gate"
+        },
+        {
+          "type": "clear",
+          "place": "whiterun",
+          "offset": [
+            0,
+            160
+          ],
+          "radius": 48,
+          "text": "Break the Stormcloak assault",
+          "spawn": [
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 6,
+              "name": "Stormcloak Attacker",
+              "hostile": true
+            },
+            {
+              "type": "npc:imperial_soldier",
+              "count": 3,
+              "name": "Whiterun Defender",
+              "decor": true
+            }
+          ],
+          "actions": "scene:whiterun_falls_legion;control:skyrim/whiterun:imperial"
+        },
+        {
+          "type": "talk",
+          "npc": "rikke",
+          "text": "Report to Legate Rikke",
+          "topic": "Whiterun held.",
+          "reply": "It did, and so did you. Now we take the fight to them, fort by fort. Come to me when you're ready to march."
+        }
       ],
-      "rewards": {"gold": 800, "faction_points": 4}
+      "rewards": {
+        "gold": 800,
+        "faction_points": 4
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_legion_fort",
@@ -110,113 +340,353 @@
       "faction": "imperial_legion",
       "start": "npc:rikke",
       "repeatable": true,
-      "requires": ["quest:cw_legion_battle_whiterun", "enemy_forts:imperial"],
-      "vars": {"fort": "enemy_fort:imperial", "region": "fort_region:@fort"},
+      "requires": [
+        "quest:cw_legion_battle_whiterun",
+        "enemy_forts:imperial"
+      ],
+      "vars": {
+        "fort": "enemy_fort:imperial",
+        "region": "fort_region:@fort"
+      },
       "offer": "Which fort do we take next?",
       "pitch": "The rebels hold a fort that guards a whole hold. Take it, and the hold is ours. I'll send a squad to meet you there.",
       "desc": "Legate Rikke sent me to seize a Stormcloak fort. If it falls, the hold it guards comes over to the Empire.",
       "objectives": [
-        {"type": "go", "place": "@fort", "text": "March on the Stormcloak fort"},
-        {"type": "clear", "place": "@fort", "radius": 48, "text": "Take the fort",
-         "spawn": [{"type": "npc:stormcloak_soldier", "count": 6, "name": "Stormcloak Defender", "hostile": true},
-                   {"type": "skycraft:bandit_chief", "count": 1, "name": "Stormcloak Fort Commander", "armor": "stormcloak"},
-                   {"type": "npc:imperial_soldier", "count": 3, "name": "Legion Assault Squad", "decor": true}],
-         "actions": "control:@region:imperial"}
+        {
+          "type": "go",
+          "place": "@fort",
+          "text": "March on the Stormcloak fort"
+        },
+        {
+          "type": "clear",
+          "place": "@fort",
+          "radius": 48,
+          "text": "Take the fort",
+          "spawn": [
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 6,
+              "name": "Stormcloak Defender",
+              "hostile": true
+            },
+            {
+              "type": "skycraft:bandit_chief",
+              "count": 1,
+              "name": "Stormcloak Fort Commander",
+              "armor": "stormcloak"
+            },
+            {
+              "type": "npc:imperial_soldier",
+              "count": 3,
+              "name": "Legion Assault Squad",
+              "decor": true
+            }
+          ],
+          "actions": "control:@region:imperial"
+        }
       ],
-      "rewards": {"gold": 600, "faction_points": 3}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 3
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_legion_capital",
       "title": "The Battle for Windhelm",
       "faction": "imperial_legion",
       "start": "npc:tullius",
-      "requires": ["quest:cw_legion_fort"],
+      "requires": [
+        "quest:cw_legion_fort"
+      ],
       "offer": "Is it time to finish this?",
       "pitch": "It's time. Windhelm. Ulfric's own city. We break the gate, we take the palace, and we end this rebellion in one day.",
       "desc": "The Legion marches on Windhelm, Ulfric Stormcloak's capital, to end the rebellion.",
       "objectives": [
-        {"type": "go", "place": "windhelm", "text": "Join the siege of Windhelm"},
-        {"type": "clear", "place": "windhelm", "radius": 64, "text": "Fight through the defenders of Windhelm",
-         "spawn": [{"type": "npc:stormcloak_soldier", "count": 8, "name": "Windhelm Defender", "hostile": true},
-                   {"type": "npc:imperial_soldier", "count": 4, "name": "Legion Siege Trooper", "decor": true}]},
-        {"type": "kill", "place": "palace_of_the_kings", "text": "Defeat Ulfric Stormcloak in the Palace of the Kings",
-         "spawn": [{"type": "npc:stormcloak_soldier", "name": "Ulfric Stormcloak, the Rebel Jarl", "target": true, "boss": true, "hp": 3.0, "hostile": true},
-                   {"type": "npc:stormcloak_soldier", "name": "Galmar Stone-Fist, Ulfric's Housecarl", "hostile": true, "hp": 2.0}],
-         "actions": "retire:ulfric;retire:galmar;scene:windhelm_falls;control:skyrim/eastmarch:imperial;control:skyrim/winterhold:imperial;control:skyrim/the_pale:imperial;control:skyrim/the_rift:imperial"}
+        {
+          "type": "go",
+          "place": "windhelm",
+          "text": "Join the siege of Windhelm"
+        },
+        {
+          "type": "clear",
+          "place": "windhelm",
+          "radius": 64,
+          "text": "Fight through the defenders of Windhelm",
+          "spawn": [
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 8,
+              "name": "Windhelm Defender",
+              "hostile": true
+            },
+            {
+              "type": "npc:imperial_soldier",
+              "count": 4,
+              "name": "Legion Siege Trooper",
+              "decor": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "palace_of_the_kings",
+          "text": "Defeat Ulfric Stormcloak in the Palace of the Kings",
+          "spawn": [
+            {
+              "type": "npc:stormcloak_soldier",
+              "name": "Ulfric Stormcloak, the Rebel Jarl",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "hostile": true
+            },
+            {
+              "type": "npc:stormcloak_soldier",
+              "name": "Galmar Stone-Fist, Ulfric's Housecarl",
+              "hostile": true,
+              "hp": 2.0
+            }
+          ],
+          "actions": "retire:ulfric;retire:galmar;scene:windhelm_falls;control:skyrim/eastmarch:imperial;control:skyrim/winterhold:imperial;control:skyrim/the_pale:imperial;control:skyrim/the_rift:imperial"
+        }
       ],
-      "rewards": {"gold": 3000, "faction_points": 20, "title": "legate", "flags": ["cw_won"],
-                  "items": [{"item": "skycraft:steel_sword", "name": "Legate's Blade", "enchant": {"sharpness": 4}}]}
+      "rewards": {
+        "gold": 3000,
+        "faction_points": 20,
+        "title": "legate",
+        "flags": [
+          "cw_won"
+        ],
+        "items": [
+          {
+            "item": "skycraft:steel_sword",
+            "name": "Legate's Blade",
+            "enchant": {
+              "sharpness": 4
+            }
+          }
+        ]
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_storm_join",
       "title": "Joining the Stormcloaks",
       "faction": "stormcloaks",
       "start": "npc:galmar",
-      "requires": ["!faction:imperial_legion", "!faction:stormcloaks"],
+      "requires": [
+        "!faction:imperial_legion",
+        "!faction:stormcloaks"
+      ],
       "offer": "I want to fight for the Stormcloaks.",
       "pitch": "Talk is cheap. There's an ice wraith in the old redoubt north of here that's been killing travelers. Bring me its teeth.",
       "desc": "Galmar Stone-Fist will take me into the Stormcloak army once I've killed an ice wraith haunting a ruin in the snow.",
       "objectives": [
-        {"type": "go", "place": "driftshade_refuge", "text": "Find the ice wraith's lair"},
-        {"type": "kill", "place": "driftshade_refuge", "text": "Kill the ice wraith",
-         "spawn": [{"type": "skycraft:ice_wraith", "name": "Ice Wraith", "target": true, "glow": true, "hp": 2.0}]},
-        {"type": "talk", "npc": "galmar", "text": "Return to Galmar Stone-Fist", "topic": "The wraith is dead.",
-         "reply": "Ha! Then raise your blade and swear it. You're a Stormcloak now. Fight for Skyrim, and Sovngarde will know your name."}
+        {
+          "type": "go",
+          "place": "driftshade_refuge",
+          "text": "Find the ice wraith's lair"
+        },
+        {
+          "type": "kill",
+          "place": "driftshade_refuge",
+          "text": "Kill the ice wraith",
+          "spawn": [
+            {
+              "type": "skycraft:ice_wraith",
+              "name": "Ice Wraith",
+              "target": true,
+              "glow": true,
+              "hp": 2.0
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "galmar",
+          "text": "Return to Galmar Stone-Fist",
+          "topic": "The wraith is dead.",
+          "reply": "Ha! Then raise your blade and swear it. You're a Stormcloak now. Fight for Skyrim, and Sovngarde will know your name."
+        }
       ],
-      "rewards": {"gold": 150, "join": true, "flags": ["cw_storm"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "flags": [
+          "cw_storm"
+        ]
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_storm_jagged_crown",
       "title": "The Jagged Crown",
       "faction": "stormcloaks",
       "start": "auto",
-      "requires": ["quest:cw_storm_join|faction:stormcloaks", "!quest:cw_legion_jagged_crown"],
+      "requires": [
+        "quest:cw_storm_join|faction:stormcloaks",
+        "!quest:cw_legion_jagged_crown"
+      ],
       "desc": "The Jagged Crown of the ancient High Kings lies in Korvanjund. Ulfric means to wear it. The Legion means to stop him.",
       "objectives": [
-        {"type": "go", "place": "korvanjund", "text": "Travel to Korvanjund"},
-        {"type": "clear", "place": "korvanjund", "text": "Drive the Legion out of Korvanjund",
-         "spawn": [{"type": "npc:imperial_soldier", "count": 4, "name": "Imperial Soldier", "hostile": true}, {"type": "npc:stormcloak_soldier", "count": 2, "name": "Stormcloak Brother", "decor": true}]},
-        {"type": "kill", "place": "korvanjund", "placement": "structure", "text": "Defeat the crown's guardian",
-         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Korvanjund Warlord", "target": true, "boss": true}]},
-        {"type": "retrieve", "place": "korvanjund", "relic": "jagged_crown", "radius": 10, "text": "Take the Jagged Crown"},
-        {"type": "deliver", "npc": "ulfric", "relic": "jagged_crown", "text": "Bring the crown to Ulfric Stormcloak",
-         "topic": "Your crown, Jarl Ulfric.",
-         "reply": "The crown of Skyrim's kings. Not mine yet; it must be earned. But this will put fire in every Nord's chest. Now: Whiterun."}
+        {
+          "type": "go",
+          "place": "korvanjund",
+          "text": "Travel to Korvanjund"
+        },
+        {
+          "type": "clear",
+          "place": "korvanjund",
+          "text": "Drive the Legion out of Korvanjund",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 4,
+              "name": "Imperial Soldier",
+              "hostile": true
+            },
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 2,
+              "name": "Stormcloak Brother",
+              "decor": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "korvanjund",
+          "placement": "structure",
+          "text": "Defeat the crown's guardian",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Korvanjund Warlord",
+              "target": true,
+              "boss": true
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "korvanjund",
+          "relic": "jagged_crown",
+          "radius": 10,
+          "text": "Take the Jagged Crown"
+        },
+        {
+          "type": "deliver",
+          "npc": "ulfric",
+          "relic": "jagged_crown",
+          "text": "Bring the crown to Ulfric Stormcloak",
+          "topic": "Your crown, Jarl Ulfric.",
+          "reply": "The crown of Skyrim's kings. Not mine yet; it must be earned. But this will put fire in every Nord's chest. Now: Whiterun."
+        }
       ],
-      "rewards": {"gold": 500, "faction_points": 3}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 3
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_storm_message",
       "title": "Message to Whiterun",
       "faction": "stormcloaks",
       "start": "auto",
-      "requires": ["quest:cw_storm_jagged_crown"],
+      "requires": [
+        "quest:cw_storm_jagged_crown"
+      ],
       "on_start": "relic:stormcloak_axe",
       "desc": "Ulfric sends Jarl Balgruuf an axe. If Balgruuf keeps it, he stands with Ulfric. If he sends it back, it means war.",
       "objectives": [
-        {"type": "deliver", "npc": "balgruuf", "relic": "stormcloak_axe", "text": "Deliver Ulfric's axe to Jarl Balgruuf",
-         "topic": "Ulfric sends you this axe.",
-         "reply": "An axe. Subtle, as always. Take it back to him. Whiterun is not his to command. If he wants it, he can come and take it."}
+        {
+          "type": "deliver",
+          "npc": "balgruuf",
+          "relic": "stormcloak_axe",
+          "text": "Deliver Ulfric's axe to Jarl Balgruuf",
+          "topic": "Ulfric sends you this axe.",
+          "reply": "An axe. Subtle, as always. Take it back to him. Whiterun is not his to command. If he wants it, he can come and take it."
+        }
       ],
-      "rewards": {"gold": 300, "faction_points": 2}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 2
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_storm_battle_whiterun",
       "title": "The Battle for Whiterun",
       "faction": "stormcloaks",
       "start": "auto",
-      "requires": ["quest:cw_storm_message"],
+      "requires": [
+        "quest:cw_storm_message"
+      ],
       "desc": "Balgruuf refused. The Stormcloaks march on Whiterun.",
       "objectives": [
-        {"type": "go", "place": "whiterun_stormcloak_camp", "text": "Join the army at the Stormcloak camp near Whiterun"},
-        {"type": "clear", "place": "whiterun", "offset": [0, 160], "radius": 48, "text": "Storm Whiterun's defenses",
-         "spawn": [{"type": "npc:imperial_soldier", "count": 6, "name": "Whiterun Defender", "hostile": true},
-                   {"type": "npc:stormcloak_soldier", "count": 3, "name": "Stormcloak Shock Trooper", "decor": true}],
-         "actions": "scene:whiterun_falls_storm;control:skyrim/whiterun:stormcloak"},
-        {"type": "talk", "npc": "galmar", "text": "Report to Galmar", "topic": "Whiterun is ours.",
-         "reply": "Ha! Whiterun is ours! Now we drive them back to their forts and burn them out one by one."}
+        {
+          "type": "go",
+          "place": "whiterun_stormcloak_camp",
+          "text": "Join the army at the Stormcloak camp near Whiterun"
+        },
+        {
+          "type": "clear",
+          "place": "whiterun",
+          "offset": [
+            0,
+            160
+          ],
+          "radius": 48,
+          "text": "Storm Whiterun's defenses",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 6,
+              "name": "Whiterun Defender",
+              "hostile": true
+            },
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 3,
+              "name": "Stormcloak Shock Trooper",
+              "decor": true
+            }
+          ],
+          "actions": "scene:whiterun_falls_storm;control:skyrim/whiterun:stormcloak"
+        },
+        {
+          "type": "talk",
+          "npc": "galmar",
+          "text": "Report to Galmar",
+          "topic": "Whiterun is ours.",
+          "reply": "Ha! Whiterun is ours! Now we drive them back to their forts and burn them out one by one."
+        }
       ],
-      "rewards": {"gold": 800, "faction_points": 4}
+      "rewards": {
+        "gold": 800,
+        "faction_points": 4
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_storm_fort",
@@ -224,42 +694,141 @@
       "faction": "stormcloaks",
       "start": "npc:galmar",
       "repeatable": true,
-      "requires": ["quest:cw_storm_battle_whiterun", "enemy_forts:stormcloak"],
-      "vars": {"fort": "enemy_fort:stormcloak", "region": "fort_region:@fort"},
+      "requires": [
+        "quest:cw_storm_battle_whiterun",
+        "enemy_forts:stormcloak"
+      ],
+      "vars": {
+        "fort": "enemy_fort:stormcloak",
+        "region": "fort_region:@fort"
+      },
       "offer": "Which Imperial fort do we hit next?",
       "pitch": "There's a Legion fort squatting over one of our holds. Take it, and that hold is free. I'll have brothers waiting for you there.",
       "desc": "Galmar sent me to seize an Imperial fort. If it falls, the hold it guards goes over to the Stormcloaks.",
       "objectives": [
-        {"type": "go", "place": "@fort", "text": "March on the Imperial fort"},
-        {"type": "clear", "place": "@fort", "radius": 48, "text": "Take the fort",
-         "spawn": [{"type": "npc:imperial_soldier", "count": 6, "name": "Imperial Defender", "hostile": true},
-                   {"type": "skycraft:bandit_chief", "count": 1, "name": "Imperial Fort Commander", "armor": "imperial"},
-                   {"type": "npc:stormcloak_soldier", "count": 3, "name": "Stormcloak Assault Squad", "decor": true}],
-         "actions": "control:@region:stormcloak"}
+        {
+          "type": "go",
+          "place": "@fort",
+          "text": "March on the Imperial fort"
+        },
+        {
+          "type": "clear",
+          "place": "@fort",
+          "radius": 48,
+          "text": "Take the fort",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 6,
+              "name": "Imperial Defender",
+              "hostile": true
+            },
+            {
+              "type": "skycraft:bandit_chief",
+              "count": 1,
+              "name": "Imperial Fort Commander",
+              "armor": "imperial"
+            },
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 3,
+              "name": "Stormcloak Assault Squad",
+              "decor": true
+            }
+          ],
+          "actions": "control:@region:stormcloak"
+        }
       ],
-      "rewards": {"gold": 600, "faction_points": 3}
+      "rewards": {
+        "gold": 600,
+        "faction_points": 3
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     },
     {
       "id": "cw_storm_capital",
       "title": "The Battle for Solitude",
       "faction": "stormcloaks",
       "start": "npc:ulfric",
-      "requires": ["quest:cw_storm_fort"],
+      "requires": [
+        "quest:cw_storm_fort"
+      ],
       "offer": "Is it time to take Solitude?",
       "pitch": "It's time. Solitude, the Empire's last stronghold. We take the city, we take Castle Dour, and Tullius goes back to Cyrodiil in a box.",
       "desc": "The Stormcloaks march on Solitude, the seat of Imperial power in Skyrim.",
       "objectives": [
-        {"type": "go", "place": "solitude", "text": "Join the siege of Solitude"},
-        {"type": "clear", "place": "solitude", "radius": 64, "text": "Fight through the defenders of Solitude",
-         "spawn": [{"type": "npc:imperial_soldier", "count": 8, "name": "Solitude Defender", "hostile": true},
-                   {"type": "npc:stormcloak_soldier", "count": 4, "name": "Stormcloak Siege Trooper", "decor": true}]},
-        {"type": "kill", "place": "castle_dour", "text": "Defeat General Tullius in Castle Dour",
-         "spawn": [{"type": "npc:imperial_soldier", "name": "General Tullius, Military Governor", "target": true, "boss": true, "hp": 3.0, "hostile": true},
-                   {"type": "npc:imperial_soldier", "name": "Legate Rikke, Tullius's Second", "hostile": true, "hp": 2.0}],
-         "actions": "retire:tullius;retire:rikke;scene:solitude_falls;control:skyrim/haafingar:stormcloak;control:skyrim/hjaalmarch:stormcloak;control:skyrim/the_reach:stormcloak;control:skyrim/falkreath:stormcloak"}
+        {
+          "type": "go",
+          "place": "solitude",
+          "text": "Join the siege of Solitude"
+        },
+        {
+          "type": "clear",
+          "place": "solitude",
+          "radius": 64,
+          "text": "Fight through the defenders of Solitude",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "count": 8,
+              "name": "Solitude Defender",
+              "hostile": true
+            },
+            {
+              "type": "npc:stormcloak_soldier",
+              "count": 4,
+              "name": "Stormcloak Siege Trooper",
+              "decor": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "castle_dour",
+          "text": "Defeat General Tullius in Castle Dour",
+          "spawn": [
+            {
+              "type": "npc:imperial_soldier",
+              "name": "General Tullius, Military Governor",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "hostile": true
+            },
+            {
+              "type": "npc:imperial_soldier",
+              "name": "Legate Rikke, Tullius's Second",
+              "hostile": true,
+              "hp": 2.0
+            }
+          ],
+          "actions": "retire:tullius;retire:rikke;scene:solitude_falls;control:skyrim/haafingar:stormcloak;control:skyrim/hjaalmarch:stormcloak;control:skyrim/the_reach:stormcloak;control:skyrim/falkreath:stormcloak"
+        }
       ],
-      "rewards": {"gold": 3000, "faction_points": 20, "title": "stormblade", "flags": ["cw_won"],
-                  "items": [{"item": "skycraft:steel_greatsword", "name": "Blade of the Bear", "enchant": {"sharpness": 4}}]}
+      "rewards": {
+        "gold": 3000,
+        "faction_points": 20,
+        "title": "stormblade",
+        "flags": [
+          "cw_won"
+        ],
+        "items": [
+          {
+            "item": "skycraft:steel_greatsword",
+            "name": "Blade of the Bear",
+            "enchant": {
+              "sharpness": 4
+            }
+          }
+        ]
+      },
+      "why": [
+        "haafingar.L9.imperial_seat",
+        "haafingar.L8.divines_temple"
+      ]
     }
   ]
 }

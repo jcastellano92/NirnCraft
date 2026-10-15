@@ -1,281 +1,656 @@
 {
- "province": "hammerfell",
- "arcs": [
-  {
-   "id": "ham_1", "title": "The Thirst of the Buried City", "tier": "S",
-   "secret": "The buried city of the Na-Totambu draws the oases down its glass-roofed shaft, each season an inch. A herald of the dead dune-king collects the water-tithe from caravan masters and sells their debts on.",
-   "order": ["the_silver_pilgrim", "goats_head_oasis", "sentinel", "volenfell", "motalion_necropolis", "tuwhaccas_throne", "lost_city_of_the_na_totambu"],
-   "entry": {"clue": "lectern", "offset": [6, 3], "text": "A roadhouse tally-board: caravans listed with a tithe column. At the bottom, in a dead man's hand: 'Water owed: thirty-one wells. Paid: nine. Ask the goat.'"},
-   "quest": {"title": "The Thirst of the Buried City", "desc": "A roadhouse tally-board lists wells owed and wells paid to someone called 'the Herald', and tells me to ask the goat.", "desc2": "The water-tithe trail crosses Sentinel's harbour and three desert tombs to the glass-roofed shaft of a lost city.", "pitch": "The Silver Pilgrim's keeper says the caravan masters all pay a tithe in water to a man nobody has met.", "outro": "The lost city's great cistern drank deep for a moment and then, slowly, began to give. In the far oases the wells rose a hand's breadth. The dune-king's herald is a shadow now, and the account is closed.", "boss": {"name": "Herald of the Dune-King", "type": "skycraft:sand_serpent", "hp": 3.4, "dmg": 1.5, "level": 28}, "reward": {"gold": 640, "loot": "legendary", "unique": "hews_bane_scimitar"}}
+  "province": "hammerfell",
+  "arcs": [
+    {
+      "id": "ham_1",
+      "title": "The Thirst of the Buried City",
+      "tier": "S",
+      "secret": "The buried city of the Na-Totambu draws the oases down its glass-roofed shaft, each season an inch. A herald of the dead dune-king collects the water-tithe from caravan masters and sells their debts on.",
+      "order": [
+        "the_silver_pilgrim",
+        "goats_head_oasis",
+        "sentinel",
+        "volenfell",
+        "motalion_necropolis",
+        "tuwhaccas_throne",
+        "lost_city_of_the_na_totambu"
+      ],
+      "entry": {
+        "clue": "lectern",
+        "offset": [
+          6,
+          3
+        ],
+        "text": "A roadhouse tally-board: caravans listed with a tithe column. At the bottom, in a dead man's hand: 'Water owed: thirty-one wells. Paid: nine. Ask the goat.'"
+      },
+      "quest": {
+        "title": "The Thirst of the Buried City",
+        "desc": "A roadhouse tally-board lists wells owed and wells paid to someone called 'the Herald', and tells me to ask the goat.",
+        "desc2": "The water-tithe trail crosses Sentinel's harbour and three desert tombs to the glass-roofed shaft of a lost city.",
+        "pitch": "The Silver Pilgrim's keeper says the caravan masters all pay a tithe in water to a man nobody has met.",
+        "outro": "The lost city's great cistern drank deep for a moment and then, slowly, began to give. In the far oases the wells rose a hand's breadth. The dune-king's herald is a shadow now, and the account is closed.",
+        "boss": {
+          "name": "Herald of the Dune-King",
+          "type": "skycraft:sand_serpent",
+          "hp": 3.4,
+          "dmg": 1.5,
+          "level": 28
+        },
+        "reward": {
+          "gold": 640,
+          "loot": "legendary",
+          "unique": "hews_bane_scimitar"
+        }
+      }
+    },
+    {
+      "id": "ham_2",
+      "title": "Reliefs That Remember Forward",
+      "tier": "A",
+      "secret": "The battle-reliefs of the Valley of Scars carve themselves a little each season, showing a battle that has not happened. The arena-master in Dragonstar stages fights to fit the stone, and a serpent cult believes the last panel shows the world's end.",
+      "order": [
+        "valley_of_scars",
+        "elinhir",
+        "dragonstar",
+        "aetherian_archive",
+        "sanctum_ophidia",
+        "skyreach_pinnacle"
+      ],
+      "entry": {
+        "clue": "stone",
+        "offset": [
+          4,
+          10
+        ],
+        "text": "A relief panel at the canyon mouth shows a scene half-carved: a dozen travellers on a staircase. The carving is fresh, and one of the faces looks very like yours."
+      },
+      "quest": {
+        "title": "Reliefs That Remember Forward",
+        "desc": "A relief at the Valley of Scars shows a dozen travellers on a staircase, one of whom looks like me.",
+        "desc2": "The panel leads through a star-watchers' city, an arena and a sealed sphere to the stair of the spire.",
+        "pitch": "A guide says the wall at the canyon mouth is being carved by nobody.",
+        "outro": "At the top of the spire I stood on the last panel and understood it. It was not an ending but a stairway. I did not carve my own face; I stepped off it.",
+        "boss": {
+          "name": "The Last Panel",
+          "type": "skycraft:gargoyle",
+          "hp": 3.2,
+          "dmg": 1.5,
+          "level": 28
+        },
+        "reward": {
+          "gold": 620,
+          "loot": "major"
+        }
+      }
+    },
+    {
+      "id": "ham_3",
+      "title": "The Gardener of Ahaleb",
+      "tier": "A",
+      "secret": "A Hews Bane lord buys freed slaves' debts and sends them, not to work, but to tend a hidden garden of palms in a necropolis. It blooms only for descendants of the dead, and he is slowly planting his entire line in it.",
+      "order": [
+        "thrall_cove",
+        "abahs_landing",
+        "taneth",
+        "hubalajad_palace",
+        "rihad",
+        "ahaleb_necropolis"
+      ],
+      "entry": {
+        "clue": "grave",
+        "offset": [
+          10,
+          -4
+        ],
+        "text": "A rusted shackle lies on a sand-grave at the old slaver's cove. Scratched on the stone: 'Paid for, not freed. Ask who buys the debts.'"
+      },
+      "quest": {
+        "title": "The Gardener of Ahaleb",
+        "desc": "A shackle on a grave at Thrall Cove, with a note that a freedman's debts were bought rather than cancelled.",
+        "desc2": "The debt-buyer's trail passes a palace and a walled bazaar and ends beneath a necropolis.",
+        "pitch": "A freedman at Thrall Cove says someone paid his debt and then asked him to plant a palm.",
+        "outro": "In the garden under the skylights the palms bent towards me. I carried out one seed and left the gardener's ledger where his heirs could find it. The dead have waited long enough.",
+        "boss": {
+          "name": "Lord Hubalajad's Steward",
+          "type": "skycraft:necromancer",
+          "hp": 3.0,
+          "dmg": 1.4,
+          "level": 24
+        },
+        "reward": {
+          "gold": 520,
+          "loot": "major"
+        }
+      }
+    },
+    {
+      "id": "ham_4",
+      "title": "The Sunken Clause",
+      "tier": "A",
+      "secret": "The treaty that freed Stros M'Kai carried a secret clause: every fifth year a ship must sail past the horizon with a cargo no one names. The inn's dragon tail is the prow of the first such ship, and the cargo is a torn page of the Tide-Ledger.",
+      "order": [
+        "port_hunding",
+        "saintsport",
+        "draggin_tale_inn",
+        "stros_mkai",
+        "onsis_breath"
+      ],
+      "entry": {
+        "clue": "lever",
+        "offset": [
+          3,
+          5
+        ],
+        "text": "A lever behind a harbour crate opens a small cabinet. Inside, a ship's manifest for a sailing in the fifth year: 'Cargo: sealed. Destination: not recorded. Return: not expected.'"
+      },
+      "quest": {
+        "title": "The Sunken Clause",
+        "desc": "A hidden cabinet at the harbour gate holds a manifest for a ship that was never expected to return.",
+        "desc2": "The ship's descendants gather at an inn with a dragon's tail over the door, and the cargo's trail ends at a ring of wind-carved arches.",
+        "pitch": "The port clerk says every fifth year a ship leaves with a sealed cargo and nobody asks.",
+        "outro": "The wind sang through the arches and the torn page lay in my hands, a map of tides with a missing corner. The fifth-year ship is no longer owed. Someone, somewhere, will have to fill the corner.",
+        "boss": {
+          "name": "The Prow-Keeper",
+          "type": "skycraft:wamasu",
+          "hp": 3.2,
+          "dmg": 1.4,
+          "level": 24
+        },
+        "reward": {
+          "gold": 500,
+          "loot": "major"
+        }
+      }
+    }
+  ],
+  "sit": {
+    "the_silver_pilgrim": {
+      "name": "The Silver Pilgrim",
+      "g": "A roadhouse on the Dragontail road, a long low building with a well-yard and a tally-board hung from the eaves.",
+      "m": "The tally-board lists every caravan's water-tithe in a dead man's handwriting. The keeper cannot account for who updates it.",
+      "c": [
+        "a tally-board updated overnight",
+        "a well-yard with every bucket tagged by a number",
+        "a roadhouse bell cast with a goat's head"
+      ],
+      "x": [
+        "goats_head_oasis"
+      ],
+      "p": "A well-token to present to the oasis keeper.",
+      "r": "The Silver Pilgrim's tally-board gets a new line every dawn, in a hand nobody knows.",
+      "lead": "Take the roadhouse well-token to the half-buried goat statue at the oasis.",
+      "n": {
+        "k": "ledger",
+        "t": "Tally-Board Copy",
+        "a": "Innkeeper Jabari",
+        "x": "Wells owed: thirty-one. Wells paid: nine. Caravans in arrears: forty-two. Collector: the Herald, who is not a man I have ever met. I copy the board each dawn and burn the copy. The board is always new again. It is a sort of mercy to be owed by someone who cannot be seen."
+      }
+    },
+    "goats_head_oasis": {
+      "name": "Goat's Head Oasis",
+      "g": "A well-oasis with palms and a half-buried statue of a goat, its horns visible above the sand.",
+      "m": "The statue's horns line up with a vanished shaft. The oasis water is falling each season, and there are older wells beneath the sand that were capped.",
+      "c": [
+        "a goat statue with horns aligned to the east",
+        "a capped older well under the sand",
+        "palms leaning toward the statue"
+      ],
+      "x": [
+        "sentinel"
+      ],
+      "p": "A well-cap key that lifts the oldest well-cap, and the shaft-map beneath it.",
+      "r": "The Goat's Head well is an inch lower every season, and the goat statue is half-buried now.",
+      "lead": "Open the older well under the goat statue and take the shaft-map to Sentinel.",
+      "n": {
+        "k": "treasure",
+        "t": "The Goat's Account",
+        "a": "",
+        "x": "Count nine paces from the left horn at dawn, dig under the shadow's tip. The first well was capped when the city's king drew the sand about his shoulders. Below it, a shaft. Below the shaft, a tithe. Bring water or bring no one."
+      }
+    },
+    "sentinel": {
+      "name": "Sentinel",
+      "g": "A harbour capital of domes with a vast palace dome, striped awnings and an oasis garden square.",
+      "m": "A water-merchant of the harbour has been buying caravan debts. His warehouse holds a roll of wells, each owed to the 'dune-king'.",
+      "c": [
+        "a water-merchant with an immense debt-roll",
+        "an oasis garden square with a dry fountain",
+        "harbour casks stamped with a goat's head"
+      ],
+      "x": [
+        "volenfell"
+      ],
+      "p": "The debt-roll: a complete list of the wells owed.",
+      "lead": "Take the water-merchant's debt-roll from Sentinel's harbour warehouse."
+    },
+    "volenfell": {
+      "name": "Volenfell",
+      "g": "A Dwemer ruin under a dune, half-flooded with sand, with mechanical halls and drifts.",
+      "m": "The Dwemer here built the pumps that the dune-king used to tap the aquifer. One pump still turns under the sand, drawing the water down.",
+      "c": [
+        "a pump-wheel turning in a drift",
+        "sand drifting upward in the lowest hall",
+        "a plate stamped with a goat and a tally"
+      ],
+      "x": [
+        "motalion_necropolis"
+      ],
+      "p": "A pump-key that can stop the draw.",
+      "r": "Volenfell hums when the wind is right. The old shepherds say it drinks.",
+      "lead": "Find the pump under Volenfell's sand and recover its stop-key.",
+      "n": {
+        "k": "inscription",
+        "t": "Pump Plate",
+        "a": "",
+        "x": "PUMP SEVEN: DRAWS FOR THE KING OF THE SAND. Do not stop while the king still lives. When the king is dead, continue until the king is remembered. Pump Seven shall not be stopped by the living."
+      }
+    },
+    "motalion_necropolis": {
+      "name": "Motalion Necropolis",
+      "g": "A tiered necropolis cut into a cliff, crowded with sarcophagus niches and a lightless stair.",
+      "m": "The dune-king's heralds are buried here, and one niche is empty and warm. The inscriptions record every water-tithe ever collected.",
+      "c": [
+        "a niche that is empty and warm",
+        "an inscription of tithes in rows",
+        "a stair worn smooth by a barefoot herald"
+      ],
+      "x": [
+        "tuwhaccas_throne"
+      ],
+      "p": "A herald's seal that gets its bearer an audience.",
+      "r": "The necropolis at Motalion has a cold wind that blows out of the empty niche.",
+      "lead": "Take the herald's seal from the Motalion niche and carry it to the throne-hall.",
+      "n": {
+        "k": "report",
+        "t": "The Heralds' Roll",
+        "a": "a tomb-scribe",
+        "x": "Eleven heralds are laid in niches. The twelfth niche stands open. The twelfth has not died but does not live. The twelfth carries the king's bell and rings it at each oasis at dawn. It is not to be spoken to. It will not answer, but it will remember."
+      }
+    },
+    "tuwhaccas_throne": {
+      "name": "Tuwhacca's Throne",
+      "g": "A ceremonial throne-hall of an ancient king with a procession of statues, colossal doors and a long colonnade.",
+      "m": "The throne faces a door sealed with sand. The king's last decree is carved on its arm: the city shall not be opened until the wells are paid in full.",
+      "c": [
+        "a throne with a decree carved on its arm",
+        "statues all turned to a sealed door",
+        "a colonnade whose last pillar is a standing man"
+      ],
+      "x": [
+        "lost_city_of_the_na_totambu"
+      ],
+      "p": "The decree's paid-in-full stamp.",
+      "r": "At Tuwhacca's Throne the statues' heads all face a door. Some mornings one has moved.",
+      "lead": "Press the herald's seal to the decree and open the sand door.",
+      "n": {
+        "k": "inscription",
+        "t": "The King's Last Decree",
+        "a": "",
+        "x": "LET NO WELL RUN DRY WHILE I SLEEP. LET EVERY CARAVAN PAY. LET THE CITY OPEN ONLY WHEN THE LAST CUP IS RETURNED. This is the word of the sand, which is more patient than any king."
+      }
+    },
+    "lost_city_of_the_na_totambu": {
+      "name": "Lost City of the Na-Totambu",
+      "g": "A buried city under the dunes, sand-choked streets below ground, a sunken temple and glass-roofed houses lit by a thin shaft of light.",
+      "m": "The great cistern sits under the glass roof. Something sits in the dry basin and drinks in the shaft of light. It is both king and herald.",
+      "c": [
+        "a cistern basin with a single wet footprint",
+        "a glass roof with a shaft of light that moves",
+        "a king's chair with a bell on its arm"
+      ],
+      "x": [
+        "goats_head_oasis",
+        "the_silver_pilgrim"
+      ],
+      "p": "The King's bell: a unique relic that calls water.",
+      "r": "At noon the lost city lets a single beam through its glass roof, and the dunes above seem to breathe.",
+      "lead": "Reach the great cistern of the lost city and settle the water-tithe.",
+      "n": {
+        "k": "prayer",
+        "t": "Prayer to the Full Cup",
+        "a": "the dune-priests",
+        "x": "O Cup, O Well, O Water that waits. We give you back what we have drunk. Take the debt from the caravan and the debt from the child. Let the sand be sand again, and the king be a king in memory only. Let the cup be full."
+      }
+    },
+    "valley_of_scars": {
+      "name": "Valley of Scars",
+      "g": "A canyon whose walls are carved with battle-reliefs from rim to floor, in a rust-red stone.",
+      "m": "A relief at the canyon mouth is carved fresh each season. It shows a staircase and a dozen travellers, and the faces change to match whoever visited last.",
+      "c": [
+        "a fresh relief with chisel dust still on the ledge",
+        "faces in the carving that look like recent visitors",
+        "a gap in the relief where one traveller stands unfinished"
+      ],
+      "x": [
+        "elinhir"
+      ],
+      "p": "A rubbing of the unfinished panel.",
+      "r": "A fresh scene appears on the Valley of Scars each season. Guides now sell tours before it fills in.",
+      "lead": "Take a rubbing of the unfinished panel to the star-watchers of Elinhir.",
+      "n": {
+        "k": "notes",
+        "t": "A Guide's Notes",
+        "a": "Samira the Guide",
+        "x": "The panels used to be old. Now they are new. A dozen figures on a stair, and one of them has a face I have seen in my tour-books. Each season another is carved. Nobody sees the chisel. I tell visitors it is only a trick of the light. It is not a trick of the light."
+      }
+    },
+    "elinhir": {
+      "name": "Elinhir",
+      "g": "A mountain-city of tiers on a granite spur, with long stairs, windy ramparts and one blue-pennanted spire.",
+      "m": "The star-watchers compared the valley's reliefs with their charts. The last panel matches no sky they have recorded, but it matches one they will.",
+      "c": [
+        "a star-chart with a blank constellation",
+        "an observatory logbook with a prophecy crossed out",
+        "a spire with a sundial that runs ahead"
+      ],
+      "x": [
+        "dragonstar"
+      ],
+      "p": "A star-chart of the coming sky.",
+      "lead": "Compare the Valley of Scars rubbing with Elinhir's blank constellation."
+    },
+    "dragonstar": {
+      "name": "Dragonstar",
+      "g": "A fortress-city with a huge circular arena at its heart, spokes of streets running to a ringed wall and a stepped palace beyond.",
+      "m": "The arena-master stages fights so that each bout matches a panel in the valley. Fighters who refuse wake bruised the next morning anyway.",
+      "c": [
+        "an arena floor carved with the relief's staircase",
+        "a master's schedule matched to panels",
+        "fighters' scars in the shape of carved figures"
+      ],
+      "x": [
+        "aetherian_archive"
+      ],
+      "p": "The arena-master's schedule: which panels have been fulfilled.",
+      "lead": "Steal the arena-master's schedule from Dragonstar and see which panels remain."
+    },
+    "aetherian_archive": {
+      "name": "Aetherian Archive",
+      "g": "A giant sealed library sphere half out of the sand, its surface covered in turning glyph-rings.",
+      "m": "The sphere's rings turn to the relief's staircase. Inside lies the only complete copy of the panels, in a language that predates the valley.",
+      "c": [
+        "glyph-rings aligned to a staircase",
+        "a seam in the sphere that opens at dusk",
+        "a library lectern with a relief rubbing under glass"
+      ],
+      "x": [
+        "sanctum_ophidia"
+      ],
+      "p": "The complete panel-roll, with the final panel's meaning.",
+      "r": "The great sphere's rings turn at dusk, always to the same heading. Scholars come to watch and write nothing down.",
+      "lead": "Open the archive's dusk seam and read the complete panel-roll.",
+      "n": {
+        "k": "book",
+        "t": "The Roll of Panels",
+        "a": "the archivist-sphere",
+        "x": "Panel the First: the climbers. Panel the Last: a stair to nowhere, and a figure who steps off it. The panels foretell the stair, not the fall. Whoever stands where the last panel stands will choose whether the stair is an ending or a door. The roll does not know."
+      }
+    },
+    "sanctum_ophidia": {
+      "name": "Sanctum Ophidia",
+      "g": "A serpent-cult sanctum of coiled-column rooms with spiral ramps, scale-patterned floors and a mirror-pool.",
+      "m": "The serpent cult reads the last panel as the world-eater's coming. They coil their pool-mirror at the stair's top and ask to be swallowed when it comes.",
+      "c": [
+        "a mirror-pool showing the stair",
+        "coiled columns scored with a countdown",
+        "robes laid out for guests with serpent scales"
+      ],
+      "x": [
+        "skyreach_pinnacle"
+      ],
+      "p": "A cult key that opens the pinnacle's stair-door.",
+      "lead": "Take the cult's key from the mirror-pool and climb the pinnacle."
+    },
+    "skyreach_pinnacle": {
+      "name": "Skyreach Pinnacle",
+      "g": "A spire of rock standing alone in dunes, ringed by stairs that wind to a small platform at the top.",
+      "m": "The platform is where the last panel shows a figure stepping off. The cult wants the figure to fall. The arena-master wants it to jump.",
+      "c": [
+        "a platform with a worn step-off notch",
+        "stairs with names scratched on the risers",
+        "wind that sings a single note at dusk"
+      ],
+      "x": [
+        "valley_of_scars",
+        "elinhir"
+      ],
+      "p": "A unique panel-chip that can rewrite a carved fate.",
+      "lead": "Stand on the platform at dusk and decide what the last panel means."
+    },
+    "thrall_cove": {
+      "name": "Thrall Cove",
+      "g": "A slavers' former cove with rotting pens on a half-tide beach and a cliff stair of rusted rings.",
+      "m": "The cove has been bought, in a single sale, by a Hubalajad steward. He pays freedmen to tend a garden he never shows them.",
+      "c": [
+        "rusted shackles hung on a post like wind-chimes",
+        "a freedmen's graveyard with new plantings",
+        "a deed-board stamped with a lord's palm-seal"
+      ],
+      "x": [
+        "abahs_landing"
+      ],
+      "p": "A freedman's contract with a palm-sealed clause.",
+      "r": "Thrall Cove's freedmen all have a palm-leaf pinned to their coat. They don't say what they plant.",
+      "lead": "Take the palm-sealed contract from Thrall Cove to the stilt harbour at Abah's Landing.",
+      "n": {
+        "k": "contract",
+        "t": "A Freedman's Contract",
+        "a": "Steward of Hubalajad",
+        "x": "The bearer, being free, agrees to plant and tend such palms as the lord shall provide, in such place as shall be named, for a period of twenty years. The bearer will be told the place when needed. The bearer will not be told why. Wages paid in water."
+      }
+    },
+    "abahs_landing": {
+      "name": "Abah's Landing",
+      "g": "A pier-and-stilt harbour on a bay, with rope walkways, nets and a lighthouse on a mole.",
+      "m": "Palm-seeds pass through the harbour in small sealed jars labelled 'for the garden'. The harbour-master has stopped asking whose garden.",
+      "c": [
+        "jars of palm seed on the dock",
+        "a customs form with the same palm-seal",
+        "a net of sleeping fishermen's palm-leaf charms"
+      ],
+      "x": [
+        "taneth"
+      ],
+      "p": "A seed-jar manifest naming the lord's agents.",
+      "lead": "Trace the seed-jar manifest from Abah's Landing to Taneth."
+    },
+    "taneth": {
+      "name": "Taneth",
+      "g": "A seaside city on stepped cliff terraces, with a white palace over turquoise pools and long stair-lanes to a harbour.",
+      "m": "The city's court physician has been asked to certify the death of freedmen who are not dead, so their debts may be sold on.",
+      "c": [
+        "a physician's stack of unsigned certificates",
+        "a court bench left empty at a freedman's trial",
+        "turquoise pools that smell of palms"
+      ],
+      "x": [
+        "hubalajad_palace"
+      ],
+      "p": "A physician's confession with the lord's name.",
+      "lead": "Take the physician's unsigned certificates from Taneth to the lord's palace."
+    },
+    "hubalajad_palace": {
+      "name": "Hubalajad Palace",
+      "g": "A walled lord's estate in the Hews Bane hills, with a long colonnade and a conservatory of potted palms.",
+      "m": "The lord is long dead. His steward has kept his name and his appetite for gardens. The conservatory's palms are labelled with ancestors' names.",
+      "c": [
+        "potted palms tagged with ancestors' names",
+        "a steward's ledger of freedmen planted",
+        "a lord's chair under a dust sheet"
+      ],
+      "x": [
+        "rihad"
+      ],
+      "p": "The steward's ledger: which freedmen are in the garden.",
+      "r": "At Hubalajad the lord has been dead twenty years and still orders palms by the barrow-load.",
+      "lead": "Take the steward's ledger from the Hubalajad conservatory to the walled bazaar-city.",
+      "n": {
+        "k": "ledger",
+        "t": "Steward's Palm Ledger",
+        "a": "the Steward",
+        "x": "Planted this season: 31. Rooted: 28. Blooming: 4. The lord's line is long; the garden is long; the list is long. I do not ask what blooms. I record the water. The bloom is said to cure the sand-fever, but only in blood of the line. I am no physician."
+      }
+    },
+    "rihad": {
+      "name": "Rihad",
+      "g": "A walled bazaar-city of narrow lanes under rope-and-cloth awnings with a single tall minaret and a scented spice gate.",
+      "m": "A spice merchant sells a tincture made from the palm-bloom to buyers who ask no questions. The tincture is why the garden is guarded.",
+      "c": [
+        "a spice stall with an unlabelled tincture",
+        "a minaret clerk's desk with sealed orders",
+        "a courier with a palm-leaf pass"
+      ],
+      "x": [
+        "ahaleb_necropolis"
+      ],
+      "p": "A tincture-phial that proves the garden's bloom heals.",
+      "lead": "Trace the palm-bloom tincture from Rihad's spice gate to its source."
+    },
+    "ahaleb_necropolis": {
+      "name": "Ahaleb Necropolis",
+      "g": "A mid-size necropolis with a long bridge hall over a pit, a hidden oasis chamber of palms under skylights and a final stair of golden doors.",
+      "m": "The hidden chamber is the garden. Palms grow from the embalmed, and the freedmen tend them in a trance of wages and water. The gardener is the steward's master.",
+      "c": [
+        "palms rooted in sarcophagi",
+        "freedmen asleep on benches with a watering-can in hand",
+        "skylights ground to focus light on a single bloom"
+      ],
+      "x": [
+        "thrall_cove",
+        "taneth"
+      ],
+      "p": "A seed of the bloom that cures sand-fever and the gardener's ledger of names.",
+      "r": "Ahaleb has a garden underneath that glows green at noon, if you stand on the right dune.",
+      "lead": "Enter the hidden oasis chamber and wake the gardeners.",
+      "n": {
+        "k": "diary",
+        "t": "A Gardener's Diary",
+        "a": "Hadiya",
+        "x": "I do not remember coming. I remember a contract, a palm, and a glass of water. I tend. The dead are warm. The bloom is gold and very beautiful, and when I touch it I feel my name loosening. I think this is how the gardens keep their gardeners. I must remember my name. Hadiya. Hadiya. Hadiya."
+      }
+    },
+    "port_hunding": {
+      "name": "Port Hunding",
+      "g": "A small port gate and pier on Stros M'Kai's coast, a customs hut and a harbour crane, with a sealed manifest cabinet.",
+      "m": "A manifest for the fifth-year ship is hidden behind a crate. Cargo: sealed. Return: not expected. The harbour clerk will not discuss it.",
+      "c": [
+        "a lever behind a harbour crate",
+        "a manifest line in red ink",
+        "a pier-plank branded with a prow"
+      ],
+      "x": [
+        "saintsport"
+      ],
+      "p": "The fifth-year manifest.",
+      "r": "Every fifth year a ship leaves Port Hunding with sealed cargo and the clerks are told to stay home.",
+      "lead": "Take the fifth-year manifest to the shrine harbour at Saintsport.",
+      "n": {
+        "k": "report",
+        "t": "Customs Note",
+        "a": "Clerk Rahim",
+        "x": "Fifth year: one ship, sealed, no passengers declared. Crew: twelve, all of the old families. Destination: unrecorded. Return: not expected. I was ordered to accept the form without reading the cargo. I read it. I will not say what I read, except that the ship is old."
+      }
+    },
+    "saintsport": {
+      "name": "Saintsport",
+      "g": "A shrine harbour on the Stros M'Kai coast, with a shrine to a drowned saint and a bell that rings under water.",
+      "m": "The saint is a captain of the first fifth-year ship, who volunteered to be lost. The shrine's bell rings when a descendant is chosen.",
+      "c": [
+        "a shrine bell that rings under water",
+        "family names painted on the harbour wall",
+        "wreaths on the water at every fifth spring"
+      ],
+      "x": [
+        "draggin_tale_inn"
+      ],
+      "p": "A shrine-token to be presented at the inn.",
+      "r": "Saintsport's bell rings under water every fifth year, and a family goes quiet.",
+      "lead": "Take the shrine-token from Saintsport to the inn with the dragon's tail.",
+      "n": {
+        "k": "prayer",
+        "t": "Sailors' Prayer",
+        "a": "Saintsport shrine",
+        "x": "Saint of the swallowed bell, whom the sea took on the fifth year: hold the ship's tilt in your two hands. Bring us back or let us be the ones who did not come. We do not ask what we carry. We carry it. Amen. Amen. Amen."
+      }
+    },
+    "draggin_tale_inn": {
+      "name": "Draggin Tale Inn",
+      "g": "An inn with a giant draconian tail over the door, a long common room and a back room where the families meet.",
+      "m": "The tail is a ship's prow-figure, not a dragon's. The families sit at the long table every fifth year to choose the next captain by lot.",
+      "c": [
+        "a long table with twelve seats",
+        "a prow-figure's scales rusted green",
+        "a lottery bowl of small carved prows"
+      ],
+      "x": [
+        "stros_mkai"
+      ],
+      "p": "A carved prow, the captain's lot, which grants passage on the fifth-year ship.",
+      "r": "The Draggin Tale's back room is shut every fifth spring while twelve families draw lots.",
+      "lead": "Win the lot at the Draggin Tale and take passage to the old harbour.",
+      "n": {
+        "k": "list",
+        "t": "The Twelve Families",
+        "a": "Innkeeper Baraka",
+        "x": "Aman, Bahrad, Cassim, Dalila, Emre, Farouk, Ghassan, Hadiya, Idris, Jabari, Karim, Layla. Each has sent a child on the fifth-year ship at least once. The lots are carved prows. This year's prow is white. I have drawn it for sixty years and never drawn mine."
+      }
+    },
+    "stros_mkai": {
+      "name": "Stros M'Kai",
+      "g": "A rocky island town with a lighthouse and fort at the harbour mouth and tight alleys climbing the central hill.",
+      "m": "The harbour treaty that freed the island carried a clause: a ship must sail beyond the horizon every fifth year or the treaty lapses. The lighthouse's lower floor holds the clause.",
+      "c": [
+        "a treaty plate in the lighthouse base",
+        "a harbour-mouth beacon that points at the horizon",
+        "a fort drill that salutes a ship that is not there"
+      ],
+      "x": [
+        "onsis_breath"
+      ],
+      "p": "The treaty clause's full text.",
+      "lead": "Read the sealed clause in the Stros M'Kai lighthouse and follow the fifth-year ship."
+    },
+    "onsis_breath": {
+      "name": "Onsi's Breath",
+      "g": "A ring of wind-carved arches on the Bangkorai coast, whose stones sing in the wind with a hollow note.",
+      "m": "The arches are fused vertebrae of a vast sea-beast. The torn page of the Tide-Ledger lies in a niche in the largest arch.",
+      "c": [
+        "arches humming a hollow note",
+        "a niche in the largest arch with a flat stone cover",
+        "a whale-bone inscription of tides"
+      ],
+      "x": [
+        "stros_mkai",
+        "draggin_tale_inn"
+      ],
+      "p": "The torn Tide-Ledger page with tide-hours.",
+      "r": "Onsi's arches hum on a westerly. The sailors say the wind is reading tides aloud.",
+      "lead": "Open the niche in the great arch and take the torn page of the ledger.",
+      "n": {
+        "k": "inscription",
+        "t": "The Arch's Footing",
+        "a": "",
+        "x": "FIFTH YEAR: BRING THE PAGE. FIFTH YEAR: LEAVE THE PAGE. The ledger is torn in nine for the safety of the sea. One piece sleeps beneath this arch, until a captain who can read it comes."
+      }
+    }
   },
-  {
-   "id": "ham_2", "title": "Reliefs That Remember Forward", "tier": "A",
-   "secret": "The battle-reliefs of the Valley of Scars carve themselves a little each season, showing a battle that has not happened. The arena-master in Dragonstar stages fights to fit the stone, and a serpent cult believes the last panel shows the world's end.",
-   "order": ["valley_of_scars", "elinhir", "dragonstar", "aetherian_archive", "sanctum_ophidia", "skyreach_pinnacle"],
-   "entry": {"clue": "stone", "offset": [4, 10], "text": "A relief panel at the canyon mouth shows a scene half-carved: a dozen travellers on a staircase. The carving is fresh, and one of the faces looks very like yours."},
-   "quest": {"title": "Reliefs That Remember Forward", "desc": "A relief at the Valley of Scars shows a dozen travellers on a staircase, one of whom looks like me.", "desc2": "The panel leads through a star-watchers' city, an arena and a sealed sphere to the stair of the spire.", "pitch": "A guide says the wall at the canyon mouth is being carved by nobody.", "outro": "At the top of the spire I stood on the last panel and understood it. It was not an ending but a stairway. I did not carve my own face; I stepped off it.", "boss": {"name": "The Last Panel", "type": "skycraft:gargoyle", "hp": 3.2, "dmg": 1.5, "level": 28}, "reward": {"gold": 620, "loot": "major"}}
-  },
-  {
-   "id": "ham_3", "title": "The Gardener of Ahaleb", "tier": "A",
-   "secret": "A Hews Bane lord buys freed slaves' debts and sends them, not to work, but to tend a hidden garden of palms in a necropolis. It blooms only for descendants of the dead, and he is slowly planting his entire line in it.",
-   "order": ["thrall_cove", "abahs_landing", "taneth", "hubalajad_palace", "rihad", "ahaleb_necropolis"],
-   "entry": {"clue": "grave", "offset": [10, -4], "text": "A rusted shackle lies on a sand-grave at the old slaver's cove. Scratched on the stone: 'Paid for, not freed. Ask who buys the debts.'"},
-   "quest": {"title": "The Gardener of Ahaleb", "desc": "A shackle on a grave at Thrall Cove, with a note that a freedman's debts were bought rather than cancelled.", "desc2": "The debt-buyer's trail passes a palace and a walled bazaar and ends beneath a necropolis.", "pitch": "A freedman at Thrall Cove says someone paid his debt and then asked him to plant a palm.", "outro": "In the garden under the skylights the palms bent towards me. I carried out one seed and left the gardener's ledger where his heirs could find it. The dead have waited long enough.", "boss": {"name": "Lord Hubalajad's Steward", "type": "skycraft:necromancer", "hp": 3.0, "dmg": 1.4, "level": 24}, "reward": {"gold": 520, "loot": "major"}}
-  },
-  {
-   "id": "ham_4", "title": "The Sunken Clause", "tier": "A",
-   "secret": "The treaty that freed Stros M'Kai carried a secret clause: every fifth year a ship must sail past the horizon with a cargo no one names. The inn's dragon tail is the prow of the first such ship, and the cargo is a torn page of the Tide-Ledger.",
-   "order": ["port_hunding", "saintsport", "draggin_tale_inn", "stros_mkai", "onsis_breath"],
-   "entry": {"clue": "lever", "offset": [3, 5], "text": "A lever behind a harbour crate opens a small cabinet. Inside, a ship's manifest for a sailing in the fifth year: 'Cargo: sealed. Destination: not recorded. Return: not expected.'"},
-   "quest": {"title": "The Sunken Clause", "desc": "A hidden cabinet at the harbour gate holds a manifest for a ship that was never expected to return.", "desc2": "The ship's descendants gather at an inn with a dragon's tail over the door, and the cargo's trail ends at a ring of wind-carved arches.", "pitch": "The port clerk says every fifth year a ship leaves with a sealed cargo and nobody asks.", "outro": "The wind sang through the arches and the torn page lay in my hands, a map of tides with a missing corner. The fifth-year ship is no longer owed. Someone, somewhere, will have to fill the corner.", "boss": {"name": "The Prow-Keeper", "type": "skycraft:wamasu", "hp": 3.2, "dmg": 1.4, "level": 24}, "reward": {"gold": 500, "loot": "major"}}
+  "thread_joins": {
+    "sentinel": "t_golems_key",
+    "tuwhaccas_throne": "t_golems_key",
+    "santaki": "t_golems_key",
+    "kozanset": "t_golems_key",
+    "skaven": "t_golems_key",
+    "volenfell": "t_golems_key",
+    "lainlyn": "t_golems_key",
+    "bangkorai_garrison": "t_golems_key",
+    "klathzgar": "t_golems_key",
+    "rihad": "t_golems_key",
+    "shedungent": "t_golems_key",
+    "elinhir": "t_golems_key",
+    "sanctum_ophidia": "t_golems_key",
+    "taneth": "t_golems_key",
+    "abahs_landing": "t_golems_key",
+    "stros_mkai": "t_golems_key",
+    "bthzark": "t_golems_key"
   }
- ],
- "sit": {
-  "the_silver_pilgrim": {
-   "name": "The Silver Pilgrim",
-   "g": "A roadhouse on the Dragontail road, a long low building with a well-yard and a tally-board hung from the eaves.",
-   "m": "The tally-board lists every caravan's water-tithe in a dead man's handwriting. The keeper cannot account for who updates it.",
-   "c": ["a tally-board updated overnight", "a well-yard with every bucket tagged by a number", "a roadhouse bell cast with a goat's head"],
-   "x": ["goats_head_oasis"],
-   "p": "A well-token to present to the oasis keeper.",
-   "r": "The Silver Pilgrim's tally-board gets a new line every dawn, in a hand nobody knows.",
-   "lead": "Take the roadhouse well-token to the half-buried goat statue at the oasis.",
-   "n": {"k": "ledger", "t": "Tally-Board Copy", "a": "Innkeeper Jabari", "x": "Wells owed: thirty-one. Wells paid: nine. Caravans in arrears: forty-two. Collector: the Herald, who is not a man I have ever met. I copy the board each dawn and burn the copy. The board is always new again. It is a sort of mercy to be owed by someone who cannot be seen."}
-  },
-  "goats_head_oasis": {
-   "name": "Goat's Head Oasis",
-   "g": "A well-oasis with palms and a half-buried statue of a goat, its horns visible above the sand.",
-   "m": "The statue's horns line up with a vanished shaft. The oasis water is falling each season, and there are older wells beneath the sand that were capped.",
-   "c": ["a goat statue with horns aligned to the east", "a capped older well under the sand", "palms leaning toward the statue"],
-   "x": ["sentinel"],
-   "p": "A well-cap key that lifts the oldest well-cap, and the shaft-map beneath it.",
-   "r": "The Goat's Head well is an inch lower every season, and the goat statue is half-buried now.",
-   "lead": "Open the older well under the goat statue and take the shaft-map to Sentinel.",
-   "n": {"k": "treasure", "t": "The Goat's Account", "a": "", "x": "Count nine paces from the left horn at dawn, dig under the shadow's tip. The first well was capped when the city's king drew the sand about his shoulders. Below it, a shaft. Below the shaft, a tithe. Bring water or bring no one."}
-  },
-  "sentinel": {
-   "name": "Sentinel",
-   "g": "A harbour capital of domes with a vast palace dome, striped awnings and an oasis garden square.",
-   "m": "A water-merchant of the harbour has been buying caravan debts. His warehouse holds a roll of wells, each owed to the 'dune-king'.",
-   "c": ["a water-merchant with an immense debt-roll", "an oasis garden square with a dry fountain", "harbour casks stamped with a goat's head"],
-   "x": ["volenfell"],
-   "p": "The debt-roll: a complete list of the wells owed.",
-   "lead": "Take the water-merchant's debt-roll from Sentinel's harbour warehouse."
-  },
-  "volenfell": {
-   "name": "Volenfell",
-   "g": "A Dwemer ruin under a dune, half-flooded with sand, with mechanical halls and drifts.",
-   "m": "The Dwemer here built the pumps that the dune-king used to tap the aquifer. One pump still turns under the sand, drawing the water down.",
-   "c": ["a pump-wheel turning in a drift", "sand drifting upward in the lowest hall", "a plate stamped with a goat and a tally"],
-   "x": ["motalion_necropolis"],
-   "p": "A pump-key that can stop the draw.",
-   "r": "Volenfell hums when the wind is right. The old shepherds say it drinks.",
-   "lead": "Find the pump under Volenfell's sand and recover its stop-key.",
-   "n": {"k": "inscription", "t": "Pump Plate", "a": "", "x": "PUMP SEVEN: DRAWS FOR THE KING OF THE SAND. Do not stop while the king still lives. When the king is dead, continue until the king is remembered. Pump Seven shall not be stopped by the living."}
-  },
-  "motalion_necropolis": {
-   "name": "Motalion Necropolis",
-   "g": "A tiered necropolis cut into a cliff, crowded with sarcophagus niches and a lightless stair.",
-   "m": "The dune-king's heralds are buried here, and one niche is empty and warm. The inscriptions record every water-tithe ever collected.",
-   "c": ["a niche that is empty and warm", "an inscription of tithes in rows", "a stair worn smooth by a barefoot herald"],
-   "x": ["tuwhaccas_throne"],
-   "p": "A herald's seal that gets its bearer an audience.",
-   "r": "The necropolis at Motalion has a cold wind that blows out of the empty niche.",
-   "lead": "Take the herald's seal from the Motalion niche and carry it to the throne-hall.",
-   "n": {"k": "report", "t": "The Heralds' Roll", "a": "a tomb-scribe", "x": "Eleven heralds are laid in niches. The twelfth niche stands open. The twelfth has not died but does not live. The twelfth carries the king's bell and rings it at each oasis at dawn. It is not to be spoken to. It will not answer, but it will remember."}
-  },
-  "tuwhaccas_throne": {
-   "name": "Tuwhacca's Throne",
-   "g": "A ceremonial throne-hall of an ancient king with a procession of statues, colossal doors and a long colonnade.",
-   "m": "The throne faces a door sealed with sand. The king's last decree is carved on its arm: the city shall not be opened until the wells are paid in full.",
-   "c": ["a throne with a decree carved on its arm", "statues all turned to a sealed door", "a colonnade whose last pillar is a standing man"],
-   "x": ["lost_city_of_the_na_totambu"],
-   "p": "The decree's paid-in-full stamp.",
-   "r": "At Tuwhacca's Throne the statues' heads all face a door. Some mornings one has moved.",
-   "lead": "Press the herald's seal to the decree and open the sand door.",
-   "n": {"k": "inscription", "t": "The King's Last Decree", "a": "", "x": "LET NO WELL RUN DRY WHILE I SLEEP. LET EVERY CARAVAN PAY. LET THE CITY OPEN ONLY WHEN THE LAST CUP IS RETURNED. This is the word of the sand, which is more patient than any king."}
-  },
-  "lost_city_of_the_na_totambu": {
-   "name": "Lost City of the Na-Totambu",
-   "g": "A buried city under the dunes, sand-choked streets below ground, a sunken temple and glass-roofed houses lit by a thin shaft of light.",
-   "m": "The great cistern sits under the glass roof. Something sits in the dry basin and drinks in the shaft of light. It is both king and herald.",
-   "c": ["a cistern basin with a single wet footprint", "a glass roof with a shaft of light that moves", "a king's chair with a bell on its arm"],
-   "x": ["goats_head_oasis", "the_silver_pilgrim"],
-   "p": "The King's bell: a unique relic that calls water.",
-   "r": "At noon the lost city lets a single beam through its glass roof, and the dunes above seem to breathe.",
-   "lead": "Reach the great cistern of the lost city and settle the water-tithe.",
-   "n": {"k": "prayer", "t": "Prayer to the Full Cup", "a": "the dune-priests", "x": "O Cup, O Well, O Water that waits. We give you back what we have drunk. Take the debt from the caravan and the debt from the child. Let the sand be sand again, and the king be a king in memory only. Let the cup be full."}
-  },
-  "valley_of_scars": {
-   "name": "Valley of Scars",
-   "g": "A canyon whose walls are carved with battle-reliefs from rim to floor, in a rust-red stone.",
-   "m": "A relief at the canyon mouth is carved fresh each season. It shows a staircase and a dozen travellers, and the faces change to match whoever visited last.",
-   "c": ["a fresh relief with chisel dust still on the ledge", "faces in the carving that look like recent visitors", "a gap in the relief where one traveller stands unfinished"],
-   "x": ["elinhir"],
-   "p": "A rubbing of the unfinished panel.",
-   "r": "A fresh scene appears on the Valley of Scars each season. Guides now sell tours before it fills in.",
-   "lead": "Take a rubbing of the unfinished panel to the star-watchers of Elinhir.",
-   "n": {"k": "notes", "t": "A Guide's Notes", "a": "Samira the Guide", "x": "The panels used to be old. Now they are new. A dozen figures on a stair, and one of them has a face I have seen in my tour-books. Each season another is carved. Nobody sees the chisel. I tell visitors it is only a trick of the light. It is not a trick of the light."}
-  },
-  "elinhir": {
-   "name": "Elinhir",
-   "g": "A mountain-city of tiers on a granite spur, with long stairs, windy ramparts and one blue-pennanted spire.",
-   "m": "The star-watchers compared the valley's reliefs with their charts. The last panel matches no sky they have recorded, but it matches one they will.",
-   "c": ["a star-chart with a blank constellation", "an observatory logbook with a prophecy crossed out", "a spire with a sundial that runs ahead"],
-   "x": ["dragonstar"],
-   "p": "A star-chart of the coming sky.",
-   "lead": "Compare the Valley of Scars rubbing with Elinhir's blank constellation."
-  },
-  "dragonstar": {
-   "name": "Dragonstar",
-   "g": "A fortress-city with a huge circular arena at its heart, spokes of streets running to a ringed wall and a stepped palace beyond.",
-   "m": "The arena-master stages fights so that each bout matches a panel in the valley. Fighters who refuse wake bruised the next morning anyway.",
-   "c": ["an arena floor carved with the relief's staircase", "a master's schedule matched to panels", "fighters' scars in the shape of carved figures"],
-   "x": ["aetherian_archive"],
-   "p": "The arena-master's schedule: which panels have been fulfilled.",
-   "lead": "Steal the arena-master's schedule from Dragonstar and see which panels remain."
-  },
-  "aetherian_archive": {
-   "name": "Aetherian Archive",
-   "g": "A giant sealed library sphere half out of the sand, its surface covered in turning glyph-rings.",
-   "m": "The sphere's rings turn to the relief's staircase. Inside lies the only complete copy of the panels, in a language that predates the valley.",
-   "c": ["glyph-rings aligned to a staircase", "a seam in the sphere that opens at dusk", "a library lectern with a relief rubbing under glass"],
-   "x": ["sanctum_ophidia"],
-   "p": "The complete panel-roll, with the final panel's meaning.",
-   "r": "The great sphere's rings turn at dusk, always to the same heading. Scholars come to watch and write nothing down.",
-   "lead": "Open the archive's dusk seam and read the complete panel-roll.",
-   "n": {"k": "book", "t": "The Roll of Panels", "a": "the archivist-sphere", "x": "Panel the First: the climbers. Panel the Last: a stair to nowhere, and a figure who steps off it. The panels foretell the stair, not the fall. Whoever stands where the last panel stands will choose whether the stair is an ending or a door. The roll does not know."}
-  },
-  "sanctum_ophidia": {
-   "name": "Sanctum Ophidia",
-   "g": "A serpent-cult sanctum of coiled-column rooms with spiral ramps, scale-patterned floors and a mirror-pool.",
-   "m": "The serpent cult reads the last panel as the world-eater's coming. They coil their pool-mirror at the stair's top and ask to be swallowed when it comes.",
-   "c": ["a mirror-pool showing the stair", "coiled columns scored with a countdown", "robes laid out for guests with serpent scales"],
-   "x": ["skyreach_pinnacle"],
-   "p": "A cult key that opens the pinnacle's stair-door.",
-   "lead": "Take the cult's key from the mirror-pool and climb the pinnacle."
-  },
-  "skyreach_pinnacle": {
-   "name": "Skyreach Pinnacle",
-   "g": "A spire of rock standing alone in dunes, ringed by stairs that wind to a small platform at the top.",
-   "m": "The platform is where the last panel shows a figure stepping off. The cult wants the figure to fall. The arena-master wants it to jump.",
-   "c": ["a platform with a worn step-off notch", "stairs with names scratched on the risers", "wind that sings a single note at dusk"],
-   "x": ["valley_of_scars", "elinhir"],
-   "p": "A unique panel-chip that can rewrite a carved fate.",
-   "lead": "Stand on the platform at dusk and decide what the last panel means."
-  },
-  "thrall_cove": {
-   "name": "Thrall Cove",
-   "g": "A slavers' former cove with rotting pens on a half-tide beach and a cliff stair of rusted rings.",
-   "m": "The cove has been bought, in a single sale, by a Hubalajad steward. He pays freedmen to tend a garden he never shows them.",
-   "c": ["rusted shackles hung on a post like wind-chimes", "a freedmen's graveyard with new plantings", "a deed-board stamped with a lord's palm-seal"],
-   "x": ["abahs_landing"],
-   "p": "A freedman's contract with a palm-sealed clause.",
-   "r": "Thrall Cove's freedmen all have a palm-leaf pinned to their coat. They don't say what they plant.",
-   "lead": "Take the palm-sealed contract from Thrall Cove to the stilt harbour at Abah's Landing.",
-   "n": {"k": "contract", "t": "A Freedman's Contract", "a": "Steward of Hubalajad", "x": "The bearer, being free, agrees to plant and tend such palms as the lord shall provide, in such place as shall be named, for a period of twenty years. The bearer will be told the place when needed. The bearer will not be told why. Wages paid in water."}
-  },
-  "abahs_landing": {
-   "name": "Abah's Landing",
-   "g": "A pier-and-stilt harbour on a bay, with rope walkways, nets and a lighthouse on a mole.",
-   "m": "Palm-seeds pass through the harbour in small sealed jars labelled 'for the garden'. The harbour-master has stopped asking whose garden.",
-   "c": ["jars of palm seed on the dock", "a customs form with the same palm-seal", "a net of sleeping fishermen's palm-leaf charms"],
-   "x": ["taneth"],
-   "p": "A seed-jar manifest naming the lord's agents.",
-   "lead": "Trace the seed-jar manifest from Abah's Landing to Taneth."
-  },
-  "taneth": {
-   "name": "Taneth",
-   "g": "A seaside city on stepped cliff terraces, with a white palace over turquoise pools and long stair-lanes to a harbour.",
-   "m": "The city's court physician has been asked to certify the death of freedmen who are not dead, so their debts may be sold on.",
-   "c": ["a physician's stack of unsigned certificates", "a court bench left empty at a freedman's trial", "turquoise pools that smell of palms"],
-   "x": ["hubalajad_palace"],
-   "p": "A physician's confession with the lord's name.",
-   "lead": "Take the physician's unsigned certificates from Taneth to the lord's palace."
-  },
-  "hubalajad_palace": {
-   "name": "Hubalajad Palace",
-   "g": "A walled lord's estate in the Hews Bane hills, with a long colonnade and a conservatory of potted palms.",
-   "m": "The lord is long dead. His steward has kept his name and his appetite for gardens. The conservatory's palms are labelled with ancestors' names.",
-   "c": ["potted palms tagged with ancestors' names", "a steward's ledger of freedmen planted", "a lord's chair under a dust sheet"],
-   "x": ["rihad"],
-   "p": "The steward's ledger: which freedmen are in the garden.",
-   "r": "At Hubalajad the lord has been dead twenty years and still orders palms by the barrow-load.",
-   "lead": "Take the steward's ledger from the Hubalajad conservatory to the walled bazaar-city.",
-   "n": {"k": "ledger", "t": "Steward's Palm Ledger", "a": "the Steward", "x": "Planted this season: 31. Rooted: 28. Blooming: 4. The lord's line is long; the garden is long; the list is long. I do not ask what blooms. I record the water. The bloom is said to cure the sand-fever, but only in blood of the line. I am no physician."}
-  },
-  "rihad": {
-   "name": "Rihad",
-   "g": "A walled bazaar-city of narrow lanes under rope-and-cloth awnings with a single tall minaret and a scented spice gate.",
-   "m": "A spice merchant sells a tincture made from the palm-bloom to buyers who ask no questions. The tincture is why the garden is guarded.",
-   "c": ["a spice stall with an unlabelled tincture", "a minaret clerk's desk with sealed orders", "a courier with a palm-leaf pass"],
-   "x": ["ahaleb_necropolis"],
-   "p": "A tincture-phial that proves the garden's bloom heals.",
-   "lead": "Trace the palm-bloom tincture from Rihad's spice gate to its source."
-  },
-  "ahaleb_necropolis": {
-   "name": "Ahaleb Necropolis",
-   "g": "A mid-size necropolis with a long bridge hall over a pit, a hidden oasis chamber of palms under skylights and a final stair of golden doors.",
-   "m": "The hidden chamber is the garden. Palms grow from the embalmed, and the freedmen tend them in a trance of wages and water. The gardener is the steward's master.",
-   "c": ["palms rooted in sarcophagi", "freedmen asleep on benches with a watering-can in hand", "skylights ground to focus light on a single bloom"],
-   "x": ["thrall_cove", "taneth"],
-   "p": "A seed of the bloom that cures sand-fever and the gardener's ledger of names.",
-   "r": "Ahaleb has a garden underneath that glows green at noon, if you stand on the right dune.",
-   "lead": "Enter the hidden oasis chamber and wake the gardeners.",
-   "n": {"k": "diary", "t": "A Gardener's Diary", "a": "Hadiya", "x": "I do not remember coming. I remember a contract, a palm, and a glass of water. I tend. The dead are warm. The bloom is gold and very beautiful, and when I touch it I feel my name loosening. I think this is how the gardens keep their gardeners. I must remember my name. Hadiya. Hadiya. Hadiya."}
-  },
-  "port_hunding": {
-   "name": "Port Hunding",
-   "g": "A small port gate and pier on Stros M'Kai's coast, a customs hut and a harbour crane, with a sealed manifest cabinet.",
-   "m": "A manifest for the fifth-year ship is hidden behind a crate. Cargo: sealed. Return: not expected. The harbour clerk will not discuss it.",
-   "c": ["a lever behind a harbour crate", "a manifest line in red ink", "a pier-plank branded with a prow"],
-   "x": ["saintsport"],
-   "p": "The fifth-year manifest.",
-   "r": "Every fifth year a ship leaves Port Hunding with sealed cargo and the clerks are told to stay home.",
-   "lead": "Take the fifth-year manifest to the shrine harbour at Saintsport.",
-   "n": {"k": "report", "t": "Customs Note", "a": "Clerk Rahim", "x": "Fifth year: one ship, sealed, no passengers declared. Crew: twelve, all of the old families. Destination: unrecorded. Return: not expected. I was ordered to accept the form without reading the cargo. I read it. I will not say what I read, except that the ship is old."}
-  },
-  "saintsport": {
-   "name": "Saintsport",
-   "g": "A shrine harbour on the Stros M'Kai coast, with a shrine to a drowned saint and a bell that rings under water.",
-   "m": "The saint is a captain of the first fifth-year ship, who volunteered to be lost. The shrine's bell rings when a descendant is chosen.",
-   "c": ["a shrine bell that rings under water", "family names painted on the harbour wall", "wreaths on the water at every fifth spring"],
-   "x": ["draggin_tale_inn"],
-   "p": "A shrine-token to be presented at the inn.",
-   "r": "Saintsport's bell rings under water every fifth year, and a family goes quiet.",
-   "lead": "Take the shrine-token from Saintsport to the inn with the dragon's tail.",
-   "n": {"k": "prayer", "t": "Sailors' Prayer", "a": "Saintsport shrine", "x": "Saint of the swallowed bell, whom the sea took on the fifth year: hold the ship's tilt in your two hands. Bring us back or let us be the ones who did not come. We do not ask what we carry. We carry it. Amen. Amen. Amen."}
-  },
-  "draggin_tale_inn": {
-   "name": "Draggin Tale Inn",
-   "g": "An inn with a giant draconian tail over the door, a long common room and a back room where the families meet.",
-   "m": "The tail is a ship's prow-figure, not a dragon's. The families sit at the long table every fifth year to choose the next captain by lot.",
-   "c": ["a long table with twelve seats", "a prow-figure's scales rusted green", "a lottery bowl of small carved prows"],
-   "x": ["stros_mkai"],
-   "p": "A carved prow, the captain's lot, which grants passage on the fifth-year ship.",
-   "r": "The Draggin Tale's back room is shut every fifth spring while twelve families draw lots.",
-   "lead": "Win the lot at the Draggin Tale and take passage to the old harbour.",
-   "n": {"k": "list", "t": "The Twelve Families", "a": "Innkeeper Baraka", "x": "Aman, Bahrad, Cassim, Dalila, Emre, Farouk, Ghassan, Hadiya, Idris, Jabari, Karim, Layla. Each has sent a child on the fifth-year ship at least once. The lots are carved prows. This year's prow is white. I have drawn it for sixty years and never drawn mine."}
-  },
-  "stros_mkai": {
-   "name": "Stros M'Kai",
-   "g": "A rocky island town with a lighthouse and fort at the harbour mouth and tight alleys climbing the central hill.",
-   "m": "The harbour treaty that freed the island carried a clause: a ship must sail beyond the horizon every fifth year or the treaty lapses. The lighthouse's lower floor holds the clause.",
-   "c": ["a treaty plate in the lighthouse base", "a harbour-mouth beacon that points at the horizon", "a fort drill that salutes a ship that is not there"],
-   "x": ["onsis_breath"],
-   "p": "The treaty clause's full text.",
-   "lead": "Read the sealed clause in the Stros M'Kai lighthouse and follow the fifth-year ship."
-  },
-  "onsis_breath": {
-   "name": "Onsi's Breath",
-   "g": "A ring of wind-carved arches on the Bangkorai coast, whose stones sing in the wind with a hollow note.",
-   "m": "The arches are fused vertebrae of a vast sea-beast. The torn page of the Tide-Ledger lies in a niche in the largest arch.",
-   "c": ["arches humming a hollow note", "a niche in the largest arch with a flat stone cover", "a whale-bone inscription of tides"],
-   "x": ["stros_mkai", "draggin_tale_inn"],
-   "p": "The torn Tide-Ledger page with tide-hours.",
-   "r": "Onsi's arches hum on a westerly. The sailors say the wind is reading tides aloud.",
-   "lead": "Open the niche in the great arch and take the torn page of the ledger.",
-   "n": {"k": "inscription", "t": "The Arch's Footing", "a": "", "x": "FIFTH YEAR: BRING THE PAGE. FIFTH YEAR: LEAVE THE PAGE. The ledger is torn in nine for the safety of the sea. One piece sleeps beneath this arch, until a captain who can read it comes."}
-  }
- }
 }

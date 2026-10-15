@@ -1,0 +1,186 @@
+{
+  "id": "tarlain_heights",
+  "why": [
+    "grahtwood.L1.elden_grove_soil",
+    "grahtwood.L4.graht_grove",
+    "grahtwood.L6.elden_root_capital"
+  ],
+  "sil": "valenwood-tarlain-heights-plan",
+  "base": "none",
+  "overlay": "grahtwood",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "grahtwood",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "grahtwood",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "tarlain_heights_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "tarlain_heights_landmark",
+      "overlay": "grahtwood"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "grahtwood",
+      "name": "tarlain_heights_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "garden",
+      "theme": "tarlain_heights_garden",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "tarlain_heights_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "tarlain_heights_b_5",
+    "smithy": "tarlain_heights_b_7"
+  },
+  "titles": {
+    "tarlain_heights_b_1": "place.skycraft.tarlain_heights Council & Seat Hall",
+    "tarlain_heights_b_2": "place.skycraft.tarlain_heights High Sanctuary",
+    "tarlain_heights_b_3": "place.skycraft.tarlain_heights Fighters & Wayfarers Hall",
+    "tarlain_heights_b_4": "place.skycraft.tarlain_heights Mages & Chroniclers Spire",
+    "tarlain_heights_b_5": "place.skycraft.tarlain_heights The Lantern & Hearth Inn",
+    "tarlain_heights_b_6": "place.skycraft.tarlain_heights The Traveler's Rest Tavern",
+    "tarlain_heights_b_7": "place.skycraft.tarlain_heights Master Forge & Armorer",
+    "tarlain_heights_landmark": "High Seat of place.skycraft.tarlain_heights",
+    "tarlain_heights_plaza": "place.skycraft.tarlain_heights Central Plaza"
+  },
+  "innKey": "tarlain_heights_b_5"
+}

@@ -1,0 +1,313 @@
+{
+  "id": "skingrad",
+  "why": [
+    "west_weald.L1.warm_limestone_slopes",
+    "west_weald.L5.wine_estates",
+    "west_weald.L6.skingrad_hill"
+  ],
+  "sil": "vineyard-hill-castle",
+  "base": "none",
+  "overlay": "skingrad",
+  "radius": 98,
+  "reach": 114,
+  "innKey": "skingrad_west_weald_inn",
+  "names": {
+    "inn": "skingrad_west_weald_inn",
+    "store": "skingrad_colovian_traders",
+    "smithy": "skingrad_hammer_and_tongs"
+  },
+  "gates": [
+    [
+      -92,
+      0
+    ],
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      92
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        48
+      ],
+      "face": "south",
+      "name": "skingrad_castle_skingrad",
+      "overlay": "skingrad"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        0,
+        -18
+      ],
+      "face": "south",
+      "name": "skingrad_chapel_spire",
+      "overlay": "skingrad"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        98
+      ],
+      "overlay": "skingrad"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_chapel_of_julianos"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        21
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        52
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_west_weald_inn"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_two_sisters_lodge"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -16,
+        56
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_colovian_traders"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_hammer_and_tongs"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -49,
+        31
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_all_things_alchemical"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_rosethorn_hall"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -57,
+        -11
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_summitmist_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_surilie_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -35,
+        -46
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_tamikas_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_lazare_milvan_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        5,
+        -58
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_nerastarel_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_glarthirs_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        43,
+        -39
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_salmos_bakery"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "skingrad",
+      "name": "skingrad_toutius_sextius_house"
+    }
+  ],
+  "features": [
+    {
+      "type": "orchard",
+      "theme": "grape_vines",
+      "count": 4
+    },
+    {
+      "type": "fountain",
+      "theme": "skingrad_courtyard",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "skingrad_crimson",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "wrought_arch",
+      "count": 3
+    }
+  ],
+  "titles": {
+    "skingrad_castle_skingrad": "Castle Skingrad",
+    "skingrad_chapel_spire": "Great Chapel of Julianos Spire",
+    "skingrad_chapel_of_julianos": "Great Chapel of Julianos",
+    "skingrad_fighters_guild": "Skingrad Fighters Guild",
+    "skingrad_mages_guild": "Skingrad Mages Guild",
+    "skingrad_west_weald_inn": "West Weald Inn",
+    "skingrad_two_sisters_lodge": "Two Sisters Lodge",
+    "skingrad_colovian_traders": "Colovian Traders",
+    "skingrad_hammer_and_tongs": "Hammer and Tongs",
+    "skingrad_all_things_alchemical": "All Things Alchemical",
+    "skingrad_rosethorn_hall": "Rosethorn Hall",
+    "skingrad_summitmist_manor": "Summitmist Manor",
+    "skingrad_surilie_house": "Surilie Brothers Wine House",
+    "skingrad_tamikas_house": "Tamika's Vineyard House",
+    "skingrad_lazare_milvan_house": "Lazare Milvan's Manor",
+    "skingrad_nerastarel_house": "Nerastarel's Manor",
+    "skingrad_glarthirs_house": "Glarthir's Townhouse",
+    "skingrad_salmos_bakery": "Salmo the Baker's House",
+    "skingrad_toutius_sextius_house": "Toutius Sextius's House"
+  }
+}

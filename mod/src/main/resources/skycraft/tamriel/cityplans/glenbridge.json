@@ -1,0 +1,186 @@
+{
+  "id": "glenbridge",
+  "why": [
+    "gideon.L1.western_levee_plain",
+    "gideon.L5.levee_rice_and_punt_trade",
+    "gideon.L6.gideon_walled_seat"
+  ],
+  "sil": "black-marsh-glenbridge-plan",
+  "base": "none",
+  "overlay": "gideon",
+  "radius": 40,
+  "reach": 52,
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        19
+      ],
+      "overlay": "gideon",
+      "wealth": "wealthy"
+    },
+    {
+      "ring": [
+        19,
+        40
+      ],
+      "overlay": "gideon",
+      "wealth": "common"
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 8,
+      "name": "glenbridge_plaza"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "xanmeer",
+      "at": [
+        0,
+        -11
+      ],
+      "name": "glenbridge_landmark",
+      "overlay": "gideon"
+    }
+  ],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 8,
+      "r1": 36,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "glenbridge_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        18,
+        23
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "glenbridge_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "glenbridge_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        -26,
+        12
+      ],
+      "face": "north",
+      "overlay": "gideon",
+      "name": "glenbridge_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "glenbridge_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        -28
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "glenbridge_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "gideon",
+      "name": "glenbridge_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "shrine",
+      "theme": "glenbridge_shrine",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "theme": "glenbridge_lamps",
+      "count": 2
+    }
+  ],
+  "names": {
+    "inn": "glenbridge_b_5",
+    "smithy": "glenbridge_b_7"
+  },
+  "titles": {
+    "glenbridge_b_1": "place.skycraft.glenbridge Council & Seat Hall",
+    "glenbridge_b_2": "place.skycraft.glenbridge High Sanctuary",
+    "glenbridge_b_3": "place.skycraft.glenbridge Fighters & Wayfarers Hall",
+    "glenbridge_b_4": "place.skycraft.glenbridge Mages & Chroniclers Spire",
+    "glenbridge_b_5": "place.skycraft.glenbridge The Lantern & Hearth Inn",
+    "glenbridge_b_6": "place.skycraft.glenbridge The Traveler's Rest Tavern",
+    "glenbridge_b_7": "place.skycraft.glenbridge Master Forge & Armorer",
+    "glenbridge_landmark": "High Seat of place.skycraft.glenbridge",
+    "glenbridge_plaza": "place.skycraft.glenbridge Central Plaza"
+  },
+  "innKey": "glenbridge_b_5"
+}

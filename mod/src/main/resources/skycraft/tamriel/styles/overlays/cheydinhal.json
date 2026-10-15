@@ -1,0 +1,29 @@
+{
+  "id": "cheydinhal",
+  "why": [
+    "nibenay_basin.L1.valus_foothills",
+    "nibenay_basin.L3.corbolo",
+    "nibenay_basin.L6.cheydinhal_on_the_corbolo"
+  ],
+  "tint": {
+    "wall": "minecraft:light_blue_terracotta",
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:stone_bricks",
+    "wood": "dark_oak",
+    "roof": "warped",
+    "accent": "purple"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:mossy_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:polished_andesite",
+    "path": "minecraft:gravel"
+  },
+  "style": {
+    "forms": {
+      "gabled": 10,
+      "towered": 5
+    }
+  }
+}

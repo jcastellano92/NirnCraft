@@ -1,302 +1,374 @@
 {
- "places": {
-  "kjolvik": {
-   "hook": "The last Atmoran hold on an ice shelf: ten long halls half-buried in drifts, whale-bone arches, a stone-lined harbour where the ice cracks, and the aurora overhead. Older and harsher than any Nord town.",
-   "rumour": "Kjolvik has never been conquered. It has, in nine winters, been very nearly forgotten, which a Nord will tell you is far worse.",
-   "notes": [
-    {
-     "id": "hearth_log",
-     "kind": "journal",
-     "title": "Log of the Last Hearth",
-     "author": "Ysa",
-     "at": "chest",
-     "pages": [
-      "#Ninth winter\nWe burn the driftwood, then the hull-planks, then the benches. I have kept the fire for nine hundred nights. There is a rule: the hearth must never be out when the sun is not up. I have broken it twice, and been forgiven both times, by the hearth.",
-      "We had seal on the solstice. The skald sang. The jarl wept, and said it was the smoke. There is no smoke in the Last Hearth. We have a very good chimney. We have always had it."
-     ]
+  "places": {
+    "kjolvik": {
+      "hook": "The last Atmoran hold on an ice shelf: ten long halls half-buried in drifts, whale-bone arches, a stone-lined harbour where the ice cracks, and the aurora overhead. Older and harsher than any Nord town.",
+      "rumour": "Kjolvik has never been conquered. It has, in nine winters, been very nearly forgotten, which a Nord will tell you is far worse.",
+      "notes": [
+        {
+          "id": "hearth_log",
+          "kind": "journal",
+          "title": "Log of the Last Hearth",
+          "author": "Ysa",
+          "at": "chest",
+          "pages": [
+            "#Ninth winter\nWe burn the driftwood, then the hull-planks, then the benches. I have kept the fire for nine hundred nights. There is a rule: the hearth must never be out when the sun is not up. I have broken it twice, and been forgiven both times, by the hearth.",
+            "We had seal on the solstice. The skald sang. The jarl wept, and said it was the smoke. There is no smoke in the Last Hearth. We have a very good chimney. We have always had it."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "jylkurfyk": {
+      "hook": "A fort of black basalt and whale-bone on the Atmoran coast, built by the first ships' captains and still held, in the long dark, by a garrison no one has relieved.",
+      "rumour": "The fort of Jylkurfyk has never been given a name by its builders. They called it only The Door, and left, and did not say which side of it they stood on.",
+      "notes": [
+        {
+          "id": "garrison_roll",
+          "kind": "orders",
+          "title": "Roll of the Jylkurfyk Garrison",
+          "author": "The Door-Captain",
+          "at": "chest",
+          "pages": [
+            "#GARRISON, THIS WINTER\nOne hundred and four shields, thirty-one spears, and nine lamps that burn without oil. We hold the Door. We do not know what is behind it. The first captain's order was to hold it. He did not say against what.",
+            "We have held it for nine hundred winters. It has never been opened from either side. In the spring the knock comes, very soft, and in the summer it is gone. We do not answer. That is the order."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "moot_of_the_five_hundred": {
+      "hook": "A ring of tall standing stones on the Atmoran ice where the five hundred skalds of the first ships met, once, to decide whether to cross the sea.",
+      "rumour": "The Moot stones are said to hold their last argument still. On a still night you can hear the vote. It was close.",
+      "notes": [
+        {
+          "id": "moot_stone",
+          "kind": "inscription",
+          "title": "The Stone of the Vote",
+          "at": "site",
+          "pages": [
+            "^FIVE HUNDRED SPOKE. TWO HUNDRED AND FORTY-NINE SAID STAY.\n^TWO HUNDRED AND FIFTY-ONE SAID GO.\n^TWO SKALDS ABSTAINED, AND ARE NOT NAMED.",
+            "Beneath, much later, in a very fine hand: 'The two who abstained went last, and wept the most, and never said which way they would have voted. It is the only secret the First Ships kept.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "tiger_plains_village": {
+      "hook": "A mountain village of curved-roof pagodas on rice terraces, a vermilion shrine gate, bamboo and paper lanterns, the most alien place in the pack, with a roofline that is long, low and level.",
+      "rumour": "The village of Tiger Plains does not lock its doors. It has no need. The tiger sees to that. It has been asleep for sixty years, and the thieves still check, very carefully, before they try.",
+      "notes": [
+        {
+          "id": "terrace_poem",
+          "kind": "poem",
+          "title": "Poem of the Terraces",
+          "author": "Lady Mei",
+          "at": "chest",
+          "pages": [
+            "~The water falls from step to step,\n~each field a mirror, each a sky;\n~the farmer bows, and does not know\n~she plants a thousand moons in rows.",
+            "Mei has copied it, she says, from the lid of a very old rice-bowl. The poet was a farmer. He never wrote anything else. He did not need to."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "tang_mo_harbor_village": {
+      "hook": "A harbour of lacquered junks and floating lantern-masts, houses raised on bamboo piles with curved roofs, a dragon-prowed ship at the quay and a tea-house for every tide.",
+      "rumour": "Tang Mo has more lanterns than people. They are hung for the dead, for the lost and for those who have not yet been born. The harbour at night is the brightest sea in the world.",
+      "notes": [
+        {
+          "id": "tea_house_slate",
+          "kind": "list",
+          "title": "Slate of the Tea-House",
+          "author": "Tea-Master Li",
+          "at": "chest",
+          "pages": [
+            "#THIS TIDE\nGreen: for the nervous. Black: for the grieving. White: for those who wish to be forgiven. Grey: for those who do not know. Red, which is not tea, and is not for sale, and is for the ones who have already decided.",
+            "In the margin, in Li's impatient brush: 'The lantern on the mast is not a tea. I do not know what it is for. I have brewed all five colours at it and it has accepted none.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "adasooms_gate": {
+      "hook": "A great iron gate in a mountain pass of Kamal, held by a garrison of Ka Po' Tun veterans who have forgotten which side they were guarding.",
+      "rumour": "Adasoom's Gate has never been breached. It has also never been opened, which a keen scholar will tell you is the same thing.",
+      "notes": [
+        {
+          "id": "gate_edict",
+          "kind": "orders",
+          "title": "Edict of the Gate",
+          "author": "The Gate-General",
+          "at": "chest",
+          "pages": [
+            "#BY ORDER OF THE GATE\nNo one passes. No one is expected. No one has been sent. If a messenger is seen, he is to be asked politely for his name, and then, politely, to turn around.",
+            "A later soldier has pencilled: 'We have been here eleven hundred years. I am not sure who is expecting us to still be here. I am not sure who has stopped. We are very good at it.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "tosh_rakas_palace": {
+      "hook": "A palace of vermilion and black lacquer on a spur of the Ka Po' Tun, its roofs curved like drawn bows, built by an emperor who was never seen to leave it.",
+      "rumour": "The palace has nine hundred rooms, and the emperor used one. The rest were built for the people who he believed would come and did not.",
+      "notes": [
+        {
+          "id": "emperor_order",
+          "kind": "notes",
+          "title": "A Torn Imperial Decree",
+          "at": "site",
+          "pages": [
+            "#BY THE HAND THAT HOLDS THE HEAVENS\nLet every room be swept. Let every lamp be lit. Let every table be laid. The guests will come in their time, and I will not have it said that Ka Po' Tun was caught unready.",
+            "A servant has scrawled beneath: 'We have swept for eleven hundred years. The table is laid. Nobody has come. I am beginning to suspect that we were the guests.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "ka_po_tun_steppe_fort": {
+      "hook": "A steppe fort of grey tile and black timber on the edge of the Ka Po' Tun, held by a garrison that has marched out every spring for a thousand years and found nothing to fight.",
+      "rumour": "The fort sends out a patrol every dawn. The patrol returns every dusk. In a thousand years, they have never met an enemy, and never once admitted to being disappointed.",
+      "notes": [
+        {
+          "id": "patrol_log",
+          "kind": "report",
+          "title": "Log of the Dawn Patrol",
+          "author": "Patrol-Captain Hu",
+          "at": "chest",
+          "pages": [
+            "#THE DAWN PATROL\nOut at the first bell. Steppe: grass. Sky: sky. Enemy: none. Returned at the last bell. I have walked the same ten miles for forty years. I have begun to name the grasses. There is one, near the stream, that I call Patience.",
+            "Today, at the stream, a horse stood. It was not ours. It was grey, and thin, and had no rider. It looked at me and did not run. I gave it water. In the morning it was gone, and the stream had a new bank."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "black_lacquer_pagoda": {
+      "hook": "A seven-tiered pagoda of black lacquer on a bluff of the Tsaesci coast, whose eaves are hung with bells that ring only when no one is near to hear.",
+      "rumour": "The Black Lacquer Pagoda is said to have an eighth tier, above the roof, that is only visible at dusk, and which is used by someone who has never come down.",
+      "notes": [
+        {
+          "id": "bell_register",
+          "kind": "ledger",
+          "title": "Register of the Pagoda Bells",
+          "author": "The Bell-Warden",
+          "at": "chest",
+          "pages": [
+            "#THE BELLS\nFirst tier: Patience, which rings at dawn. Second: Doubt, which rings at noon. Third: Resolve, which has not rung in a hundred years. Fourth through sixth: lost. Seventh: Return, which rings only for the one who returns.",
+            "Pencilled below: 'The seventh rang last night. Nobody had returned. I went up with a lamp. The bell was still swinging. On the floor, a single wet footprint, small and bare, pointing inward.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "hundings_dojo": {
+      "hook": "A sunken courtyard dojo on a Yokudan island, a bowl of white sand ringed with columns, tiers of benches and a single bright pavilion where the Way of the Sword is still, quietly, taught.",
+      "rumour": "No one in Hunding's Dojo has ever been seen to eat. They are said to live on discipline and hot tea. The tea, at least, has been confirmed.",
+      "notes": [
+        {
+          "id": "dojo_rule",
+          "kind": "inscription",
+          "title": "The Rule of the Courtyard",
+          "at": "site",
+          "pages": [
+            "^THE FIRST RULE: YOU MAY WALK AWAY.\n^THE SECOND RULE: YOU NEVER WILL.\n^THE THIRD RULE IS FOR THE STUDENT TO INVENT.",
+            "A student has added in the sand with a stick, which has been raked over and rewritten countless times: 'The third rule is not a rule. It is a question. I have been asking it for nine years. I think the answer is a sword. I think the answer is not.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "hall_of_the_ansei": {
+      "hook": "A white hall of arches and long cloisters on a Yokudan island, where the Ansei, the sword-saints of the old continent, once sat in silence to listen to their blades.",
+      "rumour": "The Hall has no roof. The Ansei said they preferred the sky. The sky has returned the compliment, and has not rained on it in a thousand years.",
+      "notes": [
+        {
+          "id": "ansei_scroll",
+          "kind": "book",
+          "title": "A Page of the Ansei Rule",
+          "author": "The Last Ansei",
+          "at": "chest",
+          "pages": [
+            "#ON LISTENING TO A BLADE\nA sword is a voice, and a voice has a meaning. Do not draw it to be heard. Draw it to hear. When the edge sings, it is not for you. It is for the one who held it before.",
+            "Many have asked what the blade says. I tell them: it says nothing, and that is the lesson. A voice that says nothing is a voice that is waiting for you to speak."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "isle_of_the_drowned_ansei": {
+      "hook": "A low green island in the Yokudan sunken isles, where a company of Ansei is said to have gone down together, sword by sword, rather than abandon their trust.",
+      "rumour": "On the isle, at low tide, you can see swords standing in the sand, upright, in a ring. They are not planted. They are not anyone's. They are, the fishermen say, keeping watch.",
+      "notes": [
+        {
+          "id": "drowned_oath",
+          "kind": "inscription",
+          "title": "Oath Carved on a Rock of the Isle",
+          "at": "site",
+          "pages": [
+            "^WE STAYED. THE SEA CAME. WE DID NOT MOVE.\n^LET THE SWORDS STAND WHERE WE STOOD.\n^LET THE TIDE KNOW WHAT IT HAS TAKEN.",
+            "Beneath, a fisherman's scratch: 'I once tried to pull one out. It was very heavy. It was very cold. It said, quite distinctly, in a voice I do not wish to describe: not yet.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "tall_papas_spire": {
+      "hook": "A tall, thin spire of white stone on the Yokudan desert, said to have been raised by a single mason who could not stop climbing, and who is still, in some tellings, at the top.",
+      "rumour": "Tall Papa's Spire has no door. A visitor must climb the outside, which is smooth as glass, and which has been the downfall of a great many confident people.",
+      "notes": [
+        {
+          "id": "spire_graffiti",
+          "kind": "notes",
+          "title": "Graffiti on the Fortieth Course",
+          "at": "site",
+          "pages": [
+            "#I WAS HERE\nAt the fortieth course. My hands are bleeding. I regret nothing. The wind up here tastes of cold stone. I can see a grey line of sea on the west. I am told there is more, higher. I do not believe it. I am going to find out.",
+            "Another hand, much higher, in a different ink: 'I was here, too. It was not worth it. It was exactly worth it. Come up.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "yokudan_wellspring": {
+      "hook": "A deep, cool spring in a bowl of the Yokudan desert, ringed with tamarisks and old cairns, where every caravan of the lost continent once stopped to drink and to give thanks.",
+      "rumour": "The wellspring has never run dry, even in the great drought. The herders say it is because it is not fed by rain, but by something beneath the sand that has not yet decided to stop.",
+      "notes": [
+        {
+          "id": "cairn_tags",
+          "kind": "list",
+          "title": "Tags Hung on the Cairns",
+          "at": "site",
+          "pages": [
+            "#THANKS LEFT AT THE WELL\nFrom a salt-carrier: thanks, and a pinch of salt. From a mother with a sick child: thanks, and a ribbon, for the child lived. From a sword-singer, who did not leave his name: thanks, and a very small, very sharp knife, point downward."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "sand_drowned_village": {
+      "hook": "A village of white-walled houses sunk to the eaves in the Yokudan dunes, its streets still readable beneath a skin of sand, and its well-head still faintly damp.",
+      "rumour": "The village of Sand-Drowned was buried in a single night, they say, and its people simply walked out of their front doors into the sand and did not come back. The doors are still open.",
+      "notes": [
+        {
+          "id": "door_chalk",
+          "kind": "notes",
+          "title": "Chalk on a Doorframe",
+          "at": "site",
+          "pages": [
+            "#WE HAVE GONE TO THE WELL\nBack by dusk. Do not wait. Dinner is in the pot. The goat has been fed. If the sand rises, leave it. It is not unkind. It is only slow.",
+            "The sand has risen. The goat has been fed. The pot is still on the fire, and the fire is still faintly warm. I did not stay. I do not think you would have either."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "pyandonean_fleet_anchorage": {
+      "hook": "A fleet at anchor: a raft-city of shell-hulled ships lashed together under green glass lanterns, a coral flagship at the centre, serpent-prowed boats alongside, everything gleaming wet.",
+      "rumour": "The Maormer say the fleet has never been in port. It is the port. The ships are the streets, and the streets are the ships, and the only place a Maormer sets foot on land is to bury his dead.",
+      "notes": [
+        {
+          "id": "fleet_orders",
+          "kind": "orders",
+          "title": "Orders of the Day, Fleet Anchorage",
+          "author": "Admiral Nehra",
+          "at": "chest",
+          "pages": [
+            "#ORDERS\nThe watch shall change at the third bell. Lanterns shall be trimmed. The prisoner in the hold shall be fed and not spoken to. If the sea is calm, it is a trick. If the sea is rough, it is a courtesy.",
+            "Pencilled on the back, small and very steady: 'The prisoner has asked three times to speak to the Admiral. I have told him she is busy. She is not busy. She is afraid of what he knows. I have decided, for the sake of my own sleep, not to ask what it is.'"
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "mistveil_village": {
+      "hook": "A fishing village of stilt-houses and pearl-rakes on a misted Pyandonean inlet, where the Maormer poor live with the tide, the gulls and the endless threat of a fleet that does not care.",
+      "rumour": "The people of Mistveil say they are quiet because the mist takes the sound. The mist, for its part, says nothing.",
+      "notes": [
+        {
+          "id": "pearl_tally",
+          "kind": "ledger",
+          "title": "Pearl-Raker's Tally",
+          "author": "A raker of Mistveil",
+          "at": "chest",
+          "pages": [
+            "#THIS SEASON\nForty pearls, of which nine were round, three were black and one was a very small, very bright thing that I did not give the fleet. I sewed it into the hem of my daughter's dress. It is the only wealth of this house.",
+            "The fleet-tax is thirty. I told them forty-one. I told them I had given the fleet its due. They believed me. It is the first lie I have told in ten years, and the best."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
+    },
+    "sload_spawning_pools": {
+      "hook": "A sprawl of warm, sluggish pools in the Thrassian reefs where the Sload breed their strange young, and where a plague-diver goes in at dawn and comes out, sometimes, at dusk.",
+      "rumour": "The pools are never still. At night they glow a very faint green. The Sload say it is the young, dreaming. The plague-divers say it is the dreaming that is the problem.",
+      "notes": [
+        {
+          "id": "diver_log",
+          "kind": "journal",
+          "title": "Log of a Plague-Diver",
+          "author": "Ooma",
+          "at": "chest",
+          "pages": [
+            "#Dive forty-one\nDown to the fourth pool. The coral is the colour of a bruise. It sings. I have never heard coral sing before. I have a wax in my ears. It does not help. I am humming, and I do not know the tune.",
+            "Dive forty-two. I have been humming the tune for a month. It is the tune of a drowned bell. I think the heart is calling for me. I think it is lonely. I think I am the only one who can hear it, and I am not sure I want to be."
+          ]
+        }
+      ],
+      "why": [
+        "skyrim.L9.talos_ban",
+        "skyrim.L8.eight_and_one"
+      ]
     }
-   ]
-  },
-  "jylkurfyk": {
-   "hook": "A fort of black basalt and whale-bone on the Atmoran coast, built by the first ships' captains and still held, in the long dark, by a garrison no one has relieved.",
-   "rumour": "The fort of Jylkurfyk has never been given a name by its builders. They called it only The Door, and left, and did not say which side of it they stood on.",
-   "notes": [
-    {
-     "id": "garrison_roll",
-     "kind": "orders",
-     "title": "Roll of the Jylkurfyk Garrison",
-     "author": "The Door-Captain",
-     "at": "chest",
-     "pages": [
-      "#GARRISON, THIS WINTER\nOne hundred and four shields, thirty-one spears, and nine lamps that burn without oil. We hold the Door. We do not know what is behind it. The first captain's order was to hold it. He did not say against what.",
-      "We have held it for nine hundred winters. It has never been opened from either side. In the spring the knock comes, very soft, and in the summer it is gone. We do not answer. That is the order."
-     ]
-    }
-   ]
-  },
-  "moot_of_the_five_hundred": {
-   "hook": "A ring of tall standing stones on the Atmoran ice where the five hundred skalds of the first ships met, once, to decide whether to cross the sea.",
-   "rumour": "The Moot stones are said to hold their last argument still. On a still night you can hear the vote. It was close.",
-   "notes": [
-    {
-     "id": "moot_stone",
-     "kind": "inscription",
-     "title": "The Stone of the Vote",
-     "at": "site",
-     "pages": [
-      "^FIVE HUNDRED SPOKE. TWO HUNDRED AND FORTY-NINE SAID STAY.\n^TWO HUNDRED AND FIFTY-ONE SAID GO.\n^TWO SKALDS ABSTAINED, AND ARE NOT NAMED.",
-      "Beneath, much later, in a very fine hand: 'The two who abstained went last, and wept the most, and never said which way they would have voted. It is the only secret the First Ships kept.'"
-     ]
-    }
-   ]
-  },
-  "tiger_plains_village": {
-   "hook": "A mountain village of curved-roof pagodas on rice terraces, a vermilion shrine gate, bamboo and paper lanterns, the most alien place in the pack, with a roofline that is long, low and level.",
-   "rumour": "The village of Tiger Plains does not lock its doors. It has no need. The tiger sees to that. It has been asleep for sixty years, and the thieves still check, very carefully, before they try.",
-   "notes": [
-    {
-     "id": "terrace_poem",
-     "kind": "poem",
-     "title": "Poem of the Terraces",
-     "author": "Lady Mei",
-     "at": "chest",
-     "pages": [
-      "~The water falls from step to step,\n~each field a mirror, each a sky;\n~the farmer bows, and does not know\n~she plants a thousand moons in rows.",
-      "Mei has copied it, she says, from the lid of a very old rice-bowl. The poet was a farmer. He never wrote anything else. He did not need to."
-     ]
-    }
-   ]
-  },
-  "tang_mo_harbor_village": {
-   "hook": "A harbour of lacquered junks and floating lantern-masts, houses raised on bamboo piles with curved roofs, a dragon-prowed ship at the quay and a tea-house for every tide.",
-   "rumour": "Tang Mo has more lanterns than people. They are hung for the dead, for the lost and for those who have not yet been born. The harbour at night is the brightest sea in the world.",
-   "notes": [
-    {
-     "id": "tea_house_slate",
-     "kind": "list",
-     "title": "Slate of the Tea-House",
-     "author": "Tea-Master Li",
-     "at": "chest",
-     "pages": [
-      "#THIS TIDE\nGreen: for the nervous. Black: for the grieving. White: for those who wish to be forgiven. Grey: for those who do not know. Red, which is not tea, and is not for sale, and is for the ones who have already decided.",
-      "In the margin, in Li's impatient brush: 'The lantern on the mast is not a tea. I do not know what it is for. I have brewed all five colours at it and it has accepted none.'"
-     ]
-    }
-   ]
-  },
-  "adasooms_gate": {
-   "hook": "A great iron gate in a mountain pass of Kamal, held by a garrison of Ka Po' Tun veterans who have forgotten which side they were guarding.",
-   "rumour": "Adasoom's Gate has never been breached. It has also never been opened, which a keen scholar will tell you is the same thing.",
-   "notes": [
-    {
-     "id": "gate_edict",
-     "kind": "orders",
-     "title": "Edict of the Gate",
-     "author": "The Gate-General",
-     "at": "chest",
-     "pages": [
-      "#BY ORDER OF THE GATE\nNo one passes. No one is expected. No one has been sent. If a messenger is seen, he is to be asked politely for his name, and then, politely, to turn around.",
-      "A later soldier has pencilled: 'We have been here eleven hundred years. I am not sure who is expecting us to still be here. I am not sure who has stopped. We are very good at it.'"
-     ]
-    }
-   ]
-  },
-  "tosh_rakas_palace": {
-   "hook": "A palace of vermilion and black lacquer on a spur of the Ka Po' Tun, its roofs curved like drawn bows, built by an emperor who was never seen to leave it.",
-   "rumour": "The palace has nine hundred rooms, and the emperor used one. The rest were built for the people who he believed would come and did not.",
-   "notes": [
-    {
-     "id": "emperor_order",
-     "kind": "notes",
-     "title": "A Torn Imperial Decree",
-     "at": "site",
-     "pages": [
-      "#BY THE HAND THAT HOLDS THE HEAVENS\nLet every room be swept. Let every lamp be lit. Let every table be laid. The guests will come in their time, and I will not have it said that Ka Po' Tun was caught unready.",
-      "A servant has scrawled beneath: 'We have swept for eleven hundred years. The table is laid. Nobody has come. I am beginning to suspect that we were the guests.'"
-     ]
-    }
-   ]
-  },
-  "ka_po_tun_steppe_fort": {
-   "hook": "A steppe fort of grey tile and black timber on the edge of the Ka Po' Tun, held by a garrison that has marched out every spring for a thousand years and found nothing to fight.",
-   "rumour": "The fort sends out a patrol every dawn. The patrol returns every dusk. In a thousand years, they have never met an enemy, and never once admitted to being disappointed.",
-   "notes": [
-    {
-     "id": "patrol_log",
-     "kind": "report",
-     "title": "Log of the Dawn Patrol",
-     "author": "Patrol-Captain Hu",
-     "at": "chest",
-     "pages": [
-      "#THE DAWN PATROL\nOut at the first bell. Steppe: grass. Sky: sky. Enemy: none. Returned at the last bell. I have walked the same ten miles for forty years. I have begun to name the grasses. There is one, near the stream, that I call Patience.",
-      "Today, at the stream, a horse stood. It was not ours. It was grey, and thin, and had no rider. It looked at me and did not run. I gave it water. In the morning it was gone, and the stream had a new bank."
-     ]
-    }
-   ]
-  },
-  "black_lacquer_pagoda": {
-   "hook": "A seven-tiered pagoda of black lacquer on a bluff of the Tsaesci coast, whose eaves are hung with bells that ring only when no one is near to hear.",
-   "rumour": "The Black Lacquer Pagoda is said to have an eighth tier, above the roof, that is only visible at dusk, and which is used by someone who has never come down.",
-   "notes": [
-    {
-     "id": "bell_register",
-     "kind": "ledger",
-     "title": "Register of the Pagoda Bells",
-     "author": "The Bell-Warden",
-     "at": "chest",
-     "pages": [
-      "#THE BELLS\nFirst tier: Patience, which rings at dawn. Second: Doubt, which rings at noon. Third: Resolve, which has not rung in a hundred years. Fourth through sixth: lost. Seventh: Return, which rings only for the one who returns.",
-      "Pencilled below: 'The seventh rang last night. Nobody had returned. I went up with a lamp. The bell was still swinging. On the floor, a single wet footprint, small and bare, pointing inward.'"
-     ]
-    }
-   ]
-  },
-  "hundings_dojo": {
-   "hook": "A sunken courtyard dojo on a Yokudan island, a bowl of white sand ringed with columns, tiers of benches and a single bright pavilion where the Way of the Sword is still, quietly, taught.",
-   "rumour": "No one in Hunding's Dojo has ever been seen to eat. They are said to live on discipline and hot tea. The tea, at least, has been confirmed.",
-   "notes": [
-    {
-     "id": "dojo_rule",
-     "kind": "inscription",
-     "title": "The Rule of the Courtyard",
-     "at": "site",
-     "pages": [
-      "^THE FIRST RULE: YOU MAY WALK AWAY.\n^THE SECOND RULE: YOU NEVER WILL.\n^THE THIRD RULE IS FOR THE STUDENT TO INVENT.",
-      "A student has added in the sand with a stick, which has been raked over and rewritten countless times: 'The third rule is not a rule. It is a question. I have been asking it for nine years. I think the answer is a sword. I think the answer is not.'"
-     ]
-    }
-   ]
-  },
-  "hall_of_the_ansei": {
-   "hook": "A white hall of arches and long cloisters on a Yokudan island, where the Ansei, the sword-saints of the old continent, once sat in silence to listen to their blades.",
-   "rumour": "The Hall has no roof. The Ansei said they preferred the sky. The sky has returned the compliment, and has not rained on it in a thousand years.",
-   "notes": [
-    {
-     "id": "ansei_scroll",
-     "kind": "book",
-     "title": "A Page of the Ansei Rule",
-     "author": "The Last Ansei",
-     "at": "chest",
-     "pages": [
-      "#ON LISTENING TO A BLADE\nA sword is a voice, and a voice has a meaning. Do not draw it to be heard. Draw it to hear. When the edge sings, it is not for you. It is for the one who held it before.",
-      "Many have asked what the blade says. I tell them: it says nothing, and that is the lesson. A voice that says nothing is a voice that is waiting for you to speak."
-     ]
-    }
-   ]
-  },
-  "isle_of_the_drowned_ansei": {
-   "hook": "A low green island in the Yokudan sunken isles, where a company of Ansei is said to have gone down together, sword by sword, rather than abandon their trust.",
-   "rumour": "On the isle, at low tide, you can see swords standing in the sand, upright, in a ring. They are not planted. They are not anyone's. They are, the fishermen say, keeping watch.",
-   "notes": [
-    {
-     "id": "drowned_oath",
-     "kind": "inscription",
-     "title": "Oath Carved on a Rock of the Isle",
-     "at": "site",
-     "pages": [
-      "^WE STAYED. THE SEA CAME. WE DID NOT MOVE.\n^LET THE SWORDS STAND WHERE WE STOOD.\n^LET THE TIDE KNOW WHAT IT HAS TAKEN.",
-      "Beneath, a fisherman's scratch: 'I once tried to pull one out. It was very heavy. It was very cold. It said, quite distinctly, in a voice I do not wish to describe: not yet.'"
-     ]
-    }
-   ]
-  },
-  "tall_papas_spire": {
-   "hook": "A tall, thin spire of white stone on the Yokudan desert, said to have been raised by a single mason who could not stop climbing, and who is still, in some tellings, at the top.",
-   "rumour": "Tall Papa's Spire has no door. A visitor must climb the outside, which is smooth as glass, and which has been the downfall of a great many confident people.",
-   "notes": [
-    {
-     "id": "spire_graffiti",
-     "kind": "notes",
-     "title": "Graffiti on the Fortieth Course",
-     "at": "site",
-     "pages": [
-      "#I WAS HERE\nAt the fortieth course. My hands are bleeding. I regret nothing. The wind up here tastes of cold stone. I can see a grey line of sea on the west. I am told there is more, higher. I do not believe it. I am going to find out.",
-      "Another hand, much higher, in a different ink: 'I was here, too. It was not worth it. It was exactly worth it. Come up.'"
-     ]
-    }
-   ]
-  },
-  "yokudan_wellspring": {
-   "hook": "A deep, cool spring in a bowl of the Yokudan desert, ringed with tamarisks and old cairns, where every caravan of the lost continent once stopped to drink and to give thanks.",
-   "rumour": "The wellspring has never run dry, even in the great drought. The herders say it is because it is not fed by rain, but by something beneath the sand that has not yet decided to stop.",
-   "notes": [
-    {
-     "id": "cairn_tags",
-     "kind": "list",
-     "title": "Tags Hung on the Cairns",
-     "at": "site",
-     "pages": [
-      "#THANKS LEFT AT THE WELL\nFrom a salt-carrier: thanks, and a pinch of salt. From a mother with a sick child: thanks, and a ribbon, for the child lived. From a sword-singer, who did not leave his name: thanks, and a very small, very sharp knife, point downward."
-     ]
-    }
-   ]
-  },
-  "sand_drowned_village": {
-   "hook": "A village of white-walled houses sunk to the eaves in the Yokudan dunes, its streets still readable beneath a skin of sand, and its well-head still faintly damp.",
-   "rumour": "The village of Sand-Drowned was buried in a single night, they say, and its people simply walked out of their front doors into the sand and did not come back. The doors are still open.",
-   "notes": [
-    {
-     "id": "door_chalk",
-     "kind": "notes",
-     "title": "Chalk on a Doorframe",
-     "at": "site",
-     "pages": [
-      "#WE HAVE GONE TO THE WELL\nBack by dusk. Do not wait. Dinner is in the pot. The goat has been fed. If the sand rises, leave it. It is not unkind. It is only slow.",
-      "The sand has risen. The goat has been fed. The pot is still on the fire, and the fire is still faintly warm. I did not stay. I do not think you would have either."
-     ]
-    }
-   ]
-  },
-  "pyandonean_fleet_anchorage": {
-   "hook": "A fleet at anchor: a raft-city of shell-hulled ships lashed together under green glass lanterns, a coral flagship at the centre, serpent-prowed boats alongside, everything gleaming wet.",
-   "rumour": "The Maormer say the fleet has never been in port. It is the port. The ships are the streets, and the streets are the ships, and the only place a Maormer sets foot on land is to bury his dead.",
-   "notes": [
-    {
-     "id": "fleet_orders",
-     "kind": "orders",
-     "title": "Orders of the Day, Fleet Anchorage",
-     "author": "Admiral Nehra",
-     "at": "chest",
-     "pages": [
-      "#ORDERS\nThe watch shall change at the third bell. Lanterns shall be trimmed. The prisoner in the hold shall be fed and not spoken to. If the sea is calm, it is a trick. If the sea is rough, it is a courtesy.",
-      "Pencilled on the back, small and very steady: 'The prisoner has asked three times to speak to the Admiral. I have told him she is busy. She is not busy. She is afraid of what he knows. I have decided, for the sake of my own sleep, not to ask what it is.'"
-     ]
-    }
-   ]
-  },
-  "mistveil_village": {
-   "hook": "A fishing village of stilt-houses and pearl-rakes on a misted Pyandonean inlet, where the Maormer poor live with the tide, the gulls and the endless threat of a fleet that does not care.",
-   "rumour": "The people of Mistveil say they are quiet because the mist takes the sound. The mist, for its part, says nothing.",
-   "notes": [
-    {
-     "id": "pearl_tally",
-     "kind": "ledger",
-     "title": "Pearl-Raker's Tally",
-     "author": "A raker of Mistveil",
-     "at": "chest",
-     "pages": [
-      "#THIS SEASON\nForty pearls, of which nine were round, three were black and one was a very small, very bright thing that I did not give the fleet. I sewed it into the hem of my daughter's dress. It is the only wealth of this house.",
-      "The fleet-tax is thirty. I told them forty-one. I told them I had given the fleet its due. They believed me. It is the first lie I have told in ten years, and the best."
-     ]
-    }
-   ]
-  },
-  "sload_spawning_pools": {
-   "hook": "A sprawl of warm, sluggish pools in the Thrassian reefs where the Sload breed their strange young, and where a plague-diver goes in at dawn and comes out, sometimes, at dusk.",
-   "rumour": "The pools are never still. At night they glow a very faint green. The Sload say it is the young, dreaming. The plague-divers say it is the dreaming that is the problem.",
-   "notes": [
-    {
-     "id": "diver_log",
-     "kind": "journal",
-     "title": "Log of a Plague-Diver",
-     "author": "Ooma",
-     "at": "chest",
-     "pages": [
-      "#Dive forty-one\nDown to the fourth pool. The coral is the colour of a bruise. It sings. I have never heard coral sing before. I have a wax in my ears. It does not help. I am humming, and I do not know the tune.",
-      "Dive forty-two. I have been humming the tune for a month. It is the tune of a drowned bell. I think the heart is calling for me. I think it is lonely. I think I am the only one who can hear it, and I am not sure I want to be."
-     ]
-    }
-   ]
   }
- }
 }

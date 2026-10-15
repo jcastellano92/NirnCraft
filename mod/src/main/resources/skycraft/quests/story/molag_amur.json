@@ -1,0 +1,811 @@
+{
+  "region": "morrowind/molag_amur",
+  "province": "morrowind",
+  "line": "story_molag_amur",
+  "category": "main",
+  "title": "The Ossuary Ledger of Necrom",
+  "why": [
+    "morrowind/molag_amur.L7.warlike_nomads",
+    "morrowind/molag_amur.L8.holy_mountains",
+    "morrowind/molag_amur.L9.erabenimsun_raids",
+    "morrowind/molag_amur.L10.lava_daedra_shrines",
+    "morrowind.L8.ancestor_worship"
+  ],
+  "hook": {
+    "place": "necrom",
+    "rumour": "Corpse-ships arriving at Zaappi Docks and Necrom's white walls have been turned away after someone stole the ancestral burial charters from the lower ossuaries.",
+    "notice": "EDICT OF THE KEEPERS OF THE DEAD AT NECROM — Seekers required to recover the stolen Ossuary Roll from the ash-wastes between Alavelis, Camonnaruhn, and Bthar-Zel.",
+    "context": "Necrom is the white-walled City of the Dead where every Dunmer House brings its ancestors; across the western ash-rivers of Molag Amur, warlike clans and grave-robbers contest the pilgrim roads.",
+    "places": [
+      "necrom",
+      "wreck_of_the_lonely_anchor",
+      "ituluabi",
+      "shrine_mehrunes_dagon_morrowind",
+      "amudiamus_spire",
+      "ashatiakku_spire",
+      "ervyn_ancestral_tomb"
+    ],
+    "npc": "story_molag_amur_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_molag_amur_01_sealed_ossuary",
+      "order": 1,
+      "title": "Unregistered Bones at Zaappi Docks",
+      "region": "morrowind/molag_amur",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/molag_amur.L7.warlike_nomads",
+        "morrowind.L8.ancestor_worship"
+      ],
+      "places": [
+        "necrom",
+        "wreck_of_the_lonely_anchor",
+        "ituluabi",
+        "shrine_mehrunes_dagon_morrowind",
+        "amudiamus_spire",
+        "ashatiakku_spire",
+        "ervyn_ancestral_tomb"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "necrom",
+          "objective": "Speak with the Keepers of the Dead in Necrom regarding the missing Ossuary Roll"
+        },
+        {
+          "id": 20,
+          "place": "zaappi_docks",
+          "objective": "Inspect the waiting funeral barges moored at Zaappi Docks"
+        },
+        {
+          "id": 30,
+          "place": "alavelis",
+          "objective": "Follow the ash-wheel tracks inland to the caravan post at Alavelis"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "necrom",
+          "text": "Speak with the Keepers of the Dead in Necrom regarding the missing Ossuary Roll"
+        },
+        {
+          "type": "go",
+          "place": "zaappi_docks",
+          "text": "Inspect the waiting funeral barges moored at Zaappi Docks"
+        },
+        {
+          "type": "go",
+          "place": "alavelis",
+          "text": "Follow the ash-wheel tracks inland to the caravan post at Alavelis"
+        }
+      ],
+      "consequence": "world_state:necrom_ossuary_trail_found",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "necrom_ossuary_trail_found",
+        "flag": "story_ma_trail_found",
+        "summary": "Witnesses at Zaappi Docks and Alavelis reveal that renegade grave-brokers carried the Ossuary Roll toward Camonnaruhn."
+      }
+    },
+    {
+      "id": "story_molag_amur_02_raiders_of_camonnaruhn",
+      "order": 2,
+      "title": "Ash-Fires of Camonnaruhn",
+      "region": "morrowind/molag_amur",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_molag_amur_01_sealed_ossuary",
+      "requires": [
+        "story_molag_amur_01_sealed_ossuary"
+      ],
+      "why": [
+        "morrowind/molag_amur.L8.holy_mountains",
+        "morrowind/molag_amur.L9.erabenimsun_raids"
+      ],
+      "places": [
+        "alavelis",
+        "camonnaruhn",
+        "bal_sunnar"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "alavelis",
+          "objective": "Set out from Alavelis across the basalt ridge toward Camonnaruhn"
+        },
+        {
+          "id": 20,
+          "place": "camonnaruhn",
+          "objective": "Clear the outcast raiders occupying Camonnaruhn and recover the bronze reliquary case"
+        },
+        {
+          "id": 30,
+          "place": "bal_sunnar",
+          "objective": "Trace the buyers of the missing parchment leaves to the hillside vaults of Bal Sunnar"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "alavelis",
+          "text": "Set out from Alavelis across the basalt ridge toward Camonnaruhn"
+        },
+        {
+          "type": "clear",
+          "place": "camonnaruhn",
+          "text": "Clear the outcast raiders occupying Camonnaruhn and recover the bronze reliquary case"
+        },
+        {
+          "type": "go",
+          "place": "bal_sunnar",
+          "text": "Trace the buyers of the missing parchment leaves to the hillside vaults of Bal Sunnar"
+        }
+      ],
+      "consequence": "world_state:camonnaruhn_reliquary_recovered",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "camonnaruhn_reliquary_recovered",
+        "flag": "story_ma_reliquary_recovered",
+        "summary": "The bronze reliquary case is recovered at Camonnaruhn, and clues at Bal Sunnar point to a necromantic buyer inside Bthar-Zel."
+      }
+    },
+    {
+      "id": "story_molag_amur_03_steam_and_cinders",
+      "order": 3,
+      "title": "The Brass Vault of Bthar-Zel",
+      "region": "morrowind/molag_amur",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_molag_amur_02_raiders_of_camonnaruhn",
+      "requires": [
+        "story_molag_amur_02_raiders_of_camonnaruhn"
+      ],
+      "why": [
+        "morrowind/molag_amur.L10.lava_daedra_shrines",
+        "morrowind.L10.dwemer_citadels"
+      ],
+      "places": [
+        "bal_sunnar",
+        "bthar_zel",
+        "uhaammu"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bal_sunnar",
+          "objective": "Cross the eastern cinder-wash from Bal Sunnar to the Dwemer citadel of Bthar-Zel"
+        },
+        {
+          "id": 20,
+          "place": "bthar_zel",
+          "objective": "Defeat the bone-binders inside Bthar-Zel and reclaim the intact Ossuary Roll of Necrom"
+        },
+        {
+          "id": 30,
+          "place": "uhaammu",
+          "objective": "Purge the Daedric shrine-altar at Uhaammu where the stolen ancestor-seals were being profaned"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "bal_sunnar",
+          "text": "Cross the eastern cinder-wash from Bal Sunnar to the Dwemer citadel of Bthar-Zel"
+        },
+        {
+          "type": "clear",
+          "place": "bthar_zel",
+          "text": "Defeat the bone-binders inside Bthar-Zel and reclaim the intact Ossuary Roll of Necrom"
+        },
+        {
+          "type": "clear",
+          "place": "uhaammu",
+          "text": "Purge the Daedric shrine-altar at Uhaammu where the stolen ancestor-seals were being profaned"
+        }
+      ],
+      "consequence": "world_state:bthar_zel_ossuary_roll_reclaimed",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "bthar_zel_ossuary_roll_reclaimed",
+        "flag": "story_ma_bthar_zel_cleared",
+        "summary": "The intact Ossuary Roll is reclaimed from Bthar-Zel and the shrine-altar at Uhaammu is cleansed."
+      }
+    },
+    {
+      "id": "story_molag_amur_04_white_walls_of_necrom",
+      "order": 4,
+      "title": "Procession of the White Walls",
+      "region": "morrowind/molag_amur",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_molag_amur_03_steam_and_cinders",
+      "requires": [
+        "story_molag_amur_03_steam_and_cinders"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind.L8.pilgrimage",
+        "morrowind.L10.ancestral_tombs"
+      ],
+      "places": [
+        "zaappi_docks",
+        "necrom"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "zaappi_docks",
+          "objective": "Signal the waiting funeral barges at Zaappi Docks that the ossuary gates are reopening"
+        },
+        {
+          "id": 20,
+          "place": "necrom",
+          "objective": "Restore the Ossuary Roll to the Keepers of the Dead in the high catacombs of Necrom"
+        },
+        {
+          "id": 30,
+          "place": "necrom",
+          "objective": "Receive the Ash-Lantern Blessing before the white walls of Necrom"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "zaappi_docks",
+          "text": "Signal the waiting funeral barges at Zaappi Docks that the ossuary gates are reopening"
+        },
+        {
+          "type": "go",
+          "place": "necrom",
+          "text": "Restore the Ossuary Roll to the Keepers of the Dead in the high catacombs of Necrom"
+        },
+        {
+          "type": "go",
+          "place": "necrom",
+          "text": "Receive the Ash-Lantern Blessing before the white walls of Necrom"
+        }
+      ],
+      "consequence": "world_state:necrom_ossuary_roll_restored",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Warden of the White Walls",
+        "unique_item": "skycraft:staff_of_flames"
+      },
+      "consequence_detail": {
+        "world_state": "necrom_ossuary_roll_restored",
+        "flag": "story_ma_finale_complete",
+        "summary": "The Ossuary Roll rests once more in Necrom's catacombs, the funeral barges dock in peace, and all five Great Houses honor your name."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_molag_amur_hook_npc",
+      "name": "Warden of Necrom",
+      "role": "guard",
+      "place": "necrom",
+      "greet": "Corpse-ships arriving at Zaappi Docks and Necrom's white walls have been turned away after someone stole the ancestral burial charters from the lower ossuaries."
+    }
+  ],
+  "scenes": {
+    "story_molag_amur_scene_01": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (1).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_02": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (2).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_03": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (3).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_04": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (4).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_05": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (5).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_06": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (6).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_07": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (7).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_08": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (8).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_09": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (9).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_10": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (10).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_11": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (11).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_12": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (12).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_13": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (13).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_14": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (14).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_15": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (15).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_16": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (16).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_17": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (17).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_18": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (18).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_19": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (19).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_20": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (20).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_21": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (21).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_22": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (22).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_23": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (23).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_24": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (24).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_25": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (25).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_26": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (26).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_27": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (27).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_28": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (28).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_29": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (29).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_30": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (30).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_31": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (31).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_32": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (32).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_33": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (33).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_34": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (34).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_35": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (35).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_36": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (36).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_37": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (37).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_38": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (38).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_39": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (39).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_40": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (40).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_41": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (41).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_42": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (42).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_43": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (43).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_44": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (44).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_45": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (45).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_46": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (46).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_47": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (47).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_48": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (48).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_49": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (49).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_50": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (50).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_51": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (51).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_52": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (52).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_53": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (53).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_54": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (54).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_55": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (55).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_56": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (56).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_57": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (57).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_58": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (58).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_59": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (59).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_60": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (60).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_61": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (61).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_62": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (62).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_63": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (63).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_64": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (64).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_65": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (65).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_66": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (66).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_67": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (67).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_68": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (68).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_69": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (69).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_70": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (70).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_71": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (71).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_72": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (72).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_73": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (73).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_74": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (74).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_75": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (75).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_76": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (76).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_77": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (77).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ],
+    "story_molag_amur_scene_78": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Necrom (78).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Necrom at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Necrom and report back to the seat."
+    ],
+    "story_molag_amur_scene_79": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Wreck Of The Lonely Anchor (79).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Wreck Of The Lonely Anchor at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Wreck Of The Lonely Anchor and report back to the seat."
+    ],
+    "story_molag_amur_scene_80": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ituluabi (80).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ituluabi at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ituluabi and report back to the seat."
+    ],
+    "story_molag_amur_scene_81": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Shrine Mehrunes Dagon Morrowind (81).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Shrine Mehrunes Dagon Morrowind at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Shrine Mehrunes Dagon Morrowind and report back to the seat."
+    ],
+    "story_molag_amur_scene_82": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Amudiamus Spire (82).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Amudiamus Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Amudiamus Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_83": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ashatiakku Spire (83).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ashatiakku Spire at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ashatiakku Spire and report back to the seat."
+    ],
+    "story_molag_amur_scene_84": [
+      "Warden of Necrom: Examine the ash-wax seals recovered near Ervyn Ancestral Tomb (84).",
+      "Watch-Captain of Molag Amur: The ledger entries match the dispatches troubling Molag Amur.",
+      "Watch-Captain of Molag Amur: Our scouts tracked the courier column past Ervyn Ancestral Tomb at dusk.",
+      "Watch-Captain of Molag Amur: Secure the approaches around Ervyn Ancestral Tomb and report back to the seat."
+    ]
+  }
+}

@@ -895,7 +895,11 @@
       "rewards": {
         "gold": 700,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
     },
     {
       "id": "mq_mw_viv_quiet",
@@ -942,7 +946,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
     },
     {
       "id": "mq_mw_viv_audit",
@@ -989,7 +997,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
     },
     {
       "id": "mq_mw_viv_pilgrim",
@@ -1049,7 +1061,11 @@
       "rewards": {
         "gold": 320,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
     },
     {
       "id": "mq_mw_viv_odds",
@@ -1128,7 +1144,11 @@
       "rewards": {
         "gold": 480,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
     },
     {
       "id": "mq_mw_viv_umbrellas",
@@ -1197,7 +1217,11 @@
       "rewards": {
         "gold": 260,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "ascadian_isles.L9.twin_lamps_underground",
+        "ascadian_isles.L8.vivec_the_living_god"
+      ]
     },
     {
       "id": "mq_mw_mh_twin",
@@ -1290,7 +1314,11 @@
       "rewards": {
         "gold": 1100,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
     },
     {
       "id": "mq_mw_mh_quietbell",
@@ -1340,7 +1368,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
     },
     {
       "id": "mq_mw_mh_hotbrass",
@@ -1376,7 +1408,11 @@
       "rewards": {
         "gold": 1000,
         "loot": "major"
-      }
+      },
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
     },
     {
       "id": "mq_mw_mh_mirror",
@@ -1422,7 +1458,11 @@
       "rewards": {
         "gold": 500,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
     },
     {
       "id": "mq_mw_mh_tea",
@@ -1477,7 +1517,11 @@
       "rewards": {
         "gold": 420,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "deshaan.L9.indoril_vs_dres",
+        "deshaan.L8.almalexia_mother"
+      ]
     },
     {
       "id": "mq_mw_bal_ledgers",
@@ -1557,7 +1601,11 @@
       "rewards": {
         "gold": 900,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
     },
     {
       "id": "mq_mw_bal_trial",
@@ -1611,7 +1659,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
     },
     {
       "id": "mq_mw_bal_ash",
@@ -1658,7 +1710,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
     },
     {
       "id": "mq_mw_bal_strider",
@@ -1714,7 +1770,11 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
     },
     {
       "id": "mq_mw_bal_plates",
@@ -1768,7 +1828,11 @@
       "rewards": {
         "gold": 280,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "west_gash.L9.hlaalu_collaboration",
+        "west_gash.L8.pragmatic_piety"
+      ]
     },
     {
       "id": "mq_mw_ald_honour",
@@ -1872,7 +1936,11 @@
       "rewards": {
         "gold": 1000,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "vvardenfell_ashlands.L8.redoran_temple_piety"
+      ]
     },
     {
       "id": "mq_mw_ald_duelnight",
@@ -1924,7 +1992,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "vvardenfell_ashlands.L8.redoran_temple_piety"
+      ]
     },
     {
       "id": "mq_mw_ald_rat",
@@ -1963,7 +2035,11 @@
       "rewards": {
         "gold": 240,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "vvardenfell_ashlands.L8.redoran_temple_piety"
+      ]
     },
     {
       "id": "mq_mw_ald_tunnel",
@@ -2013,7 +2089,11 @@
       "rewards": {
         "gold": 320,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "vvardenfell_ashlands.L9.council_of_ald_ruhn",
+        "vvardenfell_ashlands.L8.redoran_temple_piety"
+      ]
     },
     {
       "id": "mq_mw_sad_bet",
@@ -2107,7 +2187,11 @@
       "rewards": {
         "gold": 1000,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
     },
     {
       "id": "mq_mw_sad_ulveni_favour",
@@ -2146,7 +2230,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
     },
     {
       "id": "mq_mw_sad_gaenor_prize",
@@ -2196,7 +2284,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
     },
     {
       "id": "mq_mw_sad_veya",
@@ -2259,7 +2351,11 @@
       "rewards": {
         "gold": 480,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
     },
     {
       "id": "mq_mw_sad_strain",
@@ -2327,7 +2423,11 @@
       "rewards": {
         "gold": 400,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
     },
     {
       "id": "mq_mw_sad_window",
@@ -2370,7 +2470,11 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "telvannis.L9.wizard_feuds",
+        "telvannis.L8.mephala_shrines"
+      ]
     },
     {
       "id": "mq_mw_nec_grave",
@@ -2448,7 +2552,11 @@
       "rewards": {
         "gold": 700,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "molag_amur.L9.erabenimsun_raids",
+        "molag_amur.L8.holy_mountains"
+      ]
     },
     {
       "id": "mq_mw_nec_widow",
@@ -2500,7 +2608,11 @@
       "rewards": {
         "gold": 360,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "molag_amur.L9.erabenimsun_raids",
+        "molag_amur.L8.holy_mountains"
+      ]
     },
     {
       "id": "mq_mw_nec_candle",
@@ -2544,7 +2656,11 @@
       "rewards": {
         "gold": 280,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "molag_amur.L9.erabenimsun_raids",
+        "molag_amur.L8.holy_mountains"
+      ]
     },
     {
       "id": "mq_mw_mm_hot",
@@ -2631,7 +2747,11 @@
       "rewards": {
         "gold": 800,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "azuras_coast.L9.telvanni_rivalries",
+        "azuras_coast.L8.azura_shrine"
+      ]
     },
     {
       "id": "mq_mw_mm_ashes",
@@ -2684,7 +2804,11 @@
       "rewards": {
         "gold": 320,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "azuras_coast.L9.telvanni_rivalries",
+        "azuras_coast.L8.azura_shrine"
+      ]
     },
     {
       "id": "mq_mw_mm_cup",
@@ -2724,7 +2848,11 @@
       "rewards": {
         "gold": 240,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "azuras_coast.L9.telvanni_rivalries",
+        "azuras_coast.L8.azura_shrine"
+      ]
     },
     {
       "id": "mq_mw_eb_bastion",
@@ -2789,7 +2917,11 @@
       "rewards": {
         "gold": 800,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "stonefalls.L9.grand_council",
+        "stonefalls.L8.imperial_chapels"
+      ]
     },
     {
       "id": "mq_mw_eb_parrot",
@@ -2829,7 +2961,11 @@
       "rewards": {
         "gold": 240,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "stonefalls.L9.grand_council",
+        "stonefalls.L8.imperial_chapels"
+      ]
     },
     {
       "id": "mq_mw_eb_confession",
@@ -2873,7 +3009,11 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "stonefalls.L9.grand_council",
+        "stonefalls.L8.imperial_chapels"
+      ]
     }
   ]
 }

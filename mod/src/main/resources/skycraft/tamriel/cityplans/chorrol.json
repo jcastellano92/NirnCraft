@@ -1,0 +1,318 @@
+{
+  "id": "chorrol",
+  "why": [
+    "colovian_highlands.L1.karst_valleys",
+    "colovian_highlands.L6.chorrol_crossroads",
+    "colovian_highlands.L8.stendarr_chapel"
+  ],
+  "sil": "great-oak-green",
+  "base": "none",
+  "overlay": "chorrol",
+  "radius": 98,
+  "reach": 114,
+  "innKey": "chorrol_oak_and_crosier",
+  "names": {
+    "inn": "chorrol_oak_and_crosier",
+    "store": "chorrol_northern_goods",
+    "smithy": "chorrol_fire_and_steel"
+  },
+  "gates": [
+    [
+      0,
+      92
+    ],
+    [
+      0,
+      -92
+    ],
+    [
+      -92,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -46
+      ],
+      "face": "south",
+      "name": "chorrol_castle_chorrol",
+      "overlay": "chorrol"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        -22,
+        -14
+      ],
+      "face": "south",
+      "name": "chorrol_chapel_spire",
+      "overlay": "chorrol"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        98
+      ],
+      "overlay": "chorrol"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_chapel_of_stendarr"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        21
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        21,
+        19
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        52
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_oak_and_crosier"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        3,
+        28
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_grey_mare"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -16,
+        56
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_fire_and_steel"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -17,
+        22
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_northern_goods"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -49,
+        31
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_renoits_books"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -28,
+        5
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_arborwatch"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -57,
+        -11
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_motierre_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -24,
+        -15
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_valus_odiil_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -35,
+        -46
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_casta_scribonia_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -8,
+        -27
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_eugal_belette_house"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        5,
+        -58
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_vilena_donton_manor"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        12,
+        -25
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_honditars_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        43,
+        -39
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_jirolin_doran_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "chorrol",
+      "name": "chorrol_rimalus_bruiant_house"
+    }
+  ],
+  "features": [
+    {
+      "type": "great_tree",
+      "theme": "great_oak",
+      "count": 1
+    },
+    {
+      "type": "fountain",
+      "theme": "chorrol_plaza",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "chorrol_green",
+      "count": 3
+    },
+    {
+      "type": "banners",
+      "theme": "colovian_oak",
+      "count": 3
+    },
+    {
+      "type": "well",
+      "theme": "chorrol_stone",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "chorrol_castle_chorrol": "Castle Chorrol",
+    "chorrol_chapel_spire": "Great Chapel of Stendarr Spire",
+    "chorrol_chapel_of_stendarr": "Great Chapel of Stendarr",
+    "chorrol_fighters_guild": "Chorrol Fighters Guild",
+    "chorrol_mages_guild": "Chorrol Mages Guild",
+    "chorrol_oak_and_crosier": "The Oak and Crosier",
+    "chorrol_grey_mare": "The Grey Mare",
+    "chorrol_fire_and_steel": "Fire and Steel",
+    "chorrol_northern_goods": "Northern Goods and Trade",
+    "chorrol_renoits_books": "Renoit's Books",
+    "chorrol_arborwatch": "Arborwatch Manor",
+    "chorrol_motierre_house": "Francois Motierre's House",
+    "chorrol_valus_odiil_house": "Valus Odiil's Townhouse",
+    "chorrol_casta_scribonia_house": "Casta Scribonia's Manor",
+    "chorrol_eugal_belette_house": "Eugal Belette's House",
+    "chorrol_vilena_donton_manor": "Vilena Donton's Manor",
+    "chorrol_honditars_house": "Honditar's Cottage",
+    "chorrol_jirolin_doran_house": "Jirolin Doran's House",
+    "chorrol_rimalus_bruiant_house": "Rimalus Bruiant's House"
+  }
+}

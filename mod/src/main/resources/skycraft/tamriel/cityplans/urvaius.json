@@ -1,0 +1,356 @@
+{
+  "id": "urvaius",
+  "sil": "terraced-Downs-shepherd-keep",
+  "base": "none",
+  "overlay": "anticlere",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "urvaius_ram_and_bell",
+  "names": {
+    "inn": "urvaius_ram_and_bell",
+    "store": "urvaius_fleece_hall",
+    "smithy": "urvaius_bell_founders"
+  },
+  "titles": {
+    "urvaius_landmark": "Urvaius Downs Keep",
+    "urvaius_downs_keep": "Castle Urvaius Chalk-Ridge Keep",
+    "urvaius_ram_and_bell": "The Ram and Bell Inn",
+    "urvaius_fleece_hall": "Urvaius Fleece & Cheese Factor",
+    "urvaius_bell_founders": "Sheep-Bell & Ironwork Smithy",
+    "urvaius_lanolin_salve_shop": "Lanolin & Thyme Salve-Maker",
+    "urvaius_mara_shepherds_chapel": "Shepherds' Chapel of Mara",
+    "urvaius_broadcloth_fullers": "Chalk-Stream Fulling & Broadcloth Hall",
+    "urvaius_castellan_grange": "Castellan's Downland Grange",
+    "urvaius_ridge_watch": "Ridgeway Watchhouse",
+    "urvaius_drover_stables": "Downland Drover Stables",
+    "urvaius_market_plaza": "Urvaius Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "urvaius_landmark",
+      "overlay": "anticlere"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "urvaius_downs_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "urvaius_ram_and_bell"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "urvaius_fleece_hall"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "urvaius_bell_founders"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "urvaius_lanolin_salve_shop"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "urvaius_mara_shepherds_chapel"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "urvaius_broadcloth_fullers"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "urvaius_castellan_grange"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "urvaius_ridge_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "urvaius_drover_stables"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "urvaius_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "anticlere"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "anticlere"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "count": 1
+    },
+    {
+      "type": "memorial",
+      "count": 1
+    }
+  ]
+}

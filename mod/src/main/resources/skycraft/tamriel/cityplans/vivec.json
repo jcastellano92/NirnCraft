@@ -1,0 +1,355 @@
+{
+  "id": "vivec",
+  "why": [
+    "ascadian_isles.L1.lake_basins",
+    "morrowind.L6.great_house_seats",
+    "morrowind.L8.tribunal_temple"
+  ],
+  "sil": "canton-water",
+  "base": "none",
+  "overlay": "vivec",
+  "radius": 118,
+  "reach": 138,
+  "innKey": "vv_flowers_of_gold",
+  "names": {
+    "inn": "vv_flowers_of_gold",
+    "store": "vv_lucretinaus_trader",
+    "smithy": "vv_sirollus_smithy"
+  },
+  "gates": [
+    [
+      0,
+      -110
+    ],
+    [
+      -110,
+      0
+    ],
+    [
+      110,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "canton",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "vivec_palace_canton",
+      "overlay": "vivec"
+    },
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        38
+      ],
+      "face": "south",
+      "name": "vivec_high_fane",
+      "overlay": "vivec"
+    },
+    {
+      "id": "rock",
+      "at": [
+        0,
+        68
+      ],
+      "face": "south",
+      "name": "vivec_ministry_of_truth",
+      "overlay": "vivec"
+    },
+    {
+      "id": "arena",
+      "at": [
+        42,
+        -12
+      ],
+      "face": "south",
+      "name": "vivec_arena_canton",
+      "overlay": "vivec"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        118
+      ],
+      "overlay": "vivec"
+    },
+    {
+      "ring": [
+        59,
+        118
+      ],
+      "overlay": "ascadian_isles"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_foreign_quarter"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        64,
+        23
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_hlaalu_canton"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        21,
+        18
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_redoran_canton"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        34,
+        59
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_telvanni_canton"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        5,
+        28
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_hall_of_justice"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -12,
+        67
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_mages_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        -14,
+        24
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_fighters_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -52,
+        44
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_flowers_of_gold"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        10
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_black_shalk"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -68,
+        0
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_elven_nations"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -26,
+        -10
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_no_name_club"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -52,
+        -44
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_jobashas_books"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -14,
+        -24
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_simine_books"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -12,
+        -67
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_aurane_apothecary"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        5,
+        -28
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_sirollus_smithy"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        34,
+        -59
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_lucretinaus_trader"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        21,
+        -18
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_st_olms_canton"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        64,
+        -23
+      ],
+      "face": "south",
+      "overlay": "vivec",
+      "name": "vv_st_delyn_canton"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "tribunal_cantons",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "canton_paper_lantern",
+      "count": 4
+    },
+    {
+      "type": "fountain",
+      "theme": "high_fane_basin",
+      "count": 2
+    },
+    {
+      "type": "statue",
+      "theme": "tribunal:vivec",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "vivec_palace_canton": "Palace of Vivec",
+    "vivec_high_fane": "High Fane of the Temple",
+    "vivec_ministry_of_truth": "Ministry of Truth (Baar Dau)",
+    "vivec_arena_canton": "Vivec Arena Canton",
+    "vv_foreign_quarter": "Foreign Quarter Canton Plaza",
+    "vv_hlaalu_canton": "Hlaalu Canton Treasury",
+    "vv_redoran_canton": "Redoran Canton Council",
+    "vv_telvanni_canton": "Telvanni Canton Tower",
+    "vv_hall_of_justice": "Hall of Justice & Wisdom",
+    "vv_mages_guild": "Vivec Mages Guild",
+    "vv_fighters_guild": "Vivec Fighters Guild",
+    "vv_flowers_of_gold": "The Flowers of Gold",
+    "vv_black_shalk": "The Black Shalk Cornerclub",
+    "vv_elven_nations": "Elven Nations Cornerclub",
+    "vv_no_name_club": "No Name Club",
+    "vv_jobashas_books": "Jobasha's Rare Books",
+    "vv_simine_books": "Simine Fralinie's Bookstore",
+    "vv_aurane_apothecary": "Aurane Frernis Apothecary",
+    "vv_sirollus_smithy": "Sirollus Saccus's Smithy",
+    "vv_lucretinaus_trader": "Lucretinaus Olcinius's Trader",
+    "vv_st_olms_canton": "St. Olms Canton Plaza",
+    "vv_st_delyn_canton": "St. Delyn Canton Plaza"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "gold_coast",
+  "why": [
+    "gold_coast.L1.low_sea_cliffs",
+    "gold_coast.L4.coastal_scrub",
+    "gold_coast.L6.gold_road_inns"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:cut_sandstone",
+    "low": "minecraft:sandstone",
+    "wood": "oak",
+    "roof": "red_sandstone",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:smooth_sandstone",
+    "plaza": "minecraft:sandstone",
+    "plaza2": "minecraft:smooth_sandstone",
+    "path": "minecraft:sand"
+  }
+}

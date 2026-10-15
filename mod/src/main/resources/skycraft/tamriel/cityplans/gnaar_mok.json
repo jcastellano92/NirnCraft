@@ -1,0 +1,112 @@
+{
+  "id": "gnaar_mok",
+  "why": [
+    "bitter_coast.L1.mud_coast",
+    "bitter_coast.L3.brackish_inlets"
+  ],
+  "sil": "marsh-stilt-smuggler-docks",
+  "base": "none",
+  "overlay": "bitter_coast",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "bitter_coast"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        9,
+        0
+      ],
+      "face": "south",
+      "overlay": "bitter_coast",
+      "name": "gnaar_mok_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        9,
+        29
+      ],
+      "face": "south",
+      "overlay": "bitter_coast",
+      "name": "gnaar_mok_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        -7,
+        5
+      ],
+      "face": "south",
+      "overlay": "bitter_coast",
+      "name": "gnaar_mok_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        -24,
+        -18
+      ],
+      "face": "south",
+      "overlay": "bitter_coast",
+      "name": "gnaar_mok_b_4"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        3,
+        -9
+      ],
+      "face": "south",
+      "overlay": "bitter_coast",
+      "name": "gnaar_mok_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "gnaar_mok_bayou",
+      "count": 2
+    },
+    {
+      "type": "lamps",
+      "theme": "smuggler_pier_lantern",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "gnaar_mok_b_1": "Arenim Manor",
+    "gnaar_mok_b_2": "Druegh-Jigger's Rest",
+    "gnaar_mok_b_3": "Nadene Rotheran's Shack",
+    "gnaar_mok_b_4": "Caryarel's Stilted Hut",
+    "gnaar_mok_b_5": "Netch-Leather Curing Shed"
+  },
+  "innKey": "gnaar_mok_b_2",
+  "names": {
+    "inn": "gnaar_mok_b_2"
+  }
+}

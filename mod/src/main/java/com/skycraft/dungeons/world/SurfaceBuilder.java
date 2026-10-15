@@ -52,7 +52,7 @@ public final class SurfaceBuilder {
         }
         Frame frame = new Frame(p, (b.minX() + b.maxX()) / 2, (b.minZ() + b.maxZ()) / 2, c.floor, f);
         switch (c.theme) {
-            case FORT, GIANT_CAMP, DRAGON_LAIR, DAEDRIC_SHRINE -> {
+            case FORT, BRETON_KEEP_RUIN, GIANT_CAMP, DRAGON_LAIR, DAEDRIC_SHRINE -> {
             }
             case WATCHTOWER, LIGHTHOUSE, MAGE_TOWER, GREAT_LIFT -> {
                 Towers.build(frame, c);
@@ -83,7 +83,7 @@ public final class SurfaceBuilder {
         }
         Spot s = new Spot(p, c, (b.minX() + b.maxX()) / 2, (b.minZ() + b.maxZ()) / 2, c.floor, f, f.getClockWise());
         switch (c.theme) {
-            case FORT -> fort(s);
+            case FORT, BRETON_KEEP_RUIN -> fort(s);
             case GIANT_CAMP -> giantCamp(s);
             case DRAGON_LAIR -> dragonLair(s);
             default -> shrine(s);

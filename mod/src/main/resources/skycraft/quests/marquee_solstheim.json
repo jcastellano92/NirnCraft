@@ -473,7 +473,11 @@
       "rewards": {
         "gold": 1200,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_rr_hollow",
@@ -515,7 +519,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_rr_vigil",
@@ -562,7 +570,11 @@
             }
           }
         ]
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_rr_wharf",
@@ -606,7 +618,11 @@
       "rewards": {
         "gold": 280,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_rr_ash",
@@ -654,7 +670,11 @@
       "rewards": {
         "gold": 420,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_sk_telling",
@@ -728,7 +748,11 @@
       "rewards": {
         "gold": 900,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_sk_trophy",
@@ -767,7 +791,11 @@
       "rewards": {
         "gold": 400,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_sk_wind",
@@ -820,7 +848,11 @@
       "rewards": {
         "gold": 500,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_th_beast",
@@ -896,7 +928,11 @@
       "rewards": {
         "gold": 800,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_th_dice",
@@ -936,7 +972,11 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_th_boar",
@@ -994,7 +1034,11 @@
       "rewards": {
         "gold": 340,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_tm_spore",
@@ -1082,7 +1126,11 @@
       "rewards": {
         "gold": 700,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_tm_rumours",
@@ -1116,7 +1164,11 @@
       "rewards": {
         "gold": 240,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_ff_thaw",
@@ -1201,7 +1253,11 @@
       "rewards": {
         "gold": 600,
         "loot": "standard"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_ff_lantern",
@@ -1234,7 +1290,11 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_tm_glow",
@@ -1286,7 +1346,11 @@
       "rewards": {
         "gold": 320,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     },
     {
       "id": "mq_sol_ff_boots",
@@ -1338,7 +1402,11 @@
       "rewards": {
         "gold": 300,
         "loot": "minor"
-      }
+      },
+      "why": [
+        "morrowind.L9.tribunal_failing",
+        "morrowind.L8.tribunal"
+      ]
     }
   ]
 }

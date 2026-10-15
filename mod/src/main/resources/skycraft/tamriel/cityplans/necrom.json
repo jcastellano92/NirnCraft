@@ -1,0 +1,285 @@
+{
+  "id": "necrom",
+  "why": [
+    "necrom.L1.tomb_hills",
+    "necrom.L4.tomb_terraces",
+    "necrom.L5.funeral_trade"
+  ],
+  "sil": "necropolis-tomb-grid",
+  "base": "none",
+  "overlay": "necrom",
+  "radius": 96,
+  "reach": 114,
+  "innKey": "nc_pilgrims_repose",
+  "names": {
+    "inn": "nc_pilgrims_repose",
+    "store": "nc_votive_provisioner",
+    "smithy": "nc_ordinator_forge"
+  },
+  "gates": [
+    [
+      -90,
+      0
+    ],
+    [
+      0,
+      90
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        -32
+      ],
+      "face": "south",
+      "name": "necrom_cathedral_of_ancestors",
+      "overlay": "necrom"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "necrom"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_hall_of_bone_binders"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        63,
+        26
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_cloister_st_olms"
+    },
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_indoril_chancery"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        63
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_pilgrims_repose"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_lantern_of_the_east"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -26,
+        63
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_myrrh_and_ash"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_ossuary_scriptorium"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -63,
+        26
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_ordinator_forge"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_votive_provisioner"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -63,
+        -26
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_indoril_manor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_sathil_residence"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -26,
+        -63
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_ordinator_barracks"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_urn_keeper_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        26,
+        -63
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_lamplighter_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_mourner_house"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        63,
+        -26
+      ],
+      "face": "south",
+      "overlay": "necrom",
+      "name": "nc_barge_store"
+    }
+  ],
+  "features": [
+    {
+      "type": "memorial",
+      "theme": "velothi_ancestor_cenotaph",
+      "count": 4
+    },
+    {
+      "type": "shrine",
+      "theme": "saint_veloth",
+      "count": 3
+    },
+    {
+      "type": "lamps",
+      "theme": "white_incense_brazier",
+      "count": 4
+    },
+    {
+      "type": "fountain",
+      "theme": "purification_basin",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "necrom_cathedral_of_ancestors": "Cathedral of the Ancestors",
+    "nc_hall_of_bone_binders": "Hall of Bone-Binders",
+    "nc_cloister_st_olms": "Cloister of St. Olms",
+    "nc_indoril_chancery": "Indoril Prelate's Chancery",
+    "nc_pilgrims_repose": "The Pilgrim's Repose",
+    "nc_lantern_of_the_east": "Lantern of the East",
+    "nc_myrrh_and_ash": "Myrrh & Ash Embalmers",
+    "nc_ossuary_scriptorium": "Ossuary Rolls Scriptorium",
+    "nc_ordinator_forge": "Ordinator Ceremonial Forge",
+    "nc_votive_provisioner": "Votive Candle & Relic Provisioner",
+    "nc_indoril_manor": "House Indoril Mausoleum Manor",
+    "nc_sathil_residence": "Prelate Sathil's Residence",
+    "nc_ordinator_barracks": "Necrom Watch-Ordinator Hall",
+    "nc_urn_keeper_house": "Keeper of the Urns Quarters",
+    "nc_lamplighter_house": "Lamplighter's White House",
+    "nc_mourner_house": "Mourner's Terrace House",
+    "nc_barge_store": "Funeral Barge Store"
+  }
+}

@@ -1,16 +1,22 @@
 {
   "id": "imperial_arena",
+  "why": [
+    "heartlands.L1.island_bedrock",
+    "heartlands.L6.imperial_city",
+    "heartlands.L8.arena_cult"
+  ],
   "tint": {
-    "wall": "minecraft:smooth_red_sandstone",
-    "wall2": "minecraft:cut_red_sandstone",
-    "low": "minecraft:red_nether_bricks",
-    "roof": "nether_brick",
+    "wall": "minecraft:cut_sandstone",
+    "wall2": "minecraft:sandstone",
+    "low": "minecraft:stone_bricks",
+    "roof": "brick",
     "accent": "red"
   },
   "palette": {
-    "cityWall": "red_sandstone",
-    "cityWall2": "minecraft:cut_red_sandstone",
-    "plaza": "minecraft:smooth_red_sandstone",
-    "plaza2": "minecraft:cut_red_sandstone"
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:sandstone",
+    "plaza": "minecraft:sandstone",
+    "plaza2": "minecraft:red_sandstone",
+    "path": "minecraft:sand"
   }
 }

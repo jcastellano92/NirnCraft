@@ -1,0 +1,19 @@
+{
+  "id": "dragontail",
+  "tint": {
+    "wall": "minecraft:red_sandstone",
+    "wall2": "minecraft:smooth_red_sandstone",
+    "low": "minecraft:cut_red_sandstone",
+    "roof": "red_sandstone",
+    "trim": "acacia",
+    "wood": "acacia",
+    "accent": "red"
+  },
+  "palette": {
+    "cityWall": "cut_red_sandstone",
+    "cityWall2": "minecraft:red_sandstone",
+    "plaza": "minecraft:smooth_red_sandstone",
+    "plaza2": "minecraft:cut_red_sandstone",
+    "path": "minecraft:red_sand"
+  }
+}

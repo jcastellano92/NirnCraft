@@ -1,0 +1,19 @@
+{
+  "id": "daggerfall",
+  "tint": {
+    "wall": "minecraft:calcite",
+    "wall2": "minecraft:white_terracotta",
+    "low": "minecraft:stone_bricks",
+    "roof": "deepslate_tile",
+    "trim": "dark_oak",
+    "wood": "dark_oak",
+    "accent": "green"
+  },
+  "palette": {
+    "cityWall": "stone_bricks",
+    "cityWall2": "minecraft:chiseled_stone_bricks",
+    "plaza": "minecraft:stone_bricks",
+    "plaza2": "minecraft:polished_andesite",
+    "path": "minecraft:cobblestone"
+  }
+}

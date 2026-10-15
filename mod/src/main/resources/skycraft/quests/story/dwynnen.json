@@ -1,0 +1,404 @@
+{
+  "region": "high_rock/dwynnen",
+  "title": "The Raven's Ledger of Kambria",
+  "summary": "Break the stranglehold of usurious debt-collectors and mutinous deserter companies occupying the karst vaults and scarp forts of Dwynnen.",
+  "why": [
+    "dwynnen.L7.debt_poverty",
+    "dwynnen.L7.ex_soldiers",
+    "dwynnen.L8.raven_omens",
+    "dwynnen.L9.raven_debt",
+    "dwynnen.L10.deserter_holds"
+  ],
+  "hook": {
+    "place": "kambria",
+    "places": [
+      "dwynnen",
+      "greygate_lair",
+      "kambria",
+      "marchand_farm",
+      "oakcroft_watchtower",
+      "redbury_wyrd_grove",
+      "rousseau_catacombs",
+      "thibault_farm",
+      "wyngate",
+      "wynham_cavern"
+    ],
+    "npc": "story_dw_syndic_bertrand",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_dw_syndic_bertrand",
+      "name": "Syndic Bertrand Vane",
+      "role": "merchant",
+      "place": "kambria",
+      "greet": "Mind your purse on the Kambria causeway, friend. Between Daggerfall's bailiffs and Wayrest's factors, even the stones owe interest.",
+      "talk": [
+        "A rogue chapter-master of the Knights of the Raven has bought up the war-debts of thirty upland farms and hired discharged pike-companies to evict the tenants.",
+        "They hold the forged bond-books inside Oakwold Keep and the karst sinkholes of Telaata. Speak with Cantor Eloise in Balmarsh—her parish was seized yesterday."
+      ]
+    },
+    {
+      "id": "story_dw_cantor_eloise",
+      "name": "Cantor Eloise of Dibella",
+      "role": "priest",
+      "place": "balmarsh",
+      "greet": "Three ravens sat on our gable at dawn, and by noon the debt-pikemen had nailed our chapel doors shut.",
+      "talk": [
+        "Old soldiers who fought at Shinji's Scarp are being forced to choose between starving on the moor or serving Bailiff-Knight Corvus as mercenaries.",
+        "Corporal Gaspard at Wyngate still commands veterans who refuse to turn their pikes on their own neighbours."
+      ]
+    },
+    {
+      "id": "story_dw_corporal_gaspard",
+      "name": "Corporal Gaspard",
+      "role": "guard",
+      "place": "wyngate",
+      "greet": "I served twelve winters on the Bjoulsae marches, and I'll not spend my thirteenth burning tenant cottages for a usurer's seal.",
+      "talk": [
+        "Paymaster Grignon keeps the silver press and the forged mortgage rolls inside Wynham Cavern, guarded by deserters.",
+        "If we seize those rolls and march on Oakwold Keep and Telaata, every honest veteran in Dwynnen will turn against Corvus."
+      ]
+    },
+    {
+      "id": "story_dw_knight_errant_laure",
+      "name": "Dame Laure of the Raven",
+      "role": "knight",
+      "place": "oakwold_keep",
+      "greet": "Thank the Eight! I came from Dwynnen to audit Corvus's preceptory, and his mercenaries locked me outside the barbican.",
+      "talk": [
+        "Corvus has retreated into the karst vaults of Telaata beneath the ridge, where he intends to sell the forfeited land-deeds to Wayrest speculators.",
+        "Help me breach Telaata and reclaim the Raven's honour!"
+      ]
+    }
+  ],
+  "bosses": {
+    "story_dw_paymaster_grignon": {
+      "name": "Paymaster Grignon the Coin-Shear",
+      "rank": "boss",
+      "place": "wynham_cavern",
+      "weapon": "steel_sword",
+      "helmet": "chainmail_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.5
+    },
+    "story_dw_marshal_corvus": {
+      "name": "Bailiff-Marshal Corvus",
+      "rank": "boss",
+      "place": "telaata",
+      "weapon": "ebony_sword",
+      "helmet": "iron_helmet",
+      "chest": "iron_chestplate",
+      "hp_mult": 3.2,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_dw_balmarsh_eviction": [
+      "Cantor Eloise of Dibella: Look at the seal on this writ—a black raven clutching a debtor's chain, stamped over a scraped-out Kambria deed.",
+      "Syndic Bertrand Vane: They're altering the land-rolls from the old war so neither Daggerfall nor Wayrest will intervene.",
+      "Cantor Eloise of Dibella: Go to Shinji's Scarp and Wyngate; rally Corporal Gaspard before another family is driven onto the moor."
+    ],
+    "story_dw_wynham_mint": [
+      "Paymaster Grignon: Every pikeman in these hills owes me for his boots and salt! Who are you to audit my books?",
+      "Corporal Gaspard: The men bled at Shinji's Scarp while you clipped their pay-tallies, Grignon!",
+      "Paymaster Grignon: Guards! Add their bones to the lime-pit!"
+    ],
+    "story_dw_telaata_vault": [
+      "Bailiff-Marshal Corvus: Dwynnen is a beggar's ditch between two greedy crowns! Under my ledger, at least the pikes are fed!",
+      "Dame Laure of the Raven: The Order of the Raven was sworn to guard the karst passes, Corvus, not auction our people into bondage!",
+      "Bailiff-Marshal Corvus: Then let steel settle the balance!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_dwynnen_01_forged_writs",
+      "region": "high_rock/dwynnen",
+      "category": "main",
+      "title": "Three Ravens on the Gable",
+      "giver": "story_dw_syndic_bertrand",
+      "start": "npc:story_dw_syndic_bertrand",
+      "requires": [],
+      "why": [
+        "dwynnen.L7.debt_poverty",
+        "dwynnen.L8.raven_omens"
+      ],
+      "summary": "Investigate the seized parish in Balmarsh with Syndic Bertrand and Cantor Eloise.",
+      "intro": [
+        "Deserter pike-bands bearing the seal of the Knights of the Raven have begun seizing upland farms around Kambria and Balmarsh.",
+        "Travel from Kambria to Balmarsh and examine the eviction writs with Cantor Eloise."
+      ],
+      "complete": [
+        "The writs in Balmarsh were forged on scraped war-parchment. Cantor Eloise urged you to meet Corporal Gaspard via Shinji's Scarp."
+      ],
+      "journal": {
+        "start": "Syndic Bertrand in Kambria asked me to travel to Balmarsh and inspect the forged debt-writs with Cantor Eloise.",
+        "done": "We proved the eviction writs are falsified and learned Corporal Gaspard at Wyngate is gathering loyal veterans."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "kambria",
+          "text": "Review the tax-complaints in Kambria"
+        },
+        {
+          "type": "scene",
+          "place": "balmarsh",
+          "target": "scene:story_dw_balmarsh_eviction",
+          "text": "Examine the forged eviction writ in Balmarsh"
+        },
+        {
+          "type": "talk",
+          "place": "balmarsh",
+          "npc": "story_dw_cantor_eloise",
+          "text": "Speak with Cantor Eloise in Balmarsh"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "kambria",
+        "balmarsh"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "kambria",
+          "objective": "Review the tax-complaints in Kambria"
+        },
+        {
+          "id": 20,
+          "place": "balmarsh",
+          "objective": "Examine the forged eviction writ in Balmarsh"
+        },
+        {
+          "id": 30,
+          "place": "balmarsh",
+          "objective": "Speak with Cantor Eloise in Balmarsh"
+        }
+      ],
+      "consequence": "guard_banner:dwynnen_stage_1"
+    },
+    {
+      "id": "ms1_dwynnen_02_scarp_veterans",
+      "region": "high_rock/dwynnen",
+      "category": "main",
+      "title": "Ghosts of Shinji's Scarp",
+      "giver": "story_dw_cantor_eloise",
+      "start": "auto",
+      "requires": [
+        "ms1_dwynnen_01_forged_writs"
+      ],
+      "why": [
+        "dwynnen.L7.ex_soldiers",
+        "dwynnen.L9.deserter_bands"
+      ],
+      "summary": "Scout the mercenary muster-ground at Shinji's Scarp and rally Corporal Gaspard in Wyngate.",
+      "intro": [
+        "Discharged soldiers gather around the old siege works of Shinji's Scarp, where Bailiff-Marshal Corvus recruits his enforcers.",
+        "Reconnoitre Shinji's Scarp, then travel to Wyngate to speak with Corporal Gaspard."
+      ],
+      "complete": [
+        "Corporal Gaspard agreed to muster the loyal veterans once the forged debt-press in Wynham Cavern is destroyed."
+      ],
+      "journal": {
+        "start": "I must scout Shinji's Scarp and meet Corporal Gaspard in Wyngate.",
+        "done": "Corporal Gaspard pinpointed Paymaster Grignon's counterfeit press inside Wynham Cavern."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "shinjis_scarp",
+          "text": "Scout the deserter campfires at Shinji's Scarp"
+        },
+        {
+          "type": "talk",
+          "place": "wyngate",
+          "npc": "story_dw_corporal_gaspard",
+          "text": "Rally Corporal Gaspard in Wyngate"
+        }
+      ],
+      "reward": {
+        "gold": 300,
+        "xp": 450
+      },
+      "places": [
+        "shinjis_scarp",
+        "wyngate"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "shinjis_scarp",
+          "objective": "Scout the deserter campfires at Shinji's Scarp"
+        },
+        {
+          "id": 20,
+          "place": "wyngate",
+          "objective": "Rally Corporal Gaspard in Wyngate"
+        }
+      ],
+      "consequence": "npc_schedule:dwynnen_stage_2"
+    },
+    {
+      "id": "ms1_dwynnen_03_wynham_press",
+      "region": "high_rock/dwynnen",
+      "category": "main",
+      "title": "The Coin-Shear's Cavern",
+      "giver": "story_dw_corporal_gaspard",
+      "start": "auto",
+      "requires": [
+        "ms1_dwynnen_02_scarp_veterans"
+      ],
+      "why": [
+        "dwynnen.L9.raven_debt",
+        "dwynnen.L10.deserter_holds"
+      ],
+      "summary": "Enter Wynham Cavern, defeat Paymaster Grignon, and seize the forged mortgage ledgers.",
+      "intro": [
+        "Paymaster Grignon uses the dry limestone chambers of Wynham Cavern to stamp counterfeit debt-tallies and pay off deserter captains.",
+        "Fight your way into Wynham Cavern and take the ledgers from Grignon."
+      ],
+      "complete": [
+        "With Paymaster Grignon defeated and the true ledgers recovered, Corporal Gaspard's veterans marched to join Dame Laure at Oakwold Keep."
+      ],
+      "journal": {
+        "start": "I must enter Wynham Cavern and defeat Paymaster Grignon to recover the true debt-rolls.",
+        "done": "I slew Paymaster Grignon in Wynham Cavern and learned Bailiff-Marshal Corvus has fortified Telaata."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "wynham_cavern",
+          "text": "Enter Wynham Cavern"
+        },
+        {
+          "type": "scene",
+          "place": "wynham_cavern",
+          "target": "scene:story_dw_wynham_mint",
+          "text": "Confront Paymaster Grignon at the seal-press"
+        },
+        {
+          "type": "boss",
+          "place": "wynham_cavern",
+          "target": "story_dw_paymaster_grignon",
+          "text": "Defeat Paymaster Grignon the Coin-Shear"
+        }
+      ],
+      "reward": {
+        "gold": 400,
+        "xp": 600
+      },
+      "places": [
+        "wynham_cavern"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "wynham_cavern",
+          "objective": "Enter Wynham Cavern"
+        },
+        {
+          "id": 20,
+          "place": "wynham_cavern",
+          "objective": "Confront Paymaster Grignon at the seal-press"
+        },
+        {
+          "id": 30,
+          "place": "wynham_cavern",
+          "objective": "Defeat Paymaster Grignon the Coin-Shear"
+        }
+      ],
+      "consequence": "shrine_state:dwynnen_stage_3"
+    },
+    {
+      "id": "ms1_dwynnen_04_karst_reckoning",
+      "region": "high_rock/dwynnen",
+      "category": "main",
+      "title": "The Karst Vault of Telaata",
+      "giver": "story_dw_knight_errant_laure",
+      "start": "auto",
+      "requires": [
+        "ms1_dwynnen_03_wynham_press"
+      ],
+      "finale": true,
+      "why": [
+        "dwynnen.L9.two_crowns_squeeze",
+        "dwynnen.L10.karst_vaults"
+      ],
+      "summary": "Join Dame Laure at Oakwold Keep, storm the karst vault of Telaata, and defeat Bailiff-Marshal Corvus.",
+      "intro": [
+        "Bailiff-Marshal Corvus has retreated into the subterranean vaults of Telaata with the charter-chest of Dwynnen.",
+        "Meet Dame Laure outside Oakwold Keep, descend into Telaata, and end Corvus's extortion ring."
+      ],
+      "complete": [
+        "Bailiff-Marshal Corvus has fallen, the forged bonds have been burned in Kambria's square, and Dame Laure has restored the Order of the Raven."
+      ],
+      "journal": {
+        "start": "I must speak with Dame Laure at Oakwold Keep and defeat Bailiff-Marshal Corvus in Telaata.",
+        "done": "I defeated Bailiff-Marshal Corvus in Telaata and returned the freed deeds to Syndic Bertrand in Kambria."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "oakwold_keep",
+          "npc": "story_dw_knight_errant_laure",
+          "text": "Meet Dame Laure outside Oakwold Keep"
+        },
+        {
+          "type": "scene",
+          "place": "telaata",
+          "target": "scene:story_dw_telaata_vault",
+          "text": "Confront Bailiff-Marshal Corvus in Telaata"
+        },
+        {
+          "type": "boss",
+          "place": "telaata",
+          "target": "story_dw_marshal_corvus",
+          "text": "Defeat Bailiff-Marshal Corvus"
+        },
+        {
+          "type": "talk",
+          "place": "kambria",
+          "npc": "story_dw_syndic_bertrand",
+          "text": "Deliver the freed land-rolls to Syndic Bertrand in Kambria"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "oakwold_keep",
+        "telaata",
+        "kambria"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "oakwold_keep",
+          "objective": "Meet Dame Laure outside Oakwold Keep"
+        },
+        {
+          "id": 20,
+          "place": "telaata",
+          "objective": "Confront Bailiff-Marshal Corvus in Telaata"
+        },
+        {
+          "id": 30,
+          "place": "telaata",
+          "objective": "Defeat Bailiff-Marshal Corvus"
+        },
+        {
+          "id": 40,
+          "place": "kambria",
+          "objective": "Deliver the freed land-rolls to Syndic Bertrand in Kambria"
+        }
+      ],
+      "consequence": "settlement_prosperity:dwynnen_stage_4"
+    }
+  ]
+}

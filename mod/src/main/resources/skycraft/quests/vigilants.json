@@ -3,30 +3,86 @@
   "category": "faction",
   "faction": "vigilants_of_stendarr",
   "region": "skyrim/the_pale",
-  "speakers": {"narrator": "Narrator"},
+  "speakers": {
+    "narrator": "Narrator"
+  },
   "places": {
-    "harvesters_hollow": {"x": 250, "z": -1450, "r": 32, "name": "Harvester's Hollow"}
+    "harvesters_hollow": {
+      "x": 250,
+      "z": -1450,
+      "r": 32,
+      "name": "Harvester's Hollow"
+    }
   },
   "npcs": [
-    {"id": "carcette", "name": "Keeper Carcette", "role": "priest", "place": "hall_of_the_vigilant", "offset": [2, 2], "female": true,
-     "greet": "Stendarr's mercy is for the lost. His hammer is for the things that lose them. Which have you come about?"},
-    {"id": "hestor_aldrinus", "name": "Hestor Aldrinus", "role": "merchant", "place": "dawnstar", "offset": [8, -6],
-     "greet": "Antiquities, curiosities, rarities from every corner of Tamriel. Nothing dangerous, of course. Almost nothing."}
+    {
+      "id": "carcette",
+      "name": "Keeper Carcette",
+      "role": "priest",
+      "place": "hall_of_the_vigilant",
+      "offset": [
+        2,
+        2
+      ],
+      "female": true,
+      "greet": "Stendarr's mercy is for the lost. His hammer is for the things that lose them. Which have you come about?"
+    },
+    {
+      "id": "hestor_aldrinus",
+      "name": "Hestor Aldrinus",
+      "role": "merchant",
+      "place": "dawnstar",
+      "offset": [
+        8,
+        -6
+      ],
+      "greet": "Antiquities, curiosities, rarities from every corner of Tamriel. Nothing dangerous, of course. Almost nothing."
+    }
   ],
   "relics": [
-    {"id": "vg_dagon_sigil", "name": "Ember-Sigil of Dagon", "desc": "A shard of black stone that glows like a coal and never cools. Dug out of the ground beneath Mehrunes Dagon's shrine.", "icon": 25},
-    {"id": "vg_collectors_casket", "name": "Aldrinus's Locked Casket", "desc": "A lacquered box of Daedric curios. Something inside scratches, very faintly, when no one is looking at it.", "icon": 17},
-    {"id": "vg_volkihar_missive", "name": "Volkihar Missive", "desc": "Orders sealed in dark red wax: watch the Hall of the Vigilant, count its keepers, and report when the Keeper travels.", "icon": 11}
+    {
+      "id": "vg_dagon_sigil",
+      "name": "Ember-Sigil of Dagon",
+      "desc": "A shard of black stone that glows like a coal and never cools. Dug out of the ground beneath Mehrunes Dagon's shrine.",
+      "icon": 25
+    },
+    {
+      "id": "vg_collectors_casket",
+      "name": "Aldrinus's Locked Casket",
+      "desc": "A lacquered box of Daedric curios. Something inside scratches, very faintly, when no one is looking at it.",
+      "icon": 17
+    },
+    {
+      "id": "vg_volkihar_missive",
+      "name": "Volkihar Missive",
+      "desc": "Orders sealed in dark red wax: watch the Hall of the Vigilant, count its keepers, and report when the Keeper travels.",
+      "icon": 11
+    }
   ],
   "scenes": {
     "vg_hall_burning": [
-      ["narrator", "Smoke rises over the Hall of the Vigilant. The doors hang open, and on the snow outside lie Vigilants in their grey robes, very still."],
-      ["carcette", "They came at dusk, more than I have ever seen together. A lord of the Volkihar leads them. He is still inside. Stendarr guide your hand."]
+      [
+        "narrator",
+        "Smoke rises over the Hall of the Vigilant. The doors hang open, and on the snow outside lie Vigilants in their grey robes, very still."
+      ],
+      [
+        "carcette",
+        "They came at dusk, more than I have ever seen together. A lord of the Volkihar leads them. He is still inside. Stendarr guide your hand."
+      ]
     ],
     "vg_hand_of_stendarr": [
-      ["carcette", "The Hall can be rebuilt. The Vigilants who died here cannot. But they died holding the line, and you finished what they started."],
-      ["carcette", "Stendarr's Hand is not a title we give lightly. It goes to the one who stands when everyone else has fallen. Kneel. Rise, Hand of Stendarr."],
-      ["narrator", "Outside, the surviving Vigilants have begun clearing the snow from the Hall's steps."]
+      [
+        "carcette",
+        "The Hall can be rebuilt. The Vigilants who died here cannot. But they died holding the line, and you finished what they started."
+      ],
+      [
+        "carcette",
+        "Stendarr's Hand is not a title we give lightly. It goes to the one who stands when everyone else has fallen. Kneel. Rise, Hand of Stendarr."
+      ],
+      [
+        "narrator",
+        "Outside, the surviving Vigilants have begun clearing the snow from the Hall's steps."
+      ]
     ]
   },
   "quests": [
@@ -34,122 +90,398 @@
       "id": "vg_stendarrs_vigil",
       "title": "Stendarr's Vigil",
       "start": "npc:carcette",
-      "requires": ["!faction:vigilants_of_stendarr", "!curse:vampire", "!curse:werewolf"],
+      "requires": [
+        "!faction:vigilants_of_stendarr",
+        "!curse:vampire",
+        "!curse:werewolf"
+      ],
       "offer": "I want to join the Vigilants of Stendarr.",
       "pitch": "Then let us see whether you can stomach the work. Cultists have been digging beneath the Shrine of Mehrunes Dagon, south of here, and they have found something that should have stayed buried. Take it from them. Do not touch it more than you must.",
       "desc": "Keeper Carcette of the Vigilants of Stendarr sent me to take a Daedric relic from the cultists who dug it up beneath the Shrine of Mehrunes Dagon.",
       "objectives": [
-        {"type": "go", "place": "shrine_of_mehrunes_dagon", "text": "Travel to the Shrine of Mehrunes Dagon"},
-        {"type": "clear", "place": "shrine_of_mehrunes_dagon", "text": "Drive off the cultists at the shrine",
-         "spawn": [{"type": "npc:mage", "count": 3, "name": "Dagon Cultist", "hostile": true, "armor": "#6a1a1a"},
-                   {"type": "skycraft:scamp", "count": 2}],
-         "journal": "The cultists were chanting over a hole in the ground when I arrived. The scamps came out of the hole."},
-        {"type": "retrieve", "place": "shrine_of_mehrunes_dagon", "relic": "vg_dagon_sigil", "radius": 10, "text": "Take the relic the cultists unearthed"},
-        {"type": "deliver", "npc": "carcette", "relic": "vg_dagon_sigil", "text": "Bring the relic to Keeper Carcette",
-         "topic": "The cultists are dead. This is what they dug up.",
-         "reply": "A shard of a sigil stone. They would have opened a door with it, sooner or later. It goes into the vault, and you, if you still want it, go onto the rolls of the Vigilants. Welcome, Novice."}
+        {
+          "type": "go",
+          "place": "shrine_of_mehrunes_dagon",
+          "text": "Travel to the Shrine of Mehrunes Dagon"
+        },
+        {
+          "type": "clear",
+          "place": "shrine_of_mehrunes_dagon",
+          "text": "Drive off the cultists at the shrine",
+          "spawn": [
+            {
+              "type": "npc:mage",
+              "count": 3,
+              "name": "Dagon Cultist",
+              "hostile": true,
+              "armor": "#6a1a1a"
+            },
+            {
+              "type": "skycraft:scamp",
+              "count": 2
+            }
+          ],
+          "journal": "The cultists were chanting over a hole in the ground when I arrived. The scamps came out of the hole."
+        },
+        {
+          "type": "retrieve",
+          "place": "shrine_of_mehrunes_dagon",
+          "relic": "vg_dagon_sigil",
+          "radius": 10,
+          "text": "Take the relic the cultists unearthed"
+        },
+        {
+          "type": "deliver",
+          "npc": "carcette",
+          "relic": "vg_dagon_sigil",
+          "text": "Bring the relic to Keeper Carcette",
+          "topic": "The cultists are dead. This is what they dug up.",
+          "reply": "A shard of a sigil stone. They would have opened a door with it, sooner or later. It goes into the vault, and you, if you still want it, go onto the rolls of the Vigilants. Welcome, Novice."
+        }
       ],
       "outro": "I took a fragment of a Daedric sigil stone from cultists at the Shrine of Mehrunes Dagon. Keeper Carcette accepted me into the Vigilants of Stendarr.",
-      "rewards": {"gold": 150, "join": true, "items": ["skycraft:steel_mace", "skycraft:silver_ring"]}
+      "rewards": {
+        "gold": 150,
+        "join": true,
+        "items": [
+          "skycraft:steel_mace",
+          "skycraft:silver_ring"
+        ]
+      },
+      "why": [
+        "the_pale.L9.rebel_jarl",
+        "the_pale.L8.dream_dread"
+      ]
     },
     {
       "id": "vg_the_collector",
       "title": "The Collector of Dawnstar",
       "start": "npc:carcette",
-      "requires": ["quest:vg_stendarrs_vigil|faction:vigilants_of_stendarr"],
+      "requires": [
+        "quest:vg_stendarrs_vigil|faction:vigilants_of_stendarr"
+      ],
       "offer": "Is there more work, Keeper?",
       "pitch": "There is always more. A dealer in Dawnstar named Hestor Aldrinus buys and sells Daedric curios to rich fools in Solitude. One of his customers woke up screaming last week and has not stopped. Confiscate his stock, by persuasion if you can.",
       "desc": "Keeper Carcette sent me to Dawnstar to confiscate the Daedric curios that a dealer named Hestor Aldrinus has been selling to wealthy collectors.",
       "objectives": [
-        {"type": "go", "place": "dawnstar", "text": "Travel to Dawnstar"},
-        {"type": "talk", "npc": "hestor_aldrinus", "text": "Speak with Hestor Aldrinus",
-         "topic": "The Vigilants of Stendarr want your Daedric curios.",
-         "reply": "Want them? They're art. History. And legal, mostly. What happens to my customers afterwards is between them and their nightmares."},
-        {"type": "talk", "npc": "hestor_aldrinus", "text": "Convince Aldrinus to give up the casket",
-         "choices": [
-           {"label": "One of your customers hasn't stopped screaming in a week. The next one could be you.", "reply": "...Take it. Take the whole box. I haven't slept well since that ring came in anyway.", "actions": "flag:vg_aldrinus_persuaded;relic:vg_collectors_casket"},
-           {"label": "This isn't a request. Hand it over.", "reply": "Thugs in grey robes. Fine. Take it, and may it bite you.", "actions": "flag:vg_aldrinus_threatened;relic:vg_collectors_casket"}
-         ]},
-        {"type": "clear", "place": "dawnstar", "offset": [30, 30], "at_player": true, "text": "Deal with what crawls out of the casket",
-         "spawn": [{"type": "skycraft:scamp", "count": 2, "name": "Escaped Scamp"},
-                   {"type": "skycraft:imp", "name": "Casket Imp"}],
-         "journal": "The lid of the casket came open on its own outside the town walls. I was glad I was not still standing in the shop when it did."},
-        {"type": "deliver", "npc": "carcette", "relic": "vg_collectors_casket", "text": "Bring the casket to Keeper Carcette",
-         "topic": "Aldrinus's stock. Some of it didn't want to come.",
-         "reply": "It rarely does. I'll seal it tonight and see to it that nothing in this box ever reaches a rich man's mantelpiece again."}
+        {
+          "type": "go",
+          "place": "dawnstar",
+          "text": "Travel to Dawnstar"
+        },
+        {
+          "type": "talk",
+          "npc": "hestor_aldrinus",
+          "text": "Speak with Hestor Aldrinus",
+          "topic": "The Vigilants of Stendarr want your Daedric curios.",
+          "reply": "Want them? They're art. History. And legal, mostly. What happens to my customers afterwards is between them and their nightmares."
+        },
+        {
+          "type": "talk",
+          "npc": "hestor_aldrinus",
+          "text": "Convince Aldrinus to give up the casket",
+          "choices": [
+            {
+              "label": "One of your customers hasn't stopped screaming in a week. The next one could be you.",
+              "reply": "...Take it. Take the whole box. I haven't slept well since that ring came in anyway.",
+              "actions": "flag:vg_aldrinus_persuaded;relic:vg_collectors_casket"
+            },
+            {
+              "label": "This isn't a request. Hand it over.",
+              "reply": "Thugs in grey robes. Fine. Take it, and may it bite you.",
+              "actions": "flag:vg_aldrinus_threatened;relic:vg_collectors_casket"
+            }
+          ]
+        },
+        {
+          "type": "clear",
+          "place": "dawnstar",
+          "offset": [
+            30,
+            30
+          ],
+          "at_player": true,
+          "text": "Deal with what crawls out of the casket",
+          "spawn": [
+            {
+              "type": "skycraft:scamp",
+              "count": 2,
+              "name": "Escaped Scamp"
+            },
+            {
+              "type": "skycraft:imp",
+              "name": "Casket Imp"
+            }
+          ],
+          "journal": "The lid of the casket came open on its own outside the town walls. I was glad I was not still standing in the shop when it did."
+        },
+        {
+          "type": "deliver",
+          "npc": "carcette",
+          "relic": "vg_collectors_casket",
+          "text": "Bring the casket to Keeper Carcette",
+          "topic": "Aldrinus's stock. Some of it didn't want to come.",
+          "reply": "It rarely does. I'll seal it tonight and see to it that nothing in this box ever reaches a rich man's mantelpiece again."
+        }
       ],
       "outro": "I confiscated a casket of Daedric curios from Hestor Aldrinus in Dawnstar and fought off what escaped from it. Keeper Carcette has sealed it away.",
-      "rewards": {"gold": 300, "faction_points": 3}
+      "rewards": {
+        "gold": 300,
+        "faction_points": 3
+      },
+      "why": [
+        "the_pale.L9.rebel_jarl",
+        "the_pale.L8.dream_dread"
+      ]
     },
     {
       "id": "vg_under_the_broken_fang",
       "title": "Under the Broken Fang",
       "start": "auto",
-      "requires": ["quest:vg_the_collector"],
+      "requires": [
+        "quest:vg_the_collector"
+      ],
       "desc": "Travellers have been vanishing on the road west of Whiterun. Keeper Carcette believes vampires have made a nest in Broken Fang Cave.",
       "objectives": [
-        {"type": "talk", "npc": "carcette", "text": "Speak with Keeper Carcette",
-         "topic": "You sent for me?",
-         "reply": "Three travellers gone in ten days near Broken Fang Cave, and a shepherd found drained in the snow. That is not wolves. Go, and take the sun with you if you can."},
-        {"type": "go", "place": "broken_fang_cave", "text": "Travel to Broken Fang Cave"},
-        {"type": "clear", "place": "broken_fang_cave", "placement": "structure", "text": "Purge the vampire nest",
-         "spawn": [{"type": "skycraft:vampire", "count": 3, "name": "Broken Fang Vampire"},
-                   {"type": "skycraft:death_hound", "count": 1}]},
-        {"type": "kill", "place": "broken_fang_cave", "placement": "structure", "text": "Destroy the master of the nest",
-         "spawn": [{"type": "skycraft:vampire", "name": "Hjalmar the Thirsting", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4}],
-         "journal": "Hjalmar said he had a patron, and that his patron would avenge him. He laughed about it right up until the end."},
-        {"type": "retrieve", "place": "broken_fang_cave", "placement": "structure", "relic": "vg_volkihar_missive", "radius": 10, "text": "Search the nest"},
-        {"type": "deliver", "npc": "carcette", "relic": "vg_volkihar_missive", "text": "Bring the missive to Keeper Carcette",
-         "topic": "The nest is gone. Their master was carrying this.",
-         "reply": "Volkihar wax. The old clan from the islands off Solitude. And they are counting our keepers. This was not a nest, it was a watch post. They are coming for the Hall."}
+        {
+          "type": "talk",
+          "npc": "carcette",
+          "text": "Speak with Keeper Carcette",
+          "topic": "You sent for me?",
+          "reply": "Three travellers gone in ten days near Broken Fang Cave, and a shepherd found drained in the snow. That is not wolves. Go, and take the sun with you if you can."
+        },
+        {
+          "type": "go",
+          "place": "broken_fang_cave",
+          "text": "Travel to Broken Fang Cave"
+        },
+        {
+          "type": "clear",
+          "place": "broken_fang_cave",
+          "placement": "structure",
+          "text": "Purge the vampire nest",
+          "spawn": [
+            {
+              "type": "skycraft:vampire",
+              "count": 3,
+              "name": "Broken Fang Vampire"
+            },
+            {
+              "type": "skycraft:death_hound",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "broken_fang_cave",
+          "placement": "structure",
+          "text": "Destroy the master of the nest",
+          "spawn": [
+            {
+              "type": "skycraft:vampire",
+              "name": "Hjalmar the Thirsting",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4
+            }
+          ],
+          "journal": "Hjalmar said he had a patron, and that his patron would avenge him. He laughed about it right up until the end."
+        },
+        {
+          "type": "retrieve",
+          "place": "broken_fang_cave",
+          "placement": "structure",
+          "relic": "vg_volkihar_missive",
+          "radius": 10,
+          "text": "Search the nest"
+        },
+        {
+          "type": "deliver",
+          "npc": "carcette",
+          "relic": "vg_volkihar_missive",
+          "text": "Bring the missive to Keeper Carcette",
+          "topic": "The nest is gone. Their master was carrying this.",
+          "reply": "Volkihar wax. The old clan from the islands off Solitude. And they are counting our keepers. This was not a nest, it was a watch post. They are coming for the Hall."
+        }
       ],
       "outro": "I purged a vampire nest in Broken Fang Cave. Its master carried orders from the Volkihar to watch the Hall of the Vigilant and count its keepers.",
-      "rewards": {"gold": 400, "faction_points": 4}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 4
+      },
+      "why": [
+        "the_pale.L9.rebel_jarl",
+        "the_pale.L8.dream_dread"
+      ]
     },
     {
       "id": "vg_the_harvesters_hollow",
       "title": "The Harvester's Hollow",
       "start": "auto",
-      "requires": ["quest:vg_under_the_broken_fang"],
+      "requires": [
+        "quest:vg_under_the_broken_fang"
+      ],
       "desc": "The Volkihar have allies: a cult of Molag Bal, the Harvester of Souls, who keep a shrine in a hollow north of the Hall and supply the vampires with captives. Keeper Carcette wants the shrine purged.",
       "objectives": [
-        {"type": "talk", "npc": "carcette", "text": "Speak with Keeper Carcette",
-         "topic": "What do we do about the Volkihar?",
-         "reply": "We take away their friends first. Molag Bal's faithful keep a shrine in a hollow north of here, and our scouts have seen them leading captives to it in chains. Free whoever you can. Purge the rest."},
-        {"type": "go", "place": "harvesters_hollow", "text": "Travel to the Harvester's Hollow"},
-        {"type": "clear", "place": "harvesters_hollow", "placement": "structure", "text": "Purge the cultists of Molag Bal",
-         "spawn": [{"type": "npc:necromancer", "count": 3, "name": "Chainbound Cultist", "hostile": true},
-                   {"type": "skycraft:vampire", "count": 1, "name": "Volkihar Envoy"}]},
-        {"type": "kill", "place": "harvesters_hollow", "placement": "structure", "text": "Kill the cult's high priest, Ulvra Chain-Keeper",
-         "spawn": [{"type": "npc:necromancer", "name": "Ulvra Chain-Keeper", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true}],
-         "journal": "Ulvra died laughing. She told me the Hall was already burning, that the shrine had only been there to draw the Keeper's best away. I ran."},
-        {"type": "go", "place": "hall_of_the_vigilant", "text": "Hurry back to the Hall of the Vigilant", "actions": "scene:vg_hall_burning"}
+        {
+          "type": "talk",
+          "npc": "carcette",
+          "text": "Speak with Keeper Carcette",
+          "topic": "What do we do about the Volkihar?",
+          "reply": "We take away their friends first. Molag Bal's faithful keep a shrine in a hollow north of here, and our scouts have seen them leading captives to it in chains. Free whoever you can. Purge the rest."
+        },
+        {
+          "type": "go",
+          "place": "harvesters_hollow",
+          "text": "Travel to the Harvester's Hollow"
+        },
+        {
+          "type": "clear",
+          "place": "harvesters_hollow",
+          "placement": "structure",
+          "text": "Purge the cultists of Molag Bal",
+          "spawn": [
+            {
+              "type": "npc:necromancer",
+              "count": 3,
+              "name": "Chainbound Cultist",
+              "hostile": true
+            },
+            {
+              "type": "skycraft:vampire",
+              "count": 1,
+              "name": "Volkihar Envoy"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "harvesters_hollow",
+          "placement": "structure",
+          "text": "Kill the cult's high priest, Ulvra Chain-Keeper",
+          "spawn": [
+            {
+              "type": "npc:necromancer",
+              "name": "Ulvra Chain-Keeper",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true
+            }
+          ],
+          "journal": "Ulvra died laughing. She told me the Hall was already burning, that the shrine had only been there to draw the Keeper's best away. I ran."
+        },
+        {
+          "type": "go",
+          "place": "hall_of_the_vigilant",
+          "text": "Hurry back to the Hall of the Vigilant",
+          "actions": "scene:vg_hall_burning"
+        }
       ],
       "outro": "I purged the cult of Molag Bal at the Harvester's Hollow, but it was a feint. While I was gone, the Volkihar attacked the Hall of the Vigilant.",
-      "rewards": {"gold": 500, "faction_points": 4}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 4
+      },
+      "why": [
+        "the_pale.L9.rebel_jarl",
+        "the_pale.L8.dream_dread"
+      ]
     },
     {
       "id": "vg_ashes_of_the_hall",
       "title": "Ashes of the Hall",
       "start": "auto",
-      "requires": ["quest:vg_the_harvesters_hollow"],
+      "requires": [
+        "quest:vg_the_harvesters_hollow"
+      ],
       "desc": "The Volkihar have stormed the Hall of the Vigilant. Keeper Carcette survived the first assault, but the vampire lord who led it is still inside.",
       "objectives": [
-        {"type": "clear", "place": "hall_of_the_vigilant", "offset": [10, 6], "text": "Drive the Volkihar from the Hall",
-         "spawn": [{"type": "skycraft:vampire", "count": 3, "name": "Volkihar Thrall", "hp": 1.5},
-                   {"type": "skycraft:death_hound", "count": 2}]},
-        {"type": "kill", "place": "hall_of_the_vigilant", "offset": [10, 6], "text": "Destroy Vingalmo, lord of the Volkihar",
-         "spawn": [{"type": "skycraft:vampire_lord", "name": "Vingalmo of Volkihar", "target": true, "boss": true, "hp": 3.5, "dmg": 1.6}],
-         "journal": "Vingalmo rose on leathery wings and called the dead Vigilants to their feet against me. When he fell, they lay down again, and I said Stendarr's prayer over each of them."},
-        {"type": "talk", "npc": "carcette", "text": "Speak with Keeper Carcette",
-         "topic": "Vingalmo is destroyed. The Hall is ours again.",
-         "reply": "What is left of it. Help me up. No, I'm all right; it's only a cut, and a great deal of grief. Stay a moment. There is something the Vigilants owe you.",
-         "actions": "scene:vg_hand_of_stendarr"}
+        {
+          "type": "clear",
+          "place": "hall_of_the_vigilant",
+          "offset": [
+            10,
+            6
+          ],
+          "text": "Drive the Volkihar from the Hall",
+          "spawn": [
+            {
+              "type": "skycraft:vampire",
+              "count": 3,
+              "name": "Volkihar Thrall",
+              "hp": 1.5
+            },
+            {
+              "type": "skycraft:death_hound",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "hall_of_the_vigilant",
+          "offset": [
+            10,
+            6
+          ],
+          "text": "Destroy Vingalmo, lord of the Volkihar",
+          "spawn": [
+            {
+              "type": "skycraft:vampire_lord",
+              "name": "Vingalmo of Volkihar",
+              "target": true,
+              "boss": true,
+              "hp": 3.5,
+              "dmg": 1.6
+            }
+          ],
+          "journal": "Vingalmo rose on leathery wings and called the dead Vigilants to their feet against me. When he fell, they lay down again, and I said Stendarr's prayer over each of them."
+        },
+        {
+          "type": "talk",
+          "npc": "carcette",
+          "text": "Speak with Keeper Carcette",
+          "topic": "Vingalmo is destroyed. The Hall is ours again.",
+          "reply": "What is left of it. Help me up. No, I'm all right; it's only a cut, and a great deal of grief. Stay a moment. There is something the Vigilants owe you.",
+          "actions": "scene:vg_hand_of_stendarr"
+        }
       ],
       "outro": "I drove the Volkihar out of the Hall of the Vigilant and destroyed Vingalmo, the vampire lord who led them. Keeper Carcette named me Hand of Stendarr among the ashes.",
-      "rewards": {"gold": 1200, "faction_points": 9, "perks": 1, "flags": ["vg_hand_of_stendarr"],
-                  "items": [{"item": "skycraft:ebony_mace", "name": "Stendarr's Mercy", "enchant": {"smite": 5, "fire_aspect": 1, "unbreaking": 3}},
-                            {"item": "skycraft:dawnguard_chestplate", "name": "Vigilant's Grey Mail", "enchant": {"protection": 3, "fire_protection": 2}}]}
+      "rewards": {
+        "gold": 1200,
+        "faction_points": 9,
+        "perks": 1,
+        "flags": [
+          "vg_hand_of_stendarr"
+        ],
+        "items": [
+          {
+            "item": "skycraft:ebony_mace",
+            "name": "Stendarr's Mercy",
+            "enchant": {
+              "smite": 5,
+              "fire_aspect": 1,
+              "unbreaking": 3
+            }
+          },
+          {
+            "item": "skycraft:dawnguard_chestplate",
+            "name": "Vigilant's Grey Mail",
+            "enchant": {
+              "protection": 3,
+              "fire_protection": 2
+            }
+          }
+        ]
+      },
+      "why": [
+        "the_pale.L9.rebel_jarl",
+        "the_pale.L8.dream_dread"
+      ]
     }
   ]
 }

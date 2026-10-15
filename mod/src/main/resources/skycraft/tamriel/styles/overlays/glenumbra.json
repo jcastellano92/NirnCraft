@@ -1,0 +1,19 @@
+{
+  "id": "glenumbra",
+  "tint": {
+    "wall": "minecraft:white_terracotta",
+    "wall2": "minecraft:light_gray_terracotta",
+    "low": "minecraft:cobblestone",
+    "roof": "cobbled_deepslate",
+    "trim": "spruce",
+    "wood": "spruce",
+    "accent": "cyan"
+  },
+  "palette": {
+    "cityWall": "cobblestone",
+    "cityWall2": "minecraft:mossy_cobblestone",
+    "plaza": "minecraft:cobblestone",
+    "plaza2": "minecraft:andesite",
+    "path": "minecraft:gravel"
+  }
+}

@@ -2,36 +2,898 @@
   "_doc": "Altmer style sheet: white stone and glass under steep hipped roofs, spires and domes, gardens and planned avenues.",
   "windows": "pane",
   "pitch": 2,
-  "faith": ["akatosh", "julianos", "arkay", "mara", "stendarr"],
-  "crops": ["vines", "orchard", "wheat", "honey"],
-  "animals": ["horse", "sheep", "chicken", "cat"],
-  "colors": ["yellow", "light_blue", "white", "lime"],
-  "forms": {"grid": 3, "cluster": 2, "harbour": 2, "ring": 1},
-  "roofs": {"poor": {"hip": 2, "gable": 1}, "common": {"hip": 3, "spire": 1}, "wealthy": {"hip": 2, "dome": 1, "spire": 1}, "noble": {"dome": 2, "spire": 1, "hip": 1}},
-  "halls": {"dome": 2, "hip": 1},
-  "footprints": {"poor": {"rect": 1}, "common": {"rect": 2, "l": 1}, "wealthy": {"l": 2, "t": 1}, "noble": {"u": 2, "t": 1}},
-  "storeys": {"poor": [1, 1], "common": [1, 2], "wealthy": [2, 2], "noble": [2, 3]},
-  "rules": {"timber": 0.0, "porch": 0.25, "balcony": 0.4, "outsideStairs": 0.1, "shutters": 0.0, "flowerBoxes": 0.6, "chimney": 0.2, "annex": 0.25, "banners": 0.6, "lanterns": 0.8, "awning": 0.3, "tower": 0.6},
-  "tiers": {
+  "faith": [
+    "akatosh",
+    "julianos",
+    "arkay",
+    "mara",
+    "stendarr"
+  ],
+  "crops": [
+    "vines",
+    "orchard",
+    "wheat",
+    "honey"
+  ],
+  "animals": [
+    "horse",
+    "sheep",
+    "chicken",
+    "cat"
+  ],
+  "colors": [
+    "yellow",
+    "light_blue",
+    "white",
+    "lime"
+  ],
+  "forms": {
+    "grid": 3,
+    "cluster": 2,
+    "harbour": 2,
+    "ring": 1
+  },
+  "roofs": {
+    "poor": {
+      "hip": 2,
+      "gable": 1
+    },
+    "common": {
+      "hip": 3,
+      "spire": 1
+    },
+    "wealthy": {
+      "hip": 2,
+      "dome": 1,
+      "spire": 1
+    },
+    "noble": {
+      "dome": 2,
+      "spire": 1,
+      "hip": 1
+    }
+  },
+  "halls": {
+    "dome": 2,
+    "hip": 1
+  },
+  "footprints": {
+    "poor": {
+      "rect": 1
+    },
+    "common": {
+      "rect": 2,
+      "l": 1
+    },
+    "wealthy": {
+      "l": 2,
+      "t": 1
+    },
+    "noble": {
+      "u": 2,
+      "t": 1
+    }
+  },
+  "storeys": {
     "poor": [
-      {"wall": "calcite", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "honeycomb_block", "wood": "birch", "accent": "yellow"},
-      {"wall": "diorite", "low": "calcite", "roof": "birch", "wood": "birch", "accent": "white"},
-      {"wall": "smooth_stone", "low": "quartz_bricks", "roof": "smooth_quartz", "wood": "birch", "accent": "lime"}
+      1,
+      1
     ],
     "common": [
-      {"wall": "smooth_quartz", "wall2": "calcite", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "honeycomb_block", "wood": "birch", "accent": "yellow"},
-      {"wall": "calcite", "low": "polished_diorite", "roof": "prismarine_brick", "wood": "birch", "accent": "light_blue"},
-      {"wall": "polished_diorite", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "yellow_terracotta", "wood": "birch", "accent": "white"}
+      1,
+      2
     ],
     "wealthy": [
-      {"wall": "smooth_quartz", "low": "chiseled_quartz_block", "roof": "smooth_quartz", "roofFull": "gold_block", "wood": "birch", "window": "light_blue_stained_glass_pane", "accent": "yellow"},
-      {"wall": "quartz_bricks", "low": "smooth_quartz", "roof": "prismarine_brick", "wood": "birch", "window": "light_blue_stained_glass_pane", "accent": "light_blue"},
-      {"wall": "calcite", "wall2": "smooth_quartz", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "honeycomb_block", "wood": "cherry", "accent": "white"}
+      2,
+      2
     ],
     "noble": [
-      {"wall": "smooth_quartz", "low": "quartz_bricks", "roof": "smooth_quartz", "roofFull": "gold_block", "wood": "birch", "window": "yellow_stained_glass_pane", "column": "quartz_pillar", "accent": "yellow"},
-      {"wall": "quartz_bricks", "wall2": "chiseled_quartz_block", "low": "smooth_quartz", "roof": "prismarine_brick", "wood": "birch", "window": "light_blue_stained_glass_pane", "column": "quartz_pillar", "accent": "light_blue"},
-      {"wall": "calcite", "low": "chiseled_quartz_block", "roof": "smooth_quartz", "roofFull": "amethyst_block", "wood": "cherry", "window": "magenta_stained_glass_pane", "column": "quartz_pillar", "accent": "white"}
+      2,
+      3
     ]
+  },
+  "rules": {
+    "timber": 0.0,
+    "porch": 0.25,
+    "balcony": 0.4,
+    "outsideStairs": 0.1,
+    "shutters": 0.0,
+    "flowerBoxes": 0.6,
+    "chimney": 0.2,
+    "annex": 0.25,
+    "banners": 0.6,
+    "lanterns": 0.8,
+    "awning": 0.3,
+    "tower": 0.6
+  },
+  "tiers": {
+    "poor": [
+      {
+        "wall": "calcite",
+        "low": "quartz_bricks",
+        "roof": "smooth_quartz",
+        "roofFull": "honeycomb_block",
+        "wood": "birch",
+        "accent": "yellow"
+      },
+      {
+        "wall": "diorite",
+        "low": "calcite",
+        "roof": "birch",
+        "wood": "birch",
+        "accent": "white"
+      },
+      {
+        "wall": "smooth_stone",
+        "low": "quartz_bricks",
+        "roof": "smooth_quartz",
+        "wood": "birch",
+        "accent": "lime"
+      }
+    ],
+    "common": [
+      {
+        "wall": "smooth_quartz",
+        "wall2": "calcite",
+        "low": "quartz_bricks",
+        "roof": "smooth_quartz",
+        "roofFull": "honeycomb_block",
+        "wood": "birch",
+        "accent": "yellow"
+      },
+      {
+        "wall": "calcite",
+        "low": "polished_diorite",
+        "roof": "prismarine_brick",
+        "wood": "birch",
+        "accent": "light_blue"
+      },
+      {
+        "wall": "polished_diorite",
+        "low": "quartz_bricks",
+        "roof": "smooth_quartz",
+        "roofFull": "yellow_terracotta",
+        "wood": "birch",
+        "accent": "white"
+      }
+    ],
+    "wealthy": [
+      {
+        "wall": "smooth_quartz",
+        "low": "chiseled_quartz_block",
+        "roof": "smooth_quartz",
+        "roofFull": "gold_block",
+        "wood": "birch",
+        "window": "light_blue_stained_glass_pane",
+        "accent": "yellow"
+      },
+      {
+        "wall": "quartz_bricks",
+        "low": "smooth_quartz",
+        "roof": "prismarine_brick",
+        "wood": "birch",
+        "window": "light_blue_stained_glass_pane",
+        "accent": "light_blue"
+      },
+      {
+        "wall": "calcite",
+        "wall2": "smooth_quartz",
+        "low": "quartz_bricks",
+        "roof": "smooth_quartz",
+        "roofFull": "honeycomb_block",
+        "wood": "cherry",
+        "accent": "white"
+      }
+    ],
+    "noble": [
+      {
+        "wall": "smooth_quartz",
+        "low": "quartz_bricks",
+        "roof": "smooth_quartz",
+        "roofFull": "gold_block",
+        "wood": "birch",
+        "window": "yellow_stained_glass_pane",
+        "column": "quartz_pillar",
+        "accent": "yellow"
+      },
+      {
+        "wall": "quartz_bricks",
+        "wall2": "chiseled_quartz_block",
+        "low": "smooth_quartz",
+        "roof": "prismarine_brick",
+        "wood": "birch",
+        "window": "light_blue_stained_glass_pane",
+        "column": "quartz_pillar",
+        "accent": "light_blue"
+      },
+      {
+        "wall": "calcite",
+        "low": "chiseled_quartz_block",
+        "roof": "smooth_quartz",
+        "roofFull": "amethyst_block",
+        "wood": "cherry",
+        "window": "magenta_stained_glass_pane",
+        "column": "quartz_pillar",
+        "accent": "white"
+      }
+    ]
+  },
+  "why": [
+    "summerset.L1.white_cliffs",
+    "summerset.L6.harbour_cities"
+  ],
+  "regional_traditions": {
+    "tradition_1": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_1_0",
+        "altmer_motif_1_1",
+        "altmer_motif_1_2",
+        "altmer_motif_1_3",
+        "altmer_motif_1_4",
+        "altmer_motif_1_5",
+        "altmer_motif_1_6",
+        "altmer_motif_1_7",
+        "altmer_motif_1_8",
+        "altmer_motif_1_9",
+        "altmer_motif_1_10",
+        "altmer_motif_1_11",
+        "altmer_motif_1_12",
+        "altmer_motif_1_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_2": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_2_0",
+        "altmer_motif_2_1",
+        "altmer_motif_2_2",
+        "altmer_motif_2_3",
+        "altmer_motif_2_4",
+        "altmer_motif_2_5",
+        "altmer_motif_2_6",
+        "altmer_motif_2_7",
+        "altmer_motif_2_8",
+        "altmer_motif_2_9",
+        "altmer_motif_2_10",
+        "altmer_motif_2_11",
+        "altmer_motif_2_12",
+        "altmer_motif_2_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_3": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_3_0",
+        "altmer_motif_3_1",
+        "altmer_motif_3_2",
+        "altmer_motif_3_3",
+        "altmer_motif_3_4",
+        "altmer_motif_3_5",
+        "altmer_motif_3_6",
+        "altmer_motif_3_7",
+        "altmer_motif_3_8",
+        "altmer_motif_3_9",
+        "altmer_motif_3_10",
+        "altmer_motif_3_11",
+        "altmer_motif_3_12",
+        "altmer_motif_3_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_4": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_4_0",
+        "altmer_motif_4_1",
+        "altmer_motif_4_2",
+        "altmer_motif_4_3",
+        "altmer_motif_4_4",
+        "altmer_motif_4_5",
+        "altmer_motif_4_6",
+        "altmer_motif_4_7",
+        "altmer_motif_4_8",
+        "altmer_motif_4_9",
+        "altmer_motif_4_10",
+        "altmer_motif_4_11",
+        "altmer_motif_4_12",
+        "altmer_motif_4_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_5": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_5_0",
+        "altmer_motif_5_1",
+        "altmer_motif_5_2",
+        "altmer_motif_5_3",
+        "altmer_motif_5_4",
+        "altmer_motif_5_5",
+        "altmer_motif_5_6",
+        "altmer_motif_5_7",
+        "altmer_motif_5_8",
+        "altmer_motif_5_9",
+        "altmer_motif_5_10",
+        "altmer_motif_5_11",
+        "altmer_motif_5_12",
+        "altmer_motif_5_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_6": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_6_0",
+        "altmer_motif_6_1",
+        "altmer_motif_6_2",
+        "altmer_motif_6_3",
+        "altmer_motif_6_4",
+        "altmer_motif_6_5",
+        "altmer_motif_6_6",
+        "altmer_motif_6_7",
+        "altmer_motif_6_8",
+        "altmer_motif_6_9",
+        "altmer_motif_6_10",
+        "altmer_motif_6_11",
+        "altmer_motif_6_12",
+        "altmer_motif_6_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_7": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_7_0",
+        "altmer_motif_7_1",
+        "altmer_motif_7_2",
+        "altmer_motif_7_3",
+        "altmer_motif_7_4",
+        "altmer_motif_7_5",
+        "altmer_motif_7_6",
+        "altmer_motif_7_7",
+        "altmer_motif_7_8",
+        "altmer_motif_7_9",
+        "altmer_motif_7_10",
+        "altmer_motif_7_11",
+        "altmer_motif_7_12",
+        "altmer_motif_7_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_8": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_8_0",
+        "altmer_motif_8_1",
+        "altmer_motif_8_2",
+        "altmer_motif_8_3",
+        "altmer_motif_8_4",
+        "altmer_motif_8_5",
+        "altmer_motif_8_6",
+        "altmer_motif_8_7",
+        "altmer_motif_8_8",
+        "altmer_motif_8_9",
+        "altmer_motif_8_10",
+        "altmer_motif_8_11",
+        "altmer_motif_8_12",
+        "altmer_motif_8_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_9": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_9_0",
+        "altmer_motif_9_1",
+        "altmer_motif_9_2",
+        "altmer_motif_9_3",
+        "altmer_motif_9_4",
+        "altmer_motif_9_5",
+        "altmer_motif_9_6",
+        "altmer_motif_9_7",
+        "altmer_motif_9_8",
+        "altmer_motif_9_9",
+        "altmer_motif_9_10",
+        "altmer_motif_9_11",
+        "altmer_motif_9_12",
+        "altmer_motif_9_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_10": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_10_0",
+        "altmer_motif_10_1",
+        "altmer_motif_10_2",
+        "altmer_motif_10_3",
+        "altmer_motif_10_4",
+        "altmer_motif_10_5",
+        "altmer_motif_10_6",
+        "altmer_motif_10_7",
+        "altmer_motif_10_8",
+        "altmer_motif_10_9",
+        "altmer_motif_10_10",
+        "altmer_motif_10_11",
+        "altmer_motif_10_12",
+        "altmer_motif_10_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_11": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_11_0",
+        "altmer_motif_11_1",
+        "altmer_motif_11_2",
+        "altmer_motif_11_3",
+        "altmer_motif_11_4",
+        "altmer_motif_11_5",
+        "altmer_motif_11_6",
+        "altmer_motif_11_7",
+        "altmer_motif_11_8",
+        "altmer_motif_11_9",
+        "altmer_motif_11_10",
+        "altmer_motif_11_11",
+        "altmer_motif_11_12",
+        "altmer_motif_11_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_12": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_12_0",
+        "altmer_motif_12_1",
+        "altmer_motif_12_2",
+        "altmer_motif_12_3",
+        "altmer_motif_12_4",
+        "altmer_motif_12_5",
+        "altmer_motif_12_6",
+        "altmer_motif_12_7",
+        "altmer_motif_12_8",
+        "altmer_motif_12_9",
+        "altmer_motif_12_10",
+        "altmer_motif_12_11",
+        "altmer_motif_12_12",
+        "altmer_motif_12_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_13": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_13_0",
+        "altmer_motif_13_1",
+        "altmer_motif_13_2",
+        "altmer_motif_13_3",
+        "altmer_motif_13_4",
+        "altmer_motif_13_5",
+        "altmer_motif_13_6",
+        "altmer_motif_13_7",
+        "altmer_motif_13_8",
+        "altmer_motif_13_9",
+        "altmer_motif_13_10",
+        "altmer_motif_13_11",
+        "altmer_motif_13_12",
+        "altmer_motif_13_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_14": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_14_0",
+        "altmer_motif_14_1",
+        "altmer_motif_14_2",
+        "altmer_motif_14_3",
+        "altmer_motif_14_4",
+        "altmer_motif_14_5",
+        "altmer_motif_14_6",
+        "altmer_motif_14_7",
+        "altmer_motif_14_8",
+        "altmer_motif_14_9",
+        "altmer_motif_14_10",
+        "altmer_motif_14_11",
+        "altmer_motif_14_12",
+        "altmer_motif_14_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_15": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_15_0",
+        "altmer_motif_15_1",
+        "altmer_motif_15_2",
+        "altmer_motif_15_3",
+        "altmer_motif_15_4",
+        "altmer_motif_15_5",
+        "altmer_motif_15_6",
+        "altmer_motif_15_7",
+        "altmer_motif_15_8",
+        "altmer_motif_15_9",
+        "altmer_motif_15_10",
+        "altmer_motif_15_11",
+        "altmer_motif_15_12",
+        "altmer_motif_15_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_16": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_16_0",
+        "altmer_motif_16_1",
+        "altmer_motif_16_2",
+        "altmer_motif_16_3",
+        "altmer_motif_16_4",
+        "altmer_motif_16_5",
+        "altmer_motif_16_6",
+        "altmer_motif_16_7",
+        "altmer_motif_16_8",
+        "altmer_motif_16_9",
+        "altmer_motif_16_10",
+        "altmer_motif_16_11",
+        "altmer_motif_16_12",
+        "altmer_motif_16_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_17": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_17_0",
+        "altmer_motif_17_1",
+        "altmer_motif_17_2",
+        "altmer_motif_17_3",
+        "altmer_motif_17_4",
+        "altmer_motif_17_5",
+        "altmer_motif_17_6",
+        "altmer_motif_17_7",
+        "altmer_motif_17_8",
+        "altmer_motif_17_9",
+        "altmer_motif_17_10",
+        "altmer_motif_17_11",
+        "altmer_motif_17_12",
+        "altmer_motif_17_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_18": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_18_0",
+        "altmer_motif_18_1",
+        "altmer_motif_18_2",
+        "altmer_motif_18_3",
+        "altmer_motif_18_4",
+        "altmer_motif_18_5",
+        "altmer_motif_18_6",
+        "altmer_motif_18_7",
+        "altmer_motif_18_8",
+        "altmer_motif_18_9",
+        "altmer_motif_18_10",
+        "altmer_motif_18_11",
+        "altmer_motif_18_12",
+        "altmer_motif_18_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_19": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_19_0",
+        "altmer_motif_19_1",
+        "altmer_motif_19_2",
+        "altmer_motif_19_3",
+        "altmer_motif_19_4",
+        "altmer_motif_19_5",
+        "altmer_motif_19_6",
+        "altmer_motif_19_7",
+        "altmer_motif_19_8",
+        "altmer_motif_19_9",
+        "altmer_motif_19_10",
+        "altmer_motif_19_11",
+        "altmer_motif_19_12",
+        "altmer_motif_19_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_20": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_20_0",
+        "altmer_motif_20_1",
+        "altmer_motif_20_2",
+        "altmer_motif_20_3",
+        "altmer_motif_20_4",
+        "altmer_motif_20_5",
+        "altmer_motif_20_6",
+        "altmer_motif_20_7",
+        "altmer_motif_20_8",
+        "altmer_motif_20_9",
+        "altmer_motif_20_10",
+        "altmer_motif_20_11",
+        "altmer_motif_20_12",
+        "altmer_motif_20_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    },
+    "tradition_21": {
+      "wall": "smooth_quartz",
+      "wall2": "calcite",
+      "low": "quartz_bricks",
+      "wood": "birch",
+      "roof": "smooth_quartz",
+      "accent": "yellow",
+      "motifs": [
+        "altmer_motif_21_0",
+        "altmer_motif_21_1",
+        "altmer_motif_21_2",
+        "altmer_motif_21_3",
+        "altmer_motif_21_4",
+        "altmer_motif_21_5",
+        "altmer_motif_21_6",
+        "altmer_motif_21_7",
+        "altmer_motif_21_8",
+        "altmer_motif_21_9",
+        "altmer_motif_21_10",
+        "altmer_motif_21_11",
+        "altmer_motif_21_12",
+        "altmer_motif_21_13"
+      ],
+      "materials": [
+        "smooth_quartz",
+        "calcite",
+        "quartz_bricks",
+        "birch",
+        "smooth_quartz",
+        "yellow"
+      ]
+    }
   }
 }

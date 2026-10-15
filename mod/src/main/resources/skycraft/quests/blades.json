@@ -3,38 +3,123 @@
   "category": "faction",
   "faction": "blades",
   "region": "cyrodiil/jerall_mountains",
-  "speakers": {"narrator": "Narrator", "akaviri_ghost": "Ghost of the Dragonguard"},
+  "speakers": {
+    "narrator": "Narrator",
+    "akaviri_ghost": "Ghost of the Dragonguard"
+  },
   "places": {
-    "applewatch": {"x": 1180, "z": 3260, "r": 30, "name": "Applewatch"},
-    "pale_pass": {"x": 1230, "z": 2700, "r": 40, "name": "Pale Pass"},
-    "dragonclaw_rock": {"x": 1760, "z": 2760, "r": 34, "name": "Dragonclaw Rock"}
+    "applewatch": {
+      "x": 1180,
+      "z": 3260,
+      "r": 30,
+      "name": "Applewatch"
+    },
+    "pale_pass": {
+      "x": 1230,
+      "z": 2700,
+      "r": 40,
+      "name": "Pale Pass"
+    },
+    "dragonclaw_rock": {
+      "x": 1760,
+      "z": 2760,
+      "r": 34,
+      "name": "Dragonclaw Rock"
+    }
   },
   "npcs": [
-    {"id": "gaius_eruvan", "name": "Captain Gaius Eruvan", "role": "adventurer", "place": "bruma", "offset": [6, -8], "hall": "blades",
-     "greet": "Officially, the Blades were disbanded and there's nobody up here but an old man and some goats. Unofficially, mind your step on the ice."},
-    {"id": "ilvia_tarn", "name": "Ilvia Tarn", "role": "scholar", "place": "bruma", "offset": [9, -6], "female": true, "hall": "blades",
-     "greet": "The Akaviri left us their swords, their walls and their oaths. I keep all three dusted. Mostly the oaths."},
-    {"id": "tavia_orrin", "name": "Tavia Orrin", "role": "farmer", "place": "applewatch", "offset": [3, 2], "female": true,
-     "greet": "I'm a farmer. I grow apples. Whatever you think I used to be, I'm not that any more."}
+    {
+      "id": "gaius_eruvan",
+      "name": "Captain Gaius Eruvan",
+      "role": "adventurer",
+      "place": "bruma",
+      "offset": [
+        6,
+        -8
+      ],
+      "hall": "blades",
+      "greet": "Officially, the Blades were disbanded and there's nobody up here but an old man and some goats. Unofficially, mind your step on the ice."
+    },
+    {
+      "id": "ilvia_tarn",
+      "name": "Ilvia Tarn",
+      "role": "scholar",
+      "place": "bruma",
+      "offset": [
+        9,
+        -6
+      ],
+      "female": true,
+      "hall": "blades",
+      "greet": "The Akaviri left us their swords, their walls and their oaths. I keep all three dusted. Mostly the oaths."
+    },
+    {
+      "id": "tavia_orrin",
+      "name": "Tavia Orrin",
+      "role": "farmer",
+      "place": "applewatch",
+      "offset": [
+        3,
+        2
+      ],
+      "female": true,
+      "greet": "I'm a farmer. I grow apples. Whatever you think I used to be, I'm not that any more."
+    }
   ],
   "relics": [
-    {"id": "eruvan_token", "name": "Dragon-Eye Token", "desc": "A worn bronze disc with an Akaviri dragon's eye. Proof that the Blades sent you.", "icon": 26},
-    {"id": "akaviri_katana", "name": "Dragonguard Katana", "desc": "An Akaviri blade from the fall of Pale Pass. The steel is still bright under centuries of frost.", "icon": 21},
-    {"id": "justiciar_hunt_list", "name": "Thalmor Dossier", "desc": "Names of retired Blades across Cyrodiil, with notes on their families and habits, in Aldmeri script.", "icon": 11}
+    {
+      "id": "eruvan_token",
+      "name": "Dragon-Eye Token",
+      "desc": "A worn bronze disc with an Akaviri dragon's eye. Proof that the Blades sent you.",
+      "icon": 26
+    },
+    {
+      "id": "akaviri_katana",
+      "name": "Dragonguard Katana",
+      "desc": "An Akaviri blade from the fall of Pale Pass. The steel is still bright under centuries of frost.",
+      "icon": 21
+    },
+    {
+      "id": "justiciar_hunt_list",
+      "name": "Thalmor Dossier",
+      "desc": "Names of retired Blades across Cyrodiil, with notes on their families and habits, in Aldmeri script.",
+      "icon": 11
+    }
   ],
   "scenes": {
     "bl_oath": [
-      ["narrator", "Cloud Ruler Temple sits on its cliff above Bruma, snow on its curved Akaviri roofs. In the great hall, a single brazier burns before the dragon banner."],
-      ["gaius_eruvan", "We don't have an Emperor to guard. We have a world full of dragons and a Dominion that wants us dead. That will have to do."],
-      ["gaius_eruvan", "Swear to watch the sky and keep the old oath, and you are one of us. Few enough are left to hear it."]
+      [
+        "narrator",
+        "Cloud Ruler Temple sits on its cliff above Bruma, snow on its curved Akaviri roofs. In the great hall, a single brazier burns before the dragon banner."
+      ],
+      [
+        "gaius_eruvan",
+        "We don't have an Emperor to guard. We have a world full of dragons and a Dominion that wants us dead. That will have to do."
+      ],
+      [
+        "gaius_eruvan",
+        "Swear to watch the sky and keep the old oath, and you are one of us. Few enough are left to hear it."
+      ]
     ],
     "bl_pale_pass": [
-      ["narrator", "At the heart of Pale Pass, frost ghosts gather around an armoured figure kneeling over a sword. It rises as you approach."],
-      ["akaviri_ghost", "We held this pass for a lord who never came. If you carry his oath, take the blade and earn it."]
+      [
+        "narrator",
+        "At the heart of Pale Pass, frost ghosts gather around an armoured figure kneeling over a sword. It rises as you approach."
+      ],
+      [
+        "akaviri_ghost",
+        "We held this pass for a lord who never came. If you carry his oath, take the blade and earn it."
+      ]
     ],
     "bl_dragon_letter": [
-      ["delphine", "Eruvan. Dragons over Skyrim, and now over the Jerall. Esbern says the old sky-watch signs are true. Watch your peaks."],
-      ["esbern", "And tell your new recruit that a dragon is not killed by courage alone. Take the head, take the wing, and do not stand in front of it."]
+      [
+        "delphine",
+        "Eruvan. Dragons over Skyrim, and now over the Jerall. Esbern says the old sky-watch signs are true. Watch your peaks."
+      ],
+      [
+        "esbern",
+        "And tell your new recruit that a dragon is not killed by courage alone. Take the head, take the wing, and do not stand in front of it."
+      ]
     ]
   },
   "quests": [
@@ -42,137 +127,434 @@
       "id": "bl_invitation",
       "title": "An Invitation to Cloud Ruler",
       "start": "npc:gaius_eruvan",
-      "requires": ["!faction:blades", "!faction:thalmor", "!faction:aldmeri_dominion", "level:10"],
+      "requires": [
+        "!faction:blades",
+        "!faction:thalmor",
+        "!faction:aldmeri_dominion",
+        "level:10"
+      ],
       "offer": "People in Bruma say you're more than a retired soldier.",
       "pitch": "People in Bruma talk too much. But you're no Thalmor, I can see that much. There's a troll pack on the road to the temple that's killed two of our couriers. Clear it, bring back this token from the courier's satchel, and I'll show you what Cloud Ruler still is.",
       "desc": "Captain Gaius Eruvan, who keeps Cloud Ruler Temple above Bruma, hinted that the Blades still exist. To earn an invitation, I must clear the trolls that killed his couriers on the mountain road.",
       "objectives": [
-        {"type": "clear", "place": "bruma", "offset": [220, -260], "text": "Kill the trolls on the road to Cloud Ruler Temple",
-         "spawn": [{"type": "skycraft:troll", "count": 2, "name": "Frost Troll", "hp": 1.4}]},
-        {"type": "retrieve", "place": "bruma", "offset": [220, -260], "relic": "eruvan_token", "radius": 10, "text": "Recover the courier's token"},
-        {"type": "deliver", "npc": "gaius_eruvan", "relic": "eruvan_token", "text": "Bring the token to Gaius Eruvan at Cloud Ruler Temple",
-         "topic": "The trolls are dead. Your courier carried this.",
-         "reply": "He was a good lad. Thank you for bringing it home. Come inside. It's time you heard the oath.",
-         "actions": "scene:bl_oath"}
+        {
+          "type": "clear",
+          "place": "bruma",
+          "offset": [
+            220,
+            -260
+          ],
+          "text": "Kill the trolls on the road to Cloud Ruler Temple",
+          "spawn": [
+            {
+              "type": "skycraft:troll",
+              "count": 2,
+              "name": "Frost Troll",
+              "hp": 1.4
+            }
+          ]
+        },
+        {
+          "type": "retrieve",
+          "place": "bruma",
+          "offset": [
+            220,
+            -260
+          ],
+          "relic": "eruvan_token",
+          "radius": 10,
+          "text": "Recover the courier's token"
+        },
+        {
+          "type": "deliver",
+          "npc": "gaius_eruvan",
+          "relic": "eruvan_token",
+          "text": "Bring the token to Gaius Eruvan at Cloud Ruler Temple",
+          "topic": "The trolls are dead. Your courier carried this.",
+          "reply": "He was a good lad. Thank you for bringing it home. Come inside. It's time you heard the oath.",
+          "actions": "scene:bl_oath"
+        }
       ],
       "outro": "I swore the old oath of the Blades at Cloud Ruler Temple. The order is small and hidden, but it is not gone.",
-      "rewards": {"gold": 200, "join": true, "items": ["skycraft:blades_chestplate"]}
+      "rewards": {
+        "gold": 200,
+        "join": true,
+        "items": [
+          "skycraft:blades_chestplate"
+        ]
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
     },
     {
       "id": "bl_dragonguard_legacy",
       "title": "The Dragonguard's Legacy",
       "start": "auto",
-      "requires": ["quest:bl_invitation|faction:blades"],
+      "requires": [
+        "quest:bl_invitation|faction:blades"
+      ],
       "desc": "Ilvia Tarn, Cloud Ruler's archivist, insists every new Blade learns where the order came from before learning anything else.",
       "objectives": [
-        {"type": "talk", "npc": "ilvia_tarn", "text": "Speak with Ilvia Tarn in the archive",
-         "topic": "Eruvan says you're to teach me.",
-         "reply": "Then a question to start. When the Akaviri came over the Jerall and Reman Cyrodiil met them at Pale Pass, what turned a war into an oath?"},
-        {"type": "talk", "npc": "ilvia_tarn", "text": "Answer Ilvia's question",
-         "choices": [
-           {"label": "They recognised him as Dragonborn.", "reply": "Exactly. They had come hunting dragons and found a man with the blood of one. They knelt, and their swords became his guard. That is where we begin.", "actions": "flag:bl_lore_right"},
-           {"label": "Reman paid them better than their own lords.", "reply": "A soldier's guess, and wrong. They saw the dragon in his blood and swore to him. Gold never bought the Dragonguard. Remember that.", "actions": "flag:bl_lore_wrong"}
-         ]},
-        {"type": "wait", "hours": 4, "text": "Study the Akaviri records with Ilvia"},
-        {"type": "talk", "npc": "ilvia_tarn", "text": "Finish your lessons with Ilvia",
-         "topic": "I've read the records.",
-         "reply": "Good. Now you know why the Thalmor fear us and why dragons should. Go and see the Captain. He has real work for you."}
+        {
+          "type": "talk",
+          "npc": "ilvia_tarn",
+          "text": "Speak with Ilvia Tarn in the archive",
+          "topic": "Eruvan says you're to teach me.",
+          "reply": "Then a question to start. When the Akaviri came over the Jerall and Reman Cyrodiil met them at Pale Pass, what turned a war into an oath?"
+        },
+        {
+          "type": "talk",
+          "npc": "ilvia_tarn",
+          "text": "Answer Ilvia's question",
+          "choices": [
+            {
+              "label": "They recognised him as Dragonborn.",
+              "reply": "Exactly. They had come hunting dragons and found a man with the blood of one. They knelt, and their swords became his guard. That is where we begin.",
+              "actions": "flag:bl_lore_right"
+            },
+            {
+              "label": "Reman paid them better than their own lords.",
+              "reply": "A soldier's guess, and wrong. They saw the dragon in his blood and swore to him. Gold never bought the Dragonguard. Remember that.",
+              "actions": "flag:bl_lore_wrong"
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "hours": 4,
+          "text": "Study the Akaviri records with Ilvia"
+        },
+        {
+          "type": "talk",
+          "npc": "ilvia_tarn",
+          "text": "Finish your lessons with Ilvia",
+          "topic": "I've read the records.",
+          "reply": "Good. Now you know why the Thalmor fear us and why dragons should. Go and see the Captain. He has real work for you."
+        }
       ],
       "outro": "Ilvia Tarn taught me the history of the Blades, from the Akaviri Dragonguard at Pale Pass to the order's long years of service.",
-      "rewards": {"gold": 200, "faction_points": 2, "items": ["skycraft:akaviri_dagger"]}
+      "rewards": {
+        "gold": 200,
+        "faction_points": 2,
+        "items": [
+          "skycraft:akaviri_dagger"
+        ]
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
     },
     {
       "id": "bl_justiciars_in_the_snow",
       "title": "Justiciars in the Snow",
       "start": "npc:gaius_eruvan",
-      "requires": ["quest:bl_dragonguard_legacy"],
+      "requires": [
+        "quest:bl_dragonguard_legacy"
+      ],
       "offer": "Ilvia says you have something for me.",
       "pitch": "Tavia Orrin served with me for twenty years. Now she grows apples at Applewatch, and the Thalmor have found her. Justiciars are on the road. Get there first, and bring her here where the walls are thick.",
       "desc": "Thalmor Justiciars are hunting a former Blade, Tavia Orrin, who lives quietly at Applewatch west of Bruma. Captain Eruvan sent me to save her.",
       "objectives": [
-        {"type": "go", "place": "applewatch", "text": "Hurry to Applewatch"},
-        {"type": "clear", "place": "applewatch", "text": "Kill the Thalmor agents surrounding the farm",
-         "spawn": [{"type": "npc:thalmor", "count": 3, "name": "Thalmor Agent", "hostile": true}]},
-        {"type": "kill", "place": "applewatch", "text": "Kill Justiciar Aranwe",
-         "spawn": [{"type": "npc:thalmor", "name": "Justiciar Aranwe", "target": true, "boss": true, "hp": 2.5, "dmg": 1.4, "hostile": true}],
-         "actions": "relic:justiciar_hunt_list",
-         "journal": "The Justiciar carried a dossier with Tavia's name on it, and a dozen more. Some of those names were struck through already."},
-        {"type": "escort", "npc": "tavia_orrin", "place": "bruma", "text": "Bring Tavia Orrin to Cloud Ruler Temple"},
-        {"type": "deliver", "npc": "gaius_eruvan", "relic": "justiciar_hunt_list", "text": "Give Eruvan the Thalmor dossier",
-         "topic": "Tavia is safe. The Justiciar carried a list of every Blade they know about.",
-         "reply": "Then we've got their list, and they've lost their hunter. I'll send warnings to the ones still living. Tavia stays here. Gods, it's good to see her.",
-         "actions": "relocate:tavia_orrin:bruma:8:-10"}
+        {
+          "type": "go",
+          "place": "applewatch",
+          "text": "Hurry to Applewatch"
+        },
+        {
+          "type": "clear",
+          "place": "applewatch",
+          "text": "Kill the Thalmor agents surrounding the farm",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 3,
+              "name": "Thalmor Agent",
+              "hostile": true
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "applewatch",
+          "text": "Kill Justiciar Aranwe",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "name": "Justiciar Aranwe",
+              "target": true,
+              "boss": true,
+              "hp": 2.5,
+              "dmg": 1.4,
+              "hostile": true
+            }
+          ],
+          "actions": "relic:justiciar_hunt_list",
+          "journal": "The Justiciar carried a dossier with Tavia's name on it, and a dozen more. Some of those names were struck through already."
+        },
+        {
+          "type": "escort",
+          "npc": "tavia_orrin",
+          "place": "bruma",
+          "text": "Bring Tavia Orrin to Cloud Ruler Temple"
+        },
+        {
+          "type": "deliver",
+          "npc": "gaius_eruvan",
+          "relic": "justiciar_hunt_list",
+          "text": "Give Eruvan the Thalmor dossier",
+          "topic": "Tavia is safe. The Justiciar carried a list of every Blade they know about.",
+          "reply": "Then we've got their list, and they've lost their hunter. I'll send warnings to the ones still living. Tavia stays here. Gods, it's good to see her.",
+          "actions": "relocate:tavia_orrin:bruma:8:-10"
+        }
       ],
       "outro": "I killed a Thalmor Justiciar at Applewatch and brought Tavia Orrin to Cloud Ruler, along with the Dominion's list of hunted Blades.",
-      "rewards": {"gold": 500, "faction_points": 2}
+      "rewards": {
+        "gold": 500,
+        "faction_points": 2
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
     },
     {
       "id": "bl_blade_of_pale_pass",
       "title": "The Blade of Pale Pass",
       "start": "npc:ilvia_tarn",
-      "requires": ["quest:bl_justiciars_in_the_snow"],
+      "requires": [
+        "quest:bl_justiciars_in_the_snow"
+      ],
       "offer": "Is there anything left of the Dragonguard at Pale Pass?",
       "pitch": "More than anyone admits. The old fort is full of frost and restless dead, and in its heart lies a Dragonguard blade no Blade has carried since the order was young. Bring it home. A Blade should carry a true Akaviri sword.",
       "desc": "Ilvia Tarn sent me to Pale Pass, the Akaviri fortress high in the Jerall Mountains, to recover a Dragonguard katana from the dead who still guard it.",
       "objectives": [
-        {"type": "go", "place": "pale_pass", "text": "Climb to Pale Pass"},
-        {"type": "clear", "place": "pale_pass", "placement": "structure", "text": "Fight through the frozen dead of Pale Pass",
-         "spawn": [{"type": "minecraft:skeleton", "count": 3, "name": "Akaviri Revenant"}, {"type": "skycraft:ice_wraith", "count": 2}]},
-        {"type": "kill", "place": "pale_pass", "placement": "structure", "text": "Defeat the ghost of the Dragonguard commander",
-         "spawn": [{"type": "skycraft:draugr_deathlord", "name": "Ghost of the Dragonguard", "target": true, "boss": true, "hp": 3.0, "dmg": 1.4, "weapon": "skycraft:akaviri_sword"}],
-         "actions": "scene:bl_pale_pass"},
-        {"type": "retrieve", "place": "pale_pass", "relic": "akaviri_katana", "radius": 10, "text": "Take the Dragonguard katana"},
-        {"type": "deliver", "npc": "ilvia_tarn", "relic": "akaviri_katana", "text": "Bring the katana to Ilvia Tarn",
-         "topic": "The ghost let me take it, once I'd earned it.",
-         "reply": "Look at the steel. Nearly two thousand years in the ice and not a fleck of rust. It's yours now. Carry it the way they did."}
+        {
+          "type": "go",
+          "place": "pale_pass",
+          "text": "Climb to Pale Pass"
+        },
+        {
+          "type": "clear",
+          "place": "pale_pass",
+          "placement": "structure",
+          "text": "Fight through the frozen dead of Pale Pass",
+          "spawn": [
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "name": "Akaviri Revenant"
+            },
+            {
+              "type": "skycraft:ice_wraith",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "pale_pass",
+          "placement": "structure",
+          "text": "Defeat the ghost of the Dragonguard commander",
+          "spawn": [
+            {
+              "type": "skycraft:draugr_deathlord",
+              "name": "Ghost of the Dragonguard",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.4,
+              "weapon": "skycraft:akaviri_sword"
+            }
+          ],
+          "actions": "scene:bl_pale_pass"
+        },
+        {
+          "type": "retrieve",
+          "place": "pale_pass",
+          "relic": "akaviri_katana",
+          "radius": 10,
+          "text": "Take the Dragonguard katana"
+        },
+        {
+          "type": "deliver",
+          "npc": "ilvia_tarn",
+          "relic": "akaviri_katana",
+          "text": "Bring the katana to Ilvia Tarn",
+          "topic": "The ghost let me take it, once I'd earned it.",
+          "reply": "Look at the steel. Nearly two thousand years in the ice and not a fleck of rust. It's yours now. Carry it the way they did."
+        }
       ],
       "outro": "I recovered a Dragonguard katana from Pale Pass. Ilvia had it polished and bound, and returned it to me as a Blade's sword.",
-      "rewards": {"gold": 400, "faction_points": 3,
-                  "items": [{"item": "skycraft:akaviri_sword", "name": "Pale Pass Katana", "enchant": {"sharpness": 3, "unbreaking": 3}}]}
+      "rewards": {
+        "gold": 400,
+        "faction_points": 3,
+        "items": [
+          {
+            "item": "skycraft:akaviri_sword",
+            "name": "Pale Pass Katana",
+            "enchant": {
+              "sharpness": 3,
+              "unbreaking": 3
+            }
+          }
+        ]
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
     },
     {
       "id": "bl_sky_watch",
       "title": "Watchers of the Sky",
       "start": "auto",
-      "requires": ["quest:bl_blade_of_pale_pass"],
+      "requires": [
+        "quest:bl_blade_of_pale_pass"
+      ],
       "desc": "A letter has come from Skyrim, from Delphine and Esbern: dragons are returning. Captain Eruvan wants the old sky-watch at Dragonclaw Rock manned, and a dragon was seen circling it already.",
       "objectives": [
-        {"type": "talk", "npc": "gaius_eruvan", "text": "Hear the news from Skyrim",
-         "topic": "You've had word from Skyrim?",
-         "reply": "From Delphine and old Esbern, both. Listen.",
-         "actions": "scene:bl_dragon_letter"},
-        {"type": "go", "place": "dragonclaw_rock", "text": "Climb to the sky-watch at Dragonclaw Rock"},
-        {"type": "kill", "place": "dragonclaw_rock", "text": "Slay the dragon circling Dragonclaw Rock",
-         "spawn": [{"type": "skycraft:dragon", "name": "Jerall Wyrm", "target": true, "boss": true, "hp": 1.5}],
-         "journal": "The dragon came down out of the cloud like a falling house. Esbern's advice was sound. I took the wing first."},
-        {"type": "talk", "npc": "gaius_eruvan", "text": "Report to Captain Eruvan",
-         "topic": "The dragon at Dragonclaw Rock is dead.",
-         "reply": "A Blade killing a dragon in the Jerall. It hasn't happened since the Dragonguard came over the mountains. Then let's do it properly, and light the watch again."}
+        {
+          "type": "talk",
+          "npc": "gaius_eruvan",
+          "text": "Hear the news from Skyrim",
+          "topic": "You've had word from Skyrim?",
+          "reply": "From Delphine and old Esbern, both. Listen.",
+          "actions": "scene:bl_dragon_letter"
+        },
+        {
+          "type": "go",
+          "place": "dragonclaw_rock",
+          "text": "Climb to the sky-watch at Dragonclaw Rock"
+        },
+        {
+          "type": "kill",
+          "place": "dragonclaw_rock",
+          "text": "Slay the dragon circling Dragonclaw Rock",
+          "spawn": [
+            {
+              "type": "skycraft:dragon",
+              "name": "Jerall Wyrm",
+              "target": true,
+              "boss": true,
+              "hp": 1.5
+            }
+          ],
+          "journal": "The dragon came down out of the cloud like a falling house. Esbern's advice was sound. I took the wing first."
+        },
+        {
+          "type": "talk",
+          "npc": "gaius_eruvan",
+          "text": "Report to Captain Eruvan",
+          "topic": "The dragon at Dragonclaw Rock is dead.",
+          "reply": "A Blade killing a dragon in the Jerall. It hasn't happened since the Dragonguard came over the mountains. Then let's do it properly, and light the watch again."
+        }
       ],
       "outro": "I killed a dragon at Dragonclaw Rock, the old sky-watch above Bruma. Captain Eruvan means to restore the full watch.",
-      "rewards": {"gold": 700, "faction_points": 3}
+      "rewards": {
+        "gold": 700,
+        "faction_points": 3
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
     },
     {
       "id": "bl_watch_restored",
       "title": "The Watch Restored",
       "start": "auto",
-      "requires": ["quest:bl_sky_watch"],
+      "requires": [
+        "quest:bl_sky_watch"
+      ],
       "desc": "Captain Eruvan wants the beacon on Dragonclaw Rock lit again for the first time in two hundred years. The Thalmor will see it too, and they have sent a strike team to stop it.",
       "objectives": [
-        {"type": "go", "place": "dragonclaw_rock", "offset": [10, -6], "radius": 8, "text": "Relight the sky-watch beacon on Dragonclaw Rock", "actions": "summon:gaius_eruvan"},
-        {"type": "clear", "place": "dragonclaw_rock", "text": "Hold the beacon against the Thalmor strike team",
-         "spawn": [{"type": "npc:thalmor", "count": 4, "name": "Thalmor Soldier", "hostile": true},
-                   {"type": "skycraft:storm_atronach", "name": "Bound Storm Atronach"}]},
-        {"type": "kill", "place": "dragonclaw_rock", "text": "Kill the Thalmor commander, Justiciar Taarion",
-         "spawn": [{"type": "npc:thalmor", "name": "Justiciar Taarion", "target": true, "boss": true, "hp": 3.0, "dmg": 1.5, "hostile": true, "weapon": "skycraft:elven_sword"}]},
-        {"type": "talk", "npc": "gaius_eruvan", "text": "Stand watch with Captain Eruvan",
-         "topic": "The beacon is lit, and the Thalmor are dead.",
-         "reply": "Look at it burn. Every Blade still alive in Cyrodiil will see that, and know where to come. You did this. From tonight, you're Knight-Commander of Cloud Ruler."}
+        {
+          "type": "go",
+          "place": "dragonclaw_rock",
+          "offset": [
+            10,
+            -6
+          ],
+          "radius": 8,
+          "text": "Relight the sky-watch beacon on Dragonclaw Rock",
+          "actions": "summon:gaius_eruvan"
+        },
+        {
+          "type": "clear",
+          "place": "dragonclaw_rock",
+          "text": "Hold the beacon against the Thalmor strike team",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "count": 4,
+              "name": "Thalmor Soldier",
+              "hostile": true
+            },
+            {
+              "type": "skycraft:storm_atronach",
+              "name": "Bound Storm Atronach"
+            }
+          ]
+        },
+        {
+          "type": "kill",
+          "place": "dragonclaw_rock",
+          "text": "Kill the Thalmor commander, Justiciar Taarion",
+          "spawn": [
+            {
+              "type": "npc:thalmor",
+              "name": "Justiciar Taarion",
+              "target": true,
+              "boss": true,
+              "hp": 3.0,
+              "dmg": 1.5,
+              "hostile": true,
+              "weapon": "skycraft:elven_sword"
+            }
+          ]
+        },
+        {
+          "type": "talk",
+          "npc": "gaius_eruvan",
+          "text": "Stand watch with Captain Eruvan",
+          "topic": "The beacon is lit, and the Thalmor are dead.",
+          "reply": "Look at it burn. Every Blade still alive in Cyrodiil will see that, and know where to come. You did this. From tonight, you're Knight-Commander of Cloud Ruler."
+        }
       ],
       "outro": "The sky-watch beacon burns again on Dragonclaw Rock. Captain Eruvan named me Knight-Commander, and scattered Blades have begun to find their way back.",
-      "rewards": {"gold": 1500, "faction_points": 4, "flags": ["bl_watch_restored"], "perks": 1,
-                  "items": [{"item": "skycraft:blades_helmet", "name": "Helm of the Sky-Watch", "enchant": {"protection": 4, "respiration": 2}},
-                            {"item": "skycraft:akaviri_greatsword", "name": "Dai-Katana of Cloud Ruler", "enchant": {"sharpness": 4, "knockback": 1}}]}
+      "rewards": {
+        "gold": 1500,
+        "faction_points": 4,
+        "flags": [
+          "bl_watch_restored"
+        ],
+        "perks": 1,
+        "items": [
+          {
+            "item": "skycraft:blades_helmet",
+            "name": "Helm of the Sky-Watch",
+            "enchant": {
+              "protection": 4,
+              "respiration": 2
+            }
+          },
+          {
+            "item": "skycraft:akaviri_greatsword",
+            "name": "Dai-Katana of Cloud Ruler",
+            "enchant": {
+              "sharpness": 4,
+              "knockback": 1
+            }
+          }
+        ]
+      },
+      "why": [
+        "jerall_mountains.L9.pass_tolls",
+        "jerall_mountains.L8.talos_first"
+      ]
     }
   ]
 }

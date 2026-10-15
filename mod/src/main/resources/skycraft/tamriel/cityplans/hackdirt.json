@@ -1,0 +1,112 @@
+{
+  "id": "hackdirt",
+  "why": [
+    "colovian_highlands.L6.closed_villages",
+    "colovian_highlands.L10.deep_ones_below"
+  ],
+  "sil": "sunken-quarry-cult",
+  "base": "none",
+  "overlay": "colovian_highlands",
+  "radius": 38,
+  "reach": 50,
+  "gates": [
+    [
+      0,
+      36
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        38
+      ],
+      "overlay": "colovian_highlands"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "hackdirt_b_1"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        5,
+        14
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "hackdirt_b_2"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -6,
+        5
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "hackdirt_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -12,
+        -9
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "hackdirt_b_4"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        2,
+        -8
+      ],
+      "face": "south",
+      "overlay": "colovian_highlands",
+      "name": "hackdirt_b_5"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "theme": "hackdirt_cavern",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "deep_ones_bible",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "hackdirt_b_1": "Hackdirt Brethren Chapel",
+    "hackdirt_b_2": "Moslin's Dry Goods",
+    "hackdirt_b_3": "Moslin's Inn",
+    "hackdirt_b_4": "Jiv Hiriel's Ruined Shack",
+    "hackdirt_b_5": "Marlena Brussiner's House"
+  },
+  "innKey": "hackdirt_b_3",
+  "names": {
+    "inn": "hackdirt_b_3"
+  }
+}

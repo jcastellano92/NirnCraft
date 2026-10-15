@@ -1,71 +1,374 @@
 {
   "id": "elden_root",
-  "base": "none",
+  "why": [
+    "grahtwood.L1.elden_grove_soil",
+    "grahtwood.L4.graht_grove",
+    "grahtwood.L6.elden_root_capital"
+  ],
   "sil": "great-trunk-canopy-tiers",
-  "reach": 135,
-  "radius": 125,
+  "base": "none",
   "overlay": "elden_root",
-  "names": {"inn": "elden_root_amber_lantern", "store": "elden_root_root_market_stalls", "smithy": "elden_root_green_forge"},
-  "innKey": "elden_root_amber_lantern",
-  "gates": [[0, 117]],
-  "landmarks": [
-    {"id": "giant_tree", "at": [0, 0], "size": [61, 61], "h": 110, "flags": ["no_beard"]},
-    {"id": "canopy_platform", "at": [-64, 6], "size": [25, 25], "h": 8, "raise": 14},
-    {"id": "canopy_platform", "at": [64, 6], "size": [25, 25], "h": 8, "raise": 14},
-    {"id": "awning_row", "at": [-42, 46], "size": [7, 25], "h": 7, "name": "lime", "face": "S"},
-    {"id": "awning_row", "at": [42, 46], "size": [7, 25], "h": 7, "name": "green", "face": "S"}
+  "radius": 96,
+  "reach": 112,
+  "gates": [
+    [
+      0,
+      94
+    ],
+    [
+      -94,
+      0
+    ],
+    [
+      94,
+      0
+    ]
   ],
-  "lines": [
-    {"kind": "bridge", "from": [-18, 6], "to": [-52, 6], "width": 3, "lift": 14},
-    {"kind": "bridge", "from": [18, 6], "to": [52, 6], "width": 3, "lift": 14}
-  ],
-  "nets": [
-    {"type": "path", "via": [[0, 117], [-8, 100], [6, 82], [-4, 62], [0, 40]], "width": 5, "major": true, "tag": "root"},
-    {"type": "radial", "at": [0, 0], "spokes": 9, "r0": 38, "r1": 112, "wobble": 7, "offset": 0.35, "skip": [], "width": 4, "tag": "root",
-     "rings": [48, 72, 98], "ring_wobble": 6, "ring_width": 3, "ring_tag": "ring"},
-    {"type": "path", "via": [[-104, 80], [-70, 86], [-34, 74], [0, 82], [34, 74], [70, 86], [104, 80]], "width": 4, "major": true, "tag": "market"},
-    {"type": "path", "via": [[-90, -60], [-52, -72], [-18, -64]], "width": 3, "tag": "ring"},
-    {"type": "path", "via": [[90, -60], [52, -72], [18, -64]], "width": 3, "tag": "ring"},
-    {"type": "path", "via": [[-60, -100], [-24, -104], [24, -104], [60, -100]], "width": 3, "tag": "ring"}
+  "quarters": [
+    {
+      "ring": [
+        0,
+        46
+      ],
+      "overlay": "elden_root",
+      "wealth": "noble"
+    },
+    {
+      "ring": [
+        46,
+        96
+      ],
+      "overlay": "grahtwood",
+      "wealth": "common"
+    }
   ],
   "plazas": [
-    {"at": [0, 96], "size": 15, "variant": 2, "stalls": 6, "name": "elden_root_root_market"},
-    {"at": [0, -44], "size": 13, "variant": 3, "name": "elden_root_crown_steps"}
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 14,
+      "name": "elden_root_plaza"
+    }
   ],
-  "zones": [
-    {"at": [0, -70], "r": 34, "zone": "noble"},
-    {"at": [0, 90], "r": 28, "zone": "centre"},
-    {"at": [-70, 60], "r": 26, "zone": "craft"},
-    {"at": [78, -50], "r": 26, "zone": "poor"}
+  "landmarks": [
+    {
+      "id": "giant_tree",
+      "at": [
+        0,
+        -16
+      ],
+      "name": "elden_root_landmark",
+      "overlay": "elden_root"
+    }
   ],
-  "fabric": {"radius": 112, "target": 0.5},
-  "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "elden_root_amber_lantern", "on": "market"},
-    {"kind": "smithy", "size": [11, 9], "name": "elden_root_green_forge", "on": "market"},
-    {"kind": "store", "count": 3, "name": "elden_root_root_market_stalls", "on": "market"},
-    {"kind": "alchemist", "count": 2, "on": "root"},
-    {"kind": "temple", "size": [11, 17], "on": "root"}
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "r0": 10,
+      "r1": 92,
+      "spokes": 4,
+      "tag": "spoke",
+      "ring_tag": "ring"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        35,
+        0
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_1"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        66,
+        21
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_2"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        28,
+        20
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_3"
+    },
+    {
+      "kind": "tower",
+      "use": "mage_tower",
+      "wealth": "noble",
+      "at": [
+        41,
+        56
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_4"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        11,
+        33
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_5"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        0,
+        69
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_6"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -11,
+        33
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_7"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -41,
+        56
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_8"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -28,
+        20
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_9"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -66,
+        21
+      ],
+      "face": "north",
+      "overlay": "elden_root",
+      "name": "elden_root_b_10"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "common",
+      "at": [
+        -35,
+        0
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_11"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "noble",
+      "at": [
+        -66,
+        -21
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_12"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -28,
+        -20
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_13"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        -41,
+        -56
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_14"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -11,
+        -33
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_15"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        0,
+        -69
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_16"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "noble",
+      "at": [
+        11,
+        -33
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_17"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        41,
+        -56
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_18"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        28,
+        -20
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_19"
+    },
+    {
+      "kind": "house",
+      "use": "shack",
+      "wealth": "poor",
+      "at": [
+        66,
+        -21
+      ],
+      "face": "south",
+      "overlay": "elden_root",
+      "name": "elden_root_b_20"
+    }
   ],
   "features": [
-    {"type": "great_tree", "theme": "graht", "count": 2, "where": "free"},
-    {"type": "pond", "count": 2, "where": "free"},
-    {"type": "statue", "theme": "pact", "count": 2, "where": "square"},
-    {"type": "shrine", "theme": "divine:kynareth", "where": "street", "tag": "root"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "ring"},
-    {"type": "garden", "count": 2, "where": "free"},
-    {"type": "market", "where": "free"},
-    {"type": "orchard", "count": 2, "where": "edge"},
-    {"type": "tree_row", "count": 2, "where": "street", "tag": "market"},
-    {"type": "bench", "count": 2, "where": "square"},
-    {"type": "well", "where": "free"},
-    {"type": "memorial", "where": "free"}
+    {
+      "type": "great_tree",
+      "theme": "elden_root_great_tree",
+      "count": 4
+    },
+    {
+      "type": "garden",
+      "theme": "elden_root_garden",
+      "count": 4
+    },
+    {
+      "type": "lamps",
+      "theme": "elden_root_lamps",
+      "count": 6
+    },
+    {
+      "type": "shrine",
+      "theme": "elden_root_shrine",
+      "count": 4
+    }
   ],
+  "names": {
+    "inn": "elden_root_b_5",
+    "store": "elden_root_b_10",
+    "smithy": "elden_root_b_7"
+  },
   "titles": {
-    "elden_root_amber_lantern": "The Amber Lantern",
-    "elden_root_root_market_stalls": "Root Market Stalls",
-    "elden_root_green_forge": "The Green Forge",
-    "elden_root_root_market": "Root Market",
-    "elden_root_crown_steps": "Crown Steps"
-  }
+    "elden_root_b_1": "place.skycraft.elden_root Council & Seat Hall",
+    "elden_root_b_2": "place.skycraft.elden_root High Sanctuary",
+    "elden_root_b_3": "place.skycraft.elden_root Fighters & Wayfarers Hall",
+    "elden_root_b_4": "place.skycraft.elden_root Mages & Chroniclers Spire",
+    "elden_root_b_5": "place.skycraft.elden_root The Lantern & Hearth Inn",
+    "elden_root_b_6": "place.skycraft.elden_root The Traveler's Rest Tavern",
+    "elden_root_b_7": "place.skycraft.elden_root Master Forge & Armorer",
+    "elden_root_b_8": "place.skycraft.elden_root Botanicals & Remedies",
+    "elden_root_b_9": "place.skycraft.elden_root Scriptorium & Charts",
+    "elden_root_b_10": "place.skycraft.elden_root Grand Provisioner & Sundries",
+    "elden_root_b_11": "place.skycraft.elden_root Silk & Hide Clothier",
+    "elden_root_b_12": "place.skycraft.elden_root Lapidary & Signets",
+    "elden_root_b_13": "place.skycraft.elden_root Wayfarer Stables & Post",
+    "elden_root_b_14": "place.skycraft.elden_root Bonded Factor Warehouse",
+    "elden_root_b_15": "place.skycraft.elden_root Watch Garrison Barracks",
+    "elden_root_b_16": "place.skycraft.elden_root High Steward's Manor",
+    "elden_root_b_17": "place.skycraft.elden_root Merchant-Factor's Villa",
+    "elden_root_b_18": "place.skycraft.elden_root Artisan's Terrace House",
+    "elden_root_b_19": "place.skycraft.elden_root Weaver's Courtyard House",
+    "elden_root_b_20": "place.skycraft.elden_root River-Gate Cottage",
+    "elden_root_landmark": "High Seat of place.skycraft.elden_root",
+    "elden_root_plaza": "place.skycraft.elden_root Central Plaza"
+  },
+  "innKey": "elden_root_b_5"
 }

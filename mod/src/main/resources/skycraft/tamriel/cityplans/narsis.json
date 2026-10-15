@@ -1,0 +1,162 @@
+{
+  "id": "narsis",
+  "why": [
+    "deshaan.L1.fungal_plains",
+    "deshaan.L5.temple_economy"
+  ],
+  "sil": "hlaalu-council-river-plaza",
+  "base": "none",
+  "overlay": "narsis",
+  "radius": 52,
+  "reach": 68,
+  "gates": [
+    [
+      0,
+      48
+    ],
+    [
+      48,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "dome_palace",
+      "at": [
+        0,
+        0
+      ],
+      "face": "south",
+      "name": "narsis_landmark",
+      "overlay": "narsis"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        52
+      ],
+      "overlay": "narsis"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        14,
+        0
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_1"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        26,
+        33
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_2"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -3,
+        14
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_3"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        -38,
+        18
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_4"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        -13,
+        -6
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_5"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -9,
+        -41
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_6"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        9,
+        -11
+      ],
+      "face": "south",
+      "overlay": "narsis",
+      "name": "narsis_b_7"
+    }
+  ],
+  "features": [
+    {
+      "type": "banners",
+      "theme": "narsis_capital_scales",
+      "count": 3
+    },
+    {
+      "type": "fountain",
+      "theme": "nerevar_plaza",
+      "count": 2
+    },
+    {
+      "type": "garden",
+      "theme": "narsis_courtyard",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "narsis_landmark": "Narsis Hlaalu Council Hall",
+    "narsis_b_1": "Shrine of Saint Nerevar",
+    "narsis_b_2": "The Golden Scale Inn",
+    "narsis_b_3": "Narsis Grand Counting-House",
+    "narsis_b_4": "Hlaalu Charter Smithy",
+    "narsis_b_5": "Mainland Ledger Archives",
+    "narsis_b_6": "Sadras-Hlaalu Villa",
+    "narsis_b_7": "Narsis River-Watch"
+  },
+  "innKey": "narsis_b_2",
+  "names": {
+    "inn": "narsis_b_2",
+    "store": "narsis_b_3",
+    "smithy": "narsis_b_4"
+  }
+}

@@ -1087,7 +1087,16 @@ public final class TravelNetworks {
     }
 
     private static String str(JsonObject o, String key, String def) {
-        return o.has(key) && !o.get(key).isJsonNull() ? o.get(key).getAsString() : def;
+        if (!o.has(key) || o.get(key).isJsonNull()) return def;
+        JsonElement el = o.get(key);
+        if (el.isJsonPrimitive()) return el.getAsString();
+        if (el.isJsonArray()) {
+            JsonArray arr = el.getAsJsonArray();
+            if (arr.isEmpty()) return def;
+            JsonElement first = arr.get(0);
+            return first.isJsonPrimitive() ? first.getAsString() : def;
+        }
+        return def;
     }
 
     private static List<String> strList(@Nullable JsonElement el) {

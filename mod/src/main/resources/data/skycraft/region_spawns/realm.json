@@ -61,6 +61,10 @@
           4
         ]
       }
+    ],
+    "why": [
+      "foreign.L4.alien_endemics",
+      "foreign.L2.extreme_oceanic_regimes"
     ]
   },
   {
@@ -117,6 +121,10 @@
           1
         ]
       }
+    ],
+    "why": [
+      "atmora.L4.glacier_barrens",
+      "atmora.L2.Great_Freeze"
     ]
   },
   {
@@ -157,6 +165,10 @@
           1
         ]
       }
+    ],
+    "why": [
+      "yokuda.L4.mesa_scrub_and_oasis",
+      "yokuda.L2.trade_wind_arid"
     ]
   },
   {
@@ -198,6 +210,10 @@
           2
         ]
       }
+    ],
+    "why": [
+      "pyandonea.L4.kelp_and_mist_jungle",
+      "black_marsh.L10.root_caverns"
     ]
   },
   {
@@ -253,6 +269,10 @@
           2
         ]
       }
+    ],
+    "why": [
+      "morrowind.L4.native_fauna",
+      "solstheim.L4.ash_waste"
     ]
   },
   {
@@ -305,6 +325,10 @@
           2
         ]
       }
+    ],
+    "why": [
+      "foreign.L10.wonder_sanctums",
+      "skyrim.L4.below_fauna"
     ]
   }
 ]

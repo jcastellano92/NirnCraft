@@ -1,0 +1,312 @@
+{
+  "id": "kvatch",
+  "why": [
+    "gold_coast.L1.kvatch_hill",
+    "gold_coast.L6.kvatch_on_the_hill",
+    "gold_coast.L11.kvatch_burned"
+  ],
+  "sil": "crater-slope-scar",
+  "base": "none",
+  "overlay": "kvatch",
+  "radius": 96,
+  "reach": 112,
+  "innKey": "kvatch_refugees_rest_inn",
+  "names": {
+    "inn": "kvatch_refugees_rest_inn",
+    "store": "kvatch_tierras_supplies",
+    "smithy": "kvatch_batuls_forge"
+  },
+  "gates": [
+    [
+      0,
+      90
+    ],
+    [
+      90,
+      0
+    ]
+  ],
+  "landmarks": [
+    {
+      "id": "castle",
+      "at": [
+        0,
+        -46
+      ],
+      "face": "south",
+      "name": "kvatch_castle_kvatch",
+      "overlay": "kvatch"
+    },
+    {
+      "id": "chapel_spire",
+      "at": [
+        18,
+        -12
+      ],
+      "face": "south",
+      "name": "kvatch_chapel_spire",
+      "overlay": "kvatch"
+    },
+    {
+      "id": "arena",
+      "at": [
+        -28,
+        18
+      ],
+      "face": "south",
+      "name": "kvatch_arena_ruin",
+      "overlay": "kvatch"
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        96
+      ],
+      "overlay": "kvatch"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        28,
+        0
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_chapel_of_akatosh"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        54,
+        22
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_fighters_guild"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "noble",
+      "at": [
+        20,
+        20
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_mages_guild"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        22,
+        54
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_refugees_rest_inn"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        0,
+        28
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_batuls_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -22,
+        54
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_sigrids_apothecary"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        -20,
+        20
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_tierras_supplies"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -54,
+        22
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_savlian_command_post"
+    },
+    {
+      "kind": "barracks",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -28,
+        0
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_south_gate_watchhouse"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -54,
+        -22
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_goldwine_wing"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_ilend_vonius_house"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -22,
+        -54
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_menien_goneld_post"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -28
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_oletas_sanctuary"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        22,
+        -54
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_berich_inian_hall"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        20,
+        -20
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_rebuild_yard"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        54,
+        -22
+      ],
+      "face": "south",
+      "overlay": "kvatch",
+      "name": "kvatch_jesan_rilian_corral"
+    }
+  ],
+  "features": [
+    {
+      "type": "memorial",
+      "theme": "oblivion_siege",
+      "count": 2
+    },
+    {
+      "type": "statue",
+      "theme": "divine:akatosh",
+      "count": 1
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:akatosh",
+      "count": 2
+    },
+    {
+      "type": "banners",
+      "theme": "kvatch_wolf",
+      "count": 3
+    },
+    {
+      "type": "well",
+      "theme": "scorched_cistern",
+      "count": 2
+    }
+  ],
+  "titles": {
+    "kvatch_castle_kvatch": "Castle Kvatch",
+    "kvatch_chapel_spire": "Great Chapel of Akatosh Dome",
+    "kvatch_arena_ruin": "Kvatch Arena Ring",
+    "kvatch_chapel_of_akatosh": "Great Chapel of Akatosh",
+    "kvatch_fighters_guild": "Kvatch Fighters Guild Hall",
+    "kvatch_mages_guild": "Kvatch Mages Guild Hall",
+    "kvatch_refugees_rest_inn": "Refugees' Rest Inn",
+    "kvatch_batuls_forge": "Batul's Field Forge",
+    "kvatch_sigrids_apothecary": "Sigrid's Provision Tent",
+    "kvatch_tierras_supplies": "Tierra's Supply Pavilion",
+    "kvatch_savlian_command_post": "Savlian Matius's Command Post",
+    "kvatch_south_gate_watchhouse": "South Gate Watchhouse",
+    "kvatch_goldwine_wing": "Count Goldwine's Burned Wing",
+    "kvatch_ilend_vonius_house": "Ilend Vonius's Garrison Quarters",
+    "kvatch_menien_goneld_post": "Menien Goneld's Watch Post",
+    "kvatch_oletas_sanctuary": "Oleta's Relief Sanctuary",
+    "kvatch_berich_inian_hall": "Berich Inian's Guard Hall",
+    "kvatch_rebuild_yard": "Kvatch Timber & Stone Yard",
+    "kvatch_jesan_rilian_corral": "Jesan Rilian's Wagon Corral"
+  }
+}

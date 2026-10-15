@@ -1,0 +1,406 @@
+{
+  "region": "high_rock/bjoulsae",
+  "title": "The River-Oath of Evermor",
+  "summary": "Defend the Bjoulsae river-trade and the horse-clans of Evermor against a coalition of briar-heart Reach raiders and corrupt toll-wardens who have seized the river-locks.",
+  "why": [
+    "bjoulsae.L7.evermor_nobles",
+    "bjoulsae.L7.barge_men_and_riders",
+    "bjoulsae.L8.horsemens_oaths",
+    "bjoulsae.L9.reachfolk_raids",
+    "bjoulsae.L10.reach_redoubts"
+  ],
+  "hook": {
+    "place": "evermor",
+    "places": [
+      "balthorpe",
+      "bormok_quarry",
+      "briarhaven_mine",
+      "draul_camp",
+      "evermor",
+      "graystone_quarry",
+      "hildunes_secret_refuge",
+      "lowmoor_sanctum",
+      "margate_wyrd_grove",
+      "mzanzak",
+      "pengate_ruins",
+      "penhaven_cavern",
+      "shrine_namira_high_rock",
+      "stonebury_watchtower",
+      "thibault_farm"
+    ],
+    "npc": "story_bj_river_marshal_gervais",
+    "max_road_blocks": 800
+  },
+  "npcs": [
+    {
+      "id": "story_bj_river_marshal_gervais",
+      "name": "River-Marshal Gervais",
+      "role": "knight",
+      "place": "evermor",
+      "greet": "Rein in your mount, traveller! The Bjoulsae boom-chain at Evermor is raised, and no timber barge has come down from Bhoriane in four days.",
+      "talk": [
+        "Winterborn Reachfolk have come down from the eastern crags in force, yet someone opened the river-towers for them without a single arrow loosed.",
+        "Our horse-breeder scouts at The Crooked Tortoise caught a toll-clerk carrying Dwemer lock-bars toward Tzinzak. Ride there and speak with Outrider Solange."
+      ]
+    },
+    {
+      "id": "story_bj_outrider_solange",
+      "name": "Outrider Solange",
+      "role": "guard",
+      "place": "the_crooked_tortoise",
+      "greet": "By the Horse-Father's stirrup, I'm glad to see steel from Evermor! My mare lamed a shoe outrunning the briar-hearts on the towpath.",
+      "talk": [
+        "Viscount Dancourt of Castle Leclair is paying Reach Warlord Madanach-Kin to raid rival barges so his own toll-wharves monopolize the river!",
+        "Dancourt's engineers are inside the Dwemer waterworks of Tzinzak right now, dropping the river level so the barges ground on the shoals."
+      ]
+    },
+    {
+      "id": "story_bj_barge_master_henri",
+      "name": "Barge-Master Henri",
+      "role": "citizen",
+      "place": "bhoriane",
+      "greet": "Sixteen wool-barges stranded in the mud at Bhoriane, and the Reachmen shooting fire-arrows from the bluffs every dusk!",
+      "talk": [
+        "Once you reopen the Dwemer sluices in Tzinzak, take the river-road to Castle Jourdain and Pengate Keep—that's where Red-Crow Morcant has penned his warband."
+      ]
+    },
+    {
+      "id": "story_bj_captain_amaury_horse",
+      "name": "Captain Amaury of the River-Horse",
+      "role": "knight",
+      "place": "pengate_keep",
+      "greet": "Look sharp! Red-Crow Morcant and Viscount Dancourt's turncoats have retreated into Blackthornhaven Burrow above the gorge.",
+      "talk": [
+        "If we break Morcant's briar-heart circle in Blackthornhaven Burrow, the eastern passes and the Bjoulsae towpath will be free for another generation."
+      ]
+    }
+  ],
+  "bosses": {
+    "story_bj_engineer_valentin": {
+      "name": "Sluice-Warden Valentin",
+      "rank": "boss",
+      "place": "tzinzak",
+      "weapon": "steel_sword",
+      "helmet": "iron_helmet",
+      "chest": "chainmail_chestplate",
+      "hp_mult": 2.4,
+      "dmg_mult": 1.6
+    },
+    "story_bj_warlord_morcant": {
+      "name": "Red-Crow Morcant the Briar-Heart",
+      "rank": "boss",
+      "place": "blackthornhaven_burrow",
+      "weapon": "ebony_sword",
+      "helmet": "leather_helmet",
+      "chest": "leather_chestplate",
+      "hp_mult": 3.3,
+      "dmg_mult": 1.8
+    }
+  },
+  "scenes": {
+    "story_bj_tortoise_towpath": [
+      "Outrider Solange: Look at the Bjoulsae water-mark on the pier—dropped four feet overnight because someone turned the Dwemer flood-wheels in Tzinzak!",
+      "River-Marshal Gervais: And see the crow-feathers tied to the milestone? A Reach boundary-totem, planted beside a Breton toll-post.",
+      "Outrider Solange: Strike Tzinzak first before every barge at Bhoriane is burned on the mudflats!"
+    ],
+    "story_bj_tzinzak_sluice": [
+      "Sluice-Warden Valentin: Viscount Dancourt paid good gold for a dry riverbed! Stand away from the bronze valve-wheel!",
+      "Outrider Solange: The Bjoulsae belongs to the barge-men and the horse-clans, traitor! Turn the wheel!"
+    ],
+    "story_bj_blackthorn_circle": [
+      "Red-Crow Morcant: Your river-nobles sold us the lock-keys for a handful of toll-silver, and now the whole valley is our hunting-ground!",
+      "Captain Amaury of the River-Horse: No Reach totem stands while the Horsemen of Evermor keep their oath! Charge!"
+    ]
+  },
+  "quests": [
+    {
+      "id": "ms1_bjoulsae_01_grounded_barges",
+      "region": "high_rock/bjoulsae",
+      "category": "main",
+      "title": "Low Water on the Bjoulsae",
+      "giver": "story_bj_river_marshal_gervais",
+      "start": "npc:story_bj_river_marshal_gervais",
+      "requires": [],
+      "why": [
+        "bjoulsae.L7.evermor_nobles",
+        "bjoulsae.L7.barge_men_and_riders",
+        "bjoulsae.L9.barge_tolls"
+      ],
+      "summary": "Ride from Evermor to The Crooked Tortoise and inspect the drained towpath with Outrider Solange.",
+      "intro": [
+        "The Bjoulsae River has mysteriously dropped four feet overnight, stranding wool and timber barges beneath Reachmen ambush points.",
+        "Speak with River-Marshal Gervais in Evermor and ride to The Crooked Tortoise to meet Outrider Solange."
+      ],
+      "complete": [
+        "Outrider Solange discovered that Sluice-Warden Valentin is diverting the river inside the Dwemer waterworks of Tzinzak."
+      ],
+      "journal": {
+        "start": "River-Marshal Gervais in Evermor asked me to meet Outrider Solange at The Crooked Tortoise along the Bjoulsae towpath.",
+        "done": "We traced the river diversion to the Dwemer waterworks at Tzinzak."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "evermor",
+          "text": "Inspect the raised boom-chain at Evermor"
+        },
+        {
+          "type": "scene",
+          "place": "the_crooked_tortoise",
+          "target": "scene:story_bj_tortoise_towpath",
+          "text": "Examine the dropped water-mark at The Crooked Tortoise"
+        },
+        {
+          "type": "talk",
+          "place": "the_crooked_tortoise",
+          "npc": "story_bj_outrider_solange",
+          "text": "Speak with Outrider Solange at The Crooked Tortoise"
+        }
+      ],
+      "reward": {
+        "gold": 250,
+        "xp": 350
+      },
+      "places": [
+        "evermor",
+        "the_crooked_tortoise"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "evermor",
+          "objective": "Inspect the raised boom-chain at Evermor"
+        },
+        {
+          "id": 20,
+          "place": "the_crooked_tortoise",
+          "objective": "Examine the dropped water-mark at The Crooked Tortoise"
+        },
+        {
+          "id": 30,
+          "place": "the_crooked_tortoise",
+          "objective": "Speak with Outrider Solange at The Crooked Tortoise"
+        }
+      ],
+      "consequence": "guard_banner:bjoulsae_stage_1"
+    },
+    {
+      "id": "ms1_bjoulsae_02_tzinzak_wheels",
+      "region": "high_rock/bjoulsae",
+      "category": "main",
+      "title": "The Bronze Flood-Wheels of Tzinzak",
+      "giver": "story_bj_outrider_solange",
+      "start": "auto",
+      "requires": [
+        "ms1_bjoulsae_01_grounded_barges"
+      ],
+      "why": [
+        "bjoulsae.L8.water_relic_veneration",
+        "bjoulsae.L10.drowned_undercroft"
+      ],
+      "summary": "Enter the Dwemer waterworks of Tzinzak, defeat Sluice-Warden Valentin, and reopen the river sluices.",
+      "intro": [
+        "Sluice-Warden Valentin has locked the ancient Dwemer flood-wheels in Tzinzak on Viscount Dancourt's orders.",
+        "Enter Tzinzak, defeat Valentin, and release the water back into the Bjoulsae channel."
+      ],
+      "complete": [
+        "With Valentin defeated and the bronze flood-wheels turned, the Bjoulsae surged back into its channel toward Bhoriane."
+      ],
+      "journal": {
+        "start": "I must enter Tzinzak, defeat Sluice-Warden Valentin, and reopen the river sluices.",
+        "done": "I defeated Sluice-Warden Valentin and restored the water level of the Bjoulsae River."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "tzinzak",
+          "text": "Enter the Dwemer waterworks of Tzinzak"
+        },
+        {
+          "type": "scene",
+          "place": "tzinzak",
+          "target": "scene:story_bj_tzinzak_sluice",
+          "text": "Confront Sluice-Warden Valentin at the bronze valve-wheel"
+        },
+        {
+          "type": "boss",
+          "place": "tzinzak",
+          "target": "story_bj_engineer_valentin",
+          "text": "Defeat Sluice-Warden Valentin"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "tzinzak"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "tzinzak",
+          "objective": "Enter the Dwemer waterworks of Tzinzak"
+        },
+        {
+          "id": 20,
+          "place": "tzinzak",
+          "objective": "Confront Sluice-Warden Valentin at the bronze valve-wheel"
+        },
+        {
+          "id": 30,
+          "place": "tzinzak",
+          "objective": "Defeat Sluice-Warden Valentin"
+        }
+      ],
+      "consequence": "npc_schedule:bjoulsae_stage_2"
+    },
+    {
+      "id": "ms1_bjoulsae_03_bhoriane_convoy",
+      "region": "high_rock/bjoulsae",
+      "category": "main",
+      "title": "Horsemen of the Towpath",
+      "giver": "story_bj_barge_master_henri",
+      "start": "auto",
+      "requires": [
+        "ms1_bjoulsae_02_tzinzak_wheels"
+      ],
+      "why": [
+        "bjoulsae.L7.reachfolk_bands",
+        "bjoulsae.L8.horsemens_oaths"
+      ],
+      "summary": "Check on the refloated barges with Barge-Master Henri in Bhoriane and ride to Captain Amaury at Pengate Keep.",
+      "intro": [
+        "Now that the river has risen, check with Barge-Master Henri in Bhoriane to learn where the Reach raiders retreated.",
+        "Speak with Barge-Master Henri in Bhoriane, then join Captain Amaury at Pengate Keep."
+      ],
+      "complete": [
+        "Captain Amaury at Pengate Keep has cornered Red-Crow Morcant's warband inside Blackthornhaven Burrow."
+      ],
+      "journal": {
+        "start": "I must speak with Barge-Master Henri in Bhoriane and ride to Captain Amaury at Pengate Keep.",
+        "done": "Captain Amaury pinpointed Red-Crow Morcant's main camp inside Blackthornhaven Burrow."
+      },
+      "objectives": [
+        {
+          "type": "talk",
+          "place": "bhoriane",
+          "npc": "story_bj_barge_master_henri",
+          "text": "Speak with Barge-Master Henri in Bhoriane"
+        },
+        {
+          "type": "talk",
+          "place": "pengate_keep",
+          "npc": "story_bj_captain_amaury_horse",
+          "text": "Report to Captain Amaury at Pengate Keep"
+        }
+      ],
+      "reward": {
+        "gold": 350,
+        "xp": 500
+      },
+      "places": [
+        "bhoriane",
+        "pengate_keep"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "bhoriane",
+          "objective": "Speak with Barge-Master Henri in Bhoriane"
+        },
+        {
+          "id": 20,
+          "place": "pengate_keep",
+          "objective": "Report to Captain Amaury at Pengate Keep"
+        }
+      ],
+      "consequence": "shrine_state:bjoulsae_stage_3"
+    },
+    {
+      "id": "ms1_bjoulsae_04_red_crow_fall",
+      "region": "high_rock/bjoulsae",
+      "category": "main",
+      "title": "The Briar-Heart of Blackthornhaven",
+      "giver": "story_bj_captain_amaury_horse",
+      "start": "auto",
+      "requires": [
+        "ms1_bjoulsae_03_bhoriane_convoy"
+      ],
+      "finale": true,
+      "why": [
+        "bjoulsae.L8.old_gods_in_the_hills",
+        "bjoulsae.L9.reachfolk_raids",
+        "bjoulsae.L10.reach_redoubts"
+      ],
+      "summary": "Storm Blackthornhaven Burrow, slay Red-Crow Morcant, and return the toll-charters to River-Marshal Gervais in Evermor.",
+      "intro": [
+        "Red-Crow Morcant has gathered his briar-heart warriors in Blackthornhaven Burrow with Viscount Dancourt's treasonous letters.",
+        "Enter Blackthornhaven Burrow, defeat Red-Crow Morcant, and bring the letters back to River-Marshal Gervais in Evermor."
+      ],
+      "complete": [
+        "Red-Crow Morcant is dead, Viscount Dancourt has been stripped of his river-tolls, and the barges of the Bjoulsae sail freely to the bay."
+      ],
+      "journal": {
+        "start": "I must enter Blackthornhaven Burrow, defeat Red-Crow Morcant, and return to River-Marshal Gervais in Evermor.",
+        "done": "I slew Red-Crow Morcant in Blackthornhaven Burrow and restored the River-Oath of Evermor."
+      },
+      "objectives": [
+        {
+          "type": "visit",
+          "place": "blackthornhaven_burrow",
+          "text": "Enter Blackthornhaven Burrow"
+        },
+        {
+          "type": "scene",
+          "place": "blackthornhaven_burrow",
+          "target": "scene:story_bj_blackthorn_circle",
+          "text": "Confront Red-Crow Morcant at the briar-altar"
+        },
+        {
+          "type": "boss",
+          "place": "blackthornhaven_burrow",
+          "target": "story_bj_warlord_morcant",
+          "text": "Defeat Red-Crow Morcant the Briar-Heart"
+        },
+        {
+          "type": "talk",
+          "place": "evermor",
+          "npc": "story_bj_river_marshal_gervais",
+          "text": "Return the seized toll-charters to River-Marshal Gervais in Evermor"
+        }
+      ],
+      "reward": {
+        "gold": 750,
+        "xp": 1100
+      },
+      "places": [
+        "blackthornhaven_burrow",
+        "evermor"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "blackthornhaven_burrow",
+          "objective": "Enter Blackthornhaven Burrow"
+        },
+        {
+          "id": 20,
+          "place": "blackthornhaven_burrow",
+          "objective": "Confront Red-Crow Morcant at the briar-altar"
+        },
+        {
+          "id": 30,
+          "place": "blackthornhaven_burrow",
+          "objective": "Defeat Red-Crow Morcant the Briar-Heart"
+        },
+        {
+          "id": 40,
+          "place": "evermor",
+          "objective": "Return the seized toll-charters to River-Marshal Gervais in Evermor"
+        }
+      ],
+      "consequence": "settlement_prosperity:bjoulsae_stage_4"
+    }
+  ]
+}

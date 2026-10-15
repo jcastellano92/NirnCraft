@@ -25,7 +25,7 @@ public final class NaturalBuilder {
     static BlockState floorBlock(Painter p, Theme t, int x, int y, int z) {
         int roll = p.roll(x, y, z, 90, 20);
         boolean deep = y < 0;
-        if (p.kit != Kit.NONE && p.kit != Kit.NORD && t == Theme.CAVE) {
+        if (p.kit != Kit.NONE && p.kit != Kit.NORD && (t == Theme.CAVE || t == Theme.SCORPION_DEN)) {
             Kit.Palette pal = p.kit.palette();
             return roll < 9 ? pal.caveFloor : roll < 15 ? pal.rock : rock(y);
         }
@@ -35,6 +35,7 @@ public final class NaturalBuilder {
             case NECROMANCER_LAIR -> roll < 6 ? Blocks.SOUL_SOIL.defaultBlockState() : roll < 9 ? Blocks.TUFF.defaultBlockState() : rock(y);
             case HAGRAVEN_LAIR -> roll < 6 ? Blocks.MUD.defaultBlockState() : roll < 10 ? Blocks.MOSS_BLOCK.defaultBlockState()
                     : roll < 12 ? Blocks.ROOTED_DIRT.defaultBlockState() : rock(y);
+            case SCORPION_DEN -> roll < 8 ? Blocks.SAND.defaultBlockState() : roll < 14 ? Blocks.RED_SAND.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
             default -> roll < 5 ? Blocks.COARSE_DIRT.defaultBlockState() : roll < 7 ? Blocks.MOSS_BLOCK.defaultBlockState()
                     : roll < 10 ? (deep ? Blocks.COBBLED_DEEPSLATE : Blocks.ANDESITE).defaultBlockState() : rock(y);
         };
@@ -55,6 +56,8 @@ public final class NaturalBuilder {
                     : roll < 66 ? Blocks.COBBLED_DEEPSLATE.defaultBlockState() : roll < 72 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : base;
             case HAGRAVEN_LAIR -> roll < 36 ? Blocks.MOSS_BLOCK.defaultBlockState() : roll < 56 ? Blocks.MUD.defaultBlockState()
                     : roll < 70 ? Blocks.ROOTED_DIRT.defaultBlockState() : roll < 78 ? Blocks.MANGROVE_ROOTS.defaultBlockState() : base;
+            case SCORPION_DEN -> roll < 36 ? Blocks.SANDSTONE.defaultBlockState() : roll < 58 ? Blocks.RED_SANDSTONE.defaultBlockState()
+                    : roll < 72 ? Blocks.CUT_SANDSTONE.defaultBlockState() : roll < 80 ? Blocks.TERRACOTTA.defaultBlockState() : base;
             default -> roll < 28 ? (deep ? Blocks.COBBLED_DEEPSLATE : Blocks.ANDESITE).defaultBlockState()
                     : roll < 42 ? Blocks.MOSS_BLOCK.defaultBlockState() : roll < 52 ? Blocks.DRIPSTONE_BLOCK.defaultBlockState()
                     : roll < 60 ? Blocks.CLAY.defaultBlockState() : roll < 68 ? Blocks.GRAVEL.defaultBlockState()
@@ -67,7 +70,7 @@ public final class NaturalBuilder {
     public static void room(Painter p, Room room, RandomSource r) {
         Theme t = room.theme();
         boolean mine = t == Theme.MINE;
-        boolean lined = t == Theme.CAVE && p.kit != Kit.NONE && p.kit != Kit.NORD;
+        boolean lined = (t == Theme.CAVE || t == Theme.SCORPION_DEN) && p.kit != Kit.NONE && p.kit != Kit.NORD;
         double rx = room.halfX() - 0.5, rz = room.halfZ() - 0.5, ry = Math.max(3, room.height - 0.5);
         for (int x = p.minX(); x <= p.maxX(); x++) {
             for (int z = p.minZ(); z <= p.maxZ(); z++) {

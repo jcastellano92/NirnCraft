@@ -36,15 +36,18 @@ PROVINCE_ALIASES = {
     "bm": "black_marsh",
     "black_marsh": "black_marsh",
     "el": "elsweyr",
+    "ew": "elsweyr",
     "elsweyr": "elsweyr",
     "vw": "valenwood",
     "valenwood": "valenwood",
     "si": "summerset",
+    "su": "summerset",
     "summerset": "summerset",
     "so": "solstheim",
     "solstheim": "solstheim",
     "fl": "foreign",
     "foreign": "foreign",
+    "foreign_lands": "foreign",
 }
 
 REGION_ALIASES = {
@@ -54,6 +57,10 @@ REGION_ALIASES = {
     "the_rift": "the_rift",
     "reach": "the_reach",
     "the_reach": "the_reach",
+    "alikr": "alikr_desert",
+    "alikr_desert": "alikr_desert",
+    "stros": "stros_mkai",
+    "stros_mkai": "stros_mkai",
 }
 
 
@@ -61,6 +68,8 @@ def canon_scope(raw: str, default_province: str = "") -> str:
     s = raw.strip().lower()
     if "/" in s:
         s = s.split("/", 1)[1]
+    if s == "p" and default_province:
+        return PROVINCE_ALIASES.get(default_province, default_province)
     if s in PROVINCE_ALIASES:
         return PROVINCE_ALIASES[s]
     if s in REGION_ALIASES:
@@ -105,13 +114,19 @@ def parse_layer_cell(cell: str, scope: str, layer: str, errors: list) -> list:
         if raw_text.startswith(":"):
             raw_text = raw_text[1:].strip()
         raw_text = raw_text.rstrip(" .;").strip()
+        if raw_cites is None:
+            trail_m = re.search(r"\((?:cites\s+)([^)]+)\)\s*$", raw_text, flags=re.IGNORECASE)
+            if trail_m:
+                raw_cites = trail_m.group(1)
+                raw_text = raw_text[:trail_m.start()].rstrip(" .;").strip()
         if not raw_text:
             raw_text = fid.replace("_", " ")
 
         cites = []
         if raw_cites is not None:
-            for part in raw_cites.split(","):
-                c = part.strip()
+            cleaned = re.sub(r"^\s*cites\s+", "", raw_cites, flags=re.IGNORECASE)
+            for part in cleaned.split(","):
+                c = re.sub(r"^\s*cites\s+", "", part.strip(), flags=re.IGNORECASE).strip()
                 if c:
                     cites.append(c)
 
@@ -335,6 +350,276 @@ def default_forbidden(prov: str, regions: dict) -> list:
                 "reason": "Rieklings belong to Solstheim's ice caves, not Whiterun's tundra",
             },
         ]
+    if prov == "high_rock":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "warm_vineyards",
+                "b": "wrothgar.L4.snowfields",
+                "reason": "Wrothgar's permanent alpine snowfields above y 300 cannot sustain lowland vineyards or orchards",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "orichalcum_smelter",
+                "b": "wayrest.L4.mud_flats",
+                "reason": "Estuary mud flats have no orichalcum veins; orichalcum is mined in the Wrothgarian spine",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "malacath_stronghold_altar",
+                "b": "wayrest.L8.akatosh_chantry",
+                "reason": "Breton Chantry cathedrals do not host Malacath stronghold altars",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "ayleid_automatons",
+                "b": "daggerfall.L10.privateers_hold",
+                "reason": "High Rock's elder-race layer is Direnni and Dwemer, not Ayleid, and sea-cave holds house privateers",
+            },
+        ]
+    if prov == "hammerfell":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "unirrigated_grain",
+                "b": "alikr_desert.L4.erg_dunes",
+                "reason": "The mobile sand sea of the Alik'r erg cannot grow crops without an oasis well or qanat",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "timber_sawmill",
+                "b": "sentinel.L4.salt_flat",
+                "reason": "Closed-basin salt flats in Bergama have no timber canopy; logging belongs to Bangkorai's river jungles",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "open_necromancer_altar",
+                "b": "hammerfell.L8.hate_necromancy",
+                "reason": "Redguard cities honour the consecrated dead under Tu'whacca and Arkay and outlaw open necromancy",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "falmer_warband",
+                "b": "alikr_desert.L10.volenfell",
+                "reason": "Hammerfell's Dwemer halls like Volenfell are sand-choked automaton ruins without Skyrim's Falmer",
+            },
+        ]
+    if prov == "cyrodiil":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "vineyard_terraces",
+                "b": "jerall_mountains.L4.snowfield",
+                "reason": "Permanent snowfields on the Jerall crest cannot sustain West Weald grape vines",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "ebony_mine_shaft",
+                "b": "blackwood.L1.mangrove_mud",
+                "reason": "Blackwood's coastal peat and mangrove mud have no hard-rock ebony seams",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "open_daedric_cathedral_in_city",
+                "b": "cyrodiil.L8.the_nine",
+                "reason": "Each of Cyrodiil's nine walled county seats centres on a cathedral of the Nine Divines; Daedric shrines stand only in the wild",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "dwemer_centurion",
+                "b": "cyrodiil.L10.ayleid_undercity",
+                "reason": "Cyrodiil's elder-race ruins are Ayleid white-stone vaults, not Dwemer steam-citadels",
+            },
+        ]
+    if prov == "morrowind":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "saltrice_paddies",
+                "b": "red_mountain.L4.cinder_waste",
+                "reason": "Scorched cinder waste inside the Ghostfence cannot sustain flooded saltrice paddies",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "broadleaf_sawmill",
+                "b": "vvardenfell_ashlands.L4.ash_dune",
+                "reason": "Morrowind has no broadleaf or conifer timber mills outside the Velothi foothills; Ashlands grow only fungi and scrub",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "nine_divines_cathedral",
+                "b": "necrom.L8.city_of_the_dead",
+                "reason": "Necrom's sacred catacombs are governed strictly by Dunmer ancestor and Tribunal rites, not Imperial cathedrals",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "nordic_draugr",
+                "b": "morrowind.L10.ancestral_tombs",
+                "reason": "Dunmer ancestral tombs are guarded by bonewalkers and ancestor ghosts, not Nordic draugr",
+            },
+        ]
+    if prov == "solstheim":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "ash_yam_beds",
+                "b": "felsaad.L4.ice_field",
+                "reason": "Mortrag's glacial ice fields in the polar north cannot grow southern ash yams",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "commercial_stalhrim_smelter",
+                "b": "solstheim.L8.stalhrim_law",
+                "reason": "Stalhrim is sacred burial ice worked only by Skaal smith-law, never smelted in industrial furnaces",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "tribunal_temple_shrine",
+                "b": "skaal.L8.telling_at_the_fire",
+                "reason": "Skaal Village keeps the All-Maker oral tradition and has no Dunmer Tribunal shrines",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "ash_spawn_host",
+                "b": "skaal.L4.skaal_pine",
+                "reason": "Ash spawn rise from southern Red Year ash beds and Tel Mithryn experiments, not the northern Skaal pines",
+            },
+        ]
+    if prov == "black_marsh":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "dry_wheat_farmland",
+                "b": "helstrom.L4.elder_hist_canopy",
+                "reason": "The submerged toxic interior mire around Helstrom cannot support dry ploughed wheat farms",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "hist_lumber_mill",
+                "b": "black_marsh.L8.hist_communion",
+                "reason": "The Hist are sacred sentient elders; Saxhleel never fell or mill living Hist trees",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "eight_divines_chapel",
+                "b": "helstrom.L8.sap_naming_rite",
+                "reason": "The impenetrable Helstrom core answers only to the Hist and Sithis, with no Imperial chapels",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "dwemer_automaton",
+                "b": "black_marsh.L10.sunken_xanmeer",
+                "reason": "Black Marsh's ancient stone layer is pre-Duskfall Saxhleel xanmeer and Barsaebic Ayleid, never Dwemer",
+            },
+        ]
+    if prov == "elsweyr":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "moon_sugar_plantation",
+                "b": "anequina.L1.badland_gullies",
+                "reason": "Moon-sugar cane requires Pellitine's monsoon flood silts and cannot grow in Anequina's arid badland gullies",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "timber_sawmill",
+                "b": "anequina.L1.small_erg",
+                "reason": "Anequina's western sand erg has no forest canopy for timber milling",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "imperial_talos_shrine",
+                "b": "torval.L8.mane_seat",
+                "reason": "Torval's sacred rings honour the Lunar Lattice and Riddle'Thar under the Mane, not Imperial Talos worship",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "nordic_draugr",
+                "b": "elsweyr.L10.moon_temples",
+                "reason": "Ancient Khajiit moon-temples are haunted by dro-m'Athra and masked dead, not Nordic draugr",
+            },
+        ]
+    if prov == "valenwood":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "bosmer_ploughed_crop_field",
+                "b": "valenwood.L4.pact_forest",
+                "reason": "The Green Pact forbids Bosmer from clearing forest or ploughing plant crops in Valenwood",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "bosmer_lumber_mill",
+                "b": "valenwood.L8.yffre_faith",
+                "reason": "Cutting living Valenwood timber violates Y'ffre's Green Pact; wood must be imported or gathered dead",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "open_talos_shrine",
+                "b": "grahtwood.L7.crown_court_thalmor",
+                "reason": "Elden Root's Dominion capital hosts Thalmor envoys in the crown and enforces the ban on Talos worship",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "dwemer_constructs",
+                "b": "valenwood.L10.ayleid_vaults",
+                "reason": "Valenwood's subterranean ruins are Ayleid white-stone vaults and root tombs, not Dwemer halls",
+            },
+        ]
+    if prov == "summerset":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "vineyard_terraces",
+                "b": "summerset_isle.L1.corgrad_tableland",
+                "reason": "The scoured salt-and-rock Corgrad Wastes cannot sustain terraced vineyards",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "unlicensed_foreign_market",
+                "b": "summerset.L5.restricted_imports",
+                "reason": "Foreign trade is restricted to open permit quarters in Shimmerene and Vulkhel Guard, never inland cities",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "open_talos_shrine",
+                "b": "summerset.L8.no_man_god",
+                "reason": "Summerset's Aldmeri orthodoxy strictly denies that any mortal man became a god",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "falmer_betrayed",
+                "b": "summerset.L10.crystal_vaults",
+                "reason": "Summerset's underground holds ancestral crystal vaults and Sload abyssal vents, not Skyrim's Falmer",
+            },
+        ]
+    if prov == "foreign":
+        return [
+            {
+                "kind": "crop_on_micro",
+                "a": "open_grain_farming",
+                "b": "atmora.L2.Great_Freeze",
+                "reason": "Atmora's permanent sub-zero glaciation forbids any open-field agriculture",
+            },
+            {
+                "kind": "industry_without_resource",
+                "a": "timber_sawmill",
+                "b": "thras.L1.living_coral_atoll",
+                "reason": "Thras is a calcified coral atoll with brine sinkholes and no terrestrial timber forests",
+            },
+            {
+                "kind": "shrine_without_faith",
+                "a": "imperial_nine_divines_chapel",
+                "b": "pyandonea.L8.orgnum_and_the_coiled_king",
+                "reason": "Pyandonea's Maormer worship Immortal King Orgnum and the Coiled King, not the Imperial Divines",
+            },
+            {
+                "kind": "inhabitant_without_l10",
+                "a": "ayleid_wraith",
+                "b": "yokuda.L10.na_totambu_star_tombs",
+                "reason": "Yokuda's sunken vaults belong to Na-Totambu Ansei sword-singers and star-automata, not Ayleids",
+            },
+        ]
     return []
 
 
@@ -348,7 +633,8 @@ def parse_markdown_sheet(md_path: str) -> dict:
         raise ValueError(f"{md_path}: no '### 1.<n>' subsections found in Section 1")
 
     errors = []
-    prov_id = os.path.splitext(os.path.basename(md_path))[0].lower()
+    raw_prov = os.path.splitext(os.path.basename(md_path))[0].lower()
+    prov_id = PROVINCE_ALIASES.get(raw_prov, raw_prov)
     prov_truth = ""
     prov_layers = {}
     regions = {}
@@ -363,7 +649,7 @@ def parse_markdown_sheet(md_path: str) -> dict:
         code_m = re.search(r"`([^`]+)`", header)
         raw_scope = code_m.group(1) if code_m else header.split()[0]
 
-        if idx == 1 or "province sheet" in header.lower():
+        if idx == 0 or "province sheet" in header.lower() or (idx == 1 and not prov_layers and "/" not in raw_scope):
             scope = canon_scope(raw_scope, prov_id)
             if scope in PROVINCE_ALIASES:
                 prov_id = PROVINCE_ALIASES[scope]

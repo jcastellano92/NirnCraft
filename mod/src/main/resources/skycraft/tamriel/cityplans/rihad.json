@@ -5,59 +5,779 @@
   "reach": 120,
   "radius": 120,
   "overlay": "rihad",
-  "names": {"inn": "rihad_caravanserai", "store": "rihad_spice_gate_stalls", "smithy": "rihad_brass_and_steel"},
+  "names": {
+    "inn": "rihad_caravanserai",
+    "store": "rihad_spice_gate_stalls",
+    "smithy": "rihad_brass_and_steel"
+  },
   "innKey": "rihad_caravanserai",
-  "gates": [[0, 74], [61, 23], [44, -55], [-57, 36]],
+  "gates": [
+    [
+      0,
+      74
+    ],
+    [
+      61,
+      23
+    ],
+    [
+      44,
+      -55
+    ],
+    [
+      -57,
+      36
+    ]
+  ],
   "landmarks": [
-    {"id": "minaret", "at": [-34, -46], "size": [11, 11], "h": 46},
-    {"id": "minaret", "at": [38, -40], "size": [11, 11], "h": 38},
-    {"id": "awning_row", "at": [-18, 24], "size": [7, 41], "h": 7, "name": "red", "face": "S"},
-    {"id": "awning_row", "at": [18, 24], "size": [7, 41], "h": 7, "name": "yellow", "face": "S"}
+    {
+      "id": "minaret",
+      "at": [
+        -34,
+        -46
+      ],
+      "size": [
+        11,
+        11
+      ],
+      "h": 46
+    },
+    {
+      "id": "minaret",
+      "at": [
+        38,
+        -40
+      ],
+      "size": [
+        11,
+        11
+      ],
+      "h": 38
+    },
+    {
+      "id": "awning_row",
+      "at": [
+        -18,
+        24
+      ],
+      "size": [
+        7,
+        41
+      ],
+      "h": 7,
+      "name": "red",
+      "face": "S"
+    },
+    {
+      "id": "awning_row",
+      "at": [
+        18,
+        24
+      ],
+      "size": [
+        7,
+        41
+      ],
+      "h": 7,
+      "name": "yellow",
+      "face": "S"
+    }
   ],
   "nets": [
-    {"type": "wall", "via": [[0, 76], [32, 68], [61, 44], [66, 23], [70, -14], [44, -55], [6, -74], [-40, -60], [-66, -16], [-68, 20], [-57, 36], [-34, 66]], "closed": true, "h": 10, "gates": [[0, 74], [61, 23], [44, -55], [-57, 36]], "flags": ["major"]},
-    {"type": "path", "via": [[0, 74], [-8, 56], [6, 36], [-4, 14], [0, 0]], "width": 5, "major": true, "tag": "gate"},
-    {"type": "path", "via": [[61, 23], [44, 28], [30, 14], [16, 6], [0, 0]], "width": 4, "major": true, "tag": "gate"},
-    {"type": "path", "via": [[44, -55], [34, -38], [20, -22], [8, -10], [0, 0]], "width": 4, "major": true, "tag": "gate"},
-    {"type": "path", "via": [[-57, 36], [-42, 30], [-26, 16], [-12, 6], [0, 0]], "width": 4, "major": true, "tag": "gate"},
-    {"type": "loop", "at": [0, 0], "rx": 26, "rz": 24, "wobble": 5, "lobes": 3, "phase": 0.4, "width": 3, "rank": 1, "tag": "bazaar"},
-    {"type": "loop", "at": [2, -2], "rx": 46, "rz": 42, "wobble": 7, "lobes": 5, "phase": 1.3, "width": 3, "rank": 1, "tag": "bazaar"},
-    {"type": "radial", "at": [0, 0], "spokes": 7, "r0": 28, "r1": 66, "wobble": 8, "offset": 0.45, "width": 3, "tag": "alley"},
-    {"type": "path", "via": [[-30, 58], [-14, 46], [4, 52], [22, 44], [40, 52]], "width": 3, "tag": "alley"}
+    {
+      "type": "wall",
+      "via": [
+        [
+          0,
+          76
+        ],
+        [
+          32,
+          68
+        ],
+        [
+          61,
+          44
+        ],
+        [
+          66,
+          23
+        ],
+        [
+          70,
+          -14
+        ],
+        [
+          44,
+          -55
+        ],
+        [
+          6,
+          -74
+        ],
+        [
+          -40,
+          -60
+        ],
+        [
+          -66,
+          -16
+        ],
+        [
+          -68,
+          20
+        ],
+        [
+          -57,
+          36
+        ],
+        [
+          -34,
+          66
+        ]
+      ],
+      "closed": true,
+      "h": 10,
+      "gates": [
+        [
+          0,
+          74
+        ],
+        [
+          61,
+          23
+        ],
+        [
+          44,
+          -55
+        ],
+        [
+          -57,
+          36
+        ]
+      ],
+      "flags": [
+        "major"
+      ]
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          74
+        ],
+        [
+          -8,
+          56
+        ],
+        [
+          6,
+          36
+        ],
+        [
+          -4,
+          14
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "width": 5,
+      "major": true,
+      "tag": "gate"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          61,
+          23
+        ],
+        [
+          44,
+          28
+        ],
+        [
+          30,
+          14
+        ],
+        [
+          16,
+          6
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "gate"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          44,
+          -55
+        ],
+        [
+          34,
+          -38
+        ],
+        [
+          20,
+          -22
+        ],
+        [
+          8,
+          -10
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "gate"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -57,
+          36
+        ],
+        [
+          -42,
+          30
+        ],
+        [
+          -26,
+          16
+        ],
+        [
+          -12,
+          6
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "gate"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 26,
+      "rz": 24,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 0.4,
+      "width": 3,
+      "rank": 1,
+      "tag": "bazaar"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        -2
+      ],
+      "rx": 46,
+      "rz": 42,
+      "wobble": 7,
+      "lobes": 5,
+      "phase": 1.3,
+      "width": 3,
+      "rank": 1,
+      "tag": "bazaar"
+    },
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "spokes": 7,
+      "r0": 28,
+      "r1": 66,
+      "wobble": 8,
+      "offset": 0.45,
+      "width": 3,
+      "tag": "alley"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -30,
+          58
+        ],
+        [
+          -14,
+          46
+        ],
+        [
+          4,
+          52
+        ],
+        [
+          22,
+          44
+        ],
+        [
+          40,
+          52
+        ]
+      ],
+      "width": 3,
+      "tag": "alley"
+    }
   ],
   "plazas": [
-    {"at": [0, 0], "size": 13, "variant": 0, "stalls": 6}
+    {
+      "at": [
+        0,
+        0
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 6
+    }
   ],
   "zones": [
-    {"at": [0, 0], "r": 30, "zone": "centre"},
-    {"at": [-8, -52], "r": 28, "zone": "noble"},
-    {"at": [48, 36], "r": 24, "zone": "craft"},
-    {"at": [-50, 24], "r": 24, "zone": "poor"}
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 30,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -8,
+        -52
+      ],
+      "r": 28,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        48,
+        36
+      ],
+      "r": 24,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -50,
+        24
+      ],
+      "r": 24,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 104, "target": 0.7},
+  "fabric": {
+    "radius": 104,
+    "target": 0.7
+  },
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "rihad_caravanserai", "on": "gate"},
-    {"kind": "store", "count": 3, "name": "rihad_spice_gate_stalls", "on": "bazaar"},
-    {"kind": "smithy", "size": [11, 9], "name": "rihad_brass_and_steel", "on": "bazaar"},
-    {"kind": "alchemist", "count": 2, "on": "bazaar"},
-    {"kind": "temple", "size": [11, 17], "on": "gate"}
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "rihad_caravanserai",
+      "on": "gate"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "name": "rihad_spice_gate_stalls",
+      "on": "bazaar"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "rihad_brass_and_steel",
+      "on": "bazaar"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "on": "bazaar"
+    },
+    {
+      "kind": "temple",
+      "size": [
+        11,
+        17
+      ],
+      "on": "gate"
+    }
   ],
   "features": [
-    {"type": "fountain", "where": "square"},
-    {"type": "pool", "where": "free"},
-    {"type": "great_tree", "theme": "acacia", "where": "free"},
-    {"type": "statue", "theme": "divine:zenithar", "where": "square"},
-    {"type": "shrine", "theme": "divine:stendarr", "where": "street", "tag": "gate"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "gate"},
-    {"type": "market", "where": "free"},
-    {"type": "memorial", "where": "free"},
-    {"type": "gatehouse", "where": "gate"},
-    {"type": "well", "where": "free"}
+    {
+      "type": "fountain",
+      "where": "square"
+    },
+    {
+      "type": "pool",
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "acacia",
+      "where": "free"
+    },
+    {
+      "type": "statue",
+      "theme": "divine:zenithar",
+      "where": "square"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "where": "street",
+      "tag": "gate"
+    },
+    {
+      "type": "banners",
+      "count": 3,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "gate"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    },
+    {
+      "type": "gatehouse",
+      "where": "gate"
+    },
+    {
+      "type": "well",
+      "where": "free"
+    }
   ],
   "titles": {
     "rihad_caravanserai": "The Courtyard Caravanserai",
-    "rihad_spice_gate_stalls": "Spice Gate Stalls",
-    "rihad_brass_and_steel": "Brass and Steel"
-  }
+    "rihad_spice_gate_stalls": "Spice Gate Suq & Scales",
+    "rihad_brass_and_steel": "Brass and Steel Bladesmiths",
+    "rihad_emir_palace": "Alcazar of the Emir of Rihad",
+    "rihad_minaret_mosque": "Great Mosque of the Hour",
+    "rihad_fighters_chapter": "Border-Watch Fighters Hall",
+    "rihad_mages_conclave": "Conclave of the Southern Stars",
+    "rihad_forebear_factor": "Forebear Syndic's Courtyard",
+    "rihad_colovian_embassy": "Colovian Treaty Factor-House",
+    "rihad_garnet_bazaar": "Garnet & Brass Assay House",
+    "rihad_carpet_weavers": "Rihad Silk & Prayer-Rug Looms",
+    "rihad_saffron_mortar": "The Saffron Mortar Apothecary",
+    "rihad_toll_chancery": "Bridge-Toll & Caravan Chancery",
+    "rihad_border_lantern": "The Border Lantern Hostelry",
+    "rihad_grain_granary": "Brena River Bonded Granary",
+    "rihad_spice_gate_watch": "Spice Gate Customs Watchhouse",
+    "rihad_dromedary_lines": "Brena Caravan Dromedary Lines",
+    "rihad_sepulchre_of_sands": "Sepulchre of the Quiet Sands",
+    "rihad_date_and_fig": "Date-Palm & Salt-Mutton Provisioner",
+    "rihad_cordovan_leather": "Cordovan Leather & Saddle Works",
+    "rihad_estuary_quay": "Estuary Shallop & Reed-Boat Quay",
+    "rihad_water_clock_house": "House of the Brass Water-Clock",
+    "rihad_caravan_guides_lodge": "Desert Guides & Dragoman Lodge",
+    "rihad_zenithar_scales": "Pavilion of Zenithar's Scales"
+  },
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        0,
+        -64
+      ],
+      "face": "south",
+      "name": "rihad_emir_palace"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "wealthy",
+      "at": [
+        -24,
+        14
+      ],
+      "face": "east",
+      "name": "rihad_caravanserai"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "wealthy",
+      "at": [
+        24,
+        14
+      ],
+      "face": "west",
+      "name": "rihad_spice_gate_stalls"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "wealthy",
+      "at": [
+        -38,
+        -14
+      ],
+      "face": "east",
+      "name": "rihad_brass_and_steel"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "noble",
+      "at": [
+        38,
+        -14
+      ],
+      "face": "west",
+      "name": "rihad_minaret_mosque"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        -48,
+        -36
+      ],
+      "face": "east",
+      "name": "rihad_fighters_chapter"
+    },
+    {
+      "kind": "guild_hall",
+      "use": "guild_hall",
+      "wealth": "wealthy",
+      "at": [
+        48,
+        -36
+      ],
+      "face": "west",
+      "name": "rihad_mages_conclave"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "noble",
+      "at": [
+        -34,
+        -52
+      ],
+      "face": "south",
+      "name": "rihad_forebear_factor"
+    },
+    {
+      "kind": "manor",
+      "use": "manor",
+      "wealth": "wealthy",
+      "at": [
+        34,
+        -52
+      ],
+      "face": "south",
+      "name": "rihad_colovian_embassy"
+    },
+    {
+      "kind": "store",
+      "use": "jeweller",
+      "wealth": "wealthy",
+      "at": [
+        18,
+        -28
+      ],
+      "face": "west",
+      "name": "rihad_garnet_bazaar"
+    },
+    {
+      "kind": "store",
+      "use": "tailor",
+      "wealth": "wealthy",
+      "at": [
+        -18,
+        -28
+      ],
+      "face": "east",
+      "name": "rihad_carpet_weavers"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        -52,
+        8
+      ],
+      "face": "east",
+      "name": "rihad_saffron_mortar"
+    },
+    {
+      "kind": "store",
+      "use": "bookseller",
+      "wealth": "common",
+      "at": [
+        52,
+        8
+      ],
+      "face": "west",
+      "name": "rihad_toll_chancery"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        -32,
+        48
+      ],
+      "face": "north",
+      "name": "rihad_border_lantern"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "at": [
+        32,
+        48
+      ],
+      "face": "north",
+      "name": "rihad_grain_granary"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        0,
+        74
+      ],
+      "face": "north",
+      "name": "rihad_spice_gate_watch"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -28,
+        72
+      ],
+      "face": "north",
+      "name": "rihad_dromedary_lines"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -66,
+        -18
+      ],
+      "face": "east",
+      "name": "rihad_sepulchre_of_sands"
+    },
+    {
+      "kind": "store",
+      "use": "butcher",
+      "wealth": "common",
+      "at": [
+        46,
+        32
+      ],
+      "face": "west",
+      "name": "rihad_date_and_fig"
+    },
+    {
+      "kind": "store",
+      "use": "tannery",
+      "wealth": "common",
+      "at": [
+        -46,
+        32
+      ],
+      "face": "east",
+      "name": "rihad_cordovan_leather"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "poor",
+      "at": [
+        -58,
+        54
+      ],
+      "face": "north",
+      "name": "rihad_estuary_quay"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "wealthy",
+      "at": [
+        20,
+        32
+      ],
+      "face": "west",
+      "name": "rihad_water_clock_house"
+    },
+    {
+      "kind": "house",
+      "use": "townhouse",
+      "wealth": "common",
+      "at": [
+        -20,
+        32
+      ],
+      "face": "east",
+      "name": "rihad_caravan_guides_lodge"
+    },
+    {
+      "kind": "shrine",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        0,
+        -36
+      ],
+      "face": "south",
+      "name": "rihad_zenithar_scales"
+    }
+  ]
 }

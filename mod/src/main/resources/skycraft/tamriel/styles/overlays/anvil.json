@@ -1,0 +1,29 @@
+{
+  "id": "anvil",
+  "why": [
+    "gold_coast.L1.low_sea_cliffs",
+    "gold_coast.L5.anvil_shipping",
+    "gold_coast.L6.anvil_harbour"
+  ],
+  "tint": {
+    "wall": "minecraft:smooth_sandstone",
+    "wall2": "minecraft:calcite",
+    "low": "minecraft:cut_sandstone",
+    "wood": "oak",
+    "roof": "red_sandstone",
+    "accent": "yellow"
+  },
+  "palette": {
+    "cityWall": "sandstone",
+    "cityWall2": "minecraft:smooth_sandstone",
+    "plaza": "minecraft:smooth_sandstone",
+    "plaza2": "minecraft:terracotta",
+    "path": "minecraft:sandstone"
+  },
+  "style": {
+    "forms": {
+      "courtyard": 10,
+      "arcade": 6
+    }
+  }
+}

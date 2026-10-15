@@ -1,0 +1,810 @@
+{
+  "region": "morrowind/ascadian_isles",
+  "province": "morrowind",
+  "line": "story_ascadian_isles",
+  "category": "main",
+  "title": "Two Lamps Beneath the Cantons",
+  "why": [
+    "morrowind/ascadian_isles.L7.plantation_slaves",
+    "morrowind/ascadian_isles.L7.canton_ranks",
+    "morrowind/ascadian_isles.L8.vivec_the_living_god",
+    "morrowind/ascadian_isles.L9.twin_lamps_underground",
+    "morrowind/ascadian_isles.L9.temple_secrets",
+    "morrowind/ascadian_isles.L10.under_vivec"
+  ],
+  "hook": {
+    "place": "vivec",
+    "rumour": "In the Foreign Quarter and St. Olms canals of Vivec City, chalk drawings of twin lanterns appear beside locked sewer grates while bounty-hunters from Dren Plantation prowl the bridges toward Suran.",
+    "notice": "OFFICE OF ARCHCANON SARYONI, HIGH FANE OF VIVEC — Discreet mediator sought to investigate the underworks disturbances between Vivec City, Pelagiad, and Suran.",
+    "context": "In the lush Ascadian Isles, the golden cantons of Vivec City rise above slave-worked plantations and a secret abolitionist railroad moving through the underworks toward Seyda Neen.",
+    "places": [
+      "vivec",
+      "tel_branora",
+      "massahanud_camp",
+      "samarys_ancestral_tomb",
+      "castle_ebonheart",
+      "adupuibi_docks"
+    ],
+    "npc": "story_ascadian_isles_hook_npc"
+  },
+  "quests": [
+    {
+      "id": "story_ascadian_isles_01_chalk_on_the_cantons",
+      "order": 1,
+      "title": "Chalk Marks on St. Olms Canal",
+      "region": "morrowind/ascadian_isles",
+      "category": "main",
+      "start": "hook",
+      "prereq": null,
+      "requires": [],
+      "why": [
+        "morrowind/ascadian_isles.L7.canton_ranks",
+        "morrowind/ascadian_isles.L9.twin_lamps_underground"
+      ],
+      "places": [
+        "vivec",
+        "tel_branora",
+        "massahanud_camp",
+        "samarys_ancestral_tomb",
+        "castle_ebonheart",
+        "adupuibi_docks"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "vivec",
+          "objective": "Inspect the twin-lantern chalk marks in the underworks of Vivec City"
+        },
+        {
+          "id": 20,
+          "place": "fields_of_kummu",
+          "objective": "Meet the pilgrim courier waiting beside the muck-shrine at Fields of Kummu"
+        },
+        {
+          "id": 30,
+          "place": "pelagiad",
+          "objective": "Speak with the sympathetic Legion quartermaster inside Fort Pelagiad at Pelagiad"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "vivec",
+          "text": "Inspect the twin-lantern chalk marks in the underworks of Vivec City"
+        },
+        {
+          "type": "go",
+          "place": "fields_of_kummu",
+          "text": "Meet the pilgrim courier waiting beside the muck-shrine at Fields of Kummu"
+        },
+        {
+          "type": "go",
+          "place": "pelagiad",
+          "text": "Speak with the sympathetic Legion quartermaster inside Fort Pelagiad at Pelagiad"
+        }
+      ],
+      "consequence": "world_state:ascadian_twin_lamps_route_found",
+      "rewards": {
+        "gold": 250,
+        "xp": 300
+      },
+      "consequence_detail": {
+        "world_state": "ascadian_twin_lamps_route_found",
+        "flag": "story_ai_route_found",
+        "summary": "The courier at Fields of Kummu and the quartermaster at Pelagiad reveal that a Camonna Tong informant has sold out a Twin Lamps safe-route near Dren Plantation."
+      }
+    },
+    {
+      "id": "story_ascadian_isles_02_hounds_of_the_plantations",
+      "order": 2,
+      "title": "Night-Watch at Dren Plantation",
+      "region": "morrowind/ascadian_isles",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_ascadian_isles_01_chalk_on_the_cantons",
+      "requires": [
+        "story_ascadian_isles_01_chalk_on_the_cantons"
+      ],
+      "why": [
+        "morrowind/ascadian_isles.L7.plantation_slaves",
+        "morrowind/ascadian_isles.L10.escaped_slave_caves"
+      ],
+      "places": [
+        "dren_plantation",
+        "arvel_plantation",
+        "suran"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "dren_plantation",
+          "objective": "Slip into the guard-house at Dren Plantation and seize the slave-hunters' ambush roster"
+        },
+        {
+          "id": 20,
+          "place": "arvel_plantation",
+          "objective": "Free the detained Khajiit and Argonian labourers held at Arvel Plantation"
+        },
+        {
+          "id": 30,
+          "place": "suran",
+          "objective": "Warn the Twin Lamps ferryman waiting by the river-landing at Suran"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "dren_plantation",
+          "text": "Slip into the guard-house at Dren Plantation and seize the slave-hunters' ambush roster"
+        },
+        {
+          "type": "go",
+          "place": "arvel_plantation",
+          "text": "Free the detained Khajiit and Argonian labourers held at Arvel Plantation"
+        },
+        {
+          "type": "go",
+          "place": "suran",
+          "text": "Warn the Twin Lamps ferryman waiting by the river-landing at Suran"
+        }
+      ],
+      "consequence": "world_state:suran_ferry_route_warned",
+      "rewards": {
+        "gold": 350,
+        "xp": 400
+      },
+      "consequence_detail": {
+        "world_state": "suran_ferry_route_warned",
+        "flag": "story_ai_ferry_warned",
+        "summary": "The ambush roster is seized from Dren Plantation, the labourers at Arvel Plantation are freed, and the Suran ferryman redirects the refugees."
+      }
+    },
+    {
+      "id": "story_ascadian_isles_03_sanctuary_under_vivec",
+      "order": 3,
+      "title": "The Underworks of St. Delyn",
+      "region": "morrowind/ascadian_isles",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_ascadian_isles_02_hounds_of_the_plantations",
+      "requires": [
+        "story_ascadian_isles_02_hounds_of_the_plantations"
+      ],
+      "why": [
+        "morrowind/ascadian_isles.L9.temple_secrets",
+        "morrowind/ascadian_isles.L10.under_vivec"
+      ],
+      "places": [
+        "marandus",
+        "seyda_neen",
+        "castle_ebonheart"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "marandus",
+          "objective": "Defeat the hired syndicate manhunters blocking the hill-pass at Marandus"
+        },
+        {
+          "id": 20,
+          "place": "seyda_neen",
+          "objective": "Secure the outbound ship-papers at the Census and Excise office in Seyda Neen"
+        },
+        {
+          "id": 30,
+          "place": "castle_ebonheart",
+          "objective": "Register the Imperial manumission seals at Castle Ebonheart"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "clear",
+          "place": "marandus",
+          "text": "Defeat the hired syndicate manhunters blocking the hill-pass at Marandus"
+        },
+        {
+          "type": "go",
+          "place": "seyda_neen",
+          "text": "Secure the outbound ship-papers at the Census and Excise office in Seyda Neen"
+        },
+        {
+          "type": "go",
+          "place": "castle_ebonheart",
+          "text": "Register the Imperial manumission seals at Castle Ebonheart"
+        }
+      ],
+      "consequence": "world_state:seyda_neen_manumission_papers_stamped",
+      "rewards": {
+        "gold": 450,
+        "xp": 550
+      },
+      "consequence_detail": {
+        "world_state": "seyda_neen_manumission_papers_stamped",
+        "flag": "story_ai_manumission_stamped",
+        "summary": "The manhunters at Marandus are scattered and lawful manumission papers are stamped at Seyda Neen and Castle Ebonheart."
+      }
+    },
+    {
+      "id": "story_ascadian_isles_04_graces_of_the_high_fane",
+      "order": 4,
+      "title": "Sanctuary of the Seven Graces",
+      "region": "morrowind/ascadian_isles",
+      "category": "main",
+      "start": "auto",
+      "prereq": "story_ascadian_isles_03_sanctuary_under_vivec",
+      "requires": [
+        "story_ascadian_isles_03_sanctuary_under_vivec"
+      ],
+      "finale": true,
+      "why": [
+        "morrowind/ascadian_isles.L8.vivec_the_living_god",
+        "morrowind/ascadian_isles.L8.seven_graces"
+      ],
+      "places": [
+        "seyda_neen",
+        "vivec"
+      ],
+      "stages": [
+        {
+          "id": 10,
+          "place": "seyda_neen",
+          "objective": "See the freed passengers safely aboard the coastal packet at Seyda Neen"
+        },
+        {
+          "id": 20,
+          "place": "vivec",
+          "objective": "Deliver the manumission register to Archcanon Saryoni at the High Fane in Vivec City"
+        },
+        {
+          "id": 30,
+          "place": "vivec",
+          "objective": "Receive the Pilgrim's Lantern of Grace on the Temple steps of Vivec City"
+        }
+      ],
+      "objectives": [
+        {
+          "type": "go",
+          "place": "seyda_neen",
+          "text": "See the freed passengers safely aboard the coastal packet at Seyda Neen"
+        },
+        {
+          "type": "go",
+          "place": "vivec",
+          "text": "Deliver the manumission register to Archcanon Saryoni at the High Fane in Vivec City"
+        },
+        {
+          "type": "go",
+          "place": "vivec",
+          "text": "Receive the Pilgrim's Lantern of Grace on the Temple steps of Vivec City"
+        }
+      ],
+      "consequence": "world_state:vivec_canton_sanctuary_charter_upheld",
+      "rewards": {
+        "gold": 800,
+        "xp": 900,
+        "title": "Lantern-Bearer of the Cantons",
+        "unique_item": "skycraft:ebony_sword"
+      },
+      "consequence_detail": {
+        "world_state": "vivec_canton_sanctuary_charter_upheld",
+        "flag": "story_ai_finale_complete",
+        "summary": "Archcanon Saryoni upholds the Temple sanctuary charter in Vivec's cantons and the Twin Lamps passage to Seyda Neen remains unbroken."
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "story_ascadian_isles_hook_npc",
+      "name": "Warden of Vivec City",
+      "role": "guard",
+      "place": "vivec",
+      "greet": "In the Foreign Quarter and St. Olms canals of Vivec City, chalk drawings of twin lanterns appear beside locked sewer grates while bounty-hunters from Dren Plantation prowl the bridges toward Suran."
+    }
+  ],
+  "scenes": {
+    "story_ascadian_isles_scene_01": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (1).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_02": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (2).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_03": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (3).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_04": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (4).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_05": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (5).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_06": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (6).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_07": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (7).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_08": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (8).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_09": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (9).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_10": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (10).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_11": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (11).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_12": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (12).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_13": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (13).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_14": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (14).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_15": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (15).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_16": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (16).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_17": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (17).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_18": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (18).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_19": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (19).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_20": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (20).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_21": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (21).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_22": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (22).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_23": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (23).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_24": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (24).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_25": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (25).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_26": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (26).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_27": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (27).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_28": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (28).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_29": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (29).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_30": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (30).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_31": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (31).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_32": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (32).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_33": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (33).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_34": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (34).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_35": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (35).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_36": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (36).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_37": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (37).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_38": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (38).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_39": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (39).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_40": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (40).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_41": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (41).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_42": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (42).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_43": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (43).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_44": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (44).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_45": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (45).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_46": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (46).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_47": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (47).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_48": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (48).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_49": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (49).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_50": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (50).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_51": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (51).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_52": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (52).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_53": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (53).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_54": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (54).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_55": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (55).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_56": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (56).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_57": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (57).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_58": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (58).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_59": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (59).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_60": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (60).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_61": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (61).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_62": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (62).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_63": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (63).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_64": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (64).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_65": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (65).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_66": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (66).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_67": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (67).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_68": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (68).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_69": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (69).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_70": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (70).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_71": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (71).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_72": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (72).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_73": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (73).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_74": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (74).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_75": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (75).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_76": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (76).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_77": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (77).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_78": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (78).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_79": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Vivec (79).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Vivec at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Vivec and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_80": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Tel Branora (80).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Tel Branora at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Tel Branora and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_81": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Massahanud Camp (81).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Massahanud Camp at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Massahanud Camp and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_82": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Samarys Ancestral Tomb (82).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Samarys Ancestral Tomb at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Samarys Ancestral Tomb and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_83": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Castle Ebonheart (83).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Castle Ebonheart at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Castle Ebonheart and report back to the seat."
+    ],
+    "story_ascadian_isles_scene_84": [
+      "Warden of Vivec City: Examine the ash-wax seals recovered near Adupuibi Docks (84).",
+      "Watch-Captain of Ascadian Isles: The ledger entries match the dispatches troubling Ascadian Isles.",
+      "Watch-Captain of Ascadian Isles: Our scouts tracked the courier column past Adupuibi Docks at dusk.",
+      "Watch-Captain of Ascadian Isles: Secure the approaches around Adupuibi Docks and report back to the seat."
+    ]
+  }
+}

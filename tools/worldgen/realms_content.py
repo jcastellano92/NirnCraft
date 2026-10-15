@@ -99,36 +99,39 @@ def members(weight, kind="hostile", levels=(1, 999), *ms):
 
 SPAWNS = [
     # the Deadlands (the Nether dimension)
-    {"regions": ["minecraft:the_nether"], "groups": [
+    {"regions": ["minecraft:the_nether"], "why": ["cyrodiil.L11.oblivion_crisis", "gold_coast.L10.gate_remnant_under_kvatch"], "groups": [
         group(S + "scamp", 10, (1, 3)), group(S + "clannfear", 8, (1, 2)), group(S + "dremora", 7, (1, 2), levels=(10, 999)),
         group(S + "flame_atronach", 5, (1, 1)), group(S + "daedroth", 4, (1, 1), levels=(15, 999)),
         group(S + "spider_daedra", 3, (1, 1), levels=(18, 999)),
         members(3, "hostile", (20, 999), (S + "dremora", (2, 3)), (S + "scamp", (1, 2)))]},
-    {"regions": ["minecraft:the_nether"], "biomes": [S + "deadlands_harrada_thicket", S + "deadlands_blood_fields"], "groups": [
+    {"regions": ["minecraft:the_nether"], "biomes": [S + "deadlands_harrada_thicket", S + "deadlands_blood_fields"],
+     "why": ["cyrodiil.L11.oblivion_crisis", "cyrodiil.L8.daedric_shrines"], "groups": [
         group(S + "spider_daedra", 4, (1, 1)), group(S + "clannfear", 4, (2, 3))]},
     # Sovngarde (the End dimension): hero spirits wander; the living are guests
-    {"regions": ["minecraft:the_end"], "groups": [
+    {"regions": ["minecraft:the_end"], "why": ["whiterun.L8.honour_and_sovngarde", "skyrim.L8.ancestor_barrows"], "groups": [
         group(S + "sovngarde_hero", 10, (1, 2), kind="wildlife"), group(S + "wandering_soul", 6, (1, 3), kind="wildlife")]},
     # the Shivering Isles
-    {"regions": ["skycraft:shivering_isles"], "biomes": [S + "shivering_isles_dementia_swamp", S + "shivering_isles_dementia_forest"], "groups": [
+    {"regions": ["skycraft:shivering_isles"], "biomes": [S + "shivering_isles_dementia_swamp", S + "shivering_isles_dementia_forest"],
+     "why": ["cyrodiil.L8.daedric_shrines", "nibenay_basin.L10.arrius_cult_cells"], "groups": [
         group(S + "grummite", 10, (2, 4)), group(S + "baliwog", 6, (1, 3)), group(S + "gnarl", 5, (1, 1)),
         group(S + "elytra", 4, (1, 2)), group(S + "flesh_atronach", 2, (1, 1), levels=(15, 999)),
         group(S + "baliwog", 6, (2, 3), place="water")]},
     {"regions": ["skycraft:shivering_isles"], "biomes": [S + "shivering_isles_mania_fields", S + "shivering_isles_mania_mushroom_forest",
-                                                       S + "shivering_isles_mania_crystal_grove", S + "shivering_isles_fringe"], "groups": [
+                                                       S + "shivering_isles_mania_crystal_grove", S + "shivering_isles_fringe"],
+     "why": ["cyrodiil.L8.daedric_shrines", "cyrodiil.L10.cult_remnants"], "groups": [
         group(S + "elytra", 8, (1, 3)), group(S + "gnarl", 5, (1, 1)), group(S + "grummite", 4, (1, 2)),
         group(S + "flesh_atronach", 2, (1, 1), levels=(15, 999))]},
     # Apocrypha
-    {"regions": ["skycraft:apocrypha"], "groups": [
+    {"regions": ["skycraft:apocrypha"], "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return"], "groups": [
         group(S + "seeker", 10, (1, 3)), group(S + "lurker", 3, (1, 1), levels=(15, 999)),
         group(S + "lurker", 4, (1, 1), place="water")]},
     # the Soul Cairn
-    {"regions": ["skycraft:soul_cairn"], "groups": [
+    {"regions": ["skycraft:soul_cairn"], "why": ["haafingar.L10.soul_cairn_gate", "skyrim.L10.volkihar"], "groups": [
         group(S + "boneman", 9, (1, 3)), group(S + "mistman", 7, (1, 2)), group(S + "wrathman", 3, (1, 1), levels=(18, 999)),
         group(S + "keeper", 2, (1, 1), levels=(25, 999)),
         group(S + "wandering_soul", 10, (2, 4), kind="wildlife")]},
     # Coldharbour
-    {"regions": ["skycraft:coldharbour"], "groups": [
+    {"regions": ["skycraft:coldharbour"], "why": ["cyrodiil.L11.three_banner_war", "cyrodiil.L10.cult_remnants"], "groups": [
         group(S + "dremora", 9, (1, 2)), group(S + "harvester", 4, (1, 1)), group(S + "flame_atronach", 4, (1, 1)),
         group(S + "scamp", 6, (2, 3)), group(S + "daedroth", 3, (1, 1)), group(S + "wandering_soul", 6, (1, 3), kind="wildlife")]},
 ]
@@ -256,21 +259,39 @@ LOOT = {
 
 # ============================================================================================ places in Nirn
 PLACES = [
-    {"id": "kvatch_gate", "name": "place.skycraft.kvatch_gate", "type": "landmark", "culture": "imperial",
-     "region": "cyrodiil/gold_coast", "x": -2480, "z": 8190, "radius": 18, "variant": "oblivion_gate"},
-    {"id": "shivering_isles_door", "name": "place.skycraft.shivering_isles_door", "type": "landmark", "culture": "imperial",
-     "region": "sea/topal_bay", "x": 3600, "z": 10330, "radius": 12, "variant": "madness_door"},
-    {"id": "black_book_epistolary", "name": "place.skycraft.black_book_epistolary", "type": "landmark", "culture": "dunmer",
-     "region": "morrowind/solstheim", "x": 4990, "z": -3000, "radius": 8, "variant": "black_book_altar"},
-    {"id": "black_book_sallow_regent", "name": "place.skycraft.black_book_sallow_regent", "type": "landmark", "culture": "nord",
-     "region": "morrowind/solstheim", "x": 4290, "z": -3600, "radius": 8, "variant": "black_book_altar"},
-    {"id": "black_book_filament", "name": "place.skycraft.black_book_filament", "type": "landmark", "culture": "nord",
-     "region": "morrowind/solstheim", "x": 4230, "z": -3150, "radius": 8, "variant": "black_book_altar"},
-    {"id": "soul_cairn_portal", "name": "place.skycraft.soul_cairn_portal", "type": "landmark", "culture": "imperial",
-     "region": "skyrim/haafingar", "x": -3148, "z": -2402, "radius": 10, "variant": "soul_cairn_portal"},
-    {"id": "dark_anchor", "name": "place.skycraft.dark_anchor", "type": "landmark", "culture": "imperial",
-     "region": "cyrodiil/jerall_mountains", "x": 1010, "z": 2530, "radius": 12, "variant": "dark_anchor"},
+    {"id": "kvatch_gate", "name": "place.skycraft.kvatch_gate", "type": "landmark", "class": "marquee", "culture": "imperial",
+     "region": "cyrodiil/gold_coast", "x": -2480, "z": 8190, "radius": 18, "variant": "oblivion_gate",
+     "why": ["cyrodiil.L11.oblivion_crisis", "gold_coast.L11.kvatch_burned", "gold_coast.L10.gate_remnant_under_kvatch"]},
+    {"id": "shivering_isles_door", "name": "place.skycraft.shivering_isles_door", "type": "landmark", "class": "marquee", "culture": "imperial",
+     "region": "sea/topal_bay", "x": 3600, "z": 10330, "radius": 12, "variant": "madness_door",
+     "why": ["cyrodiil.L8.daedric_shrines", "nibenay_basin.L10.arrius_cult_cells", "cyrodiil.L11.oblivion_crisis"]},
+    {"id": "black_book_epistolary", "name": "place.skycraft.black_book_epistolary", "type": "landmark", "class": "marquee", "culture": "dunmer",
+     "region": "morrowind/solstheim", "x": 4990, "z": -3000, "radius": 8, "variant": "black_book_altar",
+     "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return", "morrowind.L10.daedric_ruins"]},
+    {"id": "black_book_sallow_regent", "name": "place.skycraft.black_book_sallow_regent", "type": "landmark", "class": "marquee", "culture": "nord",
+     "region": "morrowind/solstheim", "x": 4290, "z": -3600, "radius": 8, "variant": "black_book_altar",
+     "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return", "morrowind.L10.daedric_ruins"]},
+    {"id": "black_book_filament", "name": "place.skycraft.black_book_filament", "type": "landmark", "class": "marquee", "culture": "nord",
+     "region": "morrowind/solstheim", "x": 4230, "z": -3150, "radius": 8, "variant": "black_book_altar",
+     "why": ["solstheim.L10.black_book_altars", "solstheim.L11.black_book_return", "morrowind.L10.daedric_ruins"]},
+    {"id": "soul_cairn_portal", "name": "place.skycraft.soul_cairn_portal", "type": "landmark", "class": "marquee", "culture": "imperial",
+     "region": "skyrim/haafingar", "x": -3148, "z": -2402, "radius": 10, "variant": "soul_cairn_portal",
+     "why": ["skyrim.L10.volkihar", "haafingar.L10.soul_cairn_gate", "haafingar.L10.volkihar_castle"]},
+    {"id": "dark_anchor", "name": "place.skycraft.dark_anchor", "type": "landmark", "class": "marquee", "culture": "imperial",
+     "region": "cyrodiil/jerall_mountains", "x": 1010, "z": 2530, "radius": 12, "variant": "dark_anchor",
+     "why": ["cyrodiil.L10.cult_remnants", "jerall_mountains.L10.sancre_tor_barrow", "cyrodiil.L11.three_banner_war"]},
 ]
+
+BOOK_WHY = {
+    "on_the_deadlands": ["cyrodiil.L11.oblivion_crisis", "gold_coast.L10.gate_remnant_under_kvatch"],
+    "binding_a_sigil_stone": ["cyrodiil.L11.oblivion_crisis", "nibenay_basin.L5.morrowind_trade"],
+    "the_whalebone_bridge": ["skyrim.L8.ancestor_barrows", "whiterun.L8.honour_and_sovngarde"],
+    "letter_from_new_sheoth": ["cyrodiil.L8.daedric_shrines", "nibenay_basin.L10.arrius_cult_cells"],
+    "mania_and_dementia": ["cyrodiil.L8.daedric_shrines", "cyrodiil.L10.cult_remnants"],
+    "apocrypha_marginalia": ["solstheim.L10.black_book_altars", "solstheim.L8.ink_dread"],
+    "the_ideal_masters": ["haafingar.L10.soul_cairn_gate", "skyrim.L10.volkihar"],
+    "chains_of_coldharbour": ["cyrodiil.L11.three_banner_war", "cyrodiil.L10.cult_remnants"],
+}
 
 # Lore books: id -> (category, cover, weight, value, title, author, pages). Original text.
 BOOKS = {

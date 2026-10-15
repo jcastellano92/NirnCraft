@@ -1,0 +1,356 @@
+{
+  "id": "dakfron",
+  "sil": "badlands-mesa-watch-town",
+  "base": "none",
+  "overlay": "dragontail",
+  "radius": 54,
+  "reach": 62,
+  "fill_gap": 2,
+  "inn_key": "dakfron_scorpions_tail_inn",
+  "names": {
+    "inn": "dakfron_scorpions_tail_inn",
+    "store": "dakfron_cistern_provisions",
+    "smithy": "dakfron_flint_and_steel_forge"
+  },
+  "titles": {
+    "dakfron_landmark": "Dak'fron Badlands Sanctuary",
+    "dakfron_mesa_keep": "Dak'fron Badlands Watch-Keep",
+    "dakfron_scorpions_tail_inn": "The Scorpion's Tail Inn",
+    "dakfron_cistern_provisions": "Red-Mesa Water & Ration Store",
+    "dakfron_flint_and_steel_forge": "Badlands Spear & Shield Smithy",
+    "dakfron_dust_salve_shop": "Alkali-Dust & Cactus-Balm Shop",
+    "dakfron_tuwhacca_mesa_fane": "Wind-Scoured Fane of Tu'whacca",
+    "dakfron_ochre_shaft_tombs": "Ochre-Cliff Shaft Tombs",
+    "dakfron_outland_patrol_hall": "Badlands Outrider Barracks",
+    "dakfron_wadi_watchtower": "Dry-Wash Watchtower",
+    "dakfron_camel_picket_yard": "Outrider Camel Picket-Yard",
+    "dakfron_market_plaza": "Dak'fron Market Square"
+  },
+  "gates": [
+    [
+      0,
+      -50
+    ],
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ],
+    [
+      -50,
+      0
+    ]
+  ],
+  "walls": [
+    {
+      "r": 50,
+      "sides": 8,
+      "h": 7,
+      "gates": [
+        0.0,
+        1.57,
+        3.14,
+        4.71
+      ],
+      "towers": true
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "dome_temple",
+      "at": [
+        0,
+        -22
+      ],
+      "face": "south",
+      "name": "dakfron_landmark",
+      "overlay": "dragontail"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "palace",
+      "use": "keep",
+      "wealth": "noble",
+      "at": [
+        14,
+        -19
+      ],
+      "face": "south",
+      "name": "dakfron_mesa_keep"
+    },
+    {
+      "kind": "inn",
+      "use": "inn",
+      "wealth": "common",
+      "at": [
+        34,
+        -15
+      ],
+      "face": "west",
+      "name": "dakfron_scorpions_tail_inn"
+    },
+    {
+      "kind": "store",
+      "use": "general_store",
+      "wealth": "common",
+      "at": [
+        24,
+        2
+      ],
+      "face": "west",
+      "name": "dakfron_cistern_provisions"
+    },
+    {
+      "kind": "smithy",
+      "use": "smithy",
+      "wealth": "common",
+      "at": [
+        30,
+        21
+      ],
+      "face": "west",
+      "name": "dakfron_flint_and_steel_forge"
+    },
+    {
+      "kind": "alchemist",
+      "use": "alchemist",
+      "wealth": "common",
+      "at": [
+        10,
+        22
+      ],
+      "face": "north",
+      "name": "dakfron_dust_salve_shop"
+    },
+    {
+      "kind": "temple",
+      "use": "temple",
+      "wealth": "wealthy",
+      "at": [
+        -3,
+        37
+      ],
+      "face": "north",
+      "name": "dakfron_tuwhacca_mesa_fane"
+    },
+    {
+      "kind": "hall_of_dead",
+      "use": "hall_of_dead",
+      "wealth": "common",
+      "at": [
+        -13,
+        20
+      ],
+      "face": "north",
+      "name": "dakfron_ochre_shaft_tombs"
+    },
+    {
+      "kind": "barracks",
+      "use": "barracks",
+      "wealth": "common",
+      "at": [
+        -33,
+        16
+      ],
+      "face": "east",
+      "name": "dakfron_outland_patrol_hall"
+    },
+    {
+      "kind": "building",
+      "use": "guardhouse",
+      "wealth": "common",
+      "at": [
+        -24,
+        -2
+      ],
+      "face": "east",
+      "name": "dakfron_wadi_watchtower"
+    },
+    {
+      "kind": "stables",
+      "use": "stables",
+      "wealth": "common",
+      "at": [
+        -31,
+        -20
+      ],
+      "face": "east",
+      "name": "dakfron_camel_picket_yard"
+    }
+  ],
+  "streets": [
+    {
+      "from": [
+        0,
+        -44
+      ],
+      "to": [
+        0,
+        44
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -44,
+        0
+      ],
+      "to": [
+        44,
+        0
+      ],
+      "width": 4,
+      "major": true,
+      "fill": true,
+      "tag": "main"
+    },
+    {
+      "from": [
+        -28,
+        -28
+      ],
+      "to": [
+        28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        -28
+      ],
+      "to": [
+        28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        28,
+        28
+      ],
+      "to": [
+        -28,
+        28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    },
+    {
+      "from": [
+        -28,
+        28
+      ],
+      "to": [
+        -28,
+        -28
+      ],
+      "width": 4,
+      "major": false,
+      "fill": true,
+      "tag": "ring"
+    }
+  ],
+  "lines": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "stalls": 3,
+      "name": "dakfron_market_plaza"
+    }
+  ],
+  "queue": [
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "wealthy",
+      "count": 7,
+      "on": "main",
+      "flags": [
+        "upper"
+      ]
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "count": 22,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "use": "cottage",
+      "wealth": "poor",
+      "count": 5,
+      "on": "ring",
+      "flags": [
+        "for_sale"
+      ]
+    }
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        27
+      ],
+      "overlay": "dragontail"
+    },
+    {
+      "ring": [
+        27,
+        54
+      ],
+      "overlay": "dragontail"
+    }
+  ],
+  "features": [
+    {
+      "type": "well",
+      "count": 1
+    },
+    {
+      "type": "lamps",
+      "count": 1
+    },
+    {
+      "type": "banners",
+      "count": 2
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:stendarr",
+      "count": 1
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "count": 1
+    },
+    {
+      "type": "flowers",
+      "count": 1
+    }
+  ]
+}

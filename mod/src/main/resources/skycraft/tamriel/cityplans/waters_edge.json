@@ -1,0 +1,95 @@
+{
+  "id": "waters_edge",
+  "why": [
+    "blackwood.L3.niben_mouth",
+    "blackwood.L6.border_villages"
+  ],
+  "sil": "niben-reed-jetty",
+  "base": "none",
+  "overlay": "blackwood",
+  "radius": 28,
+  "reach": 40,
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
+  "quarters": [
+    {
+      "ring": [
+        0,
+        28
+      ],
+      "overlay": "blackwood"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "mill",
+      "use": "mill",
+      "wealth": "common",
+      "at": [
+        8,
+        0
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "waters_edge_b_1"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        15
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "waters_edge_b_2"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        -8,
+        0
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "waters_edge_b_3"
+    },
+    {
+      "kind": "house",
+      "use": "house",
+      "wealth": "common",
+      "at": [
+        0,
+        -15
+      ],
+      "face": "south",
+      "overlay": "blackwood",
+      "name": "waters_edge_b_4"
+    }
+  ],
+  "features": [
+    {
+      "type": "pond",
+      "theme": "waters_edge_reeds",
+      "count": 2
+    },
+    {
+      "type": "well",
+      "theme": "waters_edge_pump",
+      "count": 1
+    }
+  ],
+  "titles": {
+    "waters_edge_b_1": "Water's Edge Reed Mill",
+    "waters_edge_b_2": "Biene Amelion's House",
+    "waters_edge_b_3": "Marz's River Shack",
+    "waters_edge_b_4": "Fimmion's Shed"
+  }
+}
