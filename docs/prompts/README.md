@@ -1,68 +1,22 @@
-# Prompt library
+# Phase Prompt Library (`T1`–`T12` Tamriel Total Parity & Living World Master Plan)
 
-One ready-to-run prompt per roadmap phase of `docs/world/WORLD-PLAN.md` section 5. Each is written so a brand-new
-Claude Code session can execute it cold: what to read, the legal rule, the write set, how to verify cheaply, the
-measurable gates, the merge procedure and the report format.
+Every prompt in this folder is a self-contained execution specification for one phase of the **Tamriel Total Parity & Living World Master Plan (`T1`–`T12`)** in [`docs/world/WORLD-PLAN.md`](../world/WORLD-PLAN.md) (Sections 8–10).
 
-## Files
+Read [`_COMMON.md`](_COMMON.md) before running any phase prompt.
 
-| File | Phase | Runs after |
+## Phase Prompts (`T1`–`T12`)
+
+| Phase | Prompt File | Summary |
 | --- | --- | --- |
-| `_COMMON.md` | Rules every phase shares: roles, reading order, legal line, world building first, fast loop, gates, merge procedure, report format, resuming | (read first, always) |
-| `_province-steps.md` | The nine province steps V1-V9 (goal, write set, verification, gates) used by R4-R12 | (read with any province phase) |
-| `R0-release-playtest.md` | R0 post-P5 release build and owner playtest | P5 merged |
-| `R1-loose-ends.md` | R1a dungeons and creatures, R1b roads, sea and survival | R0 |
-| `R2-testing-tiers.md` | Tier 0 JUnit plan-layer tests, Tier 1 hot-swap dev server | R0 |
-| `R3a-world-sheets.md` | World-model sheets as data, loader, `why` fields, lint (MS22) | R0, `provinces/skyrim.md` |
-| `R3b-micro-biomes.md` | Micro-biome layer (MS21) | R3a |
-| `R3c-measurement.md` | `flow_audit.py`, floors per region, MS7, MS1 schema, MS20 | R3a |
-| `R3d-town-services.md` | Trainers, notice boards, signposting, courts, reactive lines, arrival moment | R0 |
-| `R3e-world-systems.md` | Travel networks, encounter library, festival calendar, level policy | R0 |
-| `R4-skyrim-uplift.md` | Skyrim to the measured floors (steps S1-S5) | R3a-R3e |
-| `R4a-town-overhaul.md` | Town overhaul: planned districts, recognisable shops, multi-room inns, jarl halls, daily routines (steps TO0-TO6) | R0 (integrates with R3d and R4 S2) |
-| `R5-iliac-bay.md` | High Rock and Hammerfell: IB-S, IB1-IB8, IB9, IB-G | IB1-IB3 after R1; the rest after R4 |
-| `R6-cyrodiil.md` | Cyrodiil V1-V9 | R5 (V2/V3/V5 slots) |
-| `R7-morrowind.md` | Morrowind V1-V9 | R6 |
-| `R8-black-marsh.md` | Black Marsh V1-V9 | R7 |
-| `R9-elsweyr.md` | Elsweyr V1-V9 | R8 |
-| `R10-valenwood.md` | Valenwood V1-V9 | R9 |
-| `R11-summerset.md` | Summerset V1-V9 | R10 |
-| `R12-foreign-lands.md` | Atmora, Akavir, Yokuda, Pyandonea, Thras V1-V9 at half density | R11 |
-| `R13-endless-lands-p7.md` | P7: the plan-first pipeline per 4 km tile beyond the map | R2 (free slot) |
-| `R14-items-affix.md` | Item condition, makers, enchantment names, storied items | R3a (free slot) |
-| `R15-final-polish.md` | Docs, realms, performance, release build, owner sign-off | everything else |
-
-## How to run a phase
-
-1. Open Claude Code in `F:\Projects\Personal\Skycraft\Skycraft` (the main checkout, branch `tamriel-overhaul`).
-2. Check `docs/START-HERE.md` "Next" and `docs/world/WORLD-PLAN.md` section 7 for what is runnable now (dependencies
-   met, no conflicting globally serial step in progress, fewer than 3 agents busy).
-3. Say: **"Read `docs/START-HERE.md` and `docs/prompts/_COMMON.md`, then run `docs/prompts/<file>` [step <id>]."**
-   For province phases name the step (`R6-cyrodiil.md step V2`, `R5-iliac-bay.md step IB3`, `R4-skyrim-uplift.md step
-   S2`); one step per session is the normal size.
-4. The session orchestrates: it starts worktree agents (at most 3) with the write sets in the prompt, verifies with
-   the fast loop, runs the gates once, merges (`bash tools/dev/merge_worktree.sh`, `tools\qa\qa.ps1 -Server -Rebake`),
-   commits on `tamriel-overhaul` (never pushes), and **updates the WORLD-PLAN state table and START-HERE's "Next"
-   line** before it reports.
-5. Read the report (format in `_COMMON.md` section 8). If a gate failed, the phase stays `in progress`; run the same
-   prompt again and it resumes.
-
-Running two phases at once: only if their write sets are disjoint and neither is a globally serial step while the
-other one also is (V2, V3, V5, R3b, R13). Say so in both sessions.
-
-## How to resume
-
-* **Same session, agent interrupted:** SendMessage to the agent (its id is the hex in the worktree folder name):
-  "continue where you left off; finish and report".
-* **New session:** run the same prompt; it reads WORLD-PLAN section 7, finds the phase `in progress`, lists the
-  worktrees (`git worktree list`, `git -C <path> status --short`, `diff --stat`) and restarts an agent **in the
-  existing worktree** with "Uncommitted work from a previous attempt is already in this worktree; review it first and
-  finish it rather than starting over" (`_COMMON.md` section 9).
-* **Merged but not recorded:** if `git log` shows the phase's commit but section 7 does not, update section 7 first.
-
-## Writing or changing a prompt
-
-Keep the shape: header line, Goal, Context to read, Write set, Steps (or Specifics per step), Verification, Gates
-(table: gate, tool, floor), Merge and report, Size. Gates must be measurable by a named tool. Put shared rules in
-`_COMMON.md` or `_province-steps.md`, not in every file. When a phase's plan changes, change WORLD-PLAN section 5 and
-the prompt in the same commit.
+| **T1** | [`T1-residents-and-voices.md`](T1-residents-and-voices.md) | Wire all `12,709` authored named residents (`resources/skycraft/society/*_residents.json`) into `SettlementPopulation.java`, expand `region_voice.json` and `ContextualDialogue` deed reactivity to all `75` land regions, and add `>= 6` multi-turn cultural chatter topics per province (`Chatter.java`). |
+| **T2** | [`T2-cityplans-and-peninsulas.md`](T2-cityplans-and-peninsulas.md) | Unshadow Java city builders (`mournhold`, `vivec`, `raven_rock`), add street nets/queues/infill to the `75` streetless Cyrodiil & Morrowind `cityplans/*.json` files, wire `Zoning.harbor()` & `Zoning.outskirts()` into `Zoning.adopt()`, and verify peninsula/coastline settlement completeness against Daggerfall/Arena/Morrowind/Oblivion. |
+| **T3** | [`T3-authentic-places-and-islands.md`](T3-authentic-places-and-islands.md) | Replace all `1,718` synthetic grid-stamped `_site_`/`_marker_` places in `morrowind.json`, `foreign.json`, `black_marsh.json`, `elsweyr.json`, `valenwood.json`, and `summerset.json` with terrain-fitted, culturally authentic sites, and populate minor islands across uncharted and outer-realm seas (`Beyond` + `OceanIsles`). |
+| **T4** | [`T4-world-wonders-and-peaks.md`](T4-world-wonders-and-peaks.md) | Expand `peaks.json` (`MapPeaks.java`) from `19` to `60+` analytical peaks, volcanic calderas, mesas, and graded switchback paths across all `11` provinces (`red_mountain`, `eton_nir`, `sunspire_peak`, `dive_rock_peak`), and build multi-chunk architectural wonders for Red Mountain/Dagoth Ur/Ghostfence, Adamantine Tower, Crystal-Like-Law, Baar Dau, and Falinesti. |
+| **T5** | [`T5-trade-crops-homesteads.md`](T5-trade-crops-homesteads.md) | Build `TradeNetwork.java` connecting local `WorldSheets` L3/L5 production and `TravelNetworks` routes to `ShopStock`, `PriceEngine`, and market stalls; wire real 3D regional crops (`saltrice`, `ash_yam`, `wickwheat`, `marshmerrow`, `comberry`, `hackle_lo`, `moon_sugar`), specialty camps (`PADDY`, `KWAMA`, `SUGAR`, `VINEYARD`, `ORCHARD`, `APIARY`), and `guar`/`netch` pastures; unlock all `107` Hearthfire homesteads and provincial city homes. |
+| **T6** | [`T6-factions-attitudes-encounters.md`](T6-factions-attitudes-encounters.md) | Expand `Reputation.FACTIONS` to all provincial Great Houses, Guilds, Crowns/Forebears, An-Xileel, and faiths; implement `RaceAttitudes.java` (hold × faction × race/faith disposition, guard scrutiny, shop pricing, and greetings); wire reputation and world-state branching into `Encounters.java` and `WildScenes.java`. |
+| **T7** | [`T7-carriages-and-transport.md`](T7-carriages-and-transport.md) | Cap carriage travel in `Carriages.java` at `MAX_CARRIAGE_DISTANCE = 2,600` blocks (reaching all of Skyrim from central Whiterun, requiring multi-hop rides across Tamriel), display exact distances and travel times, scale gold fare with distance, load all `14` `travel/*.json` files (including outer realms), and enforce `Prewarm` terrain loading across all travel modes. |
+| **T8** | [`T8-cave-networks-and-underworld.md`](T8-cave-networks-and-underworld.md) | Replace vanilla-only noise caves with `TamrielCaves` (avoiding dungeons/roads), expand from `5` to `14` regional subterranean biomes with `0` vanilla mob spawners, make `CavernDress.lightShaft()` truly pierce the terrain surface for real sunlight/god-rays/waterfalls, and add submerged ocean sea-caves with breathable air pockets. |
+| **T9** | [`T9-flora-harvesting-and-dens.md`](T9-flora-harvesting-and-dens.md) | Fix `Harvesting.java` to run Forge Global Loot Modifiers (`forage_fungi.json`, `forage_plants.json`) and transition harvested plants to a regrowing state; fix `FaunaBehaviors` so predators never flee from players; register `50` 3D regional alchemy plant/fungus blocks scattered by micro-biome; upgrade `Builders.animalDen()` with `DenBlockEntity` and territorial resident fauna. |
+| **T10** | [`T10-skybox-shaders-weather-fronts.md`](T10-skybox-shaders-weather-fronts.md) | Make `SkyRenderer` and `CloudRenderer` render seamlessly when Oculus / Complementary Reimagined shaders are active and blend fog with Distant Horizons; replace boolean aurora checks with continuous world-`Z` latitude aurora & atmospheric scattering; upgrade `RegionalWeather` to server-synced moving `WeatherFront` cells that drive NPCs indoors (`Schedule.java`) and shift dialogue/spawns. |
+| **T11** | [`T11-audio-instruments-and-bards.md`](T11-audio-instruments-and-bards.md) | Re-synthesize and un-blocklist the `10` silenced biome ambient beds and `3` insect calls in `AmbienceEngine.java`; register `10` 3D cultural musical instrument items equipped by bards (`NpcModel.java`); replace random note-block walks with cultural modal melodies, regional song lyrics, and travelling road bards. |
+| **T12** | [`T12-arsenal-perks-animations.md`](T12-arsenal-perks-animations.md) | Register missing regional polearms and heavy weapons so all `94/94` `LegendaryUniques` return non-empty items; include polearms/crossbows in `LeveledGear`/`RegionalGear`; implement the `5` unwired combat perks; wire NPC mages to cast `Spells.java` spells; add third-person animations for climbing, dodge rolling, spellcasting, and hip/back sheathed weapons. |
