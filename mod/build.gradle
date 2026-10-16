@@ -132,3 +132,25 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += ['-Xmaxerrs', '2000']
 }
+
+eclipse {
+    jdt {
+        file {
+            withProperties { props ->
+                props['org.eclipse.jdt.core.compiler.problem.deprecation'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.deprecationInDeprecatedCode'] = 'disabled'
+                props['org.eclipse.jdt.core.compiler.problem.deprecationWhenOverridingDeprecatedMethod'] = 'disabled'
+                props['org.eclipse.jdt.core.compiler.problem.unusedWarningToken'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.unusedImport'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.unusedLocal'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.unusedPrivateMember'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.unusedParameter'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.rawTypeReference'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.uncheckedTypeOperation'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.deadCode'] = 'ignore'
+                props['org.eclipse.jdt.core.compiler.problem.discouragedReference'] = 'ignore'
+            }
+        }
+    }
+}
+
