@@ -266,10 +266,14 @@ def _cgrid(n=CLOUD_CELL):
     return xx, yy
 
 
-def _lobes(rng, n_lobes, spread, rmin, rmax, flat_bottom=None, n=CLOUD_CELL):
-    """A cauliflower puff: soft round lobes, each lit on its own upper side.
+def _fbm(n, rng, base_exp=1.8):
+    return (0.50 * periodic_noise(n, n, rng, base_exp, low=2.0)
+            + 0.30 * periodic_noise(n, n, rng, base_exp + 0.35, low=4.0)
+            + 0.20 * periodic_noise(n, n, rng, base_exp + 0.7, low=8.0))
 
-    Returns (density about 0..1.5, brightness 0..1)."""
+
+def _lobes(rng, n_lobes, spread, rmin, rmax, flat_bottom=None, n=CLOUD_CELL):
+    """Volumetric multi-octave FBM cloud puff with soft self-shadowed lobes."""
     xx, yy = _cgrid(n)
     d = np.zeros((n, n))
     wsum = np.full((n, n), 1e-6)
@@ -279,40 +283,46 @@ def _lobes(rng, n_lobes, spread, rmin, rmax, flat_bottom=None, n=CLOUD_CELL):
         ang = rng.uniform(0, np.pi * 2)
         rad = spread * np.sqrt(rng.uniform(0, 1))
         cx = np.cos(ang) * rad
-        cy = np.sin(ang) * rad * 0.6 + 0.05
-        r = rng.uniform(rmin, rmax) * (1.15 - 0.4 * (rad / spread))
+        cy = np.sin(ang) * rad * 0.62 + 0.04
+        r = rng.uniform(rmin, rmax) * (1.18 - 0.38 * (rad / max(1e-3, spread)))
         lobes.append((cx, cy, r))
-    # small lobes along the upper rim make the cauliflower edge
-    for i in range(n_lobes):
-        ang = rng.uniform(np.pi * 1.05, np.pi * 1.95)
-        lobes.append((np.cos(ang) * spread * 1.05, np.sin(ang) * spread * 0.75, rng.uniform(rmin * 0.55, rmin * 0.9)))
+    for i in range(n_lobes + 4):
+        ang = rng.uniform(np.pi * 1.02, np.pi * 1.98)
+        lobes.append((np.cos(ang) * spread * 1.02, np.sin(ang) * spread * 0.72, rng.uniform(rmin * 0.52, rmin * 0.88)))
+    warp_x = (_fbm(n, rng, 1.9) - 0.5) * 0.16
+    warp_y = (_fbm(n, rng, 1.9) - 0.5) * 0.16
+    wx = xx + warp_x
+    wy = yy + warp_y
     for cx, cy, r in lobes:
-        q = ((xx - cx) ** 2 + (yy - cy) ** 2) / (r * r)
-        g = np.exp(-q * 1.6)
+        q = ((wx - cx) ** 2 + (wy - cy) ** 2) / (r * r)
+        g = np.exp(-q * 1.35)
         d += g
-        w = g ** 4
-        lit = np.clip(0.55 - (yy - cy) / r * 0.55 - (xx - cx) / r * 0.15, 0, 1)
+        w = g ** 3
+        lit = np.clip(0.56 - (wy - cy) / r * 0.52 - (wx - cx) / r * 0.15, 0, 1)
         bsum += w * lit
         wsum += w
     shade = bsum / wsum
     if flat_bottom is not None:
-        cut = 1 - smoothstep(flat_bottom - 0.14, flat_bottom + 0.02, yy)
+        base_ripple = (_fbm(n, rng, 1.7) - 0.5) * 0.08
+        cut = 1 - smoothstep(flat_bottom - 0.22, flat_bottom + 0.06, yy + base_ripple)
         d *= cut
     return d, shade
 
 
 def _puff(rng, flat=False, billow=False):
     n = CLOUD_CELL
-    d, lit = _lobes(rng, 9 if not billow else 13, 0.42, 0.2, 0.32, flat_bottom=0.45 if flat else None)
-    edge = periodic_noise(n, n, rng, 2.1)
-    fine = periodic_noise(n, n, rng, 1.7)
-    a = smoothstep(0.1, 0.85, d * (0.75 + 0.5 * edge)) * (0.88 + 0.12 * fine)
+    d, lit = _lobes(rng, 11 if not billow else 15, 0.40, 0.22, 0.34, flat_bottom=0.46 if flat else None)
+    edge = _fbm(n, rng, 1.85)
+    fine = _fbm(n, rng, 1.55)
+    raw = smoothstep(0.06, 0.92, d * (0.70 + 0.55 * edge))
+    a = (raw ** 1.15) * (0.84 + 0.16 * fine)
     xx, yy = _cgrid(n)
-    a *= 1 - smoothstep(0.84, 0.97, np.maximum(np.abs(xx), np.abs(yy)))  # keep clear of the cell border
+    r_env = np.sqrt(xx ** 2 + yy ** 2)
+    a *= 1 - smoothstep(0.76, 0.96, np.maximum(r_env * 0.92, np.maximum(np.abs(xx), np.abs(yy))))
     vert = 1 - (yy + 1) / 2
-    bottom = 0.86 if billow else 0.76
-    b = bottom + (1 - bottom) * np.clip(0.35 * vert + 0.65 * lit, 0, 1)
-    b *= 0.96 + 0.06 * fine
+    bottom = 0.86 if billow else 0.78
+    b = bottom + (1 - bottom) * np.clip(0.38 * vert + 0.62 * lit, 0, 1)
+    b *= 0.95 + 0.07 * fine
     return np.clip(b, 0, 1), a * (0.85 if billow else 1.0)
 
 
@@ -420,6 +430,15 @@ def clouds():
         img[r * n:(r + 1) * n, c * n:(c + 1) * n, 3] = np.clip(a, 0, 1) * 255
     Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGBA").save(SKY / "clouds.png")
     print("wrote", SKY / "clouds.png")
+
+    # Initial 128x128 weather_field.png resource (updated dynamically at runtime by WeatherFieldTexture)
+    wf = np.zeros((128, 128, 4), dtype=np.uint8)
+    wf[..., 0] = 82   # R: fair-weather baseline coverage (~0.32)
+    wf[..., 1] = 20   # G: low convective height (~0.08)
+    wf[..., 2] = 0    # B: no precipitation curtain
+    wf[..., 3] = 5    # A: band 0 (water cloud), 0 flash
+    Image.fromarray(wf, "RGBA").save(SKY / "weather_field.png")
+    print("wrote", SKY / "weather_field.png")
 
 
 def main():

@@ -136,6 +136,13 @@ public final class SkyRenderer {
             }
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
                     GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            if (shadersActive && AtmosphereConfig.DISTANT_WEATHER.get()) {
+                float angle = level.getTimeOfDay(pt) * Mth.TWO_PI;
+                float daylight = Mth.clamp(Mth.cos(angle) * 2.0F + 0.3F, 0.0F, 1.0F);
+                DistantStorms.render(pose.last().pose(), proj, camera.getPosition(), pt, daylight);
+                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
+                        GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            }
             if (clear <= 0.01F) return;
 
             if (AtmosphereConfig.AURORA.get()) {

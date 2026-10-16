@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.skycraft.atmosphere.AtmosphereMath;
 import com.skycraft.atmosphere.WeatherFront;
+import com.skycraft.atmosphere.WeatherPhysics;
 import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.atmosphere.weather.WeatherProfile;
 import com.skycraft.tamriel.MapSample;
@@ -305,18 +306,28 @@ final class CloudBuilder {
                 int o = (i * gn + j) * NP;
                 System.arraycopy(params, 0, grid, o, CloudClimate.COUNT);
 
-                // Sample TamrielMap microclimate (coast distance, elevation, rainshadow, volcanic heat, wetlands, dunes)
+                // Sample TamrielMap hydrology & relief via WeatherPhysics (moisture, windward orographic lift, leeward rainshadow)
                 TamrielMap.sample(wx, wz, sample);
                 TamrielMap.deriveStrengths(sample);
-                if (sample.coastDistance < 320f) {
-                    float marine = clamp01(1f - sample.coastDistance / 320f);
-                    grid[o + CloudClimate.ST] = clamp01(grid[o + CloudClimate.ST] + 0.14f * marine);
+                float moisture = WeatherPhysics.moistureFromSample(wx, wz, sample);
+                float[] liftDry = new float[2];
+                WeatherPhysics.orographicFactors(wx, wz, job.windX(), job.windZ(), sample, liftDry);
+                float orographicLift = liftDry[0] * (0.45f + 0.55f * moisture);
+                float leewardDry = liftDry[1];
+
+                if (sample.coastDistance < 360f) {
+                    float marine = clamp01(1f - Math.max(0f, sample.coastDistance) / 360f);
+                    grid[o + CloudClimate.ST] = clamp01(grid[o + CloudClimate.ST] + 0.16f * marine);
                     grid[o + CloudClimate.FOG] = clamp01(grid[o + CloudClimate.FOG] + 0.16f * marine);
                 }
-                if (sample.rainshadow > 0.4f) {
-                    float dry = clamp01((sample.rainshadow - 0.4f) * 1.6f);
-                    grid[o + CloudClimate.CU] *= (1f - 0.35f * dry);
-                    grid[o + CloudClimate.ST] *= (1f - 0.25f * dry);
+                if (orographicLift > 0.05f) {
+                    grid[o + CloudClimate.CU] = clamp01(grid[o + CloudClimate.CU] + 0.32f * orographicLift);
+                    grid[o + CloudClimate.ST] = clamp01(grid[o + CloudClimate.ST] + 0.25f * orographicLift);
+                    grid[o + CloudClimate.CB] = clamp01(grid[o + CloudClimate.CB] + 0.42f * orographicLift * moisture);
+                }
+                if (leewardDry > 0.08f) {
+                    grid[o + CloudClimate.CU] *= (1f - 0.45f * leewardDry);
+                    grid[o + CloudClimate.ST] *= (1f - 0.35f * leewardDry);
                 }
                 // the climate always shows a little: ash on the wind of the ashlands, dust over deserts
                 if (profile.ambient == WeatherProfile.Ambient.ASH || sample.heat > 0.35f) {
@@ -330,13 +341,19 @@ final class CloudBuilder {
                     grid[o + CloudClimate.FOG] = Math.max(grid[o + CloudClimate.FOG], 0.32f + 0.35f * sample.wetland);
                 }
 
-                // Blend moving synoptic WeatherFronts covering this grid cell
+                // Blend moving synoptic WeatherFronts and curved mesoscale rain bands / mesocyclone spirals covering this grid cell
                 for (WeatherFront front : fronts) {
                     float fi = front.intensityAt(wx, wz);
                     if (fi > 0.01f) {
+                        float band = WeatherPhysics.frontRainBandAt(front, wx, wz, job.seconds());
+                        float wBlend = clamp01(0.45f * fi + 0.55f * band);
                         float[] ft = CloudClimate.target(front.kind());
                         for (int k = 0; k < CloudClimate.COUNT; k++) {
-                            grid[o + k] = lerp(fi, grid[o + k], ft[k]);
+                            grid[o + k] = lerp(wBlend, grid[o + k], ft[k]);
+                        }
+                        if (WeatherPhysics.isMesocyclone(front)) {
+                            grid[o + CloudClimate.CB] = Math.max(grid[o + CloudClimate.CB], band * 0.92f);
+                            grid[o + CloudClimate.THUNDER] = Math.max(grid[o + CloudClimate.THUNDER], band * 0.88f);
                         }
                     }
                 }
@@ -429,7 +446,6 @@ final class CloudBuilder {
                 float cy = base - (float) job.camY();
                 float dist = (float) Math.sqrt(hd * hd + cy * cy);
                 float count = lerp(smooth(220f, 1300f, dist), full, 3f);
-                float sc = 1f + 0.35f * (1f - count / full);
                 float[] alb = albedo(p, 1f);
                 float shadow = 0.22f + 0.45f * p[CloudClimate.DARK];
                 // gales stretch cumulus into ragged fractus along the wind; otherwise the long axis is random
@@ -462,7 +478,6 @@ final class CloudBuilder {
                         py = base + (0.35f + 0.6f * hash(seed, 70 + k)) * hgt + 0.4f * rad * (1f - Math.abs(t));
                         cell = C_PUFF + (int) (hash(seed, 75 + k) * 4);
                     }
-                    rad *= sc;
                     float px = ax * t * half - az * side * depth, pz = az * t * half + ax * side * depth;
                     float x = dx + px, y = py - (float) job.camY(), z = dz + pz;
                     float d = (float) Math.sqrt(x * x + y * y + z * z);
@@ -535,8 +550,6 @@ final class CloudBuilder {
                             pz += wdz * r * 0.55f;
                             squash = 0.5f;
                         }
-                        // more detail: puffs stay smaller when many are drawn
-                        rad *= 1f + 0.25f * (1f - count / full);
                     } else if (k < levels + 28) {
                         int m = k - levels;
                         int level = m % levels;

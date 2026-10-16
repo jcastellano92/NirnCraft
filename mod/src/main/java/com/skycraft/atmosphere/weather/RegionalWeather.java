@@ -4,6 +4,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.AtmosphereConfig;
 import com.skycraft.atmosphere.AtmosphereMath;
 import com.skycraft.atmosphere.WeatherFront;
+import com.skycraft.atmosphere.WeatherPhysics;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
@@ -178,71 +179,15 @@ public final class RegionalWeather {
     }
 
     /**
-     * Deterministically generates a synoptic set of moving {@link WeatherFront}s across Tamriel's climate belts.
+     * Deterministically generates a synoptic set of moving {@link WeatherFront}s across Tamriel's hydrological and
+     * topographic cyclogenesis basins.
      */
     public static List<WeatherFront> seedInitialFronts(long seed) {
         Random rng = new Random(seed ^ 0x5F3759DF9E3779B9L);
         List<WeatherFront> list = new ArrayList<>(TARGET_SYNOPTIC_FRONTS);
-        // 1. Sea of Ghosts / Northern Skyrim / Atmora blizzard front moving SSE
-        list.add(new WeatherFront(1,
-                -600f + rng.nextFloat() * 1800f,
-                -3600f + rng.nextFloat() * 900f,
-                1100f + rng.nextFloat() * 600f,
-                0.08f + rng.nextFloat() * 0.10f,
-                0.18f + rng.nextFloat() * 0.14f,
-                WeatherKind.BLIZZARD,
-                0.82f + rng.nextFloat() * 0.18f,
-                6000 + rng.nextInt(6000)));
-        // 2. Alik'r Desert / Hammerfell sandstorm front moving ENE
-        list.add(new WeatherFront(2,
-                -5400f + rng.nextFloat() * 1400f,
-                900f + rng.nextFloat() * 1200f,
-                950f + rng.nextFloat() * 550f,
-                0.22f + rng.nextFloat() * 0.14f,
-                -0.06f + rng.nextFloat() * 0.12f,
-                WeatherKind.SANDSTORM,
-                0.85f + rng.nextFloat() * 0.15f,
-                5400 + rng.nextInt(5400)));
-        // 3. Red Mountain / Vvardenfell ashstorm front moving SW/W
-        list.add(new WeatherFront(3,
-                4800f + rng.nextFloat() * 1200f,
-                -1400f + rng.nextFloat() * 1000f,
-                900f + rng.nextFloat() * 500f,
-                -0.18f - rng.nextFloat() * 0.10f,
-                0.10f + rng.nextFloat() * 0.12f,
-                WeatherKind.ASH_STORM,
-                0.84f + rng.nextFloat() * 0.16f,
-                5400 + rng.nextInt(6000)));
-        // 4. Abecean / High Rock / Gold Coast sea squall moving inland (eastward)
-        list.add(new WeatherFront(4,
-                -6200f + rng.nextFloat() * 1600f,
-                -800f + rng.nextFloat() * 2400f,
-                1200f + rng.nextFloat() * 700f,
-                0.24f + rng.nextFloat() * 0.12f,
-                0.08f + rng.nextFloat() * 0.10f,
-                WeatherKind.STORM,
-                0.78f + rng.nextFloat() * 0.22f,
-                6000 + rng.nextInt(6000)));
-        // 5. Cyrodiil / Nibenay / Black Marsh rain & fog front
-        list.add(new WeatherFront(5,
-                600f + rng.nextFloat() * 1800f,
-                2200f + rng.nextFloat() * 2000f,
-                1000f + rng.nextFloat() * 700f,
-                -0.10f + rng.nextFloat() * 0.20f,
-                -0.16f - rng.nextFloat() * 0.10f,
-                rng.nextBoolean() ? WeatherKind.RAIN : WeatherKind.FOG,
-                0.72f + rng.nextFloat() * 0.20f,
-                6000 + rng.nextInt(6000)));
-        // 6. Central Skyrim / Jerall snow & gale front
-        list.add(new WeatherFront(6,
-                -400f + rng.nextFloat() * 1000f,
-                -900f + rng.nextFloat() * 900f,
-                850f + rng.nextFloat() * 550f,
-                0.14f + rng.nextFloat() * 0.10f,
-                0.15f + rng.nextFloat() * 0.10f,
-                WeatherKind.SNOW,
-                0.75f + rng.nextFloat() * 0.20f,
-                5400 + rng.nextInt(5400)));
+        for (int i = 0; i < TARGET_SYNOPTIC_FRONTS; i++) {
+            list.add(WeatherPhysics.spawnPhysicalFront(i + 1, i, rng));
+        }
         return list;
     }
 
@@ -335,22 +280,21 @@ public final class RegionalWeather {
             }
         }
 
-        // advect synoptic weather fronts and expire/roll regional spells
+        // advect and physically evolve synoptic weather fronts over water & mountain relief; expire/roll regional spells
         if (cycle) {
             for (Iterator<WeatherFront> fit = data.fronts.iterator(); fit.hasNext(); ) {
                 WeatherFront f = fit.next();
-                f.advect(20);
+                WeatherPhysics.advectAndEvolveFront(f, 20);
                 if (f.expired()) {
                     fit.remove();
                     frontsChanged = true;
                 }
             }
             if (data.fronts.size() < TARGET_SYNOPTIC_FRONTS) {
-                List<WeatherFront> replenished = seedInitialFronts(ow.getSeed() + now * 31L + data.nextFrontId);
-                for (WeatherFront nf : replenished) {
-                    if (data.fronts.size() >= TARGET_SYNOPTIC_FRONTS) break;
-                    data.fronts.add(new WeatherFront(
-                            data.nextFrontId++, nf.x, nf.z, nf.radius, nf.vx, nf.vz, nf.kind, nf.intensity, nf.ticksLeft));
+                Random r = new Random(ow.getSeed() + now * 31L + data.nextFrontId);
+                while (data.fronts.size() < TARGET_SYNOPTIC_FRONTS) {
+                    int id = data.nextFrontId++;
+                    data.fronts.add(WeatherPhysics.spawnPhysicalFront(id, id, r));
                     frontsChanged = true;
                 }
             }
@@ -392,7 +336,11 @@ public final class RegionalWeather {
         Spell s = data.spells.get(region.id());
         if (s == null) {
             WeatherKind kind = profile.roll(ow.random, null, mist);
-            s = new Spell(kind, now + profile.duration(ow.random, kind), ow.random.nextInt(360), now);
+            float[] wv = new float[2];
+            WeatherPhysics.prevailingWind(pos.getX(), pos.getZ(), -1f, false, wv);
+            int baseDeg = Math.floorMod((int) Math.round(Math.toDegrees(Math.atan2(-wv[0], wv[1]))), 360);
+            int windDeg = Math.floorMod(baseDeg + ow.random.nextInt(51) - 25, 360);
+            s = new Spell(kind, now + profile.duration(ow.random, kind), windDeg, now);
             data.spells.put(region.id(), s);
             changed.add(entry(region.id(), s));
             data.setDirty();

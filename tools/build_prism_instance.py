@@ -171,6 +171,13 @@ def build_prism_package(core_jar_arg):
             print("  -", f)
         sys.exit(1)
 
+    shader_zip = os.path.join(MC_DIR, "shaderpacks", "ComplementaryReimagined_r5.9.3.zip")
+    if os.path.isfile(shader_zip):
+        sys.path.insert(0, os.path.join(ROOT, "tools", "shaders"))
+        import pathlib as _pathlib
+        import patch_complementary_clouds as _pcc
+        _pcc.patch_shaderpack_zip(_pathlib.Path(shader_zip))
+
     print("\n[4/4] Writing the Prism instance...")
     with open(os.path.join(INST_DIR, "instance.cfg"), "w", encoding="utf-8", newline="\n") as f:
         f.write(f"""InstanceType=OneSix

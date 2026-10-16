@@ -209,4 +209,57 @@ class AtmospherePlanTest {
         assertFalse(AtmosphereConfig.CLOUDS_SKIP_SHADERS.getDefault(),
                 "CLOUDS_SKIP_SHADERS should default to false so Skycraft regional clouds render under Complementary");
     }
+
+    @Test
+    void landscapeDrivenWeatherPhysicsAndRegionalProfiles() {
+        // 1. Marine/coastal moisture (Sea of Ghosts / Iliac Bay) exceeds arid desert interior (Alik'r)
+        com.skycraft.tamriel.MapSample sample = new com.skycraft.tamriel.MapSample();
+        float seaMoisture = WeatherPhysics.moistureAt(0, -3400, sample);
+        float desertMoisture = WeatherPhysics.moistureAt(-6800, 4800, sample);
+        assertTrue(seaMoisture > desertMoisture,
+                "Marine moisture (" + seaMoisture + ") must exceed arid desert moisture (" + desertMoisture + ")");
+
+        // 2. Mesoscale rain bands & mesocyclone spiral structure
+        WeatherFront mesoStorm = new WeatherFront(
+                2, -500.0f, 1200.0f, 1100.0f,
+                0.40f, 0.15f, WeatherKind.STORM, 0.92f, 1200
+        );
+        WeatherFront squallStorm = new WeatherFront(
+                3, -500.0f, 1200.0f, 1100.0f,
+                0.40f, 0.15f, WeatherKind.STORM, 0.78f, 1200
+        );
+        assertTrue(WeatherPhysics.isMesocyclone(mesoStorm));
+        assertFalse(WeatherPhysics.isMesocyclone(squallStorm));
+
+        float mesoBandCore = mesoStorm.rainBandAt(-420.0, 1240.0, 100.0f);
+        float mesoCurtainCore = mesoStorm.curtainDensityAt(-420.0, 1240.0, 100.0f);
+        float squallBandCore = squallStorm.rainBandAt(-280.0, 1280.0, 100.0f);
+        assertTrue(mesoBandCore > 0.15f, "Mesocyclone wall-cloud/hook band should be active near core: " + mesoBandCore);
+        assertTrue(mesoCurtainCore > 0.10f, "Mesocyclone precipitation curtain should be dense near core: " + mesoCurtainCore);
+        assertTrue(squallBandCore > 0.15f, "Squall line leading rain band should be active: " + squallBandCore);
+        assertEquals(0.0f, mesoStorm.rainBandAt(5000.0, 5000.0, 100.0f), 1e-5f);
+
+        // 3. Physical front evolution over moisture vs arid rainshadow
+        WeatherFront coastalFront = new WeatherFront(
+                10, 0.0f, -3400.0f, 1000.0f,
+                0.30f, 0.20f, WeatherKind.STORM, 0.65f, 800
+        );
+        WeatherPhysics.advectAndEvolveFront(coastalFront, 40);
+        assertTrue(coastalFront.intensity() >= 0.65f,
+                "Storm front over open water should maintain or intensify moisture: " + coastalFront.intensity());
+
+        // 4. Regional Elder Scrolls WeatherProfile mappings
+        assertEquals(WeatherProfile.WHITERUN, WeatherProfile.of(com.skycraft.tamriel.Regions.get("skyrim/whiterun")));
+        assertEquals(WeatherProfile.WINTERHOLD, WeatherProfile.of(com.skycraft.tamriel.Regions.get("skyrim/winterhold")));
+        assertEquals(WeatherProfile.RED_MOUNTAIN, WeatherProfile.of(com.skycraft.tamriel.Regions.get("morrowind/red_mountain")));
+        assertEquals(WeatherProfile.GOLD_COAST, WeatherProfile.of(com.skycraft.tamriel.Regions.get("cyrodiil/gold_coast")));
+        assertEquals(WeatherProfile.HEARTLANDS, WeatherProfile.of(com.skycraft.tamriel.Regions.get("cyrodiil/heartlands")));
+        assertEquals(WeatherProfile.BLACKWOOD, WeatherProfile.of(com.skycraft.tamriel.Regions.get("cyrodiil/blackwood")));
+        assertEquals(WeatherProfile.DAGGERFALL_COAST, WeatherProfile.of(com.skycraft.tamriel.Regions.get("high_rock/daggerfall")));
+        assertEquals(WeatherProfile.ALIKR, WeatherProfile.of(com.skycraft.tamriel.Regions.get("hammerfell/alikr_desert")));
+        assertEquals(WeatherProfile.ANEQUINA, WeatherProfile.of(com.skycraft.tamriel.Regions.get("elsweyr/anequina")));
+        assertEquals(WeatherProfile.PELLITINE, WeatherProfile.of(com.skycraft.tamriel.Regions.get("elsweyr/pellitine")));
+    }
 }
+
+

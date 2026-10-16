@@ -2,7 +2,7 @@ hash-format = "sha256"
 
 [[files]]
 file = "config/ComplementaryReimagined_r5.9.3.zip.txt"
-hash = "93cddd4c58d8eecf882b8dcf565bdeddab5838b9fcb5e052e88df70cf729ed76"
+hash = "f368c2c4f352f0f91f6a628b66af678868cff696c272ae86ed11b7b678fed587"
 
 [[files]]
 file = "config/DistantHorizons.toml"
@@ -184,7 +184,7 @@ metafile = true
 
 [[files]]
 file = "shaderpacks/ComplementaryReimagined_r5.9.3.zip.txt"
-hash = "6341fb3816db0929029926492189054a7b79ae8964a0f521b3341d19947fec48"
+hash = "f368c2c4f352f0f91f6a628b66af678868cff696c272ae86ed11b7b678fed587"
 
 [[files]]
 file = "shaderpacks/complementary-reimagined.pw.toml"

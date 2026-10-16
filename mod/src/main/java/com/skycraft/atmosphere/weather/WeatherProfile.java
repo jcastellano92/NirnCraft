@@ -150,6 +150,49 @@ public final class WeatherProfile {
     public static final WeatherProfile SEA_OF_GHOSTS = register("sea_of_ghosts", Ambient.SNOW, -10_000, true, 3600, 12000,
             WeatherKind.CLEAR, 1, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 4, WeatherKind.SNOW, 3,
             WeatherKind.BLIZZARD, 2, WeatherKind.GALE, 2).mist(0.5f);
+    /** Cyrodiil's Gold Coast: warm Mediterranean Abecean sun, golden cumulus, and dramatic coastal sea-squalls. */
+    public static final WeatherProfile GOLD_COAST = register("gold_coast", Ambient.NONE, 10_000, false, 4800, 15600,
+            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 1, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 1,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 2).mist(0.2f);
+    /** Cyrodiil's Heartlands and Lake Rumare: pastoral fair skies, morning lake mist, and warm summer thunderstorms. */
+    public static final WeatherProfile HEARTLANDS = register("heartlands", Ambient.NONE, 260, false, 4800, 15600,
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 2).mist(0.35f);
+    /** Colovian Highlands and West Weald: breezy upland cumulus, autumn drizzle, and rolling ridge thunder. */
+    public static final WeatherProfile COLOVIA = register("colovia", Ambient.NONE, 210, false, 4200, 14400,
+            WeatherKind.CLEAR, 5, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 3, WeatherKind.STORM, 2, WeatherKind.GALE, 1).mist(0.3f);
+    /** Nibenay Valley and Blackwood: humid river fogs, Topal monsoon showers, and frequent electrical storms. */
+    public static final WeatherProfile BLACKWOOD = register("blackwood", Ambient.MARSH, 10_000, false, 3600, 12000,
+            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 4, WeatherKind.DRIZZLE, 3,
+            WeatherKind.RAIN, 4, WeatherKind.STORM, 2).mist(0.65f);
+    /** Jerall and Valus Mountains: Bruma's snowy alpine passes, frost fogs, blizzards, and ridge gales. */
+    public static final WeatherProfile JERALL = register("jerall", Ambient.SNOW, 130, true, 3600, 12000,
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.SNOW, 4,
+            WeatherKind.BLIZZARD, 2, WeatherKind.GALE, 2).mist(0.25f);
+    /** Daggerfall's Iliac Bay kingdoms: moody Atlantic sea fogs, rolling overcast, and fierce coastal thunderstorms. */
+    public static final WeatherProfile DAGGERFALL_COAST = register("daggerfall_coast", Ambient.NONE, 210, false, 3600, 12000,
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 3, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 3, WeatherKind.STORM, 2, WeatherKind.GALE, 1).mist(0.5f);
+    /** Wrothgar's mountains: cold highland mists, snow squalls, and windward storms over Orsinium. */
+    public static final WeatherProfile WROTHGAR = register("wrothgar", Ambient.SNOW, 155, true, 3600, 12000,
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.RAIN, 2,
+            WeatherKind.SNOW, 3, WeatherKind.BLIZZARD, 2, WeatherKind.STORM, 1, WeatherKind.GALE, 2).mist(0.35f);
+    /** Sentinel, Stros M'Kai and Hew's Bane: bright trade-wind sun, heat haze, and sudden maritime squalls. */
+    public static final WeatherProfile SENTINEL_COAST = register("sentinel_coast", Ambient.NONE, 10_000, false, 4800, 15600,
+            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 3, WeatherKind.DUST, 1, WeatherKind.RAIN, 2, WeatherKind.STORM, 2,
+            WeatherKind.GALE, 1).mist(0.2f);
+    /** Dragontail, Craglorn and Bangkorai: dry canyon winds, red dust, and electric high-base mountain storms. */
+    public static final WeatherProfile CRAGLORN = register("craglorn", Ambient.SAND, 240, false, 4200, 14400,
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 3, WeatherKind.DUST, 2, WeatherKind.SANDSTORM, 1, WeatherKind.RAIN, 1,
+            WeatherKind.STORM, 2, WeatherKind.GALE, 1).mist(0.1f);
+    /** Northern Elsweyr (Anequina): sun-baked badlands, amber dust veils, haboobs, and dry heat-lightning storms. */
+    public static final WeatherProfile ANEQUINA = register("anequina", Ambient.SAND, 10_000, false, 4800, 15600,
+            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 2, WeatherKind.DUST, 3, WeatherKind.SANDSTORM, 2, WeatherKind.STORM, 1).mist(0.05f);
+    /** Southern Elsweyr (Pellitine): humid Topal monsoon jungle, warm mist, and tropical electrical storms. */
+    public static final WeatherProfile PELLITINE = register("pellitine", Ambient.NONE, 10_000, false, 3600, 10800,
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 3, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2, WeatherKind.RAIN, 4,
+            WeatherKind.STORM, 2).mist(0.5f);
 
     /** Region id -> tuned climate, checked before the region's broad {@code weather} name. */
     private static final Map<String, WeatherProfile> REGIONS = new HashMap<>();
@@ -184,11 +227,22 @@ public final class WeatherProfile {
         regions(BLACK_MARSH, "black_marsh/shadowfen", "black_marsh/stormhold", "black_marsh/helstrom", "black_marsh/gideon",
                 "black_marsh/lilmoth", "black_marsh/murkmire");
         regions(ALIKR, "hammerfell/alikr_desert");
-        regions(VALENWOOD, "valenwood/grahtwood", "valenwood/greenshade", "valenwood/malabal_tor");
+        regions(SENTINEL_COAST, "hammerfell/sentinel", "hammerfell/stros_mkai", "hammerfell/hews_bane");
+        regions(CRAGLORN, "hammerfell/dragontail", "hammerfell/craglorn", "hammerfell/bangkorai");
+        regions(VALENWOOD, "valenwood/grahtwood", "valenwood/greenshade", "valenwood/malabal_tor", "valenwood/reapers_march");
         regions(SUMMERSET, "summerset/summerset_isle", "summerset/auridon");
         regions(ARTAEUM, "summerset/artaeum");
+        regions(DAGGERFALL_COAST, "high_rock/daggerfall", "high_rock/anticlere", "high_rock/dwynnen");
         regions(HIGH_ROCK, "high_rock/glenumbra", "high_rock/stormhaven", "high_rock/bjoulsae", "high_rock/wayrest");
         regions(RIVENSPIRE, "high_rock/rivenspire");
+        regions(WROTHGAR, "high_rock/wrothgar");
+        regions(GOLD_COAST, "cyrodiil/gold_coast");
+        regions(HEARTLANDS, "cyrodiil/heartlands", "cyrodiil/nibenay_basin");
+        regions(COLOVIA, "cyrodiil/colovian_highlands", "cyrodiil/west_weald");
+        regions(BLACKWOOD, "cyrodiil/nibenay_valley", "cyrodiil/blackwood");
+        regions(JERALL, "cyrodiil/jerall_mountains", "cyrodiil/valus_mountains");
+        regions(ANEQUINA, "elsweyr/anequina", "elsweyr/northern_elsweyr");
+        regions(PELLITINE, "elsweyr/pellitine", "elsweyr/southern_elsweyr", "elsweyr/quin_rawl");
         regions(ATMORA, "atmora/ice_waste", "atmora/frozen_forest");
         regions(SEA_OF_GHOSTS, "sea/sea_of_ghosts");
     }

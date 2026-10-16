@@ -121,6 +121,25 @@ public final class WeatherFront {
         return this.intensity * t * t * (3.0f - 2.0f * t);
     }
 
+    /**
+     * Curved mesoscale rain-band / squall line intensity at {@code (px, pz)} in {@code [0.0, intensity]}, modeling
+     * the leading bowed squall arc and trailing spiral rain bands inside this weather system.
+     */
+    public float rainBandAt(double px, double pz, double timeSec) {
+        return WeatherPhysics.frontRainBandAt(this, px, pz, timeSec);
+    }
+
+    /**
+     * Sub-cloud precipitation curtain density at {@code (px, pz)} in {@code [0.0, 1.0]} under this weather system's
+     * rain bands and convective core.
+     */
+    public float curtainDensityAt(double px, double pz, double timeSec) {
+        if (kind.precip == WeatherKind.Precip.NONE) return 0.0f;
+        float band = rainBandAt(px, pz, timeSec);
+        float core = intensityAt(px, pz);
+        return WeatherPhysics.clamp01(kind.amount * (0.30f * core + 0.70f * band));
+    }
+
     /** True if this front is a major storm wall/squall visible on the horizon. */
     public boolean isHorizonWallKind() {
         return kind == WeatherKind.BLIZZARD

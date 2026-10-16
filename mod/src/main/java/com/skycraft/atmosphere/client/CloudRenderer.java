@@ -118,7 +118,20 @@ public final class CloudRenderer {
         highZ += ClientWeather.windZ() * high;
         CloudClimate.tick();
         if (level.dimension() == Level.OVERWORLD) {
-            DistantStorms.tick(mc, mc.gameRenderer.getMainCamera().getPosition(), level.getGameTime());
+            Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
+            DistantStorms.tick(mc, camPos, level.getGameTime());
+            WeatherFieldTexture.tickUpdate(level, camPos, 0f);
+        }
+    }
+
+    /** Ensures the cloud sprite atlas is registered in the texture manager (used by {@link DistantStorms}). */
+    static void ensureTextureLoaded() {
+        if (!textureLoaded) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc != null && mc.getTextureManager() != null) {
+                textureLoaded = true;
+                mc.getTextureManager().register(TEXTURE, new CloudTexture(TEXTURE));
+            }
         }
     }
 
@@ -183,25 +196,13 @@ public final class CloudRenderer {
     // ================================================================== render
 
     /**
-     * Fallback stage hook when an active Oculus shader pack suppresses vanilla's {@code DimensionSpecialEffects.renderClouds}
-     * pass even though {@code CLOUD_STYLE_DEFINE=0} (shader clouds off) and {@code CLOUDS_SKIP_SHADERS=false}.
+     * Draws Skycraft's mesh clouds when shaders are off; returns {@code false} when an Oculus/Iris shader pack is
+     * active so the shader pack's 3D volumetric raymarcher (driven by {@link WeatherFieldTexture}) draws the clouds
+     * and 3D rain curtains occluded by Distant Horizons.
      */
-    @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
-        if (renderedThisFrame) return;
-        if (!ShaderCompat.shadersActive() || AtmosphereConfig.CLOUDS_SKIP_SHADERS.get()) return;
-        Minecraft mc = Minecraft.getInstance();
-        ClientLevel level = mc.level;
-        if (level == null || !AtmosphereConfig.CLOUDS.get() || level.dimension() != Level.OVERWORLD) return;
-        Vec3 cam = event.getCamera().getPosition();
-        render(level, event.getPartialTick(), event.getPoseStack(), cam.x, cam.y, cam.z, event.getProjectionMatrix());
-    }
-
-    /** Draws the clouds; false lets vanilla (or a shader pack) draw its own. */
     static boolean render(ClientLevel level, float pt, PoseStack pose, double camX, double camY, double camZ, Matrix4f proj) {
         if (!AtmosphereConfig.CLOUDS.get() || level.dimension() != Level.OVERWORLD) return false;
-        if (AtmosphereConfig.CLOUDS_SKIP_SHADERS.get() && ShaderCompat.shadersActive()) return false;
+        if (ShaderCompat.shadersActive()) return false;
         renderedThisFrame = true;
         Minecraft mc = Minecraft.getInstance();
         Camera camera = mc.gameRenderer.getMainCamera();
@@ -210,10 +211,7 @@ public final class CloudRenderer {
                 && (le.hasEffect(MobEffects.BLINDNESS) || le.hasEffect(MobEffects.DARKNESS))) return true;
         long start = System.nanoTime();
         try {
-            if (!textureLoaded) {
-                textureLoaded = true;
-                mc.getTextureManager().register(TEXTURE, new CloudTexture(TEXTURE));
-            }
+            ensureTextureLoaded();
             collect();
             schedule(level, pt, camX, camY, camZ);
             draw(level, pt, pose, camX, camY, camZ, proj);
