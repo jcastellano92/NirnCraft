@@ -23,7 +23,7 @@
     {
       "id": "dome_temple",
       "at": [
-        0,
+        16,
         0
       ],
       "face": "south",
@@ -46,7 +46,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        14,
+        38,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        5,
+        23
       ],
       "face": "south",
       "overlay": "ascadian_isles",
@@ -94,8 +94,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -15,
+        -14
       ],
       "face": "south",
       "overlay": "ascadian_isles",
@@ -118,8 +118,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        8,
+        -23
       ],
       "face": "south",
       "overlay": "ascadian_isles",
@@ -151,12 +151,188 @@
     "suran_b_4": "Garothmuk gro-Muzgub's Smithy",
     "suran_b_5": "Goldyn Belaram's Pawnbroker",
     "suran_b_6": "Ranosa Gilvayn's Outfitter",
-    "suran_b_7": "Suran Watch Tower"
+    "suran_b_7": "Suran Watch Tower",
+    "suran_pearl_market": "Lake Masobi Pearl & Lantern Promenade"
   },
   "innKey": "suran_b_1",
   "names": {
     "inn": "suran_b_1",
     "store": "suran_b_5",
     "smithy": "suran_b_4"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -38,
+        18
+      ],
+      "to": [
+        38,
+        14
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -4,
+        10
+      ],
+      "to": [
+        4,
+        24
+      ],
+      "width": 4,
+      "variant": 1
+    }
+  ],
+  "terraces": [
+    {
+      "rect": [
+        -36,
+        -40,
+        36,
+        -8
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        -8,
+        4
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 4,
+      "name": "suran_pearl_market"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          -6,
+          -10
+        ],
+        [
+          8,
+          -36
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "masobi_steps"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -38,
+          6
+        ],
+        [
+          -12,
+          8
+        ],
+        [
+          14,
+          6
+        ],
+        [
+          40,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "lakeside_promenade"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -6
+      ],
+      "rx": 30,
+      "rz": 24,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "terrace_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 3,
+      "kit": "hlaalu",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "terrace_loop"
+    },
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "lakeside_promenade"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "hlaalu",
+      "on": "masobi_steps"
+    }
+  ]
 }

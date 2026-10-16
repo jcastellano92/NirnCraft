@@ -66,7 +66,7 @@
       "sides": 12,
       "h": 9,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -114,7 +114,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        45,
+        53,
         -27
       ],
       "face": "west",
@@ -290,8 +290,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -47,
-        25
+        -50,
+        28
       ],
       "face": "east",
       "name": "daggerfall_kynareth_benevolence"
@@ -569,6 +569,14 @@
     {
       "type": "pool",
       "count": 1
+    },
+    {
+      "type": "fountain",
+      "where": "square"
+    },
+    {
+      "type": "basin",
+      "where": "edge"
     }
   ]
 }

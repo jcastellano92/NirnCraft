@@ -4,22 +4,30 @@ import com.skycraft.Skycraft;
 import com.skycraft.crafting.arcane.block.IngredientPlantBlock;
 import com.skycraft.crafting.arcane.block.StationBlock;
 import com.skycraft.crafting.arcane.item.SoulGemItem;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 /** Blocks and items of the arcane sub-module (soul gems, crafting stations, alchemy ingredients and plants). */
 public final class ArcaneRegistry {
@@ -28,6 +36,9 @@ public final class ArcaneRegistry {
 
     /** Every alchemy ingredient can be eaten (Skyrim style) to learn its first effect. */
     public static final FoodProperties INGREDIENT_FOOD = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).alwaysEat().fast().build();
+
+    /** All registered 3D harvestable alchemy flora blocks keyed by block ID. */
+    public static final Map<String, RegistryObject<Block>> FLORA_BLOCKS = new LinkedHashMap<>();
 
     // ---------------------------------------------------------------- stations
     public static final RegistryObject<Block> ARCANE_ENCHANTER = BLOCKS.register("arcane_enchanter",
@@ -38,14 +49,14 @@ public final class ArcaneRegistry {
                     .strength(2.5f, 6f).sound(SoundType.WOOD).noOcclusion().lightLevel(s -> 3)));
 
     // ---------------------------------------------------------------- wild alchemy plants
-    public static final RegistryObject<Block> NIGHTSHADE = BLOCKS.register("nightshade",
+    public static final RegistryObject<Block> NIGHTSHADE = registerFloraBlock("nightshade",
             () -> new IngredientPlantBlock(MobEffects.POISON, 10, false, BlockBehaviour.Properties.copy(Blocks.POPPY)));
-    public static final RegistryObject<Block> DEATHBELL = BLOCKS.register("deathbell",
+    public static final RegistryObject<Block> DEATHBELL = registerFloraBlock("deathbell",
             () -> new IngredientPlantBlock(MobEffects.WITHER, 6, false, BlockBehaviour.Properties.copy(Blocks.POPPY)));
-    public static final RegistryObject<Block> NIRNROOT = BLOCKS.register("nirnroot",
+    public static final RegistryObject<Block> NIRNROOT = registerFloraBlock("nirnroot",
             () -> new IngredientPlantBlock(MobEffects.INVISIBILITY, 8, true, BlockBehaviour.Properties.copy(Blocks.POPPY)
                     .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : 6)));
-    public static final RegistryObject<Block> FROST_MIRRIAM = BLOCKS.register("frost_mirriam",
+    public static final RegistryObject<Block> FROST_MIRRIAM = registerFloraBlock("frost_mirriam",
             () -> new IngredientPlantBlock(MobEffects.FIRE_RESISTANCE, 8, false, BlockBehaviour.Properties.copy(Blocks.POPPY)));
 
     public static final RegistryObject<Item> ARCANE_ENCHANTER_ITEM = ITEMS.register("arcane_enchanter",
@@ -79,7 +90,7 @@ public final class ArcaneRegistry {
 
     /**
      * Skyrim's other ingredients plus the classic ingredients of Morrowind, Elsweyr and Black Marsh. Their effects are in
-     * {@link com.skycraft.crafting.arcane.alchemy.Ingredients}; they come from flora loot tables, foraging, creature
+     * {@link com.skycraft.crafting.arcane.alchemy.Ingredients}; they come from 3D world flora blocks, foraging, creature
      * loot, chests and province merchants. Icons are drawn by {@code tools/textures/ingredients.py}.
      */
     public static final List<String> MORE_INGREDIENTS = List.of(
@@ -93,17 +104,127 @@ public final class ArcaneRegistry {
             "briar_heart", "falmer_ear", "spider_egg", "eye_of_sabre_cat", "powdered_mammoth_tusk", "wisp_wrappings",
             "dwarven_oil", "chaurus_hunter_antennae");
 
+    /**
+     * Regional 3D botanical and fungal specimens placed across Tamriel's surface biomes and subterranean caverns whose
+     * harvest yields the corresponding regional alchemy ingredient.
+     */
+    private static final Map<String, String> REGIONAL_FLORA_DROPS = Map.ofEntries(
+            Map.entry("crimson_nirnroot", "nirnroot"),
+            Map.entry("blisterwort", "imp_stool"),
+            Map.entry("fly_amanita", "mora_tapinella"),
+            Map.entry("scaly_pholiota", "mora_tapinella"),
+            Map.entry("rot_scale_fungus", "namiras_rot"),
+            Map.entry("kresh_fiber", "marshmerrow"),
+            Map.entry("coda_flower", "bittergreen_petals"),
+            Map.entry("hackle_lo", "ash_yam"),
+            Map.entry("desert_rose", "gold_kanet"),
+            Map.entry("cactus_pulp", "moon_sugar"),
+            Map.entry("hist_carp", "hist_sap"),
+            Map.entry("bog_beacon", "swamp_fungal_pod"),
+            Map.entry("luminous_russula", "glowing_mushroom"),
+            Map.entry("snowberries", "juniper_berries")
+    );
+
+    private static final Set<String> FUNGI_IDS = Set.of(
+            "imp_stool", "namiras_rot", "white_cap", "glowing_mushroom", "bleeding_crown", "swamp_fungal_pod",
+            "giant_lichen", "mora_tapinella", "hypha_facia", "blisterwort", "fly_amanita", "scaly_pholiota",
+            "rot_scale_fungus", "bog_beacon", "luminous_russula"
+    );
+
+    private static final Set<String> CEILING_FLORA_IDS = Set.of(
+            "hanging_moss", "emperor_parasol_moss", "wisp_wrappings"
+    );
+
     static {
-        for (String id : MORE_INGREDIENTS) ingredient(id);
+        for (String id : MORE_INGREDIENTS) {
+            registerMoreIngredientFlora(id);
+            ingredient(id);
+        }
+        for (Map.Entry<String, String> entry : REGIONAL_FLORA_DROPS.entrySet()) {
+            registerRegionalFloraBlock(entry.getKey(), entry.getValue());
+        }
     }
 
     private ArcaneRegistry() {}
+
+    private static RegistryObject<Block> registerFloraBlock(String id, Supplier<Block> factory) {
+        RegistryObject<Block> ro = BLOCKS.register(id, factory);
+        FLORA_BLOCKS.put(id, ro);
+        return ro;
+    }
+
+    private static void registerMoreIngredientFlora(String id) {
+        int light = floraLightLevel(id);
+        boolean glowing = "crimson_nirnroot".equals(id);
+        boolean ceiling = CEILING_FLORA_IDS.contains(id);
+        SoundType sound = FUNGI_IDS.contains(id) ? SoundType.FUNGUS : SoundType.GRASS;
+        MobEffect effect = FUNGI_IDS.contains(id) ? MobEffects.NIGHT_VISION : MobEffects.REGENERATION;
+        registerFloraBlock(id, () -> new IngredientPlantBlock(
+                effect, 6, glowing, ceiling,
+                () -> lookupItem(id),
+                BlockBehaviour.Properties.copy(Blocks.POPPY).sound(sound)
+                        .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : light)));
+    }
+
+    private static void registerRegionalFloraBlock(String blockId, String dropItemId) {
+        int light = floraLightLevel(blockId);
+        boolean glowing = "crimson_nirnroot".equals(blockId);
+        boolean ceiling = CEILING_FLORA_IDS.contains(blockId);
+        SoundType sound = FUNGI_IDS.contains(blockId) ? SoundType.FUNGUS : SoundType.GRASS;
+        MobEffect effect = glowing ? MobEffects.INVISIBILITY : (FUNGI_IDS.contains(blockId) ? MobEffects.NIGHT_VISION : MobEffects.REGENERATION);
+        registerFloraBlock(blockId, () -> new IngredientPlantBlock(
+                effect, 7, glowing, ceiling,
+                () -> lookupItem(dropItemId),
+                BlockBehaviour.Properties.copy(Blocks.POPPY).sound(sound)
+                        .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : light)));
+    }
+
+    private static int floraLightLevel(String id) {
+        return switch (id) {
+            case "glowing_mushroom" -> 8;
+            case "crimson_nirnroot", "luminous_russula" -> 7;
+            case "nirnroot", "bog_beacon" -> 6;
+            case "wisp_wrappings", "poison_bloom" -> 5;
+            case "emperor_parasol_moss", "hist_sap", "hist_carp" -> 4;
+            default -> 0;
+        };
+    }
+
+    private static Item lookupItem(String id) {
+        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, id));
+        return item != null && item != Items.AIR ? item : NIRNROOT_ITEM.get();
+    }
+
+    /** Returns a registered 3D alchemy plant block by ID, defaulting to {@link #NIGHTSHADE} if unknown. */
+    public static Block floraBlock(String id) {
+        RegistryObject<Block> ro = FLORA_BLOCKS.get(id);
+        return ro != null ? ro.get() : NIGHTSHADE.get();
+    }
+
+    /** Returns the unharvested default state of a registered 3D alchemy plant block by ID. */
+    public static BlockState floraState(String id) {
+        Block b = floraBlock(id);
+        BlockState state = b.defaultBlockState();
+        return state.hasProperty(IngredientPlantBlock.HARVESTED)
+                ? state.setValue(IngredientPlantBlock.HARVESTED, false)
+                : state;
+    }
+
+    /** Returns true if the given block is one of the cave/marsh fungi species. */
+    public static boolean isFungusBlock(Block block) {
+        ResourceLocation key = ForgeRegistries.BLOCKS.getKey(block);
+        return key != null && FUNGI_IDS.contains(key.getPath());
+    }
 
     private static RegistryObject<Item> gem(String id, int capacity, boolean black, int value, Rarity rarity) {
         return ITEMS.register(id, () -> new SoulGemItem(capacity, black, false, value, new Item.Properties().stacksTo(16).rarity(rarity)));
     }
 
     private static RegistryObject<Item> ingredient(String id) {
+        RegistryObject<Block> plant = FLORA_BLOCKS.get(id);
+        if (plant != null) {
+            return ITEMS.register(id, () -> new BlockItem(plant.get(), new Item.Properties().food(INGREDIENT_FOOD)));
+        }
         return ITEMS.register(id, () -> new Item(new Item.Properties().food(INGREDIENT_FOOD)));
     }
 

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/giant_lichen"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/giant_lichen_harvested"
+    }
+  }
+}

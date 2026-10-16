@@ -42,7 +42,7 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        0,
+        -8,
         16
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        -9,
-        0
+        -15,
+        -5
       ],
       "face": "south",
       "overlay": "red_mountain",
@@ -66,7 +66,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        0,
+        4,
         -16
       ],
       "face": "south",
@@ -91,5 +91,112 @@
     "ghostgate_b_2": "Tower of Dusk",
     "ghostgate_b_3": "Ghostgate Pilgrim Shrine",
     "ghostgate_b_4": "Buoyant Armiger Armory"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [],
+  "walls": [
+    {
+      "r": 20,
+      "sides": 8,
+      "h": 10,
+      "gates": [
+        0,
+        3.1416
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          20
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "foyada_pass"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          18,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "ghostfence_watch"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -8
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.56,
+    "outskirts": false
+  },
+  "queue": [
+    {
+      "kind": "barracks",
+      "count": 2,
+      "kit": "velothi",
+      "on": "ghostfence_watch"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "kit": "redoran",
+      "on": "foyada_pass"
+    }
+  ]
 }

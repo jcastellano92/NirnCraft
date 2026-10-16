@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          0
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          16,
+          4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 4,
-      "r1": 20,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 3,
+      "phase": 1.16,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -12,
-        12
+        -17,
+        -3
       ],
       "face": "north",
       "overlay": "artaeum",
@@ -195,5 +240,47 @@
     "artaeum_craftworks_landmark": "High Seat of place.skycraft.artaeum_craftworks",
     "artaeum_craftworks_plaza": "place.skycraft.artaeum_craftworks Central Plaza"
   },
-  "innKey": "artaeum_craftworks_b_5"
+  "innKey": "artaeum_craftworks_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

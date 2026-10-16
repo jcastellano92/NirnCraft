@@ -3,6 +3,82 @@
     "provinces": [
       "elsweyr"
     ],
+    "biomes": [
+      "skycraft:elsweyr_sandstone_caverns",
+      "skycraft:lava_caves",
+      "skycraft:dwemer_caverns"
+    ],
+    "why": [
+      "elsweyr.L4.canyon_hunters",
+      "elsweyr.L10.moon_temples",
+      "elsweyr.L11.old_kingdoms"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:giant_scorpion",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher",
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:senche_tiger",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 9,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:sand_serpent",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "elsweyr"
+    ],
     "regions": [
       "elsweyr/anequina"
     ],

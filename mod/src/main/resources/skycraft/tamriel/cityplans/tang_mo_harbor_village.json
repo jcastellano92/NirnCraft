@@ -48,8 +48,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        -10
+        -9,
+        -28
       ],
       "name": "tang_mo_harbor_village_landmark",
       "overlay": "tang_mo_harbor_village"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          33
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          0,
+          -18
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          10
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          26,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 7,
-      "r1": 34,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 19,
+      "rz": 19,
+      "wobble": 3,
+      "lobes": 3,
+      "phase": 1.35,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,7 +120,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        17,
-        21
+        11,
+        26
       ],
       "face": "north",
       "overlay": "tang_mo_harbor_village",
@@ -99,8 +144,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        13
+        -9,
+        23
       ],
       "face": "north",
       "overlay": "tang_mo_harbor_village",
@@ -123,8 +168,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -12,
-        -6
+        19,
+        -25
       ],
       "face": "south",
       "overlay": "tang_mo_harbor_village",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        -18,
+        -4
       ],
       "face": "south",
       "overlay": "tang_mo_harbor_village",
@@ -165,6 +210,10 @@
       "type": "lamps",
       "theme": "tang_mo_harbor_village_lamps",
       "count": 2
+    },
+    {
+      "type": "basin",
+      "where": "edge"
     }
   ],
   "names": {
@@ -182,5 +231,47 @@
     "tang_mo_harbor_village_landmark": "High Seat of place.skycraft.tang_mo_harbor_village",
     "tang_mo_harbor_village_plaza": "place.skycraft.tang_mo_harbor_village Central Plaza"
   },
-  "innKey": "tang_mo_harbor_village_b_5"
+  "innKey": "tang_mo_harbor_village_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        13,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

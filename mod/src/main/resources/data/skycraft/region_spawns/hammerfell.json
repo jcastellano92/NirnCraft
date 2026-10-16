@@ -3,6 +3,102 @@
     "provinces": [
       "hammerfell"
     ],
+    "biomes": [
+      "skycraft:yokudan_sand_vaults",
+      "skycraft:elsweyr_sandstone_caverns",
+      "skycraft:dwemer_caverns",
+      "skycraft:lava_caves"
+    ],
+    "why": [
+      "hammerfell.L4.scorpions",
+      "hammerfell.L4.sand_serpents",
+      "hammerfell.L10.dwemer_halls",
+      "hammerfell.L10.lava_tubes"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 14,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:giant_scorpion",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:sand_serpent",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          6,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:dwarven_spider",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "automaton",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          8,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:dwarven_sphere",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "automaton",
+        "roles": [
+          "vanguard"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "hammerfell"
+    ],
     "families": [
       "ocean",
       "beach",

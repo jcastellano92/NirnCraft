@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -11
+        ]
       ],
-      "r0": 4,
-      "r1": 18,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          15,
+          -4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        4
+      ],
+      "rx": 12,
+      "rz": 12,
+      "wobble": 3,
+      "lobes": 3,
+      "phase": 0.67,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -195,5 +240,47 @@
     "orgnums_citadel_landmark": "High Seat of place.skycraft.orgnums_citadel",
     "orgnums_citadel_plaza": "place.skycraft.orgnums_citadel Central Plaza"
   },
-  "innKey": "orgnums_citadel_b_5"
+  "innKey": "orgnums_citadel_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

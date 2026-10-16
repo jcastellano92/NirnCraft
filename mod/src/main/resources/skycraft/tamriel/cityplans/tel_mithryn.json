@@ -30,7 +30,7 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        9,
+        17,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -9,
-        0
+        -15,
+        5
       ],
       "face": "south",
       "overlay": "tel_mithryn",
@@ -90,10 +90,112 @@
     "tel_mithryn_b_1": "Tel Mithryn Central Tower",
     "tel_mithryn_b_2": "Elynea Mothren's Apothecary Pod",
     "tel_mithryn_b_3": "Varona's Steward Pod",
-    "tel_mithryn_b_4": "Talvas's Staff Enchanter Pod"
+    "tel_mithryn_b_4": "Talvas's Staff Enchanter Pod",
+    "tel_mithryn_steward_court": "Master Neloth's Root-Pod Clearing"
   },
   "innKey": "tel_mithryn_b_3",
   "names": {
     "inn": "tel_mithryn_b_3"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        2,
+        8
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "tel_mithryn_steward_court"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 20,
+      "rz": 18,
+      "wobble": 5,
+      "lobes": 3,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "neloth_spore_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          2,
+          10
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          -4,
+          -24
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "ash_coast_trail"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.5
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "kit": "telvanni",
+      "on": "neloth_spore_ring"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "kit": "telvanni",
+      "on": "ash_coast_trail"
+    }
+  ]
 }

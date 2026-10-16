@@ -1,8 +1,12 @@
 hash-format = "sha256"
 
 [[files]]
+file = "config/ComplementaryReimagined_r5.9.3.zip.txt"
+hash = "93cddd4c58d8eecf882b8dcf565bdeddab5838b9fcb5e052e88df70cf729ed76"
+
+[[files]]
 file = "config/DistantHorizons.toml"
-hash = "a443abc6dc8d8b3187e4a2cc698b7d425e3fc912b9e146ca0b7999f84b538303"
+hash = "ab18397a982259adabc82478d1ab9d5ce381648de24f52dcc44760d49c2f4867"
 
 [[files]]
 file = "config/controllable.client.toml"

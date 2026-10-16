@@ -30,8 +30,8 @@
       "use": "smelter",
       "wealth": "common",
       "at": [
-        8,
-        0
+        6,
+        -8
       ],
       "face": "south",
       "overlay": "jerall_mountains",
@@ -42,8 +42,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        0,
-        15
+        -12,
+        17
       ],
       "face": "south",
       "overlay": "jerall_mountains",
@@ -66,7 +66,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        -8,
         -15
       ],
       "face": "south",
@@ -84,16 +84,131 @@
       "type": "lamps",
       "theme": "smelter_cresset",
       "count": 1
+    },
+    {
+      "type": "lamps",
+      "where": "street"
     }
   ],
   "titles": {
     "ember_hollow_b_1": "Ember Hollow Smeltery",
     "ember_hollow_b_2": "The Hot-Spring Flagon",
     "ember_hollow_b_3": "Assay-Master's Cabin",
-    "ember_hollow_b_4": "Silver-Miner's Bunkhouse"
+    "ember_hollow_b_4": "Silver-Miner's Bunkhouse",
+    "ember_hollow_square": "Ember Hollow Smeltery Yard"
   },
   "innKey": "ember_hollow_b_2",
   "names": {
     "inn": "ember_hollow_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "ember_hollow_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        23
+      ],
+      "to": [
+        2,
+        -14
+      ],
+      "legs": 3,
+      "amp": 12,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "hot_spring_switchback"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        4
+      ],
+      "rx": 16,
+      "rz": 12,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "smeltery_basin_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -23,
+          0
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          19,
+          -4
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "ember_hollow_spur"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "smeltery_basin_loop"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "hot_spring_switchback"
+    }
+  ]
 }

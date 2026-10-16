@@ -30,7 +30,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        8,
+        16,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        0,
-        15
+        3,
+        18
       ],
       "face": "south",
       "overlay": "nibenay_valley",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        5
       ],
       "face": "south",
       "overlay": "nibenay_valley",
@@ -66,8 +66,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        0,
-        -15
+        -3,
+        -18
       ],
       "face": "south",
       "overlay": "nibenay_valley",
@@ -84,16 +84,166 @@
       "type": "lamps",
       "theme": "pier_beacon",
       "count": 1
+    },
+    {
+      "type": "orchard",
+      "where": "edge"
     }
   ],
   "titles": {
     "lunar_fang_docks_b_1": "Lunar Fang Customs Wharf",
     "lunar_fang_docks_b_2": "The Barge-Pole Tavern",
     "lunar_fang_docks_b_3": "Harbour-Clerk's Loft",
-    "lunar_fang_docks_b_4": "Anchor & Chain Smithy"
+    "lunar_fang_docks_b_4": "Anchor & Chain Smithy",
+    "lunar_fang_docks_square": "Lunar Fang Barge Wharf"
   },
   "innKey": "lunar_fang_docks_b_2",
   "names": {
     "inn": "lunar_fang_docks_b_2"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        2
+      ],
+      "to": [
+        19,
+        12
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -4,
+        -2
+      ],
+      "to": [
+        -4,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "lunar_fang_docks_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -4,
+          7
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "barge_pilings_wharf"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          -4
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          19,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "lunar_fang_docks_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        -4
+      ],
+      "rx": 15,
+      "rz": 12,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "braid_channel_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "braid_channel_loop"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "barge_pilings_wharf"
+    }
+  ]
 }

@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        16,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        5
       ],
       "face": "south",
       "overlay": "gold_coast",
@@ -90,10 +90,130 @@
     "gottshaw_inn_b_1": "Gottshaw Inn",
     "gottshaw_inn_b_2": "Gottshaw Relay Stables",
     "gottshaw_inn_b_3": "Eroin's Wayside Cottage",
-    "gottshaw_inn_b_4": "Kvatch Refugee Wagon Shed"
+    "gottshaw_inn_b_4": "Kvatch Refugee Wagon Shed",
+    "gottshaw_inn_square": "Gottshaw Wayhouse Courtyard"
   },
   "innKey": "gottshaw_inn_b_1",
   "names": {
     "inn": "gottshaw_inn_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "gottshaw_inn_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          -4,
+          6
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          4,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "coastal_scrub_track"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          -4
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          16,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "gottshaw_inn_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        -4
+      ],
+      "rx": 14,
+      "rz": 11,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "wayhouse_yard_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "wayhouse_yard_loop"
+    },
+    {
+      "kind": "house",
+      "count": 1,
+      "on": "coastal_scrub_track"
+    }
+  ]
 }

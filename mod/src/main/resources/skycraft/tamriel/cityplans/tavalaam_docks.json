@@ -37,8 +37,8 @@
     {
       "id": "awning_row",
       "at": [
-        0,
-        -14
+        -6,
+        -19
       ],
       "face": "south",
       "name": "tavalaam_docks_landmark",
@@ -52,7 +52,7 @@
       "wealth": "common",
       "at": [
         9,
-        -12
+        -16
       ],
       "face": "south",
       "name": "tavalaam_docks_lateen_spar"
@@ -62,7 +62,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        23,
+        27,
         -2
       ],
       "face": "west",
@@ -73,8 +73,8 @@
       "use": "fishery",
       "wealth": "common",
       "at": [
-        11,
-        11
+        14,
+        14
       ],
       "face": "north",
       "name": "tavalaam_docks_dhow_jetty"
@@ -95,7 +95,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        -12,
+        -16,
         9
       ],
       "face": "east",

@@ -49,7 +49,7 @@
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -75,7 +75,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        12,
+        20,
         -16
       ],
       "face": "south",
@@ -86,8 +86,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        30,
-        -11
+        36,
+        8
       ],
       "face": "west",
       "name": "crosswych_split_slate_inn"
@@ -98,7 +98,7 @@
       "wealth": "common",
       "at": [
         20,
-        4
+        8
       ],
       "face": "west",
       "name": "crosswych_masons_cantina"
@@ -108,8 +108,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        23,
-        23
+        26,
+        26
       ],
       "face": "north",
       "name": "crosswych_chisel_and_wedge"
@@ -141,8 +141,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        -16,
-        12
+        -19,
+        9
       ],
       "face": "east",
       "name": "crosswych_ashlar_yard"
@@ -152,8 +152,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -32,
-        2
+        -35,
+        5
       ],
       "face": "east",
       "name": "crosswych_span_gatehouse"

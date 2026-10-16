@@ -26,8 +26,10 @@ public final class WeatherProfile {
             WeatherKind.RAIN, 3, WeatherKind.STORM, 1);
     public static final WeatherProfile ASH = register("ash", Ambient.ASH, 10_000, false, 3600, 12000,
             WeatherKind.CLEAR, 1, WeatherKind.CLOUDY, 1, WeatherKind.OVERCAST, 2, WeatherKind.ASHFALL, 4, WeatherKind.ASH_STORM, 2);
+    public static final WeatherProfile VOLCANIC = ASH;
     public static final WeatherProfile DESERT = register("desert", Ambient.SAND, 10_000, false, 4800, 14400,
             WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 1, WeatherKind.DUST, 3, WeatherKind.SANDSTORM, 2);
+    public static final WeatherProfile ARID = DESERT;
     public static final WeatherProfile SWAMP = register("swamp", Ambient.MARSH, 10_000, false, 3600, 12000,
             WeatherKind.CLEAR, 1, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 4, WeatherKind.DRIZZLE, 3,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1);
@@ -350,5 +352,23 @@ public final class WeatherProfile {
     private static boolean has(String s, String... keys) {
         for (String k : keys) if (s.contains(k)) return true;
         return false;
+    }
+
+    // ------------------------------------------------------------------ continuous latitude helpers
+
+    public static float latitudeFactor(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.latitudeFactor(blockZ);
+    }
+
+    public static float auroraElevationMinDeg(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.auroraElevationMinDeg(blockZ);
+    }
+
+    public static float auroraElevationMaxDeg(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.auroraElevationMaxDeg(blockZ);
+    }
+
+    public static float auroraAlphaFactor(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.auroraAlphaFactor(blockZ);
     }
 }

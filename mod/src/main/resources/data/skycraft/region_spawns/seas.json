@@ -1,5 +1,95 @@
 [
   {
+    "biomes": [
+      "skycraft:submerged_sea_caverns",
+      "skycraft:abyssal_trench_caves"
+    ],
+    "why": [
+      "high_rock.L10.sea_caves",
+      "summerset.L4.reef_life",
+      "summerset.L10.abyssal_vents"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 14,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:dreugh",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:slaughterfish",
+        "count": [
+          2,
+          4
+        ],
+        "tag": "predator",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:mudcrab",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 4,
+        "levels": [
+          10,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:sea_serpent",
+        "count": [
+          1,
+          1
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      }
+    ]
+  },
+  {
     "families": [
       "ocean"
     ],

@@ -218,7 +218,7 @@ final class SkyGeometry {
 
     private static BufferBuilder.RenderedBuffer buildGalaxy() {
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         double[] a = perpendicular(GALAXY_N);
         double[] b = cross(GALAXY_N, a);
         int seg = 96;
@@ -236,7 +236,10 @@ final class SkyGeometry {
                     double[] d = normalize(a[0] * Math.cos(th) + b[0] * Math.sin(th) + GALAXY_N[0] * w,
                             a[1] * Math.cos(th) + b[1] * Math.sin(th) + GALAXY_N[1] * w,
                             a[2] * Math.cos(th) + b[2] * Math.sin(th) + GALAXY_N[2] * w);
-                    bb.vertex(d[0] * R, d[1] * R, d[2] * R).uv((float) (p[0] / seg) * repeat, (float) (p[1] / rows)).endVertex();
+                    bb.vertex(d[0] * R, d[1] * R, d[2] * R)
+                            .uv((float) (p[0] / seg) * repeat, (float) (p[1] / rows))
+                            .color(1.0F, 1.0F, 1.0F, 1.0F)
+                            .endVertex();
                 }
             }
         }
@@ -245,7 +248,24 @@ final class SkyGeometry {
 
     // ------------------------------------------------------------------ aurora
 
-    /** One curtain in the northern sky (Minecraft north is -Z); keyframes loop seamlessly. */
+    static float latitudeFactor(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.latitudeFactor(blockZ);
+    }
+
+    static float auroraElevationMinDeg(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.auroraElevationMinDeg(blockZ);
+    }
+
+    static float auroraElevationMaxDeg(double blockZ) {
+        return com.skycraft.atmosphere.AtmosphereMath.auroraElevationMaxDeg(blockZ);
+    }
+
+    /**
+     * One curtain in the northern sky (Minecraft north is -Z); keyframes loop seamlessly.
+     * Built in the reference Skyrim elevation band (18°..42°); {@link SkyRenderer} pitches and scales each band
+     * continuously by world-Z latitude so it rises into overhead coronas (38°..76°) in Atmora and sinks to a low
+     * northern horizon glow (4°..16°) in Cyrodiil before vanishing south of Z = +6000.
+     */
     private static final class AuroraBand {
         final double center, half, baseElev, height, foldAmp, foldFreq, hue;
         final double[] rayFreq = new double[4];
@@ -256,8 +276,8 @@ final class SkyGeometry {
         AuroraBand(Random r, int index) {
             center = Math.toRadians(-35 + 70 * r.nextDouble() + (index - 1.5) * 12);
             half = Math.toRadians(45 + 30 * r.nextDouble());
-            baseElev = Math.toRadians(16 + 18 * r.nextDouble());
-            height = Math.toRadians(16 + 20 * r.nextDouble());
+            baseElev = Math.toRadians(18 + 6 * r.nextDouble());
+            height = Math.toRadians(20 + 6 * r.nextDouble());
             foldAmp = Math.toRadians(3 + 5 * r.nextDouble());
             foldFreq = 1.5 + 2.5 * r.nextDouble();
             hue = r.nextDouble();

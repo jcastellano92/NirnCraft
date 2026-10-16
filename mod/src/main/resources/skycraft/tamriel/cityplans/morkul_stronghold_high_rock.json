@@ -38,7 +38,7 @@
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         3.14
       ],
       "towers": true,
@@ -51,8 +51,8 @@
     {
       "id": "gate_hammer",
       "at": [
-        0,
-        -14
+        -3,
+        -17
       ],
       "face": "south",
       "name": "morkul_stronghold_high_rock_landmark",
@@ -65,7 +65,7 @@
       "use": "longhouse",
       "wealth": "common",
       "at": [
-        9,
+        17,
         -12
       ],
       "face": "south",
@@ -76,8 +76,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        23,
-        -2
+        25,
+        6
       ],
       "face": "west",
       "name": "morkul_hand_anvil"
@@ -87,8 +87,8 @@
       "use": "smelter",
       "wealth": "common",
       "at": [
-        11,
-        11
+        13,
+        19
       ],
       "face": "north",
       "name": "morkul_deep_slag_furnace"
@@ -109,8 +109,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -12,
-        9
+        -15,
+        12
       ],
       "face": "east",
       "name": "morkul_plate_racks"

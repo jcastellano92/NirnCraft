@@ -56,8 +56,8 @@
     {
       "id": "giant_tree",
       "at": [
-        0,
-        -16
+        -12,
+        -37
       ],
       "name": "arenthia_landmark",
       "overlay": "arenthia"
@@ -65,16 +65,56 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
+      "type": "switchback",
+      "from": [
         0,
-        0
+        83
       ],
-      "r0": 10,
-      "r1": 84,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "to": [
+        -6,
+        -45
+      ],
+      "legs": 4,
+      "amp": 32,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        -6
+      ],
+      "rx": 44,
+      "rz": 40,
+      "wobble": 3,
+      "lobes": 3,
+      "phase": 1.49,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -83,
+          0
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          60,
+          6
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "cross"
     }
   ],
   "buildings": [
@@ -179,8 +219,8 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -29,
-        -14
+        -25,
+        -3
       ],
       "face": "south",
       "overlay": "arenthia",
@@ -191,8 +231,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -40,
-        -50
+        -46,
+        -45
       ],
       "face": "south",
       "overlay": "arenthia",
@@ -203,7 +243,7 @@
       "use": "tailor",
       "wealth": "common",
       "at": [
-        -7,
+        25,
         -31
       ],
       "face": "south",
@@ -215,7 +255,7 @@
       "use": "jeweller",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         -62
       ],
       "face": "south",
@@ -227,7 +267,7 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        20,
+        40,
         -25
       ],
       "face": "south",
@@ -287,5 +327,47 @@
     "arenthia_landmark": "High Seat of place.skycraft.arenthia",
     "arenthia_plaza": "place.skycraft.arenthia Central Plaza"
   },
-  "innKey": "arenthia_b_5"
+  "innKey": "arenthia_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -33
+      ],
+      "r": 28,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 25,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        30,
+        8
+      ],
+      "r": 25,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 74,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "on": "main"
+    }
+  ]
 }

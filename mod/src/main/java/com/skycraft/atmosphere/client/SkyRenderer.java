@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.AtmosphereConfig;
+import com.skycraft.atmosphere.AtmosphereMath;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -28,17 +29,20 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL32;
 
 /**
- * The Skyrim night sky, drawn right after the vanilla sky ({@link RenderLevelStageEvent.Stage#AFTER_SKY}) in the
- * overworld: Secunda on its own tilted orbit, a glow around Masser (the retextured vanilla moon), a denser twinkling
- * star field, a faint galaxy band, the thirteen birthsign constellations (the Serpent wanders), occasional shooting
- * stars and, on clear nights in the northern regions, the aurora. Under regional overcast a tinted veil dims the
- * sky first ({@link ClientWeather}). Skipped while an Oculus/Iris shader pack is active. All draws except the veil
- * are additive, like vanilla's sun, moon and stars; the render state is restored afterwards.
+ * The Tamriel night sky, drawn right after the vanilla sky ({@link RenderLevelStageEvent.Stage#AFTER_SKY}) in the
+ * overworld: Secunda on its own tilted orbit, Masser and its reddish glow, a denser twinkling star field, a faint
+ * galaxy band, the thirteen birthsign constellations (the Serpent wanders), occasional shooting stars and, on clear
+ * nights, the continuous world-Z latitude aurora. Under regional overcast a tinted veil dims the sky first
+ * ({@link ClientWeather}), except when an Oculus/Iris shader pack is active so the shader's own sky gradient, sun,
+ * and god-rays remain intact underneath the celestial overlays.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SkyRenderer {
+    private static final ResourceLocation MASSER = new ResourceLocation("textures/environment/moon_phases.png");
     private static final ResourceLocation SECUNDA = new ResourceLocation(Skycraft.MODID, "textures/environment/secunda_phases.png");
     private static final ResourceLocation MASSER_HALO = new ResourceLocation(Skycraft.MODID, "textures/environment/masser_halo.png");
     private static final ResourceLocation GALAXY = new ResourceLocation(Skycraft.MODID, "textures/environment/galaxy.png");
@@ -47,6 +51,7 @@ public final class SkyRenderer {
     private static final float SECUNDA_TILT = 24.0F;
     private static final float SECUNDA_LEAD = 31.0F;
     private static final float SECUNDA_SIZE = 7.0F;
+    private static final float MASSER_SIZE = 20.0F;
     private static final float HALO_SIZE = 36.0F;
     private static final double AURORA_KEY_SECONDS = 6.0;
     /** The Serpent drifts once around the sky in this many days, out of step with the other stars. */
@@ -62,21 +67,38 @@ public final class SkyRenderer {
     private static double mSx, mSy, mSz;     // start direction
     private static double mTx, mTy, mTz;     // travel direction (tangent at the start)
 
-    /** 0..1, how cold the player's surroundings are (smoothed by {@link AtmosphereClientEvents}). */
+    /** 0..1, continuous latitude/climate factor for the aurora (smoothed by {@link AtmosphereClientEvents}). */
     static float coldness;
     static float coldnessPrev;
 
     private SkyRenderer() {}
 
+    public static float latitudeFactor(double blockZ) {
+        return AtmosphereMath.latitudeFactor(blockZ);
+    }
+
+    public static float auroraElevationMinDeg(double blockZ) {
+        return AtmosphereMath.auroraElevationMinDeg(blockZ);
+    }
+
+    public static float auroraElevationMaxDeg(double blockZ) {
+        return AtmosphereMath.auroraElevationMaxDeg(blockZ);
+    }
+
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
+        render(event);
+    }
+
+    public static void render(RenderLevelStageEvent event) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null) return;
         if (level.dimension() != Level.OVERWORLD || level.effects().skyType() != DimensionSpecialEffects.SkyType.NORMAL) return;
         if (!AtmosphereConfig.SKY.get()) return;
-        if (AtmosphereConfig.SKIP_WITH_SHADERS.get() && ShaderCompat.shadersActive()) return;
+        boolean shadersActive = ShaderCompat.shadersActive();
+        if (AtmosphereConfig.SKIP_WITH_SHADERS.get() && shadersActive) return;
         Camera camera = event.getCamera();
         if (camera.getFluidInCamera() != FogType.NONE) return;
         if (mc.player.hasEffect(MobEffects.BLINDNESS) || mc.player.hasEffect(MobEffects.DARKNESS)) return;
@@ -86,6 +108,7 @@ public final class SkyRenderer {
         float overcast = ClientWeather.active() && AtmosphereConfig.WEATHER_SKY.get() ? ClientWeather.clouds() : 0.0F;
         float clear = (1.0F - level.getRainLevel(pt)) * (1.0F - overcast * 0.92F);
         float night = Mth.clamp(level.getStarBrightness(pt) * 2.0F, 0.0F, 1.0F);
+        double camZ = camera.getPosition().z;
 
         SkyGeometry.ensureBuilt();
         PoseStack pose = event.getPoseStack();
@@ -93,12 +116,16 @@ public final class SkyRenderer {
         double seconds = (level.getGameTime() + pt) / 20.0;
 
         RenderSystem.enableBlend();
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthFunc(GL11.GL_LEQUAL);
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
+        GL11.glEnable(GL32.GL_DEPTH_CLAMP);
         try {
-            // overcast veil: normal blending over vanilla's sun and moon, tinted like the fog
+            // overcast veil: normal blending over vanilla's sun and moon, tinted like the fog.
+            // Skipped when an Oculus/Iris shader pack is active so the shader's own sky gradient and god-rays remain intact.
             float veil = overcast * (1.0F - 0.5F * level.getRainLevel(pt));
-            if (veil > 0.01F) {
+            if (veil > 0.01F && !shadersActive) {
                 RenderSystem.defaultBlendFunc();
                 float day = Mth.clamp(Mth.cos(level.getTimeOfDay(pt) * Mth.TWO_PI) * 2.0F + 0.5F, 0.0F, 1.0F);
                 float lift = 0.85F + 0.15F * day;
@@ -108,26 +135,41 @@ public final class SkyRenderer {
                 VertexBuffer.unbind();
             }
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
-                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             if (clear <= 0.01F) return;
 
             if (AtmosphereConfig.AURORA.get()) {
-                float cold = AtmosphereConfig.AURORA_EVERYWHERE.get() ? 1.0F : Mth.lerp(pt, coldnessPrev, coldness);
+                float latAlpha = AtmosphereMath.auroraAlphaFactor(camZ);
+                float cold = AtmosphereConfig.AURORA_EVERYWHERE.get()
+                        ? 1.0F
+                        : Mth.lerp(pt, coldnessPrev, coldness) * (AtmosphereConfig.AURORA_BY_REGION.get() ? (latAlpha > 0.0F ? 1.0F : 0.0F) : 1.0F);
                 float alpha = night * night * clear * clear * cold * activity(level) * AtmosphereConfig.AURORA_BRIGHTNESS.get().floatValue();
-                if (alpha > 0.003F) drawAurora(pose, proj, alpha, seconds);
+                if (alpha > 0.003F) drawAurora(pose, proj, alpha, seconds, camZ);
             }
 
-            // celestial frame: identical to vanilla's sun/moon/star rotation
-            pose.pushPose();
-            pose.mulPose(Axis.YP.rotationDegrees(-90.0F));
-            pose.mulPose(Axis.XP.rotationDegrees(level.getTimeOfDay(pt) * 360.0F));
+            // celestial frame: tilted subtly by world-Z latitude for the star dome, constellations, and galaxy
             float starAlpha = night * clear;
             if (starAlpha > 0.003F) {
+                pose.pushPose();
+                pose.mulPose(Axis.YP.rotationDegrees(-90.0F));
+                pose.mulPose(Axis.ZP.rotationDegrees(AtmosphereMath.starDomeTiltDeg(camZ)));
+                pose.mulPose(Axis.XP.rotationDegrees(level.getTimeOfDay(pt) * 360.0F));
                 if (AtmosphereConfig.GALAXY.get()) drawGalaxy(pose, proj, starAlpha * 0.55F);
                 if (AtmosphereConfig.STARS.get()) drawStars(pose, proj, starAlpha, seconds);
                 if (AtmosphereConfig.CONSTELLATIONS.get()) drawConstellations(pose, proj, starAlpha, level.getDayTime() + pt);
+                pose.popPose();
             }
-            if (AtmosphereConfig.MASSER_HALO.get() && starAlpha > 0.003F) drawHalo(pose.last().pose(), starAlpha * 0.5F);
+
+            // Masser & halo in vanilla's exact moon orbit frame
+            pose.pushPose();
+            pose.mulPose(Axis.YP.rotationDegrees(-90.0F));
+            pose.mulPose(Axis.XP.rotationDegrees(level.getTimeOfDay(pt) * 360.0F));
+            if (shadersActive && clear > 0.01F) {
+                drawMasser(pose.last().pose(), clear, level.getMoonPhase());
+            }
+            if (AtmosphereConfig.MASSER_HALO.get() && starAlpha > 0.003F) {
+                drawHalo(pose.last().pose(), starAlpha * 0.5F);
+            }
             pose.popPose();
 
             if (AtmosphereConfig.SHOOTING_STARS.get()) drawShootingStar(pose.last().pose(), starAlpha, seconds);
@@ -141,6 +183,7 @@ public final class SkyRenderer {
                 pose.popPose();
             }
         } finally {
+            GL11.glDisable(GL32.GL_DEPTH_CLAMP);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.enableCull();
             RenderSystem.depthMask(true);
@@ -234,19 +277,23 @@ public final class SkyRenderer {
 
     private static void drawGalaxy(PoseStack pose, Matrix4f proj, float alpha) {
         RenderSystem.setShaderTexture(0, GALAXY);
-        drawBuffer(SkyGeometry.galaxy, pose.last().pose(), proj, GameRenderer.getPositionTexShader(), alpha);
+        drawBuffer(SkyGeometry.galaxy, pose.last().pose(), proj, GameRenderer.getPositionTexColorShader(), alpha);
     }
 
-    private static void drawAurora(PoseStack pose, Matrix4f proj, float alpha, double seconds) {
+    private static void drawAurora(PoseStack pose, Matrix4f proj, float alpha, double seconds, double camZ) {
         double phase = seconds / AURORA_KEY_SECONDS;
         int key = Math.floorMod((long) Math.floor(phase), SkyGeometry.AURORA_KEYS);
         float w = (float) (phase - Math.floor(phase));
         w = w * w * (3.0F - 2.0F * w);
         int next = (key + 1) % SkyGeometry.AURORA_KEYS;
+        float pitchOffset = AtmosphereMath.auroraPitchOffsetDeg(camZ);
+        float heightScale = AtmosphereMath.auroraHeightScale(camZ);
         for (int b = 0; b < SkyGeometry.AURORA_BANDS; b++) {
             float band = alpha * (0.55F + 0.45F * (float) Math.sin(seconds * 0.045 + b * 1.7));
             pose.pushPose();
             pose.mulPose(Axis.YP.rotationDegrees((float) Math.sin(seconds * 0.011 + b * 2.3) * 4.0F));
+            pose.mulPose(Axis.XP.rotationDegrees(pitchOffset));
+            pose.scale(1.0F, heightScale, 1.0F);
             Matrix4f m = pose.last().pose();
             drawBuffer(SkyGeometry.AURORA[b][key], m, proj, GameRenderer.getPositionColorShader(), band * (1.0F - w));
             drawBuffer(SkyGeometry.AURORA[b][next], m, proj, GameRenderer.getPositionColorShader(), band * w);
@@ -262,35 +309,56 @@ public final class SkyRenderer {
         VertexBuffer.unbind();
     }
 
+    /** Draws Masser (the large red moon) using POSITION_TEX_COLOR so it remains visible when Oculus shaders are active. */
+    private static void drawMasser(Matrix4f m, float alpha, int phase) {
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, MASSER);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        int col = phase % 4;
+        int row = phase / 4 % 2;
+        float u0 = col / 4.0F, v0 = row / 2.0F, u1 = (col + 1) / 4.0F, v1 = (row + 1) / 2.0F;
+        float s = MASSER_SIZE;
+        float a = Math.min(1.0F, alpha);
+        BufferBuilder bb = Tesselator.getInstance().getBuilder();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bb.vertex(m, -s, -100.0F, s).uv(u1, v1).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, s, -100.0F, s).uv(u0, v1).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, s, -100.0F, -s).uv(u0, v0).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, -s, -100.0F, -s).uv(u1, v0).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        BufferUploader.drawWithShader(bb.end());
+    }
+
     /** Soft red glow around the vanilla moon (= Masser); same placement as vanilla's moon quad. */
     private static void drawHalo(Matrix4f m, float alpha) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, MASSER_HALO);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         float s = HALO_SIZE;
+        float a = Math.min(1.0F, alpha);
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bb.vertex(m, -s, -100.0F, s).uv(1.0F, 1.0F).endVertex();
-        bb.vertex(m, s, -100.0F, s).uv(0.0F, 1.0F).endVertex();
-        bb.vertex(m, s, -100.0F, -s).uv(0.0F, 0.0F).endVertex();
-        bb.vertex(m, -s, -100.0F, -s).uv(1.0F, 0.0F).endVertex();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bb.vertex(m, -s, -100.0F, s).uv(1.0F, 1.0F).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, s, -100.0F, s).uv(0.0F, 1.0F).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, s, -100.0F, -s).uv(0.0F, 0.0F).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, -s, -100.0F, -s).uv(1.0F, 0.0F).color(1.0F, 1.0F, 1.0F, a).endVertex();
         BufferUploader.drawWithShader(bb.end());
     }
 
     private static void drawSecunda(Matrix4f m, float alpha, int phase) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, SECUNDA);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         int col = phase % 4;
         int row = phase / 4 % 2;
         float u0 = col / 4.0F, v0 = row / 2.0F, u1 = (col + 1) / 4.0F, v1 = (row + 1) / 2.0F;
         float s = SECUNDA_SIZE;
+        float a = Math.min(1.0F, alpha);
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bb.vertex(m, -s, -100.0F, s).uv(u1, v1).endVertex();
-        bb.vertex(m, s, -100.0F, s).uv(u0, v1).endVertex();
-        bb.vertex(m, s, -100.0F, -s).uv(u0, v0).endVertex();
-        bb.vertex(m, -s, -100.0F, -s).uv(u1, v0).endVertex();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bb.vertex(m, -s, -100.0F, s).uv(u1, v1).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, s, -100.0F, s).uv(u0, v1).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, s, -100.0F, -s).uv(u0, v0).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.vertex(m, -s, -100.0F, -s).uv(u1, v0).color(1.0F, 1.0F, 1.0F, a).endVertex();
         BufferUploader.drawWithShader(bb.end());
     }
 

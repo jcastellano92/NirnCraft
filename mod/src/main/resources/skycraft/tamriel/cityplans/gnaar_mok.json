@@ -30,8 +30,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        9,
-        0
+        13,
+        11
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -42,8 +42,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
-        29
+        -3,
+        31
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -55,7 +55,7 @@
       "wealth": "poor",
       "at": [
         -7,
-        5
+        9
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -78,8 +78,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        -9,
+        -7
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -96,6 +96,10 @@
       "type": "lamps",
       "theme": "smuggler_pier_lantern",
       "count": 1
+    },
+    {
+      "type": "tree",
+      "where": "free"
     }
   ],
   "titles": {
@@ -103,10 +107,158 @@
     "gnaar_mok_b_2": "Druegh-Jigger's Rest",
     "gnaar_mok_b_3": "Nadene Rotheran's Shack",
     "gnaar_mok_b_4": "Caryarel's Stilted Hut",
-    "gnaar_mok_b_5": "Netch-Leather Curing Shed"
+    "gnaar_mok_b_5": "Netch-Leather Curing Shed",
+    "gnaar_mok_plank_square": "Caryarel's Stilt-Boardwalk Landing"
   },
   "innKey": "gnaar_mok_b_2",
   "names": {
     "inn": "gnaar_mok_b_2"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -28,
+        4
+      ],
+      "to": [
+        28,
+        8
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        0,
+        -2
+      ],
+      "to": [
+        0,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        -6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "gnaar_mok_plank_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          -6,
+          -26
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "dreugh_plank_walk"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          -4
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          28,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "smuggler_creek"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -4
+      ],
+      "rx": 20,
+      "rz": 18,
+      "wobble": 5,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "stilt_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "on": "stilt_ring"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "poor",
+      "count": 2,
+      "on": "smuggler_creek"
+    }
+  ]
 }

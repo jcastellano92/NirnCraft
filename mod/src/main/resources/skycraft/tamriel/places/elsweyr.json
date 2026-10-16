@@ -6363,15 +6363,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_1_barrow",
-    "name": "place.skycraft.anequina_site_1_barrow",
+    "id": "scar_crimson_two_moons_temple",
+    "name": "place.skycraft.scar_crimson_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -848,
-    "z": 8976,
+    "x": -722,
+    "z": 10123,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6379,15 +6379,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_2_dwemer_ruin",
-    "name": "place.skycraft.anequina_site_2_dwemer_ruin",
+    "id": "elinh_dawn_claw_dance_adeptorium",
+    "name": "place.skycraft.elinh_dawn_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1232,
-    "z": 9008,
+    "x": -1589,
+    "z": 10890,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6395,63 +6395,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_3_fort",
-    "name": "place.skycraft.anequina_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -816,
-    "z": 9008,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_4_fort_mage",
-    "name": "place.skycraft.anequina_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -1264,
-    "z": 9040,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_5_akaviri_fort",
-    "name": "place.skycraft.anequina_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -848,
-    "z": 9040,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_6_daedric_ruin",
-    "name": "place.skycraft.anequina_site_6_daedric_ruin",
+    "id": "lorkh_white_sandstone_catacomb",
+    "name": "place.skycraft.lorkh_white_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1328,
-    "z": 9072,
+    "x": -657,
+    "z": 11629,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6459,15 +6411,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_7_breton_keep_ruin",
-    "name": "place.skycraft.anequina_site_7_breton_keep_ruin",
+    "id": "senche_upper_moon_sugar_den",
+    "name": "place.skycraft.senche_upper_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -912,
-    "z": 9072,
+    "x": -77,
+    "z": 10291,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6475,15 +6427,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_8_bandit_cave",
-    "name": "place.skycraft.anequina_site_8_bandit_cave",
+    "id": "orcr_hollow_canyon_cliff_redoubt",
+    "name": "place.skycraft.orcr_hollow_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1488,
-    "z": 9104,
+    "x": -1752,
+    "z": 9455,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6491,15 +6443,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_9_troll_cave",
-    "name": "place.skycraft.anequina_site_9_troll_cave",
+    "id": "cicatr_silver_baandari_caravan_halting",
+    "name": "place.skycraft.cicatr_silver_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1072,
-    "z": 9104,
+    "x": -1362,
+    "z": 11402,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6507,15 +6459,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_10_ice_cave",
-    "name": "place.skycraft.anequina_site_10_ice_cave",
+    "id": "ja_da_scarlet_palm_spring_oasis",
+    "name": "place.skycraft.ja_da_scarlet_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -656,
-    "z": 9104,
+    "x": -1323,
+    "z": 10604,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6523,15 +6475,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_11_sixth_house_base",
-    "name": "place.skycraft.anequina_site_11_sixth_house_base",
+    "id": "qijar_ashen_alkosh_crag_roost",
+    "name": "place.skycraft.qijar_ashen_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1360,
-    "z": 9136,
+    "x": -297,
+    "z": 9518,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6539,15 +6491,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_12_scorpion_den",
-    "name": "place.skycraft.anequina_site_12_scorpion_den",
+    "id": "rawlk_sacred_badlands_shale_cavern",
+    "name": "place.skycraft.rawlk_sacred_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -944,
-    "z": 9136,
+    "x": 372,
+    "z": 10162,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6555,15 +6507,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_13_vampire_lair",
-    "name": "place.skycraft.anequina_site_13_vampire_lair",
+    "id": "azurah_cinder_riddle_thar_sanctum",
+    "name": "place.skycraft.azurah_cinder_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "vampire_lair",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -528,
-    "z": 9136,
+    "x": 139,
+    "z": 11251,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6571,15 +6523,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_14_hagraven_lair",
-    "name": "place.skycraft.anequina_site_14_hagraven_lair",
+    "id": "hakos_deep_two_moons_temple",
+    "name": "place.skycraft.hakos_deep_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1456,
-    "z": 9200,
+    "x": 11,
+    "z": 10993,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6587,15 +6539,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_15_giant_camp",
-    "name": "place.skycraft.anequina_site_15_giant_camp",
+    "id": "ohmes_obsidian_claw_dance_adeptorium",
+    "name": "place.skycraft.ohmes_obsidian_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1040,
-    "z": 9200,
+    "x": -717,
+    "z": 10227,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6603,15 +6555,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_16_watchtower",
-    "name": "place.skycraft.anequina_site_16_watchtower",
+    "id": "jode_dusk_sandstone_catacomb",
+    "name": "place.skycraft.jode_dusk_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -624,
-    "z": 9200,
+    "x": -1207,
+    "z": 11694,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6619,95 +6571,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_17_cabin",
-    "name": "place.skycraft.anequina_site_17_cabin",
+    "id": "badl_golden_moon_sugar_den",
+    "name": "place.skycraft.badl_golden_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "cabin",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -208,
-    "z": 9200,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_18_grove",
-    "name": "place.skycraft.anequina_site_18_grove",
-    "type": "dungeon_fixed",
-    "variant": "grove",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -1296,
-    "z": 9232,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_19_mage_tower",
-    "name": "place.skycraft.anequina_site_19_mage_tower",
-    "type": "dungeon_fixed",
-    "variant": "mage_tower",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -880,
-    "z": 9232,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_20_imperial_camp",
-    "name": "place.skycraft.anequina_site_20_imperial_camp",
-    "type": "dungeon_fixed",
-    "variant": "imperial_camp",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -464,
-    "z": 9232,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_21_nordic_ruin",
-    "name": "place.skycraft.anequina_site_21_nordic_ruin",
-    "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -48,
-    "z": 9232,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_site_22_great_lift",
-    "name": "place.skycraft.anequina_site_22_great_lift",
-    "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
     "x": -1008,
-    "z": 9296,
+    "z": 11193,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6715,15 +6587,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_23_kolskeggr_mine",
-    "name": "place.skycraft.anequina_site_23_kolskeggr_mine",
+    "id": "falkh_inner_canyon_cliff_redoubt",
+    "name": "place.skycraft.falkh_inner_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -592,
-    "z": 9296,
+    "x": -747,
+    "z": 10663,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6731,15 +6603,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_site_24_bleak_falls_barrow",
-    "name": "place.skycraft.anequina_site_24_bleak_falls_barrow",
+    "id": "meir_shrouded_baandari_caravan_halting",
+    "name": "place.skycraft.meir_shrouded_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -176,
-    "z": 9296,
+    "x": 85,
+    "z": 11341,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6747,14 +6619,187 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_marker_1_standing_stone",
-    "name": "place.skycraft.anequina_marker_1_standing_stone",
+    "id": "taagr_basal_palm_spring_oasis",
+    "name": "place.skycraft.taagr_basal_palm_spring_oasis",
+    "type": "dungeon_fixed",
+    "variant": "desert_oasis",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -206,
+    "z": 11128,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "riverh_iron_alkosh_crag_roost",
+    "name": "place.skycraft.riverh_iron_alkosh_crag_roost",
+    "type": "dungeon_fixed",
+    "variant": "dragon_roost",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -392,
+    "z": 9593,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "darl_gilded_badlands_shale_cavern",
+    "name": "place.skycraft.darl_gilded_badlands_shale_cavern",
+    "type": "dungeon_fixed",
+    "variant": "badlands_cave",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -659,
+    "z": 11154,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "khaj_forbidden_riddle_thar_sanctum",
+    "name": "place.skycraft.khaj_forbidden_riddle_thar_sanctum",
+    "type": "dungeon_fixed",
+    "variant": "khajiit_shrine",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -1715,
+    "z": 10326,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "riddl_pale_two_moons_temple",
+    "name": "place.skycraft.riddl_pale_two_moons_temple",
+    "type": "dungeon_fixed",
+    "variant": "moon_temple",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -1208,
+    "z": 10318,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "dune_high_claw_dance_adeptorium",
+    "name": "place.skycraft.dune_high_claw_dance_adeptorium",
+    "type": "dungeon_fixed",
+    "variant": "adeptorium",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -853,
+    "z": 10707,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "baan_amber_sandstone_catacomb",
+    "name": "place.skycraft.baan_amber_sandstone_catacomb",
+    "type": "dungeon_fixed",
+    "variant": "sandstone_tomb",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -8,
+    "z": 9682,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ilara_storm_moon_sugar_den",
+    "name": "place.skycraft.ilara_storm_moon_sugar_den",
+    "type": "dungeon_fixed",
+    "variant": "sugar_smuggler_den",
+    "class": "minor",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -426,
+    "z": 11275,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pahm_jade_lunar_lantern_shrine",
+    "name": "place.skycraft.pahm_jade_lunar_lantern_shrine",
+    "type": "landmark",
+    "variant": "khajiit_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -788,
+    "z": 9417,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "jone_outer_caravan_wellspring",
+    "name": "place.skycraft.jone_outer_caravan_wellspring",
+    "type": "landmark",
+    "variant": "desert_oasis",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": 21,
+    "z": 10571,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "mesa_ancient_mane_s_pillar",
+    "name": "place.skycraft.mesa_ancient_mane_s_pillar",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": 409,
+    "z": 10993,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "grasw_verdant_eclipse_alignment_stones",
+    "name": "place.skycraft.grasw_verdant_eclipse_alignment_stones",
     "type": "standing_stone",
-    "variant": "standing_stone",
+    "variant": "stones",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1648,
-    "z": 9328,
+    "x": -496,
+    "z": 10325,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6762,14 +6807,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_marker_2_word_wall",
-    "name": "place.skycraft.anequina_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "nakh_bronze_red_mesa_defile",
+    "name": "place.skycraft.nakh_bronze_red_mesa_defile",
+    "type": "landmark",
+    "variant": "pass",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1232,
-    "z": 9328,
+    "x": 402,
+    "z": 9967,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6777,74 +6822,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_marker_3_dragon_mound",
-    "name": "place.skycraft.anequina_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -816,
-    "z": 9328,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_marker_4_azura",
-    "name": "place.skycraft.anequina_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -400,
-    "z": 9328,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_marker_5_boethiah",
-    "name": "place.skycraft.anequina_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": 16,
-    "z": 9328,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_marker_6_mephala",
-    "name": "place.skycraft.anequina_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "khajiit",
-    "region": "elsweyr/anequina",
-    "x": -1520,
-    "z": 9360,
-    "why": [
-      "anequina.L1.badland_gullies",
-      "anequina.L1.mesa_field"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "anequina_marker_7_peak",
-    "name": "place.skycraft.anequina_marker_7_peak",
+    "id": "alkosh_silent_sun_spire_butte",
+    "name": "place.skycraft.alkosh_silent_sun_spire_butte",
     "type": "landmark",
     "variant": "peak",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -1104,
-    "z": 9360,
+    "x": -937,
+    "z": 10569,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6852,14 +6837,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_marker_8_waterfall",
-    "name": "place.skycraft.anequina_marker_8_waterfall",
+    "id": "scar_twilight_monsoon_cataract",
+    "name": "place.skycraft.scar_twilight_monsoon_cataract",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -688,
-    "z": 9360,
+    "x": -1039,
+    "z": 9105,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -6867,14 +6852,29 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "anequina_marker_9_eyrie",
-    "name": "place.skycraft.anequina_marker_9_eyrie",
-    "type": "landmark",
-    "variant": "eyrie",
+    "id": "elinh_black_namiira_bentley_altar",
+    "name": "place.skycraft.elinh_black_namiira_bentley_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
     "culture": "khajiit",
     "region": "elsweyr/anequina",
-    "x": -272,
-    "z": 9360,
+    "x": 167,
+    "z": 10003,
+    "why": [
+      "anequina.L1.badland_gullies",
+      "anequina.L1.mesa_field"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "lorkh_lower_lunar_lantern_shrine",
+    "name": "place.skycraft.lorkh_lower_lunar_lantern_shrine",
+    "type": "landmark",
+    "variant": "khajiit_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/anequina",
+    "x": -1516,
+    "z": 9298,
     "why": [
       "anequina.L1.badland_gullies",
       "anequina.L1.mesa_field"
@@ -7001,15 +7001,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_1_barrow",
-    "name": "place.skycraft.rimmen_site_1_barrow",
+    "id": "mesa_crimson_two_moons_temple",
+    "name": "place.skycraft.mesa_crimson_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 624,
-    "z": 9520,
+    "x": 3533,
+    "z": 11080,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7017,15 +7017,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_2_dwemer_ruin",
-    "name": "place.skycraft.rimmen_site_2_dwemer_ruin",
+    "id": "eurax_dawn_claw_dance_adeptorium",
+    "name": "place.skycraft.eurax_dawn_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 944,
-    "z": 9520,
+    "x": 2260,
+    "z": 10506,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7033,63 +7033,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_3_fort",
-    "name": "place.skycraft.rimmen_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/rimmen",
-    "x": 1264,
-    "z": 9520,
-    "why": [
-      "rimmen.L1.alabaster_beds",
-      "rimmen.L1.eastern_canyons"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "rimmen_site_4_fort_mage",
-    "name": "place.skycraft.rimmen_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/rimmen",
-    "x": 1584,
-    "z": 9520,
-    "why": [
-      "rimmen.L1.alabaster_beds",
-      "rimmen.L1.eastern_canyons"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "rimmen_site_5_akaviri_fort",
-    "name": "place.skycraft.rimmen_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/rimmen",
-    "x": 528,
-    "z": 9584,
-    "why": [
-      "rimmen.L1.alabaster_beds",
-      "rimmen.L1.eastern_canyons"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "rimmen_site_6_daedric_ruin",
-    "name": "place.skycraft.rimmen_site_6_daedric_ruin",
+    "id": "hakosh_white_sandstone_catacomb",
+    "name": "place.skycraft.hakosh_white_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1168,
-    "z": 9584,
+    "x": 1549,
+    "z": 10102,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7097,15 +7049,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_7_breton_keep_ruin",
-    "name": "place.skycraft.rimmen_site_7_breton_keep_ruin",
+    "id": "stepp_upper_moon_sugar_den",
+    "name": "place.skycraft.stepp_upper_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1488,
-    "z": 9584,
+    "x": 2315,
+    "z": 10095,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7113,15 +7065,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_8_bandit_cave",
-    "name": "place.skycraft.rimmen_site_8_bandit_cave",
+    "id": "fenn_hollow_canyon_cliff_redoubt",
+    "name": "place.skycraft.fenn_hollow_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2128,
-    "z": 9584,
+    "x": 1078,
+    "z": 10100,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7129,15 +7081,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_9_spider_cave",
-    "name": "place.skycraft.rimmen_site_9_spider_cave",
+    "id": "tonen_silver_baandari_caravan_halting",
+    "name": "place.skycraft.tonen_silver_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "spider_cave",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 720,
-    "z": 9616,
+    "x": 1337,
+    "z": 10546,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7145,15 +7097,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_10_troll_cave",
-    "name": "place.skycraft.rimmen_site_10_troll_cave",
+    "id": "oasis_scarlet_palm_spring_oasis",
+    "name": "place.skycraft.oasis_scarlet_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1360,
-    "z": 9616,
+    "x": 3355,
+    "z": 11049,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7161,15 +7113,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_11_ice_cave",
-    "name": "place.skycraft.rimmen_site_11_ice_cave",
+    "id": "gharl_ashen_alkosh_crag_roost",
+    "name": "place.skycraft.gharl_ashen_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1680,
-    "z": 9616,
+    "x": 2710,
+    "z": 10184,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7177,15 +7129,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_12_sixth_house_base",
-    "name": "place.skycraft.rimmen_site_12_sixth_house_base",
+    "id": "akav_sacred_badlands_shale_cavern",
+    "name": "place.skycraft.akav_sacred_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2000,
-    "z": 9616,
+    "x": 1289,
+    "z": 10796,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7193,15 +7145,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_13_scorpion_den",
-    "name": "place.skycraft.rimmen_site_13_scorpion_den",
+    "id": "alkor_cinder_riddle_thar_sanctum",
+    "name": "place.skycraft.alkor_cinder_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 464,
-    "z": 9648,
+    "x": 2264,
+    "z": 11216,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7209,15 +7161,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_14_hagraven_lair",
-    "name": "place.skycraft.rimmen_site_14_hagraven_lair",
+    "id": "hissm_deep_two_moons_temple",
+    "name": "place.skycraft.hissm_deep_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 784,
-    "z": 9648,
+    "x": 2005,
+    "z": 10827,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7225,15 +7177,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_15_giant_camp",
-    "name": "place.skycraft.rimmen_site_15_giant_camp",
+    "id": "redl_obsidian_claw_dance_adeptorium",
+    "name": "place.skycraft.redl_obsidian_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1104,
-    "z": 9648,
+    "x": 3303,
+    "z": 11225,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7241,15 +7193,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_16_watchtower",
-    "name": "place.skycraft.rimmen_site_16_watchtower",
+    "id": "baand_dusk_sandstone_catacomb",
+    "name": "place.skycraft.baand_dusk_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1424,
-    "z": 9648,
+    "x": 1784,
+    "z": 10903,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7257,15 +7209,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_17_cabin",
-    "name": "place.skycraft.rimmen_site_17_cabin",
+    "id": "irai_golden_moon_sugar_den",
+    "name": "place.skycraft.irai_golden_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1744,
-    "z": 9648,
+    "x": 788,
+    "z": 9976,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7273,15 +7225,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_18_grove",
-    "name": "place.skycraft.rimmen_site_18_grove",
+    "id": "suga_inner_canyon_cliff_redoubt",
+    "name": "place.skycraft.suga_inner_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "grove",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2064,
-    "z": 9648,
+    "x": 1048,
+    "z": 9999,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7289,15 +7241,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_19_mage_tower",
-    "name": "place.skycraft.rimmen_site_19_mage_tower",
+    "id": "chasa_shrouded_baandari_caravan_halting",
+    "name": "place.skycraft.chasa_shrouded_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2384,
-    "z": 9648,
+    "x": 1353,
+    "z": 10094,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7305,15 +7257,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_20_imperial_camp",
-    "name": "place.skycraft.rimmen_site_20_imperial_camp",
+    "id": "joor_basal_palm_spring_oasis",
+    "name": "place.skycraft.joor_basal_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 976,
-    "z": 9680,
+    "x": 2026,
+    "z": 9977,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7321,15 +7273,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_21_nordic_ruin",
-    "name": "place.skycraft.rimmen_site_21_nordic_ruin",
+    "id": "cany_iron_alkosh_crag_roost",
+    "name": "place.skycraft.cany_iron_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1296,
-    "z": 9680,
+    "x": 974,
+    "z": 9720,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7337,15 +7289,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_22_great_lift",
-    "name": "place.skycraft.rimmen_site_22_great_lift",
+    "id": "do_kr_gilded_badlands_shale_cavern",
+    "name": "place.skycraft.do_kr_gilded_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1936,
-    "z": 9680,
+    "x": 1879,
+    "z": 10329,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7353,15 +7305,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_23_kolskeggr_mine",
-    "name": "place.skycraft.rimmen_site_23_kolskeggr_mine",
+    "id": "rimmen_forbidden_riddle_thar_sanctum",
+    "name": "place.skycraft.rimmen_forbidden_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2256,
-    "z": 9680,
+    "x": 664,
+    "z": 9831,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7369,15 +7321,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_site_24_bleak_falls_barrow",
-    "name": "place.skycraft.rimmen_site_24_bleak_falls_barrow",
+    "id": "mesa_pale_two_moons_temple",
+    "name": "place.skycraft.mesa_pale_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 688,
-    "z": 9712,
+    "x": 1527,
+    "z": 9559,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7385,14 +7337,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_1_standing_stone",
-    "name": "place.skycraft.rimmen_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "eurax_high_claw_dance_adeptorium",
+    "name": "place.skycraft.eurax_high_claw_dance_adeptorium",
+    "type": "dungeon_fixed",
+    "variant": "adeptorium",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1008,
-    "z": 9712,
+    "x": 2452,
+    "z": 9831,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7400,14 +7353,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_2_word_wall",
-    "name": "place.skycraft.rimmen_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "hakosh_amber_sandstone_catacomb",
+    "name": "place.skycraft.hakosh_amber_sandstone_catacomb",
+    "type": "dungeon_fixed",
+    "variant": "sandstone_tomb",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1328,
-    "z": 9712,
+    "x": 3442,
+    "z": 10963,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7415,14 +7369,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_3_dragon_mound",
-    "name": "place.skycraft.rimmen_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "stepp_storm_moon_sugar_den",
+    "name": "place.skycraft.stepp_storm_moon_sugar_den",
+    "type": "dungeon_fixed",
+    "variant": "sugar_smuggler_den",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1648,
-    "z": 9712,
+    "x": 694,
+    "z": 10232,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7430,59 +7385,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_4_azura",
-    "name": "place.skycraft.rimmen_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "khajiit",
-    "region": "elsweyr/rimmen",
-    "x": 1968,
-    "z": 9712,
-    "why": [
-      "rimmen.L1.alabaster_beds",
-      "rimmen.L1.eastern_canyons"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "rimmen_marker_5_boethiah",
-    "name": "place.skycraft.rimmen_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "khajiit",
-    "region": "elsweyr/rimmen",
-    "x": 2288,
-    "z": 9712,
-    "why": [
-      "rimmen.L1.alabaster_beds",
-      "rimmen.L1.eastern_canyons"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "rimmen_marker_6_mephala",
-    "name": "place.skycraft.rimmen_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "khajiit",
-    "region": "elsweyr/rimmen",
-    "x": 2608,
-    "z": 9712,
-    "why": [
-      "rimmen.L1.alabaster_beds",
-      "rimmen.L1.eastern_canyons"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "rimmen_marker_7_altar",
-    "name": "place.skycraft.rimmen_marker_7_altar",
+    "id": "fenn_jade_lunar_lantern_shrine",
+    "name": "place.skycraft.fenn_jade_lunar_lantern_shrine",
     "type": "landmark",
-    "variant": "altar",
+    "variant": "khajiit_shrine",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 624,
-    "z": 9776,
+    "x": 3244,
+    "z": 10930,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7490,14 +7400,29 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_8_monument",
-    "name": "place.skycraft.rimmen_marker_8_monument",
+    "id": "tonen_outer_caravan_wellspring",
+    "name": "place.skycraft.tonen_outer_caravan_wellspring",
+    "type": "landmark",
+    "variant": "desert_oasis",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 2577,
+    "z": 10585,
+    "why": [
+      "rimmen.L1.alabaster_beds",
+      "rimmen.L1.eastern_canyons"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "oasis_ancient_mane_s_pillar",
+    "name": "place.skycraft.oasis_ancient_mane_s_pillar",
     "type": "landmark",
     "variant": "monument",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 944,
-    "z": 9776,
+    "x": 2803,
+    "z": 11021,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7505,14 +7430,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_9_stones",
-    "name": "place.skycraft.rimmen_marker_9_stones",
-    "type": "landmark",
+    "id": "gharl_verdant_eclipse_alignment_stones",
+    "name": "place.skycraft.gharl_verdant_eclipse_alignment_stones",
+    "type": "standing_stone",
     "variant": "stones",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1264,
-    "z": 9776,
+    "x": 778,
+    "z": 10537,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7520,14 +7445,29 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_10_peak",
-    "name": "place.skycraft.rimmen_marker_10_peak",
+    "id": "akav_bronze_red_mesa_defile",
+    "name": "place.skycraft.akav_bronze_red_mesa_defile",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 2805,
+    "z": 10349,
+    "why": [
+      "rimmen.L1.alabaster_beds",
+      "rimmen.L1.eastern_canyons"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "alkor_silent_sun_spire_butte",
+    "name": "place.skycraft.alkor_silent_sun_spire_butte",
     "type": "landmark",
     "variant": "peak",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1584,
-    "z": 9776,
+    "x": 2742,
+    "z": 9741,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7535,14 +7475,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_11_waterfall",
-    "name": "place.skycraft.rimmen_marker_11_waterfall",
+    "id": "hissm_twilight_monsoon_cataract",
+    "name": "place.skycraft.hissm_twilight_monsoon_cataract",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 1904,
-    "z": 9776,
+    "x": 2446,
+    "z": 10317,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7550,14 +7490,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_12_clearing",
-    "name": "place.skycraft.rimmen_marker_12_clearing",
-    "type": "landmark",
-    "variant": "clearing",
+    "id": "redl_black_namiira_bentley_altar",
+    "name": "place.skycraft.redl_black_namiira_bentley_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2224,
-    "z": 9776,
+    "x": 1611,
+    "z": 10645,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7565,14 +7505,74 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "rimmen_marker_13_eyrie",
-    "name": "place.skycraft.rimmen_marker_13_eyrie",
+    "id": "baand_lower_lunar_lantern_shrine",
+    "name": "place.skycraft.baand_lower_lunar_lantern_shrine",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "khajiit_shrine",
     "culture": "khajiit",
     "region": "elsweyr/rimmen",
-    "x": 2544,
-    "z": 9776,
+    "x": 2033,
+    "z": 10958,
+    "why": [
+      "rimmen.L1.alabaster_beds",
+      "rimmen.L1.eastern_canyons"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "irai_verdigris_caravan_wellspring",
+    "name": "place.skycraft.irai_verdigris_caravan_wellspring",
+    "type": "landmark",
+    "variant": "desert_oasis",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 2952,
+    "z": 10507,
+    "why": [
+      "rimmen.L1.alabaster_beds",
+      "rimmen.L1.eastern_canyons"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "suga_ember_mane_s_pillar",
+    "name": "place.skycraft.suga_ember_mane_s_pillar",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 2727,
+    "z": 10445,
+    "why": [
+      "rimmen.L1.alabaster_beds",
+      "rimmen.L1.eastern_canyons"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "chasa_cobalt_eclipse_alignment_stones",
+    "name": "place.skycraft.chasa_cobalt_eclipse_alignment_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 1127,
+    "z": 9705,
+    "why": [
+      "rimmen.L1.alabaster_beds",
+      "rimmen.L1.eastern_canyons"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "joor_sunken_red_mesa_defile",
+    "name": "place.skycraft.joor_sunken_red_mesa_defile",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "khajiit",
+    "region": "elsweyr/rimmen",
+    "x": 883,
+    "z": 10090,
     "why": [
       "rimmen.L1.alabaster_beds",
       "rimmen.L1.eastern_canyons"
@@ -7716,15 +7716,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_1_barrow",
-    "name": "place.skycraft.torval_site_1_barrow",
+    "id": "khenar_crimson_two_moons_temple",
+    "name": "place.skycraft.khenar_crimson_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1232,
-    "z": 10800,
+    "x": 1459,
+    "z": 12776,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7732,15 +7732,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_2_dwemer_ruin",
-    "name": "place.skycraft.torval_site_2_dwemer_ruin",
+    "id": "elsw_dawn_claw_dance_adeptorium",
+    "name": "place.skycraft.elsw_dawn_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 880,
-    "z": 10832,
+    "x": 1039,
+    "z": 11089,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7748,63 +7748,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_3_fort",
-    "name": "place.skycraft.torval_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/torval",
-    "x": 1200,
-    "z": 10832,
-    "why": [
-      "torval.L1.scarp_foot",
-      "torval.L1.temple_outcrops"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "torval_site_4_fort_mage",
-    "name": "place.skycraft.torval_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/torval",
-    "x": 752,
-    "z": 10864,
-    "why": [
-      "torval.L1.scarp_foot",
-      "torval.L1.temple_outcrops"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "torval_site_5_akaviri_fort",
-    "name": "place.skycraft.torval_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/torval",
-    "x": 1072,
-    "z": 10864,
-    "why": [
-      "torval.L1.scarp_foot",
-      "torval.L1.temple_outcrops"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "torval_site_6_daedric_ruin",
-    "name": "place.skycraft.torval_site_6_daedric_ruin",
+    "id": "corint_white_sandstone_catacomb",
+    "name": "place.skycraft.corint_white_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 912,
-    "z": 10896,
+    "x": 1944,
+    "z": 12368,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7812,15 +7764,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_7_breton_keep_ruin",
-    "name": "place.skycraft.torval_site_7_breton_keep_ruin",
+    "id": "moon_upper_moon_sugar_den",
+    "name": "place.skycraft.moon_upper_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1232,
-    "z": 10896,
+    "x": 468,
+    "z": 12569,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7828,15 +7780,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_8_bandit_cave",
-    "name": "place.skycraft.torval_site_8_bandit_cave",
+    "id": "feral_hollow_canyon_cliff_redoubt",
+    "name": "place.skycraft.feral_hollow_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 656,
-    "z": 10928,
+    "x": 526,
+    "z": 13145,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7844,15 +7796,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_9_spider_cave",
-    "name": "place.skycraft.torval_site_9_spider_cave",
+    "id": "alab_silver_baandari_caravan_halting",
+    "name": "place.skycraft.alab_silver_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "spider_cave",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 976,
-    "z": 10928,
+    "x": 521,
+    "z": 11157,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7860,15 +7812,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_10_troll_cave",
-    "name": "place.skycraft.torval_site_10_troll_cave",
+    "id": "purr_scarlet_palm_spring_oasis",
+    "name": "place.skycraft.purr_scarlet_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1296,
-    "z": 10928,
+    "x": 1449,
+    "z": 12648,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7876,15 +7828,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_11_ice_cave",
-    "name": "place.skycraft.torval_site_11_ice_cave",
+    "id": "goldc_ashen_alkosh_crag_roost",
+    "name": "place.skycraft.goldc_ashen_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 592,
-    "z": 10992,
+    "x": 974,
+    "z": 12458,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7892,15 +7844,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_12_sixth_house_base",
-    "name": "place.skycraft.torval_site_12_sixth_house_base",
+    "id": "tenm_sacred_badlands_shale_cavern",
+    "name": "place.skycraft.tenm_sacred_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1232,
-    "z": 10992,
+    "x": 1448,
+    "z": 12526,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7908,15 +7860,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_13_scorpion_den",
-    "name": "place.skycraft.torval_site_13_scorpion_den",
+    "id": "azur_cinder_riddle_thar_sanctum",
+    "name": "place.skycraft.azur_cinder_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1552,
-    "z": 10992,
+    "x": 468,
+    "z": 11339,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7924,15 +7876,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_14_necromancer_lair",
-    "name": "place.skycraft.torval_site_14_necromancer_lair",
+    "id": "hunta_deep_two_moons_temple",
+    "name": "place.skycraft.hunta_deep_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "necromancer_lair",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 784,
-    "z": 11024,
+    "x": 2035,
+    "z": 12151,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7940,15 +7892,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_15_hagraven_lair",
-    "name": "place.skycraft.torval_site_15_hagraven_lair",
+    "id": "mane_obsidian_claw_dance_adeptorium",
+    "name": "place.skycraft.mane_obsidian_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1104,
-    "z": 11024,
+    "x": 1748,
+    "z": 11951,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7956,15 +7908,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_16_giant_camp",
-    "name": "place.skycraft.torval_site_16_giant_camp",
+    "id": "bahl_dusk_sandstone_catacomb",
+    "name": "place.skycraft.bahl_dusk_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1424,
-    "z": 11024,
+    "x": 1513,
+    "z": 12906,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7972,15 +7924,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_17_dragon_lair",
-    "name": "place.skycraft.torval_site_17_dragon_lair",
+    "id": "ivory_golden_moon_sugar_den",
+    "name": "place.skycraft.ivory_golden_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 528,
-    "z": 11056,
+    "x": 1614,
+    "z": 12212,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -7988,15 +7940,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_18_watchtower",
-    "name": "place.skycraft.torval_site_18_watchtower",
+    "id": "jode_c_inner_canyon_cliff_redoubt",
+    "name": "place.skycraft.jode_c_inner_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 848,
-    "z": 11056,
+    "x": 1137,
+    "z": 12376,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8004,15 +7956,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_19_cabin",
-    "name": "place.skycraft.torval_site_19_cabin",
+    "id": "clair_shrouded_baandari_caravan_halting",
+    "name": "place.skycraft.clair_shrouded_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1168,
-    "z": 11056,
+    "x": 2042,
+    "z": 11913,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8020,15 +7972,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_20_mage_tower",
-    "name": "place.skycraft.torval_site_20_mage_tower",
+    "id": "jangle_basal_palm_spring_oasis",
+    "name": "place.skycraft.jangle_basal_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1488,
-    "z": 11088,
+    "x": 1139,
+    "z": 12246,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8036,15 +7988,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_21_imperial_camp",
-    "name": "place.skycraft.torval_site_21_imperial_camp",
+    "id": "jone_c_iron_alkosh_crag_roost",
+    "name": "place.skycraft.jone_c_iron_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1808,
-    "z": 11088,
+    "x": 1398,
+    "z": 12018,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8052,15 +8004,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_22_nordic_ruin",
-    "name": "place.skycraft.torval_site_22_nordic_ruin",
+    "id": "dusk_gilded_badlands_shale_cavern",
+    "name": "place.skycraft.dusk_gilded_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 784,
-    "z": 11120,
+    "x": 618,
+    "z": 12692,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8068,15 +8020,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_23_great_lift",
-    "name": "place.skycraft.torval_site_23_great_lift",
+    "id": "torval_forbidden_riddle_thar_sanctum",
+    "name": "place.skycraft.torval_forbidden_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1104,
-    "z": 11120,
+    "x": 1802,
+    "z": 11626,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8084,15 +8036,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_24_kolskeggr_mine",
-    "name": "place.skycraft.torval_site_24_kolskeggr_mine",
+    "id": "khenar_pale_two_moons_temple",
+    "name": "place.skycraft.khenar_pale_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1424,
-    "z": 11120,
+    "x": 1271,
+    "z": 12975,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8100,15 +8052,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_site_25_bleak_falls_barrow",
-    "name": "place.skycraft.torval_site_25_bleak_falls_barrow",
+    "id": "elsw_high_claw_dance_adeptorium",
+    "name": "place.skycraft.elsw_high_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1744,
-    "z": 11120,
+    "x": 881,
+    "z": 11179,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8116,14 +8068,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_1_standing_stone",
-    "name": "place.skycraft.torval_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "corint_amber_sandstone_catacomb",
+    "name": "place.skycraft.corint_amber_sandstone_catacomb",
+    "type": "dungeon_fixed",
+    "variant": "sandstone_tomb",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 656,
-    "z": 11152,
+    "x": 780,
+    "z": 10860,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8131,14 +8084,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_2_word_wall",
-    "name": "place.skycraft.torval_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "moon_storm_moon_sugar_den",
+    "name": "place.skycraft.moon_storm_moon_sugar_den",
+    "type": "dungeon_fixed",
+    "variant": "sugar_smuggler_den",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 976,
-    "z": 11152,
+    "x": 1037,
+    "z": 12297,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8146,14 +8100,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_3_dragon_mound",
-    "name": "place.skycraft.torval_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "feral_jade_canyon_cliff_redoubt",
+    "name": "place.skycraft.feral_jade_canyon_cliff_redoubt",
+    "type": "dungeon_fixed",
+    "variant": "canyon_redoubt",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1296,
-    "z": 11152,
+    "x": 1226,
+    "z": 11281,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8161,59 +8116,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_4_azura",
-    "name": "place.skycraft.torval_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "khajiit",
-    "region": "elsweyr/torval",
-    "x": 1616,
-    "z": 11152,
-    "why": [
-      "torval.L1.scarp_foot",
-      "torval.L1.temple_outcrops"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "torval_marker_5_boethiah",
-    "name": "place.skycraft.torval_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "khajiit",
-    "region": "elsweyr/torval",
-    "x": 1936,
-    "z": 11152,
-    "why": [
-      "torval.L1.scarp_foot",
-      "torval.L1.temple_outcrops"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "torval_marker_6_mephala",
-    "name": "place.skycraft.torval_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "khajiit",
-    "region": "elsweyr/torval",
-    "x": 784,
-    "z": 11184,
-    "why": [
-      "torval.L1.scarp_foot",
-      "torval.L1.temple_outcrops"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "torval_marker_7_altar",
-    "name": "place.skycraft.torval_marker_7_altar",
+    "id": "alab_outer_caravan_wellspring",
+    "name": "place.skycraft.alab_outer_caravan_wellspring",
     "type": "landmark",
-    "variant": "altar",
+    "variant": "desert_oasis",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1104,
-    "z": 11184,
+    "x": 1016,
+    "z": 10826,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8221,14 +8131,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_8_monument",
-    "name": "place.skycraft.torval_marker_8_monument",
+    "id": "purr_ancient_mane_s_pillar",
+    "name": "place.skycraft.purr_ancient_mane_s_pillar",
     "type": "landmark",
     "variant": "monument",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1424,
-    "z": 11184,
+    "x": 817,
+    "z": 12916,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8236,14 +8146,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_9_peak",
-    "name": "place.skycraft.torval_marker_9_peak",
+    "id": "goldc_verdant_eclipse_alignment_stones",
+    "name": "place.skycraft.goldc_verdant_eclipse_alignment_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 852,
+    "z": 12343,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tenm_bronze_red_mesa_defile",
+    "name": "place.skycraft.tenm_bronze_red_mesa_defile",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1416,
+    "z": 11691,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "azur_silent_sun_spire_butte",
+    "name": "place.skycraft.azur_silent_sun_spire_butte",
     "type": "landmark",
     "variant": "peak",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1744,
-    "z": 11184,
+    "x": 720,
+    "z": 12043,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8251,14 +8191,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_10_waterfall",
-    "name": "place.skycraft.torval_marker_10_waterfall",
+    "id": "hunta_twilight_monsoon_cataract",
+    "name": "place.skycraft.hunta_twilight_monsoon_cataract",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 528,
-    "z": 11216,
+    "x": 1526,
+    "z": 11528,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8266,14 +8206,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_11_rock",
-    "name": "place.skycraft.torval_marker_11_rock",
-    "type": "landmark",
-    "variant": "rock",
+    "id": "mane_black_namiira_bentley_altar",
+    "name": "place.skycraft.mane_black_namiira_bentley_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 848,
-    "z": 11216,
+    "x": 1959,
+    "z": 12759,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8281,14 +8221,74 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "torval_marker_12_eyrie",
-    "name": "place.skycraft.torval_marker_12_eyrie",
+    "id": "bahl_lower_lunar_lantern_shrine",
+    "name": "place.skycraft.bahl_lower_lunar_lantern_shrine",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "khajiit_shrine",
     "culture": "khajiit",
     "region": "elsweyr/torval",
-    "x": 1168,
-    "z": 11216,
+    "x": 1771,
+    "z": 11179,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ivory_verdigris_caravan_wellspring",
+    "name": "place.skycraft.ivory_verdigris_caravan_wellspring",
+    "type": "landmark",
+    "variant": "desert_oasis",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1138,
+    "z": 11338,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "jode_c_ember_mane_s_pillar",
+    "name": "place.skycraft.jode_c_ember_mane_s_pillar",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 686,
+    "z": 11375,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "clair_cobalt_eclipse_alignment_stones",
+    "name": "place.skycraft.clair_cobalt_eclipse_alignment_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 1587,
+    "z": 12535,
+    "why": [
+      "torval.L1.scarp_foot",
+      "torval.L1.temple_outcrops"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "jangle_sunken_red_mesa_defile",
+    "name": "place.skycraft.jangle_sunken_red_mesa_defile",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "khajiit",
+    "region": "elsweyr/torval",
+    "x": 499,
+    "z": 12438,
     "why": [
       "torval.L1.scarp_foot",
       "torval.L1.temple_outcrops"
@@ -8432,15 +8432,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_1_barrow",
-    "name": "place.skycraft.pellitine_site_1_barrow",
+    "id": "mangr_crimson_two_moons_temple",
+    "name": "place.skycraft.mangr_crimson_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": 176,
-    "z": 11664,
+    "x": 327,
+    "z": 12939,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8448,63 +8448,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_2_fort",
-    "name": "place.skycraft.pellitine_site_2_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": -720,
-    "z": 11696,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_site_3_fort_mage",
-    "name": "place.skycraft.pellitine_site_3_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": -112,
-    "z": 11696,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_site_4_akaviri_fort",
-    "name": "place.skycraft.pellitine_site_4_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": -1360,
-    "z": 11728,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_site_5_daedric_ruin",
-    "name": "place.skycraft.pellitine_site_5_daedric_ruin",
+    "id": "eshk_dawn_claw_dance_adeptorium",
+    "name": "place.skycraft.eshk_dawn_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -752,
-    "z": 11728,
+    "x": 202,
+    "z": 14289,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8512,15 +8464,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_6_breton_keep_ruin",
-    "name": "place.skycraft.pellitine_site_6_breton_keep_ruin",
+    "id": "tenmar_white_sandstone_catacomb",
+    "name": "place.skycraft.tenmar_white_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1328,
-    "z": 11760,
+    "x": -14,
+    "z": 12439,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8528,15 +8480,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_7_bandit_cave",
-    "name": "place.skycraft.pellitine_site_7_bandit_cave",
+    "id": "monso_upper_moon_sugar_den",
+    "name": "place.skycraft.monso_upper_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -720,
-    "z": 11760,
+    "x": -1101,
+    "z": 13035,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8544,15 +8496,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_8_spider_cave",
-    "name": "place.skycraft.pellitine_site_8_spider_cave",
+    "id": "fari_hollow_canyon_cliff_redoubt",
+    "name": "place.skycraft.fari_hollow_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "spider_cave",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -112,
-    "z": 11760,
+    "x": 1230,
+    "z": 14734,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8560,15 +8512,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_9_troll_cave",
-    "name": "place.skycraft.pellitine_site_9_troll_cave",
+    "id": "pa_al_silver_baandari_caravan_halting",
+    "name": "place.skycraft.pa_al_silver_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1328,
-    "z": 11824,
+    "x": 153,
+    "z": 11893,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8576,15 +8528,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_10_ice_cave",
-    "name": "place.skycraft.pellitine_site_10_ice_cave",
+    "id": "spice_scarlet_palm_spring_oasis",
+    "name": "place.skycraft.spice_scarlet_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -720,
-    "z": 11824,
+    "x": -1037,
+    "z": 13461,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8592,15 +8544,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_11_sixth_house_base",
-    "name": "place.skycraft.pellitine_site_11_sixth_house_base",
+    "id": "ghaz_ashen_alkosh_crag_roost",
+    "name": "place.skycraft.ghaz_ashen_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -112,
-    "z": 11824,
+    "x": -647,
+    "z": 12776,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8608,15 +8560,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_12_scorpion_den",
-    "name": "place.skycraft.pellitine_site_12_scorpion_den",
+    "id": "orres_sacred_badlands_shale_cavern",
+    "name": "place.skycraft.orres_sacred_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1392,
-    "z": 11856,
+    "x": 844,
+    "z": 14122,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8624,15 +8576,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_13_hagraven_lair",
-    "name": "place.skycraft.pellitine_site_13_hagraven_lair",
+    "id": "adain_cinder_riddle_thar_sanctum",
+    "name": "place.skycraft.adain_cinder_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -784,
-    "z": 11856,
+    "x": 504,
+    "z": 13323,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8640,15 +8592,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_14_giant_camp",
-    "name": "place.skycraft.pellitine_site_14_giant_camp",
+    "id": "habas_deep_two_moons_temple",
+    "name": "place.skycraft.habas_deep_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -176,
-    "z": 11856,
+    "x": -889,
+    "z": 13647,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8656,15 +8608,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_15_watchtower",
-    "name": "place.skycraft.pellitine_site_15_watchtower",
+    "id": "pride_obsidian_claw_dance_adeptorium",
+    "name": "place.skycraft.pride_obsidian_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1456,
-    "z": 11888,
+    "x": -1655,
+    "z": 12824,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8672,15 +8624,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_16_cabin",
-    "name": "place.skycraft.pellitine_site_16_cabin",
+    "id": "balu_dusk_sandstone_catacomb",
+    "name": "place.skycraft.balu_dusk_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -848,
-    "z": 11888,
+    "x": -467,
+    "z": 12785,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8688,15 +8640,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_17_mage_tower",
-    "name": "place.skycraft.pellitine_site_17_mage_tower",
+    "id": "inir_golden_moon_sugar_den",
+    "name": "place.skycraft.inir_golden_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -240,
-    "z": 11888,
+    "x": -439,
+    "z": 14740,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8704,15 +8656,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_18_imperial_camp",
-    "name": "place.skycraft.pellitine_site_18_imperial_camp",
+    "id": "cane_inner_canyon_cliff_redoubt",
+    "name": "place.skycraft.cane_inner_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1520,
-    "z": 11920,
+    "x": -981,
+    "z": 13815,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8720,15 +8672,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_19_nordic_ruin",
-    "name": "place.skycraft.pellitine_site_19_nordic_ruin",
+    "id": "chiri_shrouded_baandari_caravan_halting",
+    "name": "place.skycraft.chiri_shrouded_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -912,
-    "z": 11920,
+    "x": -1204,
+    "z": 12045,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8736,15 +8688,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_20_great_lift",
-    "name": "place.skycraft.pellitine_site_20_great_lift",
+    "id": "jabal_basal_palm_spring_oasis",
+    "name": "place.skycraft.jabal_basal_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -304,
-    "z": 11920,
+    "x": -459,
+    "z": 13522,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8752,15 +8704,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_21_kolskeggr_mine",
-    "name": "place.skycraft.pellitine_site_21_kolskeggr_mine",
+    "id": "jungl_iron_alkosh_crag_roost",
+    "name": "place.skycraft.jungl_iron_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": 304,
-    "z": 11920,
+    "x": -1261,
+    "z": 13779,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8768,15 +8720,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_site_22_bleak_falls_barrow",
-    "name": "place.skycraft.pellitine_site_22_bleak_falls_barrow",
+    "id": "daro_gilded_badlands_shale_cavern",
+    "name": "place.skycraft.daro_gilded_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -976,
-    "z": 11952,
+    "x": -236,
+    "z": 13397,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8784,14 +8736,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_marker_1_standing_stone",
-    "name": "place.skycraft.pellitine_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "pellit_forbidden_riddle_thar_sanctum",
+    "name": "place.skycraft.pellit_forbidden_riddle_thar_sanctum",
+    "type": "dungeon_fixed",
+    "variant": "khajiit_shrine",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -368,
-    "z": 11952,
+    "x": 39,
+    "z": 12199,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8799,14 +8752,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_marker_2_word_wall",
-    "name": "place.skycraft.pellitine_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "mangr_pale_two_moons_temple",
+    "name": "place.skycraft.mangr_pale_two_moons_temple",
+    "type": "dungeon_fixed",
+    "variant": "moon_temple",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1072,
-    "z": 11984,
+    "x": 719,
+    "z": 13482,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8814,14 +8768,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_marker_3_dragon_mound",
-    "name": "place.skycraft.pellitine_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "eshk_high_claw_dance_adeptorium",
+    "name": "place.skycraft.eshk_high_claw_dance_adeptorium",
+    "type": "dungeon_fixed",
+    "variant": "adeptorium",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -464,
-    "z": 11984,
+    "x": -1582,
+    "z": 14292,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8829,89 +8784,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_marker_4_azura",
-    "name": "place.skycraft.pellitine_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": 144,
-    "z": 11984,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_marker_5_boethiah",
-    "name": "place.skycraft.pellitine_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": -1168,
-    "z": 12016,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_marker_6_mephala",
-    "name": "place.skycraft.pellitine_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": -560,
-    "z": 12016,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_marker_7_altar",
-    "name": "place.skycraft.pellitine_marker_7_altar",
-    "type": "landmark",
-    "variant": "altar",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": 48,
-    "z": 12016,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_marker_8_monument",
-    "name": "place.skycraft.pellitine_marker_8_monument",
-    "type": "landmark",
-    "variant": "monument",
-    "culture": "khajiit",
-    "region": "elsweyr/pellitine",
-    "x": -1264,
-    "z": 12048,
-    "why": [
-      "pellitine.L1.colossus_scarp",
-      "pellitine.L1.river_terraces"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "pellitine_marker_9_waterfall",
-    "name": "place.skycraft.pellitine_marker_9_waterfall",
+    "id": "tenmar_amber_monsoon_cataract",
+    "name": "place.skycraft.tenmar_amber_monsoon_cataract",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -656,
-    "z": 12048,
+    "x": -852,
+    "z": 11988,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8919,14 +8799,89 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_marker_10_pass",
-    "name": "place.skycraft.pellitine_marker_10_pass",
+    "id": "monso_storm_namiira_bentley_altar",
+    "name": "place.skycraft.monso_storm_namiira_bentley_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": -936,
+    "z": 13910,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fari_jade_lunar_lantern_shrine",
+    "name": "place.skycraft.fari_jade_lunar_lantern_shrine",
+    "type": "landmark",
+    "variant": "khajiit_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 1008,
+    "z": 13639,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pa_al_outer_caravan_wellspring",
+    "name": "place.skycraft.pa_al_outer_caravan_wellspring",
+    "type": "landmark",
+    "variant": "desert_oasis",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 1164,
+    "z": 13610,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "spice_ancient_mane_s_pillar",
+    "name": "place.skycraft.spice_ancient_mane_s_pillar",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 787,
+    "z": 14418,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ghaz_verdant_eclipse_alignment_stones",
+    "name": "place.skycraft.ghaz_verdant_eclipse_alignment_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": -726,
+    "z": 13240,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "orres_bronze_red_mesa_defile",
+    "name": "place.skycraft.orres_bronze_red_mesa_defile",
     "type": "landmark",
     "variant": "pass",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -48,
-    "z": 12048,
+    "x": 266,
+    "z": 14092,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -8934,14 +8889,59 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "pellitine_marker_11_eyrie",
-    "name": "place.skycraft.pellitine_marker_11_eyrie",
+    "id": "adain_silent_sun_spire_butte",
+    "name": "place.skycraft.adain_silent_sun_spire_butte",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "peak",
     "culture": "khajiit",
     "region": "elsweyr/pellitine",
-    "x": -1392,
-    "z": 12080,
+    "x": -1140,
+    "z": 13305,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "habas_twilight_monsoon_cataract",
+    "name": "place.skycraft.habas_twilight_monsoon_cataract",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 264,
+    "z": 12423,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pride_black_namiira_bentley_altar",
+    "name": "place.skycraft.pride_black_namiira_bentley_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": -567,
+    "z": 12537,
+    "why": [
+      "pellitine.L1.colossus_scarp",
+      "pellitine.L1.river_terraces"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "balu_lower_lunar_lantern_shrine",
+    "name": "place.skycraft.balu_lower_lunar_lantern_shrine",
+    "type": "landmark",
+    "variant": "khajiit_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": -1287,
+    "z": 14346,
     "why": [
       "pellitine.L1.colossus_scarp",
       "pellitine.L1.river_terraces"
@@ -9068,15 +9068,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_1_barrow",
-    "name": "place.skycraft.senchal_site_1_barrow",
+    "id": "suga_crimson_two_moons_temple",
+    "name": "place.skycraft.suga_crimson_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2928,
-    "z": 11472,
+    "x": 2251,
+    "z": 14039,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9084,15 +9084,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_2_dwemer_ruin",
-    "name": "place.skycraft.senchal_site_2_dwemer_ruin",
+    "id": "emera_dawn_claw_dance_adeptorium",
+    "name": "place.skycraft.emera_dawn_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2192,
-    "z": 11504,
+    "x": 1741,
+    "z": 14348,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9100,63 +9100,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_3_fort",
-    "name": "place.skycraft.senchal_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/senchal",
-    "x": 2448,
-    "z": 11504,
-    "why": [
-      "senchal.L1.harbour_bay",
-      "senchal.L1.headlands"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "senchal_site_4_fort_mage",
-    "name": "place.skycraft.senchal_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/senchal",
-    "x": 2704,
-    "z": 11504,
-    "why": [
-      "senchal.L1.harbour_bay",
-      "senchal.L1.headlands"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "senchal_site_5_akaviri_fort",
-    "name": "place.skycraft.senchal_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "khajiit",
-    "region": "elsweyr/senchal",
-    "x": 2960,
-    "z": 11504,
-    "why": [
-      "senchal.L1.harbour_bay",
-      "senchal.L1.headlands"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "senchal_site_6_daedric_ruin",
-    "name": "place.skycraft.senchal_site_6_daedric_ruin",
+    "id": "quinr_white_sandstone_catacomb",
+    "name": "place.skycraft.quinr_white_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3216,
-    "z": 11504,
+    "x": 2199,
+    "z": 13045,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9164,15 +9116,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_7_breton_keep_ruin",
-    "name": "place.skycraft.senchal_site_7_breton_keep_ruin",
+    "id": "tide_upper_moon_sugar_den",
+    "name": "place.skycraft.tide_upper_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2256,
-    "z": 11536,
+    "x": 2834,
+    "z": 12019,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9180,15 +9132,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_8_bandit_cave",
-    "name": "place.skycraft.senchal_site_8_bandit_cave",
+    "id": "flots_hollow_canyon_cliff_redoubt",
+    "name": "place.skycraft.flots_hollow_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2512,
-    "z": 11536,
+    "x": 2415,
+    "z": 12879,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9196,15 +9148,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_9_troll_cave",
-    "name": "place.skycraft.senchal_site_9_troll_cave",
+    "id": "topal_silver_baandari_caravan_halting",
+    "name": "place.skycraft.topal_silver_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2768,
-    "z": 11536,
+    "x": 2424,
+    "z": 14055,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9212,15 +9164,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_10_ice_cave",
-    "name": "place.skycraft.senchal_site_10_ice_cave",
+    "id": "wind_scarlet_palm_spring_oasis",
+    "name": "place.skycraft.wind_scarlet_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3024,
-    "z": 11536,
+    "x": 2701,
+    "z": 13967,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9228,15 +9180,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_11_sixth_house_base",
-    "name": "place.skycraft.senchal_site_11_sixth_house_base",
+    "id": "galley_ashen_alkosh_crag_roost",
+    "name": "place.skycraft.galley_ashen_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3280,
-    "z": 11536,
+    "x": 2633,
+    "z": 13011,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9244,15 +9196,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_12_scorpion_den",
-    "name": "place.skycraft.senchal_site_12_scorpion_den",
+    "id": "khen_sacred_badlands_shale_cavern",
+    "name": "place.skycraft.khen_sacred_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2320,
-    "z": 11568,
+    "x": 1962,
+    "z": 14446,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9260,15 +9212,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_13_hagraven_lair",
-    "name": "place.skycraft.senchal_site_13_hagraven_lair",
+    "id": "abaj_cinder_riddle_thar_sanctum",
+    "name": "place.skycraft.abaj_cinder_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2576,
-    "z": 11568,
+    "x": 1806,
+    "z": 13800,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9276,15 +9228,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_14_giant_camp",
-    "name": "place.skycraft.senchal_site_14_giant_camp",
+    "id": "harb_deep_two_moons_temple",
+    "name": "place.skycraft.harb_deep_two_moons_temple",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "moon_temple",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2832,
-    "z": 11568,
+    "x": 2933,
+    "z": 13525,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9292,15 +9244,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_15_watchtower",
-    "name": "place.skycraft.senchal_site_15_watchtower",
+    "id": "blackk_obsidian_claw_dance_adeptorium",
+    "name": "place.skycraft.blackk_obsidian_claw_dance_adeptorium",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "adeptorium",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3088,
-    "z": 11568,
+    "x": 3254,
+    "z": 11569,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9308,15 +9260,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_16_cabin",
-    "name": "place.skycraft.senchal_site_16_cabin",
+    "id": "baza_dusk_sandstone_catacomb",
+    "name": "place.skycraft.baza_dusk_sandstone_catacomb",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "sandstone_tomb",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3344,
-    "z": 11568,
+    "x": 2162,
+    "z": 13881,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9324,15 +9276,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_17_grove",
-    "name": "place.skycraft.senchal_site_17_grove",
+    "id": "isle_golden_moon_sugar_den",
+    "name": "place.skycraft.isle_golden_moon_sugar_den",
     "type": "dungeon_fixed",
-    "variant": "grove",
+    "variant": "sugar_smuggler_den",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2384,
-    "z": 11600,
+    "x": 1804,
+    "z": 14200,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9340,15 +9292,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_18_mage_tower",
-    "name": "place.skycraft.senchal_site_18_mage_tower",
+    "id": "corsa_inner_canyon_cliff_redoubt",
+    "name": "place.skycraft.corsa_inner_canyon_cliff_redoubt",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "canyon_redoubt",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2896,
-    "z": 11600,
+    "x": 2895,
+    "z": 12755,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9356,15 +9308,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_19_imperial_camp",
-    "name": "place.skycraft.senchal_site_19_imperial_camp",
+    "id": "cove_shrouded_baandari_caravan_halting",
+    "name": "place.skycraft.cove_shrouded_baandari_caravan_halting",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "baandari_camp",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3152,
-    "z": 11600,
+    "x": 3154,
+    "z": 12473,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9372,15 +9324,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_20_nordic_ruin",
-    "name": "place.skycraft.senchal_site_20_nordic_ruin",
+    "id": "jetty_basal_palm_spring_oasis",
+    "name": "place.skycraft.jetty_basal_palm_spring_oasis",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "desert_oasis",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2192,
-    "z": 11632,
+    "x": 2996,
+    "z": 11817,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9388,15 +9340,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_21_great_lift",
-    "name": "place.skycraft.senchal_site_21_great_lift",
+    "id": "pearl_iron_alkosh_crag_roost",
+    "name": "place.skycraft.pearl_iron_alkosh_crag_roost",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "dragon_roost",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2704,
-    "z": 11632,
+    "x": 2679,
+    "z": 12335,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9404,15 +9356,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_22_kolskeggr_mine",
-    "name": "place.skycraft.senchal_site_22_kolskeggr_mine",
+    "id": "dock_gilded_badlands_shale_cavern",
+    "name": "place.skycraft.dock_gilded_badlands_shale_cavern",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "badlands_cave",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3216,
-    "z": 11632,
+    "x": 1913,
+    "z": 13259,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9420,15 +9372,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_site_23_bleak_falls_barrow",
-    "name": "place.skycraft.senchal_site_23_bleak_falls_barrow",
+    "id": "sench_forbidden_riddle_thar_sanctum",
+    "name": "place.skycraft.sench_forbidden_riddle_thar_sanctum",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "khajiit_shrine",
     "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2256,
-    "z": 11664,
+    "x": 2439,
+    "z": 13228,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9436,14 +9388,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_1_standing_stone",
-    "name": "place.skycraft.senchal_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "suga_pale_two_moons_temple",
+    "name": "place.skycraft.suga_pale_two_moons_temple",
+    "type": "dungeon_fixed",
+    "variant": "moon_temple",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2512,
-    "z": 11664,
+    "x": 2228,
+    "z": 13785,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9451,14 +9404,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_2_word_wall",
-    "name": "place.skycraft.senchal_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "emera_high_claw_dance_adeptorium",
+    "name": "place.skycraft.emera_high_claw_dance_adeptorium",
+    "type": "dungeon_fixed",
+    "variant": "adeptorium",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2768,
-    "z": 11664,
+    "x": 2919,
+    "z": 11471,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9466,14 +9420,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_3_dragon_mound",
-    "name": "place.skycraft.senchal_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "quinr_amber_sandstone_catacomb",
+    "name": "place.skycraft.quinr_amber_sandstone_catacomb",
+    "type": "dungeon_fixed",
+    "variant": "sandstone_tomb",
+    "class": "minor",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3024,
-    "z": 11664,
+    "x": 2247,
+    "z": 11793,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9481,59 +9436,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_4_azura",
-    "name": "place.skycraft.senchal_marker_4_azura",
+    "id": "tide_storm_namiira_bentley_altar",
+    "name": "place.skycraft.tide_storm_namiira_bentley_altar",
     "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "khajiit",
-    "region": "elsweyr/senchal",
-    "x": 3280,
-    "z": 11664,
-    "why": [
-      "senchal.L1.harbour_bay",
-      "senchal.L1.headlands"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "senchal_marker_5_boethiah",
-    "name": "place.skycraft.senchal_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "khajiit",
-    "region": "elsweyr/senchal",
-    "x": 2384,
-    "z": 11696,
-    "why": [
-      "senchal.L1.harbour_bay",
-      "senchal.L1.headlands"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "senchal_marker_6_mephala",
-    "name": "place.skycraft.senchal_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "khajiit",
-    "region": "elsweyr/senchal",
-    "x": 2640,
-    "z": 11696,
-    "why": [
-      "senchal.L1.harbour_bay",
-      "senchal.L1.headlands"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "senchal_marker_7_altar",
-    "name": "place.skycraft.senchal_marker_7_altar",
-    "type": "landmark",
     "variant": "altar",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2896,
-    "z": 11696,
+    "x": 3020,
+    "z": 12627,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9541,14 +9451,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_8_monument",
-    "name": "place.skycraft.senchal_marker_8_monument",
+    "id": "flots_jade_lunar_lantern_shrine",
+    "name": "place.skycraft.flots_jade_lunar_lantern_shrine",
+    "type": "landmark",
+    "variant": "khajiit_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 3001,
+    "z": 12949,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "topal_outer_caravan_wellspring",
+    "name": "place.skycraft.topal_outer_caravan_wellspring",
+    "type": "landmark",
+    "variant": "desert_oasis",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2742,
+    "z": 11688,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "wind_ancient_mane_s_pillar",
+    "name": "place.skycraft.wind_ancient_mane_s_pillar",
     "type": "landmark",
     "variant": "monument",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 3152,
-    "z": 11696,
+    "x": 3086,
+    "z": 11512,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9556,14 +9496,59 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_9_waterfall",
-    "name": "place.skycraft.senchal_marker_9_waterfall",
+    "id": "galley_verdant_eclipse_alignment_stones",
+    "name": "place.skycraft.galley_verdant_eclipse_alignment_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2254,
+    "z": 11671,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "khen_bronze_red_mesa_defile",
+    "name": "place.skycraft.khen_bronze_red_mesa_defile",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2194,
+    "z": 13679,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "abaj_silent_sun_spire_butte",
+    "name": "place.skycraft.abaj_silent_sun_spire_butte",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2606,
+    "z": 13712,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "harb_twilight_monsoon_cataract",
+    "name": "place.skycraft.harb_twilight_monsoon_cataract",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2256,
-    "z": 11728,
+    "x": 2700,
+    "z": 12825,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
@@ -9571,18 +9556,123 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "senchal_marker_10_eyrie",
-    "name": "place.skycraft.senchal_marker_10_eyrie",
-    "type": "landmark",
-    "variant": "eyrie",
+    "id": "blackk_black_namiira_bentley_altar",
+    "name": "place.skycraft.blackk_black_namiira_bentley_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
     "culture": "khajiit",
     "region": "elsweyr/senchal",
-    "x": 2512,
-    "z": 11728,
+    "x": 2135,
+    "z": 13448,
     "why": [
       "senchal.L1.harbour_bay",
       "senchal.L1.headlands"
     ],
     "_r7_r12_v4": true
+  },
+  {
+    "id": "baza_lower_lunar_lantern_shrine",
+    "name": "place.skycraft.baza_lower_lunar_lantern_shrine",
+    "type": "landmark",
+    "variant": "khajiit_shrine",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 2774,
+    "z": 12566,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L1.headlands"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "senchal_pearl_atoll_island",
+    "name": "place.skycraft.senchal_pearl_atoll_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 3524,
+    "z": 11536,
+    "radius": 28,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L5.sugar_export"
+    ]
+  },
+  {
+    "id": "quinrawl_corsair_shipwreck",
+    "name": "place.skycraft.quinrawl_corsair_shipwreck",
+    "type": "dungeon_fixed",
+    "variant": "shipwreck",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 3417,
+    "z": 11496,
+    "radius": 28,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L5.sugar_export"
+    ]
+  },
+  {
+    "id": "topal_bay_smuggler_sea_cave",
+    "name": "place.skycraft.topal_bay_smuggler_sea_cave",
+    "type": "dungeon_fixed",
+    "variant": "sea_cave",
+    "culture": "khajiit",
+    "region": "elsweyr/senchal",
+    "x": 3436,
+    "z": 11698,
+    "radius": 28,
+    "why": [
+      "senchal.L1.harbour_bay",
+      "senchal.L5.sugar_export"
+    ]
+  },
+  {
+    "id": "khenarthi_windward_reef",
+    "name": "place.skycraft.khenarthi_windward_reef",
+    "type": "landmark",
+    "variant": "reef",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": -1440,
+    "z": 14553,
+    "radius": 28,
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L5.plantations"
+    ]
+  },
+  {
+    "id": "pa_alatiin_sugar_cay_island",
+    "name": "place.skycraft.pa_alatiin_sugar_cay_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 588,
+    "z": 14444,
+    "radius": 28,
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L5.plantations"
+    ]
+  },
+  {
+    "id": "tenmar_estuary_sea_vault",
+    "name": "place.skycraft.tenmar_estuary_sea_vault",
+    "type": "dungeon_fixed",
+    "variant": "sea_vault",
+    "culture": "khajiit",
+    "region": "elsweyr/pellitine",
+    "x": 652,
+    "z": 14528,
+    "radius": 28,
+    "why": [
+      "pellitine.L1.river_terraces",
+      "pellitine.L5.plantations"
+    ]
   }
 ]

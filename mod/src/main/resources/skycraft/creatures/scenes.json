@@ -5515,7 +5515,7 @@
       "open_ground"
     ],
     "why": [
-      "morrowind.L6.silt_strider_routes",
+      "morrowind.L6.coastal_and_river_towns",
       "morrowind.L7.house_order"
     ],
     "props": [
@@ -5631,7 +5631,7 @@
       "open_ground"
     ],
     "why": [
-      "morrowind.L3.fungal_forests",
+      "telvannis.L6.port_telvannis",
       "telvannis.L7.lord_and_thrall"
     ],
     "props": [],
@@ -8749,6 +8749,1886 @@
         "npc": "mage",
         "count": [
           1,
+          2
+        ],
+        "radius": 3
+      },
+      {
+        "entity": "skycraft:torchbug",
+        "count": [
+          3,
+          5
+        ],
+        "radius": 4
+      }
+    ]
+  },
+  {
+    "id": "t6_sk_thalmor_inquisition_hit_squad",
+    "weight": 12,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "skyrim"
+    ],
+    "regions": [
+      "haafingar",
+      "the_reach",
+      "falkreath",
+      "whiterun",
+      "hjaalmarch"
+    ],
+    "cultures": [
+      "nord"
+    ],
+    "maxFactionRep": {
+      "thalmor": -15
+    },
+    "purpose": "Thalmor Justiciar enforcement squad dispatched with a signed execution warrant against a traveler who has defied the White-Gold Concordat.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "skyrim.L9.talos_ban",
+      "skyrim.L9.thalmor_watch",
+      "haafingar.L9.thalmor_embassy"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      {
+        "npc": "thalmor",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 4,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_sk_stormcloak_outlander_toll",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "skyrim"
+    ],
+    "regions": [
+      "eastmarch",
+      "the_pale",
+      "winterhold",
+      "the_rift"
+    ],
+    "cultures": [
+      "nord"
+    ],
+    "rulingFactions": [
+      "stormcloaks"
+    ],
+    "maxFactionRep": {
+      "stormcloaks": 10
+    },
+    "purpose": "Stormcloak hold patrol halting travelers at a snowy crossroads to question outlanders and inspect for Imperial dispatches.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "skyrim.L9.civil_war",
+      "eastmarch.L9.rebel_capital",
+      "eastmarch.L7.grey_quarter"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "fire",
+      "log"
+    ],
+    "actors": [
+      {
+        "npc": "stormcloak_soldier",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3,
+        "group": "stormcloaks"
+      }
+    ]
+  },
+  {
+    "id": "t6_sk_imperial_supply_train_escort",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "skyrim"
+    ],
+    "regions": [
+      "haafingar",
+      "falkreath",
+      "the_reach",
+      "whiterun"
+    ],
+    "cultures": [
+      "nord",
+      "imperial"
+    ],
+    "rulingFactions": [
+      "imperial_legion",
+      "whiterun_court"
+    ],
+    "minFactionRep": {
+      "imperial_legion": 15
+    },
+    "purpose": "Imperial Legion quartermaster convoy greeting an allied auxiliary on the high road while guarding Castle Dour supply crates.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "skyrim.L9.civil_war",
+      "haafingar.L9.imperial_seat",
+      "haafingar.L5.company_docks"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "cart",
+      "sack"
+    ],
+    "actors": [
+      {
+        "npc": "imperial_soldier",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3,
+        "group": "imperials"
+      },
+      {
+        "npc": "merchant",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2,
+        "group": "imperials"
+      }
+    ]
+  },
+  {
+    "id": "t6_sk_silver_hand_moonlight_ambush",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "night",
+    "provinces": [
+      "skyrim"
+    ],
+    "regions": [
+      "whiterun",
+      "falkreath",
+      "the_pale",
+      "hjaalmarch"
+    ],
+    "cultures": [
+      "nord"
+    ],
+    "requiredDeed": "companion_member",
+    "purpose": "Silver Hand zealots laying a silver-armed ambush along the road to hunt a known shield-sibling of Jorrvaskr.",
+    "needs": [
+      "road_access",
+      "night_sky"
+    ],
+    "why": [
+      "whiterun.L7.warrior_hall",
+      "skyrim.L10.bandits_on_roads"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "fire"
+    ],
+    "actors": [
+      {
+        "npc": "thug",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_sk_companions_dragon_hunt",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": [
+      "skyrim"
+    ],
+    "regions": [
+      "whiterun",
+      "eastmarch",
+      "the_reach",
+      "the_rift"
+    ],
+    "cultures": [
+      "nord"
+    ],
+    "requiredDeed": "dragon_slayer",
+    "minFactionRep": {
+      "companions": 15
+    },
+    "purpose": "A hunting party of Jorrvaskr Companions hailing the Dragonborn on the tundra while tracking a beast lair.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "skyrim.L9.dragon_crisis",
+      "whiterun.L7.warrior_hall"
+    ],
+    "questHook": "radiant_hunt",
+    "props": [
+      "fire",
+      "meat"
+    ],
+    "actors": [
+      {
+        "npc": "adventurer",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3,
+        "group": "companions"
+      }
+    ]
+  },
+  {
+    "id": "t6_sk_forsworn_silver_blood_reprisal",
+    "weight": 12,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "skyrim"
+    ],
+    "regions": [
+      "the_reach"
+    ],
+    "cultures": [
+      "nord"
+    ],
+    "maxFactionRep": {
+      "forsworn": -10
+    },
+    "purpose": "Forsworn Briarhearts ambushing travelers in the Karth crags in retaliation against Silver-Blood and Nord rule.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "the_reach.L9.native_uprising",
+      "the_reach.L7.silver_family"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      {
+        "npc": "forsworn",
+        "count": [
+          2,
+          4
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_so_redoran_ash_patrol",
+    "weight": 11,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "solstheim"
+    ],
+    "regions": [
+      "solstheim"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "rulingFactions": [
+      "house_redoran"
+    ],
+    "purpose": "House Redoran Guard patrol from Raven Rock securing the ash-road against reavers and ash-spawn.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "solstheim.L6.raven_rock_bulwark",
+      "solstheim.L7.redoran_duty",
+      "solstheim.L9.reaver_menace"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "guard",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3,
+        "group": "redoran"
+      },
+      {
+        "npc": "thug",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 6,
+        "hostile": true,
+        "group": "ashlanders"
+      }
+    ]
+  },
+  {
+    "id": "t6_so_skaal_all_maker_blessing",
+    "weight": 10,
+    "wonder": false,
+    "road": "off",
+    "time": "day",
+    "provinces": [
+      "solstheim"
+    ],
+    "regions": [
+      "solstheim"
+    ],
+    "cultures": [
+      "nord",
+      "dunmer"
+    ],
+    "minFactionRep": {
+      "skaal": 15
+    },
+    "purpose": "Skaal shaman and hunters at a frozen ridge sharing provisions with an honored friend of Skaal Village.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "solstheim.L6.skaal_ring",
+      "solstheim.L8.all_maker"
+    ],
+    "questHook": "radiant_hunt",
+    "props": [
+      "fire",
+      "meat"
+    ],
+    "actors": [
+      {
+        "npc": "priest",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      },
+      {
+        "npc": "hunter",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_mw_ordinator_heretic_inspection",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "morrowind"
+    ],
+    "regions": [
+      "ascadian_isles",
+      "deshaan",
+      "velothi_mountains",
+      "molag_amar"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "maxFactionRep": {
+      "tribunal_temple": 5
+    },
+    "purpose": "Reclamations Temple Ordinators questioning outlanders along the pilgrim road for contraband idols and dissident tracts.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "morrowind.L8.tribunal",
+      "morrowind.L7.outlander_scorn",
+      "deshaan.L6.mournhold_capital"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "guard",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "priest",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      }
+    ]
+  },
+  {
+    "id": "t6_mw_telvanni_retainer_duel",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": [
+      "morrowind"
+    ],
+    "regions": [
+      "telvannis",
+      "azuras_coast",
+      "grazelands"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "rulingFactions": [
+      "house_telvanni"
+    ],
+    "purpose": "House Telvanni mouth and spell-retainer settling an arcane boundary dispute by Telvanni custom—might makes right.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "morrowind.L7.house_order",
+      "azuras_coast.L7.wizard_and_servant",
+      "azuras_coast.L6.wizard_towers"
+    ],
+    "questHook": "radiant_favor",
+    "props": [],
+    "actors": [
+      {
+        "npc": "mage",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3,
+        "group": "telvanni"
+      },
+      {
+        "npc": "necromancer",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 6,
+        "hostile": true,
+        "group": "mages"
+      }
+    ]
+  },
+  {
+    "id": "t6_mw_morag_tong_writ_execution",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "night",
+    "provinces": [
+      "morrowind"
+    ],
+    "regions": [
+      "west_gash",
+      "ascadian_isles",
+      "redoran_highlands",
+      "deshaan",
+      "telvannis"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "maxFactionRep": {
+      "house_redoran": -15
+    },
+    "purpose": "Morag Tong executioner bearing a legal Grand Council writ of Mephala against an enemy of the Great Houses.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "morrowind.L9.house_politics",
+      "morrowind.L7.legal_murder"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      {
+        "npc": "assassin",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 4,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_mw_camonna_tong_outlander_shakedown",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "any",
+    "provinces": [
+      "morrowind"
+    ],
+    "regions": [
+      "west_gash",
+      "ascadian_isles",
+      "bitter_coast"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "maxFactionRep": {
+      "camonna_tong": 0
+    },
+    "purpose": "Camonna Tong syndicate enforcers demanding outlander protection tariffs on the Odai and Ascadian trade road.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "morrowind.L7.criminal_syndicate",
+      "west_gash.L9.hlaalu_collaboration",
+      "bitter_coast.L5.contraband"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "cart",
+      "sack"
+    ],
+    "actors": [
+      {
+        "npc": "thug",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 4,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_mw_ashlander_wise_woman_counsel",
+    "weight": 10,
+    "wonder": false,
+    "road": "off",
+    "time": "dawn_dusk",
+    "provinces": [
+      "morrowind"
+    ],
+    "regions": [
+      "ashlands",
+      "grazelands",
+      "red_mountain"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "minFactionRep": {
+      "ashlanders": 15
+    },
+    "purpose": "Ashlander wise woman and gulakhan scout welcoming a clan-friend beside a windbreak campfire in the ash wastes.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "morrowind.L6.ashlander_camps",
+      "morrowind.L7.ashlanders",
+      "morrowind.L8.ashlander_old_ways"
+    ],
+    "questHook": "radiant_hunt",
+    "props": [
+      "fire",
+      "meat"
+    ],
+    "actors": [
+      {
+        "npc": "priest",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      },
+      {
+        "npc": "hunter",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_mw_dres_argonian_border_clash",
+    "weight": 11,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "morrowind"
+    ],
+    "regions": [
+      "tear",
+      "deshaan"
+    ],
+    "cultures": [
+      "dunmer"
+    ],
+    "purpose": "House Dres border outriders clashing with Argonian marsh-scouts along the scarred southern plantation marches.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "morrowind.L9.argonian_grudge",
+      "morrowind.L9.slavery_question",
+      "deshaan.L9.indoril_vs_dres"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "log"
+    ],
+    "actors": [
+      {
+        "npc": "guard",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3,
+        "group": "an_xileel"
+      },
+      {
+        "npc": "thug",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "slavers"
+      }
+    ]
+  },
+  {
+    "id": "t6_cyr_penitus_oculatus_checkpoint",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "cyrodiil"
+    ],
+    "regions": [
+      "heartlands",
+      "colovian_highlands",
+      "great_forest",
+      "jerall_mountains"
+    ],
+    "cultures": [
+      "imperial"
+    ],
+    "rulingFactions": [
+      "elder_council",
+      "imperial_legion",
+      "colovian_estates"
+    ],
+    "purpose": "Penitus Oculatus inspector and Imperial Legionaries checking waybills and questioning travelers along the Ruby Throne's radial highways.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "cyrodiil.L6.radial_roads",
+      "cyrodiil.L9.throne_empty",
+      "heartlands.L9.council_factions"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "cart"
+    ],
+    "actors": [
+      {
+        "npc": "imperial_soldier",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "scholar",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      }
+    ]
+  },
+  {
+    "id": "t6_cyr_synod_college_debate",
+    "weight": 9,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": [
+      "cyrodiil"
+    ],
+    "regions": [
+      "heartlands",
+      "nibenay_basin",
+      "nibenay_valley",
+      "colovian_highlands"
+    ],
+    "cultures": [
+      "imperial"
+    ],
+    "requiredDeed": "college_member",
+    "purpose": "Envoys of the Synod and the College of Whispers debating Ayleid relic custody and drawing an arcane colleague into their dispute.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "heartlands.L8.university_rationalism",
+      "cyrodiil.L9.throne_empty"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "mage",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "scholar",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      }
+    ]
+  },
+  {
+    "id": "t6_cyr_gold_coast_pirate_press_gang",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "cyrodiil"
+    ],
+    "regions": [
+      "gold_coast",
+      "west_weald"
+    ],
+    "cultures": [
+      "imperial"
+    ],
+    "maxFactionRep": {
+      "gold_coast_pirates": 0
+    },
+    "purpose": "Abeccean corsairs and Gold Coast smugglers ambushing a coastal wine wagon between Anvil and Kvatch.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "gold_coast.L9.wreckers",
+      "gold_coast.L9.kvatch_rebuild",
+      "cyrodiil.L10.road_bandits"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "cart",
+      "sack"
+    ],
+    "actors": [
+      {
+        "npc": "merchant",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2,
+        "group": "victims"
+      },
+      {
+        "npc": "thug",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_cyr_blackwood_border_patrol",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "any",
+    "provinces": [
+      "cyrodiil"
+    ],
+    "regions": [
+      "blackwood",
+      "nibenay_valley"
+    ],
+    "cultures": [
+      "imperial",
+      "argonian",
+      "khajiit"
+    ],
+    "purpose": "County Leyawiin watchmen intercepting Renrijra Krin border runners along the Lower Niben causeway.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "blackwood.L9.mercenary_company",
+      "blackwood.L7.imperial_core_vs_beastfolk_shanties",
+      "cyrodiil.L7.rule_of_law"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "fire"
+    ],
+    "actors": [
+      {
+        "npc": "imperial_soldier",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3,
+        "group": "imperials"
+      },
+      {
+        "npc": "thief",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "stormcloaks"
+      }
+    ]
+  },
+  {
+    "id": "t6_hr_daggerfall_wayrest_knightly_feud",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "glenumbra",
+      "stormhaven",
+      "rivenspire",
+      "menevia"
+    ],
+    "cultures": [
+      "breton"
+    ],
+    "purpose": "Armored knights-errant of rival Breton orders disputing a royal letters-patent and toll-charter at a stone bridge.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "high_rock.L7.feudal_ladder",
+      "high_rock.L9.crowns_and_barons",
+      "stormhaven.L7.abbey_stewards"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "cart"
+    ],
+    "actors": [
+      {
+        "npc": "guard",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "adventurer",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_hr_western_reach_witchmen_raid",
+    "weight": 11,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "high_rock"
+    ],
+    "regions": [
+      "western_reach",
+      "wrothgar",
+      "bangkorai_pass"
+    ],
+    "cultures": [
+      "breton"
+    ],
+    "maxFactionRep": {
+      "forsworn": 0
+    },
+    "purpose": "Western Reach hedge-mages and clansmen raiding a Breton ore convoy in the high mountain passes.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "high_rock.L9.orsinium_question",
+      "high_rock.L7.outcasts"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "cart",
+      "fire"
+    ],
+    "actors": [
+      {
+        "npc": "citizen",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2,
+        "group": "victims"
+      },
+      {
+        "npc": "forsworn",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_hr_orsinium_blood_kin_honor_guard",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "day",
+    "provinces": [
+      "high_rock",
+      "skyrim"
+    ],
+    "regions": [
+      "wrothgar",
+      "the_reach",
+      "eastmarch"
+    ],
+    "cultures": [
+      "orc",
+      "breton",
+      "nord"
+    ],
+    "minFactionRep": {
+      "orc_strongholds": 20
+    },
+    "purpose": "Orc stronghold smith-warriors recognizing a named Blood-Kin on the mountain trail and offering forged steel and counsel.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "wrothgar.L7.chief_and_wives",
+      "wrothgar.L6.orsinium_city",
+      "wrothgar.L6.stronghold_per_mine"
+    ],
+    "questHook": "radiant_hunt",
+    "props": [
+      "fire",
+      "log"
+    ],
+    "actors": [
+      {
+        "npc": "adventurer",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3,
+        "group": "orcs"
+      }
+    ]
+  },
+  {
+    "id": "t6_hf_crown_forebear_oasis_standoff",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "hammerfell"
+    ],
+    "regions": [
+      "sentinel",
+      "alikr_desert",
+      "bangkorai",
+      "dragontail",
+      "craglorn",
+      "hews_bane"
+    ],
+    "cultures": [
+      "redguard"
+    ],
+    "purpose": "Crown traditionalist cavaliers and Forebear port-guards in a tense standoff over well-tax jurisdiction and Second Treaty grievances.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "hammerfell.L7.crowns_and_forebears",
+      "hammerfell.L9.crown_forebear_rift",
+      "alikr_desert.L8.well_oaths"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "fire",
+      "sack"
+    ],
+    "actors": [
+      {
+        "npc": "guard",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3,
+        "group": "crowns"
+      },
+      {
+        "npc": "adventurer",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 4,
+        "group": "forebears"
+      }
+    ]
+  },
+  {
+    "id": "t6_hf_alikr_thalmor_collaborator_hunt",
+    "weight": 11,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "hammerfell"
+    ],
+    "regions": [
+      "alikr_desert",
+      "sentinel",
+      "stros_mkai",
+      "hews_bane",
+      "dragontail"
+    ],
+    "cultures": [
+      "redguard"
+    ],
+    "maxFactionRep": {
+      "crowns": 10
+    },
+    "purpose": "Alik'r desert swordsmen intercepting travelers to hunt down suspected Thalmor informants and treaty collaborators.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "hammerfell.L8.hate_thalmor",
+      "hammerfell.L9.collaborators",
+      "hews_bane.L8.no_forgiveness_oath"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "fire"
+    ],
+    "actors": [
+      {
+        "npc": "adventurer",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "thalmor",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "attackers"
+      }
+    ]
+  },
+  {
+    "id": "t6_hf_ashabah_necropolis_cleansing",
+    "weight": 9,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "provinces": [
+      "hammerfell"
+    ],
+    "regions": [
+      "alikr_desert",
+      "sentinel",
+      "craglorn"
+    ],
+    "cultures": [
+      "redguard"
+    ],
+    "purpose": "Exiled Ash'abah bone-consecrators putting risen Ra Gada tomb-dead back to rest so orthodox Redguards need not strike their ancestors.",
+    "needs": [
+      "open_ground",
+      "night_sky"
+    ],
+    "why": [
+      "hammerfell.L8.necropolis_dead",
+      "hammerfell.L8.hate_necromancy",
+      "sentinel.L8.arkay_patron"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "fire",
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "priest",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2,
+        "group": "vigilants"
+      },
+      {
+        "npc": "adventurer",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3,
+        "group": "vigilants"
+      },
+      {
+        "entity": "skycraft:draugr",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 6,
+        "hostile": true,
+        "group": "daedra"
+      }
+    ]
+  },
+  {
+    "id": "t6_hf_corsair_smuggler_landing",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "night",
+    "provinces": [
+      "hammerfell"
+    ],
+    "regions": [
+      "stros_mkai",
+      "hews_bane",
+      "sentinel"
+    ],
+    "cultures": [
+      "redguard"
+    ],
+    "maxFactionRep": {
+      "restless_league": 5
+    },
+    "purpose": "Iliac and Abeccean corsairs hauling untaxed dwarven brass and spices ashore under cover of darkness.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "stros_mkai.L5.harbour_trade",
+      "hews_bane.L7.forebear_merchant_syndicates",
+      "hammerfell.L5.dyes_and_spice"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "sack",
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "thief",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "thug",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 4,
+        "hostile": true
+      }
+    ]
+  },
+  {
+    "id": "t6_su_justiciar_purity_inspection",
+    "weight": 12,
+    "wonder": false,
+    "road": "on",
+    "time": "day",
+    "provinces": [
+      "summerset"
+    ],
+    "regions": [
+      "summerset_isle",
+      "auridon",
+      "northern_archipelago"
+    ],
+    "cultures": [
+      "altmer"
+    ],
+    "rulingFactions": [
+      "thalmor",
+      "aldmeri_dominion"
+    ],
+    "maxFactionRep": {
+      "thalmor": 15
+    },
+    "purpose": "Thalmor Justiciars and Divine Prosecution bailiffs halting travelers to inspect travel permits, lineage papers, and orthodox praxis.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "summerset.L7.lineage_registry",
+      "summerset.L9.thalmor_rule",
+      "summerset_isle.L9.house_vs_thalmor"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "thalmor",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "guard",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_su_aprax_dissident_rescue",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "night",
+    "provinces": [
+      "summerset"
+    ],
+    "regions": [
+      "summerset_isle",
+      "auridon",
+      "artaeum"
+    ],
+    "cultures": [
+      "altmer"
+    ],
+    "maxFactionRep": {
+      "thalmor": 10
+    },
+    "purpose": "An Altmer scholar declared aprax fleeing toward a coastal skiff while pursued by Thalmor Justiciars.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "summerset.L7.dissidents",
+      "summerset.L9.thalmor_rule",
+      "auridon.L9.cult_denial"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "scholar",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2,
+        "group": "dissidents"
+      },
+      {
+        "npc": "thalmor",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "thalmor"
+      }
+    ]
+  },
+  {
+    "id": "t6_su_psijic_rift_stabilization",
+    "weight": 9,
+    "wonder": true,
+    "road": "off",
+    "time": "dawn_dusk",
+    "provinces": [
+      "summerset"
+    ],
+    "regions": [
+      "artaeum",
+      "summerset_isle",
+      "auridon"
+    ],
+    "cultures": [
+      "altmer"
+    ],
+    "minFactionRep": {
+      "psijic_order": 0
+    },
+    "purpose": "Wonder moment: Psijic Order mystics of Ceporah Tower weaving golden stasis-glyphs around a shimmering Old Ways time-rift.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "artaeum.L6.ceporah_tower",
+      "artaeum.L8.old_ways_rite",
+      "summerset.L8.old_ways"
+    ],
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "mage",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_vw_green_pact_timber_warden_ambush",
+    "weight": 12,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "valenwood"
+    ],
+    "regions": [
+      "grahtwood",
+      "greenshade",
+      "malabal_tor",
+      "reapers_march"
+    ],
+    "cultures": [
+      "bosmer"
+    ],
+    "maxFactionRep": {
+      "green_pact_spinners": 10
+    },
+    "purpose": "Green Pact Bosmer canopy-wardens confronting outlanders suspected of snapping living boughs in Y'ffre's forest.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "valenwood.L8.meat_mandate",
+      "valenwood.L5.pact_imports",
+      "malabal_tor.L8.strictest_pact"
+    ],
+    "questHook": "radiant_hunt",
+    "props": [
+      "meat"
+    ],
+    "actors": [
+      {
+        "npc": "hunter",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 4
+      },
+      {
+        "npc": "guard",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_vw_camoran_thalmor_friction",
+    "weight": 10,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "valenwood"
+    ],
+    "regions": [
+      "grahtwood",
+      "greenshade",
+      "malabal_tor"
+    ],
+    "cultures": [
+      "bosmer",
+      "altmer"
+    ],
+    "purpose": "Camoran treethane scouts clashing with a Thalmor patrol over a hidden root-way sanctuary in the deep jungle.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "valenwood.L7.treethanes",
+      "valenwood.L9.thalmor_in_the_crown",
+      "grahtwood.L9.court_vs_voice"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [],
+    "actors": [
+      {
+        "npc": "hunter",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 3,
+        "group": "dissidents"
+      },
+      {
+        "npc": "thalmor",
+        "count": [
+          2,
+          2
+        ],
+        "radius": 5,
+        "hostile": true,
+        "group": "thalmor"
+      }
+    ]
+  },
+  {
+    "id": "t6_vw_spinner_story_circle",
+    "weight": 9,
+    "wonder": true,
+    "road": "near",
+    "time": "dawn_dusk",
+    "provinces": [
+      "valenwood"
+    ],
+    "regions": [
+      "grahtwood",
+      "greenshade",
+      "malabal_tor"
+    ],
+    "cultures": [
+      "bosmer"
+    ],
+    "minFactionRep": {
+      "green_pact_spinners": 10
+    },
+    "purpose": "Wonder moment: a Bosmer Spinner of Y'ffre chanting the memory of rooted Falinesti while torchbugs weave through the giant graht-roots.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "valenwood.L8.songs_not_stone",
+      "valenwood.L8.yffre_faith",
+      "greenshade.L9.wilderking_silent"
+    ],
+    "props": [
+      "fire"
+    ],
+    "actors": [
+      {
+        "npc": "priest",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      },
+      {
+        "npc": "bard",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 3
+      },
+      {
+        "entity": "skycraft:torchbug",
+        "count": [
+          3,
+          5
+        ],
+        "radius": 4
+      }
+    ]
+  },
+  {
+    "id": "t6_el_renrijra_krin_highway_raid",
+    "weight": 11,
+    "wonder": false,
+    "road": "on",
+    "time": "any",
+    "provinces": [
+      "elsweyr"
+    ],
+    "regions": [
+      "anequina",
+      "northern_elsweyr",
+      "reapers_march",
+      "pellitine"
+    ],
+    "cultures": [
+      "khajiit"
+    ],
+    "rulingFactions": [
+      "mane_temple",
+      "imperial_legion"
+    ],
+    "maxFactionRep": {
+      "imperial_legion": 15
+    },
+    "purpose": "Renrijra Krin moon-insurgents ambushing an Imperial border-tariff caravan along the dusty Anequina badlands road.",
+    "needs": [
+      "road_access"
+    ],
+    "why": [
+      "elsweyr.L7.clan_mothers",
+      "elsweyr.L9.renrijra_krin",
+      "anequina.L9.canyon_rebels"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "cart",
+      "sack"
+    ],
+    "actors": [
+      {
+        "npc": "thief",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 4,
+        "group": "stormcloaks"
+      },
+      {
+        "npc": "imperial_soldier",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 4,
+        "group": "imperials"
+      }
+    ]
+  },
+  {
+    "id": "t6_el_baandari_moon_sugar_caravan",
+    "weight": 10,
+    "wonder": false,
+    "road": "on",
+    "time": "night",
+    "provinces": [
+      "elsweyr"
+    ],
+    "regions": [
+      "anequina",
+      "pellitine",
+      "southern_elsweyr",
+      "khenarthis_roost"
+    ],
+    "cultures": [
+      "khajiit"
+    ],
+    "minFactionRep": {
+      "baandari_pedlars": 0
+    },
+    "purpose": "Baandari caravan traders and a Moon-Bishop of the Mane sharing spiced moon-sugar cakes under the twin moons.",
+    "needs": [
+      "road_access",
+      "night_sky"
+    ],
+    "why": [
+      "elsweyr.L5.moon_sugar",
+      "elsweyr.L7.baandari",
+      "elsweyr.L8.moons_path"
+    ],
+    "questHook": "radiant_favor",
+    "props": [
+      "cart",
+      "fire",
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "caravan_trader",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3
+      },
+      {
+        "npc": "priest",
+        "count": [
+          1,
+          1
+        ],
+        "radius": 2
+      }
+    ]
+  },
+  {
+    "id": "t6_bm_an_xileel_root_border_warden",
+    "weight": 12,
+    "wonder": false,
+    "road": "near",
+    "time": "any",
+    "provinces": [
+      "black_marsh"
+    ],
+    "regions": [
+      "thornmarsh",
+      "shadowfen",
+      "murkmire",
+      "helstrom",
+      "gideon"
+    ],
+    "cultures": [
+      "argonian"
+    ],
+    "rulingFactions": [
+      "an_xileel",
+      "hist_speakers"
+    ],
+    "maxFactionRep": {
+      "an_xileel": 15
+    },
+    "purpose": "An-Xileel shell-backed border wardens patrolling the outer root-ways to bar Dunmer slavers and unlicensed foreign factors.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "black_marsh.L7.freed_and_scarred",
+      "black_marsh.L9.an_xileel_and_imperial_border",
+      "black_marsh.L9.dres_slaver_remnants"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "fire"
+    ],
+    "actors": [
+      {
+        "npc": "guard",
+        "count": [
+          2,
+          3
+        ],
+        "radius": 3,
+        "group": "an_xileel"
+      },
+      {
+        "npc": "thug",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 6,
+        "hostile": true,
+        "group": "slavers"
+      }
+    ]
+  },
+  {
+    "id": "t6_bm_shadowscale_sithis_vigil",
+    "weight": 10,
+    "wonder": false,
+    "road": "off",
+    "time": "night",
+    "provinces": [
+      "black_marsh"
+    ],
+    "regions": [
+      "shadowfen",
+      "murkmire",
+      "helstrom",
+      "archon"
+    ],
+    "cultures": [
+      "argonian"
+    ],
+    "requiredDeed": "brotherhood_member",
+    "purpose": "Shadowscale initiates born under the sign of the Shadow emerging from the swamp mist to salute a fellow servant of Sithis.",
+    "needs": [
+      "open_ground",
+      "night_sky"
+    ],
+    "why": [
+      "black_marsh.L8.the_hist_and_sithis",
+      "black_marsh.L7.shadowscale_order"
+    ],
+    "questHook": "radiant_bounty",
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "assassin",
+        "count": [
+          1,
+          2
+        ],
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "t6_bm_hist_sap_speaker_communion",
+    "weight": 9,
+    "wonder": true,
+    "road": "off",
+    "time": "dawn_dusk",
+    "provinces": [
+      "black_marsh"
+    ],
+    "regions": [
+      "helstrom",
+      "murkmire",
+      "shadowfen",
+      "thornmarsh"
+    ],
+    "cultures": [
+      "argonian"
+    ],
+    "minFactionRep": {
+      "hist_speakers": 10
+    },
+    "purpose": "Wonder moment: Argonian Tree-Minders gathered around bioluminescent Hist roots as amber sap-light pulses through the marsh mist.",
+    "needs": [
+      "open_ground"
+    ],
+    "why": [
+      "black_marsh.L8.hist_communion",
+      "helstrom.L6.helstrom_ring_and_thorn_port",
+      "murkmire.L8.sithis_calendar_stones"
+    ],
+    "props": [
+      "lantern"
+    ],
+    "actors": [
+      {
+        "npc": "priest",
+        "count": [
+          2,
           2
         ],
         "radius": 3

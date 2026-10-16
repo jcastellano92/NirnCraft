@@ -19,7 +19,8 @@ public enum TravelMode {
     LIFT("lift", false),
     PROPYLON("propylon", false),
     INTERVENTION("intervention", false),
-    WAYSHRINE("wayshrine", false);
+    WAYSHRINE("wayshrine", false),
+    FOOT("foot", false);
 
     private final String id;
     private final boolean allowAllToAll;
@@ -43,7 +44,7 @@ public enum TravelMode {
     }
 
     public boolean isRoad() {
-        return this == CARRIAGE || this == CARAVAN || this == STRIDER;
+        return this == CARRIAGE || this == CARAVAN || this == STRIDER || this == FOOT;
     }
 
     public Component displayName() {

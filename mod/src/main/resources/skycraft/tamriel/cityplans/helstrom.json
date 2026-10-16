@@ -56,8 +56,8 @@
     {
       "id": "xanmeer",
       "at": [
-        0,
-        -16
+        -1,
+        -28
       ],
       "name": "helstrom_landmark",
       "overlay": "helstrom"
@@ -65,16 +65,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          91
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -49
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -91,
+          0
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          65,
+          4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 10,
-      "r1": 92,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 49,
+      "rz": 43,
+      "wobble": 4,
+      "lobes": 3,
+      "phase": 2.54,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -107,8 +152,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        26,
-        23
+        29,
+        26
       ],
       "face": "north",
       "overlay": "helstrom",
@@ -227,7 +272,7 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -9,
+        -25,
         -33
       ],
       "face": "south",
@@ -251,7 +296,7 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        15,
+        27,
         -31
       ],
       "face": "south",
@@ -275,8 +320,8 @@
       "use": "townhouse",
       "wealth": "noble",
       "at": [
-        32,
-        -12
+        41,
+        -25
       ],
       "face": "south",
       "overlay": "helstrom",
@@ -331,5 +376,47 @@
     "helstrom_landmark": "High Seat of place.skycraft.helstrom",
     "helstrom_plaza": "place.skycraft.helstrom Central Plaza"
   },
-  "innKey": "helstrom_b_5"
+  "innKey": "helstrom_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -36
+      ],
+      "r": 31,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 27,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        33,
+        8
+      ],
+      "r": 27,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 81,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "on": "main"
+    }
+  ]
 }

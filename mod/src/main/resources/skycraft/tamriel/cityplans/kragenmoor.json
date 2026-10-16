@@ -23,7 +23,7 @@
     {
       "id": "dome_palace",
       "at": [
-        0,
+        20,
         0
       ],
       "face": "south",
@@ -46,8 +46,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        14,
-        0
+        23,
+        27
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -58,8 +58,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        26,
-        33
+        6,
+        36
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -70,8 +70,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -3,
-        14
+        -9,
+        24
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -95,7 +95,7 @@
       "wealth": "common",
       "at": [
         -13,
-        -6
+        -10
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -119,7 +119,7 @@
       "wealth": "common",
       "at": [
         9,
-        -11
+        -27
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -151,12 +151,158 @@
     "kragenmoor_b_4": "Cheydinhal-Road Exchange",
     "kragenmoor_b_5": "Lava-Tube Distillers",
     "kragenmoor_b_6": "Dren Border Manor",
-    "kragenmoor_b_7": "Kragenmoor Gate Garrison"
+    "kragenmoor_b_7": "Kragenmoor Gate Garrison",
+    "kragenmoor_obsidian_square": "Obsidian Gate Caravan Court"
   },
   "innKey": "kragenmoor_b_2",
   "names": {
     "inn": "kragenmoor_b_2",
     "store": "kragenmoor_b_4",
     "smithy": "kragenmoor_b_3"
-  }
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -34,
+        -38,
+        34,
+        -8
+      ],
+      "level": 3,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        -8,
+        6
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 4,
+      "name": "kragenmoor_obsidian_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          -18
+        ],
+        [
+          0,
+          -40
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "obsidian_gate_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          6
+        ],
+        [
+          -16,
+          4
+        ],
+        [
+          16,
+          4
+        ],
+        [
+          42,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "basalt_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        2
+      ],
+      "rx": 32,
+      "rz": 28,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "gate_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "gate_ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "hlaalu",
+      "on": "obsidian_gate_way"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "kit": "redoran",
+      "on": "basalt_cross"
+    }
+  ]
 }

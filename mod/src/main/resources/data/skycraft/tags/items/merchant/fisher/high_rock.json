@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "skycraft:iliac_tuna", "required": false},
+    {"id": "skycraft:glenumbra_herring", "required": false},
+    {"id": "skycraft:bjoulsae_trout", "required": false},
+    {"id": "skycraft:small_pearl", "required": false}
+  ]
+}

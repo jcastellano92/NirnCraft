@@ -76,10 +76,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code max <= 800} blocks) with free discovery and minor blessing refresh on visit.</p>
  */
 public final class TravelNetworks {
-    private static final String[] PROVINCES = {
-            "skyrim", "morrowind", "cyrodiil", "high_rock", "hammerfell",
-            "summerset", "valenwood", "elsweyr", "black_marsh"
-    };
+    public static final List<String> PROVINCE_IDS = List.of(
+            "skyrim", "solstheim", "morrowind", "cyrodiil", "high_rock", "hammerfell",
+            "summerset", "valenwood", "elsweyr", "black_marsh",
+            "atmora", "yokuda", "akavir", "pyandonea", "thras"
+    );
+
+    private static final String[] PROVINCES = PROVINCE_IDS.toArray(String[]::new);
 
     private static final int WILDERNESS_VISIT_RADIUS = 18;
     private static final long BLESSING_COOLDOWN_TICKS = 3600L; // 3 minutes per node visit
@@ -103,7 +106,34 @@ public final class TravelNetworks {
             int fee,
             int durationSeconds,
             String path
-    ) {}
+    ) {
+        public double distance() {
+            return Math.hypot(destination.x() - origin.x(), destination.z() - origin.z());
+        }
+
+        public int hours() {
+            return Carriages.estimateHours(distance());
+        }
+
+        public String formattedDistance() {
+            return Carriages.formatDistance(distance());
+        }
+
+        public String formattedDuration() {
+            return Carriages.formatDuration(distance());
+        }
+
+        public String formatSummary() {
+            return String.format(
+                    Locale.ROOT,
+                    "%s (%s, %s) \u2014 %dg",
+                    destination.id(),
+                    formattedDistance(),
+                    formattedDuration(),
+                    fee
+            );
+        }
+    }
 
     public record HoldCoverage(
             String regionId,
@@ -183,11 +213,37 @@ public final class TravelNetworks {
                 net = ensureWildernessCoverage(net);
                 provinces.put(prov, net);
                 for (TravelNode n : net.nodes()) {
-                    byId.put(n.id(), n);
-                    if (n.place() != null && !n.place().isBlank()) {
-                        byPlace.putIfAbsent(n.place(), n);
+                    TravelNode existing = byId.get(n.id());
+                    if (existing != null) {
+                        List<TravelMode> mergedModes = new ArrayList<>(existing.modes());
+                        for (TravelMode m : n.modes()) {
+                            if (!mergedModes.contains(m)) mergedModes.add(m);
+                        }
+                        if (mergedModes.size() != existing.modes().size()) {
+                            TravelNode merged = new TravelNode(
+                                    existing.id(), existing.province(), existing.region(), existing.place(),
+                                    existing.nameKey(), existing.x(), existing.z(), existing.primaryMode(),
+                                    List.copyOf(mergedModes), existing.kind(), existing.discoveredOnArrival(),
+                                    existing.free(), existing.hashed(), existing.blessing(), existing.why()
+                            );
+                            byId.put(merged.id(), merged);
+                            if (merged.place() != null && !merged.place().isBlank()) {
+                                byPlace.put(merged.place(), merged);
+                            }
+                            for (int idx = 0; idx < allNodes.size(); idx++) {
+                                if (allNodes.get(idx).id().equals(merged.id())) {
+                                    allNodes.set(idx, merged);
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        byId.put(n.id(), n);
+                        if (n.place() != null && !n.place().isBlank()) {
+                            byPlace.putIfAbsent(n.place(), n);
+                        }
+                        allNodes.add(n);
                     }
-                    allNodes.add(n);
                 }
                 allRoutes.addAll(net.routes());
             } catch (Exception ex) {
@@ -227,8 +283,9 @@ public final class TravelNetworks {
                 String place = o.has("place") && !o.get("place").isJsonNull() ? o.get("place").getAsString() : null;
                 String region = str(o, "region", prov);
                 String nameKey = str(o, "name", place != null ? "place.skycraft." + place : "travel.skycraft.node." + id);
-                int x = o.has("x") ? o.get("x").getAsInt() : Places.byId(place != null ? place : id).map(Place::x).orElse(0);
-                int z = o.has("z") ? o.get("z").getAsInt() : Places.byId(place != null ? place : id).map(Place::z).orElse(0);
+                Place resolvedPlace = Places.byId(place != null ? place : id).orElse(null);
+                int x = resolvedPlace != null ? resolvedPlace.x() : (o.has("x") ? o.get("x").getAsInt() : 0);
+                int z = resolvedPlace != null ? resolvedPlace.z() : (o.has("z") ? o.get("z").getAsInt() : 0);
                 TravelMode primary = TravelMode.byId(str(o, "mode", "wayshrine")).orElse(TravelMode.WAYSHRINE);
                 List<TravelMode> nodeModes = new ArrayList<>();
                 if (o.has("modes") && o.get("modes").isJsonArray()) {
@@ -264,7 +321,9 @@ public final class TravelNetworks {
                 String to = str(o, "to", "");
                 if (from.isEmpty() || to.isEmpty()) continue;
                 TravelMode mode = TravelMode.byId(str(o, "mode", "carriage")).orElse(TravelMode.CARRIAGE);
-                int fee = o.has("fee") ? Math.max(0, o.get("fee").getAsInt()) : 0;
+                int fee = o.has("fee")
+                        ? Math.max(0, o.get("fee").getAsInt())
+                        : (o.has("cost") ? Math.max(0, o.get("cost").getAsInt()) : 0);
                 int duration = o.has("duration") ? Math.max(1, o.get("duration").getAsInt()) : 10;
                 String path = str(o, "path", mode.id() + "_route");
                 boolean bi = !o.has("bidirectional") || o.get("bidirectional").getAsBoolean();
@@ -318,7 +377,7 @@ public final class TravelNetworks {
             String hold = reg.contains("/") ? reg.substring(reg.indexOf('/') + 1) : reg;
             added++;
             String nid = "wayshrine_" + hold + "_auto_" + added;
-            List<String> why = defaultWhyForRegion(prov, hold);
+            List<String> why = !net.why().isEmpty() ? net.why() : defaultWhyForRegion(prov, hold);
             TravelNode wn = new TravelNode(
                     nid, prov, reg, null, "travel.skycraft.node." + nid,
                     pt[0], pt[1], TravelMode.WAYSHRINE, List.of(TravelMode.WAYSHRINE),
@@ -477,6 +536,10 @@ public final class TravelNetworks {
         return out;
     }
 
+    public static Optional<TravelNode> nodeForPlace(String placeId) {
+        return node(placeId);
+    }
+
     public static Optional<TravelNode> node(String idOrPlace) {
         if (idOrPlace == null || idOrPlace.isBlank()) return Optional.empty();
         String key = idOrPlace.trim().toLowerCase(Locale.ROOT);
@@ -485,6 +548,19 @@ public final class TravelNetworks {
         if (n != null) return Optional.of(n);
         n = s.byPlace().get(key);
         if (n != null) return Optional.of(n);
+        String alias = switch (key) {
+            case "ald_ruhn" -> "aldruhn";
+            case "aldruhn" -> "ald_ruhn";
+            case "frostmoth" -> "fort_frostmoth";
+            case "balfiera" -> "isle_of_balfiera";
+            default -> null;
+        };
+        if (alias != null) {
+            n = s.byId().get(alias);
+            if (n != null) return Optional.of(n);
+            n = s.byPlace().get(alias);
+            if (n != null) return Optional.of(n);
+        }
         if (key.startsWith("the_")) {
             n = s.byId().get(key.substring(4));
             if (n != null) return Optional.of(n);
@@ -541,6 +617,10 @@ public final class TravelNetworks {
             if (otherId.isEmpty()) continue;
             TravelNode dest = s.byId().get(otherId.get());
             if (dest == null) continue;
+            if (r.mode() == TravelMode.CARRIAGE) {
+                double dist = Math.hypot(dest.x() - origin.x(), dest.z() - origin.z());
+                if (dist > Carriages.MAX_CARRIAGE_DISTANCE) continue;
+            }
             String dedup = r.mode().id() + ":" + dest.id();
             if (!seen.add(dedup)) continue;
             out.add(new Offer(origin, dest, r, r.mode(), r.fee(), r.durationSeconds(), r.path()));
@@ -571,6 +651,21 @@ public final class TravelNetworks {
     // -------------------------------------------------------------------------
     // Travel Execution Engine (Server-authoritative, multiplayer-safe)
     // -------------------------------------------------------------------------
+
+    /**
+     * Universal Prewarm helper used across all travel modes ({@code carriage}, {@code strider}, {@code boat},
+     * {@code river_boat}, {@code barge}, {@code caravan}, {@code guild_guide}, {@code lift}, {@code propylon},
+     * {@code intervention}, {@code wayshrine}, {@code foot}).
+     */
+    public static boolean prewarmTo(ServerPlayer player, int destX, int destZ, Component destName, Runnable onReady) {
+        ServerLevel level = player.serverLevel();
+        if (!Prewarm.isReady(level, destX, destZ)
+                && Prewarm.start(player, destX, destZ, destName, onReady)) {
+            return true;
+        }
+        onReady.run();
+        return true;
+    }
 
     /**
      * Executes travel for {@code player} along a route from {@code fromIdOrPlace} to {@code toIdOrPlace}.
@@ -609,7 +704,7 @@ public final class TravelNetworks {
         TravelMode mode = offer.mode();
         int fee = offer.fee();
 
-        // For sea ports with a Route in Ports, delegate directly to Ferries if a Route exists
+        // For sea ports with a Route in Ports, prewarm the destination chunk and delegate to Ferries
         if (mode == TravelMode.BOAT) {
             Port fromPort = Ports.byId(origin.id()).orElse(null);
             Port toPort = Ports.byId(dest.id()).orElse(null);
@@ -620,9 +715,13 @@ public final class TravelNetworks {
                             Notifier.message(player, Component.translatable("travel.skycraft.no_gold", fee));
                             return false;
                         }
-                        Ferries.start(player, fromPort, toPort, r);
-                        onArrival(player, dest, mode);
-                        return true;
+                        final Port fp = fromPort;
+                        final Port tp = toPort;
+                        final Route fr = r;
+                        return prewarmTo(player, dest.x(), dest.z(), dest.displayName(), () -> {
+                            Ferries.start(player, fp, tp, fr);
+                            onArrival(player, dest, mode);
+                        });
                     }
                 }
             }
@@ -635,15 +734,7 @@ public final class TravelNetworks {
         }
 
         playDepartureScene(player, mode);
-
-        ServerLevel level = player.serverLevel();
-        if (!Prewarm.isReady(level, dest.x(), dest.z())
-                && Prewarm.start(player, dest.x(), dest.z(), dest.displayName(),
-                () -> completeRide(player, origin, dest, mode))) {
-            return true;
-        }
-        completeRide(player, origin, dest, mode);
-        return true;
+        return prewarmTo(player, dest.x(), dest.z(), dest.displayName(), () -> completeRide(player, origin, dest, mode));
     }
 
     private static void playDepartureScene(ServerPlayer player, TravelMode mode) {
@@ -1044,6 +1135,100 @@ public final class TravelNetworks {
         } else {
             problems++;
             details.add("FAIL: F-TRAVEL coverage violations: " + covFailures);
+        }
+
+        // Check 7: All 15 provincial/regional travel network files load cleanly with valid endpoints, places, and why citations
+        List<String> provErrors = new ArrayList<>();
+        for (String pid : PROVINCE_IDS) {
+            ProvinceNetwork pn = province(pid).orElse(null);
+            if (pn == null) {
+                provErrors.add("missing_province:" + pid);
+                continue;
+            }
+            for (TravelNode n : pn.nodes()) {
+                if (n.place() != null && Places.byId(n.place()).isEmpty()) {
+                    provErrors.add(pid + ":missing_place:" + n.id() + "->" + n.place());
+                }
+                for (String w : n.why()) {
+                    if (!WorldSheets.resolves(w)) provErrors.add(pid + ":node_why:" + n.id() + ":" + w);
+                }
+            }
+            for (TravelRoute r : pn.routes()) {
+                if (node(r.from()).isEmpty() || node(r.to()).isEmpty()) {
+                    provErrors.add(pid + ":route_endpoint:" + r.from() + "->" + r.to());
+                }
+                for (String w : r.why()) {
+                    if (!WorldSheets.resolves(w)) provErrors.add(pid + ":route_why:" + r.from() + "->" + r.to() + ":" + w);
+                }
+            }
+        }
+        if (provErrors.isEmpty()) {
+            passed++;
+            details.add("PASS: All " + PROVINCE_IDS.size() + " travel networks load with 0 missing places, 0 broken endpoints, and 100% resolved why citations");
+        } else {
+            problems++;
+            details.add("FAIL: Travel network errors across provinces: " + provErrors.subList(0, Math.min(10, provErrors.size())));
+        }
+
+        // Check 8: Carriage distance cap (<= Carriages.MAX_CARRIAGE_DISTANCE = 2800m) across all settlements and routes
+        List<String> overCapCarriages = new ArrayList<>();
+        for (TravelRoute r : allRoutes()) {
+            if (r.mode() != TravelMode.CARRIAGE) continue;
+            TravelNode a = node(r.from()).orElse(null);
+            TravelNode b = node(r.to()).orElse(null);
+            if (a != null && b != null) {
+                double d = Math.hypot(a.x() - b.x(), a.z() - b.z());
+                if (d > Carriages.MAX_CARRIAGE_DISTANCE) {
+                    overCapCarriages.add(String.format(Locale.ROOT, "%s->%s (%.1fm)", r.from(), r.to(), d));
+                }
+            }
+        }
+        Place whiterun = Places.byId("whiterun").orElse(null);
+        Set<String> whiterunDestIds = new HashSet<>();
+        if (whiterun != null) {
+            for (Carriages.Destination cd : Carriages.destinations(whiterun)) {
+                whiterunDestIds.add(cd.place().id());
+                if (cd.distance() > Carriages.MAX_CARRIAGE_DISTANCE) {
+                    overCapCarriages.add("whiterun_offer->" + cd.place().id() + ":" + cd.distance());
+                }
+            }
+        }
+        for (String cap : Set.of("solitude", "windhelm", "riften", "markarth", "morthal", "dawnstar", "winterhold", "falkreath")) {
+            if (!whiterunDestIds.contains(cap)) {
+                overCapCarriages.add("whiterun_missing_capital:" + cap);
+            }
+        }
+        if (overCapCarriages.isEmpty()) {
+            passed++;
+            details.add("PASS: 0 carriage routes or offers exceed MAX_CARRIAGE_DISTANCE (" + Carriages.MAX_CARRIAGE_DISTANCE + "m), and Whiterun reaches all 8 other Skyrim capitals");
+        } else {
+            problems++;
+            details.add("FAIL: Carriage distance cap or capital reachability violations: " + overCapCarriages);
+        }
+
+        // Check 9: Multi-modal regional networks (Morrowind strider/boat/guild_guide/propylon, Solstheim boat/foot, outer realms)
+        List<String> multiModalErrors = new ArrayList<>();
+        if (offersFrom("seyda_neen", TravelMode.STRIDER).isEmpty() || offersFrom("balmora", TravelMode.STRIDER).isEmpty()) {
+            multiModalErrors.add("morrowind_strider");
+        }
+        if (offersFrom("hlormaren", TravelMode.PROPYLON).isEmpty() || offersFrom("marandus", TravelMode.PROPYLON).isEmpty()) {
+            multiModalErrors.add("morrowind_propylon_ring");
+        }
+        if (offersFrom("balmora", TravelMode.GUILD_GUIDE).isEmpty() || offersFrom("imperial_city", TravelMode.GUILD_GUIDE).isEmpty()) {
+            multiModalErrors.add("mages_guild_guides");
+        }
+        if (offersFrom("raven_rock", TravelMode.BOAT).isEmpty() || offersFrom("thirsk_mead_hall", TravelMode.FOOT).isEmpty()) {
+            multiModalErrors.add("solstheim_boat_or_foot");
+        }
+        if (offersFrom("jylkurfyk", TravelMode.BOAT).isEmpty() || offersFrom("tang_mo_harbor_village", TravelMode.BOAT).isEmpty()) {
+            multiModalErrors.add("outer_realm_expedition_boats");
+        }
+        if (multiModalErrors.isEmpty()) {
+            passed++;
+            details.add("PASS: Multi-modal regional transport (Silt Striders, Propylon ring, Mages Guild guides, Solstheim & outer-realm boats/trails) verified");
+        } else {
+            problems++;
+            details.add("FAIL: Missing multi-modal regional transport links: " + multiModalErrors);
         }
 
         int total = passed + problems;

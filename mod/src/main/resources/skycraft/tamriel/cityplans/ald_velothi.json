@@ -91,5 +91,111 @@
     "ald_velothi_b_2": "Lledsea Relas's Shack",
     "ald_velothi_b_3": "Vireveri Darethi's Hut",
     "ald_velothi_b_4": "Banden Indarys Pier"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          20
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          -18
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "outpost_cliff_steps"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          4
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          18,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "ash_pier_lane"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 14,
+      "rz": 14,
+      "wobble": 2,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "redoran_watch_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -9
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "kit": "redoran",
+      "on": "redoran_watch_loop"
+    },
+    {
+      "kind": "barracks",
+      "count": 1,
+      "kit": "redoran",
+      "on": "outpost_cliff_steps"
+    }
+  ]
 }

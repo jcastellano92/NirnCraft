@@ -30,7 +30,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        8,
+        -16,
         0
       ],
       "face": "south",
@@ -42,7 +42,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        0,
+        4,
         15
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        3,
+        -17
       ],
       "face": "south",
       "overlay": "jerall_mountains",
@@ -66,7 +66,7 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        0,
+        16,
         -15
       ],
       "face": "south",
@@ -90,6 +90,117 @@
     "wrenstone_b_1": "Wrenstone Quarry Guildhouse",
     "wrenstone_b_2": "Mason's Chisel Forge",
     "wrenstone_b_3": "Quarrymaster's Stone House",
-    "wrenstone_b_4": "Ox-Wagon Shed"
-  }
+    "wrenstone_b_4": "Ox-Wagon Shed",
+    "wrenstone_square": "Wrenstone Silver-Quarry Terrace"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        0
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "wrenstone_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        23
+      ],
+      "to": [
+        0,
+        -14
+      ],
+      "legs": 3,
+      "amp": 12,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "silver_seam_switchback"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 14,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "quarry_ledge_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -23,
+          0
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          19,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "wrenstone_spur"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "quarry_ledge_loop"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "silver_seam_switchback"
+    }
+  ]
 }

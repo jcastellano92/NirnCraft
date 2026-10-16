@@ -198,6 +198,8 @@ final class NpcGoals {
     static final class Melee extends MeleeAttackGoal {
         private final NpcEntity npc;
         private int spellCooldown = 40;
+        private int spellWindup = 0;
+        private String queuedSpell = "";
 
         Melee(NpcEntity npc) {
             super(npc, 1.1D, true);
@@ -215,14 +217,36 @@ final class NpcGoals {
         }
 
         @Override
+        public void stop() {
+            super.stop();
+            if (spellWindup > 0) {
+                spellWindup = 0;
+                npc.setCasting(false);
+            }
+        }
+
+        @Override
         public void tick() {
             super.tick();
-            // Thalmor justiciars are spellswords: fire at whoever keeps their distance
             LivingEntity target = npc.getTarget();
-            if (target == null || npc.role() != NpcRole.THALMOR) return;
-            if (--spellCooldown <= 0 && npc.distanceToSqr(target) > 36 && npc.getSensing().hasLineOfSight(target)) {
-                spellCooldown = 70 + npc.getRandom().nextInt(50);
-                npc.castFireball(target);
+            NpcRole role = npc.role();
+            if (target == null || (role != NpcRole.THALMOR && role != NpcRole.VAMPIRE && role != NpcRole.PRIEST)) return;
+            if (spellWindup > 0) {
+                if (--spellWindup == 0) {
+                    String toCast = queuedSpell;
+                    npc.setCasting(false);
+                    if (npc.getSensing().hasLineOfSight(target)) {
+                        npc.castSpell(target, toCast);
+                    }
+                    spellCooldown = 55 + npc.getRandom().nextInt(45);
+                }
+                return;
+            }
+            boolean needsSelfHeal = npc.getHealth() < npc.getMaxHealth() * 0.5f;
+            if (--spellCooldown <= 0 && (needsSelfHeal || (npc.distanceToSqr(target) > 25 && npc.getSensing().hasLineOfSight(target)))) {
+                queuedSpell = npc.chooseCombatSpell(target);
+                spellWindup = 10;
+                npc.startSpellWindup(queuedSpell);
             }
         }
     }
@@ -293,11 +317,12 @@ final class NpcGoals {
         }
     }
 
-    /** Mages and necromancers: keep at range, wind up, throw fire; necromancers raise the dead once per fight. */
+    /** Mages and necromancers: keep at range, wind up, cast Skycraft spells (Destruction, Restoration, Alteration, Conjuration). */
     static final class Caster extends Goal {
         private final NpcEntity npc;
         private int cooldown;
         private int windup;
+        private String queuedSpell = "firebolt";
 
         Caster(NpcEntity npc) {
             this.npc = npc;
@@ -313,12 +338,11 @@ final class NpcGoals {
         @Override
         public void start() {
             npc.setAggressive(true);
-            cooldown = 10;
+            cooldown = 8;
             windup = 0;
             LivingEntity t = npc.getTarget();
             if (t != null && npc.role() == NpcRole.NECROMANCER && !npc.hasRaisedDead()) {
-                npc.setRaisedDead(true);
-                Npcs.raiseDead(npc, t);
+                npc.castSpell(t, "raise_zombie");
             }
         }
 
@@ -352,14 +376,15 @@ final class NpcGoals {
             }
             if (windup > 0) {
                 if (--windup == 0) {
+                    String spellToCast = queuedSpell;
                     npc.setCasting(false);
-                    if (sees && d < 22 * 22) npc.castFireball(t);
-                    cooldown = 35 + npc.getRandom().nextInt(30);
+                    if (sees && d < 22 * 22) npc.castSpell(t, spellToCast);
+                    cooldown = 32 + npc.getRandom().nextInt(26);
                 }
             } else if (--cooldown <= 0 && sees && d < 18 * 18) {
-                windup = 12;
-                npc.setCasting(true);
-                npc.playSound(SoundEvents.EVOKER_PREPARE_ATTACK, 0.6f, 1.3f);
+                queuedSpell = npc.chooseCombatSpell(t);
+                windup = 14;
+                npc.startSpellWindup(queuedSpell);
             }
         }
     }
@@ -778,33 +803,25 @@ final class NpcGoals {
         }
 
         private void composeSong() {
-            melody.clear();
-            int len = 84 + npc.getRandom().nextInt(24);
-            int idx = 3 + npc.getRandom().nextInt(4);
-            for (int i = 0; i < len; i++) {
-                if (npc.getRandom().nextInt(6) == 0) {
-                    melody.add(-1); // rest
-                    continue;
-                }
-                idx = Math.max(0, Math.min(SCALE.length - 1, idx + npc.getRandom().nextInt(5) - 2));
-                melody.add(SCALE[idx]);
+            if (!(npc.getMainHandItem().getItem() instanceof com.skycraft.audio.InstrumentItem)) {
+                npc.setItemInHand(InteractionHand.MAIN_HAND, com.skycraft.audio.BardPerformance.instrumentFor(npc));
             }
-            int which = npc.getRandom().nextInt(3);
-            instrument = which == 0 ? SoundEvents.NOTE_BLOCK_GUITAR : which == 1 ? SoundEvents.NOTE_BLOCK_FLUTE : SoundEvents.NOTE_BLOCK_HARP;
+            melody.clear();
+            melody.addAll(com.skycraft.audio.BardPerformance.composeMelody(npc));
+            instrument = com.skycraft.audio.BardPerformance.soundFor(npc);
             noteIndex = 0;
-            ticks = len * 5 + 10;
+            ticks = melody.size() * 5 + 10;
         }
 
         private void play(ServerLevel level) {
             Player listener = level.getNearestPlayer(npc, 16);
             if (listener != null) npc.getLookControl().setLookAt(listener, 20f, 20f);
             if (ticks % 5 != 0 || noteIndex >= melody.size()) return;
-            int note = melody.get(noteIndex++);
+            int step = noteIndex++;
+            int note = melody.get(step);
             if (note < 0) return;
-            float pitch = (float) Math.pow(2.0, (note - 12) / 12.0);
-            level.playSound(null, npc.getX(), npc.getY() + 1, npc.getZ(), instrument.value(), SoundSource.RECORDS, 1.0f, pitch);
+            com.skycraft.audio.BardPerformance.playStep(level, npc, note, step);
             if (noteIndex % 2 == 0) npc.swing(InteractionHand.MAIN_HAND);
-            level.sendParticles(ParticleTypes.NOTE, npc.getX(), npc.getY() + 2.3, npc.getZ(), 0, note / 24.0, 0, 0, 1);
         }
 
         // -------- priests

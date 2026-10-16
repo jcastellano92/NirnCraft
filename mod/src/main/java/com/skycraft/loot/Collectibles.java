@@ -131,7 +131,7 @@ public final class Collectibles {
 
     /** Provinces with a treasure set, in Journal order. */
     public static final String[] TREASURE_PROVINCES = {"skyrim", "cyrodiil", "morrowind", "black_marsh", "elsweyr", "valenwood",
-            "summerset", "hammerfell", "high_rock"};
+            "summerset", "hammerfell", "high_rock", "akavir", "atmora", "yokuda", "pyandonea", "thras", "realm"};
 
     private static volatile boolean built;
 
@@ -215,6 +215,12 @@ public final class Collectibles {
         treasures("summerset", 0xE8E0FF, "psijic_sigil", 600, "crystal_tower_shard", 650, "aldmeri_scroll_case", 400, "sapiarch_lens", 450, "merethic_coin", 350);
         treasures("hammerfell", 0xD89040, "yokudan_sword_hilt", 450, "shehai_shard", 550, "ansei_ward", 400, "satakal_figurine", 350, "alikr_sandglass", 300);
         treasures("high_rock", 0x7080C0, "direnni_crest", 500, "coven_poppet", 250, "wyrd_tree_acorn", 350, "breton_signet", 400, "orsinium_war_totem", 450);
+        treasures("akavir", 0xC83A3A, "tsaesci_golden_scale", 450, "kamal_thaw_stone", 400, "tang_mo_jade_seal", 350, "ka_po_tun_tiger_fang", 500, "akaviri_blood_seal", 550);
+        treasures("atmora", 0x78B0D8, "jylkurfyk_keel_rune", 400, "clever_craft_owl_totem", 450, "ysgramor_sea_compass", 550, "brodir_grove_amber", 350, "atmoran_hearth_horn", 500);
+        treasures("yokuda", 0xD8A848, "memory_stone_fragment", 550, "na_totambu_sun_disc", 500, "tava_wind_flute", 350, "orichalc_tower_brick", 450, "left_handed_elf_torc", 400);
+        treasures("pyandonea", 0x38A8B0, "orgnum_coffer_coin", 550, "sea_serpent_fang_charm", 450, "abbarbas_kelp_pearl", 400, "chameleon_skin_vellum", 350, "tempest_conch_horn", 500);
+        treasures("thras", 0x6A8A60, "sload_soap_jar", 450, "agalon_coral_idol", 400, "all_flags_admiral_medal", 500, "krempen_lagoon_pearl", 350, "necromancers_coral_wand", 550);
+        treasures("realm", 0x8A48B8, "sigil_stone_splinter", 550, "coldharbour_azure_plasm", 450, "soul_cairn_reaper_shard", 500, "shivering_amber_matrix", 400, "apocrypha_glyph_cylinder", 450);
 
         // ---- Legendary uniques
         Collection uniques = add(new Collection(LegendaryUniques.COLLECTION, Kind.CARRY, "uniques", new Reward(10000, 3, null)));

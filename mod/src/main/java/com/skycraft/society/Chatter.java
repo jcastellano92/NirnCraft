@@ -68,14 +68,17 @@ public final class Chatter {
         final String key;
         @Nullable
         final Component arg;
+        @Nullable
+        final List<Component> customLines;
         int step;
         long next;
 
-        Talk(NpcEntity a, NpcEntity b, String key, @Nullable Component arg, long next) {
+        Talk(NpcEntity a, NpcEntity b, String key, @Nullable Component arg, @Nullable List<Component> customLines, long next) {
             this.a = a;
             this.b = b;
             this.key = key;
             this.arg = arg;
+            this.customLines = customLines;
             this.next = next;
         }
     }
@@ -84,19 +87,21 @@ public final class Chatter {
     /** Blocks around a running conversation in which no other starts. Tuning knob. */
     private static final double CLUSTER_GAP = 10.0D;
 
-    /** Bard songs ({@code society.skycraft.song.<n>.title} and {@code .0..5} lyric lines, all original). */
+    /** Bard songs ({@code society.skycraft.song.<n>.title} and {@code .0..5}, plus regional {@code society.skycraft.song.<culture>.<0..3>.<0..3>}). */
     public static final int SONGS = 5;
-    private static final int VERSES = 6;
+    private static final int VERSES = com.skycraft.audio.BardPerformance.VERSES_PER_SONG;
 
     private static final class Song {
         final NpcEntity bard;
-        final int song;
+        final String key;
+        final int verses;
         int line;
         long next;
 
-        Song(NpcEntity bard, int song, long next) {
+        Song(NpcEntity bard, String key, int verses, long next) {
             this.bard = bard;
-            this.song = song;
+            this.key = key;
+            this.verses = verses;
             this.next = next;
         }
     }
@@ -105,22 +110,54 @@ public final class Chatter {
 
     private Chatter() {}
 
-    /** A bard sings the lyrics of {@code song} overhead while playing it. */
+    /** Returns the number of configured variants for {@code topic}, or 0 if unknown. */
+    public static int topicVariants(String topic) {
+        if (topic == null) return 0;
+        Integer v = TOPICS.get(topic);
+        if (v != null && v > 0) return v;
+        return RegionVoice.gossipCount(topic.startsWith("gossip_") ? topic.substring("gossip_".length()) : topic);
+    }
+
+    /** Deterministic helper for selecting a cultural/regional gossip topic for {@code region}. */
+    public static String pickTopic(Region region, boolean preferRegion) {
+        if (region == null) return "generic";
+        String gossip = RegionVoice.gossipTopic(region.shortId(), region.province(), preferRegion);
+        if (gossip != null && topicVariants(gossip) > 0) return gossip;
+        return "generic";
+    }
+
+    /** Regional bard song repertoire keys for {@code culture} ({@code society.skycraft.song.<culture>.<0..3>}). */
+    public static List<String> songsFor(String culture) {
+        return com.skycraft.audio.BardPerformance.songsFor(culture);
+    }
+
+    /** Regional bard song repertoire keys for {@code bard}. */
+    public static List<String> songsFor(NpcEntity bard) {
+        return com.skycraft.audio.BardPerformance.songsFor(bard);
+    }
+
+    /** A bard sings the regional lyrics of {@code song} overhead while playing it. */
     public static void sing(NpcEntity bard, int song) {
+        String key = com.skycraft.audio.BardPerformance.pickSong(bard, song);
+        singKey(bard, key, VERSES);
+    }
+
+    /** A bard sings the lyrics of an explicit song base key ({@code <key>.0 .. <key>.<verses-1>}). */
+    public static void singKey(NpcEntity bard, String songKey, int verses) {
         SINGING.removeIf(s -> s.bard == bard);
-        SINGING.add(new Song(bard, Math.floorMod(song, SONGS), bard.level().getGameTime() + 30));
+        SINGING.add(new Song(bard, songKey, Math.max(1, verses), bard.level().getGameTime() + 30));
     }
 
     private static void tickSongs() {
         for (Iterator<Song> it = SINGING.iterator(); it.hasNext(); ) {
             Song s = it.next();
-            if (!s.bard.isAlive() || s.bard.isRemoved() || s.line >= VERSES || s.bard.getTarget() != null) {
+            if (!s.bard.isAlive() || s.bard.isRemoved() || s.line >= s.verses || s.bard.getTarget() != null) {
                 it.remove();
                 continue;
             }
             long now = s.bard.level().getGameTime();
             if (now < s.next) continue;
-            Barks.say(s.bard, Component.translatable("society.skycraft.song." + s.song + "." + s.line));
+            Barks.say(s.bard, Component.translatable(s.key + "." + s.line));
             s.line++;
             s.next = now + 75;
         }
@@ -151,23 +188,58 @@ public final class Chatter {
         start(level, npc, partner);
     }
 
+    @Nullable
+    private static List<Component> buildResidentExchange(NpcEntity a, NpcEntity b, RandomSource r) {
+        String aBark = a.getPersistentData().getString(SocietyResidents.BARK_KEY);
+        String aTalk = a.getPersistentData().getString(SocietyResidents.TALK_KEY);
+        String aSecret = a.getPersistentData().getString(SocietyResidents.SECRET_KEY);
+        String bBark = b.getPersistentData().getString(SocietyResidents.BARK_KEY);
+        String bTalk = b.getPersistentData().getString(SocietyResidents.TALK_KEY);
+        String bSecret = b.getPersistentData().getString(SocietyResidents.SECRET_KEY);
+
+        String line0 = !aBark.isBlank() ? aBark : aTalk;
+        String line1 = !bTalk.isBlank() ? bTalk : (!bBark.isBlank() ? bBark : bSecret);
+        String line2 = !aSecret.isBlank() && r.nextBoolean() ? aSecret : (!aTalk.isBlank() ? aTalk : aBark);
+        if (line0.isBlank() || line1.isBlank() || line2.isBlank()) return null;
+        return List.of(
+                Component.literal(line0),
+                Component.literal(line1),
+                Component.literal(line2)
+        );
+    }
+
     private static void start(ServerLevel level, NpcEntity a, NpcEntity b) {
         RandomSource r = a.getRandom();
+        if (!a.isChild() && r.nextInt(3) == 0) {
+            List<Component> residentLines = buildResidentExchange(a, b, r);
+            if (residentLines != null) {
+                a.setConversationPartner(b.getId());
+                b.setConversationPartner(a.getId());
+                a.getNavigation().stop();
+                b.getNavigation().stop();
+                ACTIVE.add(new Talk(a, b, "", null, residentLines, level.getGameTime() + 10));
+                return;
+            }
+        }
         Component arg = null;
         String topic = topic(level, a, b, r);
         if ("rumor".equals(topic)) {
             Place place = rumorPlace(a.blockPosition(), r);
-            if (place == null) topic = "generic";
-            else arg = place.name();
+            if (place == null) {
+                Region reg = Cultures.regionAt(level, a.blockPosition());
+                topic = pickTopic(reg, true);
+            } else {
+                arg = place.name();
+            }
         }
-        Integer variants = TOPICS.get(topic);
-        if (variants == null || variants <= 0) return;
+        int variants = topicVariants(topic);
+        if (variants <= 0) return;
         String key = "society.skycraft.chat." + topic + "." + r.nextInt(variants) + ".";
         a.setConversationPartner(b.getId());
         b.setConversationPartner(a.getId());
         a.getNavigation().stop();
         b.getNavigation().stop();
-        ACTIVE.add(new Talk(a, b, key, arg, level.getGameTime() + 10));
+        ACTIVE.add(new Talk(a, b, key, arg, null, level.getGameTime() + 10));
     }
 
     private static String topic(ServerLevel level, NpcEntity a, NpcEntity b, RandomSource r) {
@@ -183,31 +255,25 @@ public final class Chatter {
         Region region = Cultures.regionAt(level, pos);
         boolean skyrim = "skyrim".equals(region.province());
         switch (roll) {
-            case 0, 1 -> {
-                String gossip = RegionVoice.gossipTopic(region.shortId(), region.province(), r.nextBoolean());
-                return gossip != null && TOPICS.containsKey(gossip) ? gossip : "generic";
-            }
-            case 2 -> {
-                return skyrim ? "dragons" : "generic";
-            }
-            case 3 -> {
-                return skyrim ? "war" : "prices";
+            case 0, 1, 2, 3, 9, 10, 11 -> {
+                String gossip = pickTopic(region, roll % 2 == 0);
+                return topicVariants(gossip) > 0 ? gossip : "generic";
             }
             case 4 -> {
                 return "rumor";
             }
             case 5, 6 -> {
                 String work = "work_" + a.role().id;
-                return TOPICS.containsKey(work) ? work : "prices";
+                return TOPICS.containsKey(work) ? work : pickTopic(region, true);
             }
             case 7 -> {
-                return skyrim ? "jarl" : "family";
+                return skyrim ? "jarl" : pickTopic(region, false);
             }
             case 8 -> {
-                return r.nextBoolean() ? "family" : "prices";
+                return skyrim && r.nextBoolean() ? "war" : (r.nextBoolean() ? "family" : "prices");
             }
             default -> {
-                return "generic";
+                return pickTopic(region, true);
             }
         }
     }
@@ -273,9 +339,14 @@ public final class Chatter {
                 }
                 NpcEntity speaker = t.step % 2 == 0 ? t.a : t.b;
                 NpcEntity listener = speaker == t.a ? t.b : t.a;
-                Component line = t.arg != null
-                        ? Component.translatable(t.key + t.step, t.arg, listener.getDisplayName())
-                        : Component.translatable(t.key + t.step, listener.getDisplayName());
+                Component line;
+                if (t.customLines != null && t.step < t.customLines.size()) {
+                    line = t.customLines.get(t.step);
+                } else {
+                    line = t.arg != null
+                            ? Component.translatable(t.key + t.step, t.arg, listener.getDisplayName())
+                            : Component.translatable(t.key + t.step, listener.getDisplayName());
+                }
                 Barks.say(speaker, line);
                 t.step++;
                 t.next = now + 60 + speaker.getRandom().nextInt(20);

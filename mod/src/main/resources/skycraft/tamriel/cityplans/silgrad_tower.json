@@ -23,8 +23,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        0
+        -5,
+        -15
       ],
       "face": "south",
       "name": "silgrad_tower_landmark",
@@ -46,7 +46,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        26,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -3,
-        14
+        6,
+        27
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -94,8 +94,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -18,
+        9
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -118,8 +118,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        20,
+        -28
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -151,12 +151,146 @@
     "silgrad_tower_b_4": "Pass-Caravan Exchange",
     "silgrad_tower_b_5": "Cinder-Spring Apothecary",
     "silgrad_tower_b_6": "Silgrad Canyon Watch",
-    "silgrad_tower_b_7": "Guar Caravan Corral"
+    "silgrad_tower_b_7": "Guar Caravan Corral",
+    "silgrad_border_exchange": "Silgrad Canyon Border Market"
   },
   "innKey": "silgrad_tower_b_2",
   "names": {
     "inn": "silgrad_tower_b_2",
     "store": "silgrad_tower_b_4",
     "smithy": "silgrad_tower_b_3"
-  }
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -34,
+        -38,
+        34,
+        -8
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        12
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 4,
+      "name": "silgrad_border_exchange"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        44
+      ],
+      "to": [
+        0,
+        -34
+      ],
+      "legs": 3,
+      "amp": 20,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "spire_switchback"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          4
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          42,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "border_pass_road"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 30,
+      "rz": 26,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "canyon_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "redoran",
+      "flags": [
+        "upper"
+      ],
+      "on": "canyon_ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "hlaalu",
+      "on": "border_pass_road"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "kit": "redoran",
+      "on": "spire_switchback"
+    }
+  ]
 }

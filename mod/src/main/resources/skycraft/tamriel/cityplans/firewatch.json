@@ -81,8 +81,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        20,
-        20
+        23,
+        23
       ],
       "face": "south",
       "overlay": "firewatch",
@@ -177,8 +177,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -20,
-        -20
+        -23,
+        -17
       ],
       "face": "south",
       "overlay": "firewatch",
@@ -201,7 +201,7 @@
       "use": "watchtower",
       "wealth": "common",
       "at": [
-        0,
+        24,
         -28
       ],
       "face": "south",
@@ -225,7 +225,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        20,
+        36,
         -20
       ],
       "face": "south",
@@ -284,6 +284,168 @@
     "fw_beacon_lighthouse": "Telvannis Beacon Lighthouse",
     "fw_customs_vault": "Harbour Customs Vault",
     "fw_harbourmaster_house": "Harbourmaster's Stone House",
-    "fw_pilot_cottage": "Pilot's Cliff Cottage"
-  }
+    "fw_pilot_cottage": "Pilot's Cliff Cottage",
+    "firewatch_charter_square": "Firewatch Beacon & Charter Square"
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -56,
+        -64,
+        56,
+        -14
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        8
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 5,
+      "name": "firewatch_charter_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -74
+        ],
+        [
+          0,
+          -34
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          48
+        ],
+        [
+          0,
+          74
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "imperial_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          16
+        ],
+        [
+          -36,
+          12
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          36,
+          12
+        ],
+        [
+          72,
+          16
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cliff_quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 52,
+      "rz": 48,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "fort_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -42
+      ],
+      "r": 30,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        8
+      ],
+      "r": 26,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        38,
+        24
+      ],
+      "r": 28,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -38,
+        28
+      ],
+      "r": 28,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 72,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "barracks",
+      "count": 2,
+      "on": "imperial_way"
+    },
+    {
+      "kind": "store",
+      "count": 4,
+      "flags": [
+        "upper"
+      ],
+      "on": "cliff_quay"
+    },
+    {
+      "kind": "house",
+      "count": 8,
+      "flags": [
+        "upper"
+      ],
+      "on": "fort_ring"
+    }
+  ]
 }

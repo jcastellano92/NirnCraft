@@ -67,8 +67,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        28,
-        0
+        12,
+        12
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -79,8 +79,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        54,
-        21
+        56,
+        29
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -91,8 +91,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        21,
-        19
+        29,
+        28
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -115,8 +115,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        3,
-        28
+        5,
+        36
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -187,7 +187,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -24,
+        -40,
         -15
       ],
       "face": "south",
@@ -211,8 +211,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        -27
+        -9,
+        -39
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -235,8 +235,8 @@
       "use": "shack",
       "wealth": "poor",
       "at": [
-        12,
-        -25
+        10,
+        -33
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -260,7 +260,7 @@
       "wealth": "common",
       "at": [
         26,
-        -10
+        -26
       ],
       "face": "south",
       "overlay": "leyawiin",
@@ -313,6 +313,247 @@
     "leyawiin_ahdarjis_house": "Ahdarji's House",
     "leyawiin_dar_jees_house": "Dar Jee's Shanty",
     "leyawiin_cingors_house": "Cingor's House",
-    "leyawiin_agatas_house": "Agata's House"
-  }
+    "leyawiin_agatas_house": "Agata's House",
+    "leyawiin_zenithar_plaza": "Chapel of Zenithar Tidewater Plaza"
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -26,
+        -82
+      ],
+      "to": [
+        -18,
+        82
+      ],
+      "width": 7
+    },
+    {
+      "kind": "canal",
+      "from": [
+        -18,
+        18
+      ],
+      "to": [
+        78,
+        26
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -32,
+        -8
+      ],
+      "to": [
+        -12,
+        -8
+      ],
+      "width": 5,
+      "variant": 1
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        16,
+        12
+      ],
+      "to": [
+        16,
+        32
+      ],
+      "width": 5,
+      "variant": 1
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        8,
+        -14
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 6,
+      "name": "leyawiin_zenithar_plaza"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          -86,
+          0
+        ],
+        [
+          -46,
+          -8
+        ],
+        [
+          -12,
+          -8
+        ],
+        [
+          24,
+          -6
+        ],
+        [
+          56,
+          0
+        ],
+        [
+          84,
+          0
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "estuary_high_street"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -86
+        ],
+        [
+          4,
+          -46
+        ],
+        [
+          8,
+          -6
+        ],
+        [
+          16,
+          32
+        ],
+        [
+          22,
+          74
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "niben_gate_road"
+    },
+    {
+      "type": "loop",
+      "at": [
+        18,
+        -18
+      ],
+      "rx": 38,
+      "rz": 32,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "plaza_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -68,
+          38
+        ],
+        [
+          -42,
+          42
+        ],
+        [
+          -28,
+          16
+        ],
+        [
+          -48,
+          -38
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "tidewater_lane"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        44,
+        -28
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        8,
+        -14
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        24,
+        44
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -52,
+        22
+      ],
+      "r": 34,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 84,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 5,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "plaza_loop"
+    },
+    {
+      "kind": "store",
+      "count": 4,
+      "flags": [
+        "upper"
+      ],
+      "on": "estuary_high_street"
+    },
+    {
+      "kind": "house",
+      "count": 8,
+      "flags": [
+        "upper"
+      ],
+      "on": "tidewater_lane"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "count": 2,
+      "on": "niben_gate_road"
+    }
+  ]
 }

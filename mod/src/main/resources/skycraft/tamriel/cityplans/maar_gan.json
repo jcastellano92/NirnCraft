@@ -30,7 +30,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        9,
+        17,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        10,
-        30
+        7,
+        33
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -54,7 +54,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -7,
+        -15,
         5
       ],
       "face": "south",
@@ -78,8 +78,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        0,
+        -6
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -103,10 +103,155 @@
     "maar_gan_b_2": "Andus Tradehouse",
     "maar_gan_b_3": "Anruin's Outfitter",
     "maar_gan_b_4": "Redoran Watch Tower",
-    "maar_gan_b_5": "Huleen's Hut"
+    "maar_gan_b_5": "Huleen's Hut",
+    "maar_gan_shrine_court": "Maar Gan Shrine Rock Forecourt"
   },
   "innKey": "maar_gan_b_2",
   "names": {
     "inn": "maar_gan_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        14
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "maar_gan_shrine_court"
+    }
+  ],
+  "walls": [
+    {
+      "r": 34,
+      "sides": 10,
+      "h": 9,
+      "gates": [
+        0,
+        1.5708,
+        -1.5708
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
+  ],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -4
+      ],
+      "rx": 16,
+      "rz": 16,
+      "wobble": 2,
+      "lobes": 3,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "boulder_shrine_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          -16,
+          -4
+        ],
+        [
+          0,
+          -20
+        ],
+        [
+          0,
+          -32
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "pilgrim_foyada_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -32,
+          0
+        ],
+        [
+          -16,
+          -4
+        ],
+        [
+          16,
+          -4
+        ],
+        [
+          32,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "andus_trade_lane"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "redoran",
+      "on": "boulder_shrine_ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "redoran",
+      "on": "andus_trade_lane"
+    }
+  ]
 }

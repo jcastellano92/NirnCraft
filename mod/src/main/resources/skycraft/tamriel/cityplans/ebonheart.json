@@ -34,8 +34,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        0
+        -6,
+        -10
       ],
       "face": "south",
       "name": "ebonheart_grand_council",
@@ -81,8 +81,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        20,
-        20
+        22,
+        28
       ],
       "face": "south",
       "overlay": "ebonheart",
@@ -105,8 +105,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        0,
-        28
+        -1,
+        40
       ],
       "face": "south",
       "overlay": "ebonheart",
@@ -153,8 +153,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -28,
-        0
+        -31,
+        3
       ],
       "face": "south",
       "overlay": "ebonheart",
@@ -177,8 +177,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -20,
-        -20
+        -32,
+        -18
       ],
       "face": "south",
       "overlay": "ebonheart",
@@ -201,8 +201,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        0,
-        -28
+        -2,
+        -36
       ],
       "face": "south",
       "overlay": "ebonheart",
@@ -284,6 +284,196 @@
     "eb_courier_stables": "Courier Post Stables",
     "eb_factors_quarters": "Factor's Harbour Quarters",
     "eb_shipwright_house": "Shipwright's Stone House",
-    "eb_clerk_quarters": "Chancery Clerk's Quarters"
-  }
+    "eb_clerk_quarters": "Chancery Clerk's Quarters",
+    "ebonheart_east_empire_plaza": "East Empire Company Charter Courtyard"
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        0,
+        56
+      ],
+      "to": [
+        0,
+        88
+      ],
+      "width": 7,
+      "variant": 1
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        18
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 6,
+      "name": "ebonheart_east_empire_plaza"
+    }
+  ],
+  "walls": [
+    {
+      "r": 78,
+      "sides": 12,
+      "h": 11,
+      "gates": [
+        0,
+        1.5708,
+        -1.5708
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -84
+        ],
+        [
+          0,
+          -42
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          48
+        ],
+        [
+          0,
+          86
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "council_causeway"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -82,
+          0
+        ],
+        [
+          -42,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          42,
+          0
+        ],
+        [
+          82,
+          0
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "garrison_parade"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 52,
+      "rz": 48,
+      "wobble": 1,
+      "lobes": 4,
+      "width": 4,
+      "rank": 1,
+      "tag": "bastion_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -44
+      ],
+      "r": 32,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        18
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        44,
+        24
+      ],
+      "r": 28,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -44,
+        28
+      ],
+      "r": 28,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 76,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "barracks",
+      "count": 3,
+      "flags": [
+        "upper"
+      ],
+      "on": "garrison_parade"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "count": 3,
+      "on": "council_causeway"
+    },
+    {
+      "kind": "house",
+      "count": 8,
+      "flags": [
+        "upper"
+      ],
+      "on": "bastion_ring"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "flags": [
+        "upper"
+      ],
+      "on": "bastion_ring"
+    }
+  ]
 }

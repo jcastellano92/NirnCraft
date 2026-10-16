@@ -171,16 +171,16 @@ public final class MinorSites {
         ctx = Ctx.of(x, z);
         if (ctx.province.equals("sea") || ctx.s.coastDistance < -96) {
             int[] isle = com.skycraft.tamriel.terrain.OceanIsles.siteInMinorCell(cx, cz, CELL);
-            if (isle == null || unit(h, 5) >= 0.72 * ExploreConfig.densityScale()) return null;
+            if (isle == null || unit(h, 5) >= 0.75 * ExploreConfig.densityScale()) return null;
             int ix = isle[0], iz = isle[1], itype = isle[2];
             double r = unit(h, 6);
             SiteKind mKind = switch (itype) {
                 case com.skycraft.tamriel.terrain.OceanIsles.TYPE_SEA_STACK ->
-                        r < 0.38 ? SiteKind.SEA_SHRINE : r < 0.72 ? SiteKind.BANDIT_LOOKOUT : SiteKind.TREASURE_CACHE;
+                        r < 0.32 ? SiteKind.OVERLOOK : r < 0.62 ? SiteKind.SEA_SHRINE : r < 0.84 ? SiteKind.BANDIT_LOOKOUT : SiteKind.TREASURE_CACHE;
                 case com.skycraft.tamriel.terrain.OceanIsles.TYPE_ATOLL ->
-                        r < 0.30 ? SiteKind.FISHING_DOCK : r < 0.60 ? SiteKind.HERMIT_HUT : r < 0.82 ? SiteKind.SEA_SHRINE : SiteKind.TREASURE_CACHE;
+                        r < 0.28 ? SiteKind.FISHING_DOCK : r < 0.56 ? SiteKind.HERMIT_HUT : r < 0.80 ? SiteKind.SEA_SHRINE : SiteKind.TREASURE_CACHE;
                 case com.skycraft.tamriel.terrain.OceanIsles.TYPE_CAY ->
-                        r < 0.28 ? SiteKind.ABANDONED_CAMP : r < 0.56 ? SiteKind.HERMIT_HUT : r < 0.80 ? SiteKind.SEA_SHRINE : SiteKind.TREASURE_CACHE;
+                        r < 0.32 ? SiteKind.ABANDONED_CAMP : r < 0.58 ? SiteKind.HERMIT_HUT : r < 0.80 ? SiteKind.SEA_SHRINE : SiteKind.TREASURE_CACHE;
                 default ->
                         r < 0.55 ? SiteKind.SHIPWRECK_DEBRIS : r < 0.82 ? SiteKind.TREASURE_CACHE : SiteKind.FISHING_DOCK;
             };

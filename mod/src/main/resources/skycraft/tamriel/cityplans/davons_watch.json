@@ -23,8 +23,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        0
+        -1,
+        -12
       ],
       "face": "south",
       "name": "davons_watch_landmark",
@@ -46,7 +46,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        14,
+        26,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        -18,
+        19
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -94,8 +94,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -25,
+        -4
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -118,8 +118,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        9,
-        -11
+        24,
+        -25
       ],
       "face": "south",
       "overlay": "stonefalls",
@@ -146,12 +146,151 @@
     "davons_watch_b_4": "The Watchman's Flagon",
     "davons_watch_b_5": "Basalt-Anvil Forge",
     "davons_watch_b_6": "Inner Sea Quay Market",
-    "davons_watch_b_7": "House Indoril Harbour Manor"
+    "davons_watch_b_7": "House Indoril Harbour Manor",
+    "davons_watch_harbor_square": "Stonefalls Sea-Gate Market"
   },
   "innKey": "davons_watch_b_4",
   "names": {
     "inn": "davons_watch_b_4",
     "store": "davons_watch_b_6",
     "smithy": "davons_watch_b_5"
-  }
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -36,
+        -40,
+        36,
+        -10
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        16
+      ],
+      "size": 13,
+      "variant": 1,
+      "stalls": 4,
+      "name": "davons_watch_harbor_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        44
+      ],
+      "to": [
+        0,
+        -34
+      ],
+      "legs": 3,
+      "amp": 20,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "bluff_climb"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          18
+        ],
+        [
+          -12,
+          22
+        ],
+        [
+          18,
+          20
+        ],
+        [
+          42,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "sea_gate_quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -4
+      ],
+      "rx": 30,
+      "rz": 26,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "watch_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "velothi",
+      "flags": [
+        "upper"
+      ],
+      "on": "watch_ring"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "count": 2,
+      "on": "sea_gate_quay"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "hlaalu",
+      "on": "bluff_climb"
+    }
+  ]
 }

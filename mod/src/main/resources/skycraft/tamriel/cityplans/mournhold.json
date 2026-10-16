@@ -6,7 +6,7 @@
     "deshaan.L5.temple_economy"
   ],
   "sil": "dome-citadel-plaza",
-  "base": "none",
+  "base": "java",
   "overlay": "mournhold",
   "radius": 140,
   "reach": 164,
@@ -58,7 +58,7 @@
     {
       "id": "orrery",
       "at": [
-        48,
+        40,
         22
       ],
       "face": "south",
@@ -101,7 +101,7 @@
       "wealth": "noble",
       "at": [
         66,
-        17
+        13
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -112,8 +112,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        25,
-        13
+        16,
+        31
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -124,7 +124,7 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        50,
+        42,
         47
       ],
       "face": "south",
@@ -136,8 +136,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        15,
-        24
+        -4,
+        31
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -160,8 +160,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        2,
-        28
+        5,
+        52
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -184,8 +184,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -12,
-        25
+        -18,
+        30
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -196,7 +196,7 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -43,
+        -39,
         52
       ],
       "face": "south",
@@ -220,8 +220,8 @@
       "use": "jeweller",
       "wealth": "noble",
       "at": [
-        -63,
-        25
+        -65,
+        17
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -232,8 +232,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -28,
-        4
+        -34,
+        -1
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -256,8 +256,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -26,
-        -10
+        -32,
+        -20
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -280,8 +280,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -18,
-        -22
+        -15,
+        -25
       ],
       "face": "south",
       "overlay": "mournhold",
@@ -304,7 +304,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -5,
+        3,
         -28
       ],
       "face": "south",
@@ -316,7 +316,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        4,
+        24,
         -68
       ],
       "face": "south",
@@ -328,7 +328,7 @@
       "use": "townhouse",
       "wealth": "noble",
       "at": [
-        9,
+        17,
         -27
       ],
       "face": "south",
@@ -340,7 +340,7 @@
       "use": "townhouse",
       "wealth": "noble",
       "at": [
-        36,
+        40,
         -57
       ],
       "face": "south",
@@ -352,7 +352,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        20,
+        32,
         -19
       ],
       "face": "south",
@@ -376,7 +376,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        27,
+        47,
         -7
       ],
       "face": "south",
@@ -439,6 +439,194 @@
     "mh_flaccus_house": "Ignatius Flaccus's House",
     "mh_braven_house": "Tervur Braven's House",
     "mh_bazaar_tenement": "Suns-In-Shadow Tenement",
-    "mh_aqueduct_store": "Aqueduct Cistern Store"
-  }
+    "mh_aqueduct_store": "Aqueduct Cistern Store",
+    "mournhold_great_bazaar_plaza": "The Great Bazaar of Mournhold",
+    "mournhold_brindisi_dorom": "Plaza Brindisi Dorom"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        62,
+        36
+      ],
+      "size": 17,
+      "variant": 0,
+      "stalls": 8,
+      "name": "mournhold_great_bazaar_plaza"
+    },
+    {
+      "at": [
+        -56,
+        36
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 4,
+      "name": "mournhold_brindisi_dorom"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          128
+        ],
+        [
+          0,
+          76
+        ],
+        [
+          0,
+          26
+        ],
+        [
+          0,
+          -24
+        ],
+        [
+          0,
+          -72
+        ],
+        [
+          0,
+          -124
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "almalexia_axis"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -124,
+          36
+        ],
+        [
+          -68,
+          36
+        ],
+        [
+          0,
+          36
+        ],
+        [
+          62,
+          36
+        ],
+        [
+          124,
+          36
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "bazaar_way"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        4
+      ],
+      "rx": 56,
+      "rz": 52,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 4,
+      "rank": 1,
+      "tag": "brindisi_ring"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        4
+      ],
+      "rx": 96,
+      "rz": 92,
+      "wobble": 3,
+      "lobes": 6,
+      "width": 4,
+      "rank": 1,
+      "tag": "godsreach_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -76
+      ],
+      "r": 42,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        12
+      ],
+      "r": 38,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        62,
+        36
+      ],
+      "r": 38,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -68,
+        72
+      ],
+      "r": 36,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 122,
+    "target": 0.62,
+    "outskirts": false
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 6,
+      "kit": "hlaalu",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "brindisi_ring"
+    },
+    {
+      "kind": "store",
+      "count": 5,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "bazaar_way"
+    },
+    {
+      "kind": "house",
+      "count": 10,
+      "kit": "velothi",
+      "flags": [
+        "upper"
+      ],
+      "on": "godsreach_ring"
+    }
+  ]
 }

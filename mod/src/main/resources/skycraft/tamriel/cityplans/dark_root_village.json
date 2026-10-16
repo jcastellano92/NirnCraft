@@ -59,14 +59,42 @@
     {
       "type": "radial",
       "at": [
-        0,
-        0
+        4,
+        2
       ],
-      "r0": 5,
+      "spokes": 8,
+      "r0": 10,
       "r1": 22,
-      "spokes": 4,
+      "wobble": 8,
+      "offset": 2.49,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
       "tag": "spoke",
       "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          -4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
     }
   ],
   "buildings": [
@@ -182,5 +210,74 @@
     "dark_root_village_landmark": "High Seat of place.skycraft.dark_root_village",
     "dark_root_village_plaza": "place.skycraft.dark_root_village Central Plaza"
   },
-  "innKey": "dark_root_village_b_5"
+  "innKey": "dark_root_village_b_5",
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -18,
+        8
+      ],
+      "to": [
+        18,
+        6
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        4,
+        -2
+      ],
+      "to": [
+        4,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

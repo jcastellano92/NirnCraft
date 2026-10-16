@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/hackle_lo"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/hackle_lo_harvested"
+    }
+  }
+}

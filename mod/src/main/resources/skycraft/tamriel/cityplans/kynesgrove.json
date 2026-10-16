@@ -9,48 +9,360 @@
     "alchemist": "kynesgrove_apothecary"
   },
   "innKey": "braidwood_inn",
-  "gates": [[0, 34]],
+  "gates": [
+    [
+      0,
+      34
+    ]
+  ],
   "buildings": [
-    {"kind": "mine", "at": [-44, -24], "size": [7, 14], "face": "S", "variant": 0, "flags": ["no_beard"], "name": "kynesgrove_malachite_mine"},
-    {"kind": "mine", "at": [-30, -28], "size": [7, 14], "face": "S", "variant": 6, "flags": ["no_beard"], "name": "kynesgrove_upper_malachite_shaft"},
-    {"kind": "shrine", "at": [20, -6], "size": [5, 5], "face": "S", "variant": 5, "name": "kynesgrove_shrine"},
-    {"kind": "camp", "at": [44, -26], "size": [13, 13], "variant": 2, "name": "kynesgrove_miners_camp"},
-    {"kind": "farmhouse", "at": [38, 30], "size": [9, 11], "face": "W", "name": "kynesgrove_ridge_farmhouse"},
-    {"kind": "field", "at": [54, 26], "size": [13, 11], "face": "W", "name": "kynesgrove_north_field"},
-    {"kind": "field", "at": [54, 40], "size": [13, 11], "face": "W", "name": "kynesgrove_south_field"}
+    {
+      "kind": "mine",
+      "at": [
+        -36,
+        -24
+      ],
+      "size": [
+        7,
+        14
+      ],
+      "face": "S",
+      "variant": 0,
+      "flags": [
+        "no_beard"
+      ],
+      "name": "kynesgrove_malachite_mine"
+    },
+    {
+      "kind": "mine",
+      "at": [
+        -26,
+        -28
+      ],
+      "size": [
+        7,
+        14
+      ],
+      "face": "S",
+      "variant": 6,
+      "flags": [
+        "no_beard"
+      ],
+      "name": "kynesgrove_upper_malachite_shaft"
+    },
+    {
+      "kind": "shrine",
+      "at": [
+        20,
+        -6
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 5,
+      "name": "kynesgrove_shrine"
+    },
+    {
+      "kind": "camp",
+      "at": [
+        38,
+        -21
+      ],
+      "size": [
+        13,
+        13
+      ],
+      "variant": 2,
+      "name": "kynesgrove_miners_camp"
+    },
+    {
+      "kind": "farmhouse",
+      "at": [
+        30,
+        30
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "name": "kynesgrove_ridge_farmhouse"
+    },
+    {
+      "kind": "field",
+      "at": [
+        38,
+        16
+      ],
+      "size": [
+        13,
+        11
+      ],
+      "face": "W",
+      "name": "kynesgrove_north_field"
+    },
+    {
+      "kind": "field",
+      "at": [
+        16,
+        37
+      ],
+      "size": [
+        13,
+        11
+      ],
+      "face": "W",
+      "name": "kynesgrove_south_field"
+    }
   ],
   "plazas": [
-    {"at": [0, 8], "size": 15, "variant": 1, "stalls": 4, "name": "kynesgrove_tusk_square"}
+    {
+      "at": [
+        0,
+        8
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 4,
+      "name": "kynesgrove_tusk_square"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 34], [0, 20], [0, 4], [0, -12], [0, -26]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-46, 12], [-24, 10], [0, 10], [24, 12], [46, 12]], "width": 3, "rank": 1, "tag": "row"},
-    {"type": "path", "via": [[-24, 10], [-30, -4], [-38, -16]], "width": 3, "rank": 1, "tag": "mine"},
-    {"type": "path", "via": [[0, -26], [20, -30], [40, -26]], "width": 2, "rank": 2, "tag": "lane"},
-    {"type": "path", "via": [[24, 12], [30, 28], [24, 40]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          0,
+          20
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          -12
+        ],
+        [
+          0,
+          -26
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -46,
+          12
+        ],
+        [
+          -24,
+          10
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          46,
+          12
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -24,
+          10
+        ],
+        [
+          -30,
+          -4
+        ],
+        [
+          -38,
+          -16
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "mine"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -26
+        ],
+        [
+          20,
+          -30
+        ],
+        [
+          40,
+          -26
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          24,
+          12
+        ],
+        [
+          30,
+          28
+        ],
+        [
+          24,
+          40
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, 10], "r": 20, "zone": "centre"},
-    {"at": [-36, -6], "r": 22, "zone": "craft"},
-    {"at": [30, 26], "r": 20, "zone": "poor"}
+    {
+      "at": [
+        0,
+        10
+      ],
+      "r": 20,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -36,
+        -6
+      ],
+      "r": 22,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        30,
+        26
+      ],
+      "r": 20,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 46, "target": 0.34, "fill_cap": 6, "yard_cap": 6},
+  "fabric": {
+    "radius": 46,
+    "target": 0.34,
+    "fill_cap": 6,
+    "yard_cap": 6
+  },
   "queue": [
-    {"kind": "inn", "size": [15, 17], "flags": ["upper"], "name": "braidwood_inn", "on": "main"},
-    {"kind": "store", "size": [9, 11], "name": "kynesgrove_trader", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "kynesgrove_smithy", "on": "mine"},
-    {"kind": "alchemist", "name": "kynesgrove_apothecary", "on": "row"},
-    {"kind": "house", "name": "kynesgrove_dorlags_house", "on": "mine"},
-    {"kind": "house", "name": "kynesgrove_bertrands_house", "on": "row"},
-    {"kind": "house", "count": 2, "flags": ["upper"], "on": "main"}
+    {
+      "kind": "inn",
+      "size": [
+        15,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "braidwood_inn",
+      "on": "main"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        11
+      ],
+      "name": "kynesgrove_trader",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "kynesgrove_smithy",
+      "on": "mine"
+    },
+    {
+      "kind": "alchemist",
+      "name": "kynesgrove_apothecary",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "kynesgrove_dorlags_house",
+      "on": "mine"
+    },
+    {
+      "kind": "house",
+      "name": "kynesgrove_bertrands_house",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "count": 2,
+      "flags": [
+        "upper"
+      ],
+      "on": "main"
+    }
   ],
   "features": [
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "main"},
-    {"type": "banners", "where": "gate"},
-    {"type": "bench", "where": "square"},
-    {"type": "garden", "where": "free"},
-    {"type": "great_tree", "theme": "birch", "where": "edge"}
+    {
+      "type": "well",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "lamps",
+      "count": 2,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "banners",
+      "where": "gate"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    },
+    {
+      "type": "garden",
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "birch",
+      "where": "edge"
+    }
   ],
   "titles": {
     "kynesgrove_trader": "Kynesgrove Provisions",

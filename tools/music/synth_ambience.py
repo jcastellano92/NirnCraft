@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Skycraft procedural ambience synthesiser: every file of the sound-catalogue categories "bed" and "ambient".
 
@@ -597,253 +597,285 @@ def bed_blizzard(B):
     B.add(B.noise(2.0, 30, 160, corr=0.5), -8)
 
 
-def distant_chirps(B, count, fband=(2500, 6500), dur=(0.015, 0.05)):
-    """Many tiny, faint FM chirps clustered in time -> an anonymous distant bird texture (no recognisable call)."""
+def reed_chorus(B, gust, lo=180.0, hi=640.0, color=1.5):
+    """Gentle leaf/reed chorus modulation over warm low-passed pink/brown breeze (180-650 Hz, zero white-noise static)."""
+    base = B.noise(color, lo, hi, corr=0.45, order=3)
+    mod_a = 0.55 + 0.45 * B.lfo(0.14, 0.9).u(B.t, 1.3)
+    mod_b = 0.65 + 0.35 * np.sin(loop_phase(0.35 + 0.12 * B.lfo(0.07)(B.t), B.sr))
+    g = gust(B.t) if callable(gust) else gust
+    return unit(base * mod_a * mod_b * (0.4 + 0.6 * g))
+
+
+def distant_chirps(B, count, fband=(1650, 3200), dur=(0.045, 0.11)):
+    """Warm melodic distant bird calls using pure sine/triangle harmonics with smooth cosine fade-in/out envelopes."""
     tr = B.track()
     rng = B.rng
     placed = 0
     while placed < count:
         c0 = rng.uniform(0, B.secs)
-        pan = rng.uniform(-0.9, 0.9)
+        pan = rng.uniform(-0.85, 0.85)
         base = rng.uniform(*fband)
-        lvl = db(rng.uniform(-14, 0))
+        lvl = db(rng.uniform(-14, -2))
         t0 = c0
-        for _ in range(rng.integers(3, 12)):
+        for _ in range(rng.integers(2, 6)):
             d = rng.uniform(*dur)
-            a = base * rng.uniform(0.8, 1.25)
-            b = a * rng.uniform(0.7, 1.4)
-            g = tone(B.sr, d, lambda u, a=a, b=b: a + (b - a) * u, harm=(1, 0.08), att=rng.uniform(0.1, 0.5))
-            B.put(tr, g, t0, pan + rng.uniform(-0.1, 0.1), lvl * db(rng.uniform(-8, 0)))
-            t0 += d + rng.uniform(0.03, 0.14)
+            a = base * rng.uniform(0.9, 1.12)
+            b = a * rng.uniform(0.88, 1.18)
+            g = tone(B.sr, d, lambda u, a=a, b=b: a + (b - a) * (0.5 - 0.5 * np.cos(np.pi * u)),
+                     harm=(1.0, 0.11, 0.03), att=0.45)
+            B.put(tr, g, t0, pan + rng.uniform(-0.08, 0.08), lvl * db(rng.uniform(-6, 0)))
+            t0 += d + rng.uniform(0.06, 0.18)
             placed += 1
-    tr = shape(tr, B.sr, lambda f: g_lp(f, 5500, 2) * g_hp(f, 1500, 2))
-    return B.verb(tr, 1.6, 1.0, 0.35, damp=0.7)
+    tr = shape(tr, B.sr, lambda f: g_lp(f, 3600, 3) * g_hp(f, 900, 2))
+    return B.verb(tr, 1.5, 0.85, 0.45, damp=0.75)
 
 
 def bed_forest_day(B):
-    gl = B.lfo(0.1, 1.0)
+    gl = B.lfo(0.09, 1.0)
     gust = lambda t: gl.u(t)  # noqa: E731
-    g = gust(B.t)
-    body, _ = wind_layer(B, gust, 1.5, 50, 300, 800, gust_db=8)
-    flutter = np.clip(1 + 0.6 * B.smooth(6.0), 0, None)
-    leaves = B.crackle(900 + 5000 * g ** 2, 1500, 7500) * flutter * (0.25 + 0.75 * g)
-    B.add(body, -2)
-    B.add(leaves, -15)  # was -3: the loud rustle of playtest 2 (engine also caps this bed)
-    B.add(B.noise(0.6, 1800, 6000, corr=0.1) * (0.2 + 0.8 * g), -16)
-    B.add(distant_chirps(B, 7 * B.secs), -13)
+    body, _ = wind_layer(B, gust, 1.6, 55, 180, 620, gust_db=7)
+    leaves = reed_chorus(B, gust, 210.0, 640.0, color=1.5)
+    B.add(body, -1)
+    B.add(leaves, -7)
+    B.add(distant_chirps(B, 4 * B.secs, (1600, 3100)), -9)
 
 
-def cricket_track(B, fc, pulses, pdur, pint, period, jitter=0.06, level=1.0):
+def cricket_track(B, fc, pulses, pdur, pint, period, jitter=0.05, level=1.0):
+    """Pure sine/triangle harmonic cricket chirps with smooth raised-cosine fade-in/out envelopes."""
     env = np.zeros(B.n)
-    w = win_grain(int(pdur * B.sr), 0.3)
+    w = win_grain(int(pdur * B.sr), 0.48)
     tt = B.rng.uniform(0, period)
     while tt < B.secs:
         for k in range(pulses):
-            place_circ(env, w * level * (1 - 0.12 * k / pulses), int((tt + k * pint) * B.sr))
+            place_circ(env, w * level * (1 - 0.1 * k / pulses), int((tt + k * pint) * B.sr))
         tt += period * (1 + B.rng.uniform(-jitter, jitter))
-    f = fc * (1 + 0.004 * B.smooth(3.0))
+    f = fc * (1 + 0.003 * B.smooth(2.5))
     ph = loop_phase(f, B.sr) + B.rng.uniform(0, TAU)
-    return env * (np.sin(ph) + 0.06 * np.sin(2 * ph))
+    return env * (np.sin(ph) + 0.09 * np.sin(2 * ph) + 0.025 * np.sin(3 * ph))
 
 
 def trill_track(B, fc, rate, level=1.0, swell=True):
-    """Continuous tree-cricket trill: carrier gated by a periodic pulse train, with slow swells."""
+    """Warm tree-cricket harmonic trill: sine/triangle carrier gated by a smooth cosine pulse envelope."""
     rph = loop_phase(np.full(B.n, rate), B.sr) + B.rng.uniform(0, TAU)
-    gate = 0.5 + 0.5 * np.cos(rph)
-    ph = loop_phase(fc * (1 + 0.003 * B.smooth(2.0)), B.sr) + B.rng.uniform(0, TAU)
+    gate = 0.5 - 0.5 * np.cos(rph)
+    ph = loop_phase(fc * (1 + 0.0025 * B.smooth(2.0)), B.sr) + B.rng.uniform(0, TAU)
     env = B.lfo(0.06).u(B.t, 1.5) if swell else 1.0
-    return level * gate * env * np.sin(ph)
+    return level * gate * env * (np.sin(ph) + 0.08 * np.sin(2 * ph) + 0.02 * np.sin(3 * ph))
 
 
 def katydid_track(B, fc, period, pulses=(2, 3), level=1.0, active=None):
+    """Harmonic night-insect syllable pulse (pure sine/triangle harmonics with smooth cosine fade-in/out)."""
     env = np.zeros(B.n)
     tt = B.rng.uniform(0, period)
     while tt < B.secs:
         on = 1.0 if active is None else float(active(np.array([tt % B.secs]))[0])
         for k in range(B.rng.integers(pulses[0], pulses[1] + 1)):
-            d = B.rng.uniform(0.022, 0.038)
-            place_circ(env, win_grain(int(d * B.sr), 0.45) * level * on, int((tt + k * B.rng.uniform(0.07, 0.1)) * B.sr))
-        tt += period * B.rng.uniform(0.85, 1.15)
-    return env * B.mono_noise(0.0, fc * 0.7, min(fc * 1.45, 11000), order=3)
+            d = B.rng.uniform(0.028, 0.045)
+            place_circ(env, win_grain(int(d * B.sr), 0.48) * level * on, int((tt + k * B.rng.uniform(0.075, 0.11)) * B.sr))
+        tt += period * B.rng.uniform(0.88, 1.12)
+    f0 = np.clip(fc * 0.42, 1850.0, 3200.0) * (1 + 0.003 * B.smooth(2.5))
+    ph = loop_phase(f0, B.sr) + B.rng.uniform(0, TAU)
+    carrier = np.sin(ph) + 0.14 * np.sin(2 * ph) + 0.04 * np.sin(3 * ph)
+    return env * carrier
 
 
 def chorus(B, tracks_and_pans, t60=0.9, wet=0.35):
     tr = B.track()
     for x, p in tracks_and_pans:
         tr += B.pan(x, p)
-    return B.verb(tr, t60, wet, 1.0, damp=0.6)
+    tr = shape(tr, B.sr, lambda f: g_lp(f, 3800, 3) * g_hp(f, 160, 2))
+    return B.verb(tr, t60, wet, 1.0, damp=0.7)
 
 
-def crickets(B, count, fband=(3600, 5400), lvl=(-14, 0)):
+def crickets(B, count, fband=(2400, 3400), lvl=(-14, -1)):
     items = []
     for _ in range(count):
-        items.append((cricket_track(B, B.rng.uniform(*fband), int(B.rng.integers(2, 5)), B.rng.uniform(0.010, 0.016),
-                                    B.rng.uniform(0.024, 0.034), B.rng.uniform(0.3, 0.85),
-                                    level=float(db(B.rng.uniform(*lvl)))), B.rng.uniform(-0.95, 0.95)))
+        items.append((cricket_track(B, B.rng.uniform(*fband), int(B.rng.integers(2, 5)), B.rng.uniform(0.014, 0.022),
+                                    B.rng.uniform(0.028, 0.038), B.rng.uniform(0.38, 0.90),
+                                    level=float(db(B.rng.uniform(*lvl)))), B.rng.uniform(-0.9, 0.9)))
     return items
 
 
 def bed_forest_night(B):
-    items = crickets(B, 14)
+    items = crickets(B, 11, (2350, 3300), (-14, -2))
     for _ in range(2):
-        items.append((trill_track(B, B.rng.uniform(2550, 3000), B.rng.uniform(48, 60), float(db(-8))),
+        items.append((trill_track(B, B.rng.uniform(1950, 2450), B.rng.uniform(34, 46), float(db(-7))),
                       B.rng.uniform(-0.8, 0.8)))
-    B.add(unit(chorus(B, items)), 0)
+    B.add(unit(chorus(B, items)), -1)
     gl = B.lfo(0.08)
     gust = lambda t: gl.u(t)  # noqa: E731
-    body, _ = wind_layer(B, gust, 1.5, 50, 250, 650, gust_db=8)
-    B.add(body, -8)
-    B.add(B.crackle(300 + 1500 * gust(B.t) ** 2, 1500, 6000) * gust(B.t), -22)
+    body, _ = wind_layer(B, gust, 1.6, 55, 180, 580, gust_db=7)
+    B.add(body, -6)
+    B.add(reed_chorus(B, gust, 190.0, 560.0, color=1.6), -11)
 
 
-def insect_hums(B, count, fband=(150, 420), cut=2500):
+def insect_hums(B, count, fband=(190, 380), cut=620):
+    """Warm low-passed harmonic bee/meadow hum (sine + triangle partials, low-passed at 180-650 Hz)."""
     tr = B.track()
     for _ in range(count):
-        f0 = B.rng.uniform(*fband) * (1 + 0.03 * B.smooth(4.0) + 0.01 * B.smooth(25.0))
-        x = B.osc_saw(f0)
-        presence = np.clip(B.lfo(0.15, 0.8)(B.t), 0, None) ** 2
-        tr += B.pan(x * presence, B.rng.uniform(-0.9, 0.9))
-    return unit(shape(tr, B.sr, lambda f: g_lp(f, cut, 2) * g_hp(f, 120, 2)))
+        f0 = B.rng.uniform(*fband) * (1 + 0.018 * B.smooth(3.0))
+        ph = loop_phase(f0, B.sr) + B.rng.uniform(0, TAU)
+        x = np.sin(ph) + 0.25 * np.sin(2 * ph) + 0.08 * np.sin(3 * ph)
+        presence = (0.5 - 0.5 * np.cos(np.pi * np.clip(B.lfo(0.12, 0.9)(B.t), 0, 1))) ** 1.5
+        tr += B.pan(x * presence, B.rng.uniform(-0.85, 0.85))
+    return unit(shape(tr, B.sr, lambda f: g_lp(f, cut, 3) * g_hp(f, 150, 2)))
 
 
 def bed_plains_day(B):
-    gl = B.lfo(0.12)
+    gl = B.lfo(0.10)
     gust = lambda t: gl.u(t)  # noqa: E731
-    g = gust(B.t)
-    body, wh = wind_layer(B, gust, 1.3, 50, 550, 1400, whistle_set(B, gust, [800, 1300], 22), gust_db=9)
+    body, _ = wind_layer(B, gust, 1.5, 55, 180, 640, gust_db=8)
     B.add(body, 0)
-    B.add(wh, -20)
-    B.add(B.crackle(500 + 3000 * g ** 2, 2000, 7000) * (0.2 + 0.8 * g), -14)
-    B.add(B.noise(0.2, 2500, 7500, corr=0.1) * g, -21)
-    B.add(insect_hums(B, 5), -15)
-    hop = [(katydid_track(B, B.rng.uniform(6500, 8500), B.rng.uniform(0.04, 0.06), (8, 18),
-                          active=lambda t, a=B.lfo(0.1): np.clip(a(t), 0, None)), B.rng.uniform(-0.8, 0.8)) for _ in range(3)]
-    B.add(unit(chorus(B, hop, 0.5, 0.2)), -20)
+    B.add(reed_chorus(B, gust, 190.0, 620.0, color=1.5), -6)
+    B.add(insect_hums(B, 4, (190, 360), 620), -13)
+    B.add(distant_chirps(B, 3 * B.secs, (1650, 2950)), -12)
 
 
 def bed_plains_night(B):
-    items = crickets(B, 8, (3800, 5000), (-16, -2))
-    for _ in range(4):
-        items.append((katydid_track(B, B.rng.uniform(6000, 9000), B.rng.uniform(0.9, 1.6),
-                                    level=float(db(B.rng.uniform(-16, -6))),
-                                    active=lambda t, a=B.lfo(0.08): (a(t) > -0.2).astype(float)), B.rng.uniform(-0.9, 0.9)))
-    B.add(unit(chorus(B, items, 0.8, 0.3)), 0)
+    items = crickets(B, 8, (2300, 3200), (-15, -2))
+    for _ in range(3):
+        items.append((katydid_track(B, B.rng.uniform(4200, 5800), B.rng.uniform(0.95, 1.65),
+                                    level=float(db(B.rng.uniform(-14, -5))),
+                                    active=lambda t, a=B.lfo(0.08): (a(t) > -0.2).astype(float)), B.rng.uniform(-0.85, 0.85)))
+    B.add(unit(chorus(B, items, 0.85, 0.3)), 0)
     gl = B.lfo(0.08)
-    body, _ = wind_layer(B, lambda t: gl.u(t), 1.4, 50, 300, 800, gust_db=8)
-    B.add(body, -12)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, _ = wind_layer(B, gust, 1.5, 55, 180, 580, gust_db=7)
+    B.add(body, -8)
+    B.add(reed_chorus(B, gust, 180.0, 540.0, color=1.6), -12)
 
 
 def lapping(B, rate, lvl=0.0):
     tr = B.track()
     tt = 0.0
     while tt < B.secs:
-        dur = B.rng.uniform(0.18, 0.42)
+        dur = B.rng.uniform(0.22, 0.46)
         m = int(B.sr * dur)
-        y = filt(B.rng.standard_normal(m), B.sr, "lowpass", B.rng.uniform(450, 1300), 2) * win_grain(m, B.rng.uniform(0.15, 0.3)) ** 1.5
-        for _ in range(B.rng.integers(0, 3)):
-            place(y, 0.25 * bubble(B.sr, B.rng.uniform(380, 1300)) * rms(y) / 0.1, int(B.rng.integers(0, m // 2)))
+        y = filt(B.rng.standard_normal(m), B.sr, "bandpass", [180, B.rng.uniform(420, 640)], 2) * win_grain(m, 0.45)
+        for _ in range(B.rng.integers(1, 3)):
+            place(y, 0.28 * bubble(B.sr, B.rng.uniform(360, 980)) * rms(y) / 0.1, int(B.rng.integers(0, m // 2)))
         B.put(tr, y, tt, B.rng.uniform(-0.7, 0.7), db(B.rng.uniform(-8, 0)))
-        tt += B.rng.exponential(1.0 / rate) + 0.05
-    return unit(B.verb(tr, 0.6, 0.25))
+        tt += B.rng.exponential(1.0 / rate) + 0.06
+    return unit(B.verb(tr, 0.65, 0.3))
 
 
-def frog_texture(B, calls, kinds, lvl=(-12, 0), pitch=(0.85, 1.2), bout=(1, 6), gap=(0.15, 0.5)):
-    """Many individual frogs calling in bouts at random positions."""
+def frog_texture(B, calls, kinds, lvl=(-12, 0), pitch=(0.85, 1.15), bout=(1, 5), gap=(0.18, 0.55)):
+    """Many individual frogs calling in bouts at random positions with smooth cosine envelopes."""
     tr = B.track()
     placed = 0
     while placed < calls:
         kind = kinds[B.rng.integers(len(kinds))]
         pitch_i = B.rng.uniform(*pitch)
-        pan = B.rng.uniform(-0.95, 0.95)
+        pan = B.rng.uniform(-0.9, 0.9)
         lv = db(B.rng.uniform(*lvl))
         tt = B.rng.uniform(0, B.secs)
         for _ in range(B.rng.integers(bout[0], bout[1] + 1)):
             g = frog_call(B.rng, B.sr, kind, pitch_i)
+            g = g * win_grain(len(g), 0.35)
             g = g / (np.max(np.abs(g)) + 1e-9)
             B.put(tr, g, tt, pan, lv)
             tt += len(g) / B.sr + B.rng.uniform(*gap)
             placed += 1
-    return tr
+    return shape(tr, B.sr, lambda f: g_lp(f, 2400, 3) * g_hp(f, 140, 2))
 
 
-def midge_drone(B, count=10):
+def midge_drone(B, count=8):
+    """Warm harmonic wetland hum in 200-520 Hz (pure sine/triangle harmonics, zero saw buzz)."""
     tr = B.track()
     for _ in range(count):
-        f0 = B.rng.uniform(380, 680) * (1 + 0.02 * B.smooth(3.0))
-        tr += B.pan(B.osc_saw(f0) * B.lfo(0.12).u(B.t, 2.0), B.rng.uniform(-0.9, 0.9))
-    return unit(shape(tr, B.sr, lambda f: g_lp(f, 3200, 2) * g_hp(f, 300, 2)))
+        f0 = B.rng.uniform(210, 420) * (1 + 0.015 * B.smooth(2.5))
+        ph = loop_phase(f0, B.sr) + B.rng.uniform(0, TAU)
+        tone_wave = np.sin(ph) + 0.22 * np.sin(2 * ph) + 0.06 * np.sin(3 * ph)
+        tr += B.pan(tone_wave * B.lfo(0.10).u(B.t, 1.8), B.rng.uniform(-0.85, 0.85))
+    return unit(shape(tr, B.sr, lambda f: g_lp(f, 640, 3) * g_hp(f, 180, 2)))
 
 
 def bed_marsh_day(B):
-    B.add(midge_drone(B), -8)
-    B.add(B.noise(0.0, 250, 800, corr=0.2) * (1 + 0.3 * B.smooth(110.0)), -22)
-    B.add(lapping(B, 1.6), 0)
-    fr = frog_texture(B, 3 * B.secs // 2, ["croak", "kruk"], (-14, -4), bout=(1, 4), gap=(0.3, 0.8))
-    fr = shape(fr, B.sr, lambda f: g_lp(f, 1800, 2))
-    B.add(unit(B.verb(fr, 1.2, 0.8, 0.5)), -10)
     gl = B.lfo(0.08)
-    body, _ = wind_layer(B, lambda t: gl.u(t), 1.4, 50, 300, 900, gust_db=8)
-    B.add(body, -9)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, _ = wind_layer(B, gust, 1.5, 55, 180, 620, gust_db=7)
+    B.add(body, -4)
+    B.add(reed_chorus(B, gust, 185.0, 610.0, color=1.5), -7)
+    B.add(lapping(B, 1.4), -1)
+    B.add(midge_drone(B, 6), -12)
+    fr = frog_texture(B, 3 * B.secs // 2, ["croak", "kruk"], (-14, -4), bout=(1, 4), gap=(0.35, 0.85))
+    fr = shape(fr, B.sr, lambda f: g_lp(f, 1650, 3))
+    B.add(unit(B.verb(fr, 1.2, 0.75, 0.5)), -8)
 
 
 def bed_marsh_night(B):
-    fr = frog_texture(B, 11 * B.secs, ["croak", "kruk", "krr", "creek", "peep"], (-16, 0))
-    items = crickets(B, 6, (3800, 5200), (-16, -4))
+    fr = frog_texture(B, 9 * B.secs, ["croak", "kruk", "krr", "creek", "peep"], (-15, -1))
+    items = crickets(B, 6, (2350, 3250), (-15, -4))
     cr = chorus(B, items)
     B.add(unit(B.verb(fr, 1.2, 0.35)), 0)
-    B.add(unit(cr), -7)
-    B.add(lapping(B, 0.9), -9)
-    gl = B.lfo(0.06)
-    body, _ = wind_layer(B, lambda t: gl.u(t), 1.4, 50, 250, 700, gust_db=6)
-    B.add(body, -15)
+    B.add(unit(cr), -6)
+    B.add(lapping(B, 0.9), -8)
+    gl = B.lfo(0.07)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, _ = wind_layer(B, gust, 1.5, 55, 180, 580, gust_db=6)
+    B.add(body, -10)
+    B.add(reed_chorus(B, gust, 180.0, 540.0, color=1.6), -13)
 
 
-def cicada_layer(B, fc, rate, q=3.0, swell_f=0.12, depth=0.85):
-    """Band-passed noise buzzing with a smooth AM at the pulse rate, swelling slowly."""
-    x = B.mono_noise(0.0)
-    x = unit(shape(x, B.sr, lambda f: g_bp(f, fc, q)))
-    am = 1.0 - depth * (0.5 + 0.5 * np.cos(loop_phase(np.full(B.n, rate), B.sr)))
-    env = B.lfo(swell_f, 0.7).u(B.t, 2.0)
-    return x * am * env
+def cicada_layer(B, fc, rate, q=3.5, swell_f=0.10, depth=0.75):
+    """Warm harmonic cicada chorus: pure sine/triangle harmonic chord modulated by a smooth cosine pulse and slow swell."""
+    f0 = np.clip(fc * 0.38, 1450.0, 2550.0) * (1 + 0.003 * B.smooth(2.2))
+    ph = loop_phase(f0, B.sr) + B.rng.uniform(0, TAU)
+    carrier = np.sin(ph) + 0.18 * np.sin(2 * ph) + 0.05 * np.sin(3 * ph)
+    mod_rate = np.clip(rate * 0.35, 32.0, 72.0)
+    am = 1.0 - depth * (0.5 - 0.5 * np.cos(loop_phase(np.full(B.n, mod_rate), B.sr)))
+    env = B.lfo(swell_f, 0.8).u(B.t, 1.8)
+    x = shape(carrier * am * env, B.sr, lambda f: g_lp(f, 3200, 3) * g_hp(f, 900, 2))
+    return unit(x)
 
 
 def leaf_drips(B, rate):
+    """Pure sine/triangle water droplets with smooth cosine fade-in/out envelopes (zero click static)."""
     tr = B.track()
     count = int(rate * B.secs)
     for _ in range(count):
-        f = B.rng.uniform(1200, 3600)
-        tau = B.rng.uniform(0.004, 0.012)
-        m = int(B.sr * tau * 6)
+        f = B.rng.uniform(950, 2400)
+        dur = B.rng.uniform(0.035, 0.075)
+        m = int(B.sr * dur)
         t = np.arange(m) / B.sr
-        g = np.sin(TAU * f * t * (1 + 0.3 * t / (tau * 6))) * np.exp(-t / tau)
-        g[:12] += B.rng.standard_normal(12) * 0.4 * np.linspace(1, 0, 12)
-        B.put(tr, g, B.rng.uniform(0, B.secs), B.rng.uniform(-0.95, 0.95), db(B.rng.uniform(-14, 0)))
+        env = win_grain(m, 0.28) * np.exp(-t / (dur * 0.45))
+        ph = TAU * f * t * (1 + 0.18 * t / dur)
+        g = (np.sin(ph) + 0.1 * np.sin(2 * ph)) * env
+        B.put(tr, g, B.rng.uniform(0, B.secs), B.rng.uniform(-0.9, 0.9), db(B.rng.uniform(-14, -2)))
     return unit(B.verb(tr, 1.1, 0.5))
 
 
 def bed_jungle_day(B):
-    for fc, rate, lv in ((5200, 180, 0), (6600, 140, -3), (4300, 215, -5)):
-        x = cicada_layer(B, fc * B.rng.uniform(0.95, 1.05), rate * B.rng.uniform(0.95, 1.05))
+    gl = B.lfo(0.09)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, _ = wind_layer(B, gust, 1.5, 55, 180, 630, gust_db=7)
+    B.add(body, -3)
+    B.add(reed_chorus(B, gust, 195.0, 640.0, color=1.5), -6)
+    for fc, rate, lv in ((4400, 140, -5), (5200, 115, -7), (3800, 165, -8)):
+        x = cicada_layer(B, fc * B.rng.uniform(0.96, 1.04), rate * B.rng.uniform(0.95, 1.05))
         B.add(B.pan(x, B.rng.uniform(-0.7, 0.7)), lv)
-    B.add(B.noise(0.0, 3500, 9000, corr=0.1) * (1 + 0.5 * B.smooth(30.0)), -13)
-    B.add(leaf_drips(B, 4.0), -9)
-    B.add(B.noise(1.4, 50, 450, corr=0.4) * (0.6 + 0.4 * B.lfo(0.08).u(B.t)), -9)
-    B.add(insect_hums(B, 3, (180, 300), 2000), -16)
+    B.add(leaf_drips(B, 3.5), -8)
+    B.add(distant_chirps(B, 5 * B.secs, (1400, 2850), (0.05, 0.13)), -8)
+    B.add(insect_hums(B, 3, (190, 320), 600), -14)
 
 
 def bed_jungle_night(B):
-    fr = frog_texture(B, 7 * B.secs, ["peep", "tink", "krr", "peep"], (-14, 0), pitch=(0.9, 1.35),
-                      bout=(3, 10), gap=(0.08, 0.3))
+    fr = frog_texture(B, 6 * B.secs, ["peep", "tink", "krr", "peep"], (-14, -1), pitch=(0.88, 1.22),
+                      bout=(2, 7), gap=(0.12, 0.36))
     B.add(unit(B.verb(fr, 1.3, 0.45)), 0)
-    for fc, rate, lv in ((3600, 120, -6), (4500, 95, -9)):
-        x = cicada_layer(B, fc * B.rng.uniform(0.95, 1.05), rate, q=4.0, swell_f=0.1)
+    for fc, rate, lv in ((3600, 110, -7), (4300, 90, -10)):
+        x = cicada_layer(B, fc * B.rng.uniform(0.96, 1.04), rate, q=4.0, swell_f=0.09)
         B.add(B.pan(x, B.rng.uniform(-0.7, 0.7)), lv)
-    kat = [(katydid_track(B, B.rng.uniform(5500, 9000), B.rng.uniform(0.5, 1.1), (2, 4),
-                          level=float(db(B.rng.uniform(-8, 0)))), B.rng.uniform(-0.9, 0.9)) for _ in range(4)]
-    tri = [(trill_track(B, B.rng.uniform(2700, 3400), B.rng.uniform(40, 70), float(db(-6))), B.rng.uniform(-0.8, 0.8))
+    kat = [(katydid_track(B, B.rng.uniform(4400, 6200), B.rng.uniform(0.6, 1.2), (2, 4),
+                          level=float(db(B.rng.uniform(-9, -1)))), B.rng.uniform(-0.85, 0.85)) for _ in range(4)]
+    tri = [(trill_track(B, B.rng.uniform(2100, 2750), B.rng.uniform(36, 54), float(db(-6))), B.rng.uniform(-0.8, 0.8))
            for _ in range(2)]
     B.add(unit(chorus(B, kat + tri, 1.2, 0.4)), -4)
-    B.add(B.noise(1.6, 40, 350, corr=0.5) * (0.7 + 0.3 * B.lfo(0.08).u(B.t)), -9)
+    gl = B.lfo(0.08)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, _ = wind_layer(B, gust, 1.6, 50, 180, 580, gust_db=6)
+    B.add(body, -8)
+    B.add(reed_chorus(B, gust, 185.0, 550.0, color=1.6), -11)
 
 
 def bed_desert_wind(B):
@@ -1074,33 +1106,36 @@ def bed_sovngarde(B):
 
 
 def bed_swamp_night(B):
-    """Warm swamps (Black Marsh, the Bitter Coast, Blackwood) after dark: a dense frog chorus over insects."""
-    fr = frog_texture(B, 14 * B.secs, ["croak", "croak", "kruk", "krr", "creek", "tink"], (-16, 0), pitch=(0.8, 1.15),
-                      bout=(2, 8), gap=(0.1, 0.4))
+    """Warm swamps (Black Marsh, the Bitter Coast, Blackwood) after dark: a warm frog chorus over gentle reeds and insects."""
+    fr = frog_texture(B, 11 * B.secs, ["croak", "croak", "kruk", "krr", "creek", "peep"], (-15, -1), pitch=(0.82, 1.12),
+                      bout=(2, 6), gap=(0.14, 0.42))
     B.add(unit(B.verb(fr, 1.4, 0.4)), 0)
-    x = cicada_layer(B, 3900 * B.rng.uniform(0.95, 1.05), 110, q=4.0, swell_f=0.08)
+    x = cicada_layer(B, 3600 * B.rng.uniform(0.96, 1.04), 95, q=4.0, swell_f=0.08)
     B.add(B.pan(x, B.rng.uniform(-0.6, 0.6)), -9)
-    kat = [(katydid_track(B, B.rng.uniform(5000, 8000), B.rng.uniform(0.6, 1.2), (2, 4),
-                          level=float(db(B.rng.uniform(-8, 0)))), B.rng.uniform(-0.9, 0.9)) for _ in range(3)]
-    B.add(unit(chorus(B, kat, 1.0, 0.3)), -9)
-    B.add(midge_drone(B, 8), -15)
-    B.add(lapping(B, 0.7), -12)
-    B.add(B.noise(1.6, 40, 300, corr=0.5), -12)
+    kat = [(katydid_track(B, B.rng.uniform(4200, 6000), B.rng.uniform(0.65, 1.25), (2, 4),
+                          level=float(db(B.rng.uniform(-9, -1)))), B.rng.uniform(-0.85, 0.85)) for _ in range(3)]
+    B.add(unit(chorus(B, kat, 1.0, 0.3)), -8)
+    B.add(midge_drone(B, 6), -14)
+    B.add(lapping(B, 0.8), -9)
+    gl = B.lfo(0.07)
+    gust = lambda t: gl.u(t)  # noqa: E731
+    body, _ = wind_layer(B, gust, 1.6, 48, 180, 560, gust_db=6)
+    B.add(body, -9)
+    B.add(reed_chorus(B, gust, 180.0, 540.0, color=1.6), -11)
 
 
 def bed_savanna_day(B):
-    """Hot grassland by day: dry grass in the wind and loud, swelling cicadas."""
-    gl = B.lfo(0.1)
+    """Hot grassland by day: warm low-passed breeze, gentle dry-reed chorus modulation, and harmonic cicada/bird calls."""
+    gl = B.lfo(0.09)
     gust = lambda t: gl.u(t)  # noqa: E731
-    g = gust(B.t)
-    body, _ = wind_layer(B, gust, 1.2, 60, 600, 1800, gust_db=9)
-    B.add(body, -2)
-    B.add(B.crackle(800 + 4000 * g ** 2, 2500, 8000) * (0.2 + 0.8 * g), -12)
-    for fc, rate, lv in ((6200, 160, -4), (7400, 210, -9)):
-        x = cicada_layer(B, fc * B.rng.uniform(0.95, 1.05), rate * B.rng.uniform(0.95, 1.05), q=3.5, swell_f=0.1, depth=0.9)
+    body, _ = wind_layer(B, gust, 1.5, 55, 180, 650, gust_db=8)
+    B.add(body, -1)
+    B.add(reed_chorus(B, gust, 195.0, 645.0, color=1.4), -6)
+    for fc, rate, lv in ((4600, 130, -6), (5400, 160, -9)):
+        x = cicada_layer(B, fc * B.rng.uniform(0.96, 1.04), rate * B.rng.uniform(0.96, 1.04), q=3.8, swell_f=0.09, depth=0.75)
         B.add(B.pan(x, B.rng.uniform(-0.7, 0.7)), lv)
-    B.add(insect_hums(B, 3), -18)
-    B.add(distant_chirps(B, 3 * B.secs, (2000, 5000)), -16)
+    B.add(insect_hums(B, 3, (190, 350), 620), -14)
+    B.add(distant_chirps(B, 3 * B.secs, (1650, 3050)), -11)
 
 
 def bed_hot_springs(B):
@@ -1528,45 +1563,53 @@ def sh_frog(rng, v, sr):
 
 def sh_cricket(rng, v, sr):
     out = np.zeros(int(sr * 1.8))
-    if v == 1:   # chirps of 3-4 pulses
-        fc = rng.uniform(4400, 4800)
+    if v == 1:   # warm harmonic chirps of 3-4 pulses with raised-cosine fade-in/out
+        fc = rng.uniform(2650, 3150)
         for c in range(4):
             for k in range(3 + (c % 2)):
-                place(out, tone(sr, 0.015, lambda u: fc * (1.02 - 0.04 * u), harm=(1, 0.05), att=0.3),
-                      int((0.03 + 0.4 * c + 0.03 * k) * sr))
-        out = out[:int(sr * 1.4)]
-    else:        # continuous trill burst, softer and purer
-        n = int(sr * 1.3)
+                place(out, tone(sr, 0.022, lambda u: fc * (1.015 - 0.03 * (0.5 - 0.5 * np.cos(np.pi * u))),
+                                harm=(1.0, 0.09, 0.025), att=0.48),
+                      int((0.04 + 0.38 * c + 0.034 * k) * sr))
+        out = out[:int(sr * 1.5)]
+    else:        # continuous harmonic tree-cricket trill burst, soft and warm
+        n = int(sr * 1.4)
         tt = np.arange(n) / sr
-        gate = (0.5 + 0.5 * np.cos(TAU * 46 * tt)) ** 3
-        out[:n] = np.sin(TAU * 3200 * tt) * gate * curve(tt / 1.3, [(0, 0), (0.1, 1), (0.8, 0.9), (1, 0)])
-    return verb(out, sr, rng, 0.6, 0.12)
+        u = tt / 1.4
+        gate = (0.5 - 0.5 * np.cos(TAU * 38 * tt)) ** 1.5
+        ph = TAU * rng.uniform(2250, 2550) * tt
+        env = 0.5 - 0.5 * np.cos(TAU * u)
+        out[:n] = (np.sin(ph) + 0.08 * np.sin(2 * ph) + 0.02 * np.sin(3 * ph)) * gate * env
+        out = out[:n]
+    out = filt(out, sr, "lowpass", 3600, 2)
+    return verb(out, sr, rng, 0.65, 0.14)
 
 
 def insect_pass(rng, sr, dur, f0, t_close, d_close, speed, erratic, tilt, hp):
     n = int(sr * dur)
     tt = np.arange(n) / sr
+    u = tt / dur
     x = speed * (tt - t_close)
     y = d_close + (erratic * smooth(rng, n, sr, 1.5) if erratic else 0.0)
     if erratic:
         x = x + erratic * smooth(rng, n, sr, 1.0)
     r = np.sqrt(x ** 2 + y ** 2)
     vr = np.gradient(r) * sr
-    f = f0 * (1 - 0.05 * np.tanh(vr / max(speed, 0.1))) * (1 + 0.02 * smooth(rng, n, sr, 8.0))
+    f = f0 * (1 - 0.04 * np.tanh(vr / max(speed, 0.1))) * (1 + 0.012 * smooth(rng, n, sr, 5.0))
     ph = TAU * np.cumsum(f) / sr
-    src = harmonics(ph, f, sr, 40, tilt)
-    src = filt(src, sr, "highpass", hp, 2)
-    amp = 1.0 / np.maximum(r, 0.15)
-    return src * amp * curve(tt / dur, [(0, 0), (0.1, 1), (0.9, 1), (1, 0)])
+    src = np.sin(ph) + 0.32 * np.sin(2 * ph) + 0.12 * np.sin(3 * ph) + 0.04 * np.sin(4 * ph)
+    src = filt(src, sr, "bandpass", [max(hp, 150), 640], 2)
+    amp = 1.0 / np.maximum(r, 0.22)
+    env = 0.5 - 0.5 * np.cos(TAU * u)
+    return src * amp * env
 
 
 def sh_insect(rng, v, sr):
-    if v == 1:   # erratic fly darting past
-        y = insect_pass(rng, sr, 2.3, 185, 1.1, 0.35, 1.2, 0.25, 1.1, 150)
-    else:        # steady deeper bee drifting by
-        y = insect_pass(rng, sr, 2.7, 228, 1.4, 0.45, 0.9, 0.0, 1.3, 120)
-        y = y + 0.4 * formant(y, sr, [(500, 200, 1.0)])
-    return y
+    if v == 1:   # gentle meadow bumblebee drifting past
+        y = insect_pass(rng, sr, 2.3, 195, 1.1, 0.38, 1.0, 0.15, 1.6, 160)
+    else:        # steady deeper honeybee hum drifting by
+        y = insect_pass(rng, sr, 2.7, 224, 1.35, 0.45, 0.85, 0.05, 1.8, 150)
+        y = y + 0.25 * formant(y, sr, [(420, 140, 1.0)])
+    return filt(y, sr, "lowpass", 650, 2)
 
 
 def drop(rng, sr, f0, xi=0.25, damp=1.0):
@@ -1950,15 +1993,20 @@ def sh_ice_creak(rng, v, sr):
 
 
 def sh_cicada(rng, v, sr):
-    D = 2.8 if v == 1 else 2.2
+    D = 2.6 if v == 1 else 2.2
     n = int(sr * D)
-    u = np.arange(n) / n
-    fc = rng.uniform(5200, 6800) if v == 1 else rng.uniform(3800, 4600)
-    rate = rng.uniform(140, 200) if v == 1 else rng.uniform(80, 110)
-    x = bandnoise(rng, n, sr, fc * 0.8, fc * 1.25, 3)
-    am = 1.0 - 0.9 * (0.5 + 0.5 * np.cos(TAU * rate * np.arange(n) / sr))
-    e = curve(u, [(0, 0), (0.3, 1), (0.8, 0.9), (1, 0)]) if v == 1 else curve(u, [(0, 0), (0.15, 1), (0.5, 0.5), (0.65, 1), (1, 0)])
-    return x * am * e
+    tt = np.arange(n) / sr
+    u = tt / D
+    fc = rng.uniform(1950, 2450) if v == 1 else rng.uniform(1650, 2100)
+    rate = rng.uniform(46, 64) if v == 1 else rng.uniform(34, 48)
+    f = fc * (1 + 0.008 * np.sin(TAU * 2.5 * tt) + 0.004 * smooth(rng, n, sr, 4.0))
+    ph = TAU * np.cumsum(f) / sr
+    carrier = np.sin(ph) + 0.16 * np.sin(2 * ph) + 0.04 * np.sin(3 * ph)
+    am = 0.25 + 0.75 * (0.5 - 0.5 * np.cos(TAU * rate * tt))
+    breeze = 0.12 * bandnoise(rng, n, sr, 180, 620, 2)
+    e = (0.5 - 0.5 * np.cos(TAU * u)) if v == 1 else curve(u, [(0, 0), (0.18, 1), (0.5, 0.55), (0.72, 0.95), (1, 0)])
+    y = filt((carrier * am + breeze) * e, sr, "lowpass", 3400, 2)
+    return verb(y, sr, rng, 0.75, 0.16)
 
 
 # ---------------------------------------------------------------------------- fire and aftermath (com.skycraft.fire)

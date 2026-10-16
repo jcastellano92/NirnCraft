@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/emperor_parasol_moss"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/emperor_parasol_moss_harvested"
+    }
+  }
+}

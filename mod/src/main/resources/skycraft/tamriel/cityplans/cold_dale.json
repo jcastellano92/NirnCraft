@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        16,
         0
       ],
       "face": "south",
@@ -54,7 +54,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        -8,
+        -16,
         0
       ],
       "face": "south",
@@ -66,8 +66,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        0,
-        -15
+        -3,
+        -18
       ],
       "face": "south",
       "overlay": "nibenay_valley",
@@ -79,16 +79,166 @@
       "type": "lamps",
       "theme": "fog_horn_lantern",
       "count": 3
+    },
+    {
+      "type": "statue",
+      "where": "square"
     }
   ],
   "titles": {
     "cold_dale_b_1": "Cold Dale Ferryman's Rest",
     "cold_dale_b_2": "Net-Mender's Shack",
     "cold_dale_b_3": "Barge Cordage Store",
-    "cold_dale_b_4": "Tow-Path Mule Shed"
+    "cold_dale_b_4": "Tow-Path Mule Shed",
+    "cold_dale_square": "Cold Dale Ferry Meadow Green"
   },
   "innKey": "cold_dale_b_1",
   "names": {
     "inn": "cold_dale_b_1"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        2
+      ],
+      "to": [
+        19,
+        12
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -4,
+        -2
+      ],
+      "to": [
+        -4,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "cold_dale_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -4,
+          7
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "flood_meadow_ferry"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          -4
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          19,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "cold_dale_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        -4
+      ],
+      "rx": 14,
+      "rz": 12,
+      "wobble": 2,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "mist_hollow_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "mist_hollow_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "flood_meadow_ferry"
+    }
+  ]
 }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/eye_of_sabre_cat"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/eye_of_sabre_cat_harvested"
+    }
+  }
+}

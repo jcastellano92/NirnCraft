@@ -91,5 +91,90 @@
     "thirsk_mead_hall_b_2": "Fjalding Shore Forge",
     "thirsk_mead_hall_b_3": "Horker Meat Smokehouse",
     "thirsk_mead_hall_b_4": "Chieftain's Mead Loft"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          22
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          -18
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "fjalding_mead_path"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 16,
+      "rz": 14,
+      "wobble": 2,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "mead_clearing_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -10
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.5
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 3,
+      "culture": "nord",
+      "on": "mead_clearing_loop"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "culture": "nord",
+      "on": "fjalding_mead_path"
+    }
+  ]
 }

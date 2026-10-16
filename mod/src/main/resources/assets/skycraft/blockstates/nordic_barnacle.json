@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/nordic_barnacle"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/nordic_barnacle_harvested"
+    }
+  }
+}

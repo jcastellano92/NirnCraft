@@ -9,7 +9,8 @@
   "modes": [
     "boat",
     "caravan",
-    "wayshrine"
+    "wayshrine",
+    "foot"
   ],
   "nodes": [
     {
@@ -136,7 +137,9 @@
       "mode": "boat",
       "modes": [
         "boat",
-        "wayshrine"
+        "wayshrine",
+        "caravan",
+        "foot"
       ],
       "kind": "hub",
       "discoveredOnArrival": true,
@@ -156,7 +159,8 @@
       "mode": "boat",
       "modes": [
         "boat",
-        "wayshrine"
+        "wayshrine",
+        "caravan"
       ],
       "kind": "hub",
       "discoveredOnArrival": true,
@@ -175,7 +179,8 @@
       "z": -11000,
       "mode": "wayshrine",
       "modes": [
-        "wayshrine"
+        "wayshrine",
+        "foot"
       ],
       "kind": "wayshrine",
       "discoveredOnArrival": true,
@@ -279,6 +284,94 @@
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
       ]
+    },
+    {
+      "id": "wolf_jarls_howe",
+      "region": "atmora/ice_waste",
+      "x": -400,
+      "z": -12900,
+      "modes": [
+        "caravan",
+        "foot",
+        "wayshrine"
+      ],
+      "why": [
+        "ice_waste.L6.kjolvik_camp",
+        "atmora.L5.relic_and_stalhrim_expeditions"
+      ],
+      "place": "wolf_jarls_howe"
+    },
+    {
+      "id": "saarvik_landing",
+      "region": "atmora/frozen_forest",
+      "x": -800,
+      "z": -10000,
+      "modes": [
+        "boat",
+        "caravan",
+        "foot"
+      ],
+      "why": [
+        "frozen_forest.L6.jylkurfyk_port_ruins",
+        "atmora.L6.jylkurfyk_ruins"
+      ],
+      "place": "saarvik_landing"
+    },
+    {
+      "id": "solitude",
+      "region": "skyrim/haafingar",
+      "x": -1216,
+      "z": -1740,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "atmora.L6.kjolvik_anchorage"
+      ],
+      "place": "solitude"
+    },
+    {
+      "id": "windhelm",
+      "region": "skyrim/eastmarch",
+      "x": 1825,
+      "z": -717,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "atmora.L6.jylkurfyk_ruins"
+      ],
+      "place": "windhelm"
+    },
+    {
+      "id": "dawnstar",
+      "region": "skyrim/the_pale",
+      "x": 174,
+      "z": -1801,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "atmora.L6.kjolvik_anchorage"
+      ],
+      "place": "dawnstar"
+    },
+    {
+      "id": "winterhold",
+      "region": "skyrim/winterhold",
+      "x": 1417,
+      "z": -1749,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "atmora.L6.jylkurfyk_ruins"
+      ],
+      "place": "winterhold"
     }
   ],
   "routes": [
@@ -286,19 +379,8 @@
       "from": "wayshrine_ice_waste_01",
       "to": "wayshrine_ice_waste_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          900,
-          -11800
-        ],
-        [
-          -400,
-          -12900
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_01_to_wayshrine_ice_waste_04",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -308,19 +390,8 @@
       "from": "wayshrine_ice_waste_01",
       "to": "wayshrine_ice_waste_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          900,
-          -11800
-        ],
-        [
-          -448,
-          -12924
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_01_to_wayshrine_ice_waste_05",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -330,19 +401,8 @@
       "from": "wayshrine_ice_waste_02",
       "to": "wayshrine_ice_waste_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -4083,
-          -12103
-        ],
-        [
-          -448,
-          -12924
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_02_to_wayshrine_ice_waste_05",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -352,19 +412,8 @@
       "from": "wayshrine_ice_waste_02",
       "to": "wayshrine_ice_waste_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -4083,
-          -12103
-        ],
-        [
-          -400,
-          -12900
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_02_to_wayshrine_ice_waste_04",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -374,19 +423,8 @@
       "from": "wayshrine_ice_waste_03",
       "to": "wayshrine_ice_waste_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          3600,
-          -12400
-        ],
-        [
-          3576,
-          -12424
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_03_to_wayshrine_ice_waste_06",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -396,19 +434,8 @@
       "from": "wayshrine_ice_waste_03",
       "to": "wayshrine_ice_waste_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          3600,
-          -12400
-        ],
-        [
-          900,
-          -11800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_03_to_wayshrine_ice_waste_01",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -418,19 +445,8 @@
       "from": "wayshrine_ice_waste_04",
       "to": "wayshrine_ice_waste_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -400,
-          -12900
-        ],
-        [
-          -448,
-          -12924
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_04_to_wayshrine_ice_waste_05",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -440,19 +456,8 @@
       "from": "wayshrine_ice_waste_04",
       "to": "wayshrine_ice_waste_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -400,
-          -12900
-        ],
-        [
-          900,
-          -11800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_04_to_wayshrine_ice_waste_01",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -462,19 +467,8 @@
       "from": "wayshrine_ice_waste_05",
       "to": "wayshrine_ice_waste_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -448,
-          -12924
-        ],
-        [
-          -400,
-          -12900
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_05_to_wayshrine_ice_waste_04",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -484,19 +478,8 @@
       "from": "wayshrine_ice_waste_05",
       "to": "wayshrine_ice_waste_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -448,
-          -12924
-        ],
-        [
-          900,
-          -11800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_05_to_wayshrine_ice_waste_01",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -506,19 +489,8 @@
       "from": "wayshrine_ice_waste_06",
       "to": "wayshrine_ice_waste_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          3576,
-          -12424
-        ],
-        [
-          3600,
-          -12400
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_06_to_wayshrine_ice_waste_03",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -528,19 +500,8 @@
       "from": "wayshrine_ice_waste_06",
       "to": "wayshrine_ice_waste_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          3576,
-          -12424
-        ],
-        [
-          900,
-          -11800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_ice_waste_06_to_wayshrine_ice_waste_01",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -550,19 +511,8 @@
       "from": "jylkurfyk",
       "to": "moot_of_the_five_hundred",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          300,
-          -11300
-        ],
-        [
-          -1200,
-          -11000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_jylkurfyk_to_moot_of_the_five_hundred",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -572,19 +522,8 @@
       "from": "jylkurfyk",
       "to": "wayshrine_frozen_forest_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          300,
-          -11300
-        ],
-        [
-          -800,
-          -10000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_jylkurfyk_to_wayshrine_frozen_forest_03",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -594,19 +533,8 @@
       "from": "kjolvik",
       "to": "wayshrine_frozen_forest_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          2400,
-          -10800
-        ],
-        [
-          1700,
-          -10300
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_kjolvik_to_wayshrine_frozen_forest_01",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -616,19 +544,8 @@
       "from": "kjolvik",
       "to": "wayshrine_frozen_forest_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          2400,
-          -10800
-        ],
-        [
-          3930,
-          -11199
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_kjolvik_to_wayshrine_frozen_forest_04",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -638,19 +555,8 @@
       "from": "moot_of_the_five_hundred",
       "to": "wayshrine_frozen_forest_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -1200,
-          -11000
-        ],
-        [
-          -800,
-          -10000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_moot_of_the_five_hundred_to_wayshrine_frozen_forest_03",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -660,19 +566,8 @@
       "from": "moot_of_the_five_hundred",
       "to": "wayshrine_frozen_forest_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -1200,
-          -11000
-        ],
-        [
-          -2600,
-          -11200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_moot_of_the_five_hundred_to_wayshrine_frozen_forest_02",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -682,19 +577,8 @@
       "from": "wayshrine_frozen_forest_01",
       "to": "kjolvik",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          1700,
-          -10300
-        ],
-        [
-          2400,
-          -10800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_01_to_kjolvik",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -704,19 +588,8 @@
       "from": "wayshrine_frozen_forest_01",
       "to": "jylkurfyk",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          1700,
-          -10300
-        ],
-        [
-          300,
-          -11300
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_01_to_jylkurfyk",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -726,19 +599,8 @@
       "from": "wayshrine_frozen_forest_02",
       "to": "wayshrine_frozen_forest_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -2600,
-          -11200
-        ],
-        [
-          -3600,
-          -10500
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_02_to_wayshrine_frozen_forest_05",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -748,19 +610,8 @@
       "from": "wayshrine_frozen_forest_02",
       "to": "moot_of_the_five_hundred",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -2600,
-          -11200
-        ],
-        [
-          -1200,
-          -11000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_02_to_moot_of_the_five_hundred",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -770,19 +621,8 @@
       "from": "wayshrine_frozen_forest_03",
       "to": "moot_of_the_five_hundred",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -800,
-          -10000
-        ],
-        [
-          -1200,
-          -11000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_03_to_moot_of_the_five_hundred",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -792,19 +632,8 @@
       "from": "wayshrine_frozen_forest_03",
       "to": "jylkurfyk",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -800,
-          -10000
-        ],
-        [
-          300,
-          -11300
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_03_to_jylkurfyk",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -814,19 +643,8 @@
       "from": "wayshrine_frozen_forest_04",
       "to": "kjolvik",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          3930,
-          -11199
-        ],
-        [
-          2400,
-          -10800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_04_to_kjolvik",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -836,19 +654,8 @@
       "from": "wayshrine_frozen_forest_04",
       "to": "wayshrine_frozen_forest_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          3930,
-          -11199
-        ],
-        [
-          1700,
-          -10300
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_04_to_wayshrine_frozen_forest_01",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -858,19 +665,8 @@
       "from": "wayshrine_frozen_forest_05",
       "to": "wayshrine_frozen_forest_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -3600,
-          -10500
-        ],
-        [
-          -2600,
-          -11200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_05_to_wayshrine_frozen_forest_02",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -880,19 +676,8 @@
       "from": "wayshrine_frozen_forest_05",
       "to": "moot_of_the_five_hundred",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          -3600,
-          -10500
-        ],
-        [
-          -1200,
-          -11000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_wayshrine_wayshrine_frozen_forest_05_to_moot_of_the_five_hundred",
       "why": [
         "frozen_forest.L1.fjord_valleys",
         "frozen_forest.L2.rime_hoarfrost"
@@ -902,19 +687,8 @@
       "from": "jylkurfyk",
       "to": "kjolvik",
       "mode": "boat",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          300,
-          -11300
-        ],
-        [
-          2400,
-          -10800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_boat_jylkurfyk_to_kjolvik",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
@@ -924,22 +698,187 @@
       "from": "kjolvik",
       "to": "jylkurfyk",
       "mode": "boat",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          2400,
-          -10800
-        ],
-        [
-          300,
-          -11300
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "atmora_boat_kjolvik_to_jylkurfyk",
       "why": [
         "ice_waste.L1.glacial_shield",
         "ice_waste.L2.catabatic_whiteout"
+      ]
+    },
+    {
+      "from": "jylkurfyk",
+      "to": "windhelm",
+      "mode": "boat",
+      "cost": 110,
+      "path": "sea_of_ghosts_ysgramor_wake",
+      "why": [
+        "atmora.L6.jylkurfyk_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "windhelm",
+      "to": "jylkurfyk",
+      "mode": "boat",
+      "cost": 110,
+      "path": "sea_of_ghosts_ysgramor_wake",
+      "why": [
+        "atmora.L6.jylkurfyk_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "jylkurfyk",
+      "to": "solitude",
+      "mode": "boat",
+      "cost": 120,
+      "path": "haafingar_polar_pack_expedition",
+      "why": [
+        "atmora.L6.jylkurfyk_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "jylkurfyk",
+      "mode": "boat",
+      "cost": 120,
+      "path": "haafingar_polar_pack_expedition",
+      "why": [
+        "atmora.L6.jylkurfyk_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "kjolvik",
+      "to": "dawnstar",
+      "mode": "boat",
+      "cost": 105,
+      "path": "pale_icebreaker_expedition",
+      "why": [
+        "atmora.L6.kjolvik_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "dawnstar",
+      "to": "kjolvik",
+      "mode": "boat",
+      "cost": 105,
+      "path": "pale_icebreaker_expedition",
+      "why": [
+        "atmora.L6.kjolvik_anchorage",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "saarvik_landing",
+      "to": "winterhold",
+      "mode": "boat",
+      "cost": 100,
+      "path": "broken_cape_glacier_crossing",
+      "why": [
+        "frozen_forest.L6.jylkurfyk_port_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "winterhold",
+      "to": "saarvik_landing",
+      "mode": "boat",
+      "cost": 100,
+      "path": "broken_cape_glacier_crossing",
+      "why": [
+        "frozen_forest.L6.jylkurfyk_port_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "jylkurfyk",
+      "to": "kjolvik",
+      "mode": "caravan",
+      "cost": 91,
+      "path": "frozen_shield_dog_sled_track",
+      "why": [
+        "atmora.L6.kjolvik_anchorage",
+        "atmora.L5.relic_and_stalhrim_expeditions"
+      ]
+    },
+    {
+      "from": "kjolvik",
+      "to": "jylkurfyk",
+      "mode": "caravan",
+      "cost": 91,
+      "path": "frozen_shield_dog_sled_track",
+      "why": [
+        "atmora.L6.kjolvik_anchorage",
+        "atmora.L5.relic_and_stalhrim_expeditions"
+      ]
+    },
+    {
+      "from": "kjolvik",
+      "to": "wolf_jarls_howe",
+      "mode": "caravan",
+      "cost": 138,
+      "path": "ice_waste_stalhrim_sled_run",
+      "why": [
+        "ice_waste.L6.kjolvik_camp",
+        "ice_waste.L5.stalhrim_salvage"
+      ]
+    },
+    {
+      "from": "wolf_jarls_howe",
+      "to": "kjolvik",
+      "mode": "caravan",
+      "cost": 138,
+      "path": "ice_waste_stalhrim_sled_run",
+      "why": [
+        "ice_waste.L6.kjolvik_camp",
+        "ice_waste.L5.stalhrim_salvage"
+      ]
+    },
+    {
+      "from": "jylkurfyk",
+      "to": "moot_of_the_five_hundred",
+      "mode": "foot",
+      "cost": 0,
+      "path": "five_hundred_companions_ice_march",
+      "why": [
+        "atmora.L6.jylkurfyk_ruins",
+        "frozen_forest.L5.dragon_cult_relic_digs"
+      ]
+    },
+    {
+      "from": "moot_of_the_five_hundred",
+      "to": "jylkurfyk",
+      "mode": "foot",
+      "cost": 0,
+      "path": "five_hundred_companions_ice_march",
+      "why": [
+        "atmora.L6.jylkurfyk_ruins",
+        "frozen_forest.L5.dragon_cult_relic_digs"
+      ]
+    },
+    {
+      "from": "moot_of_the_five_hundred",
+      "to": "saarvik_landing",
+      "mode": "foot",
+      "cost": 0,
+      "path": "frozen_fjord_ridge_path",
+      "why": [
+        "frozen_forest.L6.jylkurfyk_port_ruins",
+        "frozen_forest.L5.dragon_cult_relic_digs"
+      ]
+    },
+    {
+      "from": "saarvik_landing",
+      "to": "moot_of_the_five_hundred",
+      "mode": "foot",
+      "cost": 0,
+      "path": "frozen_fjord_ridge_path",
+      "why": [
+        "frozen_forest.L6.jylkurfyk_port_ruins",
+        "frozen_forest.L5.dragon_cult_relic_digs"
       ]
     }
   ]

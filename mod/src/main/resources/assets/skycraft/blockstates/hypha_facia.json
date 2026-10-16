@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/hypha_facia"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/hypha_facia_harvested"
+    }
+  }
+}

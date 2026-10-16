@@ -6,7 +6,7 @@
     "morrowind.L8.tribunal_temple"
   ],
   "sil": "canton-water",
-  "base": "none",
+  "base": "java",
   "overlay": "vivec",
   "radius": 118,
   "reach": 138,
@@ -52,7 +52,7 @@
       "overlay": "vivec"
     },
     {
-      "id": "rock",
+      "id": "baar_dau",
       "at": [
         0,
         68
@@ -94,8 +94,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        28,
-        0
+        35,
+        23
       ],
       "face": "south",
       "overlay": "vivec",
@@ -118,8 +118,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        21,
-        18
+        25,
+        46
       ],
       "face": "south",
       "overlay": "vivec",
@@ -130,8 +130,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        34,
-        59
+        37,
+        62
       ],
       "face": "south",
       "overlay": "vivec",
@@ -142,8 +142,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        5,
-        28
+        -23,
+        31
       ],
       "face": "south",
       "overlay": "vivec",
@@ -154,7 +154,7 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -12,
+        -20,
         67
       ],
       "face": "south",
@@ -166,8 +166,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -14,
-        24
+        -27,
+        9
       ],
       "face": "south",
       "overlay": "vivec",
@@ -190,8 +190,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -26,
-        10
+        -45,
+        17
       ],
       "face": "south",
       "overlay": "vivec",
@@ -214,8 +214,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -26,
-        -10
+        -29,
+        -13
       ],
       "face": "south",
       "overlay": "vivec",
@@ -286,8 +286,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        21,
-        -18
+        14,
+        -41
       ],
       "face": "south",
       "overlay": "vivec",
@@ -298,7 +298,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        64,
+        68,
         -23
       ],
       "face": "south",
@@ -351,5 +351,155 @@
     "vv_lucretinaus_trader": "Lucretinaus Olcinius's Trader",
     "vv_st_olms_canton": "St. Olms Canton Plaza",
     "vv_st_delyn_canton": "St. Delyn Canton Plaza"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -96
+        ],
+        [
+          0,
+          -48
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          48
+        ],
+        [
+          0,
+          96
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "canton_spine"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          -45
+        ],
+        [
+          0,
+          -45
+        ],
+        [
+          72,
+          -45
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "north_cantons"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          45
+        ],
+        [
+          0,
+          45
+        ],
+        [
+          72,
+          45
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "south_cantons"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 74,
+      "rz": 88,
+      "wobble": 0,
+      "lobes": 6,
+      "width": 4,
+      "rank": 1,
+      "tag": "lagoon_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 38,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -88
+      ],
+      "r": 34,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        68,
+        -42
+      ],
+      "r": 32,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -68,
+        42
+      ],
+      "r": 32,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 104,
+    "target": 0.55,
+    "outskirts": false
+  },
+  "queue": [
+    {
+      "kind": "store",
+      "count": 4,
+      "kit": "velothi",
+      "on": "north_cantons"
+    },
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "velothi",
+      "on": "lagoon_ring"
+    },
+    {
+      "kind": "temple",
+      "count": 2,
+      "kit": "velothi",
+      "on": "canton_spine"
+    }
+  ]
 }

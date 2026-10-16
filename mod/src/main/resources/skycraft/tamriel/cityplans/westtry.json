@@ -37,8 +37,8 @@
     {
       "id": "stone_circle",
       "at": [
-        0,
-        -14
+        -3,
+        -17
       ],
       "face": "south",
       "name": "westtry_landmark",
@@ -51,7 +51,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        17,
         -12
       ],
       "face": "south",
@@ -62,8 +62,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        23,
-        -2
+        25,
+        6
       ],
       "face": "west",
       "name": "westtry_downland_store"
@@ -73,8 +73,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        11,
-        11
+        13,
+        19
       ],
       "face": "north",
       "name": "westtry_iron_hasp_smithy"
@@ -95,8 +95,8 @@
       "use": "hall_of_dead",
       "wealth": "common",
       "at": [
-        -12,
-        9
+        -15,
+        12
       ],
       "face": "east",
       "name": "westtry_barrow_watch_chapel"

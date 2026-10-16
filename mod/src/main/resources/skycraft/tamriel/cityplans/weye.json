@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -43,7 +43,7 @@
       "wealth": "common",
       "at": [
         0,
-        15
+        19
       ],
       "face": "south",
       "overlay": "great_forest",
@@ -54,8 +54,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        5
       ],
       "face": "south",
       "overlay": "great_forest",
@@ -84,16 +84,166 @@
       "type": "lamps",
       "theme": "bridge_lantern",
       "count": 1
+    },
+    {
+      "type": "bell_tower",
+      "where": "square"
     }
   ],
   "titles": {
     "weye_b_1": "Wawnet Crossing Taproom",
     "weye_b_2": "Aelwin Merowald's Cottage",
     "weye_b_3": "Rumare Scale Shed",
-    "weye_b_4": "Red Ring Ferry Stables"
+    "weye_b_4": "Red Ring Ferry Stables",
+    "weye_square": "Weye Rumare Bridgehead Square"
   },
   "innKey": "weye_b_1",
   "names": {
     "inn": "weye_b_1"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        8
+      ],
+      "to": [
+        19,
+        6
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -2,
+        -2
+      ],
+      "to": [
+        -2,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        2,
+        4
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "weye_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -2,
+          7
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          2,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "imperial_bridgehead_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          2
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          19,
+          -2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "weye_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        2
+      ],
+      "rx": 14,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "rumare_fisher_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "rumare_fisher_loop"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "imperial_bridgehead_way"
+    }
+  ]
 }

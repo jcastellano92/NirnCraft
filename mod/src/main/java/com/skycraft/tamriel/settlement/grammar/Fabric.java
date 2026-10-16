@@ -53,6 +53,7 @@ public final class Fabric {
         x.sk = new Zoning.Skeleton();
         x.R = f.has("radius") ? f.get("radius").getAsInt() : (int) (plan.radius * 0.8);
         x.sk.radius = x.R;
+        Zoning.site(x.sk, plan.cx, plan.cz, plan.back, x.R);
         x.sk.form = Zoning.Form.CLUSTER;
         if (cp.gates != null) for (int[] g : cp.gates) x.sk.gates.add(new int[]{g[0], g[1]});
         if (x.sk.gates.isEmpty()) x.sk.gates.add(new int[]{0, x.R});
@@ -117,10 +118,10 @@ public final class Fabric {
         Zoning.squareFrontage(x);
         Zoning.infill(x);
         boolean gap = !f.has("gap") || f.get("gap").getAsBoolean();
-        double target = f.has("target") ? f.get("target").getAsDouble() : Metrics.target(size) + 0.2;
+        double target = f.has("target") ? f.get("target").getAsDouble() : f.has("density") ? f.get("density").getAsDouble() : Metrics.target(size) + 0.2;
         if (gap) gaps(x, zoner, target, 3);
         Zoning.backyards(x);
-        if (!f.has("outskirts") || f.get("outskirts").getAsBoolean()) Zoning.outskirts(x, "");
+        if (!f.has("outskirts") || f.get("outskirts").getAsBoolean()) Zoning.outskirts(x, p != null ? p.variant() : "");
         seatOnTerraces(plan, firstNew);
         double[] m = measure(plan, x.R);
         plan.fabricReport = String.format(Locale.ROOT, "fabric %s: buildings %.0f%%, developed %.0f%% of r%d, %d features (%s), %d specs, %d ms",

@@ -59,7 +59,8 @@ public class DungeonStructure extends Structure {
         ).apply(i, PlaceFilter::new));
 
         public boolean matches(Place p) {
-            return types.contains(p.type().id()) && (variants.isEmpty() || variants.contains(p.variant()));
+            return types.contains(p.type().id()) && (variants.isEmpty() || variants.contains(p.variant())
+                    || (p.variant().isEmpty() && types.contains("landmark") && variants.contains("monument")));
         }
     }
 
@@ -277,6 +278,7 @@ public class DungeonStructure extends Structure {
         int fx = x, fz = z;
         com.skycraft.Skycraft.LOGGER.debug("Skycraft dungeons: {} ({}) starts at {} {} {}", pl.id(), theme.id, x, h, z);
 
+        SiteParams.Style wonder = SiteParams.wonderStyle(pl.id());
         if (theme == Theme.SHIPWRECK) {
             int base = Math.max(Math.min(h, sea + 1), ground(ctx, x, z));
             Direction facing = out;
@@ -290,7 +292,11 @@ public class DungeonStructure extends Structure {
             Layout.Ground g = ground(ctx);
             String fortId = pl.id();
             return Optional.of(new GenerationStub(new BlockPos(x, base, z), builder -> {
-                Layout.surface(builder, site, fx, base, fz, out, seed, false);
+                if (wonder != null) {
+                    addWonderSurface(builder, ctx, site, wonder, fx, base, fz, out, seed);
+                } else {
+                    Layout.surface(builder, site, fx, base, fz, out, seed, false);
+                }
                 // a hand-authored marquee plan replaces the cellars
                 if (com.skycraft.dungeons.marquee.MarqueePlans.build(builder, site, fortId, fx + out.getStepX() * 3, base,
                         fz + out.getStepZ() * 3, out, depth, seed ^ 0x5DEECE66DL, minY + 10)) return;
@@ -305,6 +311,10 @@ public class DungeonStructure extends Structure {
                         builder -> Layout.greatLift(builder, site, fx, base, fz, out, seed)));
             }
             Direction facing = facingFor(pl, out);
+            if (wonder != null) {
+                return Optional.of(new GenerationStub(new BlockPos(x, base, z),
+                        builder -> addWonderSurface(builder, ctx, site, wonder, fx, base, fz, facing, seed)));
+            }
             return Optional.of(new GenerationStub(new BlockPos(x, base, z),
                     builder -> Layout.surface(builder, site, fx, base, fz, facing, seed, pad)));
         }
@@ -319,11 +329,26 @@ public class DungeonStructure extends Structure {
         Layout.Ground g = ground(ctx);
         String placeId = pl.id();
         return Optional.of(new GenerationStub(new BlockPos(x, surface, z), builder -> {
+            if (wonder != null) addWonderSurface(builder, ctx, site, wonder, fx, surface, fz, fOut, seed);
             // a hand-authored marquee plan replaces the procedural layout
             if (com.skycraft.dungeons.marquee.MarqueePlans.build(builder, site, placeId, fx, surface, fz, fOut, fDepth, seed, minY + 10)) return;
             Layout.underground(builder, site, fx, surface, fz, fOut, fDepth, seed, minY + 10, false, g, 3);
-            if (special != Special.NONE && special != Special.LABYRINTHIAN) Layout.exterior(builder, site, fx, surface, fz, fOut, seed);
+            if (special != Special.NONE && special != Special.LABYRINTHIAN && wonder == null) Layout.exterior(builder, site, fx, surface, fz, fOut, seed);
         }));
+    }
+
+    private static void addWonderSurface(net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder builder,
+                                         GenerationContext ctx, Site baseSite, SiteParams.Style wonder,
+                                         int x, int y, int z, Direction facing, long seed) {
+        Site wonderSite = new Site(Theme.LANDMARK, baseSite.kit(), baseSite.special(), baseSite.flavor(), wonder.ordinal(), baseSite.place());
+        int r = 34;
+        int minY = ctx.heightAccessor().getMinBuildHeight() + 2;
+        int maxY = ctx.heightAccessor().getMaxBuildHeight() - 2;
+        int lo = Math.max(minY, y - 20);
+        int hi = Math.max(lo + 24, Math.min(maxY, y + 156));
+        BoundingBox box = new BoundingBox(x - r, lo, z - r, x + r, hi, z + r);
+        builder.addPiece(new DungeonPiece(wonderSite, DungeonPiece.Kind.SURFACE, box, seed, y, 0,
+                facing.get2DDataValue(), 0, DungeonPiece.ROLE_NORMAL, 0, 0, 0));
     }
 
     /** Uniques face a fixed way (the monastery towards the pilgrims' path); others face a seeded direction. */

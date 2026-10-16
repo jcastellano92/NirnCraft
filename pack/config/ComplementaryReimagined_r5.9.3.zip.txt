@@ -1,0 +1,10 @@
+# Skycraft defaults for Complementary Reimagined r5.9.3 (Oculus)
+# Disables generic shader clouds, auroras, and nebulae so Skycraft's regional cloud engine (CloudRenderer),
+# continuous latitude-driven aurora borealis, Aetherius galaxy band, and Masser & Secunda twin moons render cleanly.
+CLOUD_STYLE_DEFINE=0
+CLOUD_SHADOWS=false
+SUN_MOON_STYLE_DEFINE=1
+AURORA_STYLE_DEFINE=0
+AURORA_CONDITION=0
+NIGHT_NEBULAE=0
+BORDER_FOG=true

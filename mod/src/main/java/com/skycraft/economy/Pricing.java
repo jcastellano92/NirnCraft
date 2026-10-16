@@ -43,18 +43,27 @@ public final class Pricing {
         return (int) Math.max(1, Math.floor(value * sellMult(player)));
     }
 
-    /** Price of ONE item bought from {@code npc}: a faction's quartermaster gives its members a discount. */
+    /** Price of ONE item bought from {@code npc}: regional/faction attitude multiplier plus quartermaster discount. */
     public static int buyPrice(Player player, ItemStack stack, net.minecraft.world.entity.LivingEntity npc) {
         int price = buyPrice(player, stack);
+        if (npc != null) {
+            float att = PriceEngine.attitudeMultiplier(player, npc);
+            price = (int) Math.max(1, Math.min(Integer.MAX_VALUE / 128, Math.ceil(price * att)));
+        }
         int off = com.skycraft.quest.faction.FactionStaff.discountFor(player, npc);
         if (off <= 0) return price;
         // never below what any merchant pays for it, so the discount can't be traded for gold
-        int floor = (int) Math.ceil(sellPrice(player, stack) * 1.1) + 1;
+        int floor = (int) Math.ceil(sellPrice(player, stack, npc) * 1.1) + 1;
         return Math.max(Math.min(price, floor), (int) Math.ceil(price * (100 - off) / 100.0));
     }
 
-    /** Gold paid by {@code npc} for ONE item (a faction's quartermaster pays the usual price). */
+    /** Gold paid by {@code npc} for ONE item (scaled inversely by regional/faction attitude multiplier). */
     public static int sellPrice(Player player, ItemStack stack, net.minecraft.world.entity.LivingEntity npc) {
-        return sellPrice(player, stack);
+        int base = sellPrice(player, stack);
+        if (base <= 0 || npc == null) return base;
+        float att = PriceEngine.attitudeMultiplier(player, npc);
+        int adjusted = (int) Math.max(1, Math.floor(base / Math.max(0.5f, att)));
+        return Math.min(adjusted, buyPrice(player, stack));
     }
 }
+

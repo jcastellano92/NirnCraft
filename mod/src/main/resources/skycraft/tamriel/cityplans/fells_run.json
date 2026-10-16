@@ -38,7 +38,7 @@
       "id": "chapel_spire",
       "at": [
         0,
-        -14
+        -18
       ],
       "face": "south",
       "name": "fells_run_landmark",
@@ -51,7 +51,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        21,
         -12
       ],
       "face": "south",
@@ -62,8 +62,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        23,
-        -2
+        25,
+        6
       ],
       "face": "west",
       "name": "fells_run_valley_provender"
@@ -73,8 +73,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        11,
-        11
+        13,
+        19
       ],
       "face": "north",
       "name": "fells_run_scythe_smithy"
@@ -95,8 +95,8 @@
       "use": "mill",
       "wealth": "common",
       "at": [
-        -12,
-        9
+        -15,
+        12
       ],
       "face": "east",
       "name": "fells_run_barley_mill"

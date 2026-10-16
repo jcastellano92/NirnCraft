@@ -57,7 +57,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        28,
+        32,
         0
       ],
       "face": "south",
@@ -82,7 +82,7 @@
       "wealth": "noble",
       "at": [
         20,
-        20
+        24
       ],
       "face": "south",
       "overlay": "blacklight",
@@ -106,7 +106,7 @@
       "wealth": "common",
       "at": [
         0,
-        28
+        32
       ],
       "face": "south",
       "overlay": "blacklight",
@@ -177,7 +177,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -20,
+        -28,
         -20
       ],
       "face": "south",
@@ -201,7 +201,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        0,
+        28,
         -28
       ],
       "face": "south",
@@ -225,8 +225,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        20,
-        -20
+        27,
+        -43
       ],
       "face": "south",
       "overlay": "blacklight",
@@ -284,6 +284,180 @@
     "bl_salt_store": "Sea of Ghosts Salt-Store",
     "bl_warden_house": "Pass-Warden's Shell House",
     "bl_harpooner_house": "Harpooner's Stone House",
-    "bl_mason_house": "Mason's Terrace House"
-  }
+    "bl_mason_house": "Mason's Terrace House",
+    "blacklight_rootspire_plaza": "Rootspire Arch-Canon Square"
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -56,
+        -64,
+        56,
+        -16
+      ],
+      "level": 5,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        12
+      ],
+      "size": 15,
+      "variant": 0,
+      "stalls": 6,
+      "name": "blacklight_rootspire_plaza"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -32
+      ],
+      "rx": 38,
+      "rz": 26,
+      "wobble": 2,
+      "lobes": 3,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "rootspire_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          74
+        ],
+        [
+          0,
+          38
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          -24
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "fjord_climb"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -74,
+          0
+        ],
+        [
+          -38,
+          8
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          38,
+          8
+        ],
+        [
+          74,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "harbor_terrace"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        8
+      ],
+      "rx": 58,
+      "rz": 48,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "redoran_outer"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -36
+      ],
+      "r": 32,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        12
+      ],
+      "r": 26,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        42,
+        18
+      ],
+      "r": 28,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -42,
+        32
+      ],
+      "r": 28,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 72,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 5,
+      "kit": "redoran",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "rootspire_ring"
+    },
+    {
+      "kind": "house",
+      "count": 9,
+      "kit": "redoran",
+      "on": "redoran_outer"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "kit": "redoran",
+      "on": "harbor_terrace"
+    }
+  ]
 }

@@ -31,7 +31,7 @@
       "wealth": "noble",
       "at": [
         9,
-        0
+        -4
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -54,8 +54,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -7,
-        5
+        -10,
+        8
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -78,7 +78,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        3,
+        -5,
         -9
       ],
       "face": "south",
@@ -96,6 +96,10 @@
       "type": "pond",
       "theme": "tel_mora_cove",
       "count": 1
+    },
+    {
+      "type": "garden",
+      "where": "free"
     }
   ],
   "titles": {
@@ -103,10 +107,130 @@
     "tel_mora_b_2": "The Covenant",
     "tel_mora_b_3": "Jolda's Apothecary",
     "tel_mora_b_4": "Elegnan's Clothier & Goods",
-    "tel_mora_b_5": "Radras's Smithy Pod"
+    "tel_mora_b_5": "Radras's Smithy Pod",
+    "tel_mora_root_plaza": "Mistress Dratha's Root-Bridge Plaza"
   },
   "innKey": "tel_mora_b_2",
   "names": {
     "inn": "tel_mora_b_2"
-  }
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -18,
+        4
+      ],
+      "to": [
+        6,
+        10
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        10
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "tel_mora_root_plaza"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        -2
+      ],
+      "spokes": 5,
+      "r0": 10,
+      "r1": 28,
+      "wobble": 6,
+      "offset": 0.5,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        20
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          -8,
+          -24
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "kirsty_cove_way"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "telvanni",
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "telvanni",
+      "on": "kirsty_cove_way"
+    }
+  ]
 }

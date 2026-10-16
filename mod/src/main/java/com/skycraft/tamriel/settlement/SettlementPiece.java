@@ -35,7 +35,7 @@ public class SettlementPiece extends StructurePiece {
     public final int index;
 
     public SettlementPiece(Spec spec, long seed, String settlement, int index) {
-        super(SettlementStructures.PIECE.get(), 0, box(spec));
+        super(SettlementStructures.PIECE.orElse(null), 0, box(spec));
         this.spec = spec;
         this.seed = seed;
         this.settlement = settlement;
@@ -43,7 +43,7 @@ public class SettlementPiece extends StructurePiece {
     }
 
     public SettlementPiece(StructurePieceSerializationContext context, CompoundTag tag) {
-        super(SettlementStructures.PIECE.get(), tag);
+        super(SettlementStructures.PIECE.orElse(null), tag);
         Spec s = new Spec(Archetype.byOrdinal(tag.getInt("K")));
         s.culture = tag.getInt("C");
         s.style = tag.getInt("St");

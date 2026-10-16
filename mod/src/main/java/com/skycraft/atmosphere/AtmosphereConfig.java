@@ -31,6 +31,7 @@ public final class AtmosphereConfig {
     public static final ForgeConfigSpec.BooleanValue WEATHER_PARTICLES;
     public static final ForgeConfigSpec.DoubleValue WEATHER_FOG_STRENGTH;
     public static final ForgeConfigSpec.BooleanValue CLOUDS;
+    public static final ForgeConfigSpec.BooleanValue CLOUDS_SKIP_SHADERS;
     public static final ForgeConfigSpec.IntValue CLOUD_DISTANCE;
     public static final ForgeConfigSpec.BooleanValue DISTANT_WEATHER;
     public static final ForgeConfigSpec.BooleanValue DISTANT_THUNDER;
@@ -57,8 +58,8 @@ public final class AtmosphereConfig {
         GALAXY = b.comment("Faint galaxy band across the night sky.").define("galaxy", true);
         CONSTELLATIONS = b.comment("The thirteen birthsign constellations, faintly traced among the stars.").define("constellations", true);
         SHOOTING_STARS = b.comment("Occasional shooting stars on clear nights.").define("shootingStars", true);
-        SKIP_WITH_SHADERS = b.comment("Don't draw the extra sky while an Oculus/Iris shader pack is active (shader packs draw their own sky).")
-                .define("skipWithShaders", true);
+        SKIP_WITH_SHADERS = b.comment("Don't draw the extra sky while an Oculus/Iris shader pack is active.")
+                .define("skipWithShaders", false);
         CLOUD_HEIGHT = b.comment("Overworld cloud layer altitude (vanilla 192). Tamriel's mountains reach far above y 192, so the clouds sit",
                 "higher; shader packs that follow the cloud height (Complementary) move with it.").defineInRange("cloudHeight", 330, 64, 2048);
         b.pop();
@@ -71,9 +72,11 @@ public final class AtmosphereConfig {
         WEATHER_PARTICLES = b.comment("Snow, ash and sand precipitation particles for regional weather vanilla can't draw.").define("precipitationParticles", true);
         b.pop();
         b.push("clouds");
-        CLOUDS = b.comment("Skycraft's own clouds replace vanilla's in the overworld (not while an Oculus/Iris shader pack is active):",
+        CLOUDS = b.comment("Skycraft's own clouds replace vanilla's in the overworld:",
                 "cumulus, cirrus, overcast decks, storm towers, fog banks, peak caps, ash and sand, chosen by each region's",
                 "weather and climate. They follow Video Settings > Clouds (Fast = fewer puffs, Off = none).").define("skycraftClouds", true);
+        CLOUDS_SKIP_SHADERS = b.comment("Don't draw Skycraft clouds while an Oculus/Iris shader pack is active.")
+                .define("skipWithShaders", false);
         CLOUD_DISTANCE = b.comment("How far out clouds and distant weather are drawn, in blocks.").defineInRange("cloudDistance", 1800, 400, 3200);
         DISTANT_WEATHER = b.comment("Weather you can see in other regions: rain curtains under storms, snow squalls over mountains,",
                 "lightning, ash plumes and sandstorm walls on the horizon.").define("distantWeather", true);

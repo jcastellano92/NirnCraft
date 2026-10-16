@@ -94,8 +94,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        20,
-        20
+        10,
+        27
       ],
       "face": "south",
       "overlay": "sadrith_mora",
@@ -118,8 +118,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        0,
-        28
+        -6,
+        38
       ],
       "face": "south",
       "overlay": "sadrith_mora",
@@ -142,8 +142,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        -20,
-        20
+        -26,
+        25
       ],
       "face": "south",
       "overlay": "sadrith_mora",
@@ -190,8 +190,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -20,
-        -20
+        -23,
+        -17
       ],
       "face": "south",
       "overlay": "sadrith_mora",
@@ -214,8 +214,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        0,
-        -28
+        -9,
+        -41
       ],
       "face": "south",
       "overlay": "sadrith_mora",
@@ -239,7 +239,7 @@
       "wealth": "common",
       "at": [
         20,
-        -20
+        -24
       ],
       "face": "south",
       "overlay": "sadrith_mora",
@@ -298,6 +298,203 @@
     "sm_therana_pod": "Therana's Envoy Pod",
     "sm_nevrasa_house": "Nevrasa Dralor's Pod House",
     "sm_meluria_house": "Meluria Seleth's Root House",
-    "sm_trendrus_house": "Trendrus Dral's Spore House"
-  }
+    "sm_trendrus_house": "Trendrus Dral's Spore House",
+    "sadrith_mora_tel_naga_bazaar": "Tel Naga Fungal Root Market"
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -18,
+        44
+      ],
+      "to": [
+        12,
+        54
+      ],
+      "width": 4,
+      "variant": 0
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        24,
+        -18
+      ],
+      "to": [
+        44,
+        -8
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        -8,
+        18
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 5,
+      "name": "sadrith_mora_tel_naga_bazaar"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        -8,
+        -8
+      ],
+      "spokes": 7,
+      "r0": 18,
+      "r1": 76,
+      "wobble": 9,
+      "offset": 0.3,
+      "width": 4,
+      "ring_width": 3,
+      "rings": [
+        34,
+        62
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          86
+        ],
+        [
+          -12,
+          56
+        ],
+        [
+          -4,
+          24
+        ],
+        [
+          -8,
+          -8
+        ],
+        [
+          -22,
+          -48
+        ],
+        [
+          -8,
+          -76
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "root_causeway"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -86,
+          0
+        ],
+        [
+          -52,
+          12
+        ],
+        [
+          -18,
+          4
+        ],
+        [
+          22,
+          -12
+        ],
+        [
+          58,
+          8
+        ],
+        [
+          78,
+          32
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "spore_walk"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -12,
+        -24
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -8,
+        18
+      ],
+      "r": 26,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        42,
+        16
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -44,
+        38
+      ],
+      "r": 30,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 80,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 4,
+      "kit": "telvanni",
+      "flags": [
+        "rich"
+      ],
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "count": 9,
+      "kit": "telvanni",
+      "on": "spoke"
+    },
+    {
+      "kind": "alchemist",
+      "count": 3,
+      "kit": "telvanni",
+      "on": "root_causeway"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "kit": "telvanni",
+      "on": "spore_walk"
+    }
+  ]
 }

@@ -235,6 +235,7 @@ public final class Npcs {
             case SCHOLAR -> {
                 if (r.nextBoolean()) hand(npc, new ItemStack(Items.BOOK));
             }
+            case BARD -> hand(npc, com.skycraft.audio.BardPerformance.instrumentFor(npc));
             case TRAINER -> {
                 hand(npc, r.nextBoolean() ? item("skycraft:steel_sword", Items.IRON_SWORD) : new ItemStack(Items.BOOK));
             }

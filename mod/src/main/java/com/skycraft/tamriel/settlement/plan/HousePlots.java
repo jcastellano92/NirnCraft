@@ -39,29 +39,70 @@ public final class HousePlots {
             new Plot("corbolo_house", "cheydinhal", -28, 28, E, 11, 11, 15000, "imperial", false),
             new Plot("blackwood_villa", "leyawiin", 28, 28, W, 11, 13, 12000, "imperial", false),
             new Plot("jerall_view", "bruma", -28, 28, E, 11, 11, 10000, "colovian", false),
-            // Morrowind
+            new Plot("kvatch_hill_house", "kvatch", -28, 28, E, 11, 13, 14000, "colovian", false),
+            // Morrowind & Solstheim
             new Plot("balmora_manor", "balmora", 28, 28, W, 11, 13, 12000, "hlaalu", false),
             new Plot("vivec_canalside", "vivec", 30, 122, N, 9, 11, 9000, "hlaalu", true),
             new Plot("uvirith_spire", "sadrith_mora", -28, 28, E, 13, 13, 15000, "telvanni", false),
             new Plot("godsreach_manor", "mournhold", -40, 58, E, 13, 13, 20000, "hlaalu", false),
-            // High Rock
+            new Plot("severin_manor", "raven_rock", 28, 28, W, 13, 13, 15000, "hlaalu", false),
+            new Plot("aldruhn_redoran_manor", "aldruhn", -28, 28, E, 13, 15, 16000, "hlaalu", false),
+            new Plot("ebonheart_villa", "ebonheart", 28, 40, W, 11, 13, 14000, "imperial", false),
+            new Plot("necrom_sanctum", "necrom", -28, 40, E, 11, 13, 16000, "hlaalu", false),
+            new Plot("blacklight_manor", "blacklight", 28, 40, W, 13, 15, 18000, "hlaalu", false),
+            // High Rock & Orsinium
             new Plot("wayrest_townhouse", "wayrest", 28, 60, W, 11, 13, 15000, "breton", false),
             new Plot("daggerfall_manor", "daggerfall", -28, 28, E, 11, 13, 18000, "breton", false),
+            new Plot("camlorn_townhouse", "camlorn", -28, 40, E, 11, 13, 14000, "breton", false),
+            new Plot("shornhelm_manor", "shornhelm", 28, 40, W, 11, 13, 14000, "breton", false),
+            new Plot("evermor_villa", "evermor", -28, 40, E, 11, 13, 13000, "breton", false),
             new Plot("orsinium_longhouse", "orsinium", 28, 60, W, 9, 15, 10000, "orc", false),
             // Hammerfell
             new Plot("sentinel_villa", "sentinel", 28, 60, W, 13, 13, 20000, "redguard", false),
+            new Plot("rihad_townhouse", "rihad", -28, 40, E, 13, 13, 16000, "redguard", false),
+            new Plot("taneth_villa", "taneth", 28, 40, W, 13, 13, 15000, "redguard", false),
+            new Plot("hegathe_palace_house", "hegathe", -28, 40, E, 13, 15, 18000, "redguard", false),
+            new Plot("skaven_courtyard_home", "skaven", 28, 40, W, 11, 13, 13000, "redguard", false),
+            new Plot("elinhir_tower_house", "elinhir", -28, 40, E, 11, 13, 14000, "redguard", false),
+            new Plot("abahs_landing_villa", "abahs_landing", 28, 40, W, 13, 13, 17000, "redguard", false),
             // Valenwood
             new Plot("elden_root_treehouse", "elden_root", 32, 70, W, 11, 11, 15000, "bosmer", false),
+            new Plot("falinesti_bough_house", "falinesti", -28, 48, E, 11, 11, 16000, "bosmer", false),
+            new Plot("woodhearth_harbor_home", "woodhearth", 28, 40, W, 11, 13, 13000, "bosmer", false),
+            new Plot("silvenar_canopy_lodge", "silvenar", -28, 40, E, 11, 11, 14000, "bosmer", false),
+            new Plot("haven_port_lodge", "haven", 28, 40, W, 11, 11, 12000, "bosmer", false),
             // Summerset
             new Plot("alinor_villa", "alinor", 28, 60, W, 13, 13, 30000, "altmer", false),
+            new Plot("shimmerene_villa", "shimmerene", -28, 48, E, 13, 13, 24000, "altmer", false),
+            new Plot("firsthold_manor", "firsthold", 28, 48, W, 13, 15, 26000, "altmer", false),
+            new Plot("lillandril_spire", "lillandril", -28, 48, E, 13, 13, 24000, "altmer", false),
+            new Plot("cloudrest_aerie", "cloudrest", 28, 40, W, 13, 13, 25000, "altmer", false),
+            new Plot("skywatch_villa", "skywatch", -28, 40, E, 13, 13, 20000, "altmer", false),
             // Black Marsh
             new Plot("lilmoth_stilt_house", "lilmoth", 28, 60, W, 11, 11, 8000, "argonian", false),
+            new Plot("stormhold_xanmeer_house", "stormhold", -28, 48, E, 11, 13, 10000, "argonian", false),
+            new Plot("gideon_marsh_manor", "gideon", 28, 48, W, 11, 13, 11000, "argonian", false),
+            new Plot("helstrom_root_lodge", "helstrom", -28, 40, E, 11, 11, 12000, "argonian", false),
+            new Plot("thorn_fen_house", "thorn", 28, 40, W, 11, 11, 9000, "argonian", false),
+            new Plot("soulrest_bay_house", "soulrest", -28, 40, E, 11, 11, 9000, "argonian", false),
             // Elsweyr
-            new Plot("torval_moon_house", "torval", 28, 60, W, 11, 11, 12000, "khajiit", false));
+            new Plot("torval_moon_house", "torval", 28, 60, W, 11, 11, 12000, "khajiit", false),
+            new Plot("senchal_port_villa", "senchal", -28, 48, E, 13, 13, 16000, "khajiit", false),
+            new Plot("rimmen_palace_house", "rimmen", 28, 48, W, 13, 13, 15000, "khajiit", false),
+            new Plot("riverhold_caravanserai_home", "riverhold", -28, 40, E, 11, 13, 12000, "khajiit", false),
+            new Plot("dune_oasis_house", "dune", 28, 40, W, 11, 11, 11000, "khajiit", false),
+            new Plot("corinthe_bazaar_house", "corinthe", -28, 40, E, 11, 13, 12000, "khajiit", false));
 
     public static Plot byId(String id) {
         for (Plot p : PLOTS) if (p.id().equals(id)) return p;
         return null;
+    }
+
+    public static List<Plot> plotsForPlace(String placeId) {
+        if (placeId == null || placeId.isEmpty()) return List.of();
+        List<Plot> out = new ArrayList<>();
+        for (Plot p : PLOTS) if (p.place().equals(placeId)) out.add(p);
+        return List.copyOf(out);
     }
 
     /** Reserves the plots of a place in its finished layout (before floors are resolved). */

@@ -27,6 +27,9 @@ public enum WeatherKind {
     /** Dry, roaring wind under broken cloud: the gales of Atmora, the Sea of Ghosts and the frozen north. */
     GALE(Precip.NONE, 0.00f, 0.45f, 0.06f, 1.00f, 0f, 0xA8B4C0, 0.60f);
 
+    /** Alias for {@link #ASH_STORM} used by synoptic weather front specs. */
+    public static final WeatherKind ASHSTORM = ASH_STORM;
+
     /** What falls from the sky. RAIN becomes snow in snowy biomes and above the profile's snow line. */
     public enum Precip { NONE, RAIN, SNOW, ASH, SAND }
 
@@ -57,12 +60,20 @@ public enum WeatherKind {
         return precip == Precip.RAIN || precip == Precip.SNOW;
     }
 
+    /** True for severe outdoor weather (blizzard, sandstorm, ash storm, blight) where citizens seek shelter indoors. */
+    public boolean severe() {
+        return this == BLIZZARD || this == SANDSTORM || this == ASH_STORM || this == BLIGHT;
+    }
+
     public String id() {
         return name().toLowerCase(Locale.ROOT);
     }
 
     public static WeatherKind byId(String id) {
-        for (WeatherKind k : values()) if (k.id().equals(id)) return k;
+        if (id == null) return null;
+        String norm = id.toLowerCase(Locale.ROOT);
+        if ("ashstorm".equals(norm)) return ASH_STORM;
+        for (WeatherKind k : values()) if (k.id().equals(norm)) return k;
         return null;
     }
 

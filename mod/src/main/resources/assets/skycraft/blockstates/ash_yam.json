@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/ash_yam"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/ash_yam_harvested"
+    }
+  }
+}

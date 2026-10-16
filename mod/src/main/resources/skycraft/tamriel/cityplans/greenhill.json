@@ -57,16 +57,56 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
+      "type": "switchback",
+      "from": [
         0,
-        0
+        21
       ],
-      "r0": 5,
-      "r1": 22,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "to": [
+        6,
+        -14
+      ],
+      "legs": 3,
+      "amp": 12,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 3,
+      "phase": 1.74,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          18,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "cross"
     }
   ],
   "buildings": [
@@ -182,5 +222,47 @@
     "greenhill_landmark": "High Seat of place.skycraft.greenhill",
     "greenhill_plaza": "place.skycraft.greenhill Central Plaza"
   },
-  "innKey": "greenhill_b_5"
+  "innKey": "greenhill_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

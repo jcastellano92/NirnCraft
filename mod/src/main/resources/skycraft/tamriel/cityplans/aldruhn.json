@@ -112,8 +112,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        3,
-        28
+        12,
+        41
       ],
       "face": "south",
       "overlay": "aldruhn",
@@ -136,8 +136,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        -17,
-        22
+        -20,
+        25
       ],
       "face": "south",
       "overlay": "aldruhn",
@@ -160,8 +160,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -28,
-        5
+        -31,
+        2
       ],
       "face": "south",
       "overlay": "aldruhn",
@@ -184,8 +184,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -24,
-        -15
+        -27,
+        -18
       ],
       "face": "south",
       "overlay": "aldruhn",
@@ -208,8 +208,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -8,
-        -27
+        -30,
+        -37
       ],
       "face": "south",
       "overlay": "aldruhn",
@@ -232,7 +232,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        12,
+        28,
         -25
       ],
       "face": "south",
@@ -256,7 +256,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        26,
+        42,
         -10
       ],
       "face": "south",
@@ -304,6 +304,190 @@
     "ar_codus_books": "Codus Callonus's Books",
     "ar_tiras_trader": "Tiras Sadus's General Goods",
     "ar_bivale_clothier": "Bivale Teneran's Clothier",
-    "ar_gildans_house": "Gildan's Shell House"
-  }
+    "ar_gildans_house": "Gildan's Shell House",
+    "aldruhn_ash_plaza": "Under-Skar Forecourt Plaza"
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -46,
+        -68,
+        46,
+        -12
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        22
+      ],
+      "size": 15,
+      "variant": 0,
+      "stalls": 5,
+      "name": "aldruhn_ash_plaza"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -34
+      ],
+      "rx": 32,
+      "rz": 24,
+      "wobble": 2,
+      "lobes": 2,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "skar_ring"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        6
+      ],
+      "rx": 64,
+      "rz": 52,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 4,
+      "rank": 1,
+      "tag": "redoran_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          86
+        ],
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          18
+        ],
+        [
+          0,
+          -10
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "silt_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -86,
+          0
+        ],
+        [
+          -52,
+          4
+        ],
+        [
+          -26,
+          -12
+        ],
+        [
+          26,
+          -12
+        ],
+        [
+          52,
+          4
+        ],
+        [
+          86,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "guild_archway"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -36
+      ],
+      "r": 36,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        22
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -44,
+        18
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        44,
+        34
+      ],
+      "r": 30,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 82,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 6,
+      "kit": "redoran",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "skar_ring"
+    },
+    {
+      "kind": "house",
+      "count": 10,
+      "kit": "redoran",
+      "on": "redoran_loop"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "kit": "redoran",
+      "on": "guild_archway"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "kit": "redoran",
+      "on": "silt_road"
+    }
+  ]
 }

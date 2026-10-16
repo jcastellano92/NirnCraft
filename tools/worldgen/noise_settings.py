@@ -90,22 +90,81 @@ DF = {
 }
 
 SLOPED = "skycraft:tamriel/sloped"
+
+# Tier 1: Shallow & mid-depth karst galleries (horizontal/sloping bedding planes + braided spaghetti tunnels)
+KARST_GALLERIES = {
+    "type": "minecraft:min",
+    "argument1": add(
+        mul(3.6, {"type": "minecraft:square", "argument": noise("minecraft:cave_layer", 0.85, 7.0)}),
+        add(
+            {"type": "minecraft:clamp", "input": add(0.24, noise("minecraft:cave_cheese", 0.9, 0.6666666666666666)), "min": -1.0, "max": 1.0},
+            {"type": "minecraft:clamp", "input": add(1.5, mul(-0.64, SLOPED)), "min": 0.0, "max": 0.5},
+        ),
+    ),
+    "argument2": add("minecraft:overworld/caves/spaghetti_2d", "minecraft:overworld/caves/spaghetti_roughness_function"),
+}
+
+# Tier 2: Deep underworld vaulted chambers (y = -32..40, wide-span domes with flat-biased floors)
+VAULT_VERTICAL_ENVELOPE = mul(
+    ygrad(-44, -24, 0.0, 1.0),
+    ygrad(24, 46, 1.0, 0.0),
+)
+VAULT_CHAMBERS = add(
+    1.0,
+    mul(
+        VAULT_VERTICAL_ENVELOPE,
+        add(
+            -1.0,
+            add(
+                {"type": "minecraft:clamp", "input": add(0.18, noise("minecraft:cave_cheese", 0.55, 0.5)), "min": -1.0, "max": 1.0},
+                ygrad(-32, -16, 0.35, 0.0),
+            ),
+        ),
+    ),
+)
+
+# Tier 3: River-fed underground gorges & sinkhole throats where upland rivers (elevation > 90, river > 0.1) cut karst
+RIVER_GORGE_MASK = mul(
+    {"type": "minecraft:clamp", "input": mul(2.5, add(channel("river"), -0.1)), "min": 0.0, "max": 1.0},
+    {"type": "minecraft:clamp", "input": mul(0.025, add(channel("elevation"), -90.0)), "min": 0.0, "max": 1.0},
+)
+RIVER_GORGE_CAVE = add(
+    1.0,
+    mul(
+        RIVER_GORGE_MASK,
+        add(
+            -1.0,
+            add(
+                "minecraft:overworld/caves/spaghetti_2d",
+                mul(2.0, {"type": "minecraft:square", "argument": noise("minecraft:cave_layer", 0.75, 6.0)}),
+            ),
+        ),
+    ),
+)
+
+DEEP_CAVE_UNION = {
+    "type": "minecraft:min",
+    "argument1": {
+        "type": "minecraft:min",
+        "argument1": {"type": "minecraft:min", "argument1": KARST_GALLERIES, "argument2": "minecraft:overworld/caves/entrances"},
+        "argument2": VAULT_CHAMBERS,
+    },
+    "argument2": RIVER_GORGE_CAVE,
+}
+
 CAVES = {
     "type": "minecraft:range_choice", "input": SLOPED, "min_inclusive": -1000000.0, "max_exclusive": 1.5625,
     "when_in_range": {"type": "minecraft:min", "argument1": SLOPED,
                       "argument2": mul(5.0, add("minecraft:overworld/caves/entrances",
-                                                mul(2.0, "skycraft:tamriel/road")))},
-    "when_out_of_range": {"type": "minecraft:max",
-        "argument1": {"type": "minecraft:min",
-            "argument1": {"type": "minecraft:min",
-                "argument1": add(mul(4.0, {"type": "minecraft:square", "argument": noise("minecraft:cave_layer", 1.0, 8.0)}),
-                                 add({"type": "minecraft:clamp", "input": add(0.27, noise("minecraft:cave_cheese", 1.0, 0.6666666666666666)), "min": -1.0, "max": 1.0},
-                                     {"type": "minecraft:clamp", "input": add(1.5, mul(-0.64, SLOPED)), "min": 0.0, "max": 0.5})),
-                "argument2": "minecraft:overworld/caves/entrances"},
-            "argument2": add("minecraft:overworld/caves/spaghetti_2d", "minecraft:overworld/caves/spaghetti_roughness_function")},
-        "argument2": {"type": "minecraft:range_choice", "input": "minecraft:overworld/caves/pillars",
-                      "min_inclusive": -1000000.0, "max_exclusive": 0.03, "when_in_range": -1000000.0,
-                      "when_out_of_range": "minecraft:overworld/caves/pillars"}},
+                                                mul(2.5, "skycraft:tamriel/road")))},
+    "when_out_of_range": add(
+        mul(3.5, "skycraft:tamriel/road"),
+        {"type": "minecraft:max",
+         "argument1": DEEP_CAVE_UNION,
+         "argument2": {"type": "minecraft:range_choice", "input": "minecraft:overworld/caves/pillars",
+                       "min_inclusive": -1000000.0, "max_exclusive": 0.03, "when_in_range": -1000000.0,
+                       "when_out_of_range": "minecraft:overworld/caves/pillars"}},
+    ),
 }
 
 # Well above the surface (more than ~17 blocks, past any overhang) skip the cave noises entirely: that is most of a
@@ -210,12 +269,20 @@ DEFAULT_SURFACE = seq(
 
 
 def surface_rule():
-    gen = os.path.join(HERE, "generated", "surface_rule.json")
-    if os.path.exists(gen):
-        print("using", gen)
-        return json.load(open(gen, encoding="utf-8"))
-    print("using the default surface rule (tools/worldgen/generated/surface_rule.json not found)")
-    return DEFAULT_SURFACE
+    import sys
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
+    try:
+        import biomes
+        print("using live surface_rule() from tools/worldgen/biomes.py")
+        return biomes.surface_rule()
+    except Exception:
+        gen = os.path.join(HERE, "generated", "surface_rule.json")
+        if os.path.exists(gen):
+            print("using", gen)
+            return json.load(open(gen, encoding="utf-8"))
+        print("using the default surface rule (tools/worldgen/generated/surface_rule.json not found)")
+        return DEFAULT_SURFACE
 
 
 def main():

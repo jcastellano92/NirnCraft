@@ -1,6 +1,6 @@
 {
   "id": "winterhold",
-  "base": "none",
+  "base": "java",
   "sil": "frost-cliff-ruined-quarter",
   "names": {
     "inn": "the_frozen_hearth",
@@ -14,61 +14,501 @@
     "sigrun": "winterhold_sigruns_house"
   },
   "innKey": "the_frozen_hearth",
-  "gates": [[0, 66]],
+  "gates": [
+    [
+      0,
+      66
+    ]
+  ],
   "buildings": [
-    {"kind": "longhouse", "at": [0, -38], "size": [13, 21], "face": "S", "flags": ["seat"], "name": "jarls_longhouse"},
-    {"kind": "temple", "at": [-30, -16], "size": [9, 13], "face": "E", "variant": 7, "name": "winterhold_shrine"},
-    {"kind": "tower", "at": [42, -32], "size": [7, 7], "face": "W", "h": 14, "flags": ["ruined"], "name": "winterhold_fallen_watchtower"},
-    {"kind": "house", "at": [30, -10], "size": [7, 9], "face": "W", "flags": ["ruined"], "name": "winterhold_collapsed_manor"},
-    {"kind": "house", "at": [42, -14], "size": [7, 9], "face": "S", "flags": ["ruined"], "name": "winterhold_frostbitten_gable"},
-    {"kind": "house", "at": [54, -12], "size": [9, 9], "face": "W", "flags": ["ruined"], "name": "winterhold_cliffside_ruin"},
-    {"kind": "house", "at": [28, -26], "size": [7, 9], "face": "S", "flags": ["ruined"], "name": "winterhold_north_gable_ruin"},
-    {"kind": "house", "at": [50, -26], "size": [7, 9], "face": "W", "flags": ["ruined"], "name": "winterhold_bluff_cellar_ruin"},
-    {"kind": "house", "at": [36, 2], "size": [7, 9], "face": "W", "flags": ["ruined"], "name": "winterhold_sunken_hearth_ruin"},
-    {"kind": "house", "at": [56, 4], "size": [7, 9], "face": "S", "flags": ["ruined"], "name": "winterhold_sea_cliff_ruin"},
-    {"kind": "inn", "at": [18, -2], "size": [9, 9], "face": "W", "flags": ["ruined"], "name": "winterhold_old_coach_house_ruin"},
-    {"kind": "stables", "at": [-20, 56], "size": [11, 13], "face": "E", "name": "winterhold_stables"}
+    {
+      "kind": "longhouse",
+      "at": [
+        0,
+        -38
+      ],
+      "size": [
+        13,
+        21
+      ],
+      "face": "S",
+      "flags": [
+        "seat"
+      ],
+      "name": "jarls_longhouse"
+    },
+    {
+      "kind": "temple",
+      "at": [
+        -30,
+        -16
+      ],
+      "size": [
+        9,
+        13
+      ],
+      "face": "E",
+      "variant": 7,
+      "name": "winterhold_shrine"
+    },
+    {
+      "kind": "tower",
+      "at": [
+        42,
+        -32
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "face": "W",
+      "h": 14,
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_fallen_watchtower"
+    },
+    {
+      "kind": "house",
+      "at": [
+        30,
+        -10
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_collapsed_manor"
+    },
+    {
+      "kind": "house",
+      "at": [
+        42,
+        -14
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_frostbitten_gable"
+    },
+    {
+      "kind": "house",
+      "at": [
+        54,
+        -12
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_cliffside_ruin"
+    },
+    {
+      "kind": "house",
+      "at": [
+        28,
+        -26
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_north_gable_ruin"
+    },
+    {
+      "kind": "house",
+      "at": [
+        54,
+        -26
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_bluff_cellar_ruin"
+    },
+    {
+      "kind": "house",
+      "at": [
+        36,
+        2
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_sunken_hearth_ruin"
+    },
+    {
+      "kind": "house",
+      "at": [
+        56,
+        4
+      ],
+      "size": [
+        7,
+        9
+      ],
+      "face": "S",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_sea_cliff_ruin"
+    },
+    {
+      "kind": "inn",
+      "at": [
+        18,
+        -2
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "W",
+      "flags": [
+        "ruined"
+      ],
+      "name": "winterhold_old_coach_house_ruin"
+    },
+    {
+      "kind": "stables",
+      "at": [
+        -20,
+        56
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "E",
+      "name": "winterhold_stables"
+    }
   ],
   "plazas": [
-    {"at": [0, 12], "size": 13, "variant": 0, "stalls": 3, "name": "winterhold_square"}
+    {
+      "at": [
+        0,
+        12
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 3,
+      "name": "winterhold_square"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 66], [1, 46], [-2, 26], [0, 10], [0, -10], [0, -22]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-52, 28], [-28, 24], [-8, 28], [14, 26], [38, 24], [54, 26]], "width": 3, "rank": 1, "tag": "row"},
-    {"type": "path", "via": [[-26, -24], [-36, -6], [-40, 12], [-30, 24]], "width": 3, "rank": 1, "tag": "west"},
-    {"type": "path", "via": [[22, 28], [30, 44], [20, 58]], "width": 2, "rank": 2, "tag": "lane"},
-    {"type": "path", "via": [[-24, 30], [-32, 46], [-22, 58]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          66
+        ],
+        [
+          1,
+          46
+        ],
+        [
+          -2,
+          26
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          0,
+          -10
+        ],
+        [
+          0,
+          -22
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -52,
+          28
+        ],
+        [
+          -28,
+          24
+        ],
+        [
+          -8,
+          28
+        ],
+        [
+          14,
+          26
+        ],
+        [
+          38,
+          24
+        ],
+        [
+          54,
+          26
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          -24
+        ],
+        [
+          -36,
+          -6
+        ],
+        [
+          -40,
+          12
+        ],
+        [
+          -30,
+          24
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "west"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          22,
+          28
+        ],
+        [
+          30,
+          44
+        ],
+        [
+          20,
+          58
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -24,
+          30
+        ],
+        [
+          -32,
+          46
+        ],
+        [
+          -22,
+          58
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, -38], "r": 24, "zone": "noble"},
-    {"at": [0, 14], "r": 20, "zone": "centre"},
-    {"at": [-34, 36], "r": 22, "zone": "poor"},
-    {"at": [28, 40], "r": 22, "zone": "craft"}
+    {
+      "at": [
+        0,
+        -38
+      ],
+      "r": 24,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        14
+      ],
+      "r": 20,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -34,
+        36
+      ],
+      "r": 22,
+      "zone": "poor"
+    },
+    {
+      "at": [
+        28,
+        40
+      ],
+      "r": 22,
+      "zone": "craft"
+    }
   ],
-  "fabric": {"radius": 62, "target": 0.34, "fill_cap": 0, "yard_cap": 6},
+  "fabric": {
+    "radius": 62,
+    "target": 0.34,
+    "fill_cap": 0,
+    "yard_cap": 6
+  },
   "queue": [
-    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "the_frozen_hearth", "on": "main"},
-    {"kind": "store", "size": [9, 9], "name": "birnas_oddments", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "winterhold_smithy", "on": "row"},
-    {"kind": "alchemist", "name": "winterhold_apothecary", "on": "row"},
-    {"kind": "house", "name": "winterhold_dravyns_house", "on": "row"},
-    {"kind": "house", "name": "winterhold_ysoldes_house", "on": "west"},
-    {"kind": "house", "name": "winterhold_ilvesis_house", "on": "lane"},
-    {"kind": "house", "name": "winterhold_sigruns_house", "on": "row"}
+    {
+      "kind": "inn",
+      "size": [
+        11,
+        15
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "the_frozen_hearth",
+      "on": "main"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        9
+      ],
+      "name": "birnas_oddments",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "winterhold_smithy",
+      "on": "row"
+    },
+    {
+      "kind": "alchemist",
+      "name": "winterhold_apothecary",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "winterhold_dravyns_house",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "winterhold_ysoldes_house",
+      "on": "west"
+    },
+    {
+      "kind": "house",
+      "name": "winterhold_ilvesis_house",
+      "on": "lane"
+    },
+    {
+      "kind": "house",
+      "name": "winterhold_sigruns_house",
+      "on": "row"
+    }
   ],
   "features": [
-    {"type": "shrine", "theme": "divine:talos", "where": "free"},
-    {"type": "memorial", "at": [38, -4]},
-    {"type": "memorial", "where": "free"},
-    {"type": "great_tree", "theme": "spruce", "where": "free"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "main"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "bench", "count": 2, "where": "square"},
-    {"type": "market", "where": "free"},
-    {"type": "statue", "theme": "divine:kynareth", "where": "square"},
-    {"type": "bell_tower", "where": "free"},
-    {"type": "garden", "where": "free"}
+    {
+      "type": "shrine",
+      "theme": "divine:talos",
+      "where": "free"
+    },
+    {
+      "type": "memorial",
+      "at": [
+        38,
+        -4
+      ]
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 3,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "well",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "bench",
+      "count": 2,
+      "where": "square"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "statue",
+      "theme": "divine:kynareth",
+      "where": "square"
+    },
+    {
+      "type": "bell_tower",
+      "where": "free"
+    },
+    {
+      "type": "garden",
+      "where": "free"
+    }
   ],
   "titles": {
     "winterhold_shrine": "Winterhold Shrine",

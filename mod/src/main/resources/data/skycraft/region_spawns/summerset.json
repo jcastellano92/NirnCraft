@@ -3,6 +3,99 @@
     "provinces": [
       "summerset"
     ],
+    "biomes": [
+      "skycraft:summerset_crystal_grottoes",
+      "skycraft:falmer_glow_caves",
+      "skycraft:mushroom_grottos"
+    ],
+    "why": [
+      "summerset.L4.silk_spiders",
+      "summerset.L10.crystal_vaults",
+      "summerset.L10.abyssal_vents"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:wisp",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "spirit",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:indrik",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 9,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:spriggan",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:land_dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "summerset"
+    ],
     "regions": [
       "summerset/summerset_isle"
     ],

@@ -103,6 +103,30 @@ public final class ProvincialHomes {
         return HousePlots.byId(houseId) != null;
     }
 
+    /** All provincial city home plots in the given settlement ({@code placeId}). */
+    public static java.util.List<HousePlots.Plot> plotsForPlace(String placeId) {
+        return HousePlots.plotsForPlace(placeId);
+    }
+
+    /** All provincial city home plots in the given province ({@code cyrodiil}, {@code morrowind}, etc.). */
+    public static java.util.List<HousePlots.Plot> plotsForProvince(String province) {
+        if (province == null || province.isEmpty()) return java.util.List.of();
+        String prov = province.toLowerCase(java.util.Locale.ROOT);
+        int slash = prov.indexOf('/');
+        if (slash >= 0) prov = prov.substring(0, slash);
+        java.util.List<HousePlots.Plot> out = new java.util.ArrayList<>();
+        for (HousePlots.Plot plot : HousePlots.PLOTS) {
+            Optional<Place> place = Places.byId(plot.place());
+            if (place.isPresent()) {
+                String reg = place.get().regionId();
+                if (reg != null && (reg.startsWith(prov + "/") || reg.equals(prov))) {
+                    out.add(plot);
+                }
+            }
+        }
+        return java.util.List.copyOf(out);
+    }
+
     // ------------------------------------------------------------------ who may buy
 
     /** Null when the player may buy the home, else why not. */

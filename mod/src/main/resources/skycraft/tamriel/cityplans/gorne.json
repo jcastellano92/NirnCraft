@@ -23,8 +23,8 @@
     {
       "id": "dome_palace",
       "at": [
-        0,
-        0
+        -5,
+        -15
       ],
       "face": "south",
       "name": "gorne_landmark",
@@ -46,7 +46,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -3,
-        14
+        -4,
+        26
       ],
       "face": "south",
       "overlay": "telvannis",
@@ -94,8 +94,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -13,
-        -6
+        -18,
+        9
       ],
       "face": "south",
       "overlay": "telvannis",
@@ -118,8 +118,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        17,
+        -20
       ],
       "face": "south",
       "overlay": "telvannis",
@@ -151,11 +151,137 @@
     "gorne_b_4": "Island Herbary",
     "gorne_b_5": "Lady Llaren's Summer Estate",
     "gorne_b_6": "Ferryman's Stone Cottage",
-    "gorne_b_7": "Bay Pier Store"
+    "gorne_b_7": "Bay Pier Store",
+    "gorne_islet_square": "Gorne Emerald Islet Quay"
   },
   "innKey": "gorne_b_2",
   "names": {
     "inn": "gorne_b_2",
     "store": "gorne_b_3"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        10
+      ],
+      "size": 13,
+      "variant": 1,
+      "stalls": 4,
+      "name": "gorne_islet_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 32,
+      "rz": 28,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "emerald_manor_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          -14
+        ],
+        [
+          0,
+          -38
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "islet_avenue"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -38,
+          4
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          42,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "garden_walk"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 4,
+      "kit": "velothi",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "emerald_manor_ring"
+    },
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "velothi",
+      "on": "islet_avenue"
+    }
+  ]
 }

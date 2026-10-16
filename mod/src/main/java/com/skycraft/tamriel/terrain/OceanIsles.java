@@ -54,6 +54,14 @@ public final class OceanIsles {
         MapSample ms = new MapSample();
         TamrielMap.sample(ix, iz, ms);
         if (ms.coastDistance > MIN_CENTER_COAST) return null;
+        if (!TamrielMap.inTamriel(ix, iz)) {
+            // In Beyond outer-realm archipelagos, ensure the island perimeter stays clear of foreign island shores
+            int[][] card = {{72, 0}, {-72, 0}, {0, 72}, {0, -72}};
+            for (int[] o : card) {
+                TamrielMap.sample(ix + o[0], iz + o[1], ms);
+                if (ms.coastDistance > -96f) return null;
+            }
+        }
         if (!Places.overlapping(ix - 140, iz - 140, ix + 140, iz + 140).isEmpty()) return null;
 
         double tr = unit(h, 3);

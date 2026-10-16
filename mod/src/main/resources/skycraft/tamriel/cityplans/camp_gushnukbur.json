@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          31
+        ],
+        [
+          -2,
+          8
+        ],
+        [
+          -2,
+          -17
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -24,
+          9
+        ],
+        [
+          -2,
+          11
+        ],
+        [
+          24,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
       "at": [
-        0,
+        -2,
         0
       ],
-      "r0": 7,
-      "r1": 32,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 20,
+      "rz": 15,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 2.23,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        16,
-        20
+        3,
+        29
       ],
       "face": "north",
       "overlay": "greenshade",
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -23,
-        11
+        -19,
+        22
       ],
       "face": "north",
       "overlay": "greenshade",
@@ -182,5 +227,47 @@
     "camp_gushnukbur_landmark": "High Seat of place.skycraft.camp_gushnukbur",
     "camp_gushnukbur_plaza": "place.skycraft.camp_gushnukbur Central Plaza"
   },
-  "innKey": "camp_gushnukbur_b_5"
+  "innKey": "camp_gushnukbur_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -13
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        12,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 30,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

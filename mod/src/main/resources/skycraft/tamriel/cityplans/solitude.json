@@ -27,51 +27,311 @@
   },
   "innKey": "winking_skeever",
   "buildings": [
-    {"kind": "manor", "at": [48, 12], "size": [11, 13], "face": "W", "raise": 16, "flags": ["upper", "rich"], "name": "solitude_erikurs_manor"},
-    {"kind": "manor", "at": [-50, -30], "size": [11, 13], "face": "E", "raise": 16, "flags": ["upper", "rich"], "name": "solitude_brylings_manor"},
-    {"kind": "house", "at": [50, 52], "size": [9, 11], "face": "W", "raise": 16, "flags": ["upper"], "name": "solitude_vittorias_house"},
-    {"kind": "stables", "at": [-28, 92], "size": [11, 9], "face": "E", "raise": 16, "name": "solitude_gate_stables"}
+    {
+      "kind": "manor",
+      "at": [
+        48,
+        12
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "W",
+      "raise": 16,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "name": "solitude_erikurs_manor"
+    },
+    {
+      "kind": "manor",
+      "at": [
+        -50,
+        -30
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "E",
+      "raise": 16,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "name": "solitude_brylings_manor"
+    },
+    {
+      "kind": "house",
+      "at": [
+        50,
+        52
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "raise": 16,
+      "flags": [
+        "upper"
+      ],
+      "name": "solitude_vittorias_house"
+    },
+    {
+      "kind": "stables",
+      "at": [
+        -28,
+        92
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "E",
+      "raise": 16,
+      "name": "solitude_gate_stables"
+    }
   ],
   "plazas": [
-    {"at": [-32, 38], "size": 11, "variant": 0, "stalls": 2, "raise": 16, "name": "solitude_wells_square"},
-    {"at": [0, -68], "size": 13, "variant": 1, "stalls": 0, "raise": 16, "name": "solitude_palace_courtyard"}
+    {
+      "at": [
+        -32,
+        38
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "raise": 16,
+      "name": "solitude_wells_square"
+    },
+    {
+      "at": [
+        0,
+        -68
+      ],
+      "size": 13,
+      "variant": 1,
+      "stalls": 0,
+      "raise": 16,
+      "name": "solitude_palace_courtyard"
+    }
   ],
   "nets": [
-    {"type": "loop", "at": [0, 8], "rx": 84, "rz": 98, "wobble": 8, "lobes": 4, "phase": 0.5, "width": 3, "rank": 1, "tag": "ring", "raise": 16},
-    {"type": "path", "via": [[-52, 104], [-30, 92], [-6, 100]], "width": 3, "tag": "ring", "raise": 16},
-    {"type": "path", "via": [[52, 104], [30, 92], [6, 100]], "width": 3, "tag": "ring", "raise": 16}
+    {
+      "type": "loop",
+      "at": [
+        0,
+        8
+      ],
+      "rx": 84,
+      "rz": 98,
+      "wobble": 8,
+      "lobes": 4,
+      "phase": 0.5,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring",
+      "raise": 16
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -52,
+          104
+        ],
+        [
+          -30,
+          92
+        ],
+        [
+          -6,
+          100
+        ]
+      ],
+      "width": 3,
+      "tag": "ring",
+      "raise": 16
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          52,
+          104
+        ],
+        [
+          30,
+          92
+        ],
+        [
+          6,
+          100
+        ]
+      ],
+      "width": 3,
+      "tag": "ring",
+      "raise": 16
+    }
   ],
   "zones": [
-    {"at": [0, -80], "r": 36, "zone": "noble"},
-    {"at": [0, 40], "r": 26, "zone": "centre"},
-    {"at": [64, 76], "r": 26, "zone": "craft"},
-    {"at": [-70, 70], "r": 26, "zone": "poor"}
+    {
+      "at": [
+        0,
+        -80
+      ],
+      "r": 36,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        40
+      ],
+      "r": 26,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        64,
+        76
+      ],
+      "r": 26,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -70,
+        70
+      ],
+      "r": 26,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 120, "target": 0.5},
+  "fabric": {
+    "radius": 120,
+    "target": 0.5
+  },
   "queue": [
-    {"kind": "house", "name": "solitude_styrrs_house", "raise": 16, "on": "ring"},
-    {"kind": "house", "name": "solitude_evettes_house", "raise": 16, "on": "ring"},
-    {"kind": "house", "name": "solitude_addvars_house", "raise": 16, "on": "ring"},
-    {"kind": "house", "name": "solitude_jalas_house", "raise": 16, "on": "ring"},
-    {"kind": "house", "name": "solitude_melarans_lodging", "raise": 16, "on": "ring"},
-    {"kind": "store", "size": [9, 11], "name": "solitude_spiced_wine_shop", "raise": 16, "on": "ring"}
+    {
+      "kind": "house",
+      "name": "solitude_styrrs_house",
+      "raise": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "solitude_evettes_house",
+      "raise": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "solitude_addvars_house",
+      "raise": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "solitude_jalas_house",
+      "raise": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "solitude_melarans_lodging",
+      "raise": 16,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        11
+      ],
+      "name": "solitude_spiced_wine_shop",
+      "raise": 16,
+      "on": "ring"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "emperor", "at": [0, 18]},
-    {"type": "fountain", "where": "square"},
-    {"type": "great_tree", "theme": "oak", "where": "free"},
-    {"type": "memorial", "count": 2, "where": "free"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "ring"},
-    {"type": "market", "where": "free"},
-    {"type": "garden", "count": 2, "where": "free"},
-    {"type": "shrine", "theme": "divine:akatosh", "count": 2, "where": "free"},
-    {"type": "aqueduct", "where": "edge"},
-    {"type": "bell_tower", "where": "free"},
-    {"type": "bench", "count": 2, "where": "square"},
-    {"type": "tree_row", "where": "street", "tag": "ring"},
-    {"type": "pool", "where": "free"},
-    {"type": "well", "where": "free"}
+    {
+      "type": "statue",
+      "theme": "emperor",
+      "at": [
+        0,
+        18
+      ]
+    },
+    {
+      "type": "fountain",
+      "where": "square"
+    },
+    {
+      "type": "great_tree",
+      "theme": "oak",
+      "where": "free"
+    },
+    {
+      "type": "memorial",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 3,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "ring"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "garden",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:akatosh",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "aqueduct",
+      "where": "edge"
+    },
+    {
+      "type": "bell_tower",
+      "where": "free"
+    },
+    {
+      "type": "bench",
+      "count": 2,
+      "where": "square"
+    },
+    {
+      "type": "tree_row",
+      "where": "street",
+      "tag": "ring"
+    },
+    {
+      "type": "pool",
+      "where": "free"
+    },
+    {
+      "type": "well",
+      "where": "free"
+    }
   ],
   "titles": {
     "blue_palace": "The Blue Palace",

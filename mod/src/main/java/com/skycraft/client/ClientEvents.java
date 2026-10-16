@@ -44,8 +44,16 @@ public final class ClientEvents {
     private static boolean punchLeftNext = false;
     private static float offhandFistSwing = 0f;
     private static float prevOffhandFistSwing = 0f;
+    private static int dodgeRollTicks = 0;
+    private static int shieldBashTicks = 0;
+    private static int powerAttackTicks = 0;
+    private static boolean pushedPlayerPose = false;
 
     private ClientEvents() {}
+
+    public static boolean isWallClinging() {
+        return isWallClinging;
+    }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -71,6 +79,7 @@ public final class ClientEvents {
         while (SkyKeys.DODGE.consumeClick()) {
             if (Perks.has(mc.player, "athletics.dodge_roll") && !ClientState.has(CorePackets.SyncVitals.EXHAUSTED)) {
                 SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.DODGE_ROLL, 0));
+                dodgeRollTicks = 12;
                 Vec3 look = mc.player.getViewVector(1.0f);
                 Vec3 horiz = new Vec3(look.x, 0, look.z).normalize();
                 float fwd = mc.player.input.jumping ? 0 : (mc.player.input.up ? 1 : (mc.player.input.down ? -1 : 0));
@@ -242,11 +251,14 @@ public final class ClientEvents {
             mc.options.keySprint.setDown(false);
         }
 
-        // Offhand fist swing animation decay
+        // Offhand fist swing & third-person action animation decay
         prevOffhandFistSwing = offhandFistSwing;
         if (offhandFistSwing > 0f) {
             offhandFistSwing = Math.max(0f, offhandFistSwing - 0.16f);
         }
+        if (dodgeRollTicks > 0) dodgeRollTicks--;
+        if (shieldBashTicks > 0) shieldBashTicks--;
+        if (powerAttackTicks > 0) powerAttackTicks--;
     }
 
     /** Out of stamina (until it recovers) or carrying too much: no running. */
@@ -255,11 +267,26 @@ public final class ClientEvents {
         return ClientState.has(CorePackets.SyncVitals.EXHAUSTED) || com.skycraft.inventory.client.ClientInventoryHandlers.over;
     }
 
-    /** Keep the forward impulse under the sprint threshold so neither the sprint key nor double-tapping W can start a run. */
+    /**
+     * Keep forward impulse under sprint threshold when exhausted/over-encumbered, and cancel vanilla item-use
+     * slowness for Archery "Ranger" (move at full speed with drawn bow/crossbow) and Block "Block Runner"
+     * (move faster with shield or weapon raised).
+     */
     @SubscribeEvent
     public static void onMovementInput(MovementInputUpdateEvent event) {
-        if (event.getEntity() instanceof net.minecraft.client.player.LocalPlayer player && cannotSprint(player)) {
-            Input input = event.getInput();
+        if (!(event.getEntity() instanceof net.minecraft.client.player.LocalPlayer player)) return;
+        Input input = event.getInput();
+        if (player.isUsingItem() && !player.isPassenger()) {
+            var useItem = player.getUseItem().getItem();
+            boolean rangedUse = useItem instanceof BowItem || useItem instanceof net.minecraft.world.item.CrossbowItem;
+            boolean rangerActive = rangedUse && Perks.has(player, "archery.ranger");
+            boolean blockRunnerActive = (player.isBlocking() || wasBlocking) && Perks.has(player, "block.block_runner");
+            if (rangerActive || blockRunnerActive) {
+                input.forwardImpulse *= 5.0f;
+                input.leftImpulse *= 5.0f;
+            }
+        }
+        if (cannotSprint(player)) {
             if (input.forwardImpulse > 0.79f) input.forwardImpulse = 0.79f;
         }
     }
@@ -285,9 +312,14 @@ public final class ClientEvents {
         if (mainItem.isEmpty() && offItem.getItem() instanceof net.minecraft.world.item.ShieldItem) {
             // Single shield equipped: shield bash instead of unarmed punch!
             event.setCanceled(true);
+            shieldBashTicks = 10;
             mc.player.swing(net.minecraft.world.InteractionHand.OFF_HAND, false);
             SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHIELD_BASH, 0));
             return;
+        }
+
+        if (mc.player.isSprinting() && !ClientState.has(CorePackets.SyncVitals.EXHAUSTED)) {
+            powerAttackTicks = 10;
         }
 
         if (mainItem.isEmpty() && offItem.isEmpty()) {
@@ -429,13 +461,134 @@ public final class ClientEvents {
         }
     }
 
-    /** Archery "Eagle Eye": sneak while drawing a bow to zoom in. */
+    /** Archery "Eagle Eye" and "Steady Hand": sneak while drawing a bow to zoom in (deeper zoom with Steady Hand). */
     @SubscribeEvent
     public static void fov(ComputeFovModifierEvent event) {
         var player = event.getPlayer();
         if (player.isUsingItem() && player.getUseItem().getItem() instanceof BowItem && player.isCrouching()
                 && Perks.has(player, "archery.eagle_eye")) {
-            event.setNewFovModifier(event.getNewFovModifier() * 0.6f);
+            int steadyRank = Perks.rank(player, "archery.steady_hand");
+            float zoom = steadyRank >= 2 ? 0.42f : (steadyRank == 1 ? 0.50f : 0.60f);
+            event.setNewFovModifier(event.getNewFovModifier() * zoom);
+        }
+    }
+
+    /**
+     * Third-person player animations: sheathed relaxed arms, spell-casting gestures, wall-climbing hand-over-hand reach,
+     * dodge-roll somersault, power-attack overhead windup & lunge, and shield-bash thrust.
+     */
+    @SubscribeEvent
+    public static void onRenderPlayerPre(net.minecraftforge.client.event.RenderLivingEvent.Pre<?, ?> event) {
+        pushedPlayerPose = false;
+        if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player)) return;
+        if (!(event.getRenderer().getModel() instanceof net.minecraft.client.model.PlayerModel<?> playerModel)) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        boolean isLocal = player == mc.player;
+        float pt = event.getPartialTick();
+        var poseStack = event.getPoseStack();
+
+        // 1. Sheathed relaxed stance: lower arms to sides when weapons are stowed
+        if (com.skycraft.arsenal.Sheathe.isSheathed(player)) {
+            playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
+            playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
+        }
+
+        // 2. Spell-casting gestures (left, right, or dual/two-handed channeling)
+        if (isLocal && com.skycraft.magic.client.MagicClientEvents.isCasting()) {
+            boolean leftCast = com.skycraft.magic.client.MagicClientEvents.isCasting(com.skycraft.magic.spell.SpellCasting.LEFT);
+            boolean rightCast = com.skycraft.magic.client.MagicClientEvents.isCasting(com.skycraft.magic.spell.SpellCasting.RIGHT);
+            String spellId = com.skycraft.magic.MagicData.selectedSpell(player);
+            com.skycraft.magic.spell.Spell spell = com.skycraft.magic.spell.Spells.byId(spellId);
+            boolean twoHandChannel = (leftCast && rightCast) || (spell != null && (
+                    spell.school == com.skycraft.magic.spell.School.RESTORATION
+                            || spell.school == com.skycraft.magic.spell.School.ALTERATION
+                            || spell.school == com.skycraft.magic.spell.School.CONJURATION));
+            if (twoHandChannel) {
+                playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
+                playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
+            } else {
+                if (rightCast) playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
+                if (leftCast) playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
+            }
+        }
+
+        // 3. Wall climbing: alternating overhead reach + slight lean into the wall
+        boolean climbing = (isLocal && isWallClinging) || com.skycraft.vitals.ActionHandler.isClimbing(player);
+        if (climbing) {
+            boolean rightReach = ((player.tickCount / 6) & 1) == 0;
+            playerModel.rightArmPose = rightReach
+                    ? net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR
+                    : net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
+            playerModel.leftArmPose = rightReach
+                    ? net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS
+                    : net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR;
+            poseStack.pushPose();
+            pushedPlayerPose = true;
+            float bob = net.minecraft.util.Mth.sin((player.tickCount + pt) * 0.55F) * 0.05F;
+            poseStack.translate(0.0F, bob, 0.0F);
+            return;
+        }
+
+        // 4. Dodge roll: compact tucked crouch + 360-degree forward somersault
+        int rollRem = isLocal ? dodgeRollTicks : (com.skycraft.vitals.ActionHandler.isDodgeRolling(player) ? 6 : 0);
+        if (rollRem > 0) {
+            playerModel.crouching = true;
+            float progress = 1.0F - ((rollRem - pt) / 12.0F);
+            progress = net.minecraft.util.Mth.clamp(progress, 0.0F, 1.0F);
+            poseStack.pushPose();
+            pushedPlayerPose = true;
+            float bodyYaw = net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot);
+            poseStack.translate(0.0F, 0.80F, 0.0F);
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-bodyYaw));
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(progress * 360.0F));
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(bodyYaw));
+            poseStack.translate(0.0F, -0.80F, 0.0F);
+            return;
+        }
+
+        // 5. Shield bash: forward shield lunge
+        int bashRem = isLocal ? shieldBashTicks : (com.skycraft.vitals.ActionHandler.isShieldBashing(player) ? 5 : 0);
+        if (bashRem > 0) {
+            playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD;
+            float thrust = net.minecraft.util.Mth.sin(((10.0F - bashRem + pt) / 10.0F) * (float) Math.PI);
+            poseStack.pushPose();
+            pushedPlayerPose = true;
+            double yawRad = Math.toRadians(net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot));
+            poseStack.translate(-Math.sin(yawRad) * 0.32 * thrust, 0.0, Math.cos(yawRad) * 0.32 * thrust);
+            return;
+        }
+
+        // 6. Power-attack windup & cleave lunge
+        int pwrRem = isLocal ? powerAttackTicks : (com.skycraft.vitals.ActionHandler.isPowerAttacking(player) ? 5 : 0);
+        if (pwrRem > 0) {
+            float progress = (10.0F - pwrRem + pt) / 10.0F;
+            if (progress < 0.45F) {
+                playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR;
+            }
+            float lunge = net.minecraft.util.Mth.sin(progress * (float) Math.PI);
+            poseStack.pushPose();
+            pushedPlayerPose = true;
+            double yawRad = Math.toRadians(net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot));
+            poseStack.translate(-Math.sin(yawRad) * 0.25 * lunge, 0.06 * lunge, Math.cos(yawRad) * 0.25 * lunge);
+            return;
+        }
+
+        // 7. Weapon blocking stance
+        if (isLocal && wasBlocking) {
+            if (player.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem) {
+                playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
+            } else {
+                playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderPlayerPost(net.minecraftforge.client.event.RenderLivingEvent.Post<?, ?> event) {
+        if (pushedPlayerPose && event.getEntity() instanceof net.minecraft.world.entity.player.Player) {
+            event.getPoseStack().popPose();
+            pushedPlayerPose = false;
         }
     }
 

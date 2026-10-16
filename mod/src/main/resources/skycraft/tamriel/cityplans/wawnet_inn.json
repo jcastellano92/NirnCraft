@@ -30,8 +30,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
-        0
+        -12,
+        3
       ],
       "face": "south",
       "overlay": "great_forest",
@@ -42,7 +42,7 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        0,
+        4,
         15
       ],
       "face": "south",
@@ -55,7 +55,7 @@
       "wealth": "common",
       "at": [
         -8,
-        0
+        -16
       ],
       "face": "south",
       "overlay": "great_forest",
@@ -66,7 +66,7 @@
       "use": "barn",
       "wealth": "common",
       "at": [
-        0,
+        4,
         -15
       ],
       "face": "south",
@@ -90,10 +90,130 @@
     "wawnet_inn_b_1": "Wawnet Inn",
     "wawnet_inn_b_2": "Wawnet Post Stables",
     "wawnet_inn_b_3": "Nerussa's Wine Cellar",
-    "wawnet_inn_b_4": "Red Ring Coach Shed"
+    "wawnet_inn_b_4": "Red Ring Coach Shed",
+    "wawnet_inn_square": "Wawnet Lakeside Coaching Yard"
   },
   "innKey": "wawnet_inn_b_1",
   "names": {
     "inn": "wawnet_inn_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        0
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "wawnet_inn_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "rumare_west_highway"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          -2
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          16,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "wawnet_inn_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 14,
+      "rz": 11,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "gable_inn_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "gable_inn_loop"
+    },
+    {
+      "kind": "house",
+      "count": 1,
+      "on": "rumare_west_highway"
+    }
+  ]
 }

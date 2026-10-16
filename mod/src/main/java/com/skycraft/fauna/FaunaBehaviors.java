@@ -1,6 +1,12 @@
 package com.skycraft.fauna;
 
 import com.skycraft.Skycraft;
+import com.skycraft.fauna.entity.BearEntity;
+import com.skycraft.fauna.entity.HorkerEntity;
+import com.skycraft.fauna.entity.MammothEntity;
+import com.skycraft.fauna.entity.MudcrabEntity;
+import com.skycraft.fauna.entity.SabreCatEntity;
+import com.skycraft.fauna.entity.SlaughterfishEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,9 +52,23 @@ public final class FaunaBehaviors {
     public static void applyWildFleeGoal(Animal animal) {
         if (animal.getPersistentData().getBoolean(FLEE_FLAG)) return;
 
-        // Predators, tamed pets, or farm animals don't flee
+        // Predators, neutral/defensive fauna, SkyBeast (which manages its own goals by Temper), tamed pets, or farm animals don't flee
         if (animal instanceof TamableAnimal tamable && tamable.isTame()) return;
         if (Livestock.isOwned(animal) || animal.getPersistentData().getBoolean(Livestock.PLAYER_OWNED)) return;
+        if (animal instanceof BearEntity
+                || animal instanceof SabreCatEntity
+                || animal instanceof HorkerEntity
+                || animal instanceof MudcrabEntity
+                || animal instanceof MammothEntity
+                || animal instanceof com.skycraft.creatures.entity.SkyBeast
+                || animal instanceof net.minecraft.world.entity.NeutralMob) {
+            return;
+        }
+        if (!animal.targetSelector.getAvailableGoals().isEmpty()
+                || animal.goalSelector.getAvailableGoals().stream()
+                        .anyMatch(w -> w.getGoal() instanceof net.minecraft.world.entity.ai.goal.MeleeAttackGoal)) {
+            return;
+        }
 
         // Only add to non-predator wild animals / passive animals
         animal.goalSelector.addGoal(2, new AvoidEntityGoal<>(

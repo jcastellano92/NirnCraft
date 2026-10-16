@@ -433,7 +433,7 @@ public final class Landmarks {
         c.set(cx, 1, cz + hr, B.stair(p.stairs, Direction.SOUTH, false));
         Props.brazier(c, p, cx - hr + 1, 0, cz);
         // ring platforms with huts and a spiral stair
-        int[] levels = {18, 36, 54};
+        int[] levels = {18, 36, 54, 72};
         for (int L : levels) {
             if (L > top - 6) break;
             double tr = trunk * (1 - 0.25 * L / top);
@@ -458,7 +458,7 @@ public final class Landmarks {
         }
         // spiral stair round the trunk
         double sr0 = trunk + 1.5;
-        for (int y = 1; y < Math.min(top - 6, 55); y++) {
+        for (int y = 1; y < Math.min(top - 6, 73); y++) {
             double ang = y * 0.35;
             double tr = trunk * (1 - 0.25 * y / top) * (1 + 0.6 * Math.max(0, (6 - y) / 6.0)) + 1.2;
             int x = cx + (int) Math.round(Math.cos(ang) * tr), z = cz + (int) Math.round(Math.sin(ang) * tr);

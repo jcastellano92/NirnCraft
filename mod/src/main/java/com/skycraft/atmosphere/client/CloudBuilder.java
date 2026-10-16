@@ -3,6 +3,9 @@ package com.skycraft.atmosphere.client;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.skycraft.atmosphere.AtmosphereMath;
+import com.skycraft.atmosphere.WeatherFront;
+import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.atmosphere.weather.WeatherProfile;
 import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.Region;
@@ -10,12 +13,13 @@ import com.skycraft.tamriel.TamrielMap;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Builds the cloud meshes for {@link CloudRenderer} on its worker thread, from a {@link Job} the render thread
  * captured. Nothing here touches the level or GL; it reads the Tamriel map (thread-safe) and the job's snapshot of
- * the regional weather.
+ * the regional weather and moving {@link WeatherFront}s.
  *
  * <p>The sky is laid out in "wind space" (world position minus the accumulated wind drift), so clouds keep their
  * shape while they drift. A coarse weather grid (192 blocks) samples each region's eased cloud parameters
@@ -50,7 +54,18 @@ final class CloudBuilder {
                float windX, float windZ, float wind, float sunX, float sunY, float sunZ,
                float fogR, float fogG, float fogB, float localFog, int height, int radius, boolean fancy, boolean distant,
                float mistHour, float seconds, Map<String, float[]> climate,
-               double plumeX, double plumeZ, boolean plume, double throatX, double throatZ, boolean throat) {}
+               double plumeX, double plumeZ, boolean plume, double throatX, double throatZ, boolean throat,
+               List<WeatherFront> fronts) {
+        Job(double camX, double camY, double camZ, double driftX, double driftZ, double highX, double highZ,
+            float windX, float windZ, float wind, float sunX, float sunY, float sunZ,
+            float fogR, float fogG, float fogB, float localFog, int height, int radius, boolean fancy, boolean distant,
+            float mistHour, float seconds, Map<String, float[]> climate,
+            double plumeX, double plumeZ, boolean plume, double throatX, double throatZ, boolean throat) {
+            this(camX, camY, camZ, driftX, driftZ, highX, highZ, windX, windZ, wind, sunX, sunY, sunZ,
+                    fogR, fogG, fogB, localFog, height, radius, fancy, distant, mistHour, seconds, climate,
+                    plumeX, plumeZ, plume, throatX, throatZ, throat, List.of());
+        }
+    }
 
     /** A finished build: the two meshes (null when empty), where they were built, and the storm cells for lightning. */
     static final class Result {
@@ -128,6 +143,7 @@ final class CloudBuilder {
             caps();
             if (job.distant()) {
                 dustAndAsh();
+                approachingFronts();
                 if (job.plume()) plume();
             }
             out.sky = write(sky, skyBuffer);
@@ -168,6 +184,12 @@ final class CloudBuilder {
 
     private void lighting() {
         float sy = job.sunY();
+        float lat = (float) AtmosphereMath.latitudeFactor(job.camZ());
+        Region camRegion = TamrielMap.region((int) Math.floor(job.camX()), (int) Math.floor(job.camZ()));
+        WeatherProfile camProfile = WeatherProfile.of(camRegion);
+        TamrielMap.sample((int) Math.floor(job.camX()), (int) Math.floor(job.camZ()), sample);
+        TamrielMap.deriveStrengths(sample);
+
         float warm = 1f - smooth(0.02f, 0.42f, sy);
         sunI = smooth(-0.12f, 0.1f, sy);
         float sun = sunI * lerp(warm, 0.55f, 0.8f);
@@ -178,14 +200,31 @@ final class CloudBuilder {
         ambR = lerp(day, 0.08f, 0.66f);
         ambG = lerp(day, 0.09f, 0.70f);
         ambB = lerp(day, 0.125f, 0.78f);
-        // dawn and dusk: the sun low on the horizon lights the undersides pink and gold
-        dusk = smooth(-0.16f, 0.0f, sy) * (1f - smooth(0.05f, 0.3f, sy));
-        duskR = 1.0f;
-        duskG = 0.52f;
-        duskB = 0.42f;
-        ambR += 0.08f * dusk;
-        ambG += 0.03f * dusk;
-        ambB += 0.04f * dusk;
+        // dawn and dusk: the sun low on the horizon lights the undersides with regional scattering
+        dusk = smooth(-0.18f - 0.06f * lat, 0.0f, sy) * (1f - smooth(0.05f, 0.32f + 0.08f * lat, sy));
+        if (camProfile == WeatherProfile.VOLCANIC || sample.heat > 0.35f) {
+            // Vvardenfell / Stonefalls smoldering volcanic ash-crimson twilight
+            duskR = 0.92f;
+            duskG = 0.36f;
+            duskB = 0.24f;
+        } else if (camProfile == WeatherProfile.ARID || sample.dunes > 0.25f) {
+            // Alik'r / Anequina warm amber desert twilight
+            duskR = 1.0f;
+            duskG = 0.68f;
+            duskB = 0.38f;
+        } else if ("summerset_isles".equals(camRegion.province()) || sample.elevation > 220f) {
+            // Summerset / Eton Nir crisp prismatic violet-rose-gold high-altitude light
+            duskR = 0.96f;
+            duskG = 0.66f;
+            duskB = 0.88f;
+        } else {
+            duskR = 1.0f;
+            duskG = 0.52f;
+            duskB = 0.42f;
+        }
+        ambR += 0.08f * dusk * duskR;
+        ambG += 0.04f * dusk * duskG;
+        ambB += 0.05f * dusk * duskB;
         moonI = 1f - smooth(-0.3f, -0.05f, sy);
     }
 
@@ -252,6 +291,7 @@ final class CloudBuilder {
         gn = (int) Math.ceil(2 * span / G) + 2;
         if (grid.length < gn * gn * NP) grid = new float[gn * gn * NP];
         float[] clear = CloudClimate.target(null);
+        List<WeatherFront> fronts = job.fronts() != null ? job.fronts() : List.of();
         for (int i = 0; i < gn; i++) {
             for (int j = 0; j < gn; j++) {
                 int wx = (gx0 + i) * G, wz = (gz0 + j) * G;
@@ -264,15 +304,46 @@ final class CloudBuilder {
                 if (params == null) params = clear;
                 int o = (i * gn + j) * NP;
                 System.arraycopy(params, 0, grid, o, CloudClimate.COUNT);
+
+                // Sample TamrielMap microclimate (coast distance, elevation, rainshadow, volcanic heat, wetlands, dunes)
+                TamrielMap.sample(wx, wz, sample);
+                TamrielMap.deriveStrengths(sample);
+                if (sample.coastDistance < 320f) {
+                    float marine = clamp01(1f - sample.coastDistance / 320f);
+                    grid[o + CloudClimate.ST] = clamp01(grid[o + CloudClimate.ST] + 0.14f * marine);
+                    grid[o + CloudClimate.FOG] = clamp01(grid[o + CloudClimate.FOG] + 0.16f * marine);
+                }
+                if (sample.rainshadow > 0.4f) {
+                    float dry = clamp01((sample.rainshadow - 0.4f) * 1.6f);
+                    grid[o + CloudClimate.CU] *= (1f - 0.35f * dry);
+                    grid[o + CloudClimate.ST] *= (1f - 0.25f * dry);
+                }
                 // the climate always shows a little: ash on the wind of the ashlands, dust over deserts
-                if (profile.ambient == WeatherProfile.Ambient.ASH) grid[o + CloudClimate.ASH] = Math.max(grid[o + CloudClimate.ASH], 0.2f);
-                if (profile.ambient == WeatherProfile.Ambient.SAND) {
-                    grid[o + CloudClimate.SAND] = Math.max(grid[o + CloudClimate.SAND], 0.22f);
+                if (profile.ambient == WeatherProfile.Ambient.ASH || sample.heat > 0.35f) {
+                    grid[o + CloudClimate.ASH] = Math.max(grid[o + CloudClimate.ASH], Math.max(0.2f, sample.heat * 0.45f));
+                }
+                if (profile.ambient == WeatherProfile.Ambient.SAND || sample.dunes > 0.25f) {
+                    grid[o + CloudClimate.SAND] = Math.max(grid[o + CloudClimate.SAND], Math.max(0.22f, sample.dunes * 0.48f));
                     grid[o + CloudClimate.CU] *= 0.55f;
                 }
+                if (profile == WeatherProfile.SWAMP || sample.wetland > 0.35f) {
+                    grid[o + CloudClimate.FOG] = Math.max(grid[o + CloudClimate.FOG], 0.32f + 0.35f * sample.wetland);
+                }
+
+                // Blend moving synoptic WeatherFronts covering this grid cell
+                for (WeatherFront front : fronts) {
+                    float fi = front.intensityAt(wx, wz);
+                    if (fi > 0.01f) {
+                        float[] ft = CloudClimate.target(front.kind());
+                        for (int k = 0; k < CloudClimate.COUNT; k++) {
+                            grid[o + k] = lerp(fi, grid[o + k], ft[k]);
+                        }
+                    }
+                }
+
                 grid[o + E] = terrain(wx, wz)[0];
                 grid[o + SL] = Math.min(profile.snowLine, 2000);
-                grid[o + MI] = profile.dawnMist;
+                grid[o + MI] = Math.max(profile.dawnMist, sample.wetland * 0.85f);
             }
         }
     }
@@ -659,7 +730,7 @@ final class CloudBuilder {
 
     // ================================================================== ground layer (world-fixed)
 
-    /** Valley fog banks and mist over marshes, lakes and rivers: thickest at dawn and in foggy weather. */
+    /** Valley fog banks and mist over marshes, lakes and rivers: thickest at dawn, in foggy weather, and over humid swamps. */
     private void fogBanks() {
         final int S = 40;
         float reach = Math.min(R, 720f);
@@ -682,7 +753,9 @@ final class CloudBuilder {
                 }
                 float lowland = Math.max(wet, valley);
                 if (lowland < 0.25f) continue;
-                float mist = p[MI] * job.mistHour();
+                Region reg = TamrielMap.region(cx, cz);
+                boolean swamp = WeatherProfile.of(reg) == WeatherProfile.SWAMP || p[MI] > 0.65f;
+                float mist = p[MI] * (swamp ? Math.max(0.55f, job.mistHour()) : job.mistHour());
                 float amount = clamp01(Math.max(fogW * 0.85f, mist * 1.3f) * lowland);
                 long seed = seed(i, j, 29);
                 float strength = clamp01((amount - hash(seed, 1) * 0.6f) / 0.25f);
@@ -697,8 +770,14 @@ final class CloudBuilder {
                 float alpha = 0.6f * strength * fade;
                 if (alpha < 0.01f) continue;
                 nFog++;
-                // mist glows with the sky's own colour (gold at dawn, grey under cloud)
+                // mist glows with the sky's own colour (gold at dawn, grey under cloud, bioluminescent mossy-teal in Black Marsh/Bitter Coast/Hjaalmarch)
                 float er = job.fogR() * 0.45f, eg = job.fogG() * 0.45f, eb = job.fogB() * 0.45f;
+                if (swamp) {
+                    float bio = 0.14f + 0.18f * moonI;
+                    er = lerp(bio, er, 0.22f);
+                    eg = lerp(bio, eg, 0.56f);
+                    eb = lerp(bio, eb, 0.46f);
+                }
                 float c = color(0.75f, 0.76f, 0.77f, 0.8f, 0.2f, 0.15f, x, y0 + hh, z, d, alpha, er, eg, eb);
                 upright(ground, x, z, y0 - hh * 0.3f, y0 + hh * 1.7f, d, S * (0.75f + 0.4f * hash(seed, 6)), 0, 0, C_FOG,
                         hash(seed, 7) < 0.5f, c, c);
@@ -833,6 +912,113 @@ final class CloudBuilder {
                 }
             }
             inner = ro;
+        }
+    }
+
+    /**
+     * Renders distant approaching {@link WeatherFront}s (200..1,600 blocks from the camera) in the exact direction
+     * {@code (fx - camX, fz - camZ)}: towering haboob sandstorm walls in Alik'r/Anequina, volcanic ash/blight fronts
+     * off Vvardenfell/Stonefalls, and dark anvil storm towers with rain/blizzard squall curtains.
+     */
+    private void approachingFronts() {
+        List<WeatherFront> fronts = job.fronts();
+        if (fronts == null || fronts.isEmpty()) return;
+        float H = job.height();
+        for (WeatherFront front : fronts) {
+            if (front == null || front.expired()) continue;
+            double vdx = front.x - job.camX();
+            double vdz = front.z - job.camZ();
+            double centerDist = Math.sqrt(vdx * vdx + vdz * vdz);
+            if (centerDist < 1.0) continue;
+            double edgeDist = centerDist - front.radius;
+            if (edgeDist > 1600.0 || edgeDist < -front.radius * 0.5) continue;
+
+            float dirX = (float) (vdx / centerDist);
+            float dirZ = (float) (vdz / centerDist);
+            float perpX = -dirZ;
+            float perpZ = dirX;
+            float baseEdge = (float) Math.max(200.0, Math.min(R - 90.0, Math.max(200.0, edgeDist)));
+            float visibility = edgeDist <= 200.0
+                    ? 1.0f
+                    : clamp01(1.0f - (float) ((edgeDist - 200.0) / 1400.0));
+            float strength = clamp01(front.intensity * (0.45f + 0.55f * visibility));
+            if (strength < 0.04f) continue;
+
+            WeatherKind kind = front.kind;
+            float[] ft = CloudClimate.target(kind);
+            int arcSegments = job.fancy() ? 9 : 5;
+            float arcHalfSpan = Math.min(front.radius * 0.75f, 680f);
+
+            for (int s = 0; s < arcSegments; s++) {
+                long seed = seed(front.id, s, 79);
+                float u = (arcSegments == 1) ? 0f : ((float) s / (arcSegments - 1) * 2f - 1f);
+                float lateral = u * arcHalfSpan + (hash(seed, 1) - 0.5f) * 70f;
+                float curveBack = u * u * 140f + hash(seed, 2) * 55f;
+                float dist = Math.min(R - 45f, baseEdge + curveBack);
+                float dx = dirX * dist + perpX * lateral;
+                float dz = dirZ * dist + perpZ * lateral;
+                double wx = job.camX() + dx;
+                double wz = job.camZ() + dz;
+                float g = groundAt(wx, wz);
+                float taper = (1f - 0.45f * u * u) * strength;
+
+                if (kind == WeatherKind.SANDSTORM || kind == WeatherKind.DUST
+                        || kind == WeatherKind.ASH_STORM || kind == WeatherKind.ASHFALL || kind == WeatherKind.BLIGHT) {
+                    // Towering haboob sand wall or volcanic ash/blight wall advancing along (fx - camX, fz - camZ)
+                    boolean isSand = (kind == WeatherKind.SANDSTORM || kind == WeatherKind.DUST);
+                    float blight = (kind == WeatherKind.BLIGHT) ? 1f : 0f;
+                    float ar = isSand ? 0.88f : lerp(blight, 0.46f, 0.60f);
+                    float ag = isSand ? 0.72f : lerp(blight, 0.38f, 0.30f);
+                    float ab = isSand ? 0.50f : lerp(blight, 0.35f, 0.24f);
+                    float hh = (65f + 50f * hash(seed, 3)) * (0.65f + 0.35f * taper);
+                    float y = g - 6f - (float) job.camY();
+                    float d = (float) Math.sqrt(dx * dx + (y + hh) * (y + hh) + dz * dz);
+                    float alpha = 0.88f * taper * smooth(90f, 240f, dist);
+                    if (alpha > 0.02f) {
+                        nWalls++;
+                        float ct = color(ar, ag, ab, 0.9f, 0.35f, 0.25f, dx, y + hh, dz, d, alpha, 0, 0, 0);
+                        float cb = color(ar * 0.82f, ag * 0.82f, ab * 0.82f, 0.18f, 0.1f, 0.3f, dx, y, dz, d, alpha, 0, 0, 0);
+                        upright(ground, dx, dz, y, y + hh * 2.1f, d, 135f + 45f * hash(seed, 4), 0, 0,
+                                C_WALL, hash(seed, 5) < 0.5f, ct, cb);
+                    }
+                }
+
+                if (kind == WeatherKind.STORM || kind == WeatherKind.RAIN || kind == WeatherKind.BLIZZARD
+                        || kind == WeatherKind.SNOW || kind == WeatherKind.ASH_STORM || kind == WeatherKind.BLIGHT) {
+                    // Advancing anvil storm tower and precipitation curtain
+                    nTowers++;
+                    float base = H - 24f;
+                    float top = H + (210f + 130f * hash(seed, 6)) * (0.65f + 0.35f * taper);
+                    float hgt = top - base;
+                    float rad = (75f + 40f * hash(seed, 7)) * (0.75f + 0.25f * taper);
+                    float[] alb = albedo(ft, 0.92f);
+                    float shadow = 0.65f + 0.25f * ft[CloudClimate.DARK];
+                    for (int l = 0; l < 4; l++) {
+                        float lt = (l + 0.4f) / 4f;
+                        float py = base + hgt * lt;
+                        float y = py - (float) job.camY();
+                        float d = (float) Math.sqrt(dx * dx + y * y + dz * dz);
+                        float lrad = rad * (l == 3 ? 1.35f : (1.0f - 0.15f * lt));
+                        float squash = l == 3 ? 0.5f : 0.85f;
+                        float alpha = 0.92f * taper * smooth(lrad * 0.8f, lrad * 2.2f, d);
+                        if (alpha < 0.02f) continue;
+                        float facing = facing(dx, y, dz);
+                        float ct = color(alb[0], alb[1], alb[2], clamp01(lt + 0.2f), facing, shadow, dx, y, dz, d, alpha, 0, 0, 0);
+                        float cb = color(alb[0], alb[1], alb[2], clamp01(lt * lt), facing, shadow, dx, y, dz, d, alpha, 0, 0, 0);
+                        billboard(sky, dx, y, dz, d, lrad * 1.8f, lrad * 1.8f * squash,
+                                (hash(seed, 20 + l) - 0.5f) * 0.35f, l == 0 ? C_FLAT : C_PUFF + (l & 3),
+                                hash(seed, 30 + l) < 0.5f, ct, cb);
+                    }
+                    boolean snow = kind == WeatherKind.BLIZZARD || kind == WeatherKind.SNOW;
+                    if (snow || kind == WeatherKind.STORM || kind == WeatherKind.RAIN) {
+                        curtain(sky, dx, dz, base + 8f, g - 4f, rad * 1.15f,
+                                (0.45f + 0.35f * taper) * smooth(150f, 340f, dist), snow, ft, seed);
+                    }
+                    if (ft[CloudClimate.THUNDER] > 0.15f) {
+                        addStorm((float) wx, base, (float) wz, top, rad, ft[CloudClimate.THUNDER] * taper);
+                    }
+                }
+            }
         }
     }
 

@@ -30,7 +30,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        9,
+        17,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "watchtower",
       "wealth": "common",
       "at": [
-        -7,
-        5
+        -4,
+        8
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -78,8 +78,8 @@
       "use": "shack",
       "wealth": "poor",
       "at": [
-        3,
-        -9
+        2,
+        -21
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -103,10 +103,168 @@
     "seyda_neen_b_2": "Arrille's Tradehouse",
     "seyda_neen_b_3": "Seyda Neen Lighthouse",
     "seyda_neen_b_4": "Fargoth's House",
-    "seyda_neen_b_5": "Vodunius Nuccius's House"
+    "seyda_neen_b_5": "Vodunius Nuccius's House",
+    "seyda_neen_excise_yard": "Arrille's Tradehouse & Excise Square"
   },
   "innKey": "seyda_neen_b_2",
   "names": {
     "inn": "seyda_neen_b_2"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -30,
+        6
+      ],
+      "to": [
+        30,
+        10
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -4,
+        0
+      ],
+      "to": [
+        -4,
+        16
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "seyda_neen_excise_yard"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          -4,
+          16
+        ],
+        [
+          -4,
+          0
+        ],
+        [
+          4,
+          -26
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "census_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          -4
+        ],
+        [
+          -4,
+          0
+        ],
+        [
+          18,
+          -8
+        ],
+        [
+          28,
+          -18
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "lighthouse_path"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -4
+      ],
+      "rx": 20,
+      "rz": 18,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "marsh_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "culture": "imperial",
+      "on": "marsh_ring"
+    },
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "count": 1,
+      "on": "census_lane"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "lighthouse_path"
+    }
+  ]
 }

@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -12
+        ]
       ],
-      "r0": 4,
-      "r1": 20,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          0
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          16,
+          -4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        4
+      ],
+      "rx": 14,
+      "rz": 11,
+      "wobble": 5,
+      "lobes": 5,
+      "phase": 0.95,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -12,
-        12
+        -17,
+        -3
       ],
       "face": "north",
       "overlay": "frozen_forest",
@@ -195,5 +240,47 @@
     "hrothgard_barrow_landmark": "High Seat of place.skycraft.hrothgard_barrow",
     "hrothgard_barrow_plaza": "place.skycraft.hrothgard_barrow Central Plaza"
   },
-  "innKey": "hrothgard_barrow_b_5"
+  "innKey": "hrothgard_barrow_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

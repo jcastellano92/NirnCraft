@@ -778,7 +778,7 @@ public final class Zoning {
         return best;
     }
 
-    static int localX(Plan p, int wx, int wz) {
+    public static int localX(Plan p, int wx, int wz) {
         int dx = wx - p.cx, dz = wz - p.cz;
         return switch (p.back) {
             case EAST -> dz;
@@ -788,7 +788,7 @@ public final class Zoning {
         };
     }
 
-    static int localZ(Plan p, int wx, int wz) {
+    public static int localZ(Plan p, int wx, int wz) {
         int dx = wx - p.cx, dz = wz - p.cz;
         return switch (p.back) {
             case EAST -> -dx;
@@ -1235,6 +1235,14 @@ public final class Zoning {
                     case 3, 4 -> Outdoors.TREE;
                     default -> Outdoors.BENCH;
                 };
+            } else if (plan.culture == Culture.BOSMER) {
+                // Green Pact: no tilled vegetable gardens or felled woodpiles behind Bosmer homes
+                kind = switch (roll) {
+                    case 0, 1, 2 -> -2;
+                    case 3 -> Outdoors.LAUNDRY;
+                    case 4 -> Outdoors.BENCH;
+                    default -> Outdoors.COOP;
+                };
             } else {
                 kind = switch (roll) {
                     case 0, 1 -> -1;
@@ -1285,14 +1293,39 @@ public final class Zoning {
         List<String> crops = x.style.crops();
         if (crops.isEmpty()) return x.r.nextInt(8);
         String c = crops.get(x.r.nextInt(crops.size()));
-        return switch (c) {
-            case "carrots" -> 1;
-            case "potatoes", "ash_yam" -> 2;
-            case "beetroots" -> 3;
+        return cropVariant(c);
+    }
+
+    /**
+     * Maps a cultural crop name from {@code styles/*.json} to a distinct 3D field/garden crop variant ID
+     * (consumed by {@link com.skycraft.tamriel.settlement.build.Works}). Only {@code "wheat"} maps to {@code 0}.
+     */
+    public static int cropVariant(String crop) {
+        if (crop == null) return 0;
+        return switch (crop.trim().toLowerCase(Locale.ROOT)) {
+            case "wheat" -> 0;
+            case "carrots", "carrot" -> 1;
+            case "potatoes", "potato" -> 2;
+            case "beetroots", "beetroot" -> 3;
             case "cabbage" -> 4;
-            case "leek" -> 5;
+            case "leek", "leeks" -> 5;
             case "garlic" -> 6;
-            case "tomato" -> 7;
+            case "tomato", "tomatoes" -> 7;
+            case "ash_yam" -> 8;
+            case "saltrice", "rice" -> 9;
+            case "marshmerrow" -> 10;
+            case "comberry" -> 11;
+            case "wickwheat" -> 12;
+            case "hackle_lo" -> 13;
+            case "scathecraw" -> 14;
+            case "coda_flower" -> 15;
+            case "sugar", "moon_sugar" -> 16;
+            case "vines", "grapes", "jazbay_grapes" -> 17;
+            case "melon", "melons" -> 18;
+            case "gourd", "pumpkin" -> 19;
+            case "orchard", "apple", "figs", "dates" -> 20;
+            case "honey" -> 21;
+            case "kwama" -> 22;
             default -> 0;
         };
     }
@@ -1450,7 +1483,8 @@ public final class Zoning {
 
     static void outskirts(Ctx x, String variant) {
         Plan plan = x.plan;
-        int R = x.R;
+        int maxOut = Math.max(18, plan.radius - 6);
+        int R = Math.min(x.R, Math.max(10, Math.min((int) (plan.radius * 0.68), maxOut - 8)));
         int t = x.tier;
         // the stables and carriage stop outside the main gate
         if (t >= 2 && !x.sk.gates.isEmpty()) {
@@ -1473,23 +1507,24 @@ public final class Zoning {
             fields = 0;
             farms = 0;
         }
-        for (int i = 0; i < farms; i++) farm(x, R + 12, R + 34);
-        for (int i = 0; i < fields; i++) field(x, R + 6, Math.min(plan.radius - 4, R + 38));
+        for (int i = 0; i < farms; i++) farm(x, Math.min(R + 10, maxOut - 6), Math.min(R + 34, maxOut));
+        for (int i = 0; i < fields; i++) field(x, Math.min(R + 4, maxOut - 4), Math.min(R + 38, maxOut));
         // pens with livestock
         for (int i = 0; i < 1 + t; i++) {
-            Spec pen = outside(x, Archetype.PEN, 9 + x.r.nextInt(3) * 2, 7 + x.r.nextInt(2) * 2, R + 4, R + 26);
+            Spec pen = outside(x, Archetype.PEN, 9 + x.r.nextInt(3) * 2, 7 + x.r.nextInt(2) * 2, Math.min(R + 4, maxOut - 4), Math.min(R + 26, maxOut));
             if (pen != null) pen.variant = x.r.nextInt(8);
         }
         // a mill on the water, else a windmill on open ground for the farming cultures
         Culture c = plan.culture;
         boolean water = x.sk.water != null && x.sk.waterDist < R + 30;
         if (t >= 1 && (water || c == Culture.IMPERIAL || c == Culture.BRETON || c == Culture.NORD && x.r.nextInt(3) == 0)) {
-            Spec mill = water ? outsideToward(x, Use.MILL, x.sk.water, R + 2, R + 30) : outsideUse(x, Use.MILL, R + 8, R + 30);
+            Spec mill = water ? outsideToward(x, Use.MILL, x.sk.water, Math.min(R + 2, maxOut - 4), Math.min(R + 30, maxOut))
+                    : outsideUse(x, Use.MILL, Math.min(R + 6, maxOut - 4), Math.min(R + 30, maxOut));
             if (mill != null) mill.variant = water ? 1 : 0;
         }
         // lumber where the culture fells trees, a mine toward the hills for mining towns
         if (t >= 1 && c != Culture.BOSMER && x.r.nextInt(3) > 0) {
-            Spec saw = outsideUse(x, Use.SAWMILL, R + 6, R + 30);
+            Spec saw = outsideUse(x, Use.SAWMILL, Math.min(R + 6, maxOut - 4), Math.min(R + 30, maxOut));
             if (saw != null) {
                 int lx = localX(plan, saw.x, saw.z), lz = localZ(plan, saw.x, saw.z);
                 Spec yardSpec = plan.at(Archetype.CAMP, lx + (lx > 0 ? 12 : -12), lz, Direction.SOUTH).size(11, 9);
@@ -1499,29 +1534,36 @@ public final class Zoning {
             }
         }
         if (variant.equals("mining") || t >= 1 && x.sk.hill && x.r.nextBoolean()) {
-            Spec mine = outside(x, Archetype.MINE, 7, 14, R + 6, Math.min(plan.radius - 2, R + 32));
+            Spec mine = outside(x, Archetype.MINE, 7, 14, Math.min(R + 6, maxOut - 4), Math.min(R + 32, maxOut));
             if (mine != null) {
                 mine.flag(Spec.NO_BEARD);
                 mine.variant = x.r.nextInt(7);
             }
         }
         if (t >= 2) {
-            Spec g = outside(x, Archetype.GRAVEYARD, 13, 11, R + 4, R + 22);
+            Spec g = outside(x, Archetype.GRAVEYARD, 13, 11, Math.min(R + 4, maxOut - 4), Math.min(R + 22, maxOut));
             if (g != null) g.margin = 0;
         }
-        // farm cultures' specialities: vines, moon sugar, saltrice, hives
+        // farm cultures' specialities: vines, moon sugar, saltrice, hives, orchards, kwama
+        boolean placedKwama = false;
         for (String crop : x.style.crops()) {
             int kind = switch (crop) {
-                case "vines" -> Outdoors.VINEYARD;
-                case "sugar" -> Outdoors.SUGAR;
-                case "saltrice" -> Outdoors.PADDY;
+                case "vines", "grapes" -> Outdoors.VINEYARD;
+                case "sugar", "moon_sugar" -> Outdoors.SUGAR;
+                case "saltrice", "rice" -> Outdoors.PADDY;
                 case "honey" -> Outdoors.APIARY;
-                case "orchard" -> Outdoors.ORCHARD;
+                case "orchard", "apple", "figs", "dates" -> Outdoors.ORCHARD;
+                case "kwama", "ash_yam" -> Outdoors.KWAMA;
                 default -> -1;
             };
             if (kind < 0 || t == 0 && x.r.nextBoolean()) continue;
-            Spec camp = outside(x, Archetype.CAMP, 13, 11, R + 8, R + 36);
+            if (kind == Outdoors.KWAMA) placedKwama = true;
+            Spec camp = outside(x, Archetype.CAMP, 13, 11, Math.min(R + 6, maxOut - 6), Math.min(R + 36, maxOut));
             if (camp != null) camp.variant = kind;
+        }
+        if (!placedKwama && c == Culture.DUNMER && (t >= 1 || x.r.nextBoolean())) {
+            Spec camp = outside(x, Archetype.CAMP, 13, 11, Math.min(R + 6, maxOut - 6), Math.min(R + 36, maxOut));
+            if (camp != null) camp.variant = Outdoors.KWAMA;
         }
     }
 
@@ -1646,7 +1688,7 @@ public final class Zoning {
         plan.place(barn, 2);
         plan.street(0, 6, 0, plan.radius, 3, false);
         x.sk.gates.add(new int[]{0, plan.radius});
-        int fields = 2 + x.r.nextInt(2);
+        int fields = plan.culture == Culture.BOSMER ? 0 : 2 + x.r.nextInt(2);
         for (int i = 0; i < fields; i++) field(x, 10, plan.radius);
         // a farmstead always keeps stock: a fenced pen with a gate and animals (retry wider, then a smaller pen)
         Spec pen = outside(x, Archetype.PEN, 9, 7, 8, plan.radius - 4);
@@ -1654,10 +1696,37 @@ public final class Zoning {
             pen = outside(x, Archetype.PEN, 7, 5, 7, plan.radius - 1);
         }
         if (pen != null) pen.variant = x.r.nextInt(8);
-        Spec g = plan.at(Archetype.GARDEN, 9, -5, Direction.SOUTH);
-        g.variant = cropVariant(x);
-        plan.place(g, 1);
-        yard(x, Outdoors.WOODPILE, -6, -6, Direction.SOUTH, 4, 2, 0);
+        boolean placedCamp = false;
+        for (String crop : x.style.crops()) {
+            int kind = switch (crop) {
+                case "vines", "grapes", "jazbay_grapes" -> Outdoors.VINEYARD;
+                case "sugar", "moon_sugar" -> Outdoors.SUGAR;
+                case "saltrice", "rice", "marshmerrow" -> Outdoors.PADDY;
+                case "honey" -> Outdoors.APIARY;
+                case "orchard", "apple", "figs", "dates" -> Outdoors.ORCHARD;
+                case "kwama", "ash_yam", "comberry", "wickwheat", "hackle_lo" -> Outdoors.KWAMA;
+                default -> -1;
+            };
+            if (kind < 0) continue;
+            Spec camp = outside(x, Archetype.CAMP, 11, 9, 9, Math.max(16, plan.radius - 2));
+            if (camp != null) {
+                camp.variant = kind;
+                placedCamp = true;
+                break;
+            }
+        }
+        if (!placedCamp && plan.culture == Culture.DUNMER) {
+            Spec camp = outside(x, Archetype.CAMP, 11, 9, 9, Math.max(16, plan.radius - 2));
+            if (camp != null) camp.variant = Outdoors.KWAMA;
+        }
+        if (plan.culture != Culture.BOSMER) {
+            Spec g = plan.at(Archetype.GARDEN, 9, -5, Direction.SOUTH);
+            g.variant = cropVariant(x);
+            plan.place(g, 1);
+            yard(x, Outdoors.WOODPILE, -6, -6, Direction.SOUTH, 4, 2, 0);
+        } else {
+            yard(x, Outdoors.BARRELS, -6, -6, Direction.SOUTH, 3, 2, 0);
+        }
         yard(x, Outdoors.COOP, 7, 6, Direction.SOUTH, 4, 4, 0);
         variety(plan);
     }
@@ -1754,6 +1823,17 @@ public final class Zoning {
         x.sk = new Skeleton();
         x.R = plan.radius;
         x.sk.radius = plan.radius;
+        site(x.sk, plan.cx, plan.cz, plan.back, x.R);
+        com.skycraft.tamriel.settlement.plan.CityPlan cp = plan.place != null ? com.skycraft.tamriel.settlement.plan.CityPlans.of(plan.place) : null;
+        if (cp != null && cp.gates != null) {
+            for (int[] g : cp.gates) x.sk.gates.add(new int[]{g[0], g[1]});
+        }
+        if (x.sk.gates.isEmpty()) {
+            for (Spec s : plan.specs) {
+                if (s.kind == Archetype.GATE) x.sk.gates.add(new int[]{localX(plan, s.x, s.z), localZ(plan, s.x, s.z)});
+            }
+        }
+        if (x.sk.gates.isEmpty()) x.sk.gates.add(new int[]{0, Math.max(16, plan.radius - 6)});
         for (Spec s : plan.specs) {
             if (s.isLine() && s.kind == Archetype.STREET) {
                 if (s.floor != Spec.UNSET && s.floor2 != Spec.UNSET && s.floor != s.floor2) continue;
@@ -1812,6 +1892,9 @@ public final class Zoning {
         if (x.sk.squares.isEmpty()) {
             for (Spec s : plan.specs) if (s.kind == Archetype.PLAZA) x.sk.squares.add(new int[]{localX(plan, s.x, s.z), localZ(plan, s.x, s.z), s.w});
         }
+        if (x.sk.streets.size() < 2 && plan.radius >= 24) {
+            synthesizeStreets(x);
+        }
         if (!x.sk.streets.isEmpty() && x.tier >= 1) {
             reserved(x);
             lining(x);
@@ -1820,10 +1903,139 @@ public final class Zoning {
             ensureTrades(x, com.skycraft.tamriel.settlement.plan.Cities.names(plan.place));
         }
         fillGaps(x);
+        if (x.tier >= 1) {
+            adoptHarbor(x);
+            adoptOutskirts(x, cp);
+        }
         // the homes of a hand-laid layout (and the ones the fill added) get a yard behind them like generated towns do
         if (x.tier >= 1) backyards(x);
         variety(plan);
         clearing(plan, 0, Math.min(plan.radius, 120));
+    }
+
+    static void synthesizeStreets(Ctx x) {
+        Plan plan = x.plan;
+        int R = Math.max(20, plan.radius - 8);
+        int[] mainGate = x.sk.gates.isEmpty() ? new int[]{0, R} : x.sk.gates.get(0);
+        int gx = Math.max(-R, Math.min(R, mainGate[0])), gz = Math.max(-R, Math.min(R, mainGate[1]));
+        int[] keepPt = new int[]{0, -(int) (R * 0.55)};
+        for (Spec s : plan.specs) {
+            if (s.has(Spec.SEAT)) {
+                keepPt = new int[]{localX(plan, s.x, s.z), localZ(plan, s.x, s.z)};
+                break;
+            }
+        }
+        int kx = Math.max(-R, Math.min(R, keepPt[0])), kz = Math.max(-R, Math.min(R, keepPt[1]));
+        int wMain = x.tier >= 2 ? 5 : 4;
+        addSafeStreet(x, gx, gz, 0, 0, wMain, true);
+        if (Math.hypot(kx, kz) >= 12) {
+            addSafeStreet(x, 0, 0, kx, kz, wMain, true);
+        } else {
+            addSafeStreet(x, 0, 0, -gx / 2, -gz / 2, wMain, true);
+        }
+        int span = (int) (R * 0.65);
+        addSafeStreet(x, -span, 0, span, 0, 3, false);
+        if (x.tier >= 2) {
+            int zNorth = -(int) (R * 0.35), zSouth = (int) (R * 0.35);
+            addSafeStreet(x, -span, zNorth, span, zNorth, 3, false);
+            addSafeStreet(x, -span, zSouth, span, zSouth, 3, false);
+        }
+    }
+
+    static void addSafeStreet(Ctx x, int x1, int z1, int x2, int z2, int width, boolean major) {
+        Plan plan = x.plan;
+        double len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 8) return;
+        double nx = -(z2 - z1) / len, nz = (x2 - x1) / len;
+        for (int off : new int[]{0, 6, -6, 10, -10, 14, -14}) {
+            int ax = x1 + (int) Math.round(nx * off), az = z1 + (int) Math.round(nz * off);
+            int bx = x2 + (int) Math.round(nx * off), bz = z2 + (int) Math.round(nz * off);
+            Spec cand = plan.line(Archetype.STREET, ax, az, bx, bz, width);
+            boolean hit = false;
+            for (Spec o : plan.specs) {
+                if (!o.isLine() && !o.has(Spec.GROUND) && Plan.collides(cand, o, 0)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (!hit) {
+                plan.street(ax, az, bx, bz, width, major);
+                x.sk.streets.add(new Street(ax, az, bx, bz, width, major ? 0 : 1));
+                return;
+            }
+        }
+        // Clip into unblocked segments of length >= 8
+        int steps = (int) Math.ceil(len);
+        int hw = width / 2 + 1;
+        int runStart = -1;
+        for (int i = 0; i <= steps; i++) {
+            double t = i / (double) steps;
+            int lx = (int) Math.round(x1 + (x2 - x1) * t), lz = (int) Math.round(z1 + (z2 - z1) * t);
+            int wx = plan.wx(lx, lz), wz = plan.wz(lx, lz);
+            boolean blocked = false;
+            for (Spec o : plan.specs) {
+                if (o.isLine() || o.has(Spec.GROUND)) continue;
+                if (Math.abs(wx - o.x) <= o.halfX() + hw && Math.abs(wz - o.z) <= o.halfZ() + hw) {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (!blocked) {
+                if (runStart < 0) runStart = i;
+            } else if (runStart >= 0) {
+                if (i - 1 - runStart >= 8) {
+                    double t0 = runStart / (double) steps, t1 = (i - 1) / (double) steps;
+                    int sx1 = (int) Math.round(x1 + (x2 - x1) * t0), sz1 = (int) Math.round(z1 + (z2 - z1) * t0);
+                    int sx2 = (int) Math.round(x1 + (x2 - x1) * t1), sz2 = (int) Math.round(z1 + (z2 - z1) * t1);
+                    plan.street(sx1, sz1, sx2, sz2, width, major);
+                    x.sk.streets.add(new Street(sx1, sz1, sx2, sz2, width, major ? 0 : 1));
+                }
+                runStart = -1;
+            }
+        }
+        if (runStart >= 0 && steps - runStart >= 8) {
+            double t0 = runStart / (double) steps;
+            int sx1 = (int) Math.round(x1 + (x2 - x1) * t0), sz1 = (int) Math.round(z1 + (z2 - z1) * t0);
+            plan.street(sx1, sz1, x2, z2, width, major);
+            x.sk.streets.add(new Street(sx1, sz1, x2, z2, width, major ? 0 : 1));
+        }
+    }
+
+    static void adoptHarbor(Ctx x) {
+        Plan plan = x.plan;
+        if (x.sk.water == null || x.sk.waterDist >= plan.radius + 24) return;
+        boolean hasDock = false, hasFishery = false, hasWarehouse = false;
+        for (Spec s : plan.specs) {
+            if (s.kind == Archetype.DOCK) hasDock = true;
+            if (s.use == Use.FISHERY.ordinal()) hasFishery = true;
+            if (s.use == Use.WAREHOUSE.ordinal()) hasWarehouse = true;
+        }
+        int r0 = Math.max(12, (int) (plan.radius * 0.55));
+        int r1 = Math.max(r0 + 8, plan.radius - 6);
+        if (!hasDock) docks(x);
+        if (!hasFishery) outsideToward(x, Use.FISHERY, x.sk.water, r0, r1);
+        if (!hasWarehouse && x.tier >= 2) outsideToward(x, Use.WAREHOUSE, x.sk.water, r0, r1);
+    }
+
+    static void adoptOutskirts(Ctx x, com.skycraft.tamriel.settlement.plan.CityPlan cp) {
+        if (cp != null && cp.fabric != null && cp.fabric.has("outskirts") && !cp.fabric.get("outskirts").getAsBoolean()) return;
+        Plan plan = x.plan;
+        boolean hasOutskirts = false;
+        for (Spec s : plan.specs) {
+            if (s.kind == Archetype.FIELD || s.kind == Archetype.FARMHOUSE || s.use == Use.FARMHOUSE.ordinal()) {
+                hasOutskirts = true;
+                break;
+            }
+            if (s.kind == Archetype.CAMP && (s.variant == Outdoors.VINEYARD || s.variant == Outdoors.SUGAR
+                    || s.variant == Outdoors.PADDY || s.variant == Outdoors.ORCHARD
+                    || s.variant == Outdoors.APIARY || s.variant == Outdoors.KWAMA)) {
+                hasOutskirts = true;
+                break;
+            }
+        }
+        if (!hasOutskirts) {
+            outskirts(x, plan.place != null ? plan.place.variant() : "");
+        }
     }
 
     /**

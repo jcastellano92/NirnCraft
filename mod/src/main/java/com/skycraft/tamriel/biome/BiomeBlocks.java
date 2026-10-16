@@ -28,6 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.skycraft.scatter.DenBlock;
+import com.skycraft.scatter.DenBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+
 /**
  * The blocks of Nirn's biomes: Morrowind's ash and volcanic rock, autumn aspens, giant mushrooms, Graht-oak, palm and
  * Hist wood, Summerset crystal, Thras coral stone, desert dunes, swamp reeds and ash plants. Every block gets a block
@@ -36,6 +40,8 @@ import java.util.function.Supplier;
 public final class BiomeBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Skycraft.MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Skycraft.MODID);
 
     /** Every block of this module in registration order. */
     public static final Map<String, RegistryObject<Block>> ALL = new LinkedHashMap<>();
@@ -134,12 +140,23 @@ public final class BiomeBlocks {
                     .offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.DESTROY),
                     s -> GroundPlantBlock.softSoil(s) || s.is(Blocks.MUD) || s.is(Blocks.MOSS_BLOCK)));
 
+    public static final RegistryObject<Block> CREATURE_DEN = registerBlockOnly("creature_den", DenBlock::new);
+    public static final RegistryObject<BlockEntityType<DenBlockEntity>> CREATURE_DEN_BE =
+            BLOCK_ENTITIES.register("creature_den",
+                    () -> BlockEntityType.Builder.of(DenBlockEntity::new, CREATURE_DEN.get()).build(null));
+
     private BiomeBlocks() {}
 
     private static RegistryObject<Block> register(String id, Supplier<Block> factory) {
         RegistryObject<Block> block = BLOCKS.register(id, factory);
         ALL.put(id, block);
         ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+        return block;
+    }
+
+    private static RegistryObject<Block> registerBlockOnly(String id, Supplier<Block> factory) {
+        RegistryObject<Block> block = BLOCKS.register(id, factory);
+        ALL.put(id, block);
         return block;
     }
 
@@ -175,5 +192,6 @@ public final class BiomeBlocks {
     public static void init(IEventBus modBus) {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
+        BLOCK_ENTITIES.register(modBus);
     }
 }

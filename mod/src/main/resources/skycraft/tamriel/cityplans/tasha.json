@@ -48,8 +48,8 @@
     {
       "id": "twin_domes",
       "at": [
-        0,
-        -7
+        -1,
+        -19
       ],
       "name": "tasha_landmark",
       "overlay": "torval"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          6,
+          -14
+        ]
       ],
-      "r0": 5,
-      "r1": 22,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          0
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          18,
+          6
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        -6
+      ],
+      "rx": 13,
+      "rz": 14,
+      "wobble": 3,
+      "lobes": 4,
+      "phase": 2.25,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        12,
-        15
+        -18,
+        5
       ],
       "face": "north",
       "overlay": "torval",
@@ -182,5 +227,47 @@
     "tasha_landmark": "High Seat of place.skycraft.tasha",
     "tasha_plaza": "place.skycraft.tasha Central Plaza"
   },
-  "innKey": "tasha_b_5"
+  "innKey": "tasha_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

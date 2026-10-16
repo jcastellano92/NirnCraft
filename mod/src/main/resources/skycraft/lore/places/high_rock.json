@@ -33338,44 +33338,38 @@
         "daggerfall.L9.betony_garrison",
         "daggerfall.L4.tannery_reeds"
       ],
-      "hook": "Stone markers and worn thresholds around place.skycraft.daggerfall_landmark_02 attest to generations of contested jurisdiction in Daggerfall. [daggerfall_landmark_02]",
-      "rumour": "A bailiff's clerk in Daggerfall offered ten septims to anyone who can verify who currently holds place.skycraft.daggerfall_landmark_02. [daggerfall_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.daggerfall_landmark_02 in Daggerfall and recover the warden's seal.",
+      "summary": "Daggerfall Divines Wayshrine stands in Daggerfall as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Daggerfall, Daggerfall Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Daggerfall Divines Wayshrine in Daggerfall.",
+      "hook": "Wayfarers in Daggerfall report recent activity around Daggerfall Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Daggerfall Divines Wayshrine speak of sealed caches preserved within this wayshrine of Daggerfall.",
       "notes": [
         {
-          "id": "ib_lore_daggerfall_landmark_02_note_1",
+          "id": "daggerfall_landmark_02_field_record_1",
+          "title": "Daggerfall Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.daggerfall_landmark_02 Field Record 1",
-          "at": "site",
+          "author": "Surveyor of Daggerfall",
+          "at": "chest",
           "pages": [
-            "Entry 1 — place.skycraft.daggerfall_landmark_02 (Daggerfall)\n\nRecorded by the regional wardens inspecting place.skycraft.daggerfall_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Daggerfall Divines Wayshrine (daggerfall_landmark_02) in Daggerfall (high_rock/daggerfall). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "daggerfall.L9.betony_garrison",
+            "daggerfall.L4.tannery_reeds"
           ]
         },
         {
-          "id": "ib_lore_daggerfall_landmark_02_note_2",
-          "kind": "ledger",
-          "title": "place.skycraft.daggerfall_landmark_02 Field Record 2",
-          "at": "site",
+          "id": "daggerfall_landmark_02_field_record_2",
+          "title": "Daggerfall Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Daggerfall",
+          "at": "boss",
           "pages": [
-            "Entry 2 — place.skycraft.daggerfall_landmark_02 (Daggerfall)\n\nRecorded by the regional wardens inspecting place.skycraft.daggerfall_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_daggerfall_landmark_02_note_3",
-          "kind": "report",
-          "title": "place.skycraft.daggerfall_landmark_02 Field Record 3",
-          "at": "site",
-          "pages": [
-            "Entry 3 — place.skycraft.daggerfall_landmark_02 (Daggerfall)\n\nRecorded by the regional wardens inspecting place.skycraft.daggerfall_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_daggerfall_landmark_02_note_4",
-          "kind": "letter",
-          "title": "place.skycraft.daggerfall_landmark_02 Field Record 4",
-          "at": "site",
-          "pages": [
-            "Entry 4 — place.skycraft.daggerfall_landmark_02 (Daggerfall)\n\nRecorded by the regional wardens inspecting place.skycraft.daggerfall_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Standing orders for Daggerfall Divines Wayshrine (daggerfall_landmark_02) in Daggerfall (high_rock/daggerfall): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "daggerfall.L9.betony_garrison",
+            "daggerfall.L4.tannery_reeds"
           ]
         }
       ]
@@ -33432,44 +33426,38 @@
         "anticlere.L1.anticlere_scarp",
         "anticlere.L1.river_meadows"
       ],
-      "hook": "Around place.skycraft.anticlere_landmark_02, the old masonry and beaten tracks carry the unmistakable imprint of Anticlere's border history. [anticlere_landmark_02]",
-      "rumour": "Scouts in Anticlere warn that the approaches to place.skycraft.anticlere_landmark_02 have grown dangerous since the watch-posts were thinned. [anticlere_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.anticlere_landmark_02 in Anticlere and recover the warden's seal.",
+      "summary": "Anticlere Divines Wayshrine stands in Anticlere as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Anticlere, Anticlere Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Anticlere Divines Wayshrine in Anticlere.",
+      "hook": "Wayfarers in Anticlere report recent activity around Anticlere Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Anticlere Divines Wayshrine speak of sealed caches preserved within this wayshrine of Anticlere.",
       "notes": [
         {
-          "id": "ib_lore_anticlere_landmark_02_note_1",
-          "kind": "report",
-          "title": "place.skycraft.anticlere_landmark_02 Field Record 1",
-          "at": "site",
-          "pages": [
-            "Entry 1 — place.skycraft.anticlere_landmark_02 (Anticlere)\n\nRecorded by the regional wardens inspecting place.skycraft.anticlere_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_anticlere_landmark_02_note_2",
-          "kind": "letter",
-          "title": "place.skycraft.anticlere_landmark_02 Field Record 2",
-          "at": "site",
-          "pages": [
-            "Entry 2 — place.skycraft.anticlere_landmark_02 (Anticlere)\n\nRecorded by the regional wardens inspecting place.skycraft.anticlere_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_anticlere_landmark_02_note_3",
+          "id": "anticlere_landmark_02_field_record_1",
+          "title": "Anticlere Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.anticlere_landmark_02 Field Record 3",
-          "at": "site",
+          "author": "Surveyor of Anticlere",
+          "at": "chest",
           "pages": [
-            "Entry 3 — place.skycraft.anticlere_landmark_02 (Anticlere)\n\nRecorded by the regional wardens inspecting place.skycraft.anticlere_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Anticlere Divines Wayshrine (anticlere_landmark_02) in Anticlere (high_rock/anticlere). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "anticlere.L1.anticlere_scarp",
+            "anticlere.L1.river_meadows"
           ]
         },
         {
-          "id": "ib_lore_anticlere_landmark_02_note_4",
-          "kind": "ledger",
-          "title": "place.skycraft.anticlere_landmark_02 Field Record 4",
-          "at": "site",
+          "id": "anticlere_landmark_02_field_record_2",
+          "title": "Anticlere Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Anticlere",
+          "at": "boss",
           "pages": [
-            "Entry 4 — place.skycraft.anticlere_landmark_02 (Anticlere)\n\nRecorded by the regional wardens inspecting place.skycraft.anticlere_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Standing orders for Anticlere Divines Wayshrine (anticlere_landmark_02) in Anticlere (high_rock/anticlere): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "anticlere.L1.anticlere_scarp",
+            "anticlere.L1.river_meadows"
           ]
         }
       ]
@@ -33573,44 +33561,38 @@
         "dwynnen.L9.raven_debt",
         "dwynnen.L4.karst_bat_caves"
       ],
-      "hook": "In the lee of place.skycraft.dwynnen_landmark_02, wayfarers find a stark reminder of the rivalries that shape Dwynnen. [dwynnen_landmark_02]",
-      "rumour": "According to local herbalists, rare reagents and old coins still turn up in the rubble around place.skycraft.dwynnen_landmark_02. [dwynnen_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.dwynnen_landmark_02 in Dwynnen and recover the warden's seal.",
+      "summary": "Dwynnen Divines Wayshrine stands in Dwynnen as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Dwynnen, Dwynnen Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Dwynnen Divines Wayshrine in Dwynnen.",
+      "hook": "Wayfarers in Dwynnen report recent activity around Dwynnen Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Dwynnen Divines Wayshrine speak of sealed caches preserved within this wayshrine of Dwynnen.",
       "notes": [
         {
-          "id": "ib_lore_dwynnen_landmark_02_note_1",
-          "kind": "ledger",
-          "title": "place.skycraft.dwynnen_landmark_02 Field Record 1",
-          "at": "site",
-          "pages": [
-            "Entry 1 — place.skycraft.dwynnen_landmark_02 (Dwynnen)\n\nRecorded by the regional wardens inspecting place.skycraft.dwynnen_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_dwynnen_landmark_02_note_2",
-          "kind": "report",
-          "title": "place.skycraft.dwynnen_landmark_02 Field Record 2",
-          "at": "site",
-          "pages": [
-            "Entry 2 — place.skycraft.dwynnen_landmark_02 (Dwynnen)\n\nRecorded by the regional wardens inspecting place.skycraft.dwynnen_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_dwynnen_landmark_02_note_3",
-          "kind": "letter",
-          "title": "place.skycraft.dwynnen_landmark_02 Field Record 3",
-          "at": "site",
-          "pages": [
-            "Entry 3 — place.skycraft.dwynnen_landmark_02 (Dwynnen)\n\nRecorded by the regional wardens inspecting place.skycraft.dwynnen_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_dwynnen_landmark_02_note_4",
+          "id": "dwynnen_landmark_02_field_record_1",
+          "title": "Dwynnen Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.dwynnen_landmark_02 Field Record 4",
-          "at": "site",
+          "author": "Surveyor of Dwynnen",
+          "at": "chest",
           "pages": [
-            "Entry 4 — place.skycraft.dwynnen_landmark_02 (Dwynnen)\n\nRecorded by the regional wardens inspecting place.skycraft.dwynnen_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Dwynnen Divines Wayshrine (dwynnen_landmark_02) in Dwynnen (high_rock/dwynnen). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "dwynnen.L9.raven_debt",
+            "dwynnen.L4.karst_bat_caves"
+          ]
+        },
+        {
+          "id": "dwynnen_landmark_02_field_record_2",
+          "title": "Dwynnen Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Dwynnen",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Dwynnen Divines Wayshrine (dwynnen_landmark_02) in Dwynnen (high_rock/dwynnen): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "dwynnen.L9.raven_debt",
+            "dwynnen.L4.karst_bat_caves"
           ]
         }
       ]
@@ -33667,44 +33649,38 @@
         "wayrest.L6.border_keep",
         "wayrest.L11.covenant_capital"
       ],
-      "hook": "At place.skycraft.wayrest_landmark_02, Wayrest's frontier watch and local folk cross paths under the shadow of its word wall. [wayrest_landmark_02]",
-      "rumour": "Carters at the nearest crossroads claim place.skycraft.wayrest_landmark_02 holds cached ledgers and seal-rings hidden during the last border dispute. [wayrest_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.wayrest_landmark_02 in Wayrest and recover the warden's seal.",
+      "summary": "Wayrest Divines Wayshrine stands in Wayrest as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Wayrest, Wayrest Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Wayrest Divines Wayshrine in Wayrest.",
+      "hook": "Wayfarers in Wayrest report recent activity around Wayrest Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Wayrest Divines Wayshrine speak of sealed caches preserved within this wayshrine of Wayrest.",
       "notes": [
         {
-          "id": "ib_lore_wayrest_landmark_02_note_1",
-          "kind": "letter",
-          "title": "place.skycraft.wayrest_landmark_02 Field Record 1",
-          "at": "site",
-          "pages": [
-            "Entry 1 — place.skycraft.wayrest_landmark_02 (Wayrest)\n\nRecorded by the regional wardens inspecting place.skycraft.wayrest_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_wayrest_landmark_02_note_2",
+          "id": "wayrest_landmark_02_field_record_1",
+          "title": "Wayrest Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.wayrest_landmark_02 Field Record 2",
-          "at": "site",
+          "author": "Surveyor of Wayrest",
+          "at": "chest",
           "pages": [
-            "Entry 2 — place.skycraft.wayrest_landmark_02 (Wayrest)\n\nRecorded by the regional wardens inspecting place.skycraft.wayrest_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Wayrest Divines Wayshrine (wayrest_landmark_02) in Wayrest (high_rock/wayrest). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "wayrest.L6.border_keep",
+            "wayrest.L11.covenant_capital"
           ]
         },
         {
-          "id": "ib_lore_wayrest_landmark_02_note_3",
-          "kind": "ledger",
-          "title": "place.skycraft.wayrest_landmark_02 Field Record 3",
-          "at": "site",
+          "id": "wayrest_landmark_02_field_record_2",
+          "title": "Wayrest Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Wayrest",
+          "at": "boss",
           "pages": [
-            "Entry 3 — place.skycraft.wayrest_landmark_02 (Wayrest)\n\nRecorded by the regional wardens inspecting place.skycraft.wayrest_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_wayrest_landmark_02_note_4",
-          "kind": "report",
-          "title": "place.skycraft.wayrest_landmark_02 Field Record 4",
-          "at": "site",
-          "pages": [
-            "Entry 4 — place.skycraft.wayrest_landmark_02 (Wayrest)\n\nRecorded by the regional wardens inspecting place.skycraft.wayrest_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Standing orders for Wayrest Divines Wayshrine (wayrest_landmark_02) in Wayrest (high_rock/wayrest): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "wayrest.L6.border_keep",
+            "wayrest.L11.covenant_capital"
           ]
         }
       ]
@@ -33761,44 +33737,38 @@
         "stormhaven.L8.wayside_miracles",
         "stormhaven.L11.old_pilgrim_way"
       ],
-      "hook": "place.skycraft.stormhaven_landmark_02 stands as a focal point of Stormhaven, where travellers, patrol-captains, and delvers trade word of the roads. [stormhaven_landmark_02]",
-      "rumour": "Outriders advise carrying extra torch-oil and cold iron when venturing into the precincts of place.skycraft.stormhaven_landmark_02. [stormhaven_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.stormhaven_landmark_02 in Stormhaven and recover the warden's seal.",
+      "summary": "Stormhaven Divines Wayshrine stands in Stormhaven as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Stormhaven, Stormhaven Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Stormhaven Divines Wayshrine in Stormhaven.",
+      "hook": "Wayfarers in Stormhaven report recent activity around Stormhaven Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Stormhaven Divines Wayshrine speak of sealed caches preserved within this wayshrine of Stormhaven.",
       "notes": [
         {
-          "id": "ib_lore_stormhaven_landmark_02_note_1",
-          "kind": "ledger",
-          "title": "place.skycraft.stormhaven_landmark_02 Field Record 1",
-          "at": "site",
-          "pages": [
-            "Entry 1 — place.skycraft.stormhaven_landmark_02 (Stormhaven)\n\nRecorded by the regional wardens inspecting place.skycraft.stormhaven_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_stormhaven_landmark_02_note_2",
-          "kind": "report",
-          "title": "place.skycraft.stormhaven_landmark_02 Field Record 2",
-          "at": "site",
-          "pages": [
-            "Entry 2 — place.skycraft.stormhaven_landmark_02 (Stormhaven)\n\nRecorded by the regional wardens inspecting place.skycraft.stormhaven_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_stormhaven_landmark_02_note_3",
-          "kind": "letter",
-          "title": "place.skycraft.stormhaven_landmark_02 Field Record 3",
-          "at": "site",
-          "pages": [
-            "Entry 3 — place.skycraft.stormhaven_landmark_02 (Stormhaven)\n\nRecorded by the regional wardens inspecting place.skycraft.stormhaven_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_stormhaven_landmark_02_note_4",
+          "id": "stormhaven_landmark_02_field_record_1",
+          "title": "Stormhaven Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.stormhaven_landmark_02 Field Record 4",
-          "at": "site",
+          "author": "Surveyor of Stormhaven",
+          "at": "chest",
           "pages": [
-            "Entry 4 — place.skycraft.stormhaven_landmark_02 (Stormhaven)\n\nRecorded by the regional wardens inspecting place.skycraft.stormhaven_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Stormhaven Divines Wayshrine (stormhaven_landmark_02) in Stormhaven (high_rock/stormhaven). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "stormhaven.L8.wayside_miracles",
+            "stormhaven.L11.old_pilgrim_way"
+          ]
+        },
+        {
+          "id": "stormhaven_landmark_02_field_record_2",
+          "title": "Stormhaven Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Stormhaven",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Stormhaven Divines Wayshrine (stormhaven_landmark_02) in Stormhaven (high_rock/stormhaven): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "stormhaven.L8.wayside_miracles",
+            "stormhaven.L11.old_pilgrim_way"
           ]
         }
       ]

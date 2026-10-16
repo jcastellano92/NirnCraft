@@ -15,6 +15,7 @@
     "deep_cave"
   ],
   "catalogue": [
+    "skycraft:abyssal_trench_caves",
     "skycraft:alikr_desert",
     "skycraft:alikr_dunes",
     "skycraft:alpine_meadow",
@@ -26,10 +27,12 @@
     "skycraft:atmoran_frozen_forest",
     "skycraft:atmoran_ice_waste",
     "skycraft:auridon_vineyards",
+    "skycraft:ayleid_limestone_caverns",
     "skycraft:azuras_coast",
     "skycraft:bangkorai",
     "skycraft:bitter_coast_swamp",
     "skycraft:bjoulsae_river",
+    "skycraft:black_marsh_hist_caverns",
     "skycraft:black_marsh_swamp",
     "skycraft:blackwood_swamp",
     "skycraft:cold_ocean",
@@ -51,6 +54,7 @@
     "skycraft:eastmarch_volcanic_tundra",
     "skycraft:elsweyr_canyons",
     "skycraft:elsweyr_dunes",
+    "skycraft:elsweyr_sandstone_caverns",
     "skycraft:elsweyr_savanna",
     "skycraft:falkreath_forest",
     "skycraft:falmer_glow_caves",
@@ -82,6 +86,7 @@
     "skycraft:murky_river",
     "skycraft:mushroom_grottos",
     "skycraft:nibenay_valley",
+    "skycraft:nordic_karst_caverns",
     "skycraft:pale_heath",
     "skycraft:pale_snowfield",
     "skycraft:pellitine_jungle",
@@ -109,7 +114,9 @@
     "skycraft:stonefalls",
     "skycraft:stormhaven",
     "skycraft:stros_mkai_coast",
+    "skycraft:submerged_sea_caverns",
     "skycraft:sugar_fields",
+    "skycraft:summerset_crystal_grottoes",
     "skycraft:summerset_meadow",
     "skycraft:summerset_shore",
     "skycraft:sunken_isles",
@@ -124,6 +131,7 @@
     "skycraft:tsaesci_jungle",
     "skycraft:valenwood_mangrove_coast",
     "skycraft:valenwood_rainforest",
+    "skycraft:valenwood_root_warrens",
     "skycraft:vvardenfell_ashlands",
     "skycraft:warm_beach",
     "skycraft:warm_ocean",
@@ -137,6 +145,7 @@
     "skycraft:winterhold_glacier",
     "skycraft:wrothgarian_mountains",
     "skycraft:yokudan_desert",
+    "skycraft:yokudan_sand_vaults",
     "minecraft:deep_dark",
     "minecraft:dripstone_caves",
     "minecraft:lush_caves"
@@ -209,12 +218,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -231,8 +244,12 @@
             "weight": 1
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:falmer_glow_caves",
@@ -328,8 +345,12 @@
             "weight": 1
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 2
+          },
+          {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "minecraft:dripstone_caves",
@@ -344,6 +365,10 @@
           {
             "biome": "skycraft:falmer_glow_caves",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
           },
           {
             "biome": "@surface",
@@ -427,12 +452,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:ayleid_limestone_caverns",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -445,16 +474,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:ayleid_limestone_caverns",
+            "weight": 2
+          },
+          {
             "biome": "skycraft:dwemer_caverns",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
-          },
-          {
-            "biome": "skycraft:falmer_glow_caves",
-            "weight": 1
+            "weight": 2
           },
           {
             "biome": "minecraft:deep_dark",
@@ -637,12 +666,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:black_marsh_hist_caverns",
+            "weight": 3
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -651,12 +684,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:black_marsh_hist_caverns",
+            "weight": 3
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -746,12 +783,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:elsweyr_sandstone_caverns",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:lava_caves",
@@ -760,12 +801,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:elsweyr_sandstone_caverns",
+            "weight": 2
+          },
+          {
             "biome": "skycraft:lava_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:dwemer_caverns",
@@ -847,12 +892,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -861,12 +910,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -948,12 +1001,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:summerset_crystal_grottoes",
+            "weight": 3
+          },
+          {
             "biome": "skycraft:falmer_glow_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -962,8 +1019,12 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:summerset_crystal_grottoes",
+            "weight": 3
+          },
+          {
             "biome": "skycraft:falmer_glow_caves",
-            "weight": 2
+            "weight": 1
           },
           {
             "biome": "@surface",
@@ -1045,12 +1106,20 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:yokudan_sand_vaults",
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:elsweyr_sandstone_caverns",
+            "weight": 1
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 3
           },
           {
             "biome": "skycraft:lava_caves",
@@ -1059,16 +1128,20 @@
         ],
         "deep_cave": [
           {
-            "biome": "skycraft:lava_caves",
+            "biome": "skycraft:yokudan_sand_vaults",
             "weight": 1
-          },
-          {
-            "biome": "@surface",
-            "weight": 3
           },
           {
             "biome": "skycraft:dwemer_caverns",
-            "weight": 1
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:lava_caves",
+            "weight": 2
+          },
+          {
+            "biome": "@surface",
+            "weight": 2
           }
         ]
       }
@@ -1150,30 +1223,38 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:mushroom_grottos",
             "weight": 1
           },
           {
-            "biome": "minecraft:lush_caves",
+            "biome": "skycraft:submerged_sea_caverns",
             "weight": 1
           }
         ],
         "deep_cave": [
+          {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 2
+          },
           {
             "biome": "skycraft:dwemer_caverns",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:falmer_glow_caves",
@@ -1259,8 +1340,12 @@
             "weight": 3
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           }
         ],
         "deep_cave": [
@@ -1269,8 +1354,12 @@
             "weight": 2
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "minecraft:deep_dark",
@@ -3774,12 +3863,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -3788,12 +3881,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -6303,21 +6400,11 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:yokudan_sand_vaults",
+            "weight": 3
+          },
+          {
             "biome": "minecraft:dripstone_caves",
-            "weight": 2
-          },
-          {
-            "biome": "@surface",
-            "weight": 5
-          },
-          {
-            "biome": "skycraft:lava_caves",
-            "weight": 1
-          }
-        ],
-        "deep_cave": [
-          {
-            "biome": "skycraft:lava_caves",
             "weight": 1
           },
           {
@@ -6325,8 +6412,26 @@
             "weight": 3
           },
           {
-            "biome": "skycraft:dwemer_caverns",
+            "biome": "skycraft:submerged_sea_caverns",
             "weight": 1
+          }
+        ],
+        "deep_cave": [
+          {
+            "biome": "skycraft:yokudan_sand_vaults",
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:abyssal_trench_caves",
+            "weight": 1
+          },
+          {
+            "biome": "skycraft:lava_caves",
+            "weight": 1
+          },
+          {
+            "biome": "@surface",
+            "weight": 2
           }
         ]
       },
@@ -8828,33 +8933,29 @@
         ],
         "cave": [
           {
-            "biome": "minecraft:lush_caves",
-            "weight": 2
+            "biome": "skycraft:submerged_sea_caverns",
+            "weight": 3
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 2
           },
           {
-            "biome": "skycraft:mushroom_grottos",
+            "biome": "skycraft:abyssal_trench_caves",
             "weight": 1
           }
         ],
         "deep_cave": [
           {
-            "biome": "minecraft:lush_caves",
-            "weight": 1
-          },
-          {
-            "biome": "@surface",
+            "biome": "skycraft:abyssal_trench_caves",
             "weight": 3
           },
           {
-            "biome": "skycraft:mushroom_grottos",
-            "weight": 1
+            "biome": "skycraft:submerged_sea_caverns",
+            "weight": 2
           },
           {
-            "biome": "minecraft:deep_dark",
+            "biome": "@surface",
             "weight": 1
           }
         ]
@@ -11357,29 +11458,29 @@
         ],
         "cave": [
           {
-            "biome": "skycraft:falmer_glow_caves",
-            "weight": 1
+            "biome": "skycraft:submerged_sea_caverns",
+            "weight": 3
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 2
           },
           {
-            "biome": "skycraft:mushroom_grottos",
+            "biome": "skycraft:abyssal_trench_caves",
             "weight": 1
           }
         ],
         "deep_cave": [
           {
-            "biome": "skycraft:falmer_glow_caves",
+            "biome": "skycraft:abyssal_trench_caves",
+            "weight": 3
+          },
+          {
+            "biome": "skycraft:submerged_sea_caverns",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 2
-          },
-          {
-            "biome": "minecraft:lush_caves",
             "weight": 1
           }
         ]
@@ -13847,6 +13948,34 @@
         "upland": [
           {
             "biome": "skycraft:rocky_shore",
+            "weight": 1
+          }
+        ],
+        "cave": [
+          {
+            "biome": "skycraft:submerged_sea_caverns",
+            "weight": 3
+          },
+          {
+            "biome": "@surface",
+            "weight": 2
+          },
+          {
+            "biome": "skycraft:abyssal_trench_caves",
+            "weight": 1
+          }
+        ],
+        "deep_cave": [
+          {
+            "biome": "skycraft:abyssal_trench_caves",
+            "weight": 3
+          },
+          {
+            "biome": "skycraft:submerged_sea_caverns",
+            "weight": 2
+          },
+          {
+            "biome": "@surface",
             "weight": 1
           }
         ]
@@ -18634,8 +18763,12 @@
             "weight": 1
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 2
+          },
+          {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "minecraft:dripstone_caves",
@@ -18650,6 +18783,10 @@
           {
             "biome": "skycraft:falmer_glow_caves",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
           },
           {
             "biome": "@surface",
@@ -26999,12 +27136,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -37102,12 +37243,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -40496,8 +40641,12 @@
             "weight": 1
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 2
+          },
+          {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "minecraft:dripstone_caves",
@@ -51678,12 +51827,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -51692,12 +51845,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -55661,12 +55818,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:summerset_crystal_grottoes",
+            "weight": 3
+          },
+          {
             "biome": "skycraft:falmer_glow_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -56278,8 +56439,12 @@
             "weight": 1
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 2
+          },
+          {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "minecraft:dripstone_caves",
@@ -56294,6 +56459,10 @@
           {
             "biome": "skycraft:falmer_glow_caves",
             "weight": 2
+          },
+          {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
           },
           {
             "biome": "@surface",
@@ -59907,12 +60076,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -59921,12 +60094,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -77739,12 +77916,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 2
           },
           {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -77753,12 +77934,16 @@
         ],
         "deep_cave": [
           {
+            "biome": "skycraft:valenwood_root_warrens",
+            "weight": 2
+          },
+          {
             "biome": "minecraft:lush_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "skycraft:mushroom_grottos",
@@ -92913,8 +93098,12 @@
             "weight": 3
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "@surface",
-            "weight": 4
+            "weight": 3
           }
         ],
         "deep_cave": [
@@ -92923,8 +93112,12 @@
             "weight": 2
           },
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "@surface",
-            "weight": 3
+            "weight": 2
           },
           {
             "biome": "minecraft:deep_dark",
@@ -92997,12 +93190,16 @@
         ],
         "cave": [
           {
+            "biome": "skycraft:nordic_karst_caverns",
+            "weight": 1
+          },
+          {
             "biome": "minecraft:dripstone_caves",
             "weight": 1
           },
           {
             "biome": "@surface",
-            "weight": 5
+            "weight": 4
           },
           {
             "biome": "skycraft:mushroom_grottos",

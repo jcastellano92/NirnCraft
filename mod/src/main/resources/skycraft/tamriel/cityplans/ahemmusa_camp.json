@@ -30,7 +30,7 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        9,
+        13,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        -7,
-        5
+        -13,
+        10
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -78,8 +78,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        0,
+        -12
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -103,6 +103,101 @@
     "ahemmusa_camp_b_2": "Kausi's Yurt",
     "ahemmusa_camp_b_3": "Dutadalk's Yurt",
     "ahemmusa_camp_b_4": "Yenammu's Yurt",
-    "ahemmusa_camp_b_5": "Ahemmusa Guar Kraal"
-  }
+    "ahemmusa_camp_b_5": "Ahemmusa Guar Kraal",
+    "ahemmusa_wise_woman_fire": "Sinnammu Mirpal's Council Hearth"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "ahemmusa_wise_woman_fire"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 22,
+      "rz": 18,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "ald_daedroth_yurt_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          -4,
+          12
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          6,
+          -24
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "headland_trail"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.48
+  },
+  "queue": [
+    {
+      "kind": "tent",
+      "count": 6,
+      "on": "ald_daedroth_yurt_ring"
+    }
+  ]
 }

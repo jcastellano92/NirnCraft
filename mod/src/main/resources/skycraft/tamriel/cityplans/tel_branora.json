@@ -30,8 +30,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        9,
-        0
+        7,
+        -8
       ],
       "face": "south",
       "overlay": "azuras_coast",
@@ -54,8 +54,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -7,
-        5
+        -10,
+        8
       ],
       "face": "south",
       "overlay": "azuras_coast",
@@ -78,7 +78,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        3,
+        -5,
         -9
       ],
       "face": "south",
@@ -103,10 +103,132 @@
     "tel_branora_b_2": "Sethan's Tradehouse",
     "tel_branora_b_3": "Ferele Athram's Apothecary",
     "tel_branora_b_4": "Galos Farethi's Armorer",
-    "tel_branora_b_5": "Fedris Tharen's Healer Pod"
+    "tel_branora_b_5": "Fedris Tharen's Healer Pod",
+    "tel_branora_pod_square": "Tel Branora Pod-Cluster Market"
   },
   "innKey": "tel_branora_b_2",
   "names": {
     "inn": "tel_branora_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        8
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "tel_branora_pod_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 22,
+      "rz": 20,
+      "wobble": 5,
+      "lobes": 4,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "therana_pod_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          -6,
+          -24
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "archipelago_pier_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          6
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          28,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "feather_trail"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "telvanni",
+      "on": "therana_pod_loop"
+    },
+    {
+      "kind": "alchemist",
+      "count": 1,
+      "kit": "telvanni",
+      "on": "archipelago_pier_way"
+    }
+  ]
 }

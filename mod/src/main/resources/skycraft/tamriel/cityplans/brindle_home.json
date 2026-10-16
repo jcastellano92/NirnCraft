@@ -30,7 +30,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -43,7 +43,7 @@
       "wealth": "common",
       "at": [
         0,
-        15
+        19
       ],
       "face": "south",
       "overlay": "colovian_highlands",
@@ -54,7 +54,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
+        -12,
         0
       ],
       "face": "south",
@@ -84,12 +84,136 @@
       "type": "flowers",
       "theme": "colovian_heather",
       "count": 2
+    },
+    {
+      "type": "orchard",
+      "where": "edge"
     }
   ],
   "titles": {
     "brindle_home_b_1": "Brindle Home Farmhouse",
     "brindle_home_b_2": "Engorm's Shepherd Cottage",
     "brindle_home_b_3": "Pinarius Inventius's Lodge",
-    "brindle_home_b_4": "Brindle Wool Barn"
-  }
+    "brindle_home_b_4": "Brindle Wool Barn",
+    "brindle_home_square": "Brindle Home Highland Fold"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        2,
+        4
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "brindle_home_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -2,
+          7
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          2,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "highland_drove_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          2
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          19,
+          -2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "brindle_home_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        2
+      ],
+      "rx": 15,
+      "rz": 12,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "pasture_cot_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "pasture_cot_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "highland_drove_lane"
+    }
+  ]
 }

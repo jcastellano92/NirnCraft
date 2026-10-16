@@ -3,6 +3,99 @@
     "provinces": [
       "cyrodiil"
     ],
+    "biomes": [
+      "skycraft:ayleid_limestone_caverns",
+      "skycraft:dwemer_caverns",
+      "skycraft:mushroom_grottos"
+    ],
+    "why": [
+      "cyrodiil.L4.oak_beech_forest",
+      "cyrodiil.L10.ayleid_undercity",
+      "cyrodiil.L11.ayleid_era"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:will_o_wisp",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "spirit",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:minotaur",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:ogre",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:spriggan",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "skirmisher"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "cyrodiil"
+    ],
     "regions": [
       "cyrodiil/heartlands"
     ],

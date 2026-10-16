@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/thistle_branch"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/thistle_branch_harvested"
+    }
+  }
+}

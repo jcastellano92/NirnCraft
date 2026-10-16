@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/luminous_russula"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/luminous_russula_harvested"
+    }
+  }
+}

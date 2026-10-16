@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/spawn_ash"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/spawn_ash_harvested"
+    }
+  }
+}

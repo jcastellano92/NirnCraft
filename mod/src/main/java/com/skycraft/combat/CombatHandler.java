@@ -69,8 +69,19 @@ public final class CombatHandler {
     private static final ThreadLocal<Boolean> SECONDARY = ThreadLocal.withInitial(() -> false);
     /** Game time of each player's last melee swing (vanilla sweeping hits arrive in the same tick). */
     private static final Map<UUID, Long> LAST_SWING = new HashMap<>();
+    /** Transient attribute modifier IDs for Dual Flurry, Ranger, and Block Runner perks. */
+    private static final UUID DUAL_FLURRY_SPEED_ID = UUID.fromString("92b4c5d6-7e8f-4a1b-9c2d-3e4f5a6b7c8d");
+    private static final UUID RANGER_SPEED_ID = UUID.fromString("a3c5d7e9-1f2a-4b3c-8d9e-0f1a2b3c4d5e");
+    private static final UUID BLOCK_RUNNER_SPEED_ID = UUID.fromString("b4d6e8f0-2a3b-4c5d-9e0f-1a2b3c4d5e6f");
 
     private CombatHandler() {}
+
+    /** True when both main hand and offhand hold one-handed melee weapons. */
+    public static boolean isDualWielding(Player player) {
+        return !player.getMainHandItem().isEmpty() && !player.getOffhandItem().isEmpty()
+                && WeaponClass.of(player.getMainHandItem()).skill == Skill.ONE_HANDED
+                && WeaponClass.of(player.getOffhandItem()).skill == Skill.ONE_HANDED;
+    }
 
     /**
      * Deals damage caused by a combat side effect (two-handed sweep, shield bash, reflected blows, fire cloak...).
@@ -166,16 +177,18 @@ public final class CombatHandler {
         // Unsheathe on swing
         Sheathe.setSheathed(player, false);
 
-        // Weapon cooldown: penalize spamming
-        if (player.getAttackStrengthScale(0.5f) < 0.75f) {
+        boolean dualWield = isDualWielding(player);
+        int flurryRank = dualWield ? Perks.rank(data, "one_handed.dual_flurry") : 0;
+        float flurryBonus = flurryRank >= 2 ? 0.35f : flurryRank == 1 ? 0.20f : 0f;
+
+        // Weapon cooldown: penalize spamming (Dual Flurry lowers threshold proportionally to speed bonus)
+        float spamThreshold = 0.75f / (1f + flurryBonus);
+        if (player.getAttackStrengthScale(0.5f) < spamThreshold) {
             mult *= 0.4f;
         }
 
         // Melee swing stamina drain
         float swingCost = wc.twoHanded() ? 10f : (wc == WeaponClass.UNARMED ? 4f : 6f);
-        boolean dualWield = !player.getMainHandItem().isEmpty() && !player.getOffhandItem().isEmpty()
-                && WeaponClass.of(player.getMainHandItem()).skill == Skill.ONE_HANDED
-                && WeaponClass.of(player.getOffhandItem()).skill == Skill.ONE_HANDED;
         if (dualWield) swingCost = 8f;
         if (!Vitals.consumeStamina(player, swingCost, true)) {
             mult *= 0.5f; // Weak swing when exhausted
@@ -250,6 +263,7 @@ public final class CombatHandler {
                 mult *= wc.twoHanded() ? 1.75f : 1.5f;
                 if (wc == WeaponClass.UNARMED && Perks.has(data, "unarmed.haymaker")) mult *= 1.5f;
                 if (wc.skill == Skill.ONE_HANDED && Perks.has(data, "one_handed.savage_strike")) mult *= 1.25f;
+                if (dualWield && Perks.has(data, "one_handed.dual_savagery")) mult *= 1.50f;
                 if (wc.skill == Skill.TWO_HANDED && Perks.has(data, "two_handed.devastating_blow")) mult *= 1.25f;
                 if (sprinting && (wc.skill == Skill.ONE_HANDED && Perks.has(data, "one_handed.critical_charge")
                         || wc.skill == Skill.TWO_HANDED && Perks.has(data, "two_handed.great_critical_charge"))) {
@@ -522,18 +536,29 @@ public final class CombatHandler {
         }
     }
 
-    /** Archery "Quick Shot": draw bows 30% faster. */
+    /** Archery "Quick Shot" (draw bows 30% faster) and "Steady Hand" (focus stamina while zooming to steady aim & slow targets). */
     @SubscribeEvent
     public static void onUseTick(LivingEntityUseItemEvent.Tick event) {
-        if (event.getEntity() instanceof Player player && event.getItem().getItem() instanceof BowItem
-                && Perks.has(player, "archery.quick_shot") && player.tickCount % 3 == 0) {
+        if (!(event.getEntity() instanceof Player player) || !(event.getItem().getItem() instanceof BowItem)) return;
+        if (Perks.has(player, "archery.quick_shot") && player.tickCount % 3 == 0) {
             event.setDuration(event.getDuration() - 1);
+        }
+        if (player instanceof ServerPlayer sp && sp.isCrouching() && Perks.has(sp, "archery.eagle_eye")) {
+            int steadyRank = Perks.rank(sp, "archery.steady_hand");
+            if (steadyRank > 0 && Vitals.consumeStamina(sp, 0.35f, false) && sp.tickCount % 5 == 0) {
+                int amp = steadyRank >= 2 ? 2 : 0; // ~25% slow at rank 1, ~50% slow at rank 2
+                for (LivingEntity e : sp.level().getEntitiesOfClass(LivingEntity.class, sp.getBoundingBox().inflate(24.0),
+                        e -> e != sp && e.isAlive() && !(e instanceof Player))) {
+                    e.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 12, amp, true, false));
+                }
+            }
         }
     }
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+        updateCombatPerkAttributes(player);
         if (player.tickCount % 20 == 0) {
             RacePowers.tickFireCloak(player);
             // Block "Shield Charge": sprinting into enemies with a shield knocks them down.
@@ -545,4 +570,50 @@ public final class CombatHandler {
             }
         }
     }
+
+    private static void updateCombatPerkAttributes(ServerPlayer player) {
+        var attackSpeed = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED);
+        if (attackSpeed != null) {
+            int flurryRank = isDualWielding(player) ? Perks.rank(player, "one_handed.dual_flurry") : 0;
+            double flurryBonus = flurryRank >= 2 ? 0.35 : (flurryRank == 1 ? 0.20 : 0.0);
+            var existing = attackSpeed.getModifier(DUAL_FLURRY_SPEED_ID);
+            if (flurryBonus > 0.0) {
+                if (existing == null || Math.abs(existing.getAmount() - flurryBonus) > 1e-4) {
+                    if (existing != null) attackSpeed.removeModifier(DUAL_FLURRY_SPEED_ID);
+                    attackSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                            DUAL_FLURRY_SPEED_ID, "Dual Flurry", flurryBonus,
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+                }
+            } else if (existing != null) {
+                attackSpeed.removeModifier(DUAL_FLURRY_SPEED_ID);
+            }
+        }
+
+        var moveSpeed = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        if (moveSpeed != null) {
+            boolean drawingRanged = player.isUsingItem() && (player.getUseItem().getItem() instanceof BowItem
+                    || player.getUseItem().getItem() instanceof net.minecraft.world.item.CrossbowItem);
+            boolean rangerActive = drawingRanged && Perks.has(player, "archery.ranger");
+            var existingRanger = moveSpeed.getModifier(RANGER_SPEED_ID);
+            if (rangerActive && existingRanger == null) {
+                moveSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        RANGER_SPEED_ID, "Ranger", 0.35,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+            } else if (!rangerActive && existingRanger != null) {
+                moveSpeed.removeModifier(RANGER_SPEED_ID);
+            }
+
+            boolean blocking = player.isBlocking() || ActionHandler.isWeaponBlocking(player);
+            boolean blockRunnerActive = blocking && Perks.has(player, "block.block_runner");
+            var existingBlockRunner = moveSpeed.getModifier(BLOCK_RUNNER_SPEED_ID);
+            if (blockRunnerActive && existingBlockRunner == null) {
+                moveSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        BLOCK_RUNNER_SPEED_ID, "Block Runner", 0.35,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+            } else if (!blockRunnerActive && existingBlockRunner != null) {
+                moveSpeed.removeModifier(BLOCK_RUNNER_SPEED_ID);
+            }
+        }
+    }
 }
+

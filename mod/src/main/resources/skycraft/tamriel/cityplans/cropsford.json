@@ -31,7 +31,7 @@
       "wealth": "noble",
       "at": [
         8,
-        0
+        -16
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -42,8 +42,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        5,
-        14
+        7,
+        22
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -6,
-        5
+        -9,
+        8
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -78,8 +78,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        2,
-        -8
+        -11,
+        -23
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -96,6 +96,10 @@
       "type": "memorial",
       "theme": "crestbridge_peace",
       "count": 1
+    },
+    {
+      "type": "flowers",
+      "where": "street"
     }
   ],
   "titles": {
@@ -103,6 +107,126 @@
     "cropsford_b_2": "Lusius Petronius's House",
     "cropsford_b_3": "Mardaneus Varus's Cottage",
     "cropsford_b_4": "Crestbridge Timber Barn",
-    "cropsford_b_5": "Cropsford Field Smithy"
-  }
+    "cropsford_b_5": "Cropsford Field Smithy",
+    "cropsford_square": "Cropsford Founders' Green"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "cropsford_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          2,
+          9
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          -2,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "blue_road_avenue"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          4
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          27,
+          -4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "cropsford_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        4
+      ],
+      "rx": 21,
+      "rz": 17,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "new_settlement_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        2,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "new_settlement_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "blue_road_avenue"
+    }
+  ]
 }

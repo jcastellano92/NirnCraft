@@ -31,7 +31,7 @@
       "wealth": "noble",
       "at": [
         9,
-        0
+        -4
       ],
       "face": "south",
       "overlay": "azuras_coast",
@@ -54,7 +54,7 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -7,
+        -15,
         5
       ],
       "face": "south",
@@ -78,7 +78,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        3,
+        -5,
         -9
       ],
       "face": "south",
@@ -103,10 +103,132 @@
     "tel_aruhn_b_2": "Plot and Plaster",
     "tel_aruhn_b_3": "Bildren Areleth's Apothecary",
     "tel_aruhn_b_4": "Ferele's Underground Market",
-    "tel_aruhn_b_5": "Maren Uvaren's Enchanter"
+    "tel_aruhn_b_5": "Maren Uvaren's Enchanter",
+    "tel_aruhn_market_ring": "Tel Aruhn Under-Root Bazaar"
   },
   "innKey": "tel_aruhn_b_2",
   "names": {
     "inn": "tel_aruhn_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        10
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 4,
+      "name": "tel_aruhn_market_ring"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 22,
+      "rz": 20,
+      "wobble": 5,
+      "lobes": 3,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "plot_and_plaster_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          -4,
+          12
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          6,
+          -26
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "spire_causeway"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          0
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          26,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "lantern_lane"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "telvanni",
+      "on": "plot_and_plaster_ring"
+    },
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "telvanni",
+      "on": "spire_causeway"
+    }
+  ]
 }

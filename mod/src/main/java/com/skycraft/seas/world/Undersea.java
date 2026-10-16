@@ -218,9 +218,15 @@ final class Undersea {
                 int roof = bed + (int) Math.round(h * Math.sqrt(1 - d * d));
                 for (int y = b; y <= roof; y++) {
                     double inner = Math.hypot(dx, dz) / (rad - 1.6);
-                    boolean hollow = inner < 1 && y > bed && y < bed + (h - 1) * Math.sqrt(Math.max(0, 1 - inner * inner));
+                    double innerCeil = bed + (h - 1) * Math.sqrt(Math.max(0, 1 - inner * inner));
+                    boolean hollow = inner < 1 && y > bed && y < innerCeil;
                     if (hollow) {
-                        k.set(x, y, z, s(Blocks.WATER));
+                        // Upper dome above the low mouth (y >= bed + 4) traps a breathable air pocket
+                        if (y >= bed + 4 && roof < SEA - 1) {
+                            k.air(x, y, z);
+                        } else {
+                            k.set(x, y, z, s(Blocks.WATER));
+                        }
                     } else {
                         int roll = (x * 31 + y * 17 + z * 13) & 7;
                         k.set(x, y, z, roll < 4 ? rock : roll < 6 ? rock2 : tuff);
@@ -228,11 +234,15 @@ final class Undersea {
                 }
             }
         }
-        // the mouth, facing out
+        // the mouth, facing out (stays at y = 1..2 so the upper air pocket remains sealed)
         for (int a = (int) rad - 2; a <= (int) rad + 1; a++) {
             for (int l = -1; l <= 1; l++) {
                 for (int y = 1; y <= 2; y++) fr.set(a, bed + y, l, s(Blocks.WATER));
             }
+        }
+        // bioluminescent sea-lantern crystal in the dome crown
+        if (bed + h - 1 < SEA - 1) {
+            k.setDry(k.cx, bed + h - 2, k.cz, s(Blocks.SEA_LANTERN));
         }
         // the nest: wax combs, cast shells, bones, wreckage
         for (int i = 0; i < (queen ? 14 : 8); i++) {
@@ -245,7 +255,7 @@ final class Undersea {
             k.set(x, bed + 1, z, st);
         }
         k.chest(k.cx - 2, bed + 1, k.cz + 2, fr.f, loot(queen ? "dreugh_queen_hoard" : "dreugh_lair"));
-        k.airVent(k.cx + 2, bed, k.cz - 2, bed + h - 2);
+        k.airVent(k.cx + 2, bed, k.cz - 2, Math.min(bed + 3, bed + h - 2));
         // kollops on the sand around it
         kollops(k, k.cx, k.cz, (int) rad + 6, 12);
         LairMarkerBlockEntity m = k.marker(k.cx, bed + 2, k.cz);
@@ -421,12 +431,67 @@ final class Undersea {
             int y = k.floor(x, z);
             k.setIfOpen(x, y, z, k.r.nextInt(3) == 0 ? s(Blocks.BONE_BLOCK) : s(Blocks.SEAGRASS));
         }
+        if (bed + 9 < SEA - 2 && k.r.nextInt(3) == 0) {
+            seaCavernWithAirPocket(k, k.cx + 8, k.cz);
+        }
         k.barrel(k.cx + 1, bed + 1, k.cz - 1, loot("slaughterfish_nest"));
         LairMarkerBlockEntity m = k.marker(k.cx, bed + 2, k.cz);
         if (m != null) {
             m.creature("skycraft:slaughterfish", 3 + k.r.nextInt(3), 4);
             if (k.r.nextInt(3) == 0) m.creature("skycraft:giant_slaughterfish", 1, 2);
         }
+        return true;
+    }
+
+    /**
+     * A submerged sea cavern dome on the seabed with a flooded lower pool, low diver entry arch, and a sealed stone &
+     * prismarine roof trapping a breathable air pocket lit by sea-lanterns and sea pickles.
+     */
+    static boolean seaCavernWithAirPocket(SiteKit k) {
+        return seaCavernWithAirPocket(k, k.cx, k.cz);
+    }
+
+    static boolean seaCavernWithAirPocket(SiteKit k, int cx, int cz) {
+        int bed = k.floor(cx, cz);
+        int h = 7;
+        if (bed <= 0 || bed + h + 2 > SEA - 1) return false;
+        float rad = 5.5f;
+        BlockState stone = s(Blocks.STONE), mossy = s(Blocks.MOSSY_COBBLESTONE), prism = s(Blocks.PRISMARINE);
+        int ir = (int) Math.ceil(rad) + 1;
+        for (int dx = -ir; dx <= ir; dx++) {
+            for (int dz = -ir; dz <= ir; dz++) {
+                double d = Math.hypot(dx, dz) / rad;
+                if (d > 1) continue;
+                int x = cx + dx, z = cz + dz;
+                int b = k.floor(x, z);
+                int roof = bed + (int) Math.round(h * Math.sqrt(Math.max(0, 1 - d * d)));
+                for (int y = Math.min(b, bed); y <= roof; y++) {
+                    double inner = Math.hypot(dx, dz) / (rad - 1.4);
+                    double innerCeil = bed + (h - 1) * Math.sqrt(Math.max(0, 1 - inner * inner));
+                    boolean hollow = inner < 1 && y > bed && y < innerCeil;
+                    if (hollow) {
+                        if (y >= bed + 3) {
+                            k.air(x, y, z);
+                        } else {
+                            k.set(x, y, z, s(Blocks.WATER));
+                        }
+                    } else {
+                        int roll = (x * 19 + y * 13 + z * 7) & 7;
+                        k.set(x, y, z, roll == 0 ? prism : roll < 4 ? mossy : stone);
+                    }
+                }
+            }
+        }
+        // low submerged entry arch on the west side (y = bed + 1 .. bed + 2) so upper air pocket stays sealed
+        for (int dx = -(int) rad; dx <= -2; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                k.set(cx + dx, bed + 1, cz + dz, s(Blocks.WATER));
+                k.set(cx + dx, bed + 2, cz + dz, s(Blocks.WATER));
+            }
+        }
+        k.setDry(cx, bed + h - 2, cz, s(Blocks.SEA_LANTERN));
+        k.set(cx + 1, bed + 1, cz + 1, s(Blocks.SEA_PICKLE).setValue(BlockStateProperties.PICKLES, 3));
+        k.chest(cx + 1, bed + 1, cz - 1, Direction.WEST, SiteKit.loot("chests/flotsam"));
         return true;
     }
 

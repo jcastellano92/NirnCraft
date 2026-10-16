@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        16,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        5
       ],
       "face": "south",
       "overlay": "gold_coast",
@@ -84,16 +84,140 @@
       "type": "bench",
       "theme": "coach_stop",
       "count": 1
+    },
+    {
+      "type": "pond",
+      "where": "free"
     }
   ],
   "titles": {
     "brina_cross_inn_b_1": "Brina Cross Inn",
     "brina_cross_inn_b_2": "Gold Road Coaching Stables",
     "brina_cross_inn_b_3": "Christophe Marane's Quarters",
-    "brina_cross_inn_b_4": "Anvil Wagon Depot"
+    "brina_cross_inn_b_4": "Anvil Wagon Depot",
+    "brina_cross_inn_square": "Brina Cross Coaching Yard"
   },
   "innKey": "brina_cross_inn_b_1",
   "names": {
     "inn": "brina_cross_inn_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "brina_cross_inn_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          -4,
+          6
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          4,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "gold_road_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          -4
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          16,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "brina_cross_inn_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        -4
+      ],
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "coaching_yard_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "coaching_yard_loop"
+    },
+    {
+      "kind": "house",
+      "count": 1,
+      "on": "gold_road_way"
+    }
+  ]
 }

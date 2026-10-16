@@ -27,45 +27,251 @@
   },
   "innKey": "bee_and_barb",
   "buildings": [
-    {"kind": "manor", "at": [42, -12], "size": [11, 13], "face": "W", "flags": ["upper", "rich"], "name": "riften_bollis_house"},
-    {"kind": "house", "at": [-44, 18], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "riften_aerins_house"},
-    {"kind": "house", "at": [-44, -8], "size": [9, 11], "face": "E", "name": "riften_romlyns_house"},
-    {"kind": "house", "at": [44, 20], "size": [9, 11], "face": "W", "name": "riften_valindors_house"}
+    {
+      "kind": "manor",
+      "at": [
+        42,
+        -12
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "W",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "name": "riften_bollis_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        -44,
+        18
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "flags": [
+        "upper"
+      ],
+      "name": "riften_aerins_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        -44,
+        -8
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "name": "riften_romlyns_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        44,
+        20
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "name": "riften_valindors_house"
+    }
   ],
   "plazas": [
-    {"at": [-28, -6], "size": 11, "variant": 0, "stalls": 2, "name": "riften_canal_market"},
-    {"at": [0, -38], "size": 11, "variant": 1, "stalls": 0, "name": "riften_keep_courtyard"}
+    {
+      "at": [
+        -28,
+        -6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "riften_canal_market"
+    },
+    {
+      "at": [
+        0,
+        -38
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 0,
+      "name": "riften_keep_courtyard"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[-52, -16], [-28, -16], [28, -16], [52, -16]], "width": 3, "rank": 1, "tag": "row"},
-    {"type": "path", "via": [[-50, 48], [-26, 48], [26, 48], [50, 48]], "width": 3, "rank": 1, "tag": "south"}
+    {
+      "type": "path",
+      "via": [
+        [
+          -52,
+          -16
+        ],
+        [
+          -28,
+          -16
+        ],
+        [
+          28,
+          -16
+        ],
+        [
+          52,
+          -16
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -50,
+          48
+        ],
+        [
+          -26,
+          48
+        ],
+        [
+          26,
+          48
+        ],
+        [
+          50,
+          48
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "south"
+    }
   ],
   "zones": [
-    {"at": [0, -50], "r": 26, "zone": "noble"},
-    {"at": [0, 20], "r": 24, "zone": "centre"},
-    {"at": [40, 50], "r": 22, "zone": "poor"}
+    {
+      "at": [
+        0,
+        -50
+      ],
+      "r": 26,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        20
+      ],
+      "r": 24,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        40,
+        50
+      ],
+      "r": 22,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 72, "target": 0.55},
+  "fabric": {
+    "radius": 72,
+    "target": 0.55
+  },
   "queue": [
-    {"kind": "house", "name": "riften_marises_cottage", "on": "row"},
-    {"kind": "house", "name": "riften_grelods_office", "on": "row"},
-    {"kind": "house", "name": "riften_madesis_stall_house", "on": "row"},
-    {"kind": "house", "name": "riften_brand_sheis_lodging", "on": "south"},
-    {"kind": "house", "name": "riften_wujeetas_bunk", "on": "south"},
-    {"kind": "house", "name": "riften_mauls_watchhouse", "on": "south"}
+    {
+      "kind": "house",
+      "name": "riften_marises_cottage",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "riften_grelods_office",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "riften_madesis_stall_house",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "riften_brand_sheis_lodging",
+      "on": "south"
+    },
+    {
+      "kind": "house",
+      "name": "riften_wujeetas_bunk",
+      "on": "south"
+    },
+    {
+      "kind": "house",
+      "name": "riften_mauls_watchhouse",
+      "on": "south"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "divine:mara", "where": "square"},
-    {"type": "shrine", "theme": "divine:mara", "where": "free"},
-    {"type": "great_tree", "theme": "birch", "where": "free"},
-    {"type": "pond", "where": "edge"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "fountain", "where": "square"},
-    {"type": "lamps", "count": 3, "where": "free"},
-    {"type": "market", "where": "free"},
-    {"type": "bench", "where": "square"},
-    {"type": "memorial", "where": "free"}
+    {
+      "type": "statue",
+      "theme": "divine:mara",
+      "where": "square"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:mara",
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "birch",
+      "where": "free"
+    },
+    {
+      "type": "pond",
+      "where": "edge"
+    },
+    {
+      "type": "well",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 3,
+      "where": "gate"
+    },
+    {
+      "type": "fountain",
+      "where": "square"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "free"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    }
   ],
   "titles": {
     "riften_hall_of_the_dead": "Riften Hall of the Dead",

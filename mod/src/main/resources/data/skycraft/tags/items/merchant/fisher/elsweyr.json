@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "skycraft:senchal_snapper", "required": false},
+    {"id": "skycraft:riverhold_catfish", "required": false},
+    {"id": "skycraft:sugar_koi", "required": false},
+    {"id": "skycraft:small_pearl", "required": false}
+  ]
+}

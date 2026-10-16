@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -54,7 +54,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
+        -12,
         0
       ],
       "face": "south",
@@ -66,8 +66,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        0,
-        -15
+        -3,
+        -18
       ],
       "face": "south",
       "overlay": "jerall_mountains",
@@ -90,10 +90,156 @@
     "fern_mouth_b_1": "Fern Mouth Pack-Train Post",
     "fern_mouth_b_2": "Mule-Driver's Barn",
     "fern_mouth_b_3": "Toll-Keeper's Cabin",
-    "fern_mouth_b_4": "Pass Salt Store"
+    "fern_mouth_b_4": "Pass Salt Store",
+    "fern_mouth_square": "Fern Mouth Packbridge Crossing"
   },
   "innKey": "fern_mouth_b_1",
   "names": {
     "inn": "fern_mouth_b_1"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        4
+      ],
+      "to": [
+        19,
+        10
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        0,
+        -2
+      ],
+      "to": [
+        0,
+        14
+      ],
+      "width": 4,
+      "variant": 1
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        0
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "fern_mouth_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "packbridge_gorge_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          -2
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          19,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "fern_mouth_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 16,
+      "rz": 11,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "snowmelt_bank_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "snowmelt_bank_loop"
+    },
+    {
+      "kind": "house",
+      "count": 1,
+      "on": "packbridge_gorge_way"
+    }
+  ]
 }

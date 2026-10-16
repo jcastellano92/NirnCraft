@@ -11038,13 +11038,13 @@
   {
     "id": "daggerfall_landmark_02",
     "name": "place.skycraft.daggerfall_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "breton",
     "region": "high_rock/daggerfall",
     "x": -9496,
     "z": 2376,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "daggerfall.L9.betony_garrison",
       "daggerfall.L4.tannery_reeds"
@@ -11068,13 +11068,13 @@
   {
     "id": "anticlere_landmark_02",
     "name": "place.skycraft.anticlere_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "breton",
     "region": "high_rock/anticlere",
     "x": -8632,
     "z": 1272,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "anticlere.L1.anticlere_scarp",
       "anticlere.L1.river_meadows"
@@ -11113,13 +11113,13 @@
   {
     "id": "dwynnen_landmark_02",
     "name": "place.skycraft.dwynnen_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "breton",
     "region": "high_rock/dwynnen",
     "x": -7256,
     "z": 2168,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "dwynnen.L9.raven_debt",
       "dwynnen.L4.karst_bat_caves"
@@ -11143,13 +11143,13 @@
   {
     "id": "wayrest_landmark_02",
     "name": "place.skycraft.wayrest_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "breton",
     "region": "high_rock/wayrest",
     "x": -5296,
     "z": 3088,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "wayrest.L6.border_keep",
       "wayrest.L11.covenant_capital"
@@ -11173,13 +11173,13 @@
   {
     "id": "stormhaven_landmark_02",
     "name": "place.skycraft.stormhaven_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "breton",
     "region": "high_rock/stormhaven",
     "x": -7128,
     "z": -408,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "stormhaven.L8.wayside_miracles",
       "stormhaven.L11.old_pilgrim_way"

@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          -6,
+          -11
+        ]
       ],
-      "r0": 4,
-      "r1": 18,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          6,
+          -2
+        ],
+        [
+          15,
+          2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 12,
+      "rz": 11,
+      "wobble": 4,
+      "lobes": 5,
+      "phase": 0.38,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -195,5 +240,47 @@
     "coral_choked_palace_landmark": "High Seat of place.skycraft.coral_choked_palace",
     "coral_choked_palace_plaza": "place.skycraft.coral_choked_palace Central Plaza"
   },
-  "innKey": "coral_choked_palace_b_5"
+  "innKey": "coral_choked_palace_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

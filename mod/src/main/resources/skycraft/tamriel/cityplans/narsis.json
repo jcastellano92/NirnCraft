@@ -23,8 +23,8 @@
     {
       "id": "dome_palace",
       "at": [
-        0,
-        0
+        -15,
+        5
       ],
       "face": "south",
       "name": "narsis_landmark",
@@ -46,7 +46,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        14,
+        30,
         0
       ],
       "face": "south",
@@ -70,7 +70,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -3,
+        9,
         14
       ],
       "face": "south",
@@ -94,8 +94,8 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -14,
+        -18
       ],
       "face": "south",
       "overlay": "narsis",
@@ -119,7 +119,7 @@
       "wealth": "common",
       "at": [
         9,
-        -11
+        -27
       ],
       "face": "south",
       "overlay": "narsis",
@@ -151,12 +151,180 @@
     "narsis_b_4": "Hlaalu Charter Smithy",
     "narsis_b_5": "Mainland Ledger Archives",
     "narsis_b_6": "Sadras-Hlaalu Villa",
-    "narsis_b_7": "Narsis River-Watch"
+    "narsis_b_7": "Narsis River-Watch",
+    "narsis_thirr_bazaar": "Narsis Thirr-Bank Hlaalu Exchange"
   },
   "innKey": "narsis_b_2",
   "names": {
     "inn": "narsis_b_2",
     "store": "narsis_b_3",
     "smithy": "narsis_b_4"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -38,
+        -10
+      ],
+      "to": [
+        38,
+        14
+      ],
+      "width": 7
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        -12
+      ],
+      "to": [
+        6,
+        6
+      ],
+      "width": 5,
+      "variant": 1
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        10,
+        -8
+      ],
+      "size": 13,
+      "variant": 1,
+      "stalls": 5,
+      "name": "narsis_thirr_bazaar"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          0,
+          -14
+        ],
+        [
+          0,
+          -40
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "thirr_avenue"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          -2
+        ],
+        [
+          -14,
+          -4
+        ],
+        [
+          14,
+          4
+        ],
+        [
+          44,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "council_quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 30,
+      "rz": 26,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "hlaalu_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.64
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 4,
+      "kit": "hlaalu",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "hlaalu_ring"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "council_quay"
+    },
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "thirr_avenue"
+    }
+  ]
 }

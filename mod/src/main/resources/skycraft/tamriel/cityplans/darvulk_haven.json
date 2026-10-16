@@ -56,8 +56,8 @@
     {
       "id": "twin_domes",
       "at": [
-        0,
-        -16
+        -6,
+        -21
       ],
       "name": "darvulk_haven_landmark",
       "overlay": "pellitine"
@@ -65,16 +65,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          -4,
+          14
+        ],
+        [
+          -4,
+          -27
+        ]
       ],
-      "r0": 10,
-      "r1": 54,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -39,
+          15
+        ],
+        [
+          -4,
+          18
+        ],
+        [
+          39,
+          12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        4
+      ],
+      "rx": 30,
+      "rz": 26,
+      "wobble": 4,
+      "lobes": 3,
+      "phase": 0.64,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -95,7 +140,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        38,
+        42,
         18
       ],
       "face": "north",
@@ -107,8 +152,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        13,
-        16
+        15,
+        24
       ],
       "face": "north",
       "overlay": "pellitine",
@@ -155,8 +200,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -19,
-        9
+        -22,
+        12
       ],
       "face": "north",
       "overlay": "pellitine",
@@ -179,8 +224,8 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -19,
-        -9
+        -17,
+        -1
       ],
       "face": "south",
       "overlay": "pellitine",
@@ -203,8 +248,8 @@
       "use": "tailor",
       "wealth": "common",
       "at": [
-        -5,
-        -20
+        -25,
+        -17
       ],
       "face": "south",
       "overlay": "pellitine",
@@ -227,8 +272,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        13,
-        -16
+        15,
+        -24
       ],
       "face": "south",
       "overlay": "pellitine",
@@ -239,7 +284,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        38,
+        42,
         -18
       ],
       "face": "south",
@@ -287,5 +332,74 @@
     "darvulk_haven_landmark": "High Seat of place.skycraft.darvulk_haven",
     "darvulk_haven_plaza": "place.skycraft.darvulk_haven Central Plaza"
   },
-  "innKey": "darvulk_haven_b_5"
+  "innKey": "darvulk_haven_b_5",
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -39,
+        10
+      ],
+      "to": [
+        39,
+        4
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -4,
+        -2
+      ],
+      "to": [
+        -4,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

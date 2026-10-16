@@ -30,7 +30,7 @@
       "use": "mill",
       "wealth": "common",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -43,7 +43,7 @@
       "wealth": "common",
       "at": [
         0,
-        15
+        19
       ],
       "face": "south",
       "overlay": "blackwood",
@@ -54,7 +54,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
+        -12,
         0
       ],
       "face": "south",
@@ -84,12 +84,162 @@
       "type": "well",
       "theme": "waters_edge_pump",
       "count": 1
+    },
+    {
+      "type": "tree",
+      "where": "free"
     }
   ],
   "titles": {
     "waters_edge_b_1": "Water's Edge Reed Mill",
     "waters_edge_b_2": "Biene Amelion's House",
     "waters_edge_b_3": "Marz's River Shack",
-    "waters_edge_b_4": "Fimmion's Shed"
-  }
+    "waters_edge_b_4": "Fimmion's Shed",
+    "waters_edge_square": "Water's Edge Reed-Jetty Green"
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        8
+      ],
+      "to": [
+        19,
+        6
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -2,
+        -2
+      ],
+      "to": [
+        -2,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        2,
+        4
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "waters_edge_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -2,
+          7
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          2,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "niben_reed_jetty_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          2
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          19,
+          -2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "waters_edge_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        2
+      ],
+      "rx": 15,
+      "rz": 12,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "bayou_bank_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "bayou_bank_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "niben_reed_jetty_lane"
+    }
+  ]
 }

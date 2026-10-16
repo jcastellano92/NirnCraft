@@ -48,8 +48,8 @@
     {
       "id": "crystal_tower",
       "at": [
-        0,
-        -11
+        -6,
+        -21
       ],
       "name": "phaer_landmark",
       "overlay": "auridon"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          6,
+          9
+        ],
+        [
+          6,
+          -19
+        ]
       ],
-      "r0": 8,
-      "r1": 36,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          10
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          27,
+          9
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 21,
+      "rz": 18,
+      "wobble": 4,
+      "lobes": 5,
+      "phase": 0.76,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,7 +120,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        18,
-        23
+        21,
+        26
       ],
       "face": "north",
       "overlay": "auridon",
@@ -99,8 +144,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        -1,
+        22
       ],
       "face": "north",
       "overlay": "auridon",
@@ -123,8 +168,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -25,
+        -4
       ],
       "face": "south",
       "overlay": "auridon",
@@ -135,7 +180,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -6,
+        14,
         -28
       ],
       "face": "south",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        -25,
+        -23
       ],
       "face": "south",
       "overlay": "auridon",
@@ -182,5 +227,47 @@
     "phaer_landmark": "High Seat of place.skycraft.phaer",
     "phaer_plaza": "place.skycraft.phaer Central Plaza"
   },
-  "innKey": "phaer_b_5"
+  "innKey": "phaer_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

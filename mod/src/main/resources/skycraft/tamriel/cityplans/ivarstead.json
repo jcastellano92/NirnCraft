@@ -8,47 +8,315 @@
     "smithy": "ivarstead_forge"
   },
   "innKey": "vilemyr_inn",
-  "gates": [[0, 38], [32, -16], [-34, 8]],
+  "gates": [
+    [
+      0,
+      38
+    ],
+    [
+      32,
+      -16
+    ],
+    [
+      -34,
+      8
+    ]
+  ],
   "lines": [
-    {"kind": "bridge", "from": [14, -10], "to": [32, -16], "width": 5, "variant": 1}
+    {
+      "kind": "bridge",
+      "from": [
+        14,
+        -10
+      ],
+      "to": [
+        32,
+        -16
+      ],
+      "width": 5,
+      "variant": 1
+    }
   ],
   "buildings": [
-    {"kind": "mill", "at": [22, 18], "size": [9, 11], "face": "W", "margin": 3, "name": "ivarstead_sawmill"},
-    {"kind": "lumber", "at": [32, 26], "size": [7, 5], "face": "W"},
-    {"kind": "farmhouse", "at": [-26, -18], "size": [9, 11], "face": "E", "name": "ivarstead_fellstar_farm"},
-    {"kind": "field", "at": [-34, -30], "size": [13, 11], "face": "E"},
-    {"kind": "shrine", "at": [12, -18], "size": [5, 5], "face": "S", "variant": 4, "name": "ivarstead_pilgrim_shrine"},
-    {"kind": "stables", "at": [-18, 28], "size": [11, 9], "face": "E", "name": "ivarstead_stables"}
+    {
+      "kind": "mill",
+      "at": [
+        22,
+        18
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "margin": 3,
+      "name": "ivarstead_sawmill"
+    },
+    {
+      "kind": "lumber",
+      "at": [
+        36,
+        26
+      ],
+      "size": [
+        7,
+        5
+      ],
+      "face": "W"
+    },
+    {
+      "kind": "farmhouse",
+      "at": [
+        -26,
+        -18
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "name": "ivarstead_fellstar_farm"
+    },
+    {
+      "kind": "field",
+      "at": [
+        -34,
+        -34
+      ],
+      "size": [
+        13,
+        11
+      ],
+      "face": "E"
+    },
+    {
+      "kind": "shrine",
+      "at": [
+        12,
+        -18
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "S",
+      "variant": 4,
+      "name": "ivarstead_pilgrim_shrine"
+    },
+    {
+      "kind": "stables",
+      "at": [
+        -18,
+        28
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "E",
+      "name": "ivarstead_stables"
+    }
   ],
   "plazas": [
-    {"at": [0, 6], "size": 13, "variant": 0, "stalls": 3, "name": "ivarstead_step_square"}
+    {
+      "at": [
+        0,
+        6
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 3,
+      "name": "ivarstead_step_square"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 38], [0, 22], [0, 6], [6, -4], [14, -10]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-34, 8], [-16, 8], [0, 6], [16, 10], [28, 12]], "width": 3, "rank": 1, "tag": "row"},
-    {"type": "path", "via": [[-16, 8], [-20, -6], [-22, -18]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          38
+        ],
+        [
+          0,
+          22
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          6,
+          -4
+        ],
+        [
+          14,
+          -10
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -34,
+          8
+        ],
+        [
+          -16,
+          8
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          16,
+          10
+        ],
+        [
+          28,
+          12
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          8
+        ],
+        [
+          -20,
+          -6
+        ],
+        [
+          -22,
+          -18
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, 6], "r": 20, "zone": "centre"},
-    {"at": [22, 18], "r": 18, "zone": "craft"},
-    {"at": [-24, -14], "r": 18, "zone": "poor"}
+    {
+      "at": [
+        0,
+        6
+      ],
+      "r": 20,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        22,
+        18
+      ],
+      "r": 18,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -24,
+        -14
+      ],
+      "r": 18,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 48, "target": 0.30, "fill_cap": 6, "yard_cap": 6},
+  "fabric": {
+    "radius": 48,
+    "target": 0.3,
+    "fill_cap": 6,
+    "yard_cap": 6
+  },
   "queue": [
-    {"kind": "inn", "size": [13, 17], "flags": ["upper"], "name": "vilemyr_inn", "on": "main"},
-    {"kind": "store", "size": [9, 11], "name": "ivarstead_pilgrim_supplies", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "ivarstead_forge", "on": "row"},
-    {"kind": "house", "name": "ivarstead_klimmeks_house", "on": "row"},
-    {"kind": "house", "name": "ivarstead_tembas_millhouse", "on": "row"},
-    {"kind": "house", "name": "ivarstead_barrow_keepers_house", "on": "lane"},
-    {"kind": "house", "count": 2, "on": "main"}
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "vilemyr_inn",
+      "on": "main"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        11
+      ],
+      "name": "ivarstead_pilgrim_supplies",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "ivarstead_forge",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "ivarstead_klimmeks_house",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "ivarstead_tembas_millhouse",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "ivarstead_barrow_keepers_house",
+      "on": "lane"
+    },
+    {
+      "kind": "house",
+      "count": 2,
+      "on": "main"
+    }
   ],
   "features": [
-    {"type": "shrine", "theme": "divine:kynareth", "where": "square"},
-    {"type": "memorial", "count": 2, "where": "free"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "main"},
-    {"type": "great_tree", "theme": "birch", "where": "free"},
-    {"type": "well", "where": "free"}
+    {
+      "type": "shrine",
+      "theme": "divine:kynareth",
+      "where": "square"
+    },
+    {
+      "type": "memorial",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "lamps",
+      "count": 2,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "great_tree",
+      "theme": "birch",
+      "where": "free"
+    },
+    {
+      "type": "well",
+      "where": "free"
+    }
   ],
   "titles": {
     "ivarstead_pilgrim_supplies": "Pilgrim's Pack Provisions",

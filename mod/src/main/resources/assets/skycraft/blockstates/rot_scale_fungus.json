@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/rot_scale_fungus"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/rot_scale_fungus_harvested"
+    }
+  }
+}

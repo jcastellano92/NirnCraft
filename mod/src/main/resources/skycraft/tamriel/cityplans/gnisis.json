@@ -24,7 +24,7 @@
       "id": "castle",
       "at": [
         0,
-        0
+        16
       ],
       "face": "south",
       "name": "gnisis_landmark",
@@ -46,7 +46,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        14,
+        26,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        -25,
+        24
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -82,7 +82,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -38,
+        -42,
         18
       ],
       "face": "south",
@@ -94,8 +94,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -16,
+        -9
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -119,7 +119,7 @@
       "wealth": "common",
       "at": [
         9,
-        -11
+        -27
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -151,12 +151,169 @@
     "gnisis_b_4": "Legion Garrison Smithy",
     "gnisis_b_5": "Hetman Abelmawia Hut",
     "gnisis_b_6": "Talos Cult Barracks",
-    "gnisis_b_7": "Eggmine Kwama Depot"
+    "gnisis_b_7": "Eggmine Kwama Depot",
+    "gnisis_legion_yard": "Fort Darius & Eggmine Muster Yard"
   },
   "innKey": "gnisis_b_2",
   "names": {
     "inn": "gnisis_b_2",
     "store": "gnisis_b_5",
     "smithy": "gnisis_b_4"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -38,
+        12
+      ],
+      "to": [
+        38,
+        -8
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        -4
+      ],
+      "to": [
+        6,
+        10
+      ],
+      "width": 4,
+      "variant": 1
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        -10
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "gnisis_legion_yard"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          -4,
+          14
+        ],
+        [
+          4,
+          -12
+        ],
+        [
+          12,
+          -38
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "darius_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          -6
+        ],
+        [
+          -12,
+          0
+        ],
+        [
+          16,
+          -4
+        ],
+        [
+          42,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "eggmine_trail"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        -2
+      ],
+      "rx": 28,
+      "rz": 26,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "ash_ridge_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "barracks",
+      "count": 2,
+      "on": "darius_way"
+    },
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "redoran",
+      "on": "ash_ridge_loop"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "kit": "redoran",
+      "on": "eggmine_trail"
+    }
+  ]
 }

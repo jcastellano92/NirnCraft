@@ -1789,6 +1789,44 @@ C_LAVA = cave_surface(VOLCANIC, [("netherrack", 0.4, MAX, MAGMA_ROCK), ("surface
                                  ("surface", -0.6, -0.3, "blackstone")],
                       ceiling=st("basalt", axis="y"), ceiling_patches=[("surface", 0.0, MAX, VOLCANIC)], under=VOLCANIC)
 C_GROTTO = cave_surface("moss_block", [("surface", 0.2, MAX, MYCELIUM), ("surface", -0.6, -0.3, PODZOL)], under="dirt")
+C_NORDIC_KARST = cave_surface("stone", [("gravel", 0.35, MAX, "gravel"), ("surface", 0.3, MAX, "mossy_cobblestone"),
+                                        ("surface", -0.5, -0.2, "tuff")],
+                              ceiling="stone", ceiling_patches=[("surface", 0.4, MAX, "tuff")], under="stone")
+C_AYLEID_LIMESTONE = cave_surface("calcite", [("surface", 0.3, MAX, "diorite"), ("surface", -0.5, -0.15, "moss_block"),
+                                              ("gravel", 0.55, MAX, "smooth_basalt")],
+                                  ceiling="calcite", ceiling_patches=[("surface", 0.35, MAX, "diorite")],
+                                  under="calcite")
+C_VALENWOOD_ROOT = cave_surface("rooted_dirt", [("surface", 0.25, MAX, "moss_block"), ("surface", -0.55, -0.2, PODZOL),
+                                                ("gravel", 0.5, MAX, "coarse_dirt")],
+                                ceiling="rooted_dirt", ceiling_patches=[("surface", 0.2, MAX, "moss_block")],
+                                under="rooted_dirt")
+C_HIST_CAVERN = cave_surface("mud", [("surface", 0.2, MAX, "moss_block"), ("surface", -0.5, -0.15, "clay"),
+                                     ("gravel", 0.45, MAX, "rooted_dirt")],
+                             ceiling="rooted_dirt", ceiling_patches=[("surface", 0.3, MAX, "mud")], under="mud")
+C_ELSWEYR_SANDSTONE = cave_surface("smooth_red_sandstone", [("surface", 0.3, MAX, "red_sand"),
+                                                            ("surface", -0.5, -0.2, "terracotta"),
+                                                            ("gravel", 0.5, MAX, "orange_terracotta")],
+                                   ceiling="red_sandstone",
+                                   ceiling_patches=[("surface", 0.35, MAX, "smooth_red_sandstone")],
+                                   under="red_sandstone")
+C_SUMMERSET_CRYSTAL = cave_surface("calcite", [("surface", 0.25, MAX, CRYSTAL), ("surface", -0.5, -0.15, "amethyst_block"),
+                                               ("gravel", 0.5, MAX, "moss_block")],
+                                   ceiling="calcite", ceiling_patches=[("surface", 0.3, MAX, "amethyst_block")],
+                                   under="calcite")
+C_YOKUDAN_SAND = cave_surface("smooth_sandstone", [("surface", 0.3, MAX, "sand"),
+                                                   ("surface", -0.5, -0.2, "cut_sandstone"),
+                                                   ("gravel", 0.5, MAX, "terracotta")],
+                              ceiling="sandstone", ceiling_patches=[("surface", 0.35, MAX, "smooth_sandstone")],
+                              under="sandstone")
+C_SUBMERGED_SEA = cave_surface(CORAL_STONE, [("surface", 0.3, MAX, "prismarine"), ("surface", -0.5, -0.15, "sand"),
+                                             ("gravel", 0.45, MAX, "gravel")],
+                               ceiling="prismarine", ceiling_patches=[("surface", 0.3, MAX, CORAL_STONE)],
+                               under=CORAL_STONE)
+C_ABYSSAL_TRENCH = cave_surface("deepslate", [("surface", 0.3, MAX, "dark_prismarine"),
+                                              ("surface", -0.5, -0.15, "blackstone"),
+                                              ("gravel", 0.45, MAX, MAGMA_ROCK)],
+                                ceiling="deepslate", ceiling_patches=[("surface", 0.3, MAX, "blackstone")],
+                                under="deepslate")
 
 
 # =============================================================================================== catalogue
@@ -1866,7 +1904,7 @@ def biome(bid, name, *, temp, downfall, sky, fog, water, water_fog="#050533", fe
           tags=(), base=None):
     assert bid not in BIOMES, bid
     if monster is None:
-        monster = monsters("frozen" if temp < 0.0 else "desert" if temp >= 1.5 and not precip else "std")
+        monster = () if kind == "cave" else monsters("frozen" if temp < 0.0 else "desert" if temp >= 1.5 and not precip else "std")
     if base is None:
         base = SEA if kind == "ocean" else LAND
     BIOMES[bid] = dict(id=bid, temp=temp, downfall=downfall, sky=sky, fog=fog, water=water, water_fog=water_fog,
@@ -2506,22 +2544,26 @@ biome("coral_sea", "Coral Sea", temp=0.5, downfall=0.5, sky="#70B0FF", fog="#D0E
 
 # -------------------------------------------------------------------------------------------- underground
 CAVE = LAND
+biome("nordic_karst_caverns", "Nordic Karst Caverns", temp=0.3, downfall=0.5, sky="#78A7FF", fog="#5B6978",
+      water="#3D6B99", surface=C_NORDIC_KARST, province="underground", kind="cave",
+      features=["minecraft:large_dripstone", "cave_tuff", "cave_moss", "minecraft:dripstone_cluster",
+                "minecraft:pointed_dripstone", "spring_water_dense", "cave_moss_patches", "cave_mushroom_patches"],
+      tags=["underground", "cold"])
 biome("dwemer_caverns", "Dwemer Caverns", temp=0.6, downfall=0.3, sky="#78A7FF", fog="#A08C6A", water="#3F76E4",
-      surface=C_DWEMER, province="underground", kind="cave", particle=particle("white_ash", 0.002), extra=X_DWEMER,
+      surface=C_DWEMER, province="underground", kind="cave", particle=particle("white_ash", 0.002),
       features=["cave_tuff", "cave_dwemer_copper", "dwemer_pipes", "minecraft:dripstone_cluster",
                 "minecraft:pointed_dripstone"],
       tags=["underground"])
 biome("falmer_glow_caves", "Falmer Glow Caves", temp=0.5, downfall=0.6, sky="#78A7FF", fog="#4A6A8A", water="#3A8AB0",
-      surface=C_FALMER, province="underground", kind="cave", particle=particle("warped_spore", 0.01), extra=X_FALMER,
+      surface=C_FALMER, province="underground", kind="cave", particle=particle("warped_spore", 0.01),
       features=["cave_moss", "glowing_mushrooms", "cave_mushroom_patches", "cave_moss_patches", "cave_crystals"],
       tags=["underground", "magical"])
 biome("ice_caves", "Ice Caves", temp=-0.5, downfall=0.5, sky="#A0B8E0", fog="#A8C8E8", water="#3938C9",
-      surface=C_ICE, province="underground", kind="cave", monster=monsters("frozen"), extra=X_ICE_CAVE,
+      surface=C_ICE, province="underground", kind="cave",
       features=["cave_packed_ice", "cave_blue_ice", "cave_snow", "ice_formations"],
       tags=["underground", "cold", "snowy"])
 biome("lava_caves", "Lava Caves", temp=1.5, downfall=0.0, precip=False, sky="#78A7FF", fog="#8A4A2A",
       water="#5A4A40", surface=C_LAVA, province="underground", kind="cave", particle=particle("ash", 0.01),
-      extra=MAGMA_CUBES,
       features=["cave_volcanic_rock", "cave_magma", "cave_basalt", "cave_blackstone", "spring_lava_dense"],
       tags=["underground", "hot", "dry"])
 biome("mushroom_grottos", "Mushroom Grottos", temp=0.7, downfall=0.8, sky="#78A7FF", fog="#8A7AA8", water="#3F76E4",
@@ -2529,6 +2571,53 @@ biome("mushroom_grottos", "Mushroom Grottos", temp=0.7, downfall=0.8, sky="#78A7
       features=["cave_moss", "minecraft:spore_blossom", "grotto_mushrooms", "cave_mushroom_patches",
                 "cave_moss_patches"],
       tags=["underground", "mushroom", "lush"])
+biome("ayleid_limestone_caverns", "Ayleid Limestone Caverns", temp=0.75, downfall=0.6, sky="#78A7FF", fog="#7694A8",
+      water="#3B8AC4", surface=C_AYLEID_LIMESTONE, province="underground", kind="cave",
+      particle=particle("spore_blossom_air", 0.004),
+      features=["cave_calcite", "cave_moss", "minecraft:dripstone_cluster", "minecraft:pointed_dripstone",
+                "spring_water_dense", "minecraft:cave_vines", "cave_moss_patches", "cave_crystals"],
+      tags=["underground", "magical"])
+biome("valenwood_root_warrens", "Valenwood Root Warrens", temp=0.9, downfall=0.9, sky="#78A7FF", fog="#4D6E48",
+      water="#3A8F6E", surface=C_VALENWOOD_ROOT, province="underground", kind="cave",
+      particle=particle("spore_blossom_air", 0.008),
+      features=["cave_moss", "minecraft:lush_caves_ceiling_vegetation", "minecraft:cave_vines",
+                "minecraft:lush_caves_clay", "minecraft:lush_caves_vegetation", "minecraft:rooted_azalea_tree",
+                "minecraft:spore_blossom", "cave_moss_patches", "cave_mushroom_patches"],
+      tags=["underground", "lush"])
+biome("black_marsh_hist_caverns", "Black Marsh Hist Caverns", temp=0.95, downfall=0.95, sky="#6E9475", fog="#3E5C47",
+      water="#48683C", water_fog="#1B2E1E", surface=C_HIST_CAVERN, province="underground", kind="cave",
+      particle=particle("spore_blossom_air", 0.012),
+      features=["cave_moss", "spring_water_dense", "minecraft:lush_caves_ceiling_vegetation", "minecraft:cave_vines",
+                "minecraft:lush_caves_clay", "minecraft:spore_blossom", "glowing_mushrooms", "grotto_mushrooms",
+                "cave_moss_patches", "cave_mushroom_patches"],
+      tags=["underground", "lush", "wet"])
+biome("elsweyr_sandstone_caverns", "Elsweyr Sandstone Caverns", temp=1.6, downfall=0.1, precip=False, sky="#78A7FF",
+      fog="#B5845B", water="#4389A8", surface=C_ELSWEYR_SANDSTONE, province="underground", kind="cave",
+      features=["minecraft:large_dripstone", "minecraft:fossil_upper", "minecraft:dripstone_cluster",
+                "minecraft:pointed_dripstone", "cave_crystals"],
+      tags=["underground", "hot", "dry"])
+biome("summerset_crystal_grottoes", "Summerset Crystal Grottoes", temp=0.8, downfall=0.65, sky="#78A7FF", fog="#8CA4D8",
+      water="#3B9AE1", surface=C_SUMMERSET_CRYSTAL, province="underground", kind="cave",
+      particle=particle("end_rod", 0.002),
+      features=["cave_calcite", "cave_moss", "spring_water_dense", "minecraft:cave_vines", "glowing_mushrooms",
+                "cave_moss_patches", "cave_crystals"],
+      tags=["underground", "magical", "lush"])
+biome("yokudan_sand_vaults", "Yokudan Sand Vaults", temp=1.8, downfall=0.0, precip=False, sky="#78A7FF", fog="#C29B68",
+      water="#3E8CA6", surface=C_YOKUDAN_SAND, province="underground", kind="cave",
+      features=["minecraft:large_dripstone", "minecraft:fossil_upper", "minecraft:fossil_lower",
+                "minecraft:dripstone_cluster", "minecraft:pointed_dripstone"],
+      tags=["underground", "hot", "dry"])
+biome("submerged_sea_caverns", "Submerged Sea Caverns", temp=0.65, downfall=0.8, sky="#78A7FF", fog="#295E7A",
+      water="#25769E", water_fog="#08283B", surface=C_SUBMERGED_SEA, province="underground", kind="cave",
+      features=["ground_coral_stone", "cave_calcite", "spring_water_dense", "minecraft:seagrass_warm",
+                "minecraft:sea_pickle", "cave_crystals"],
+      tags=["underground", "wet"])
+biome("abyssal_trench_caves", "Abyssal Trench Caves", temp=0.2, downfall=0.8, sky="#3A5478", fog="#0B1929",
+      water="#132942", water_fog="#040B14", surface=C_ABYSSAL_TRENCH, province="underground", kind="cave",
+      particle=particle("ash", 0.004),
+      features=["cave_blackstone", "cave_magma", "cave_basalt", "minecraft:sculk_vein", "minecraft:sea_pickle",
+                "cave_crystals"],
+      tags=["underground", "wet", "spooky"])
 
 
 # ================================================================================================ palettes
@@ -2575,20 +2664,32 @@ def pal(key, fallback=None, upland_y=None, peak_y=None, summit_y=None, bias=None
 DC = "minecraft:dripstone_caves"
 LC = "minecraft:lush_caves"
 DD = "minecraft:deep_dark"
-CAVE_SKYRIM = [("ice_caves", 1), (SURFACE, 4), (DC, 1), ("mushroom_grottos", 1)]
-DEEP_SKYRIM = [("falmer_glow_caves", 2), (SURFACE, 2), ("dwemer_caverns", 2), (DD, 1)]
-CAVE_TEMPERATE = [(DC, 1), (SURFACE, 5), ("mushroom_grottos", 1), (LC, 1)]
-DEEP_TEMPERATE = [("dwemer_caverns", 1), (SURFACE, 3), ("falmer_glow_caves", 1), (DD, 1)]
+CAVE_SKYRIM = [("ice_caves", 1), ("nordic_karst_caverns", 2), (SURFACE, 3), (DC, 1), ("mushroom_grottos", 1)]
+DEEP_SKYRIM = [("falmer_glow_caves", 2), ("nordic_karst_caverns", 1), (SURFACE, 2), ("dwemer_caverns", 2), (DD, 1)]
+CAVE_TEMPERATE = [("nordic_karst_caverns", 1), (DC, 1), (SURFACE, 4), ("mushroom_grottos", 1), (LC, 1)]
+DEEP_TEMPERATE = [("dwemer_caverns", 1), ("nordic_karst_caverns", 1), (SURFACE, 2), ("falmer_glow_caves", 1), (DD, 1)]
+CAVE_CYRODIIL = [("ayleid_limestone_caverns", 2), (DC, 1), (SURFACE, 4), ("mushroom_grottos", 1), (LC, 1)]
+DEEP_CYRODIIL = [("ayleid_limestone_caverns", 2), ("dwemer_caverns", 1), (SURFACE, 2), (DD, 1)]
+CAVE_HIGH_ROCK = [("nordic_karst_caverns", 2), (DC, 1), (SURFACE, 4), ("mushroom_grottos", 1), ("submerged_sea_caverns", 1)]
+DEEP_HIGH_ROCK = [("nordic_karst_caverns", 2), ("dwemer_caverns", 1), (SURFACE, 2), ("falmer_glow_caves", 1), (DD, 1)]
 CAVE_VOLCANIC = [("lava_caves", 2), (SURFACE, 4), ("mushroom_grottos", 2), (DC, 1)]
 DEEP_VOLCANIC = [("lava_caves", 2), (SURFACE, 2), ("dwemer_caverns", 3)]
-CAVE_HOT = [(DC, 2), (SURFACE, 5), ("lava_caves", 1)]
-DEEP_HOT = [("lava_caves", 1), (SURFACE, 3), ("dwemer_caverns", 1)]
-CAVE_WET = [(LC, 2), (SURFACE, 4), ("mushroom_grottos", 1)]
-DEEP_WET = [(LC, 1), (SURFACE, 3), ("mushroom_grottos", 1), (DD, 1)]
-CAVE_FROZEN = [("ice_caves", 3), (SURFACE, 4)]
-DEEP_FROZEN = [("ice_caves", 2), (SURFACE, 3), (DD, 1)]
-CAVE_MAGIC = [("falmer_glow_caves", 1), (SURFACE, 4), ("mushroom_grottos", 1)]
-DEEP_MAGIC = [("falmer_glow_caves", 2), (SURFACE, 2), (LC, 1)]
+CAVE_HOT = [("elsweyr_sandstone_caverns", 2), (DC, 2), (SURFACE, 4), ("lava_caves", 1)]
+DEEP_HOT = [("elsweyr_sandstone_caverns", 2), ("lava_caves", 1), (SURFACE, 2), ("dwemer_caverns", 1)]
+CAVE_HAMMERFELL = [("yokudan_sand_vaults", 2), ("elsweyr_sandstone_caverns", 1), (DC, 2), (SURFACE, 3), ("lava_caves", 1)]
+DEEP_HAMMERFELL = [("yokudan_sand_vaults", 1), ("dwemer_caverns", 2), ("lava_caves", 2), (SURFACE, 2)]
+CAVE_YOKUDA = [("yokudan_sand_vaults", 3), (DC, 1), (SURFACE, 3), ("submerged_sea_caverns", 1)]
+DEEP_YOKUDA = [("yokudan_sand_vaults", 2), ("abyssal_trench_caves", 1), ("lava_caves", 1), (SURFACE, 2)]
+CAVE_WET = [("valenwood_root_warrens", 2), (LC, 2), (SURFACE, 3), ("mushroom_grottos", 1)]
+DEEP_WET = [("valenwood_root_warrens", 2), (LC, 1), (SURFACE, 2), ("mushroom_grottos", 1), (DD, 1)]
+CAVE_HIST = [("black_marsh_hist_caverns", 3), (LC, 2), (SURFACE, 3), ("mushroom_grottos", 1)]
+DEEP_HIST = [("black_marsh_hist_caverns", 3), (LC, 1), (SURFACE, 2), ("mushroom_grottos", 1), (DD, 1)]
+CAVE_FROZEN = [("ice_caves", 3), ("nordic_karst_caverns", 1), (SURFACE, 3)]
+DEEP_FROZEN = [("ice_caves", 2), ("nordic_karst_caverns", 1), (SURFACE, 2), (DD, 1)]
+CAVE_MAGIC = [("summerset_crystal_grottoes", 3), ("falmer_glow_caves", 1), (SURFACE, 3), ("mushroom_grottos", 1)]
+DEEP_MAGIC = [("summerset_crystal_grottoes", 3), ("falmer_glow_caves", 1), (SURFACE, 2), (LC, 1)]
+CAVE_SEA = [("submerged_sea_caverns", 3), (SURFACE, 2), ("abyssal_trench_caves", 1)]
+DEEP_SEA = [("abyssal_trench_caves", 3), ("submerged_sea_caverns", 2), (SURFACE, 1)]
 
 # --- the default and the province fallbacks
 pal("default", upland_y=115, peak_y=240, summit_y=420,
@@ -2603,8 +2704,8 @@ pal("province/skyrim", fallback="default", peak_y=255, summit_y=470,
 pal("province/cyrodiil", fallback="default",
     ocean="temperate_ocean", deep_ocean="deep_temperate_ocean", beach="temperate_beach", river="cyrodiil_river",
     lake="lake_rumare_shore", marsh="nibenay_valley", lowland=[("heartlands", 2), ("great_forest", 1)],
-    upland=[("colovian_highlands", 2), ("jerall_foothills", 1)], peak="snowy_slopes", cave=CAVE_TEMPERATE,
-    deep_cave=DEEP_TEMPERATE)
+    upland=[("colovian_highlands", 2), ("jerall_foothills", 1)], peak="snowy_slopes", cave=CAVE_CYRODIIL,
+    deep_cave=DEEP_CYRODIIL)
 pal("province/morrowind", fallback="default",
     ocean="inner_sea", deep_ocean="deep_temperate_ocean", beach="ash_shore", river="cyrodiil_river",
     lake="cyrodiil_river", marsh="bitter_coast_swamp", lowland=[("vvardenfell_ashlands", 1), ("grazelands", 1)],
@@ -2613,7 +2714,7 @@ pal("province/morrowind", fallback="default",
 pal("province/black_marsh", fallback="default",
     ocean="warm_ocean", deep_ocean="deep_warm_ocean", beach="mangrove_delta", river="murky_river", lake="murky_river",
     marsh="deep_mire", lowland=[("black_marsh_swamp", 3), ("hist_grove", 1)], upland="black_marsh_swamp",
-    peak="black_marsh_swamp", summit="black_marsh_swamp", cave=CAVE_WET, deep_cave=DEEP_WET)
+    peak="black_marsh_swamp", summit="black_marsh_swamp", cave=CAVE_HIST, deep_cave=DEEP_HIST)
 pal("province/elsweyr", fallback="default",
     ocean="warm_ocean", deep_ocean="deep_warm_ocean", beach="warm_beach", river="warm_river", lake="warm_river",
     marsh="sugar_fields", lowland=[("elsweyr_dunes", 1), ("anequina_badlands", 1), ("elsweyr_savanna", 2)],
@@ -2631,12 +2732,12 @@ pal("province/summerset", fallback="default",
 pal("province/hammerfell", fallback="default",
     ocean="warm_ocean", deep_ocean="deep_warm_ocean", beach="warm_beach", river="warm_river", lake="warm_river",
     marsh="warm_river", lowland=[("alikr_dunes", 1), ("alikr_desert", 3)], upland=[("dragontail_mountains", 1)],
-    peak="dragontail_mountains", summit="dragontail_mountains", cave=CAVE_HOT, deep_cave=DEEP_HOT)
+    peak="dragontail_mountains", summit="dragontail_mountains", cave=CAVE_HAMMERFELL, deep_cave=DEEP_HAMMERFELL)
 pal("province/high_rock", fallback="default",
     ocean="cold_ocean", deep_ocean="deep_cold_ocean", beach=[("rocky_shore", 1), ("temperate_beach", 1)],
     river="bjoulsae_river", lake="bjoulsae_river", marsh="glenumbra_moors",
     lowland=[("glenumbra_moors", 1), ("wayrest_farmland", 1), ("stormhaven", 1)], upland="bangkorai",
-    peak="wrothgarian_mountains", summit="snowy_slopes", cave=CAVE_TEMPERATE, deep_cave=DEEP_TEMPERATE)
+    peak="wrothgarian_mountains", summit="snowy_slopes", cave=CAVE_HIGH_ROCK, deep_cave=DEEP_HIGH_ROCK)
 pal("province/atmora", fallback="default",
     ocean="sea_of_ghosts", deep_ocean="deep_sea_of_ghosts", beach="frozen_shore", river="frozen_river",
     lake="frozen_river", marsh="atmoran_ice_waste", lowland=[("atmoran_ice_waste", 1), ("atmoran_frozen_forest", 1)],
@@ -2649,17 +2750,17 @@ pal("province/akavir", fallback="default",
 pal("province/yokuda", fallback="default",
     ocean="warm_ocean", deep_ocean="deep_warm_ocean", beach="warm_beach", river="warm_river", lake="warm_river",
     marsh="sunken_isles", lowland="yokudan_desert", upland="dragontail_mountains", peak="dragontail_mountains",
-    summit="dragontail_mountains", cave=CAVE_HOT, deep_cave=DEEP_HOT)
+    summit="dragontail_mountains", cave=CAVE_YOKUDA, deep_cave=DEEP_YOKUDA)
 pal("province/pyandonea", fallback="default",
     ocean="coral_sea", deep_ocean="deep_warm_ocean", beach="tropical_beach", river="jungle_river", lake="jungle_river",
     marsh="valenwood_mangrove_coast", lowland="pyandonean_jungle_isles", upland="pyandonean_jungle_isles",
-    peak="pyandonean_jungle_isles", summit="pyandonean_jungle_isles", cave=CAVE_WET, deep_cave=DEEP_WET)
+    peak="pyandonean_jungle_isles", summit="pyandonean_jungle_isles", cave=CAVE_SEA, deep_cave=DEEP_SEA)
 pal("province/thras", fallback="default",
     ocean="coral_sea", deep_ocean="deep_warm_ocean", beach="tropical_beach", river="warm_river", lake="warm_river",
     marsh="thras_coral", lowland="thras_coral", upland="thras_coral", peak="crystal_spires", summit="crystal_spires",
-    cave=CAVE_MAGIC, deep_cave=DEEP_MAGIC)
+    cave=CAVE_SEA, deep_cave=DEEP_SEA)
 pal("province/sea", fallback="default", ocean="temperate_ocean", deep_ocean="deep_temperate_ocean",
-    beach="temperate_beach", lowland="temperate_beach", upland="rocky_shore")
+    beach="temperate_beach", lowland="temperate_beach", upland="rocky_shore", cave=CAVE_SEA, deep_cave=DEEP_SEA)
 pal("province/realm", fallback="default")
 
 # --- Skyrim's holds
@@ -91857,21 +91958,6 @@ def main():
         for fn in os.listdir(bdir):
             if fn.endswith(".json") and fn[:-5] in BIOMES:
                 os.remove(os.path.join(bdir, fn))
-    for d in (os.path.join(DATA, SK, "worldgen", "configured_feature", "biome"),
-              os.path.join(DATA, SK, "worldgen", "placed_feature", "biome")):
-        if os.path.isdir(d):
-            shutil.rmtree(d)
-    for name, cf in CF.items():
-        dump(os.path.join(DATA, SK, "worldgen", "configured_feature", "biome", *name.split("/")) + ".json", cf)
-    for name, pf in PF.items():
-        dump(os.path.join(DATA, SK, "worldgen", "placed_feature", "biome", *name.split("/")) + ".json", pf)
-    # the map_water placeholder (the terrain workstream ships the real one)
-    mw_cf = os.path.join(DATA, SK, "worldgen", "configured_feature", "map_water.json")
-    mw_pf = os.path.join(DATA, SK, "worldgen", "placed_feature", "map_water.json")
-    if not os.path.exists(mw_cf):
-        dump(mw_cf, {"type": "minecraft:no_op", "config": {}})
-    if not os.path.exists(mw_pf):
-        dump(mw_pf, {"feature": MAP_WATER, "placement": []})
 
     lists = []
     for bid, b in BIOMES.items():
@@ -91882,7 +91968,6 @@ def main():
 
     tags = build_tags()
     check_tags(tags)
-    write_tags(tags)
 
     apply_ecotones()
     apply_micro_rules()
@@ -91900,13 +91985,7 @@ def main():
             PALETTES["province/" + prov]["micro"] = rules
     dump(os.path.join(RES, SK, "tamriel", "palettes.json"), pal_out)
 
-    lang = dict(sorted(LANG.items()))
-    for k, v in BLOCK_NAMES.items():
-        lang["block.skycraft." + k] = v
-    dump(os.path.join(ROOT, "mod", "src", "main", "lang", SK, "tamriel_biomes.json"), lang)
-
-    rule = surface_rule()
-    dump(os.path.join(ROOT, "tools", "worldgen", "generated", "surface_rule.json"), rule)
+    _ = surface_rule()
     print("biomes: %d, configured features: %d, placed features: %d, palettes: %d, tags: %d" % (
         len(BIOMES), len(CF), len(PF), len(PALETTES), len(tags)))
 

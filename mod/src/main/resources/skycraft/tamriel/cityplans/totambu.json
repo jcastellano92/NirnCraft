@@ -50,7 +50,7 @@
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -76,7 +76,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        26,
         -19
       ],
       "face": "south",
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        47,
+        -6
       ],
       "face": "west",
       "name": "totambu_jade_fountain_serai"
@@ -142,8 +142,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -13,
-        20
+        -16,
+        17
       ],
       "face": "north",
       "name": "totambu_ruptga_pillars"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -27,
+        -5
       ],
       "face": "east",
       "name": "totambu_lotus_gate_watch"
@@ -351,6 +351,14 @@
     {
       "type": "fountain",
       "count": 1
+    },
+    {
+      "type": "basin",
+      "where": "edge"
+    },
+    {
+      "type": "tree",
+      "where": "free"
     }
   ]
 }

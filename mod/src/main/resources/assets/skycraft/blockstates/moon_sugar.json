@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/moon_sugar"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/moon_sugar_harvested"
+    }
+  }
+}

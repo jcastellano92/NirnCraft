@@ -595,10 +595,17 @@ public final class SocietySelfTest {
                 courtComplete, whiterunCourt.jarl() + " / " + whiterunCourt.steward() + " / " + whiterunCourt.courtWizard() + " / " + whiterunCourt.housecarl());
 
         String holdKey = ContextualDialogue.resolveReactiveKey("whiterun", "dragon_slayer");
+        String nonSkyrimRegionKey = ContextualDialogue.resolveReactiveKey("heartlands", "dragon_slayer");
         String fallbackKey = ContextualDialogue.resolveReactiveKey("cyrodiil", "dragon_slayer");
-        r.check("reactive dialogue key resolves react.<region>.<deed> with fallback to react.generic.<deed>",
-                "react.whiterun.dragon_slayer".equals(holdKey) && "react.generic.dragon_slayer".equals(fallbackKey),
-                holdKey + " / " + fallbackKey);
+        r.check("reactive dialogue key resolves react.<region>.<deed> across all regions with fallback to react.generic.<deed>",
+                "react.whiterun.dragon_slayer".equals(holdKey)
+                        && "react.heartlands.dragon_slayer".equals(nonSkyrimRegionKey)
+                        && "react.generic.dragon_slayer".equals(fallbackKey),
+                holdKey + " / " + nonSkyrimRegionKey + " / " + fallbackKey);
+
+        residentAndVoiceChecks(r, level);
+        factionAttitudeAndEncounterChecks(r, level);
+        bardAndArsenalChecks(r, level);
 
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skycraft-trainer-test".getBytes()), "[TrainerTest]"));
         com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(p);
@@ -671,4 +678,255 @@ public final class SocietySelfTest {
                         && (goldBeforeExp - goldAfterExp) == expectedExpertFee,
                 "skill=" + data.getSkill(com.skycraft.core.Skill.SMITHING) + ", feePaid=" + (goldBeforeExp - goldAfterExp));
     }
+
+    /**
+     * T1 self-test: verifies 12,709 authored residents across all 10 province files, canonical Whiterun and
+     * 9-province sample settlements, and 100% regional voice & gossip coverage across all Regions.all().
+     */
+    private static void residentAndVoiceChecks(Run r, ServerLevel level) {
+        int totalResidents = SocietyResidents.totalCount();
+        r.check("authored residents loaded >= 12000 across all 10 province files",
+                totalResidents >= 12000, "totalResidents=" + totalResidents + ", settlements=" + SocietyResidents.settlementCount());
+
+        String[] sampleSettlements = {
+                "whiterun", "balmora", "anvil", "daggerfall", "sentinel",
+                "alinor", "elden_root", "rimmen", "stormhold"
+        };
+        List<String> missingSamples = new ArrayList<>();
+        for (String s : sampleSettlements) {
+            List<SocietyResidents.Entry> list = SocietyResidents.forSettlement(s);
+            if (list.isEmpty() || list.stream().anyMatch(e -> e.name().isBlank() || e.why().isEmpty() || e.greet().isBlank())) {
+                missingSamples.add(s + "(" + list.size() + ")");
+            }
+        }
+        r.check("all 9 province sample settlements have authored residents with names, why citations, and dialogue",
+                missingSamples.isEmpty(), missingSamples.isEmpty() ? "all 9 sample settlements verified" : "missing=" + missingSamples);
+
+        List<SocietyResidents.Entry> whiterunRes = SocietyResidents.forSettlement("whiterun");
+        boolean hasBalgruuf = whiterunRes.stream().anyMatch(e -> e.name().contains("Balgruuf"));
+        boolean hasAdrianne = whiterunRes.stream().anyMatch(e -> e.name().contains("Adrianne"));
+        boolean hasHulda = whiterunRes.stream().anyMatch(e -> e.name().contains("Hulda"));
+        SocietyResidents.Entry huldaInnkeeper = SocietyResidents.innkeeperFor("whiterun");
+        r.check("Whiterun authored residents include canonical Balgruuf, Adrianne, and innkeeper Hulda",
+                hasBalgruuf && hasAdrianne && hasHulda && huldaInnkeeper != null && huldaInnkeeper.name().contains("Hulda"),
+                "Balgruuf=" + hasBalgruuf + ", Adrianne=" + hasAdrianne + ", Hulda=" + (huldaInnkeeper != null ? huldaInnkeeper.name() : "null"));
+
+        SocietyResidents.Entry sampleEntry = whiterunRes.stream().filter(e -> e.name().contains("Adrianne")).findFirst().orElse(whiterunRes.get(0));
+        com.skycraft.society.entity.NpcEntity sampleNpc = Npcs.create(level, new BlockPos(0, 80, 0), sampleEntry.npcRole());
+        if (sampleNpc != null) {
+            SocietyResidents.applyToNpc(sampleNpc, sampleEntry);
+            String appliedId = sampleNpc.getPersistentData().getString(SocietyResidents.RESIDENT_ID_KEY);
+            String appliedWhy = sampleNpc.getPersistentData().getString(Housing.WHY_KEY);
+            String appliedGreet = sampleNpc.getPersistentData().getString(SocietyResidents.GREET_KEY);
+            r.check("applying authored resident sets custom name, SkycraftResidentId, SkycraftWhy, and SkycraftGreet on NPC",
+                    sampleEntry.id().equals(appliedId) && !appliedWhy.isBlank() && !appliedGreet.isBlank()
+                            && sampleNpc.getName().getString().contains(sampleEntry.name()),
+                    "id=" + appliedId + ", name=" + sampleNpc.getName().getString() + ", why=" + appliedWhy);
+        }
+
+        List<String> unknownVoiceRegions = new ArrayList<>();
+        List<String> lowGossipRegions = new ArrayList<>();
+        for (com.skycraft.tamriel.Region reg : com.skycraft.tamriel.Regions.all()) {
+            String sayKey = RegionVoice.sayKey(reg);
+            if (sayKey.endsWith(".unknown")) {
+                unknownVoiceRegions.add(reg.id());
+            }
+            if (!"sea".equals(reg.province()) && RegionVoice.gossipCount(reg.shortId()) < 2) {
+                lowGossipRegions.add(reg.shortId());
+            }
+        }
+        r.check("RegionVoice resolves every region in Regions.all() without returning region.unknown and provides >= 2 regional gossip topics",
+                unknownVoiceRegions.isEmpty() && lowGossipRegions.isEmpty(),
+                "unknown=" + unknownVoiceRegions + ", lowGossip=" + lowGossipRegions);
+    }
+
+    /**
+     * T6 self-test: verifies provincial factions and regional polity mappings, RaceAttitudes across contrasting
+     * holds/provinces, Orc stronghold Blood-Kin gate, reputation override (trusted_outlander), live disposition
+     * and barter price scaling, and political/faction-gated WildScenes.
+     */
+    private static void factionAttitudeAndEncounterChecks(Run r, ServerLevel level) {
+        // 1. Factions & regional polities across all 75 land regions + WorldSheets causal citations
+        List<String> missingPolity = new ArrayList<>();
+        List<String> brokenWhy = new ArrayList<>();
+        int landRegions = 0;
+        for (com.skycraft.tamriel.Region reg : com.skycraft.tamriel.Regions.all()) {
+            if ("sea".equals(reg.province())) continue;
+            landRegions++;
+            Reputation.PolityMapping pol = Reputation.regionPolity(reg.id());
+            if (pol == null || pol.rulingFaction().isEmpty() || pol.why().isEmpty()) {
+                missingPolity.add(reg.id());
+            } else {
+                for (String w : pol.why()) {
+                    if (!com.skycraft.tamriel.world.WorldSheets.resolves(w)) brokenWhy.add(reg.id() + ":" + w);
+                }
+            }
+            RaceAttitudes.AttitudeProfile prof = RaceAttitudes.regionProfile(reg.id());
+            if (prof == null || prof.why().isEmpty()) {
+                missingPolity.add("attitude:" + reg.id());
+            } else {
+                for (String w : prof.why()) {
+                    if (!com.skycraft.tamriel.world.WorldSheets.resolves(w)) brokenWhy.add("attitude:" + reg.id() + ":" + w);
+                }
+            }
+        }
+        for (Reputation.FactionDef f : Reputation.allFactionDefs().values()) {
+            if (f.why().isEmpty()) brokenWhy.add("faction:" + f.id());
+            for (String w : f.why()) {
+                if (!com.skycraft.tamriel.world.WorldSheets.resolves(w)) brokenWhy.add("faction:" + f.id() + ":" + w);
+            }
+        }
+        r.check("all " + landRegions + " land regions have causal faction polities and RaceAttitudes profiles with valid WorldSheets citations",
+                landRegions >= 75 && missingPolity.isEmpty() && brokenWhy.isEmpty(),
+                "landRegions=" + landRegions + ", factions=" + Reputation.allFactionDefs().size()
+                        + ", missing=" + missingPolity + ", brokenWhy=" + brokenWhy);
+
+        // 2. Contrasting Skyrim holds: Windhelm (Eastmarch) vs. Solitude (Haafingar)
+        RaceAttitudes.Evaluation nordWindhelm = RaceAttitudes.evaluate("skyrim/eastmarch", "windhelm", "merchant", "nord", "nord", Map.of());
+        RaceAttitudes.Evaluation dunmerWindhelm = RaceAttitudes.evaluate("skyrim/eastmarch", "windhelm", "merchant", "nord", "dunmer", Map.of());
+        RaceAttitudes.Evaluation argonianWindhelm = RaceAttitudes.evaluate("skyrim/eastmarch", "windhelm", "guard", "nord", "argonian", Map.of());
+        RaceAttitudes.Evaluation altmerWindhelm = RaceAttitudes.evaluate("skyrim/eastmarch", "windhelm", "guard", "nord", "altmer", Map.of());
+        RaceAttitudes.Evaluation impWindhelm = RaceAttitudes.evaluate("skyrim/eastmarch", "windhelm", "guard", "nord", "imperial", Map.of());
+        RaceAttitudes.Evaluation impSolitude = RaceAttitudes.evaluate("skyrim/haafingar", "solitude", "merchant", "imperial", "imperial", Map.of());
+        r.check("Windhelm (Eastmarch) welcomes Nords and penalizes Dunmer, Argonians, Altmer, and Imperials compared to Solitude (Haafingar)",
+                nordWindhelm.dispositionDelta() > 0 && nordWindhelm.priceMultiplier() < 1.0f
+                        && dunmerWindhelm.dispositionDelta() < 0 && dunmerWindhelm.priceMultiplier() > 1.0f
+                        && argonianWindhelm.dispositionDelta() <= -15 && argonianWindhelm.guardScrutiny() > 1.15f
+                        && altmerWindhelm.dispositionDelta() <= -20 && altmerWindhelm.priceMultiplier() >= 1.15f
+                        && impSolitude.dispositionDelta() > impWindhelm.dispositionDelta()
+                        && impSolitude.priceMultiplier() < impWindhelm.priceMultiplier(),
+                "nord=" + nordWindhelm.dispositionDelta() + ", dunmer=" + dunmerWindhelm.dispositionDelta()
+                        + ", argonian=" + argonianWindhelm.dispositionDelta() + ", altmer=" + altmerWindhelm.dispositionDelta()
+                        + ", impSolitude=" + impSolitude.dispositionDelta() + " vs impWindhelm=" + impWindhelm.dispositionDelta());
+
+        // 3. Contrasting Morrowind, Hammerfell, Summerset, and Black Marsh attitudes
+        RaceAttitudes.Evaluation dunmerTelvanni = RaceAttitudes.evaluate("morrowind/telvannis", "sadrith_mora", "mage", "dunmer", "dunmer", Map.of());
+        RaceAttitudes.Evaluation argonianTelvanni = RaceAttitudes.evaluate("morrowind/telvannis", "sadrith_mora", "mage", "dunmer", "argonian", Map.of());
+        RaceAttitudes.Evaluation impTelvanni = RaceAttitudes.evaluate("morrowind/telvannis", "sadrith_mora", "merchant", "dunmer", "imperial", Map.of());
+        RaceAttitudes.Evaluation impBalmora = RaceAttitudes.evaluate("morrowind/west_gash", "balmora", "merchant", "dunmer", "imperial", Map.of());
+        RaceAttitudes.Evaluation altmerAlikr = RaceAttitudes.evaluate("hammerfell/alikr_desert", null, "guard", "redguard", "altmer", Map.of());
+        RaceAttitudes.Evaluation impAlikr = RaceAttitudes.evaluate("hammerfell/alikr_desert", null, "merchant", "redguard", "imperial", Map.of());
+        RaceAttitudes.Evaluation impSentinel = RaceAttitudes.evaluate("hammerfell/sentinel", "sentinel", "merchant", "redguard", "imperial", Map.of());
+        RaceAttitudes.Evaluation nordSummerset = RaceAttitudes.evaluate("summerset/summerset_isle", "alinor", "guard", "altmer", "nord", Map.of());
+        RaceAttitudes.Evaluation dunmerHelstrom = RaceAttitudes.evaluate("black_marsh/helstrom", "helstrom", "guard", "argonian", "dunmer", Map.of());
+        r.check("provincial attitudes reflect Telvanni vs Hlaalu Balmora, Crown Alik'r vs Forebear Sentinel, Thalmor Alinor, and An-Xileel Helstrom",
+                dunmerTelvanni.dispositionDelta() > 0
+                        && argonianTelvanni.dispositionDelta() <= -20
+                        && impBalmora.dispositionDelta() > impTelvanni.dispositionDelta()
+                        && altmerAlikr.dispositionDelta() <= -20
+                        && impSentinel.dispositionDelta() > impAlikr.dispositionDelta()
+                        && nordSummerset.dispositionDelta() <= -15 && nordSummerset.priceMultiplier() >= 1.15f
+                        && dunmerHelstrom.dispositionDelta() <= -20 && RaceAttitudes.KEY_ANCESTRAL_GRUDGE.equals(dunmerHelstrom.attitudeKey()),
+                "telvanni(dunmer=" + dunmerTelvanni.dispositionDelta() + ",arg=" + argonianTelvanni.dispositionDelta()
+                        + "), balmora vs telvanni imp(" + impBalmora.dispositionDelta() + ">" + impTelvanni.dispositionDelta()
+                        + "), alikr altmer=" + altmerAlikr.dispositionDelta() + ", helstrom dunmer=" + dunmerHelstrom.dispositionDelta());
+
+        // 4. Orc stronghold Blood-Kin gate & reputation override (trusted_outlander)
+        RaceAttitudes.Evaluation outsiderStronghold = RaceAttitudes.evaluate("skyrim/eastmarch", "narzulbur", "merchant", "orc", "nord", Map.of());
+        RaceAttitudes.Evaluation orcStronghold = RaceAttitudes.evaluate("skyrim/eastmarch", "narzulbur", "merchant", "orc", "orc", Map.of());
+        RaceAttitudes.Evaluation bloodKinStronghold = RaceAttitudes.evaluate("skyrim/eastmarch", "narzulbur", "merchant", "orc", "nord",
+                Map.of(Reputation.ORC_STRONGHOLDS, 25));
+        RaceAttitudes.Evaluation trustedDunmerWindhelm = RaceAttitudes.evaluate("skyrim/eastmarch", "windhelm", "merchant", "nord", "dunmer",
+                Map.of(Reputation.STORMCLOAKS, 45));
+        r.check("Orc strongholds enforce blood_kin_required for non-Orc outsiders and unlock for Orcs or Blood-Kin; high local faction rep grants trusted_outlander",
+                RaceAttitudes.KEY_BLOOD_KIN_REQUIRED.equals(outsiderStronghold.attitudeKey())
+                        && outsiderStronghold.dispositionDelta() <= -20
+                        && orcStronghold.dispositionDelta() > 0
+                        && RaceAttitudes.KEY_TRUSTED_OUTLANDER.equals(bloodKinStronghold.attitudeKey())
+                        && bloodKinStronghold.dispositionDelta() > 0 && bloodKinStronghold.priceMultiplier() < 1.0f
+                        && RaceAttitudes.KEY_TRUSTED_OUTLANDER.equals(trustedDunmerWindhelm.attitudeKey())
+                        && trustedDunmerWindhelm.dispositionDelta() > 0 && trustedDunmerWindhelm.priceMultiplier() < 1.0f,
+                "outsider=" + outsiderStronghold.attitudeKey() + ", orc=" + orcStronghold.attitudeKey()
+                        + ", bloodKin=" + bloodKinStronghold.attitudeKey() + ", trustedDunmer=" + trustedDunmerWindhelm.attitudeKey());
+
+        // 5. Live NPC integration with Relationships.disposition, Pricing.buyPrice/sellPrice, and ContextualDialogue
+        FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skycraft-attitude-test".getBytes()), "[AttitudeTest]"));
+        com.skycraft.core.PlayerData pData = com.skycraft.core.SkyData.get(p);
+        Reputation.clear(p);
+        com.skycraft.society.entity.NpcEntity merch = Npcs.create(level, new BlockPos(0, 80, 0), NpcRole.MERCHANT);
+        if (merch != null) {
+            merch.setRace(NpcNames.Race.NORD);
+            merch.getPersistentData().putString(RaceAttitudes.TAG_REGION_OVERRIDE, "skyrim/eastmarch");
+            merch.getPersistentData().putString(RaceAttitudes.TAG_SETTLEMENT_OVERRIDE, "windhelm");
+            net.minecraft.world.item.ItemStack sword = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD);
+
+            pData.setRace(com.skycraft.core.Race.ALTMER);
+            int dispAltmer = Relationships.disposition(merch, p);
+            int personalAltmer = Relationships.personalDisposition(merch, p);
+            int buyAltmer = com.skycraft.economy.Pricing.buyPrice(p, sword, merch);
+            int sellAltmer = com.skycraft.economy.Pricing.sellPrice(p, sword, merch);
+
+            pData.setRace(com.skycraft.core.Race.NORD);
+            int dispNord = Relationships.disposition(merch, p);
+            int buyNord = com.skycraft.economy.Pricing.buyPrice(p, sword, merch);
+            int sellNord = com.skycraft.economy.Pricing.sellPrice(p, sword, merch);
+
+            merch.getPersistentData().putString(RaceAttitudes.TAG_SETTLEMENT_OVERRIDE, "narzulbur");
+            merch.setRace(NpcNames.Race.ORC);
+            String strongholdGreetKey = ContextualDialogue.attitudeGreetingKey(merch, p);
+
+            r.check("live Relationships.disposition, Pricing.buyPrice/sellPrice, and ContextualDialogue reflect RaceAttitudes without mutating personalDisposition",
+                    personalAltmer == 0 && dispAltmer < 0 && dispNord > 0
+                            && buyAltmer > buyNord && sellAltmer <= sellNord
+                            && "society.skycraft.attitude.blood_kin_required.0".equals(strongholdGreetKey),
+                    "disp(altmer=" + dispAltmer + ",nord=" + dispNord + "), buy(" + buyAltmer + " vs " + buyNord
+                            + "), sell(" + sellAltmer + " vs " + sellNord + "), greet=" + strongholdGreetKey);
+        }
+
+        // 6. Dynamic political & reputation-filtered WildScenes
+        List<com.skycraft.creatures.spawn.WildScenes.Scene> allScenes = com.skycraft.creatures.spawn.WildScenes.all();
+        long stateScenes = allScenes.stream().filter(com.skycraft.creatures.spawn.WildScenes.Scene::isPoliticalOrStateFiltered).count();
+        List<String> sceneBadWhy = new ArrayList<>();
+        for (com.skycraft.creatures.spawn.WildScenes.Scene s : allScenes) {
+            for (String w : s.why()) {
+                if (!com.skycraft.tamriel.world.WorldSheets.resolves(w)) sceneBadWhy.add(s.id() + ":" + w);
+            }
+        }
+        var thalmorSquad = com.skycraft.creatures.spawn.WildScenes.byId("t6_sk_thalmor_inquisition_hit_squad").orElse(null);
+        var compHunt = com.skycraft.creatures.spawn.WildScenes.byId("t6_sk_companions_dragon_hunt").orElse(null);
+        boolean squadMatchesHated = thalmorSquad != null && com.skycraft.creatures.spawn.WildScenes.matchesState(
+                thalmorSquad, "skyrim/haafingar", "nord", java.util.Set.of(), f -> Reputation.THALMOR.equals(f) ? -30 : 0);
+        boolean squadBlockedNeutral = thalmorSquad != null && !com.skycraft.creatures.spawn.WildScenes.matchesState(
+                thalmorSquad, "skyrim/haafingar", "nord", java.util.Set.of(), f -> 0);
+        boolean compMatchesHero = compHunt != null && com.skycraft.creatures.spawn.WildScenes.matchesState(
+                compHunt, "skyrim/whiterun", "nord", java.util.Set.of("dragon_slayer"), f -> Reputation.COMPANIONS.equals(f) ? 25 : 0);
+        boolean compBlockedUninitiated = compHunt != null && !com.skycraft.creatures.spawn.WildScenes.matchesState(
+                compHunt, "skyrim/whiterun", "nord", java.util.Set.of(), f -> 0);
+        r.check("WildScenes loads >= 30 political/reputation-gated scenes with 100% valid WorldSheets why citations and enforces reputation/deed filters",
+                stateScenes >= 30 && sceneBadWhy.isEmpty()
+                        && squadMatchesHated && squadBlockedNeutral && compMatchesHero && compBlockedUninitiated,
+                "totalScenes=" + allScenes.size() + ", stateScenes=" + stateScenes + ", badWhy=" + sceneBadWhy);
+    }
+
+    /**
+     * T11 & T12 self-test: verifies 10 cultural musical instruments, 13-culture bard repertoires, bard equipment,
+     * and all 94/94 LegendaryUniques resolving to non-empty ItemStacks.
+     */
+    private static void bardAndArsenalChecks(Run r, ServerLevel level) {
+        List<String> bardErrors = new ArrayList<>();
+        for (String culture : com.skycraft.audio.BardPerformance.CULTURES) {
+            net.minecraft.world.item.ItemStack inst = com.skycraft.audio.BardPerformance.instrumentFor(culture);
+            if (inst.isEmpty() || !(inst.getItem() instanceof com.skycraft.audio.InstrumentItem)) {
+                bardErrors.add("bard instrument missing for culture " + culture);
+            }
+            List<String> songs = com.skycraft.audio.BardPerformance.songsFor(culture);
+            if (songs.size() < 4) {
+                bardErrors.add("culture " + culture + " has fewer than 4 bard songs: " + songs.size());
+            }
+        }
+        int instCount = com.skycraft.audio.BardPerformance.allInstruments().size();
+        if (instCount != 10) {
+            bardErrors.add("expected 10 cultural instruments, got " + instCount);
+        }
+        com.skycraft.society.entity.NpcEntity bard = Npcs.create(level, new BlockPos(0, 80, 0), NpcRole.BARD);
+        boolean bardEquipped = bard != null && bard.getMainHandItem().getItem() instanceof com.skycraft.audio.InstrumentItem;
+        r.check("all 10 cultural instruments and 13-culture bard song repertoires (>= 4 songs/culture) load and equip on BARD NPCs",
+                bardErrors.isEmpty() && bardEquipped,
+                bardErrors.isEmpty() ? "instruments=" + instCount + ", bardHeld=" + (bard != null ? bard.getMainHandItem().getItem() : "null") : "errors=" + bardErrors);
+
+        int uniqueCount = com.skycraft.loot.LegendaryUniques.verifyAllNonEmpty();
+        r.check("all " + uniqueCount + " LegendaryUniques resolve to non-empty ItemStacks (0 missing regional weapons)",
+                uniqueCount >= 94, "verified=" + uniqueCount);
+    }
 }
+

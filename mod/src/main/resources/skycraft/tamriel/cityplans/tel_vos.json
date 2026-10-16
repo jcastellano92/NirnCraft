@@ -30,8 +30,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        9,
-        0
+        6,
+        -3
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -54,7 +54,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -7,
+        -15,
         5
       ],
       "face": "south",
@@ -78,8 +78,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        3,
-        -9
+        -3,
+        -19
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -103,6 +103,119 @@
     "tel_vos_b_2": "Tel Vos Southern Keep",
     "tel_vos_b_3": "Tel Vos Tradehouse",
     "tel_vos_b_4": "Tel Vos Imperial Shrine",
-    "tel_vos_b_5": "Aryon's Museum"
-  }
+    "tel_vos_b_5": "Aryon's Museum",
+    "tel_vos_hybrid_court": "Master Aryon's Fort-Root Courtyard"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        12
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 3,
+      "name": "tel_vos_hybrid_court"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        -4
+      ],
+      "spokes": 5,
+      "r0": 10,
+      "r1": 30,
+      "wobble": 5,
+      "offset": 0.1,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18,
+        28
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -26
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "aryon_bridge_way"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "barracks",
+      "count": 1,
+      "culture": "imperial",
+      "on": "aryon_bridge_way"
+    },
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "telvanni",
+      "on": "ring"
+    },
+    {
+      "kind": "alchemist",
+      "count": 1,
+      "kit": "telvanni",
+      "on": "spoke"
+    }
+  ]
 }

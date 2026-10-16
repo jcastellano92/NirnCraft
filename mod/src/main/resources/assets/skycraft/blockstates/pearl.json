@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/pearl"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/pearl_harvested"
+    }
+  }
+}

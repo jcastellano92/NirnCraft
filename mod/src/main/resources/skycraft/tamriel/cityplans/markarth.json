@@ -27,48 +27,358 @@
   },
   "innKey": "silver_blood_inn",
   "buildings": [
-    {"kind": "house", "at": [-38, 32], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "markarth_ogmunds_house"},
-    {"kind": "manor", "at": [38, -22], "size": [11, 13], "face": "W", "raise": 4, "flags": ["upper", "rich"], "name": "markarth_endons_house"},
-    {"kind": "house", "at": [-38, -22], "size": [9, 11], "face": "E", "raise": 4, "name": "markarth_dryhten_house"},
-    {"kind": "smithy", "at": [-38, 60], "size": [11, 9], "face": "E", "name": "markarth_silver_smelter"}
+    {
+      "kind": "house",
+      "at": [
+        -38,
+        32
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "flags": [
+        "upper"
+      ],
+      "name": "markarth_ogmunds_house"
+    },
+    {
+      "kind": "manor",
+      "at": [
+        38,
+        -22
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "W",
+      "raise": 4,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "name": "markarth_endons_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        -38,
+        -22
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "raise": 4,
+      "name": "markarth_dryhten_house"
+    },
+    {
+      "kind": "smithy",
+      "at": [
+        -38,
+        60
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "E",
+      "name": "markarth_silver_smelter"
+    }
   ],
   "plazas": [
-    {"at": [0, -24], "size": 11, "variant": 1, "stalls": 2, "raise": 4, "name": "markarth_waterfall_terrace"},
-    {"at": [0, -60], "size": 11, "variant": 1, "stalls": 0, "raise": 9, "name": "markarth_keep_terrace"}
+    {
+      "at": [
+        0,
+        -24
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "raise": 4,
+      "name": "markarth_waterfall_terrace"
+    },
+    {
+      "at": [
+        0,
+        -60
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 0,
+      "raise": 9,
+      "name": "markarth_keep_terrace"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[-74, 40], [-48, 48], [-24, 40], [0, 46]], "width": 3, "tag": "low", "raise": 0},
-    {"type": "path", "via": [[74, 40], [48, 48], [24, 40], [0, 46]], "width": 3, "tag": "low", "raise": 0},
-    {"type": "switchback", "from": [0, 36], "to": [0, -26], "legs": 4, "amp": 30, "width": 3, "tag": "stair"},
-    {"type": "path", "via": [[-72, -30], [-48, -36], [-22, -28], [0, -32], [22, -28], [48, -36], [72, -30]], "width": 3, "tag": "mid", "raise": 4},
-    {"type": "switchback", "from": [0, -34], "to": [0, -66], "legs": 3, "amp": 26, "width": 3, "tag": "stair"},
-    {"type": "path", "via": [[-70, -68], [-44, -74], [-20, -66], [0, -70], [20, -66], [44, -74], [70, -68]], "width": 3, "tag": "up", "raise": 9}
+    {
+      "type": "path",
+      "via": [
+        [
+          -74,
+          40
+        ],
+        [
+          -48,
+          48
+        ],
+        [
+          -24,
+          40
+        ],
+        [
+          0,
+          46
+        ]
+      ],
+      "width": 3,
+      "tag": "low",
+      "raise": 0
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          74,
+          40
+        ],
+        [
+          48,
+          48
+        ],
+        [
+          24,
+          40
+        ],
+        [
+          0,
+          46
+        ]
+      ],
+      "width": 3,
+      "tag": "low",
+      "raise": 0
+    },
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        36
+      ],
+      "to": [
+        0,
+        -26
+      ],
+      "legs": 4,
+      "amp": 30,
+      "width": 3,
+      "tag": "stair"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          -30
+        ],
+        [
+          -48,
+          -36
+        ],
+        [
+          -22,
+          -28
+        ],
+        [
+          0,
+          -32
+        ],
+        [
+          22,
+          -28
+        ],
+        [
+          48,
+          -36
+        ],
+        [
+          72,
+          -30
+        ]
+      ],
+      "width": 3,
+      "tag": "mid",
+      "raise": 4
+    },
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        -34
+      ],
+      "to": [
+        0,
+        -66
+      ],
+      "legs": 3,
+      "amp": 26,
+      "width": 3,
+      "tag": "stair"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -70,
+          -68
+        ],
+        [
+          -44,
+          -74
+        ],
+        [
+          -20,
+          -66
+        ],
+        [
+          0,
+          -70
+        ],
+        [
+          20,
+          -66
+        ],
+        [
+          44,
+          -74
+        ],
+        [
+          70,
+          -68
+        ]
+      ],
+      "width": 3,
+      "tag": "up",
+      "raise": 9
+    }
   ],
   "zones": [
-    {"at": [0, -60], "r": 30, "zone": "noble"},
-    {"at": [0, 40], "r": 20, "zone": "centre"},
-    {"at": [-56, 60], "r": 24, "zone": "poor"}
+    {
+      "at": [
+        0,
+        -60
+      ],
+      "r": 30,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        40
+      ],
+      "r": 20,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -56,
+        60
+      ],
+      "r": 24,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 78, "target": 0.5},
+  "fabric": {
+    "radius": 78,
+    "target": 0.5
+  },
   "queue": [
-    {"kind": "house", "name": "markarth_betilds_house", "on": "low"},
-    {"kind": "house", "name": "markarth_mulush_office", "on": "low"},
-    {"kind": "house", "name": "markarth_kerahs_shop", "raise": 4, "on": "mid"},
-    {"kind": "house", "name": "markarth_hognis_stall_house", "on": "low"},
-    {"kind": "house", "name": "markarth_calcelmos_study", "raise": 9, "on": "up"},
-    {"kind": "house", "name": "markarth_thonars_lodging", "raise": 9, "on": "up"}
+    {
+      "kind": "house",
+      "name": "markarth_betilds_house",
+      "on": "low"
+    },
+    {
+      "kind": "house",
+      "name": "markarth_mulush_office",
+      "on": "low"
+    },
+    {
+      "kind": "house",
+      "name": "markarth_kerahs_shop",
+      "raise": 4,
+      "on": "mid"
+    },
+    {
+      "kind": "house",
+      "name": "markarth_hognis_stall_house",
+      "on": "low"
+    },
+    {
+      "kind": "house",
+      "name": "markarth_calcelmos_study",
+      "raise": 9,
+      "on": "up"
+    },
+    {
+      "kind": "house",
+      "name": "markarth_thonars_lodging",
+      "raise": 9,
+      "on": "up"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "divine:dibella", "where": "square"},
-    {"type": "memorial", "where": "free"},
-    {"type": "shrine", "theme": "divine:talos", "where": "street", "tag": "stair"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "mid"},
-    {"type": "market", "where": "free"},
-    {"type": "pool", "where": "free"},
-    {"type": "bench", "where": "square"},
-    {"type": "great_tree", "theme": "spruce", "where": "edge"}
+    {
+      "type": "statue",
+      "theme": "divine:dibella",
+      "where": "square"
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:talos",
+      "where": "street",
+      "tag": "stair"
+    },
+    {
+      "type": "well",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 3,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "mid"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "pool",
+      "where": "free"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "where": "edge"
+    }
   ],
   "titles": {
     "understone_keep": "Understone Keep",

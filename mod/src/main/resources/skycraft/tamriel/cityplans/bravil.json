@@ -87,8 +87,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        20,
-        20
+        11,
+        7
       ],
       "face": "south",
       "overlay": "bravil",
@@ -99,8 +99,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        22,
-        54
+        30,
+        63
       ],
       "face": "south",
       "overlay": "bravil",
@@ -183,7 +183,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -20,
+        -28,
         -20
       ],
       "face": "south",
@@ -207,7 +207,7 @@
       "use": "shack",
       "wealth": "poor",
       "at": [
-        0,
+        4,
         -28
       ],
       "face": "south",
@@ -291,6 +291,249 @@
     "bravil_city_swimmer_shack": "City-Swimmer's Shanty",
     "bravil_ranalines_house": "Ranaline's Loft",
     "bravil_luciana_galena_house": "Luciana Galena's Loft",
-    "bravil_carandials_house": "Carandial's Shanty"
-  }
+    "bravil_carandials_house": "Carandial's Shanty",
+    "bravil_lucky_lady_square": "Statue of the Lucky Old Lady Square"
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -72,
+        -18
+      ],
+      "to": [
+        72,
+        12
+      ],
+      "width": 7
+    },
+    {
+      "kind": "canal",
+      "from": [
+        -12,
+        -74
+      ],
+      "to": [
+        18,
+        74
+      ],
+      "width": 7
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -4,
+        -22
+      ],
+      "to": [
+        10,
+        -22
+      ],
+      "width": 5,
+      "variant": 0
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -28,
+        -14
+      ],
+      "to": [
+        -28,
+        2
+      ],
+      "width": 5,
+      "variant": 0
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        32,
+        -2
+      ],
+      "to": [
+        32,
+        16
+      ],
+      "width": 5,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        -12,
+        -28
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 5,
+      "name": "bravil_lucky_lady_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -84
+        ],
+        [
+          -6,
+          -42
+        ],
+        [
+          4,
+          -6
+        ],
+        [
+          8,
+          34
+        ],
+        [
+          28,
+          66
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "niben_walk"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -82,
+          0
+        ],
+        [
+          -42,
+          -8
+        ],
+        [
+          4,
+          -6
+        ],
+        [
+          46,
+          6
+        ],
+        [
+          76,
+          18
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "canal_side"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        10
+      ],
+      "rx": 44,
+      "rz": 38,
+      "wobble": 5,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "shanty_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -54,
+          34
+        ],
+        [
+          -18,
+          42
+        ],
+        [
+          24,
+          48
+        ],
+        [
+          56,
+          36
+        ]
+      ],
+      "width": 3,
+      "rank": 2,
+      "tag": "dock_alley"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        38,
+        42
+      ],
+      "r": 28,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -12,
+        -28
+      ],
+      "r": 26,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -38,
+        -22
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -24,
+        38
+      ],
+      "r": 38,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 80,
+    "target": 0.64
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 10,
+      "flags": [
+        "upper"
+      ],
+      "on": "shanty_loop"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "on": "canal_side"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "poor",
+      "count": 2,
+      "on": "dock_alley"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "on": "niben_walk"
+    }
+  ]
 }

@@ -30,7 +30,7 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        9,
+        13,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        0,
-        30
+        18,
+        20
       ],
       "face": "south",
       "overlay": "azuras_coast",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -9,
-        0
+        -15,
+        -5
       ],
       "face": "south",
       "overlay": "azuras_coast",
@@ -90,6 +90,142 @@
     "tel_fyr_b_1": "Hall of Fyr",
     "tel_fyr_b_2": "Corprusarium Sub-Chamber",
     "tel_fyr_b_3": "Onyx Closet",
-    "tel_fyr_b_4": "Tel Fyr Boat Landing"
-  }
+    "tel_fyr_b_4": "Tel Fyr Boat Landing",
+    "tel_fyr_dock_landing": "Hall of Fyr Cove Landing"
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -16,
+        12
+      ],
+      "to": [
+        4,
+        20
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        -4,
+        10
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "tel_fyr_dock_landing"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -4
+      ],
+      "rx": 22,
+      "rz": 18,
+      "wobble": 6,
+      "lobes": 3,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "corprus_root_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          -6,
+          14
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          10,
+          -24
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "fyr_cove_path"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          -2
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          26,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "onyx_hall_lane"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.52
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "kit": "telvanni",
+      "on": "corprus_root_loop"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "kit": "telvanni",
+      "on": "fyr_cove_path"
+    }
+  ]
 }

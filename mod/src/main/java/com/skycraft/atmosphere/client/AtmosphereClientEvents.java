@@ -2,15 +2,14 @@ package com.skycraft.atmosphere.client;
 
 import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.AtmosphereConfig;
+import com.skycraft.atmosphere.AtmosphereMath;
 import com.skycraft.atmosphere.AtmosphereSounds;
-import com.skycraft.atmosphere.weather.WeatherProfile;
 import com.skycraft.core.SkyData;
-import com.skycraft.tamriel.Region;
-import com.skycraft.tamriel.Regions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -18,8 +17,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Client tick work of the atmosphere module: smooths the "cold biome" factor that gates the aurora, and plays the
- * level-up fanfare when the synced character level goes up.
+ * Client tick work of the atmosphere module: smoothly updates the continuous world-Z latitude aurora factor, and
+ * plays the level-up fanfare when the synced character level goes up.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class AtmosphereClientEvents {
@@ -45,22 +44,31 @@ public final class AtmosphereClientEvents {
         }
         if (mc.isPaused()) return;
 
-        // ---- aurora: a northern sky (Skyrim, Atmora, cold climates), brightest over cold ground
-        if (player.tickCount % 20 == 0 || trackedPlayer != player) {
+        // ---- aurora: continuous world-Z latitude from Atmora (-6500) through Skyrim (-2000) to Cyrodiil (+3500..+6000)
+        double pz = player.getZ();
+        if (AtmosphereConfig.AURORA_BY_REGION.get()) {
+            float latAlpha = AtmosphereMath.auroraAlphaFactor(pz);
+            if (latAlpha <= 0.0F) {
+                coldTarget = 0.0F;
+            } else {
+                BlockPos pos = player.blockPosition();
+                float temp = mc.level.getBiome(pos).value().getBaseTemperature();
+                float tempBoost = Mth.clamp(1.12F - 0.25F * temp, 0.72F, 1.15F);
+                coldTarget = Mth.clamp(latAlpha * tempBoost, 0.0F, 1.0F);
+            }
+        } else {
             BlockPos pos = player.blockPosition();
             float temp = mc.level.getBiome(pos).value().getBaseTemperature();
             boolean cold = temp <= AtmosphereConfig.AURORA_MAX_TEMPERATURE.get();
-            if (AtmosphereConfig.AURORA_BY_REGION.get()) {
-                Region region = Regions.at(mc.level, pos);
-                boolean north = "skyrim".equals(region.province()) || "atmora".equals(region.province())
-                        || WeatherProfile.of(region).aurora;
-                coldTarget = north ? (cold ? 1.0F : 0.6F) : 0.0F;
-            } else {
-                coldTarget = cold ? 1.0F : 0.0F;
-            }
+            coldTarget = cold ? 1.0F : 0.0F;
         }
-        SkyRenderer.coldnessPrev = SkyRenderer.coldness;
-        SkyRenderer.coldness += (coldTarget - SkyRenderer.coldness) * 0.02F;
+        if (trackedPlayer != player) {
+            SkyRenderer.coldness = coldTarget;
+            SkyRenderer.coldnessPrev = coldTarget;
+        } else {
+            SkyRenderer.coldnessPrev = SkyRenderer.coldness;
+            SkyRenderer.coldness += (coldTarget - SkyRenderer.coldness) * 0.08F;
+        }
 
         // ---- level-up fanfare
         if (trackedPlayer != player) {

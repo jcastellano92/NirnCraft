@@ -38,7 +38,7 @@
       "id": "chapel_spire",
       "at": [
         0,
-        -14
+        -18
       ],
       "face": "south",
       "name": "eagles_brook_landmark",
@@ -51,7 +51,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        21,
         -12
       ],
       "face": "south",
@@ -62,8 +62,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        23,
-        -2
+        25,
+        6
       ],
       "face": "west",
       "name": "eagles_brook_village_chandler"
@@ -73,8 +73,8 @@
       "use": "mill",
       "wealth": "common",
       "at": [
-        11,
-        11
+        9,
+        19
       ],
       "face": "north",
       "name": "eagles_brook_stone_mill"
@@ -84,8 +84,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -2,
-        23
+        -5,
+        26
       ],
       "face": "north",
       "name": "eagles_brook_farrier_forge"
@@ -95,8 +95,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -12,
-        9
+        -15,
+        12
       ],
       "face": "east",
       "name": "eagles_brook_watercress_herb"

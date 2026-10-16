@@ -145,8 +145,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        0,
-        -56
+        7,
+        -33
       ],
       "face": "south",
       "name": "wayrest_castle_keep"
@@ -178,7 +178,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -34,
+        -30,
         -12
       ],
       "face": "east",
@@ -189,8 +189,8 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        -44,
-        -28
+        -59,
+        -23
       ],
       "face": "east",
       "name": "wayrest_mages_guild"
@@ -200,8 +200,8 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        44,
-        -28
+        42,
+        -36
       ],
       "face": "west",
       "name": "wayrest_fighters_guild"
@@ -211,8 +211,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -38,
-        -48
+        -41,
+        -45
       ],
       "face": "south",
       "name": "wayrest_gardner_house"
@@ -222,8 +222,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        38,
-        -48
+        36,
+        -56
       ],
       "face": "south",
       "name": "wayrest_cumberland_manor"
@@ -233,8 +233,8 @@
       "use": "manor",
       "wealth": "wealthy",
       "at": [
-        -54,
-        -18
+        -49,
+        -3
       ],
       "face": "east",
       "name": "wayrest_horley_townhouse"
@@ -244,7 +244,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        54,
+        58,
         -18
       ],
       "face": "west",
@@ -255,7 +255,7 @@
       "use": "jeweller",
       "wealth": "noble",
       "at": [
-        18,
+        26,
         -22
       ],
       "face": "west",
@@ -266,7 +266,7 @@
       "use": "bookseller",
       "wealth": "wealthy",
       "at": [
-        -18,
+        -14,
         -22
       ],
       "face": "east",
@@ -277,8 +277,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -48,
-        8
+        -42,
+        13
       ],
       "face": "east",
       "name": "wayrest_fen_alembic"
@@ -299,8 +299,8 @@
       "use": "inn",
       "wealth": "poor",
       "at": [
-        -36,
-        48
+        -48,
+        50
       ],
       "face": "north",
       "name": "wayrest_cloudy_dregs"
@@ -321,7 +321,7 @@
       "use": "fishery",
       "wealth": "poor",
       "at": [
-        -18,
+        -14,
         62
       ],
       "face": "north",
@@ -332,8 +332,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        28,
-        -36
+        60,
+        -41
       ],
       "face": "west",
       "name": "wayrest_zenithar_bourse"
@@ -354,8 +354,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        0,
-        -82
+        -6,
+        -87
       ],
       "face": "south",
       "name": "wayrest_north_gate_mews"
@@ -376,7 +376,7 @@
       "use": "townhouse",
       "wealth": "wealthy",
       "at": [
-        -24,
+        -16,
         -36
       ],
       "face": "east",

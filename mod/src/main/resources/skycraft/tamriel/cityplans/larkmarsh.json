@@ -30,8 +30,8 @@
       "use": "mill",
       "wealth": "common",
       "at": [
-        8,
-        0
+        2,
+        -10
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -42,7 +42,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        -8,
         15
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        -5
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -66,7 +66,7 @@
       "use": "barn",
       "wealth": "common",
       "at": [
-        0,
+        16,
         -15
       ],
       "face": "south",
@@ -84,16 +84,166 @@
       "type": "pond",
       "theme": "eel_trap_pool",
       "count": 1
+    },
+    {
+      "type": "memorial",
+      "where": "free"
     }
   ],
   "titles": {
     "larkmarsh_b_1": "Larkmarsh Weir-Mill",
     "larkmarsh_b_2": "Eel-Trapper's Stilted Cottage",
     "larkmarsh_b_3": "The Heron and Weir",
-    "larkmarsh_b_4": "Peat-Stack Barn"
+    "larkmarsh_b_4": "Peat-Stack Barn",
+    "larkmarsh_square": "Larkmarsh Reed-Dyke Landing"
   },
   "innKey": "larkmarsh_b_3",
   "names": {
     "inn": "larkmarsh_b_3"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        10
+      ],
+      "to": [
+        19,
+        4
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        2,
+        -2
+      ],
+      "to": [
+        2,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        6
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "larkmarsh_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          2,
+          7
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          -2,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "arrius_reed_causeway"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          4
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          19,
+          -4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "larkmarsh_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        4
+      ],
+      "rx": 14,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "dyke_cottages_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "dyke_cottages_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "arrius_reed_causeway"
+    }
+  ]
 }

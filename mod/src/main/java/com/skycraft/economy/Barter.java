@@ -47,12 +47,22 @@ public final class Barter {
     /** Opens the barter menu with a merchant. */
     public static void open(ServerPlayer player, LivingEntity npc) {
         if (!Merchants.isMerchant(npc)) return;
+        com.skycraft.society.RaceAttitudes.Evaluation eval = com.skycraft.society.RaceAttitudes.evaluate(npc, player);
+        if (com.skycraft.society.RaceAttitudes.KEY_BLOOD_KIN_REQUIRED.equals(eval.attitudeKey())) {
+            Dialogue.open(player, npc, Component.translatable("society.skycraft.attitude.blood_kin_required.0"));
+            return;
+        }
         if (!Merchants.alwaysOpen(npc) && !Shop.isOpen(player.level())) {
             Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.economy.closed"));
             return;
         }
         Shop shop = Shop.of(npc, player);
         sendState(player, npc, shop, Merchants.greeting(npc), true);
+    }
+
+    /** Returns the regional/faction attitude price multiplier for {@code player} trading with {@code npc}. */
+    public static float attitudePriceMultiplier(net.minecraft.world.entity.player.Player player, LivingEntity npc) {
+        return PriceEngine.attitudeMultiplier(player, npc);
     }
 
     static boolean canReach(ServerPlayer player, LivingEntity npc) {

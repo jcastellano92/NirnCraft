@@ -188,7 +188,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        56,
+        84,
         -28
       ],
       "face": "south",
@@ -200,8 +200,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        68,
-        -14
+        81,
+        -5
       ],
       "face": "south",
       "overlay": "imperial_arena",
@@ -248,8 +248,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        22,
-        -46
+        25,
+        -43
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -260,8 +260,8 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -14,
-        -72
+        -17,
+        -69
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -272,7 +272,7 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        14,
+        18,
         -72
       ],
       "face": "south",
@@ -284,8 +284,8 @@
       "use": "tailor",
       "wealth": "common",
       "at": [
-        0,
-        -76
+        -19,
+        -83
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -296,8 +296,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -28,
-        -66
+        -31,
+        -63
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -308,7 +308,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        28,
+        32,
         -66
       ],
       "face": "south",
@@ -320,8 +320,8 @@
       "use": "jeweller",
       "wealth": "noble",
       "at": [
-        -28,
-        -54
+        -38,
+        -47
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -332,8 +332,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        0,
-        -88
+        -2,
+        -96
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -344,8 +344,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -52,
-        28
+        -48,
+        39
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -356,8 +356,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -64,
-        16
+        -65,
+        4
       ],
       "face": "south",
       "overlay": "imperial_market",
@@ -368,7 +368,7 @@
       "use": "townhouse",
       "wealth": "noble",
       "at": [
-        -38,
+        -34,
         42
       ],
       "face": "south",
@@ -392,7 +392,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -64,
+        -68,
         -16
       ],
       "face": "south",
@@ -404,8 +404,8 @@
       "use": "townhouse",
       "wealth": "noble",
       "at": [
-        -38,
-        -42
+        -30,
+        -33
       ],
       "face": "south",
       "overlay": "imperial_garden",
@@ -416,8 +416,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        52,
-        28
+        49,
+        31
       ],
       "face": "south",
       "overlay": "imperial_garden",
@@ -536,6 +536,264 @@
     "ic_imperial_prison_bastion": "Imperial Prison Bastion",
     "ic_bloated_float": "The Bloated Float Inn",
     "ic_east_empire_warehouse": "Imperial Trading Company Warehouse",
-    "ic_armand_christophe_shack": "Waterfront Doyen's Shack"
-  }
+    "ic_armand_christophe_shack": "Waterfront Doyen's Shack",
+    "ic_market_district_plaza": "Market District Grand Colonnade",
+    "ic_talos_plaza_court": "Talos Plaza Court",
+    "ic_temple_precinct_court": "Temple of the One Forecourt"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        72,
+        34
+      ],
+      "size": 17,
+      "variant": 1,
+      "stalls": 8,
+      "name": "ic_market_district_plaza"
+    },
+    {
+      "at": [
+        -72,
+        24
+      ],
+      "size": 15,
+      "variant": 0,
+      "stalls": 0,
+      "name": "ic_talos_plaza_court"
+    },
+    {
+      "at": [
+        0,
+        -76
+      ],
+      "size": 15,
+      "variant": 0,
+      "stalls": 0,
+      "name": "ic_temple_precinct_court"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        0,
+        0
+      ],
+      "spokes": 6,
+      "r0": 32,
+      "r1": 138,
+      "wobble": 0,
+      "offset": 0,
+      "width": 5,
+      "ring_width": 4,
+      "rings": [
+        56,
+        98,
+        134
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 34,
+      "rz": 34,
+      "wobble": 0,
+      "lobes": 6,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "emperor_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -144,
+          0
+        ],
+        [
+          -98,
+          0
+        ],
+        [
+          -56,
+          0
+        ],
+        [
+          -34,
+          0
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -144
+        ],
+        [
+          0,
+          -98
+        ],
+        [
+          0,
+          -56
+        ],
+        [
+          0,
+          -34
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          144,
+          0
+        ],
+        [
+          98,
+          0
+        ],
+        [
+          56,
+          0
+        ],
+        [
+          34,
+          0
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          144
+        ],
+        [
+          0,
+          98
+        ],
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        0
+      ],
+      "r": 44,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -72,
+        -40
+      ],
+      "r": 42,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        72,
+        36
+      ],
+      "r": 44,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        0,
+        118
+      ],
+      "r": 36,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 142,
+    "target": 0.65,
+    "outskirts": false
+  },
+  "queue": [
+    {
+      "kind": "store",
+      "count": 6,
+      "flags": [
+        "upper"
+      ],
+      "on": "spoke"
+    },
+    {
+      "kind": "manor",
+      "count": 8,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "count": 10,
+      "flags": [
+        "upper"
+      ],
+      "on": "ring"
+    },
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        17
+      ],
+      "flags": [
+        "upper"
+      ],
+      "on": "main"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "on": "spoke"
+    }
+  ]
 }

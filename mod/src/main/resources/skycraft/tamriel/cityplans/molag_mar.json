@@ -23,8 +23,8 @@
     {
       "id": "canton",
       "at": [
-        0,
-        0
+        -9,
+        -18
       ],
       "face": "south",
       "name": "molag_mar_landmark",
@@ -46,7 +46,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        14,
+        18,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -3,
-        14
+        1,
+        25
       ],
       "face": "south",
       "overlay": "molag_amur",
@@ -94,8 +94,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -18,
+        9
       ],
       "face": "south",
       "overlay": "molag_amur",
@@ -106,8 +106,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -9,
-        -41
+        -12,
+        -44
       ],
       "face": "south",
       "overlay": "molag_amur",
@@ -118,8 +118,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        17,
+        -20
       ],
       "face": "south",
       "overlay": "molag_amur",
@@ -151,12 +151,155 @@
     "molag_mar_b_4": "Vasesius Viciulus's Trader",
     "molag_mar_b_5": "Saras Orelu's Healer Hall",
     "molag_mar_b_6": "Buoyant Armigers Garrison",
-    "molag_mar_b_7": "Silt Strider & Boat Landing"
+    "molag_mar_b_7": "Silt Strider & Boat Landing",
+    "molag_mar_pilgrim_bazaar": "Molag Mar Canton Pilgrim Bazaar"
   },
   "innKey": "molag_mar_b_2",
   "names": {
     "inn": "molag_mar_b_2",
     "store": "molag_mar_b_4",
     "smithy": "molag_mar_b_3"
-  }
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -34,
+        -36,
+        34,
+        18
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        10
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 4,
+      "name": "molag_mar_pilgrim_bazaar"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          -12
+        ],
+        [
+          0,
+          -38
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "canton_plaza_walk"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          0
+        ],
+        [
+          -16,
+          0
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          42,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "pilgrim_arcade"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 28,
+      "rz": 26,
+      "wobble": 1,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "waistworks_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "velothi",
+      "on": "waistworks_ring"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "velothi",
+      "on": "pilgrim_arcade"
+    },
+    {
+      "kind": "temple",
+      "count": 1,
+      "kit": "velothi",
+      "on": "canton_plaza_walk"
+    }
+  ]
 }

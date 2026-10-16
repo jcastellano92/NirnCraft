@@ -59,14 +59,42 @@
     {
       "type": "radial",
       "at": [
-        0,
-        0
+        -6,
+        -6
       ],
-      "r0": 2,
-      "r1": 12,
-      "spokes": 4,
+      "spokes": 7,
+      "r0": 10,
+      "r1": 22,
+      "wobble": 7,
+      "offset": 0.14,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
       "tag": "spoke",
       "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          12
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          6,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
     }
   ],
   "buildings": [
@@ -195,5 +223,47 @@
     "thousand_monkey_tree_landmark": "High Seat of place.skycraft.thousand_monkey_tree",
     "thousand_monkey_tree_plaza": "place.skycraft.thousand_monkey_tree Central Plaza"
   },
-  "innKey": "thousand_monkey_tree_b_5"
+  "innKey": "thousand_monkey_tree_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        7,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

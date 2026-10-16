@@ -30,7 +30,7 @@
       "use": "watchtower",
       "wealth": "common",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -54,7 +54,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
+        -12,
         0
       ],
       "face": "south",
@@ -84,12 +84,127 @@
       "type": "lamps",
       "theme": "harluns_torches",
       "count": 2
+    },
+    {
+      "type": "orchard",
+      "where": "edge"
     }
   ],
   "titles": {
     "harluns_watch_b_1": "Harlun's Watch Beacon",
     "harluns_watch_b_2": "Drarana Thelis's House",
     "harluns_watch_b_3": "Mirie Chabinel's Cottage",
-    "harluns_watch_b_4": "Swamp-Edge Pack Stables"
-  }
+    "harluns_watch_b_4": "Swamp-Edge Pack Stables",
+    "harluns_watch_square": "Harlun's Watch Foothill Green"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        0
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "harluns_watch_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        23
+      ],
+      "to": [
+        0,
+        -14
+      ],
+      "legs": 3,
+      "amp": 12,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "valus_beacon_climb"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 15,
+      "rz": 12,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "watch_lantern_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -23,
+          0
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          19,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "harluns_watch_spur"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "watch_lantern_loop"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "valus_beacon_climb"
+    }
+  ]
 }

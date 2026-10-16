@@ -31,7 +31,8 @@ public final class MapPeaks {
     private static final double TWO_PI = Math.PI * 2;
 
     private static final class Peak {
-        double x, z, height, shape, power, hornHeight, hornRadius, jag, maxReach;
+        String name;
+        double x, z, height, shape, power, hornHeight, hornRadius, calderaRadius, calderaDepth, jag, maxReach;
         float[] reach;            // per bearing bin
         double[][] shelves;       // x, z, radius, level
         double[][] clear;         // x, z, radius
@@ -59,6 +60,60 @@ public final class MapPeaks {
 
     private MapPeaks() {}
 
+    /** Total number of analytical peaks loaded from {@code peaks.json}. */
+    public static int count() {
+        return PEAKS.length;
+    }
+
+    /** Returns true if a named peak is present in {@code peaks.json}. */
+    public static boolean hasPeak(String name) {
+        return find(name) != null;
+    }
+
+    /** Configured summit height of a named peak, or {@code 0} if absent. */
+    public static double peakHeight(String name) {
+        Peak p = find(name);
+        return p != null ? p.height : 0;
+    }
+
+    /** Configured caldera radius of a named peak, or {@code 0} if absent/non-volcanic. */
+    public static double calderaRadius(String name) {
+        Peak p = find(name);
+        return p != null ? p.calderaRadius : 0;
+    }
+
+    /** Configured caldera depth of a named peak, or {@code 0} if absent/non-volcanic. */
+    public static double calderaDepth(String name) {
+        Peak p = find(name);
+        return p != null ? p.calderaDepth : 0;
+    }
+
+    /** Number of authored shelves on a named peak, or {@code 0} if absent. */
+    public static int shelfCount(String name) {
+        Peak p = find(name);
+        return p != null ? p.shelves.length : 0;
+    }
+
+    /** Number of authored graded ascent paths on a named peak, or {@code 0} if absent. */
+    public static int pathCount(String name) {
+        Peak p = find(name);
+        return p != null ? p.paths.length : 0;
+    }
+
+    /** Block coordinates {@code [x, z]} of a named peak's center, or {@code null} if absent. */
+    public static int[] peakCoords(String name) {
+        Peak p = find(name);
+        return p != null ? new int[]{(int) Math.round(p.x), (int) Math.round(p.z)} : null;
+    }
+
+    private static Peak find(String name) {
+        if (name == null) return null;
+        for (Peak p : PEAKS) {
+            if (name.equals(p.name)) return p;
+        }
+        return null;
+    }
+
     /**
      * Raises a raster sample by the sharp peaks over it: {@code out.elevation} gets the peak, {@code out.peak} the
      * amplitude of its crag detail in blocks and {@code out.calm} how much of the seeded detail to suppress.
@@ -83,8 +138,19 @@ public final class MapPeaks {
             }
             double base = out.elevation;
             double y = base + Math.max(p.height - p.hornHeight - base, 0) * prof;
-            if (r < p.hornRadius) y += p.hornHeight * Math.pow(1 - r / p.hornRadius, 1.5);
             double calm = 0;
+            if (p.calderaRadius > 0) {
+                if (r >= p.calderaRadius) {
+                    double hr = r - p.calderaRadius;
+                    if (hr < p.hornRadius) y += p.hornHeight * Math.pow(1 - hr / p.hornRadius, 1.5);
+                } else {
+                    double cu = r / p.calderaRadius;
+                    y += p.hornHeight - p.calderaDepth * Math.pow(1 - cu * cu, 1.35);
+                    calm = Math.max(calm, 0.65 * (1 - cu * cu));
+                }
+            } else if (r < p.hornRadius) {
+                y += p.hornHeight * Math.pow(1 - r / p.hornRadius, 1.5);
+            }
             for (double[] s : p.shelves) {
                 double d = Math.hypot(x - s[0], z - s[1]);
                 if (d >= s[2] + 40) continue;
@@ -143,6 +209,7 @@ public final class MapPeaks {
             for (JsonElement e : root.getAsJsonArray("peaks")) {
                 JsonObject o = e.getAsJsonObject();
                 Peak p = new Peak();
+                p.name = o.has("name") ? o.get("name").getAsString() : "";
                 p.x = o.get("x").getAsDouble();
                 p.z = o.get("z").getAsDouble();
                 p.height = o.get("height").getAsDouble();
@@ -151,6 +218,8 @@ public final class MapPeaks {
                 JsonArray horn = o.has("horn") ? o.getAsJsonArray("horn") : null;
                 p.hornHeight = horn != null ? horn.get(0).getAsDouble() : 0;
                 p.hornRadius = horn != null ? Math.max(1, horn.get(1).getAsDouble()) : 1;
+                p.calderaRadius = o.has("calderaRadius") ? Math.max(0, o.get("calderaRadius").getAsDouble()) : 0;
+                p.calderaDepth = o.has("calderaDepth") ? Math.max(0, o.get("calderaDepth").getAsDouble()) : 0;
                 p.jag = o.has("jag") ? o.get("jag").getAsDouble() : 20;
                 double reach = o.get("reach").getAsDouble();
                 JsonArray spurs = o.getAsJsonArray("spurs");

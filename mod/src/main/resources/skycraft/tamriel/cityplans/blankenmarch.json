@@ -30,7 +30,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        8,
+        -16,
         0
       ],
       "face": "south",
@@ -42,7 +42,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        4,
         15
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        3,
+        -17
       ],
       "face": "south",
       "overlay": "blackwood",
@@ -66,7 +66,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        16,
         -15
       ],
       "face": "south",
@@ -84,12 +84,162 @@
       "type": "tree_row",
       "theme": "swamp_cypress",
       "count": 2
+    },
+    {
+      "type": "garden",
+      "where": "free"
     }
   ],
   "titles": {
     "blankenmarch_b_1": "Blankenmarch Headman's Hall",
     "blankenmarch_b_2": "Hanz gro-Hubrag's Cabin",
     "blankenmarch_b_3": "Julitta Plotius's Cottage",
-    "blankenmarch_b_4": "S'thasa's Fisherman Hut"
-  }
+    "blankenmarch_b_4": "S'thasa's Fisherman Hut",
+    "blankenmarch_square": "Blankenmarch Cypress Pond Clearing"
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -19,
+        4
+      ],
+      "to": [
+        19,
+        10
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        0,
+        -2
+      ],
+      "to": [
+        0,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        0
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "blankenmarch_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cypress_dyke_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          -2
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          19,
+          2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "blankenmarch_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 15,
+      "rz": 11,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "pond_shack_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "pond_shack_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "cypress_dyke_lane"
+    }
+  ]
 }

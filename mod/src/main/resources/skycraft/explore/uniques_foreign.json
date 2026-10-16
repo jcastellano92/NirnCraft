@@ -725,762 +725,762 @@
   },
   {
     "id": "atmora_ice_waste_v4_unique_5",
-    "name": "Relic of Ice Waste Site 2 Dwemer Ruin (5)",
+    "name": "Relic of Dibell Dawn Atmoran Hearth-Ruin (5)",
     "region": "ice_waste",
     "why": [
       "ice_waste.L1.glacial_shield",
       "ice_waste.L10.entombed_great_halls"
     ],
-    "place": "ice_waste_site_2_dwemer_ruin",
-    "x": 3683,
-    "z": -12352,
+    "place": "dibell_dawn_atmoran_hearth_ruin",
+    "x": -534,
+    "z": -12680,
     "kind": "camp",
     "item": "skycraft:stalhrim_battleaxe",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Ice Waste Site 2 Dwemer Ruin in Ice Waste from the elder council.",
+    "note": "Preserved at Dibell Dawn Atmoran Hearth-Ruin in Ice Waste from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "atmora_ice_waste_v4_unique_6",
-    "name": "Relic of Ice Waste Site 3 Fort (6)",
+    "name": "Relic of Fimbul White Glacier Rime-Vault (6)",
     "region": "ice_waste",
     "why": [
       "ice_waste.L1.glacial_shield",
       "ice_waste.L10.entombed_great_halls"
     ],
-    "place": "ice_waste_site_3_fort",
-    "x": -317,
-    "z": -12852,
+    "place": "fimbul_white_glacier_rime_vault",
+    "x": -876,
+    "z": -11722,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Ice Waste Site 3 Fort in Ice Waste from the elder council.",
+    "note": "Preserved at Fimbul White Glacier Rime-Vault in Ice Waste from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "atmora_ice_waste_v4_unique_7",
-    "name": "Relic of Ice Waste Site 4 Keep (7)",
+    "name": "Relic of Mjoln Upper Frost-Giant Steading (7)",
     "region": "ice_waste",
     "why": [
       "ice_waste.L1.glacial_shield",
       "ice_waste.L10.entombed_great_halls"
     ],
-    "place": "ice_waste_site_4_keep",
-    "x": -4001,
-    "z": -12055,
+    "place": "mjoln_upper_frost_giant_steading",
+    "x": -686,
+    "z": -12594,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Ice Waste Site 4 Keep in Ice Waste from the elder council.",
+    "note": "Preserved at Mjoln Upper Frost-Giant Steading in Ice Waste from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "atmora_ice_waste_v4_unique_8",
-    "name": "Relic of Ice Waste Site 5 Fort Mage (8)",
+    "name": "Relic of Vahlok Hollow Sea-King's Cairn (8)",
     "region": "ice_waste",
     "why": [
       "ice_waste.L1.glacial_shield",
       "ice_waste.L10.entombed_great_halls"
     ],
-    "place": "ice_waste_site_5_fort_mage",
-    "x": 945,
-    "z": -11746,
+    "place": "vahlok_hollow_sea_king_s_cairn",
+    "x": -116,
+    "z": -13074,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Ice Waste Site 5 Fort Mage in Ice Waste from the elder council.",
+    "note": "Preserved at Vahlok Hollow Sea-King's Cairn in Ice Waste from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "atmora_frozen_forest_v4_unique_7",
-    "name": "Relic of Frozen Forest Site 1 Dwemer Ruin (7)",
+    "name": "Relic of Totem Crimson Dragon-Totem Barrow (7)",
     "region": "frozen_forest",
     "why": [
       "frozen_forest.L1.fjord_valleys",
       "frozen_forest.L10.jylkurfyk_great_barrow"
     ],
-    "place": "frozen_forest_site_1_dwemer_ruin",
-    "x": 2510,
-    "z": -10800,
+    "place": "totem_crimson_dragon_totem_barrow",
+    "x": -2157,
+    "z": -11344,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Frozen Forest Site 1 Dwemer Ruin in Frozen Forest from the elder council.",
+    "note": "Preserved at Totem Crimson Dragon-Totem Barrow in Frozen Forest from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "atmora_frozen_forest_v4_unique_8",
-    "name": "Relic of Frozen Forest Site 2 Fort (8)",
+    "name": "Relic of Snake V Dawn Atmoran Hearth-Ruin (8)",
     "region": "frozen_forest",
     "why": [
       "frozen_forest.L1.fjord_valleys",
       "frozen_forest.L10.jylkurfyk_great_barrow"
     ],
-    "place": "frozen_forest_site_2_fort",
-    "x": 410,
-    "z": -11300,
+    "place": "snake_v_dawn_atmoran_hearth_ruin",
+    "x": -1008,
+    "z": -10997,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Frozen Forest Site 2 Fort in Frozen Forest from the elder council.",
+    "note": "Preserved at Snake V Dawn Atmoran Hearth-Ruin in Frozen Forest from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tsaesci_v4_unique_5",
-    "name": "Relic of Tsaesci Site 2 Dwemer Ruin (5)",
+    "name": "Relic of Lotus Dawn Lacquered Bastion (5)",
     "region": "tsaesci",
     "why": [
       "tsaesci.L1.red_earth_basin",
       "tsaesci.L10.citadel_of_ionith"
     ],
-    "place": "tsaesci_site_2_dwemer_ruin",
-    "x": 15283,
-    "z": 5448,
+    "place": "lotus_dawn_lacquered_bastion",
+    "x": 17011,
+    "z": 7118,
     "kind": "camp",
     "item": "skycraft:stalhrim_battleaxe",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Tsaesci Site 2 Dwemer Ruin in Tsaesci from the elder council.",
+    "note": "Preserved at Lotus Dawn Lacquered Bastion in Tsaesci from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tsaesci_v4_unique_6",
-    "name": "Relic of Tsaesci Site 3 Fort (6)",
+    "name": "Relic of Tachi White Red-Dragon Eyrie (6)",
     "region": "tsaesci",
     "why": [
       "tsaesci.L1.red_earth_basin",
       "tsaesci.L10.citadel_of_ionith"
     ],
-    "place": "tsaesci_site_3_fort",
-    "x": 16883,
-    "z": 7048,
+    "place": "tachi_white_red_dragon_eyrie",
+    "x": 15342,
+    "z": 4024,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Tsaesci Site 3 Fort in Tsaesci from the elder council.",
+    "note": "Preserved at Tachi White Red-Dragon Eyrie in Tsaesci from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tsaesci_v4_unique_7",
-    "name": "Relic of Tsaesci Site 4 Keep (7)",
+    "name": "Relic of Bushi Upper Blood-Iron Adit (7)",
     "region": "tsaesci",
     "why": [
       "tsaesci.L1.red_earth_basin",
       "tsaesci.L10.citadel_of_ionith"
     ],
-    "place": "tsaesci_site_4_keep",
-    "x": 15083,
-    "z": 4048,
+    "place": "bushi_upper_blood_iron_adit",
+    "x": 16425,
+    "z": 5930,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Tsaesci Site 4 Keep in Tsaesci from the elder council.",
+    "note": "Preserved at Bushi Upper Blood-Iron Adit in Tsaesci from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tsaesci_v4_unique_8",
-    "name": "Relic of Tsaesci Site 5 Fort Mage (8)",
+    "name": "Relic of Gilded Hollow Viper-Coil Cavern (8)",
     "region": "tsaesci",
     "why": [
       "tsaesci.L1.red_earth_basin",
       "tsaesci.L10.citadel_of_ionith"
     ],
-    "place": "tsaesci_site_5_fort_mage",
-    "x": 16445,
-    "z": 6254,
+    "place": "gilded_hollow_viper_coil_cavern",
+    "x": 15989,
+    "z": 5992,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Tsaesci Site 5 Fort Mage in Tsaesci from the elder council.",
+    "note": "Preserved at Gilded Hollow Viper-Coil Cavern in Tsaesci from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_kamal_v4_unique_4",
-    "name": "Relic of Kamal Site 2 Dwemer Ruin (4)",
+    "name": "Relic of Krag Dawn Siege-Host Citadel (4)",
     "region": "kamal",
     "why": [
       "kamal.L1.volcanic_ice_peaks",
       "kamal.L10.steam_ice_bastions"
     ],
-    "place": "kamal_site_2_dwemer_ruin",
-    "x": 16827,
-    "z": -752,
+    "place": "krag_dawn_siege_host_citadel",
+    "x": 18568,
+    "z": 1268,
     "kind": "shrine",
     "item": "skycraft:dwarven_warhammer",
     "enchant": {
       "smite": 5
     },
-    "note": "Preserved at Kamal Site 2 Dwemer Ruin in Kamal from the elder council.",
+    "note": "Preserved at Krag Dawn Siege-Host Citadel in Kamal from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_kamal_v4_unique_5",
-    "name": "Relic of Kamal Site 3 Fort (5)",
+    "name": "Relic of Shatt K White Rime-Carapace Cavern (5)",
     "region": "kamal",
     "why": [
       "kamal.L1.volcanic_ice_peaks",
       "kamal.L10.steam_ice_bastions"
     ],
-    "place": "kamal_site_3_fort",
-    "x": 18831,
-    "z": -1536,
+    "place": "shatt_k_white_rime_carapace_cavern",
+    "x": 17041,
+    "z": -247,
     "kind": "camp",
     "item": "skycraft:stalhrim_battleaxe",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Kamal Site 3 Fort in Kamal from the elder council.",
+    "note": "Preserved at Shatt K White Rime-Carapace Cavern in Kamal from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_kamal_v4_unique_6",
-    "name": "Relic of Kamal Site 4 Keep (6)",
+    "name": "Relic of Zorn K Upper Permafrost Ore-Shaft (6)",
     "region": "kamal",
     "why": [
       "kamal.L1.volcanic_ice_peaks",
       "kamal.L10.steam_ice_bastions"
     ],
-    "place": "kamal_site_4_keep",
-    "x": 15227,
-    "z": 348,
+    "place": "zorn_k_upper_permafrost_ore_shaft",
+    "x": 15538,
+    "z": 471,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Kamal Site 4 Keep in Kamal from the elder council.",
+    "note": "Preserved at Zorn K Upper Permafrost Ore-Shaft in Kamal from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_kamal_v4_unique_7",
-    "name": "Relic of Kamal Site 5 Fort Mage (7)",
+    "name": "Relic of Frost H Hollow Thaw-Breaker Ice Vault (7)",
     "region": "kamal",
     "why": [
       "kamal.L1.volcanic_ice_peaks",
       "kamal.L10.steam_ice_bastions"
     ],
-    "place": "kamal_site_5_fort_mage",
-    "x": 16827,
-    "z": -848,
+    "place": "frost_h_hollow_thaw_breaker_ice_vault",
+    "x": 18826,
+    "z": 1528,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Kamal Site 5 Fort Mage in Kamal from the elder council.",
+    "note": "Preserved at Frost H Hollow Thaw-Breaker Ice Vault in Kamal from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_kamal_v4_unique_8",
-    "name": "Relic of Kamal Site 6 Akaviri Fort (8)",
+    "name": "Relic of Jugg Silver Siege-Host Citadel (8)",
     "region": "kamal",
     "why": [
       "kamal.L1.volcanic_ice_peaks",
       "kamal.L10.steam_ice_bastions"
     ],
-    "place": "kamal_site_6_akaviri_fort",
-    "x": 18831,
-    "z": -1632,
+    "place": "jugg_silver_siege_host_citadel",
+    "x": 17044,
+    "z": -526,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Kamal Site 6 Akaviri Fort in Kamal from the elder council.",
+    "note": "Preserved at Jugg Silver Siege-Host Citadel in Kamal from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tang_mo_v4_unique_4",
-    "name": "Relic of Tang Mo Site 2 Dwemer Ruin (4)",
+    "name": "Relic of Emeral Dawn Bamboo-Bridge Keep (4)",
     "region": "tang_mo",
     "why": [
       "tang_mo.L1.karst_spire_isles",
       "tang_mo.L10.mist_pillar_sanctums"
     ],
-    "place": "tang_mo_site_2_dwemer_ruin",
-    "x": 21225,
-    "z": 4492,
+    "place": "emeral_dawn_bamboo_bridge_keep",
+    "x": 22218,
+    "z": 4875,
     "kind": "shrine",
     "item": "skycraft:dwarven_warhammer",
     "enchant": {
       "smite": 5
     },
-    "note": "Preserved at Tang Mo Site 2 Dwemer Ruin in Tang Mo from the elder council.",
+    "note": "Preserved at Emeral Dawn Bamboo-Bridge Keep in Tang Mo from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tang_mo_v4_unique_5",
-    "name": "Relic of Tang Mo Site 3 Fort (5)",
+    "name": "Relic of Lanter White Mist-Karst Grotto (5)",
     "region": "tang_mo",
     "why": [
       "tang_mo.L1.karst_spire_isles",
       "tang_mo.L10.mist_pillar_sanctums"
     ],
-    "place": "tang_mo_site_3_fort",
-    "x": 22235,
-    "z": 4620,
+    "place": "lanter_white_mist_karst_grotto",
+    "x": 22512,
+    "z": 4622,
     "kind": "camp",
     "item": "skycraft:stalhrim_battleaxe",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Tang Mo Site 3 Fort in Tang Mo from the elder council.",
+    "note": "Preserved at Lanter White Mist-Karst Grotto in Tang Mo from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tang_mo_v4_unique_6",
-    "name": "Relic of Tang Mo Site 4 Keep (6)",
+    "name": "Relic of Saffr Upper Jade-Seam Quarry (6)",
     "region": "tang_mo",
     "why": [
       "tang_mo.L1.karst_spire_isles",
       "tang_mo.L10.mist_pillar_sanctums"
     ],
-    "place": "tang_mo_site_4_keep",
-    "x": 21225,
-    "z": 4396,
+    "place": "saffr_upper_jade_seam_quarry",
+    "x": 20968,
+    "z": 4563,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Tang Mo Site 4 Keep in Tang Mo from the elder council.",
+    "note": "Preserved at Saffr Upper Jade-Seam Quarry in Tang Mo from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tang_mo_v4_unique_7",
-    "name": "Relic of Tang Mo Site 5 Fort Mage (7)",
+    "name": "Relic of Jade M Hollow Cloud-Monkey Pagoda (7)",
     "region": "tang_mo",
     "why": [
       "tang_mo.L1.karst_spire_isles",
       "tang_mo.L10.mist_pillar_sanctums"
     ],
-    "place": "tang_mo_site_5_fort_mage",
-    "x": 22645,
-    "z": 5946,
+    "place": "jade_m_hollow_cloud_monkey_pagoda",
+    "x": 22089,
+    "z": 4844,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Tang Mo Site 5 Fort Mage in Tang Mo from the elder council.",
+    "note": "Preserved at Jade M Hollow Cloud-Monkey Pagoda in Tang Mo from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_tang_mo_v4_unique_8",
-    "name": "Relic of Tang Mo Site 6 Akaviri Fort (8)",
+    "name": "Relic of Crane Silver Bamboo-Bridge Keep (8)",
     "region": "tang_mo",
     "why": [
       "tang_mo.L1.karst_spire_isles",
       "tang_mo.L10.mist_pillar_sanctums"
     ],
-    "place": "tang_mo_site_6_akaviri_fort",
-    "x": 21263,
-    "z": 4390,
+    "place": "crane_silver_bamboo_bridge_keep",
+    "x": 22549,
+    "z": 5672,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Tang Mo Site 6 Akaviri Fort in Tang Mo from the elder council.",
+    "note": "Preserved at Crane Silver Bamboo-Bridge Keep in Tang Mo from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_ka_po_tun_v4_unique_6",
-    "name": "Relic of Ka Po Tun Site 2 Dwemer Ruin (6)",
+    "name": "Relic of Emper Dawn Black-Dragon Roost (6)",
     "region": "ka_po_tun",
     "why": [
       "ka_po_tun.L1.golden_steppe_mesa",
       "ka_po_tun.L10.dragon_step_sanctuary"
     ],
-    "place": "ka_po_tun_site_2_dwemer_ruin",
-    "x": 19558,
-    "z": 1319,
+    "place": "emper_dawn_black_dragon_roost",
+    "x": 20395,
+    "z": 3564,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Ka Po Tun Site 2 Dwemer Ruin in Ka Po Tun from the elder council.",
+    "note": "Preserved at Emper Dawn Black-Dragon Roost in Ka Po Tun from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_ka_po_tun_v4_unique_7",
-    "name": "Relic of Ka Po Tun Site 3 Fort (7)",
+    "name": "Relic of Lion K White Golden-Stripe Citadel (7)",
     "region": "ka_po_tun",
     "why": [
       "ka_po_tun.L1.golden_steppe_mesa",
       "ka_po_tun.L10.dragon_step_sanctuary"
     ],
-    "place": "ka_po_tun_site_3_fort",
-    "x": 20083,
-    "z": 3648,
+    "place": "lion_k_white_golden_stripe_citadel",
+    "x": 19281,
+    "z": 2222,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Ka Po Tun Site 3 Fort in Ka Po Tun from the elder council.",
+    "note": "Preserved at Lion K White Golden-Stripe Citadel in Ka Po Tun from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "akavir_ka_po_tun_v4_unique_8",
-    "name": "Relic of Ka Po Tun Site 4 Fort Mage (8)",
+    "name": "Relic of Solar Upper Sun-Crag Cavern (8)",
     "region": "ka_po_tun",
     "why": [
       "ka_po_tun.L1.golden_steppe_mesa",
       "ka_po_tun.L10.dragon_step_sanctuary"
     ],
-    "place": "ka_po_tun_site_4_fort_mage",
-    "x": 18283,
-    "z": 3648,
+    "place": "solar_upper_sun_crag_cavern",
+    "x": 18794,
+    "z": 4471,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Ka Po Tun Site 4 Fort Mage in Ka Po Tun from the elder council.",
+    "note": "Preserved at Solar Upper Sun-Crag Cavern in Ka Po Tun from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_yokudan_desert_v4_unique_6",
-    "name": "Relic of Yokudan Desert Site 2 Dwemer Ruin (6)",
+    "name": "Relic of Ruptga Dawn Orichalc Sword-Fane (6)",
     "region": "yokudan_desert",
     "why": [
       "yokudan_desert.L1.sheared_red_mesas",
       "yokudan_desert.L10.vault_of_the_pankratosword"
     ],
-    "place": "yokudan_desert_site_2_dwemer_ruin",
-    "x": -19390,
-    "z": 5200,
+    "place": "ruptga_dawn_orichalc_sword_fane",
+    "x": -18485,
+    "z": 5416,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Yokudan Desert Site 2 Dwemer Ruin in Yokudan Desert from the elder council.",
+    "note": "Preserved at Ruptga Dawn Orichalc Sword-Fane in Yokudan Desert from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_yokudan_desert_v4_unique_7",
-    "name": "Relic of Yokudan Desert Site 3 Fort (7)",
+    "name": "Relic of Naban White Wind-Carved Dune Cavern (7)",
     "region": "yokudan_desert",
     "why": [
       "yokudan_desert.L1.sheared_red_mesas",
       "yokudan_desert.L10.vault_of_the_pankratosword"
     ],
-    "place": "yokudan_desert_site_3_fort",
-    "x": -19490,
-    "z": 8400,
+    "place": "naban_white_wind_carved_dune_cavern",
+    "x": -19985,
+    "z": 6519,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Yokudan Desert Site 3 Fort in Yokudan Desert from the elder council.",
+    "note": "Preserved at Naban White Wind-Carved Dune Cavern in Yokudan Desert from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_yokudan_desert_v4_unique_8",
-    "name": "Relic of Yokudan Desert Site 4 Fort Mage (8)",
+    "name": "Relic of Ulad Upper Sunken Fleet Hulk (8)",
     "region": "yokudan_desert",
     "why": [
       "yokudan_desert.L1.sheared_red_mesas",
       "yokudan_desert.L10.vault_of_the_pankratosword"
     ],
-    "place": "yokudan_desert_site_4_fort_mage",
-    "x": -17490,
-    "z": 6600,
+    "place": "ulad_upper_sunken_fleet_hulk",
+    "x": -19179,
+    "z": 4363,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Yokudan Desert Site 4 Fort Mage in Yokudan Desert from the elder council.",
+    "note": "Preserved at Ulad Upper Sunken Fleet Hulk in Yokudan Desert from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_sunken_isles_v4_unique_3",
-    "name": "Relic of Sunken Isles Site 2 Dwemer Ruin (3)",
+    "name": "Relic of Ebb Y Dawn Orichalc Sword-Fane (3)",
     "region": "sunken_isles",
     "why": [
       "sunken_isles.L1.submerged_city_shelves",
       "sunken_isles.L10.drowned_orichalc_vaults"
     ],
-    "place": "sunken_isles_site_2_dwemer_ruin",
-    "x": -17973,
-    "z": 10948,
+    "place": "ebb_y_dawn_orichalc_sword_fane",
+    "x": -17230,
+    "z": 12147,
     "kind": "chest",
     "item": "skycraft:daedric_dagger",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Sunken Isles Site 2 Dwemer Ruin in Sunken Isles from the elder council.",
+    "note": "Preserved at Ebb Y Dawn Orichalc Sword-Fane in Sunken Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_sunken_isles_v4_unique_4",
-    "name": "Relic of Sunken Isles Site 3 Fort (4)",
+    "name": "Relic of Mast White Wind-Carved Dune Cavern (4)",
     "region": "sunken_isles",
     "why": [
       "sunken_isles.L1.submerged_city_shelves",
       "sunken_isles.L10.drowned_orichalc_vaults"
     ],
-    "place": "sunken_isles_site_3_fort",
-    "x": -18273,
-    "z": 11648,
+    "place": "mast_white_wind_carved_dune_cavern",
+    "x": -17360,
+    "z": 12630,
     "kind": "shrine",
     "item": "skycraft:dwarven_warhammer",
     "enchant": {
       "smite": 5
     },
-    "note": "Preserved at Sunken Isles Site 3 Fort in Sunken Isles from the elder council.",
+    "note": "Preserved at Mast White Wind-Carved Dune Cavern in Sunken Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_sunken_isles_v4_unique_5",
-    "name": "Relic of Sunken Isles Site 4 Keep (5)",
+    "name": "Relic of Tidal Y Upper Sunken Fleet Hulk (5)",
     "region": "sunken_isles",
     "why": [
       "sunken_isles.L1.submerged_city_shelves",
       "sunken_isles.L10.drowned_orichalc_vaults"
     ],
-    "place": "sunken_isles_site_4_keep",
-    "x": -17235,
-    "z": 12485,
+    "place": "tidal_y_upper_sunken_fleet_hulk",
+    "x": -18033,
+    "z": 10447,
     "kind": "camp",
     "item": "skycraft:stalhrim_battleaxe",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Sunken Isles Site 4 Keep in Sunken Isles from the elder council.",
+    "note": "Preserved at Tidal Y Upper Sunken Fleet Hulk in Sunken Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_sunken_isles_v4_unique_6",
-    "name": "Relic of Sunken Isles Site 5 Fort Mage (6)",
+    "name": "Relic of Yokud S Hollow Coral-Basalt Sea Cave (6)",
     "region": "sunken_isles",
     "why": [
       "sunken_isles.L1.submerged_city_shelves",
       "sunken_isles.L10.drowned_orichalc_vaults"
     ],
-    "place": "sunken_isles_site_5_fort_mage",
-    "x": -17973,
-    "z": 10852,
+    "place": "yokud_s_hollow_coral_basalt_sea_cave",
+    "x": -18068,
+    "z": 11858,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Sunken Isles Site 5 Fort Mage in Sunken Isles from the elder council.",
+    "note": "Preserved at Yokud S Hollow Coral-Basalt Sea Cave in Sunken Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_sunken_isles_v4_unique_7",
-    "name": "Relic of Sunken Isles Site 6 Akaviri Fort (7)",
+    "name": "Relic of Calde Silver Orichalc Vein Mine (7)",
     "region": "sunken_isles",
     "why": [
       "sunken_isles.L1.submerged_city_shelves",
       "sunken_isles.L10.drowned_orichalc_vaults"
     ],
-    "place": "sunken_isles_site_6_akaviri_fort",
-    "x": -18273,
-    "z": 11552,
+    "place": "calde_silver_orichalc_vein_mine",
+    "x": -17642,
+    "z": 11765,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Sunken Isles Site 6 Akaviri Fort in Sunken Isles from the elder council.",
+    "note": "Preserved at Calde Silver Orichalc Vein Mine in Sunken Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "yokuda_sunken_isles_v4_unique_8",
-    "name": "Relic of Sunken Isles Site 7 Daedric Ruin (8)",
+    "name": "Relic of Keel Scarlet Na-Totambu Sand-Tomb (8)",
     "region": "sunken_isles",
     "why": [
       "sunken_isles.L1.submerged_city_shelves",
       "sunken_isles.L10.drowned_orichalc_vaults"
     ],
-    "place": "sunken_isles_site_7_daedric_ruin",
-    "x": -17235,
-    "z": 12389,
+    "place": "keel_scarlet_na_totambu_sand_tomb",
+    "x": -17810,
+    "z": 10446,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Sunken Isles Site 7 Daedric Ruin in Sunken Isles from the elder council.",
+    "note": "Preserved at Keel Scarlet Na-Totambu Sand-Tomb in Sunken Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "pyandonea_maormer_isles_v4_unique_6",
-    "name": "Relic of Maormer Isles Site 3 Fort (6)",
+    "name": "Relic of Pelag P White Spindrift Tidal Grotto (6)",
     "region": "maormer_isles",
     "why": [
       "maormer_isles.L1.volcanic_reef_isles",
       "maormer_isles.L10.sanctum_of_the_coiled_king"
     ],
-    "place": "maormer_isles_site_3_fort",
-    "x": -18117,
-    "z": 20860,
+    "place": "pelag_p_white_spindrift_tidal_grotto",
+    "x": -19822,
+    "z": 18771,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Maormer Isles Site 3 Fort in Maormer Isles from the elder council.",
+    "note": "Preserved at Pelag P White Spindrift Tidal Grotto in Maormer Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "pyandonea_maormer_isles_v4_unique_7",
-    "name": "Relic of Maormer Isles Site 4 Keep (7)",
+    "name": "Relic of Watersp Upper Leviathan-Crushed Wreck (7)",
     "region": "maormer_isles",
     "why": [
       "maormer_isles.L1.volcanic_reef_isles",
       "maormer_isles.L10.sanctum_of_the_coiled_king"
     ],
-    "place": "maormer_isles_site_4_keep",
-    "x": -20089,
-    "z": 18697,
+    "place": "watersp_upper_leviathan_crushed_wreck",
+    "x": -19213,
+    "z": 20023,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Maormer Isles Site 4 Keep in Maormer Isles from the elder council.",
+    "note": "Preserved at Watersp Upper Leviathan-Crushed Wreck in Maormer Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "pyandonea_maormer_isles_v4_unique_8",
-    "name": "Relic of Maormer Isles Site 5 Fort Mage (8)",
+    "name": "Relic of Leviath Hollow Storm-Weaver Spire (8)",
     "region": "maormer_isles",
     "why": [
       "maormer_isles.L1.volcanic_reef_isles",
       "maormer_isles.L10.sanctum_of_the_coiled_king"
     ],
-    "place": "maormer_isles_site_5_fort_mage",
-    "x": -19717,
-    "z": 19648,
+    "place": "leviath_hollow_storm_weaver_spire",
+    "x": -20841,
+    "z": 19633,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Maormer Isles Site 5 Fort Mage in Maormer Isles from the elder council.",
+    "note": "Preserved at Leviath Hollow Storm-Weaver Spire in Maormer Isles from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "thras_coral_kingdom_v4_unique_4",
-    "name": "Relic of Coral Kingdom Site 2 Dwemer Ruin (4)",
+    "name": "Relic of Effluv Dawn Necrotic Coral Spire (4)",
     "region": "coral_kingdom",
     "why": [
       "coral_kingdom.L1.agonir_coral_caldera",
       "coral_kingdom.L10.the_pillar_of_thras"
     ],
-    "place": "coral_kingdom_site_2_dwemer_ruin",
-    "x": -15383,
-    "z": 16778,
+    "place": "effluv_dawn_necrotic_coral_spire",
+    "x": -14583,
+    "z": 17358,
     "kind": "shrine",
     "item": "skycraft:dwarven_warhammer",
     "enchant": {
       "smite": 5
     },
-    "note": "Preserved at Coral Kingdom Site 2 Dwemer Ruin in Coral Kingdom from the elder council.",
+    "note": "Preserved at Effluv Dawn Necrotic Coral Spire in Coral Kingdom from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "thras_coral_kingdom_v4_unique_5",
-    "name": "Relic of Coral Kingdom Site 3 Fort (5)",
+    "name": "Relic of Lagoon T White Abyssal Flesh-Vault (5)",
     "region": "coral_kingdom",
     "why": [
       "coral_kingdom.L1.agonir_coral_caldera",
       "coral_kingdom.L10.the_pillar_of_thras"
     ],
-    "place": "coral_kingdom_site_3_fort",
-    "x": -14573,
-    "z": 17848,
+    "place": "lagoon_t_white_abyssal_flesh_vault",
+    "x": -15128,
+    "z": 17515,
     "kind": "camp",
     "item": "skycraft:stalhrim_battleaxe",
     "enchant": {
       "sharpness": 5
     },
-    "note": "Preserved at Coral Kingdom Site 3 Fort in Coral Kingdom from the elder council.",
+    "note": "Preserved at Lagoon T White Abyssal Flesh-Vault in Coral Kingdom from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "thras_coral_kingdom_v4_unique_6",
-    "name": "Relic of Coral Kingdom Site 4 Keep (6)",
+    "name": "Relic of Soap Upper All-Flags Graveyard Reef (6)",
     "region": "coral_kingdom",
     "why": [
       "coral_kingdom.L1.agonir_coral_caldera",
       "coral_kingdom.L10.the_pillar_of_thras"
     ],
-    "place": "coral_kingdom_site_4_keep",
-    "x": -16017,
-    "z": 16210,
+    "place": "soap_upper_all_flags_graveyard_reef",
+    "x": -15024,
+    "z": 17389,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Coral Kingdom Site 4 Keep in Coral Kingdom from the elder council.",
+    "note": "Preserved at Soap Upper All-Flags Graveyard Reef in Coral Kingdom from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "thras_coral_kingdom_v4_unique_7",
-    "name": "Relic of Coral Kingdom Site 5 Fort Mage (7)",
+    "name": "Relic of Sload Hollow Miasma-Vent Sea Cave (7)",
     "region": "coral_kingdom",
     "why": [
       "coral_kingdom.L1.agonir_coral_caldera",
       "coral_kingdom.L10.the_pillar_of_thras"
     ],
-    "place": "coral_kingdom_site_5_fort_mage",
-    "x": -14573,
-    "z": 17752,
+    "place": "sload_hollow_miasma_vent_sea_cave",
+    "x": -14870,
+    "z": 17224,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Coral Kingdom Site 5 Fort Mage in Coral Kingdom from the elder council.",
+    "note": "Preserved at Sload Hollow Miasma-Vent Sea Cave in Coral Kingdom from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "thras_coral_kingdom_v4_unique_8",
-    "name": "Relic of Coral Kingdom Site 6 Akaviri Fort (8)",
+    "name": "Relic of Cenote Silver Sacrificial Coral Cenote (8)",
     "region": "coral_kingdom",
     "why": [
       "coral_kingdom.L1.agonir_coral_caldera",
       "coral_kingdom.L10.the_pillar_of_thras"
     ],
-    "place": "coral_kingdom_site_6_akaviri_fort",
-    "x": -16353,
-    "z": 17287,
+    "place": "cenote_silver_sacrificial_coral_cenote",
+    "x": -15985,
+    "z": 16109,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Coral Kingdom Site 6 Akaviri Fort in Coral Kingdom from the elder council.",
+    "note": "Preserved at Cenote Silver Sacrificial Coral Cenote in Coral Kingdom from the elder council.",
     "_r7_r12_v4": true
   }
 ]

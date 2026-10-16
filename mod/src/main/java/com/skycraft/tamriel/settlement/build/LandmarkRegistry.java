@@ -39,11 +39,11 @@ public final class LandmarkRegistry {
         reg("college", Landmarks.COLLEGE, 51, 51, 60);
         reg("sea_stack", Landmarks.SEA_STACK, 57, 57, 4);
         reg("white_gold_tower", Landmarks.WHITE_GOLD_TOWER, 27, 27, 210);
-        reg("giant_tree", Landmarks.GIANT_TREE, 61, 61, 110);
+        reg("giant_tree", Landmarks.GIANT_TREE, 61, 61, 128);
         reg("canton", Landmarks.CANTON, 31, 31, 30);
         reg("dome_temple", Landmarks.DOME_TEMPLE, 25, 25, 32);
         reg("xanmeer", Landmarks.XANMEER, 33, 33, 26);
-        reg("crystal_tower", Landmarks.CRYSTAL_TOWER, 19, 19, 110);
+        reg("crystal_tower", Landmarks.CRYSTAL_TOWER, 19, 19, 148);
         reg("castle", Landmarks.CASTLE, 31, 31, 32);
         reg("cliff", Landmarks.CLIFF, 55, 25, 46);
         reg("ratway", Landmarks.RATWAY, 5, 7, 8);
@@ -67,6 +67,10 @@ public final class LandmarkRegistry {
         reg("awning_row", 112, 7, 41, 7);
         reg("canopy_platform", 113, 29, 29, 8);
         reg("glass_dome", 114, 25, 25, 20);
+        reg("adamantine_tower", 115, 29, 29, 144);
+        reg("baar_dau", 116, 31, 31, 68);
+        reg("red_mountain_citadel", 117, 35, 35, 58);
+        reg("sunspire_temple", 118, 33, 33, 56);
     }
 
     private LandmarkRegistry() {}

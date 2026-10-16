@@ -44,8 +44,8 @@
     {
       "id": "chapel_spire",
       "at": [
-        20,
-        -22
+        1,
+        -15
       ],
       "face": "south",
       "name": "anvil_chapel_spire",
@@ -91,8 +91,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        21,
-        19
+        27,
+        24
       ],
       "face": "south",
       "overlay": "anvil",
@@ -115,8 +115,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        3,
-        28
+        5,
+        36
       ],
       "face": "south",
       "overlay": "anvil",
@@ -127,7 +127,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -16,
+        -8,
         56
       ],
       "face": "south",
@@ -151,8 +151,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -49,
-        31
+        -51,
+        23
       ],
       "face": "south",
       "overlay": "anvil",
@@ -211,8 +211,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -8,
-        -27
+        -18,
+        -34
       ],
       "face": "south",
       "overlay": "anvil",
@@ -235,8 +235,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        12,
-        -25
+        3,
+        -38
       ],
       "face": "south",
       "overlay": "anvil",
@@ -259,8 +259,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        26,
-        -10
+        39,
+        -19
       ],
       "face": "south",
       "overlay": "anvil",
@@ -313,6 +313,241 @@
     "anvil_strangers_house": "The Stranger's Abandoned House",
     "anvil_gogan_house": "Gogan and Maelona's House",
     "anvil_newheims_house": "Newheim the Portly's House",
-    "anvil_ulfgar_house": "Ulfgar Fog-Eye's Watch Quarters"
-  }
+    "anvil_ulfgar_house": "Ulfgar Fog-Eye's Watch Quarters",
+    "anvil_harbor_exchange": "Gold Coast Merchant Quay",
+    "anvil_dibella_parvis": "Chapel of Dibella Forecourt"
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -36,
+        26
+      ],
+      "to": [
+        -36,
+        42
+      ],
+      "width": 6,
+      "variant": 1
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        8,
+        14
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 6,
+      "name": "anvil_harbor_exchange"
+    },
+    {
+      "at": [
+        24,
+        -28
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 0,
+      "name": "anvil_dibella_parvis"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -88
+        ],
+        [
+          0,
+          -48
+        ],
+        [
+          0,
+          -12
+        ],
+        [
+          0,
+          22
+        ],
+        [
+          0,
+          68
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "gold_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          88,
+          0
+        ],
+        [
+          48,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          -28,
+          8
+        ],
+        [
+          -58,
+          16
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "harbor_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -68,
+          42
+        ],
+        [
+          -36,
+          36
+        ],
+        [
+          0,
+          42
+        ],
+        [
+          38,
+          40
+        ],
+        [
+          68,
+          28
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        8,
+        -14
+      ],
+      "rx": 42,
+      "rz": 32,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "chapel_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -36,
+          36
+        ],
+        [
+          -52,
+          8
+        ],
+        [
+          -62,
+          -18
+        ]
+      ],
+      "width": 3,
+      "rank": 2,
+      "tag": "headland"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -24,
+        -18
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        8,
+        14
+      ],
+      "r": 30,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        42,
+        24
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -32,
+        46
+      ],
+      "r": 32,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 84,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "building",
+      "use": "warehouse",
+      "wealth": "common",
+      "count": 3,
+      "on": "quay"
+    },
+    {
+      "kind": "store",
+      "count": 4,
+      "flags": [
+        "upper"
+      ],
+      "on": "harbor_way"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "chapel_ring"
+    },
+    {
+      "kind": "house",
+      "count": 8,
+      "flags": [
+        "upper"
+      ],
+      "on": "gold_road"
+    }
+  ]
 }

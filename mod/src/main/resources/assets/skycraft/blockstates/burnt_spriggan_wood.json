@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/burnt_spriggan_wood"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/burnt_spriggan_wood_harvested"
+    }
+  }
+}

@@ -672,59 +672,59 @@
   },
   {
     "id": "summerset_artaeum_v4_unique_6",
-    "name": "Relic of Artaeum Site 1 Barrow (6)",
+    "name": "Relic of Glass A Crimson Crystal Praxis Vault (6)",
     "region": "artaeum",
     "why": [
       "artaeum.L1.isle_rock",
       "artaeum.L10.psijic_time_vaults"
     ],
-    "place": "artaeum_site_1_barrow",
-    "x": -11632,
-    "z": 10832,
+    "place": "glass_a_crimson_crystal_praxis_vault",
+    "x": -11861,
+    "z": 11123,
     "kind": "barrow",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 5
     },
-    "note": "Preserved at Artaeum Site 1 Barrow in Artaeum from the elder council.",
+    "note": "Preserved at Glass A Crimson Crystal Praxis Vault in Artaeum from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "summerset_artaeum_v4_unique_7",
-    "name": "Relic of Artaeum Site 2 Dwemer Ruin (7)",
+    "name": "Relic of Old W Dawn Glass Sky-Spire (7)",
     "region": "artaeum",
     "why": [
       "artaeum.L1.isle_rock",
       "artaeum.L10.psijic_time_vaults"
     ],
-    "place": "artaeum_site_2_dwemer_ruin",
-    "x": -11568,
-    "z": 10832,
+    "place": "old_w_dawn_glass_sky_spire",
+    "x": -11929,
+    "z": 11371,
     "kind": "ruin",
     "item": "skycraft:bonemold_chestplate",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Artaeum Site 2 Dwemer Ruin in Artaeum from the elder council.",
+    "note": "Preserved at Old W Dawn Glass Sky-Spire in Artaeum from the elder council.",
     "_r7_r12_v4": true
   },
   {
     "id": "summerset_artaeum_v4_unique_8",
-    "name": "Relic of Artaeum Site 3 Fort (8)",
+    "name": "Relic of Psijic White Aldmeri Ancestor Fane (8)",
     "region": "artaeum",
     "why": [
       "artaeum.L1.isle_rock",
       "artaeum.L10.psijic_time_vaults"
     ],
-    "place": "artaeum_site_3_fort",
-    "x": -11824,
-    "z": 10864,
+    "place": "psijic_white_aldmeri_ancestor_fane",
+    "x": -11766,
+    "z": 11347,
     "kind": "cairn",
     "item": "skycraft:chitin_helmet",
     "enchant": {
       "protection": 4
     },
-    "note": "Preserved at Artaeum Site 3 Fort in Artaeum from the elder council.",
+    "note": "Preserved at Psijic White Aldmeri Ancestor Fane in Artaeum from the elder council.",
     "_r7_r12_v4": true
   }
 ]

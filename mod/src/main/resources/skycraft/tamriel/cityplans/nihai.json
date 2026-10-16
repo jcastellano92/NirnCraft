@@ -48,8 +48,8 @@
     {
       "id": "twin_domes",
       "at": [
-        0,
-        -7
+        -1,
+        -19
       ],
       "name": "nihai_landmark",
       "overlay": "senchal"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          -2,
+          6
+        ],
+        [
+          -2,
+          -13
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          7
+        ],
+        [
+          -2,
+          8
+        ],
+        [
+          18,
+          6
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
       "at": [
-        0,
+        -2,
         0
       ],
-      "r0": 5,
-      "r1": 22,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 15,
+      "rz": 12,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 0.71,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        12,
-        15
+        -18,
+        5
       ],
       "face": "north",
       "overlay": "senchal",
@@ -182,5 +227,47 @@
     "nihai_landmark": "High Seat of place.skycraft.nihai",
     "nihai_plaza": "place.skycraft.nihai Central Plaza"
   },
-  "innKey": "nihai_b_5"
+  "innKey": "nihai_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

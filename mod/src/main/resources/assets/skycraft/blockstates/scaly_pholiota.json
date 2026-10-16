@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/scaly_pholiota"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/scaly_pholiota_harvested"
+    }
+  }
+}

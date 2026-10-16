@@ -30,7 +30,7 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        9,
+        13,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        -7,
-        5
+        -13,
+        10
       ],
       "face": "south",
       "overlay": "molag_amur",
@@ -79,7 +79,7 @@
       "wealth": "common",
       "at": [
         3,
-        -9
+        -13
       ],
       "face": "south",
       "overlay": "molag_amur",
@@ -103,6 +103,101 @@
     "erabenimsun_camp_b_2": "Manirai's Wise Woman Yurt",
     "erabenimsun_camp_b_3": "Ahaz's Gulakhan Yurt",
     "erabenimsun_camp_b_4": "Han-Ammu's Yurt",
-    "erabenimsun_camp_b_5": "Erabenimsun War-Guar Pen"
-  }
+    "erabenimsun_camp_b_5": "Erabenimsun War-Guar Pen",
+    "erabenimsun_war_fire": "Ashkhan Ulath-Pal's War Hearth"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        2
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "erabenimsun_war_fire"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 22,
+      "rz": 20,
+      "wobble": 5,
+      "lobes": 4,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "cinder_war_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          -6,
+          -26
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "molag_cinder_path"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.48
+  },
+  "queue": [
+    {
+      "kind": "tent",
+      "count": 6,
+      "on": "cinder_war_ring"
+    }
+  ]
 }

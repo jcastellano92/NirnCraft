@@ -30,7 +30,7 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        9,
+        21,
         0
       ],
       "face": "south",
@@ -54,7 +54,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -7,
+        -11,
         5
       ],
       "face": "south",
@@ -78,8 +78,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        0,
+        -12
       ],
       "face": "south",
       "overlay": "sheogorad",
@@ -96,6 +96,10 @@
       "type": "well",
       "theme": "sheogorad_rain_barrel",
       "count": 1
+    },
+    {
+      "type": "basin",
+      "where": "edge"
     }
   ],
   "titles": {
@@ -103,10 +107,137 @@
     "dagon_fel_b_2": "The End of the World",
     "dagon_fel_b_3": "Heifnir's Trader",
     "dagon_fel_b_4": "Hurg's Nordic Longhouse",
-    "dagon_fel_b_5": "Onmi Hard-Mouth's Shack"
+    "dagon_fel_b_5": "Onmi Hard-Mouth's Shack",
+    "dagon_fel_end_of_world_yard": "End of the World Harbour Yard"
   },
   "innKey": "dagon_fel_b_2",
   "names": {
     "inn": "dagon_fel_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        4
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "dagon_fel_end_of_world_yard"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          -4,
+          10
+        ],
+        [
+          2,
+          -10
+        ],
+        [
+          8,
+          -28
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "dwemer_bay_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          4
+        ],
+        [
+          -4,
+          2
+        ],
+        [
+          18,
+          6
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "islet_quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 22,
+      "rz": 18,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "nord_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "culture": "nord",
+      "on": "nord_ring"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "common",
+      "count": 2,
+      "on": "islet_quay"
+    }
+  ]
 }

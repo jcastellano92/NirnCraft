@@ -13,6 +13,13 @@ _version = 5
 		# GPU and 8 GB+ of heap can raise it to 256.
 		lodChunkRenderDistanceRadius = 128
 
+	[client.advanced.graphics.fog]
+		# Blend distant LOD terrain into Skycraft's regional and twilight fog color (ClientWeather) without a hard seam.
+		colorMode = "USE_WORLD_FOG_COLOR"
+		farFogStart = 0.35
+		farFogMax = 1.0
+		farFogFalloff = "EXPONENTIAL_SQUARED"
+
 	[client.advanced.autoUpdater]
 		# The pack pins Distant Horizons; never download a different version at launch.
 		enableAutoUpdater = false

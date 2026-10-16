@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/juniper_berries"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/juniper_berries_harvested"
+    }
+  }
+}

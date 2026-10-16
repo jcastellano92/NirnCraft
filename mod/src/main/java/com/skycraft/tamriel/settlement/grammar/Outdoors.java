@@ -83,7 +83,8 @@ public final class Outdoors {
     }
 
     public static EntityType<?> animalType(String id) {
-        return switch (id) {
+        if (id == null) return EntityType.CHICKEN;
+        return switch (id.trim().toLowerCase(java.util.Locale.ROOT)) {
             case "cow" -> EntityType.COW;
             case "sheep" -> EntityType.SHEEP;
             case "pig" -> EntityType.PIG;
@@ -98,6 +99,27 @@ public final class Outdoors {
             case "frog" -> EntityType.FROG;
             case "rabbit" -> EntityType.RABBIT;
             case "turtle" -> EntityType.TURTLE;
+            case "guar" -> com.skycraft.creatures.Bestiary.GUAR.get();
+            case "netch" -> com.skycraft.creatures.Bestiary.NETCH.get();
+            case "kwama_forager", "kwama" -> com.skycraft.creatures.Bestiary.CHAURUS.get();
+            case "nix_hound" -> com.skycraft.creatures.Bestiary.NIX_HOUND.get();
+            case "silt_strider" -> com.skycraft.creatures.Bestiary.SILT_STRIDER.get();
+            case "kagouti" -> com.skycraft.creatures.Bestiary.KAGOUTI.get();
+            case "alit" -> com.skycraft.creatures.Bestiary.ALIT.get();
+            case "echatere" -> com.skycraft.creatures.Bestiary.ECHATERE.get();
+            case "durzog" -> com.skycraft.creatures.Bestiary.DURZOG.get();
+            case "senche", "senche_tiger" -> com.skycraft.creatures.Bestiary.SENCHE_TIGER.get();
+            case "alfiq" -> com.skycraft.creatures.Bestiary.ALFIQ.get();
+            case "indrik" -> com.skycraft.creatures.Bestiary.INDRIK.get();
+            case "hackwing" -> com.skycraft.creatures.Bestiary.HACKWING.get();
+            case "wamasu" -> com.skycraft.creatures.Bestiary.WAMASU.get();
+            case "horker" -> com.skycraft.fauna.FaunaEntities.HORKER.get();
+            case "mammoth" -> com.skycraft.fauna.FaunaEntities.MAMMOTH.get();
+            case "deer" -> com.skycraft.fauna.FaunaEntities.DEER.get();
+            case "elk" -> com.skycraft.fauna.FaunaEntities.ELK.get();
+            case "mudcrab" -> com.skycraft.fauna.FaunaEntities.MUDCRAB.get();
+            case "sabre_cat" -> com.skycraft.fauna.FaunaEntities.SABRE_CAT.get();
+            case "bear" -> com.skycraft.fauna.FaunaEntities.BEAR.get();
             default -> EntityType.CHICKEN;
         };
     }
@@ -324,7 +346,8 @@ public final class Outdoors {
         gset(c, 1, 1, d - 2, B.s(Blocks.HAY_BLOCK));
         gset(c, w - 2, 1, d - 2, B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
         String kind = st.animals().isEmpty() ? "sheep" : st.animals().get(Math.floorMod(s.variant, st.animals().size()));
-        if (kind.equals("horse") || kind.equals("camel")) kind = st.animals().size() > 1 ? st.animals().get(0) : "sheep";
+        if (kind.equals("silt_strider")) kind = "guar";
+        else if (kind.equals("horse")) kind = st.animals().size() > 1 ? st.animals().get(1) : "sheep";
         int n = Math.max(2, (w - 2) * (d - 2) / 6);
         for (int i = 0; i < n; i++) {
             int x = 1 + c.roll(i, 0, 0, 31, Math.max(1, w - 2)), z = 1 + c.roll(i, 0, 1, 33, Math.max(1, d - 2));

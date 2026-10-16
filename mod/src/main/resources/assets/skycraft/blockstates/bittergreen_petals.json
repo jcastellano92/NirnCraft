@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/bittergreen_petals"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/bittergreen_petals_harvested"
+    }
+  }
+}

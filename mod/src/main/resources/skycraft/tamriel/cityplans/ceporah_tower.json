@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -14,
+          0
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          14,
+          4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 1,
-      "r1": 12,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 4,
+      "phase": 0.42,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -195,5 +240,47 @@
     "ceporah_tower_landmark": "High Seat of place.skycraft.ceporah_tower",
     "ceporah_tower_plaza": "place.skycraft.ceporah_tower Central Plaza"
   },
-  "innKey": "ceporah_tower_b_5"
+  "innKey": "ceporah_tower_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        7,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/crimson_nirnroot"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/crimson_nirnroot_harvested"
+    }
+  }
+}

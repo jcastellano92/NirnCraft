@@ -128095,6 +128095,1031 @@
           ]
         }
       ]
+    },
+    "remans_crimson_ore_adit": {
+      "why": [
+        "cyrodiil.L8.wayshrines",
+        "cyrodiil.L8.elf_ruin_fear"
+      ],
+      "summary": "Remans Crimson Ore-Adit stands in Jerall Mountains as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Jerall Mountains, Remans Crimson Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Remans Crimson Ore-Adit in Jerall Mountains.",
+      "hook": "Wayfarers in Jerall Mountains report recent activity around Remans Crimson Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Remans Crimson Ore-Adit speak of sealed caches preserved within this mine of Jerall Mountains.",
+      "notes": [
+        {
+          "id": "remans_crimson_ore_adit_field_record_1",
+          "title": "Remans Crimson Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Jerall Mountains",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Remans Crimson Ore-Adit (remans_crimson_ore_adit) in Jerall Mountains (cyrodiil/jerall_mountains). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L8.wayshrines",
+            "cyrodiil.L8.elf_ruin_fear"
+          ]
+        },
+        {
+          "id": "remans_crimson_ore_adit_field_record_2",
+          "title": "Remans Crimson Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Jerall Mountains",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Remans Crimson Ore-Adit (remans_crimson_ore_adit) in Jerall Mountains (cyrodiil/jerall_mountains): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L8.wayshrines",
+            "cyrodiil.L8.elf_ruin_fear"
+          ]
+        }
+      ]
+    },
+    "wendir_dawn_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L8.daedric_shrines",
+        "cyrodiil.L8.arena_glory"
+      ],
+      "summary": "Wendir Dawn Ayleid Reliquary stands in Jerall Mountains as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Jerall Mountains, Wendir Dawn Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Wendir Dawn Ayleid Reliquary in Jerall Mountains.",
+      "hook": "Wayfarers in Jerall Mountains report recent activity around Wendir Dawn Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Wendir Dawn Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Jerall Mountains.",
+      "notes": [
+        {
+          "id": "wendir_dawn_ayleid_reliquary_field_record_1",
+          "title": "Wendir Dawn Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Jerall Mountains",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Wendir Dawn Ayleid Reliquary (wendir_dawn_ayleid_reliquary) in Jerall Mountains (cyrodiil/jerall_mountains). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L8.daedric_shrines",
+            "cyrodiil.L8.arena_glory"
+          ]
+        },
+        {
+          "id": "wendir_dawn_ayleid_reliquary_field_record_2",
+          "title": "Wendir Dawn Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Jerall Mountains",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Wendir Dawn Ayleid Reliquary (wendir_dawn_ayleid_reliquary) in Jerall Mountains (cyrodiil/jerall_mountains): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L8.daedric_shrines",
+            "cyrodiil.L8.arena_glory"
+          ]
+        }
+      ]
+    },
+    "vinda_white_ore_adit": {
+      "why": [
+        "cyrodiil.L11.alessian_revolt",
+        "cyrodiil.L11.septim_empire"
+      ],
+      "summary": "Vinda White Ore-Adit stands in Jerall Mountains as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Jerall Mountains, Vinda White Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Vinda White Ore-Adit in Jerall Mountains.",
+      "hook": "Wayfarers in Jerall Mountains report recent activity around Vinda White Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Vinda White Ore-Adit speak of sealed caches preserved within this mine of Jerall Mountains.",
+      "notes": [
+        {
+          "id": "vinda_white_ore_adit_field_record_1",
+          "title": "Vinda White Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Jerall Mountains",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Vinda White Ore-Adit (vinda_white_ore_adit) in Jerall Mountains (cyrodiil/jerall_mountains). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.alessian_revolt",
+            "cyrodiil.L11.septim_empire"
+          ]
+        },
+        {
+          "id": "vinda_white_ore_adit_field_record_2",
+          "title": "Vinda White Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Jerall Mountains",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Vinda White Ore-Adit (vinda_white_ore_adit) in Jerall Mountains (cyrodiil/jerall_mountains): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L11.alessian_revolt",
+            "cyrodiil.L11.septim_empire"
+          ]
+        }
+      ]
+    },
+    "telepe_verdant_ore_adit": {
+      "why": [
+        "cyrodiil.L9.gate_scars",
+        "cyrodiil.L9.border_pressure"
+      ],
+      "summary": "Telepe Verdant Ore-Adit stands in Colovian Highlands as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Colovian Highlands, Telepe Verdant Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Telepe Verdant Ore-Adit in Colovian Highlands.",
+      "hook": "Wayfarers in Colovian Highlands report recent activity around Telepe Verdant Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Telepe Verdant Ore-Adit speak of sealed caches preserved within this mine of Colovian Highlands.",
+      "notes": [
+        {
+          "id": "telepe_verdant_ore_adit_field_record_1",
+          "title": "Telepe Verdant Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Colovian Highlands",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Telepe Verdant Ore-Adit (telepe_verdant_ore_adit) in Colovian Highlands (cyrodiil/colovian_highlands). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.gate_scars",
+            "cyrodiil.L9.border_pressure"
+          ]
+        },
+        {
+          "id": "telepe_verdant_ore_adit_field_record_2",
+          "title": "Telepe Verdant Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Colovian Highlands",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Telepe Verdant Ore-Adit (telepe_verdant_ore_adit) in Colovian Highlands (cyrodiil/colovian_highlands): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L9.gate_scars",
+            "cyrodiil.L9.border_pressure"
+          ]
+        }
+      ]
+    },
+    "colovian_bronze_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L9.county_rivalry",
+        "cyrodiil.L10.ayleid_undercity"
+      ],
+      "summary": "Colovian Bronze Ayleid Reliquary stands in Colovian Highlands as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Colovian Highlands, Colovian Bronze Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Colovian Bronze Ayleid Reliquary in Colovian Highlands.",
+      "hook": "Wayfarers in Colovian Highlands report recent activity around Colovian Bronze Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Colovian Bronze Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Colovian Highlands.",
+      "notes": [
+        {
+          "id": "colovian_bronze_ayleid_reliquary_field_record_1",
+          "title": "Colovian Bronze Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Colovian Highlands",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Colovian Bronze Ayleid Reliquary (colovian_bronze_ayleid_reliquary) in Colovian Highlands (cyrodiil/colovian_highlands). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.county_rivalry",
+            "cyrodiil.L10.ayleid_undercity"
+          ]
+        },
+        {
+          "id": "colovian_bronze_ayleid_reliquary_field_record_2",
+          "title": "Colovian Bronze Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Colovian Highlands",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Colovian Bronze Ayleid Reliquary (colovian_bronze_ayleid_reliquary) in Colovian Highlands (cyrodiil/colovian_highlands): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L9.county_rivalry",
+            "cyrodiil.L10.ayleid_undercity"
+          ]
+        }
+      ]
+    },
+    "strid_inner_ore_adit": {
+      "why": [
+        "cyrodiil.L9.gate_scars",
+        "cyrodiil.L9.border_pressure"
+      ],
+      "summary": "Strid Inner Ore-Adit stands in Heartlands as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Heartlands, Strid Inner Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Strid Inner Ore-Adit in Heartlands.",
+      "hook": "Wayfarers in Heartlands report recent activity around Strid Inner Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Strid Inner Ore-Adit speak of sealed caches preserved within this mine of Heartlands.",
+      "notes": [
+        {
+          "id": "strid_inner_ore_adit_field_record_1",
+          "title": "Strid Inner Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Heartlands",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Strid Inner Ore-Adit (strid_inner_ore_adit) in Heartlands (cyrodiil/heartlands). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.gate_scars",
+            "cyrodiil.L9.border_pressure"
+          ]
+        },
+        {
+          "id": "strid_inner_ore_adit_field_record_2",
+          "title": "Strid Inner Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Heartlands",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Strid Inner Ore-Adit (strid_inner_ore_adit) in Heartlands (cyrodiil/heartlands): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L9.gate_scars",
+            "cyrodiil.L9.border_pressure"
+          ]
+        }
+      ]
+    },
+    "fanacas_shrouded_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L9.county_rivalry",
+        "cyrodiil.L10.ayleid_undercity"
+      ],
+      "summary": "Fanacas Shrouded Ayleid Reliquary stands in Heartlands as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Heartlands, Fanacas Shrouded Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Fanacas Shrouded Ayleid Reliquary in Heartlands.",
+      "hook": "Wayfarers in Heartlands report recent activity around Fanacas Shrouded Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Fanacas Shrouded Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Heartlands.",
+      "notes": [
+        {
+          "id": "fanacas_shrouded_ayleid_reliquary_field_record_1",
+          "title": "Fanacas Shrouded Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Heartlands",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Fanacas Shrouded Ayleid Reliquary (fanacas_shrouded_ayleid_reliquary) in Heartlands (cyrodiil/heartlands). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.county_rivalry",
+            "cyrodiil.L10.ayleid_undercity"
+          ]
+        },
+        {
+          "id": "fanacas_shrouded_ayleid_reliquary_field_record_2",
+          "title": "Fanacas Shrouded Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Heartlands",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Fanacas Shrouded Ayleid Reliquary (fanacas_shrouded_ayleid_reliquary) in Heartlands (cyrodiil/heartlands): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L9.county_rivalry",
+            "cyrodiil.L10.ayleid_undercity"
+          ]
+        }
+      ]
+    },
+    "brena_silent_ore_adit": {
+      "why": [
+        "cyrodiil.L11.three_banner_war",
+        "heartlands.L1.island_bedrock"
+      ],
+      "summary": "Brena Silent Ore-Adit stands in Heartlands as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Heartlands, Brena Silent Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Brena Silent Ore-Adit in Heartlands.",
+      "hook": "Wayfarers in Heartlands report recent activity around Brena Silent Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Brena Silent Ore-Adit speak of sealed caches preserved within this mine of Heartlands.",
+      "notes": [
+        {
+          "id": "brena_silent_ore_adit_field_record_1",
+          "title": "Brena Silent Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Heartlands",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Brena Silent Ore-Adit (brena_silent_ore_adit) in Heartlands (cyrodiil/heartlands). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.three_banner_war",
+            "heartlands.L1.island_bedrock"
+          ]
+        },
+        {
+          "id": "brena_silent_ore_adit_field_record_2",
+          "title": "Brena Silent Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Heartlands",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Brena Silent Ore-Adit (brena_silent_ore_adit) in Heartlands (cyrodiil/heartlands): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L11.three_banner_war",
+            "heartlands.L1.island_bedrock"
+          ]
+        }
+      ]
+    },
+    "pelinal_upper_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L11.septim_empire",
+        "heartlands.L1.lakeshore_clay"
+      ],
+      "summary": "Pelinal Upper Ayleid Reliquary stands in Heartlands as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Heartlands, Pelinal Upper Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Pelinal Upper Ayleid Reliquary in Heartlands.",
+      "hook": "Wayfarers in Heartlands report recent activity around Pelinal Upper Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Pelinal Upper Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Heartlands.",
+      "notes": [
+        {
+          "id": "pelinal_upper_ayleid_reliquary_field_record_1",
+          "title": "Pelinal Upper Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Heartlands",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Pelinal Upper Ayleid Reliquary (pelinal_upper_ayleid_reliquary) in Heartlands (cyrodiil/heartlands). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.septim_empire",
+            "heartlands.L1.lakeshore_clay"
+          ]
+        },
+        {
+          "id": "pelinal_upper_ayleid_reliquary_field_record_2",
+          "title": "Pelinal Upper Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Heartlands",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Pelinal Upper Ayleid Reliquary (pelinal_upper_ayleid_reliquary) in Heartlands (cyrodiil/heartlands): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L11.septim_empire",
+            "heartlands.L1.lakeshore_clay"
+          ]
+        }
+      ]
+    },
+    "welke_dawn_ore_adit": {
+      "why": [
+        "cyrodiil.L10.abandoned_forts",
+        "cyrodiil.L11.ayleid_era"
+      ],
+      "summary": "Welke Dawn Ore-Adit stands in Great Forest as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Great Forest, Welke Dawn Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Welke Dawn Ore-Adit in Great Forest.",
+      "hook": "Wayfarers in Great Forest report recent activity around Welke Dawn Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Welke Dawn Ore-Adit speak of sealed caches preserved within this mine of Great Forest.",
+      "notes": [
+        {
+          "id": "welke_dawn_ore_adit_field_record_1",
+          "title": "Welke Dawn Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Great Forest",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Welke Dawn Ore-Adit (welke_dawn_ore_adit) in Great Forest (cyrodiil/great_forest). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L10.abandoned_forts",
+            "cyrodiil.L11.ayleid_era"
+          ]
+        },
+        {
+          "id": "welke_dawn_ore_adit_field_record_2",
+          "title": "Welke Dawn Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Great Forest",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Welke Dawn Ore-Adit (welke_dawn_ore_adit) in Great Forest (cyrodiil/great_forest): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L10.abandoned_forts",
+            "cyrodiil.L11.ayleid_era"
+          ]
+        }
+      ]
+    },
+    "morihaus_white_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L10.road_bandits",
+        "cyrodiil.L11.alessian_revolt"
+      ],
+      "summary": "Morihaus White Ayleid Reliquary stands in Great Forest as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Great Forest, Morihaus White Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Morihaus White Ayleid Reliquary in Great Forest.",
+      "hook": "Wayfarers in Great Forest report recent activity around Morihaus White Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Morihaus White Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Great Forest.",
+      "notes": [
+        {
+          "id": "morihaus_white_ayleid_reliquary_field_record_1",
+          "title": "Morihaus White Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Great Forest",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Morihaus White Ayleid Reliquary (morihaus_white_ayleid_reliquary) in Great Forest (cyrodiil/great_forest). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L10.road_bandits",
+            "cyrodiil.L11.alessian_revolt"
+          ]
+        },
+        {
+          "id": "morihaus_white_ayleid_reliquary_field_record_2",
+          "title": "Morihaus White Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Great Forest",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Morihaus White Ayleid Reliquary (morihaus_white_ayleid_reliquary) in Great Forest (cyrodiil/great_forest): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L10.road_bandits",
+            "cyrodiil.L11.alessian_revolt"
+          ]
+        }
+      ]
+    },
+    "panther_bronze_ore_adit": {
+      "why": [
+        "cyrodiil.L8.arena_glory",
+        "cyrodiil.L9.county_rivalry"
+      ],
+      "summary": "Panther Bronze Ore-Adit stands in Nibenay Basin as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Basin, Panther Bronze Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Panther Bronze Ore-Adit in Nibenay Basin.",
+      "hook": "Wayfarers in Nibenay Basin report recent activity around Panther Bronze Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Panther Bronze Ore-Adit speak of sealed caches preserved within this mine of Nibenay Basin.",
+      "notes": [
+        {
+          "id": "panther_bronze_ore_adit_field_record_1",
+          "title": "Panther Bronze Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Basin",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Panther Bronze Ore-Adit (panther_bronze_ore_adit) in Nibenay Basin (cyrodiil/nibenay_basin). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L8.arena_glory",
+            "cyrodiil.L9.county_rivalry"
+          ]
+        },
+        {
+          "id": "panther_bronze_ore_adit_field_record_2",
+          "title": "Panther Bronze Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Basin",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Panther Bronze Ore-Adit (panther_bronze_ore_adit) in Nibenay Basin (cyrodiil/nibenay_basin): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L8.arena_glory",
+            "cyrodiil.L9.county_rivalry"
+          ]
+        }
+      ]
+    },
+    "ninendava_silent_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L9.throne_empty",
+        "cyrodiil.L9.guild_wars"
+      ],
+      "summary": "Ninendava Silent Ayleid Reliquary stands in Nibenay Basin as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Basin, Ninendava Silent Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Ninendava Silent Ayleid Reliquary in Nibenay Basin.",
+      "hook": "Wayfarers in Nibenay Basin report recent activity around Ninendava Silent Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Ninendava Silent Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Nibenay Basin.",
+      "notes": [
+        {
+          "id": "ninendava_silent_ayleid_reliquary_field_record_1",
+          "title": "Ninendava Silent Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Basin",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Ninendava Silent Ayleid Reliquary (ninendava_silent_ayleid_reliquary) in Nibenay Basin (cyrodiil/nibenay_basin). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.throne_empty",
+            "cyrodiil.L9.guild_wars"
+          ]
+        },
+        {
+          "id": "ninendava_silent_ayleid_reliquary_field_record_2",
+          "title": "Ninendava Silent Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Basin",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Ninendava Silent Ayleid Reliquary (ninendava_silent_ayleid_reliquary) in Nibenay Basin (cyrodiil/nibenay_basin): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L9.throne_empty",
+            "cyrodiil.L9.guild_wars"
+          ]
+        }
+      ]
+    },
+    "belda_basal_ore_adit": {
+      "why": [
+        "cyrodiil.L11.reman_akaviri",
+        "cyrodiil.L11.oblivion_crisis"
+      ],
+      "summary": "Belda Basal Ore-Adit stands in Nibenay Basin as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Basin, Belda Basal Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Belda Basal Ore-Adit in Nibenay Basin.",
+      "hook": "Wayfarers in Nibenay Basin report recent activity around Belda Basal Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Belda Basal Ore-Adit speak of sealed caches preserved within this mine of Nibenay Basin.",
+      "notes": [
+        {
+          "id": "belda_basal_ore_adit_field_record_1",
+          "title": "Belda Basal Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Basin",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Belda Basal Ore-Adit (belda_basal_ore_adit) in Nibenay Basin (cyrodiil/nibenay_basin). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.reman_akaviri",
+            "cyrodiil.L11.oblivion_crisis"
+          ]
+        },
+        {
+          "id": "belda_basal_ore_adit_field_record_2",
+          "title": "Belda Basal Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Basin",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Belda Basal Ore-Adit (belda_basal_ore_adit) in Nibenay Basin (cyrodiil/nibenay_basin): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L11.reman_akaviri",
+            "cyrodiil.L11.oblivion_crisis"
+          ]
+        }
+      ]
+    },
+    "mackament_twilight_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L11.three_banner_war",
+        "nibenay_basin.L1.valus_foothills"
+      ],
+      "summary": "Mackament Twilight Ayleid Reliquary stands in Nibenay Basin as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Basin, Mackament Twilight Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Mackament Twilight Ayleid Reliquary in Nibenay Basin.",
+      "hook": "Wayfarers in Nibenay Basin report recent activity around Mackament Twilight Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Mackament Twilight Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Nibenay Basin.",
+      "notes": [
+        {
+          "id": "mackament_twilight_ayleid_reliquary_field_record_1",
+          "title": "Mackament Twilight Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Basin",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Mackament Twilight Ayleid Reliquary (mackament_twilight_ayleid_reliquary) in Nibenay Basin (cyrodiil/nibenay_basin). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.three_banner_war",
+            "nibenay_basin.L1.valus_foothills"
+          ]
+        },
+        {
+          "id": "mackament_twilight_ayleid_reliquary_field_record_2",
+          "title": "Mackament Twilight Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Basin",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Mackament Twilight Ayleid Reliquary (mackament_twilight_ayleid_reliquary) in Nibenay Basin (cyrodiil/nibenay_basin): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L11.three_banner_war",
+            "nibenay_basin.L1.valus_foothills"
+          ]
+        }
+      ]
+    },
+    "valus_shrouded_ore_adit": {
+      "why": [
+        "cyrodiil.L10.abandoned_forts",
+        "cyrodiil.L11.ayleid_era"
+      ],
+      "summary": "Valus Shrouded Ore-Adit stands in West Weald as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of West Weald, Valus Shrouded Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Valus Shrouded Ore-Adit in West Weald.",
+      "hook": "Wayfarers in West Weald report recent activity around Valus Shrouded Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Valus Shrouded Ore-Adit speak of sealed caches preserved within this mine of West Weald.",
+      "notes": [
+        {
+          "id": "valus_shrouded_ore_adit_field_record_1",
+          "title": "Valus Shrouded Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of West Weald",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Valus Shrouded Ore-Adit (valus_shrouded_ore_adit) in West Weald (cyrodiil/west_weald). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L10.abandoned_forts",
+            "cyrodiil.L11.ayleid_era"
+          ]
+        },
+        {
+          "id": "valus_shrouded_ore_adit_field_record_2",
+          "title": "Valus Shrouded Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of West Weald",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Valus Shrouded Ore-Adit (valus_shrouded_ore_adit) in West Weald (cyrodiil/west_weald): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L10.abandoned_forts",
+            "cyrodiil.L11.ayleid_era"
+          ]
+        }
+      ]
+    },
+    "remans_basal_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L10.road_bandits",
+        "cyrodiil.L11.alessian_revolt"
+      ],
+      "summary": "Remans Basal Ayleid Reliquary stands in West Weald as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of West Weald, Remans Basal Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Remans Basal Ayleid Reliquary in West Weald.",
+      "hook": "Wayfarers in West Weald report recent activity around Remans Basal Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Remans Basal Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of West Weald.",
+      "notes": [
+        {
+          "id": "remans_basal_ayleid_reliquary_field_record_1",
+          "title": "Remans Basal Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of West Weald",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Remans Basal Ayleid Reliquary (remans_basal_ayleid_reliquary) in West Weald (cyrodiil/west_weald). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L10.road_bandits",
+            "cyrodiil.L11.alessian_revolt"
+          ]
+        },
+        {
+          "id": "remans_basal_ayleid_reliquary_field_record_2",
+          "title": "Remans Basal Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of West Weald",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Remans Basal Ayleid Reliquary (remans_basal_ayleid_reliquary) in West Weald (cyrodiil/west_weald): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L10.road_bandits",
+            "cyrodiil.L11.alessian_revolt"
+          ]
+        }
+      ]
+    },
+    "vilverin_white_ore_adit": {
+      "why": [
+        "cyrodiil.L8.arena_glory",
+        "cyrodiil.L9.county_rivalry"
+      ],
+      "summary": "Vilverin White Ore-Adit stands in Gold Coast as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Gold Coast, Vilverin White Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Vilverin White Ore-Adit in Gold Coast.",
+      "hook": "Wayfarers in Gold Coast report recent activity around Vilverin White Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Vilverin White Ore-Adit speak of sealed caches preserved within this mine of Gold Coast.",
+      "notes": [
+        {
+          "id": "vilverin_white_ore_adit_field_record_1",
+          "title": "Vilverin White Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Gold Coast",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Vilverin White Ore-Adit (vilverin_white_ore_adit) in Gold Coast (cyrodiil/gold_coast). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L8.arena_glory",
+            "cyrodiil.L9.county_rivalry"
+          ]
+        },
+        {
+          "id": "vilverin_white_ore_adit_field_record_2",
+          "title": "Vilverin White Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Gold Coast",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Vilverin White Ore-Adit (vilverin_white_ore_adit) in Gold Coast (cyrodiil/gold_coast): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L8.arena_glory",
+            "cyrodiil.L9.county_rivalry"
+          ]
+        }
+      ]
+    },
+    "telepe_upper_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L9.throne_empty",
+        "cyrodiil.L9.guild_wars"
+      ],
+      "summary": "Telepe Upper Ayleid Reliquary stands in Gold Coast as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Gold Coast, Telepe Upper Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Telepe Upper Ayleid Reliquary in Gold Coast.",
+      "hook": "Wayfarers in Gold Coast report recent activity around Telepe Upper Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Telepe Upper Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Gold Coast.",
+      "notes": [
+        {
+          "id": "telepe_upper_ayleid_reliquary_field_record_1",
+          "title": "Telepe Upper Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Gold Coast",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Telepe Upper Ayleid Reliquary (telepe_upper_ayleid_reliquary) in Gold Coast (cyrodiil/gold_coast). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.throne_empty",
+            "cyrodiil.L9.guild_wars"
+          ]
+        },
+        {
+          "id": "telepe_upper_ayleid_reliquary_field_record_2",
+          "title": "Telepe Upper Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Gold Coast",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Telepe Upper Ayleid Reliquary (telepe_upper_ayleid_reliquary) in Gold Coast (cyrodiil/gold_coast): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L9.throne_empty",
+            "cyrodiil.L9.guild_wars"
+          ]
+        }
+      ]
+    },
+    "rumare_silent_ore_adit": {
+      "why": [
+        "cyrodiil.L9.county_rivalry",
+        "cyrodiil.L10.ayleid_undercity"
+      ],
+      "summary": "Rumare Silent Ore-Adit stands in Nibenay Valley as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Valley, Rumare Silent Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Rumare Silent Ore-Adit in Nibenay Valley.",
+      "hook": "Wayfarers in Nibenay Valley report recent activity around Rumare Silent Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Rumare Silent Ore-Adit speak of sealed caches preserved within this mine of Nibenay Valley.",
+      "notes": [
+        {
+          "id": "rumare_silent_ore_adit_field_record_1",
+          "title": "Rumare Silent Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Valley",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Rumare Silent Ore-Adit (rumare_silent_ore_adit) in Nibenay Valley (cyrodiil/nibenay_valley). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.county_rivalry",
+            "cyrodiil.L10.ayleid_undercity"
+          ]
+        },
+        {
+          "id": "rumare_silent_ore_adit_field_record_2",
+          "title": "Rumare Silent Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Valley",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Rumare Silent Ore-Adit (rumare_silent_ore_adit) in Nibenay Valley (cyrodiil/nibenay_valley): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L9.county_rivalry",
+            "cyrodiil.L10.ayleid_undercity"
+          ]
+        }
+      ]
+    },
+    "strid_twilight_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L9.guild_wars",
+        "cyrodiil.L10.cult_remnants"
+      ],
+      "summary": "Strid Twilight Ayleid Reliquary stands in Nibenay Valley as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Valley, Strid Twilight Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Strid Twilight Ayleid Reliquary in Nibenay Valley.",
+      "hook": "Wayfarers in Nibenay Valley report recent activity around Strid Twilight Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Strid Twilight Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Nibenay Valley.",
+      "notes": [
+        {
+          "id": "strid_twilight_ayleid_reliquary_field_record_1",
+          "title": "Strid Twilight Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Valley",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Strid Twilight Ayleid Reliquary (strid_twilight_ayleid_reliquary) in Nibenay Valley (cyrodiil/nibenay_valley). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.guild_wars",
+            "cyrodiil.L10.cult_remnants"
+          ]
+        },
+        {
+          "id": "strid_twilight_ayleid_reliquary_field_record_2",
+          "title": "Strid Twilight Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Valley",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Strid Twilight Ayleid Reliquary (strid_twilight_ayleid_reliquary) in Nibenay Valley (cyrodiil/nibenay_valley): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L9.guild_wars",
+            "cyrodiil.L10.cult_remnants"
+          ]
+        }
+      ]
+    },
+    "larsius_upper_ore_adit": {
+      "why": [
+        "cyrodiil.L11.septim_empire",
+        "nibenay_valley.L1.riverbank_caves"
+      ],
+      "summary": "Larsius Upper Ore-Adit stands in Nibenay Valley as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Valley, Larsius Upper Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Larsius Upper Ore-Adit in Nibenay Valley.",
+      "hook": "Wayfarers in Nibenay Valley report recent activity around Larsius Upper Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Larsius Upper Ore-Adit speak of sealed caches preserved within this mine of Nibenay Valley.",
+      "notes": [
+        {
+          "id": "larsius_upper_ore_adit_field_record_1",
+          "title": "Larsius Upper Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Valley",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Larsius Upper Ore-Adit (larsius_upper_ore_adit) in Nibenay Valley (cyrodiil/nibenay_valley). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.septim_empire",
+            "nibenay_valley.L1.riverbank_caves"
+          ]
+        },
+        {
+          "id": "larsius_upper_ore_adit_field_record_2",
+          "title": "Larsius Upper Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Valley",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Larsius Upper Ore-Adit (larsius_upper_ore_adit) in Nibenay Valley (cyrodiil/nibenay_valley): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L11.septim_empire",
+            "nibenay_valley.L1.riverbank_caves"
+          ]
+        }
+      ]
+    },
+    "alessian_iron_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L11.oblivion_crisis",
+        "nibenay_valley.L2.humid_heat"
+      ],
+      "summary": "Alessian Iron Ayleid Reliquary stands in Nibenay Valley as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Nibenay Valley, Alessian Iron Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Alessian Iron Ayleid Reliquary in Nibenay Valley.",
+      "hook": "Wayfarers in Nibenay Valley report recent activity around Alessian Iron Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Alessian Iron Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Nibenay Valley.",
+      "notes": [
+        {
+          "id": "alessian_iron_ayleid_reliquary_field_record_1",
+          "title": "Alessian Iron Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Nibenay Valley",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Alessian Iron Ayleid Reliquary (alessian_iron_ayleid_reliquary) in Nibenay Valley (cyrodiil/nibenay_valley). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L11.oblivion_crisis",
+            "nibenay_valley.L2.humid_heat"
+          ]
+        },
+        {
+          "id": "alessian_iron_ayleid_reliquary_field_record_2",
+          "title": "Alessian Iron Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Nibenay Valley",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Alessian Iron Ayleid Reliquary (alessian_iron_ayleid_reliquary) in Nibenay Valley (cyrodiil/nibenay_valley): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L11.oblivion_crisis",
+            "nibenay_valley.L2.humid_heat"
+          ]
+        }
+      ]
+    },
+    "lindai_basal_ore_adit": {
+      "why": [
+        "cyrodiil.L9.guild_wars",
+        "cyrodiil.L10.cult_remnants"
+      ],
+      "summary": "Lindai Basal Ore-Adit stands in Blackwood as a notable mine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Blackwood, Lindai Basal Ore-Adit has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Lindai Basal Ore-Adit in Blackwood.",
+      "hook": "Wayfarers in Blackwood report recent activity around Lindai Basal Ore-Adit, an enduring mine holding provincial records.",
+      "rumour": "Travelers near Lindai Basal Ore-Adit speak of sealed caches preserved within this mine of Blackwood.",
+      "notes": [
+        {
+          "id": "lindai_basal_ore_adit_field_record_1",
+          "title": "Lindai Basal Ore-Adit Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Blackwood",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Lindai Basal Ore-Adit (lindai_basal_ore_adit) in Blackwood (cyrodiil/blackwood). Wardens inspecting this mine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.guild_wars",
+            "cyrodiil.L10.cult_remnants"
+          ]
+        },
+        {
+          "id": "lindai_basal_ore_adit_field_record_2",
+          "title": "Lindai Basal Ore-Adit Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Blackwood",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Lindai Basal Ore-Adit (lindai_basal_ore_adit) in Blackwood (cyrodiil/blackwood): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the mine."
+          ],
+          "why": [
+            "cyrodiil.L9.guild_wars",
+            "cyrodiil.L10.cult_remnants"
+          ]
+        }
+      ]
+    },
+    "welke_iron_ayleid_reliquary": {
+      "why": [
+        "cyrodiil.L9.border_pressure",
+        "cyrodiil.L10.abandoned_forts"
+      ],
+      "summary": "Welke Iron Ayleid Reliquary stands in Blackwood as a notable ayleid ruin landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Blackwood, Welke Iron Ayleid Reliquary has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Welke Iron Ayleid Reliquary in Blackwood.",
+      "hook": "Wayfarers in Blackwood report recent activity around Welke Iron Ayleid Reliquary, an enduring ayleid ruin holding provincial records.",
+      "rumour": "Travelers near Welke Iron Ayleid Reliquary speak of sealed caches preserved within this ayleid ruin of Blackwood.",
+      "notes": [
+        {
+          "id": "welke_iron_ayleid_reliquary_field_record_1",
+          "title": "Welke Iron Ayleid Reliquary Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Blackwood",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Welke Iron Ayleid Reliquary (welke_iron_ayleid_reliquary) in Blackwood (cyrodiil/blackwood). Wardens inspecting this ayleid ruin catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "cyrodiil.L9.border_pressure",
+            "cyrodiil.L10.abandoned_forts"
+          ]
+        },
+        {
+          "id": "welke_iron_ayleid_reliquary_field_record_2",
+          "title": "Welke Iron Ayleid Reliquary Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Blackwood",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Welke Iron Ayleid Reliquary (welke_iron_ayleid_reliquary) in Blackwood (cyrodiil/blackwood): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the ayleid ruin."
+          ],
+          "why": [
+            "cyrodiil.L9.border_pressure",
+            "cyrodiil.L10.abandoned_forts"
+          ]
+        }
+      ]
     }
   }
 }

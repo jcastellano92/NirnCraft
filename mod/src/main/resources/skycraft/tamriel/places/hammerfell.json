@@ -6981,13 +6981,13 @@
   {
     "id": "sentinel_landmark_02",
     "name": "place.skycraft.sentinel_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "redguard",
     "region": "hammerfell/sentinel",
     "x": -8872,
     "z": 6008,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "sentinel.L6.marsh_town",
       "sentinel.L3.palace_cisterns"
@@ -7026,13 +7026,13 @@
   {
     "id": "bangkorai_landmark_02",
     "name": "place.skycraft.bangkorai_landmark_02",
-    "type": "word_wall",
+    "type": "landmark",
     "culture": "redguard",
     "region": "hammerfell/bangkorai",
     "x": -5336,
     "z": 4200,
     "radius": 20,
-    "variant": "unrelenting_force",
+    "variant": "wayshrine",
     "why": [
       "bangkorai.L6.ford_towns",
       "bangkorai.L8.na_totambu_reverence"
@@ -7141,6 +7141,96 @@
     "why": [
       "stros_mkai.L1.two_lobes",
       "stros_mkai.L11.hunding_bay_battle"
+    ]
+  },
+  {
+    "id": "abahs_fang_corsair_island",
+    "name": "place.skycraft.abahs_fang_corsair_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8203,
+    "z": 7714,
+    "radius": 28,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L5.abecean_shipping"
+    ]
+  },
+  {
+    "id": "no_shira_outer_shipwreck",
+    "name": "place.skycraft.no_shira_outer_shipwreck",
+    "type": "dungeon_fixed",
+    "variant": "shipwreck",
+    "culture": "redguard",
+    "region": "hammerfell/hews_bane",
+    "x": -8381,
+    "z": 7787,
+    "radius": 28,
+    "why": [
+      "hews_bane.L1.abecean_headlands",
+      "hews_bane.L5.abecean_shipping"
+    ]
+  },
+  {
+    "id": "stros_mkai_chain_sea_cave",
+    "name": "place.skycraft.stros_mkai_chain_sea_cave",
+    "type": "dungeon_fixed",
+    "variant": "sea_cave",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10985,
+    "z": 6779,
+    "radius": 28,
+    "why": [
+      "stros_mkai.L1.two_lobes",
+      "stros_mkai.L5.harbour_trade"
+    ]
+  },
+  {
+    "id": "bthzark_shoal_coral_reef",
+    "name": "place.skycraft.bthzark_shoal_coral_reef",
+    "type": "landmark",
+    "variant": "reef",
+    "culture": "redguard",
+    "region": "hammerfell/stros_mkai",
+    "x": -10844,
+    "z": 7105,
+    "radius": 28,
+    "why": [
+      "stros_mkai.L1.two_lobes",
+      "stros_mkai.L5.harbour_trade"
+    ]
+  },
+  {
+    "id": "sentinel_iliac_atoll_island",
+    "name": "place.skycraft.sentinel_iliac_atoll_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -6984,
+    "z": 4230,
+    "radius": 28,
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L5.dye_works"
+    ]
+  },
+  {
+    "id": "kairula_tidal_sea_vault",
+    "name": "place.skycraft.kairula_tidal_sea_vault",
+    "type": "dungeon_fixed",
+    "variant": "sea_vault",
+    "culture": "redguard",
+    "region": "hammerfell/sentinel",
+    "x": -7031,
+    "z": 4089,
+    "radius": 28,
+    "why": [
+      "sentinel.L1.harbour_cliff",
+      "sentinel.L5.dye_works"
     ]
   }
 ]

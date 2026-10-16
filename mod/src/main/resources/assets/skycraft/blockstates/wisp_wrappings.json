@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/wisp_wrappings"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/wisp_wrappings_harvested"
+    }
+  }
+}

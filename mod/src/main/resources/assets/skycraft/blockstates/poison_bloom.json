@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/poison_bloom"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/poison_bloom_harvested"
+    }
+  }
+}

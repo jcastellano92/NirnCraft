@@ -14480,7 +14480,7 @@
     "x": -2336,
     "z": 2954,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "short",
     "why": [
       "cyrodiil.L6.poor_places",
@@ -14545,7 +14545,7 @@
     "x": 1506,
     "z": 3650,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L7.guilds_everywhere",
@@ -14569,15 +14569,15 @@
     ]
   },
   {
-    "id": "jerall_mountains_delve_9_kolskeggr_mine",
-    "name": "place.skycraft.jerall_mountains_delve_9_kolskeggr_mine",
+    "id": "remans_crimson_ore_adit",
+    "name": "place.skycraft.remans_crimson_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/jerall_mountains",
     "x": 1730,
     "z": 2850,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.wayshrines",
@@ -14586,15 +14586,15 @@
     "hidden": true
   },
   {
-    "id": "jerall_mountains_delve_10_bleak_falls_barrow",
-    "name": "place.skycraft.jerall_mountains_delve_10_bleak_falls_barrow",
+    "id": "wendir_dawn_ayleid_reliquary",
+    "name": "place.skycraft.wendir_dawn_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/jerall_mountains",
     "x": 1712,
     "z": 3152,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L8.daedric_shrines",
@@ -14642,7 +14642,7 @@
     "x": 951,
     "z": 3632,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.arena_glory",
@@ -14805,7 +14805,7 @@
     "x": 1013,
     "z": 3558,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L10.assassins_and_thieves",
@@ -14829,15 +14829,15 @@
     ]
   },
   {
-    "id": "jerall_mountains_delve_25_kolskeggr_mine",
-    "name": "place.skycraft.jerall_mountains_delve_25_kolskeggr_mine",
+    "id": "vinda_white_ore_adit",
+    "name": "place.skycraft.vinda_white_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/jerall_mountains",
     "x": 1489,
     "z": 2946,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L11.alessian_revolt",
@@ -15087,7 +15087,7 @@
     "x": -3426,
     "z": 4254,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "short",
     "why": [
       "cyrodiil.L7.colovian_nibenese_split",
@@ -15119,7 +15119,7 @@
     "x": -3202,
     "z": 4414,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L7.rule_of_law",
@@ -15233,7 +15233,7 @@
     "x": -3358,
     "z": 4098,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "minor",
     "why": [
       "cyrodiil.L8.arena_glory",
@@ -15258,15 +15258,15 @@
     "hidden": true
   },
   {
-    "id": "colovian_highlands_delve_14_kolskeggr_mine",
-    "name": "place.skycraft.colovian_highlands_delve_14_kolskeggr_mine",
+    "id": "telepe_verdant_ore_adit",
+    "name": "place.skycraft.telepe_verdant_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/colovian_highlands",
     "x": -2978,
     "z": 4638,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "minor",
     "why": [
       "cyrodiil.L9.gate_scars",
@@ -15274,15 +15274,15 @@
     ]
   },
   {
-    "id": "colovian_highlands_delve_15_bleak_falls_barrow",
-    "name": "place.skycraft.colovian_highlands_delve_15_bleak_falls_barrow",
+    "id": "colovian_bronze_ayleid_reliquary",
+    "name": "place.skycraft.colovian_bronze_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/colovian_highlands",
     "x": -3394,
     "z": 3742,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "short",
     "why": [
       "cyrodiil.L9.county_rivalry",
@@ -15719,7 +15719,7 @@
     "x": 538,
     "z": 6972,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "short",
     "why": [
       "cyrodiil.L7.class_ladder",
@@ -15751,7 +15751,7 @@
     "x": 1597,
     "z": 7094,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L7.guilds_everywhere",
@@ -15849,7 +15849,7 @@
     "x": 678,
     "z": 4378,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L8.arena_glory",
@@ -15873,15 +15873,15 @@
     ]
   },
   {
-    "id": "heartlands_delve_13_kolskeggr_mine",
-    "name": "place.skycraft.heartlands_delve_13_kolskeggr_mine",
+    "id": "strid_inner_ore_adit",
+    "name": "place.skycraft.strid_inner_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/heartlands",
     "x": 646,
     "z": 6938,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L9.gate_scars",
@@ -15890,15 +15890,15 @@
     "hidden": true
   },
   {
-    "id": "heartlands_delve_14_bleak_falls_barrow",
-    "name": "place.skycraft.heartlands_delve_14_bleak_falls_barrow",
+    "id": "fanacas_shrouded_ayleid_reliquary",
+    "name": "place.skycraft.fanacas_shrouded_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/heartlands",
     "x": 849,
     "z": 5918,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L9.county_rivalry",
@@ -16044,7 +16044,7 @@
     "x": 2498,
     "z": 6370,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L11.alessian_revolt",
@@ -16068,15 +16068,15 @@
     ]
   },
   {
-    "id": "heartlands_delve_25_kolskeggr_mine",
-    "name": "place.skycraft.heartlands_delve_25_kolskeggr_mine",
+    "id": "brena_silent_ore_adit",
+    "name": "place.skycraft.brena_silent_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/heartlands",
     "x": 354,
     "z": 6946,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L11.three_banner_war",
@@ -16085,15 +16085,15 @@
     "hidden": true
   },
   {
-    "id": "heartlands_delve_26_bleak_falls_barrow",
-    "name": "place.skycraft.heartlands_delve_26_bleak_falls_barrow",
+    "id": "pelinal_upper_ayleid_reliquary",
+    "name": "place.skycraft.pelinal_upper_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/heartlands",
     "x": 518,
     "z": 7066,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L11.septim_empire",
@@ -16376,7 +16376,7 @@
     "x": -294,
     "z": 5510,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "short",
     "why": [
       "cyrodiil.L8.wayshrines",
@@ -16408,7 +16408,7 @@
     "x": -538,
     "z": 5658,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.doomstones",
@@ -16538,7 +16538,7 @@
     "x": -414,
     "z": 5698,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "unmarked",
     "why": [
       "cyrodiil.L10.ayleid_undercity",
@@ -16563,15 +16563,15 @@
     ]
   },
   {
-    "id": "great_forest_delve_15_kolskeggr_mine",
-    "name": "place.skycraft.great_forest_delve_15_kolskeggr_mine",
+    "id": "welke_dawn_ore_adit",
+    "name": "place.skycraft.welke_dawn_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/great_forest",
     "x": -400,
     "z": 5469,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "short",
     "why": [
       "cyrodiil.L10.abandoned_forts",
@@ -16579,15 +16579,15 @@
     ]
   },
   {
-    "id": "great_forest_delve_16_bleak_falls_barrow",
-    "name": "place.skycraft.great_forest_delve_16_bleak_falls_barrow",
+    "id": "morihaus_white_ayleid_reliquary",
+    "name": "place.skycraft.morihaus_white_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/great_forest",
     "x": -322,
     "z": 7614,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L10.road_bandits",
@@ -16853,7 +16853,7 @@
     "x": 3514,
     "z": 5478,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "short",
     "why": [
       "cyrodiil.L7.colovian_nibenese_split",
@@ -16885,7 +16885,7 @@
     "x": 2970,
     "z": 6278,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L7.rule_of_law",
@@ -16967,7 +16967,7 @@
     "x": 3258,
     "z": 5382,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "minor",
     "why": [
       "cyrodiil.L8.doomstones",
@@ -16991,15 +16991,15 @@
     ]
   },
   {
-    "id": "nibenay_basin_delve_12_kolskeggr_mine",
-    "name": "place.skycraft.nibenay_basin_delve_12_kolskeggr_mine",
+    "id": "panther_bronze_ore_adit",
+    "name": "place.skycraft.panther_bronze_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_basin",
     "x": 4038,
     "z": 4346,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "minor",
     "why": [
       "cyrodiil.L8.arena_glory",
@@ -17007,15 +17007,15 @@
     ]
   },
   {
-    "id": "nibenay_basin_delve_13_bleak_falls_barrow",
-    "name": "place.skycraft.nibenay_basin_delve_13_bleak_falls_barrow",
+    "id": "ninendava_silent_ayleid_reliquary",
+    "name": "place.skycraft.ninendava_silent_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_basin",
     "x": 4155,
     "z": 5206,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "unmarked",
     "why": [
       "cyrodiil.L9.throne_empty",
@@ -17178,7 +17178,7 @@
     "x": 3290,
     "z": 4430,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L11.ayleid_era",
@@ -17202,15 +17202,15 @@
     ]
   },
   {
-    "id": "nibenay_basin_delve_25_kolskeggr_mine",
-    "name": "place.skycraft.nibenay_basin_delve_25_kolskeggr_mine",
+    "id": "belda_basal_ore_adit",
+    "name": "place.skycraft.belda_basal_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_basin",
     "x": 3518,
     "z": 5342,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L11.reman_akaviri",
@@ -17219,15 +17219,15 @@
     "hidden": true
   },
   {
-    "id": "nibenay_basin_delve_26_bleak_falls_barrow",
-    "name": "place.skycraft.nibenay_basin_delve_26_bleak_falls_barrow",
+    "id": "mackament_twilight_ayleid_reliquary",
+    "name": "place.skycraft.mackament_twilight_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_basin",
     "x": 3002,
     "z": 4998,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L11.three_banner_war",
@@ -17477,7 +17477,7 @@
     "x": -2362,
     "z": 6042,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.daedric_shrines",
@@ -17510,7 +17510,7 @@
     "x": -2402,
     "z": 6014,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "short",
     "why": [
       "cyrodiil.L8.elf_ruin_fear",
@@ -17624,7 +17624,7 @@
     "x": -3170,
     "z": 6910,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "minor",
     "why": [
       "cyrodiil.L10.ayleid_undercity",
@@ -17648,15 +17648,15 @@
     ]
   },
   {
-    "id": "west_weald_delve_16_kolskeggr_mine",
-    "name": "place.skycraft.west_weald_delve_16_kolskeggr_mine",
+    "id": "valus_shrouded_ore_adit",
+    "name": "place.skycraft.valus_shrouded_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/west_weald",
     "x": -3452,
     "z": 5743,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "minor",
     "why": [
       "cyrodiil.L10.abandoned_forts",
@@ -17664,15 +17664,15 @@
     ]
   },
   {
-    "id": "west_weald_delve_17_bleak_falls_barrow",
-    "name": "place.skycraft.west_weald_delve_17_bleak_falls_barrow",
+    "id": "remans_basal_ayleid_reliquary",
+    "name": "place.skycraft.remans_basal_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/west_weald",
     "x": -3420,
     "z": 5846,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "unmarked",
     "why": [
       "cyrodiil.L10.road_bandits",
@@ -17906,7 +17906,7 @@
     "x": -1538,
     "z": 8670,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "short",
     "why": [
       "cyrodiil.L6.poor_places",
@@ -17938,7 +17938,7 @@
     "x": -4250,
     "z": 8634,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L7.class_ladder",
@@ -18036,7 +18036,7 @@
     "x": -1529,
     "z": 8594,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L8.doomstones",
@@ -18060,15 +18060,15 @@
     ]
   },
   {
-    "id": "gold_coast_delve_13_kolskeggr_mine",
-    "name": "place.skycraft.gold_coast_delve_13_kolskeggr_mine",
+    "id": "vilverin_white_ore_adit",
+    "name": "place.skycraft.vilverin_white_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/gold_coast",
     "x": -4190,
     "z": 7874,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.arena_glory",
@@ -18077,15 +18077,15 @@
     "hidden": true
   },
   {
-    "id": "gold_coast_delve_14_bleak_falls_barrow",
-    "name": "place.skycraft.gold_coast_delve_14_bleak_falls_barrow",
+    "id": "telepe_upper_ayleid_reliquary",
+    "name": "place.skycraft.telepe_upper_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/gold_coast",
     "x": -4266,
     "z": 8295,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L9.throne_empty",
@@ -18319,7 +18319,7 @@
     "x": 2046,
     "z": 9502,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "unmarked",
     "why": [
       "cyrodiil.L7.rule_of_law",
@@ -18352,7 +18352,7 @@
     "x": 2598,
     "z": 9402,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.the_nine",
@@ -18450,7 +18450,7 @@
     "x": 432,
     "z": 9040,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L9.throne_empty",
@@ -18474,15 +18474,15 @@
     ]
   },
   {
-    "id": "nibenay_valley_delve_13_kolskeggr_mine",
-    "name": "place.skycraft.nibenay_valley_delve_13_kolskeggr_mine",
+    "id": "rumare_silent_ore_adit",
+    "name": "place.skycraft.rumare_silent_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_valley",
     "x": 502,
     "z": 8184,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L9.county_rivalry",
@@ -18491,15 +18491,15 @@
     "hidden": true
   },
   {
-    "id": "nibenay_valley_delve_14_bleak_falls_barrow",
-    "name": "place.skycraft.nibenay_valley_delve_14_bleak_falls_barrow",
+    "id": "strid_twilight_ayleid_reliquary",
+    "name": "place.skycraft.strid_twilight_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_valley",
     "x": 1712,
     "z": 8400,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L9.guild_wars",
@@ -18645,7 +18645,7 @@
     "x": 2586,
     "z": 9190,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "short",
     "why": [
       "cyrodiil.L11.reman_akaviri",
@@ -18669,15 +18669,15 @@
     ]
   },
   {
-    "id": "nibenay_valley_delve_25_kolskeggr_mine",
-    "name": "place.skycraft.nibenay_valley_delve_25_kolskeggr_mine",
+    "id": "larsius_upper_ore_adit",
+    "name": "place.skycraft.larsius_upper_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_valley",
     "x": 548,
     "z": 8896,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "unmarked",
     "why": [
       "cyrodiil.L11.septim_empire",
@@ -18686,15 +18686,15 @@
     "hidden": true
   },
   {
-    "id": "nibenay_valley_delve_26_bleak_falls_barrow",
-    "name": "place.skycraft.nibenay_valley_delve_26_bleak_falls_barrow",
+    "id": "alessian_iron_ayleid_reliquary",
+    "name": "place.skycraft.alessian_iron_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/nibenay_valley",
     "x": 2249,
     "z": 9414,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "minor",
     "why": [
       "cyrodiil.L11.oblivion_crisis",
@@ -18944,7 +18944,7 @@
     "x": 3966,
     "z": 8286,
     "radius": 24,
-    "variant": "ice_cave",
+    "variant": "cave",
     "class": "unmarked",
     "why": [
       "cyrodiil.L7.rule_of_law",
@@ -18977,7 +18977,7 @@
     "x": 3806,
     "z": 8318,
     "radius": 24,
-    "variant": "barrow",
+    "variant": "imperial_crypt",
     "class": "unmarked",
     "why": [
       "cyrodiil.L8.the_nine",
@@ -19091,7 +19091,7 @@
     "x": 4262,
     "z": 8762,
     "radius": 24,
-    "variant": "giant_camp",
+    "variant": "bandit_camp",
     "class": "minor",
     "why": [
       "cyrodiil.L9.gate_scars",
@@ -19116,15 +19116,15 @@
     "hidden": true
   },
   {
-    "id": "blackwood_delve_14_kolskeggr_mine",
-    "name": "place.skycraft.blackwood_delve_14_kolskeggr_mine",
+    "id": "lindai_basal_ore_adit",
+    "name": "place.skycraft.lindai_basal_ore_adit",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/blackwood",
     "x": 3970,
     "z": 8034,
     "radius": 24,
-    "variant": "kolskeggr_mine",
+    "variant": "mine",
     "class": "minor",
     "why": [
       "cyrodiil.L9.guild_wars",
@@ -19132,15 +19132,15 @@
     ]
   },
   {
-    "id": "blackwood_delve_15_bleak_falls_barrow",
-    "name": "place.skycraft.blackwood_delve_15_bleak_falls_barrow",
+    "id": "welke_iron_ayleid_reliquary",
+    "name": "place.skycraft.welke_iron_ayleid_reliquary",
     "type": "dungeon_fixed",
     "culture": "imperial",
     "region": "cyrodiil/blackwood",
     "x": 4531,
     "z": 7712,
     "radius": 24,
-    "variant": "bleak_falls_barrow",
+    "variant": "ayleid_ruin",
     "class": "short",
     "why": [
       "cyrodiil.L9.border_pressure",

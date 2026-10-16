@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/dwarven_oil"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/dwarven_oil_harvested"
+    }
+  }
+}

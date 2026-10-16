@@ -27,10 +27,15 @@ public class NpcModel extends PlayerModel<NpcEntity> {
     public void prepareMobModel(NpcEntity entity, float limbSwing, float limbSwingAmount, float partialTick) {
         ArmPose main = ArmPose.EMPTY;
         ArmPose off = ArmPose.EMPTY;
+        boolean sheathed = com.skycraft.arsenal.Sheathe.isSheathedOrHolstered(entity);
         ItemStack mainStack = entity.getMainHandItem();
-        if (mainStack.getItem() instanceof BowItem && entity.isAggressive()) main = ArmPose.BOW_AND_ARROW;
-        else if (!mainStack.isEmpty()) main = ArmPose.ITEM;
-        if (!entity.getOffhandItem().isEmpty()) off = ArmPose.ITEM;
+        if (mainStack.getItem() instanceof com.skycraft.audio.InstrumentItem) {
+            main = ArmPose.ITEM;
+        } else if (!sheathed) {
+            if (mainStack.getItem() instanceof BowItem && entity.isAggressive()) main = ArmPose.BOW_AND_ARROW;
+            else if (!mainStack.isEmpty()) main = ArmPose.ITEM;
+            if (!entity.getOffhandItem().isEmpty()) off = ArmPose.ITEM;
+        }
         if (entity.getMainArm() == HumanoidArm.RIGHT) {
             this.rightArmPose = main;
             this.leftArmPose = off;
@@ -68,21 +73,78 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             this.head.xRot = Math.max(this.head.xRot, 0.35F);
             this.hat.copyFrom(this.head);
         } else if (entity.isCasting()) {
-            float wave = Mth.cos(ageInTicks * 0.6F) * 0.08F;
-            this.rightArm.xRot = -1.35F + wave;
-            this.rightArm.yRot = -0.15F;
-            this.rightArm.zRot = 0.0F;
-            this.leftArm.xRot = -1.35F - wave;
-            this.leftArm.yRot = 0.15F;
-            this.leftArm.zRot = 0.0F;
+            float wave = Mth.cos(ageInTicks * 0.65F) * 0.09F;
+            com.skycraft.magic.spell.Spell spell = entity.getCastingSpell();
+            com.skycraft.magic.spell.School school = spell != null ? spell.school : com.skycraft.magic.spell.School.DESTRUCTION;
+            if (school == com.skycraft.magic.spell.School.RESTORATION
+                    || school == com.skycraft.magic.spell.School.ALTERATION
+                    || school == com.skycraft.magic.spell.School.CONJURATION) {
+                // Two-handed upward channeling / ward / summoning gesture
+                this.rightArm.xRot = -1.75F + wave;
+                this.rightArm.yRot = -0.28F;
+                this.rightArm.zRot = 0.16F;
+                this.leftArm.xRot = -1.75F - wave;
+                this.leftArm.yRot = 0.28F;
+                this.leftArm.zRot = -0.16F;
+            } else {
+                // Offensive spell aim: dominant casting hand extended toward target, offhand gathering charge
+                this.rightArm.xRot = -1.45F + this.head.xRot * 0.45F + wave;
+                this.rightArm.yRot = -0.12F + this.head.yRot * 0.35F;
+                this.rightArm.zRot = 0.05F;
+                this.leftArm.xRot = -1.18F - wave;
+                this.leftArm.yRot = 0.28F;
+                this.leftArm.zRot = -0.08F;
+            }
         } else if (entity.isPlaying()) {
-            // holding an invisible lute: left hand on the neck, right hand strumming
-            this.leftArm.xRot = -0.95F;
-            this.leftArm.yRot = 0.55F;
-            this.leftArm.zRot = 0.0F;
-            this.rightArm.xRot = -0.55F + Mth.sin(ageInTicks * 0.9F) * 0.12F;
-            this.rightArm.yRot = -0.45F;
-            this.rightArm.zRot = 0.0F;
+            com.skycraft.audio.InstrumentItem.Pose pose = com.skycraft.audio.InstrumentItem.Pose.STRUM;
+            if (entity.getMainHandItem().getItem() instanceof com.skycraft.audio.InstrumentItem inst) {
+                pose = inst.pose();
+            }
+            float sway = Mth.sin(ageInTicks * 0.22F) * 0.05F;
+            this.head.zRot += sway;
+            this.hat.copyFrom(this.head);
+            switch (pose) {
+                case FLUTE, HORN -> {
+                    float breath = Mth.sin(ageInTicks * 0.45F) * 0.05F;
+                    this.rightArm.xRot = -1.35F + breath;
+                    this.rightArm.yRot = -0.32F;
+                    this.rightArm.zRot = 0.05F;
+                    this.leftArm.xRot = -1.28F + breath;
+                    this.leftArm.yRot = 0.36F;
+                    this.leftArm.zRot = -0.05F;
+                }
+                case DRUM -> {
+                    this.leftArm.xRot = -0.85F;
+                    this.leftArm.yRot = 0.45F;
+                    this.leftArm.zRot = 0.0F;
+                    this.rightArm.xRot = -0.75F + Mth.sin(ageInTicks * 1.15F) * 0.22F;
+                    this.rightArm.yRot = -0.35F;
+                    this.rightArm.zRot = 0.0F;
+                }
+                case HARP -> {
+                    this.leftArm.xRot = -1.08F;
+                    this.leftArm.yRot = 0.42F;
+                    this.leftArm.zRot = -0.05F;
+                    this.rightArm.xRot = -0.95F + Mth.sin(ageInTicks * 0.85F) * 0.14F;
+                    this.rightArm.yRot = -0.38F;
+                    this.rightArm.zRot = 0.05F;
+                }
+                default -> {
+                    // Strumming a lute, redguard oud, or khajiit sitar: left hand on neck, right hand strumming
+                    this.leftArm.xRot = -0.95F;
+                    this.leftArm.yRot = 0.55F;
+                    this.leftArm.zRot = 0.0F;
+                    this.rightArm.xRot = -0.55F + Mth.sin(ageInTicks * 0.9F) * 0.14F;
+                    this.rightArm.yRot = -0.45F;
+                    this.rightArm.zRot = 0.0F;
+                }
+            }
+        } else if (this.attackTime > 0.0F && entity.isAggressive()) {
+            // Power-attack cleave / two-handed swing follow-through
+            float swing = Mth.sin(this.attackTime * (float) Math.PI);
+            this.rightArm.xRot -= swing * 0.55F;
+            this.body.yRot += swing * 0.18F;
+            this.jacket.copyFrom(this.body);
         } else {
             changed = false;
         }

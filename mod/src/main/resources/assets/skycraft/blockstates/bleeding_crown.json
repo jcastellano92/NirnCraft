@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/bleeding_crown"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/bleeding_crown_harvested"
+    }
+  }
+}

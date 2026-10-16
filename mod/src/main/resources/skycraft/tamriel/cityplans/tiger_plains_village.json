@@ -49,7 +49,7 @@
       "id": "castle",
       "at": [
         0,
-        -11
+        -27
       ],
       "name": "tiger_plains_village_landmark",
       "overlay": "tiger_plains_village"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          0
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          27,
+          4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 8,
-      "r1": 36,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 20,
+      "rz": 19,
+      "wobble": 3,
+      "lobes": 4,
+      "phase": 0.27,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,8 +120,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        0
+        25,
+        5
       ],
       "face": "south",
       "overlay": "tiger_plains_village",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        18,
-        23
+        5,
+        32
       ],
       "face": "north",
       "overlay": "tiger_plains_village",
@@ -99,8 +144,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        -13,
+        21
       ],
       "face": "north",
       "overlay": "tiger_plains_village",
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -26,
-        12
+        -29,
+        15
       ],
       "face": "north",
       "overlay": "tiger_plains_village",
@@ -123,8 +168,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -25,
+        -4
       ],
       "face": "south",
       "overlay": "tiger_plains_village",
@@ -135,8 +180,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -6,
-        -28
+        24,
+        -18
       ],
       "face": "south",
       "overlay": "tiger_plains_village",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        -25,
+        -23
       ],
       "face": "south",
       "overlay": "tiger_plains_village",
@@ -165,6 +210,10 @@
       "type": "lamps",
       "theme": "tiger_plains_village_lamps",
       "count": 2
+    },
+    {
+      "type": "garden",
+      "where": "free"
     }
   ],
   "names": {
@@ -182,5 +231,47 @@
     "tiger_plains_village_landmark": "High Seat of place.skycraft.tiger_plains_village",
     "tiger_plains_village_plaza": "place.skycraft.tiger_plains_village Central Plaza"
   },
-  "innKey": "tiger_plains_village_b_5"
+  "innKey": "tiger_plains_village_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

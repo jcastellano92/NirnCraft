@@ -2,6 +2,11 @@ package com.skycraft.tamriel.biome.flora;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.skycraft.crafting.arcane.ArcaneRegistry;
+import com.skycraft.dungeons.world.Cultures;
+import com.skycraft.tamriel.MapSample;
+import com.skycraft.tamriel.Region;
+import com.skycraft.tamriel.TamrielMap;
 import com.skycraft.tamriel.biome.feature.GenBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ExtraCodecs;
@@ -87,7 +92,108 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
             }
             placed++;
         }
+
+        // Regional 3D alchemy botanical & fungal drift alongside ground cover
+        if (placed > 0 && random.nextInt(4) == 0) {
+            placeRegionalAlchemyFlora(level, box, o.getX(), o.getZ(), cfg.nearWater(), random, p);
+        }
         return placed > 0;
+    }
+
+    private static void placeRegionalAlchemyFlora(WorldGenLevel level, GenBox box, int ox, int oz,
+                                                  boolean nearWaterCfg, RandomSource random, BlockPos.MutableBlockPos p) {
+        int x = ox + random.nextInt(5) - 2;
+        int z = oz + random.nextInt(5) - 2;
+        if ((x >> 4) != box.center.x || (z >> 4) != box.center.z) return;
+        if (!com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return;
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        p.set(x, y, z);
+        if (!level.getBlockState(p).isAir()) return;
+
+        boolean byWater = nearWaterCfg || nearWater(box, x, y - 1, z);
+        String floraId = chooseRegionalFloraId(x, y, z, byWater, random);
+        BlockState floraState = ArcaneRegistry.floraState(floraId);
+        if (floraState.canSurvive(level, p)) {
+            level.setBlock(p, floraState, 2);
+        }
+    }
+
+    private static String chooseRegionalFloraId(int x, int y, int z, boolean byWater, RandomSource r) {
+        Region region = TamrielMap.region(x, z);
+        String province = Cultures.province(region, x, z);
+        String regId = region.id();
+        MapSample s = new MapSample();
+        TamrielMap.sample(x, z, s);
+
+        if (byWater) {
+            if ("morrowind".equals(province)) {
+                String[] mwWater = {"marshmerrow", "saltrice", "kresh_fiber", "coda_flower", "luminous_russula", "bog_beacon", "nirnroot"};
+                return mwWater[r.nextInt(mwWater.length)];
+            }
+            if ("black_marsh".equals(province)) {
+                String[] bmWater = {"hist_carp", "swamp_fungal_pod", "bog_beacon", "luminous_russula", "rot_scale_fungus", "giant_lichen", "nirnroot"};
+                return bmWater[r.nextInt(bmWater.length)];
+            }
+            return r.nextInt(3) == 0 ? "nirnroot" : (r.nextBoolean() ? "nordic_barnacle" : "swamp_fungal_pod");
+        }
+
+        return switch (province) {
+            case "morrowind" -> {
+                if (regId.contains("ashlands") || regId.contains("red_mountain") || regId.contains("molag_amur")) {
+                    String[] ash = {"trama_root", "ashen_grass_pod", "ash_creep_cluster", "ash_yam", "scaly_pholiota", "spawn_ash"};
+                    yield ash[r.nextInt(ash.length)];
+                }
+                if (regId.contains("bitter_coast") || regId.contains("ascadian")) {
+                    String[] coast = {"coda_flower", "luminous_russula", "bog_beacon", "bittergreen_petals", "hypha_facia", "emperor_parasol_moss"};
+                    yield coast[r.nextInt(coast.length)];
+                }
+                String[] mw = {"comberry", "hackle_lo", "marshmerrow", "saltrice", "gold_kanet", "kresh_fiber", "ash_yam", "trama_root"};
+                yield mw[r.nextInt(mw.length)];
+            }
+            case "black_marsh" -> {
+                String[] bm = {"hist_sap", "hist_carp", "swamp_fungal_pod", "bog_beacon", "luminous_russula", "rot_scale_fungus",
+                        "giant_lichen", "poison_bloom", "deathbell", "canis_root", "hanging_moss"};
+                yield bm[r.nextInt(bm.length)];
+            }
+            case "elsweyr", "hammerfell" -> {
+                String[] desert = {"moon_sugar", "desert_rose", "cactus_pulp", "gold_kanet", "thistle_branch", "jazbay_grapes", "juniper_berries"};
+                yield desert[r.nextInt(desert.length)];
+            }
+            case "valenwood", "summerset" -> {
+                String[] forest = {"mora_tapinella", "scaly_pholiota", "hanging_moss", "nightshade", "wisp_wrappings",
+                        "fly_amanita", "bleeding_crown", "comberry", "elves_ear"};
+                yield forest[r.nextInt(forest.length)];
+            }
+            case "cyrodiil", "high_rock" -> {
+                String[] heartland = {"nightshade", "deathbell", "mora_tapinella", "fly_amanita", "bleeding_crown",
+                        "thistle_branch", "juniper_berries", "canis_root", "giant_lichen", "scaly_pholiota"};
+                yield heartland[r.nextInt(heartland.length)];
+            }
+            default -> {
+                if (regId.contains("eastmarch")) {
+                    String[] volcanic = {"jazbay_grapes", "creep_cluster", "canis_root", "dragon_tongue".equals(regId) ? "thistle_branch" : "mora_tapinella"};
+                    yield volcanic[r.nextInt(volcanic.length)];
+                }
+                if (regId.contains("hjaalmarch")) {
+                    String[] marsh = {"deathbell", "swamp_fungal_pod", "canis_root", "giant_lichen", "mora_tapinella"};
+                    yield marsh[r.nextInt(marsh.length)];
+                }
+                if (regId.contains("the_rift") || regId.contains("falkreath")) {
+                    String[] woods = {"mora_tapinella", "scaly_pholiota", "imp_stool", "fly_amanita", "bleeding_crown", "canis_root", "nightshade"};
+                    yield woods[r.nextInt(woods.length)];
+                }
+                if (regId.contains("the_reach")) {
+                    String[] reach = {"juniper_berries", "hanging_moss", "thistle_branch", "briar_heart", "namiras_rot", "bleeding_crown"};
+                    yield reach[r.nextInt(reach.length)];
+                }
+                if (y > 110 || s.elevation > 140 || regId.contains("winterhold") || regId.contains("the_pale") || "atmora".equals(province)) {
+                    String[] cold = {"frost_mirriam", "snowberries", "elves_ear", "thistle_branch", "white_cap"};
+                    yield cold[r.nextInt(cold.length)];
+                }
+                String[] skyrim = {"thistle_branch", "snowberries", "frost_mirriam", "elves_ear", "juniper_berries", "fly_amanita", "nightshade"};
+                yield skyrim[r.nextInt(skyrim.length)];
+            }
+        };
     }
 
     /** Water within two blocks of (x, y, z) at the same level (reeds, cane and rushes keep to the shore). */

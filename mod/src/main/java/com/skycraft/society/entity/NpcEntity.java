@@ -64,6 +64,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     private static final EntityDataAccessor<Integer> CONVERSATION_PARTNER = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.INT);
     /** Packed appearance (see {@link com.skycraft.society.NpcLook}); -1 until chosen. */
     private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.INT);
+    /** Active spell id from {@link com.skycraft.magic.spell.Spells} while {@link #FLAG_CASTING} is set. */
+    private static final EntityDataAccessor<String> CASTING_SPELL = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.STRING);
     public static final int FLAG_PRISONER = 1;
     public static final int FLAG_CASTING = 2;
     public static final int FLAG_PLAYING = 4;
@@ -111,6 +113,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     private int letter = -1;
     /** Necromancer: skeletons already raised in the current fight. */
     private boolean raisedDead;
+    /** Caster: whether Oakflesh/Stoneflesh was already cast in the current fight. */
+    private boolean fleshCast;
     /** Bard: a player asked for a song. */
     private boolean songRequested;
     /** Where this townsperson works (forge, counter, field, temple...), found once and re-checked daily. */
@@ -161,6 +165,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.entityData.define(FLAGS, (byte) 0);
         this.entityData.define(CONVERSATION_PARTNER, -1);
         this.entityData.define(LOOK, -1);
+        this.entityData.define(CASTING_SPELL, "");
     }
 
     @Override
@@ -318,6 +323,27 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         return look < 0 ? com.skycraft.society.NpcNames.Race.NORD : com.skycraft.society.NpcLook.race(look);
     }
 
+    /** Updates the NPC's look to use the specified {@link com.skycraft.society.NpcNames.Race}. */
+    public void setRace(com.skycraft.society.NpcNames.Race race) {
+        if (race == null) return;
+        int cur = getLook();
+        if (cur < 0) {
+            setLook(com.skycraft.society.NpcLook.pack(race, isFemale(), 0, 1, 0, 0,
+                    com.skycraft.society.Outfit.cultural(race), 0, isChild()));
+        } else {
+            setLook(com.skycraft.society.NpcLook.pack(race,
+                    com.skycraft.society.NpcLook.raceVariant(cur),
+                    com.skycraft.society.NpcLook.female(cur),
+                    com.skycraft.society.NpcLook.tone(cur),
+                    com.skycraft.society.NpcLook.hair(cur),
+                    com.skycraft.society.NpcLook.hairColor(cur),
+                    com.skycraft.society.NpcLook.beard(cur),
+                    com.skycraft.society.NpcLook.outfit(cur),
+                    com.skycraft.society.NpcLook.variant(cur),
+                    com.skycraft.society.NpcLook.child(cur)));
+        }
+    }
+
     /** Children are small and can't be harmed. */
     public boolean isChild() {
         return role() == NpcRole.CHILD;
@@ -368,6 +394,25 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     public void setCasting(boolean casting) {
         setFlag(FLAG_CASTING, casting);
+        if (!casting) this.entityData.set(CASTING_SPELL, "");
+    }
+
+    public String getCastingSpellId() {
+        return this.entityData.get(CASTING_SPELL);
+    }
+
+    @Nullable
+    public com.skycraft.magic.spell.Spell getCastingSpell() {
+        String id = getCastingSpellId();
+        return id == null || id.isEmpty() ? null : com.skycraft.magic.spell.Spells.byId(id);
+    }
+
+    public void startSpellWindup(String spellId) {
+        this.entityData.set(CASTING_SPELL, spellId == null ? "" : spellId);
+        setFlag(FLAG_CASTING, true);
+        if (!this.level().isClientSide) {
+            this.playSound(com.skycraft.audio.AudioSounds.spell("charge"), 0.7f, 1.0f + this.getRandom().nextFloat() * 0.2f);
+        }
     }
 
     public boolean isPlaying() {
@@ -606,22 +651,211 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         this.level().addFreshEntity(arrow);
     }
 
-    /** A fire charge that burns its victim but never sets the world on fire. */
-    public void castFireball(LivingEntity target) {
-        double dx = target.getX() - this.getX();
-        double dy = target.getY(0.5D) - this.getY(0.5D);
-        double dz = target.getZ() - this.getZ();
-        float spread = 0.2f;
-        SmallFireball ball = new SmallFireball(this.level(), this, dx + this.getRandom().nextGaussian() * spread, dy,
-                dz + this.getRandom().nextGaussian() * spread) {
+    /** Chooses an appropriate Skycraft spell from {@link com.skycraft.magic.spell.Spells} for this NPC's role and combat situation. */
+    public String chooseCombatSpell(LivingEntity target) {
+        NpcRole r = role();
+        if (!fleshCast && (r == NpcRole.MAGE || r == NpcRole.NECROMANCER || r == NpcRole.THALMOR || r == NpcRole.PRIEST)) {
+            return r == NpcRole.MAGE || r == NpcRole.THALMOR ? "stoneflesh" : "oakflesh";
+        }
+        if (this.getHealth() < this.getMaxHealth() * 0.5f) {
+            return r == NpcRole.MAGE || r == NpcRole.PRIEST ? "close_wounds" : "fast_healing";
+        }
+        if (r == NpcRole.PRIEST || r == NpcRole.MAGE) {
+            for (NpcEntity ally : this.level().getEntitiesOfClass(NpcEntity.class, this.getBoundingBox().inflate(10.0),
+                    a -> a != this && a.isAlive() && this.isAlliedTo(a) && a.getHealth() < a.getMaxHealth() * 0.6f)) {
+                return "healing_hands";
+            }
+        }
+        if ((r == NpcRole.NECROMANCER || r == NpcRole.VAMPIRE) && !hasRaisedDead()) {
+            return r == NpcRole.NECROMANCER ? "raise_zombie" : "conjure_familiar";
+        }
+        int roll = this.getRandom().nextInt(3);
+        return switch (r) {
+            case NECROMANCER, VAMPIRE -> roll == 0 ? "lightning_bolt" : "ice_spike";
+            case THALMOR -> roll == 0 ? "chain_lightning" : (roll == 1 ? "lightning_bolt" : "firebolt");
+            case PRIEST -> "sun_fire";
+            default -> switch (this.getRandom().nextInt(5)) {
+                case 0 -> "firebolt";
+                case 1 -> "ice_spike";
+                case 2 -> "lightning_bolt";
+                case 3 -> "fireball";
+                default -> "chain_lightning";
+            };
+        };
+    }
+
+    /** Casts a Skycraft spell from {@link com.skycraft.magic.spell.Spells} at {@code target} (or self/allies for Restoration/Alteration/Conjuration). */
+    public void castSpell(LivingEntity target, String spellId) {
+        if (!(this.level() instanceof net.minecraft.server.level.ServerLevel serverLevel)) return;
+        com.skycraft.magic.spell.Spell spell = com.skycraft.magic.spell.Spells.byId(spellId != null && !spellId.isEmpty() ? spellId : "firebolt");
+        if (spell == null) spell = com.skycraft.magic.spell.Spells.byId("firebolt");
+        if (spell == null) return;
+
+        switch (spell.id) {
+            case "oakflesh", "stoneflesh" -> {
+                fleshCast = true;
+                var eff = "stoneflesh".equals(spell.id)
+                        ? com.skycraft.magic.MagicRegistry.STONEFLESH.get()
+                        : com.skycraft.magic.MagicRegistry.OAKFLESH.get();
+                this.addEffect(new net.minecraft.world.effect.MobEffectInstance(eff, spell.duration, Math.max(0, (int) spell.magnitude - 1)));
+                com.skycraft.magic.MagicFx.send(this, com.skycraft.magic.MagicFx.AURA, com.skycraft.magic.spell.Element.NATURE,
+                        this.position(), this.position(), this.getId(), 0);
+                this.playSound(com.skycraft.audio.AudioSounds.spell("alteration"), 0.8f, 1.0f);
+                return;
+            }
+            case "fast_healing", "close_wounds" -> {
+                this.heal(spell.magnitude);
+                com.skycraft.magic.MagicFx.send(this, com.skycraft.magic.MagicFx.HEAL, com.skycraft.magic.spell.Element.HOLY,
+                        this.position(), this.position(), this.getId(), 0);
+                this.playSound(com.skycraft.audio.AudioSounds.spell("heal"), 0.85f, 1.05f);
+                return;
+            }
+            case "healing_hands" -> {
+                LivingEntity healTarget = this;
+                for (NpcEntity ally : serverLevel.getEntitiesOfClass(NpcEntity.class, this.getBoundingBox().inflate(10.0),
+                        a -> a != this && a.isAlive() && this.isAlliedTo(a) && a.getHealth() < a.getMaxHealth())) {
+                    healTarget = ally;
+                    break;
+                }
+                healTarget.heal(spell.magnitude * 4.0f);
+                com.skycraft.magic.MagicFx.send(this, com.skycraft.magic.MagicFx.HEAL, com.skycraft.magic.spell.Element.HOLY,
+                        healTarget.position(), healTarget.position(), healTarget.getId(), 0);
+                this.playSound(com.skycraft.audio.AudioSounds.spell("heal"), 0.85f, 1.1f);
+                return;
+            }
+            case "raise_zombie", "conjure_familiar" -> {
+                setRaisedDead(true);
+                Npcs.raiseDead(this, target);
+                com.skycraft.magic.MagicFx.send(this, com.skycraft.magic.MagicFx.SUMMON, com.skycraft.magic.spell.Element.SOUL,
+                        this.position(), this.position(), this.getId(), 0);
+                this.playSound(com.skycraft.audio.AudioSounds.spell("conjure"), 0.9f, 1.0f);
+                return;
+            }
+            case "lightning_bolt", "chain_lightning" -> {
+                net.minecraft.world.phys.Vec3 from = this.getEyePosition().add(0, -0.2, 0);
+                net.minecraft.world.phys.Vec3 to = target.getBoundingBox().getCenter();
+                com.skycraft.magic.MagicFx.sendNear(serverLevel, from, 64, com.skycraft.magic.MagicFx.LIGHTNING,
+                        com.skycraft.magic.spell.Element.SHOCK, from, to, -1, 0);
+                com.skycraft.magic.MagicFx.burst(serverLevel, to, com.skycraft.magic.spell.Element.SHOCK, 1.2f);
+                this.playSound(com.skycraft.audio.AudioSounds.spell("shock"), 0.9f, 1.0f + this.getRandom().nextFloat() * 0.2f);
+                DamageSource shockSrc = com.skycraft.magic.MagicDamage.source(serverLevel, com.skycraft.magic.MagicDamage.SHOCK, null, this);
+                target.hurt(shockSrc, spell.magnitude);
+                if ("chain_lightning".equals(spell.id)) {
+                    int chained = 0;
+                    for (LivingEntity extra : serverLevel.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(spell.radius),
+                            e -> e != this && e != target && e.isAlive() && !this.isAlliedTo(e) && this.isHostileTo(e))) {
+                        net.minecraft.world.phys.Vec3 arcTo = extra.getBoundingBox().getCenter();
+                        com.skycraft.magic.MagicFx.sendNear(serverLevel, to, 64, com.skycraft.magic.MagicFx.ARC,
+                                com.skycraft.magic.spell.Element.SHOCK, to, arcTo, -1, 0);
+                        extra.hurt(shockSrc, spell.magnitude * 0.65f);
+                        if (++chained >= 2) break;
+                    }
+                }
+                return;
+            }
+            default -> {}
+        }
+
+        // Aimed SpellProjectile (firebolt, ice_spike, fireball, sun_fire, etc.)
+        final com.skycraft.magic.spell.Spell castSpell = spell;
+        com.skycraft.magic.spell.SpellProjectile proj = new com.skycraft.magic.spell.SpellProjectile(serverLevel, this, castSpell) {
+            private int npcLife;
+
             @Override
-            protected void onHitBlock(BlockHitResult hit) {
-                // spell fire fizzles on stone and wood alike
+            public void tick() {
+                // Run Entity/Projectile base movement and collision without SpellProjectile's ServerPlayer-only check
+                super.baseTick();
+                net.minecraft.world.phys.HitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+                if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, hit)) {
+                    this.onHit(hit);
+                }
+                this.checkInsideBlocks();
+                net.minecraft.world.phys.Vec3 v = this.getDeltaMovement();
+                this.setPos(this.getX() + v.x, this.getY() + v.y, this.getZ() + v.z);
+                this.updateRotation();
+                if (this.level().isClientSide || this.isRemoved()) return;
+                if (++npcLife > 80 || (castSpell.element == com.skycraft.magic.spell.Element.FIRE && this.isInWater())) {
+                    this.discard();
+                }
+            }
+
+            @Override
+            protected boolean canHitEntity(Entity candidate) {
+                if (candidate == NpcEntity.this || candidate instanceof NpcEntity ally && NpcEntity.this.isAlliedTo(ally)) return false;
+                return candidate instanceof LivingEntity l && l.isAlive();
+            }
+
+            @Override
+            protected void onHitEntity(net.minecraft.world.phys.EntityHitResult result) {
+                if (this.level() instanceof net.minecraft.server.level.ServerLevel sl && result.getEntity() instanceof LivingEntity hitLiving) {
+                    applyNpcProjectileHit(sl, this, castSpell, hitLiving, result.getLocation());
+                }
+                this.discard();
+            }
+
+            @Override
+            protected void onHitBlock(BlockHitResult result) {
+                if (this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                    net.minecraft.world.phys.Vec3 pos = result.getLocation();
+                    applyNpcProjectileHit(sl, this, castSpell, null, pos);
+                }
+                this.discard();
             }
         };
-        ball.setPos(ball.getX(), this.getY(0.5D) + 0.5D, ball.getZ());
-        this.level().addFreshEntity(ball);
-        this.playSound(SoundEvents.BLAZE_SHOOT, 0.8f, 1.1f + this.getRandom().nextFloat() * 0.2f);
+        proj.setPos(this.getX(), this.getEyeY() - 0.15D, this.getZ());
+        double dx = target.getX() - proj.getX();
+        double dy = target.getY(0.5D) - proj.getY();
+        double dz = target.getZ() - proj.getZ();
+        proj.shoot(dx, dy, dz, Math.max(1.4f, castSpell.speed), 1.5f);
+        serverLevel.addFreshEntity(proj);
+        String soundKey = switch (castSpell.element) {
+            case FROST -> "frost";
+            case SHOCK -> "shock";
+            case HOLY -> "heal";
+            default -> "fire";
+        };
+        this.playSound(com.skycraft.audio.AudioSounds.spell(soundKey), 0.85f, 1.0f + this.getRandom().nextFloat() * 0.2f);
+    }
+
+    private void applyNpcProjectileHit(net.minecraft.server.level.ServerLevel level, Entity direct,
+                                       com.skycraft.magic.spell.Spell spell, @Nullable LivingEntity directTarget,
+                                       net.minecraft.world.phys.Vec3 pos) {
+        DamageSource src = com.skycraft.magic.MagicDamage.source(level, com.skycraft.magic.MagicDamage.forElement(spell.element), direct, this);
+        float radius = Math.max(1.2f, spell.radius);
+        com.skycraft.magic.MagicFx.burst(level, pos, spell.element, radius);
+        String impactSound = switch (spell.element) {
+            case FROST -> "impact_frost";
+            case SHOCK -> "impact_shock";
+            default -> "impact_fire";
+        };
+        com.skycraft.magic.MagicFx.worldSound(level, pos, com.skycraft.audio.AudioSounds.spell(impactSound),
+                net.minecraft.sounds.SoundSource.HOSTILE, 0.8f, 1.0f);
+        if (directTarget != null) {
+            directTarget.hurt(src, spell.magnitude);
+            applyNpcSpellElement(spell.element, directTarget);
+        }
+        if (spell.radius > 1.5f) {
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
+                    net.minecraft.world.phys.AABB.ofSize(pos, spell.radius * 2, spell.radius * 2, spell.radius * 2),
+                    e -> e != this && e != directTarget && e.isAlive() && !this.isAlliedTo(e))) {
+                e.hurt(src, spell.magnitude * 0.65f);
+                applyNpcSpellElement(spell.element, e);
+            }
+        }
+    }
+
+    private static void applyNpcSpellElement(com.skycraft.magic.spell.Element element, LivingEntity target) {
+        switch (element) {
+            case FIRE -> target.setSecondsOnFire(4);
+            case FROST -> target.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+            default -> {}
+        }
+    }
+
+    /** Launches this NPC's chosen Skycraft spell at {@code target}. */
+    public void castFireball(LivingEntity target) {
+        castSpell(target, chooseCombatSpell(target));
     }
 
     public void requestSong() {
@@ -711,10 +945,32 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     @Override
     public void tick() {
         super.tick();
-        if (!this.level().isClientSide) placeBySchedule();
-        if (!this.level().isClientSide && !initialized) initialize();
-        if (!this.level().isClientSide && getLook() < 0 && this.tickCount % 20 == 1) Npcs.ensureLook(this); // older saves
-        if (!this.level().isClientSide && isConversing()) {
+        if (this.level().isClientSide) {
+            if (isCasting() && this.tickCount % 2 == 0) {
+                com.skycraft.magic.spell.Spell spell = getCastingSpell();
+                com.skycraft.magic.spell.Element elem = spell != null ? spell.element : com.skycraft.magic.spell.Element.FIRE;
+                net.minecraft.core.particles.ParticleOptions particle = switch (elem) {
+                    case FROST -> net.minecraft.core.particles.ParticleTypes.SNOWFLAKE;
+                    case SHOCK -> net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK;
+                    case HOLY, NATURE -> net.minecraft.core.particles.ParticleTypes.END_ROD;
+                    case SOUL -> net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME;
+                    default -> net.minecraft.core.particles.ParticleTypes.FLAME;
+                };
+                double yawRad = Math.toRadians(this.yBodyRot);
+                double fwdX = -Math.sin(yawRad) * 0.45;
+                double fwdZ = Math.cos(yawRad) * 0.45;
+                double sideX = Math.cos(yawRad) * 0.32;
+                double sideZ = Math.sin(yawRad) * 0.32;
+                double handY = this.getY() + this.getBbHeight() * 0.68;
+                this.level().addParticle(particle, this.getX() + fwdX + sideX, handY, this.getZ() + fwdZ + sideZ, 0, 0.015, 0);
+                this.level().addParticle(particle, this.getX() + fwdX - sideX, handY, this.getZ() + fwdZ - sideZ, 0, 0.015, 0);
+            }
+            return;
+        }
+        placeBySchedule();
+        if (!initialized) initialize();
+        if (getLook() < 0 && this.tickCount % 20 == 1) Npcs.ensureLook(this); // older saves
+        if (isConversing()) {
             this.getNavigation().stop();
         }
     }
@@ -758,6 +1014,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
             }
         } else {
             raisedDead = false;
+            fleshCast = false;
             if (this.getHealth() < this.getMaxHealth() && this.tickCount % 60 == 0) this.heal(1.0f);
         }
     }

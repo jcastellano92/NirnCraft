@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          6,
+          -12
+        ]
       ],
-      "r0": 4,
-      "r1": 20,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          0
+        ],
+        [
+          -6,
+          -6
+        ],
+        [
+          16,
+          6
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        -6
+      ],
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 3,
+      "phase": 2.76,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -16,
-        7
+        -17,
+        -5
       ],
       "face": "north",
       "overlay": "torval",
@@ -182,5 +227,47 @@
     "roadside_sleeping_sand_cat_landmark": "High Seat of place.skycraft.roadside_sleeping_sand_cat",
     "roadside_sleeping_sand_cat_plaza": "place.skycraft.roadside_sleeping_sand_cat Central Plaza"
   },
-  "innKey": "roadside_sleeping_sand_cat_b_5"
+  "innKey": "roadside_sleeping_sand_cat_b_5",
+  "zones": [
+    {
+      "at": [
+        -6,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

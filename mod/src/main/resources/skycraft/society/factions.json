@@ -1,0 +1,1872 @@
+{
+  "factions": {
+    "townsfolk": {
+      "province": "skyrim",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["guards", "companions", "bards_college"],
+      "rivals": ["bandits", "vampires", "volkihar", "forsworn"],
+      "why": ["skyrim.L6.nine_seats", "skyrim.L7.jarls_and_thanes"]
+    },
+    "guards": {
+      "province": "skyrim",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["townsfolk", "companions"],
+      "rivals": ["bandits", "thieves_guild", "dark_brotherhood", "forsworn", "vampires"],
+      "why": ["skyrim.L6.nine_seats", "skyrim.L7.jarls_and_thanes"]
+    },
+    "companions": {
+      "province": "skyrim",
+      "category": "guild",
+      "dominantFaith": "talos_cult",
+      "allies": ["townsfolk", "guards", "greybeards"],
+      "rivals": ["silver_hand", "bandits", "vampires"],
+      "why": ["whiterun.L7.warrior_hall", "whiterun.L8.honour_and_sovngarde"]
+    },
+    "college": {
+      "province": "skyrim",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["college_of_winterhold", "mages_guild", "synod", "college_of_whispers", "psijic_order"],
+      "rivals": ["thalmor", "necromancers"],
+      "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L8.knowledge_seeker"]
+    },
+    "college_of_winterhold": {
+      "province": "skyrim",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["college", "mages_guild", "synod", "college_of_whispers", "psijic_order"],
+      "rivals": ["thalmor"],
+      "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L9.thalmor_at_college"]
+    },
+    "thieves_guild": {
+      "province": "skyrim",
+      "category": "guild",
+      "dominantFaith": "daedric_veneration",
+      "allies": ["dark_brotherhood", "baandari_pedlars", "corsairs_of_abahs_landing"],
+      "rivals": ["guards", "townsfolk", "camonna_tong"],
+      "why": ["the_rift.L7.guild_decline", "the_rift.L8.shadow_patron", "the_rift.L9.meadery_power"]
+    },
+    "dark_brotherhood": {
+      "province": "skyrim",
+      "category": "guild",
+      "dominantFaith": "daedric_veneration",
+      "allies": ["thieves_guild", "shadowscales"],
+      "rivals": ["guards", "imperial_legion", "imperials", "morag_tong", "vigilants_of_stendarr"],
+      "why": ["falkreath.L8.night_mother", "nibenay_valley.L8.night_mother_crypt"]
+    },
+    "imperial_legion": {
+      "province": "cyrodiil",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["imperials", "elder_council", "east_empire_company", "fighters_guild", "synod", "bards_college"],
+      "rivals": ["stormcloaks", "forsworn", "bandits", "renrijra_krin", "an_xileel", "mythic_dawn"],
+      "why": ["haafingar.L9.imperial_seat", "skyrim.L9.civil_war", "cyrodiil.L7.rule_of_law"]
+    },
+    "imperials": {
+      "province": "skyrim",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["imperial_legion", "elder_council", "east_empire_company", "bards_college"],
+      "rivals": ["stormcloaks", "forsworn", "bandits"],
+      "why": ["haafingar.L7.imperial_nobles", "haafingar.L9.imperial_seat", "skyrim.L9.civil_war"]
+    },
+    "stormcloaks": {
+      "province": "skyrim",
+      "category": "polity",
+      "dominantFaith": "talos_cult",
+      "allies": ["atmoran_remnant"],
+      "rivals": ["imperial_legion", "imperials", "thalmor", "east_empire_company", "forsworn"],
+      "why": ["eastmarch.L7.nord_first", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital", "skyrim.L9.civil_war"]
+    },
+    "bards_college": {
+      "province": "skyrim",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["townsfolk", "imperials", "imperial_legion"],
+      "rivals": ["bandits"],
+      "why": ["haafingar.L6.solitude_seat", "haafingar.L8.burning_of_king_olaf"]
+    },
+    "blades": {
+      "province": "skyrim",
+      "category": "order",
+      "dominantFaith": "nine_divines",
+      "allies": ["imperial_legion", "fighters_guild"],
+      "rivals": ["thalmor", "greybeards", "mythic_dawn"],
+      "why": ["jerall_mountains.L8.dragon_blood_lore", "jerall_mountains.L9.blades_without_emperor", "skyrim.L9.dragon_crisis"]
+    },
+    "greybeards": {
+      "province": "skyrim",
+      "category": "order",
+      "dominantFaith": "eight_divines",
+      "allies": ["companions", "townsfolk"],
+      "rivals": ["blades"],
+      "why": ["skyrim.L8.way_of_the_voice", "whiterun.L8.voice_pilgrims", "the_rift.L8.voice_pilgrims"]
+    },
+    "dawnguard": {
+      "province": "skyrim",
+      "category": "order",
+      "dominantFaith": "eight_divines",
+      "allies": ["vigilants_of_stendarr", "order_of_the_virtuous_blood", "guards", "townsfolk"],
+      "rivals": ["volkihar", "vampires"],
+      "why": ["skyrim.L9.vampire_war", "the_rift.L9.hunters_fort"]
+    },
+    "volkihar": {
+      "province": "skyrim",
+      "category": "clan",
+      "dominantFaith": "daedric_veneration",
+      "allies": ["vampires"],
+      "rivals": ["dawnguard", "vigilants_of_stendarr", "order_of_the_virtuous_blood", "guards", "townsfolk"],
+      "why": ["skyrim.L9.vampire_war", "hjaalmarch.L9.vampire_fear"]
+    },
+    "vampires": {
+      "province": "skyrim",
+      "category": "clan",
+      "dominantFaith": "daedric_veneration",
+      "allies": ["volkihar"],
+      "rivals": ["dawnguard", "vigilants_of_stendarr", "order_of_the_virtuous_blood", "guards", "townsfolk"],
+      "why": ["skyrim.L9.vampire_war", "hjaalmarch.L9.vampire_fear"]
+    },
+    "forsworn": {
+      "province": "skyrim",
+      "category": "rebel",
+      "dominantFaith": "old_gods",
+      "allies": ["glenmoril_wyrd"],
+      "rivals": ["guards", "townsfolk", "stormcloaks", "imperial_legion", "imperials"],
+      "why": ["the_reach.L7.reachfolk_outcast", "the_reach.L8.old_gods", "the_reach.L9.native_uprising"]
+    },
+    "bandits": {
+      "province": "skyrim",
+      "category": "syndicate",
+      "dominantFaith": "eight_divines",
+      "allies": [],
+      "rivals": ["guards", "townsfolk", "imperial_legion", "stormcloaks", "companions", "fighters_guild"],
+      "why": ["skyrim.L6.failing_seats", "falkreath.L9.helgen_burned"]
+    },
+    "thalmor": {
+      "province": "summerset",
+      "category": "polity",
+      "dominantFaith": "aldmeri_ancestors",
+      "allies": ["divine_prosecution", "sapiarchs", "camoran_dynasty", "pellitine_merchant_lords"],
+      "rivals": ["stormcloaks", "blades", "crowns", "forebears", "veiled_heritance", "psijic_order", "maormer_armada", "renrijra_krin"],
+      "why": ["summerset.L7.thalmor_order", "summerset.L8.no_man_god", "summerset.L9.thalmor_rule", "skyrim.L9.thalmor_watch"]
+    },
+    "vigilants_of_stendarr": {
+      "province": "skyrim",
+      "category": "order",
+      "dominantFaith": "eight_divines",
+      "allies": ["dawnguard", "order_of_the_virtuous_blood", "guards"],
+      "rivals": ["volkihar", "vampires", "mythic_dawn", "sixth_house", "sload_cabal"],
+      "why": ["skyrim.L8.daedric_wilds", "skyrim.L9.vampire_war", "colovian_highlands.L8.stendarr_chapel"]
+    },
+    "orc_blood_kin": {
+      "province": "skyrim",
+      "category": "clan",
+      "dominantFaith": "malacath_code",
+      "allies": ["clan_tumnosh", "clan_shatul", "clan_bagrakh"],
+      "rivals": ["forsworn"],
+      "why": ["skyrim.L7.orc_strongholds", "the_reach.L6.two_strongholds", "eastmarch.L6.narzulbur", "the_rift.L6.largashbur"]
+    },
+    "house_redoran": {
+      "province": "morrowind",
+      "category": "polity",
+      "dominantFaith": "tribunal_reclamations",
+      "allies": ["tribunal_temple", "morag_tong"],
+      "rivals": ["house_hlaalu", "house_telvanni", "sixth_house", "an_xileel"],
+      "why": ["morrowind.L7.house_order", "vvardenfell_ashlands.L7.redoran_duty", "solstheim.L7.redoran_duty"]
+    },
+    "house_telvanni": {
+      "province": "morrowind",
+      "category": "polity",
+      "dominantFaith": "daedric_veneration",
+      "allies": ["morag_tong"],
+      "rivals": ["mages_guild", "synod", "house_redoran", "house_hlaalu", "imperial_legion", "an_xileel"],
+      "why": ["telvannis.L7.lord_and_thrall", "telvannis.L9.wizard_feuds", "zafirbel_bay.L7.power_is_rank"]
+    },
+    "house_hlaalu": {
+      "province": "morrowind",
+      "category": "polity",
+      "dominantFaith": "tribunal_reclamations",
+      "allies": ["east_empire_company", "imperial_legion", "thieves_guild"],
+      "rivals": ["house_redoran", "house_indoril", "camonna_tong"],
+      "why": ["west_gash.L7.merchant_city", "west_gash.L9.hlaalu_collaboration", "morrowind.L9.house_politics"]
+    },
+    "house_indoril": {
+      "province": "morrowind",
+      "category": "polity",
+      "dominantFaith": "tribunal_reclamations",
+      "allies": ["tribunal_temple", "house_redoran"],
+      "rivals": ["house_hlaalu", "house_dres", "imperial_legion", "sixth_house"],
+      "why": ["deshaan.L7.priest_nobility", "deshaan.L9.indoril_vs_dres", "morrowind.L8.tribunal"]
+    },
+    "house_dres": {
+      "province": "morrowind",
+      "category": "polity",
+      "dominantFaith": "tribunal_reclamations",
+      "allies": ["camonna_tong"],
+      "rivals": ["an_xileel", "hist_speakers", "shadowscales", "bright_throat_tribe", "dead_water_tribe", "house_indoril", "imperial_legion"],
+      "why": ["deshaan.L7.slaves_of_tear", "morrowind.L9.argonian_grudge", "black_marsh.L9.dres_slaver_remnants"]
+    },
+    "tribunal_temple": {
+      "province": "morrowind",
+      "category": "temple",
+      "dominantFaith": "tribunal_reclamations",
+      "allies": ["house_indoril", "house_redoran"],
+      "rivals": ["sixth_house", "ashlanders"],
+      "why": ["morrowind.L8.tribunal", "ascadian_isles.L8.vivec_the_living_god", "deshaan.L8.almalexia_mother"]
+    },
+    "ashlanders": {
+      "province": "morrowind",
+      "category": "clan",
+      "dominantFaith": "daedric_veneration",
+      "allies": [],
+      "rivals": ["tribunal_temple", "house_hlaalu", "house_dres", "imperial_legion", "sixth_house"],
+      "why": ["morrowind.L7.ashlanders", "morrowind.L8.ashlander_old_ways", "vvardenfell_ashlands.L8.urshilaku_prophecy"]
+    },
+    "morag_tong": {
+      "province": "morrowind",
+      "category": "guild",
+      "dominantFaith": "daedric_veneration",
+      "allies": ["house_redoran", "house_telvanni", "house_indoril"],
+      "rivals": ["dark_brotherhood"],
+      "why": ["morrowind.L7.legal_murder", "telvannis.L8.mephala_shrines"]
+    },
+    "camonna_tong": {
+      "province": "morrowind",
+      "category": "syndicate",
+      "dominantFaith": "tribunal_reclamations",
+      "allies": ["house_dres"],
+      "rivals": ["thieves_guild", "imperial_legion", "east_empire_company", "house_hlaalu"],
+      "why": ["morrowind.L7.criminal_syndicate", "west_gash.L7.dockside_syndicate", "morrowind.L7.outlander_scorn"]
+    },
+    "sixth_house": {
+      "province": "morrowind",
+      "category": "cult",
+      "dominantFaith": "daedric_veneration",
+      "allies": [],
+      "rivals": ["tribunal_temple", "house_redoran", "house_indoril", "ashlanders", "imperial_legion"],
+      "why": ["red_mountain.L8.fence_of_the_dead", "red_mountain.L9.fence_weakening", "vvardenfell_ashlands.L9.sleepers_in_the_north"]
+    },
+    "fighters_guild": {
+      "province": "cyrodiil",
+      "category": "guild",
+      "dominantFaith": "nine_divines",
+      "allies": ["imperial_legion", "mages_guild", "elder_council", "daggerfall_covenant"],
+      "rivals": ["blackwood_company", "bandits", "camonna_tong"],
+      "why": ["cyrodiil.L7.guilds_everywhere", "colovian_highlands.L7.guild_town", "cyrodiil.L9.guild_wars"]
+    },
+    "mages_guild": {
+      "province": "cyrodiil",
+      "category": "guild",
+      "dominantFaith": "nine_divines",
+      "allies": ["fighters_guild", "college_of_winterhold", "synod", "college_of_whispers"],
+      "rivals": ["house_telvanni", "mythic_dawn"],
+      "why": ["cyrodiil.L7.guilds_everywhere", "heartlands.L8.university_rationalism", "great_forest.L9.necromancer_war_front"]
+    },
+    "synod": {
+      "province": "cyrodiil",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["elder_council", "imperial_legion", "mages_guild"],
+      "rivals": ["college_of_whispers", "college_of_winterhold", "thalmor"],
+      "why": ["heartlands.L8.university_rationalism", "heartlands.L9.council_factions"]
+    },
+    "college_of_whispers": {
+      "province": "cyrodiil",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["elder_council", "mages_guild"],
+      "rivals": ["synod", "vigilants_of_stendarr"],
+      "why": ["heartlands.L8.university_rationalism", "heartlands.L9.council_factions"]
+    },
+    "elder_council": {
+      "province": "cyrodiil",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["imperial_legion", "imperials", "east_empire_company", "synod", "college_of_whispers", "fighters_guild"],
+      "rivals": ["stormcloaks", "thalmor", "mythic_dawn", "an_xileel"],
+      "why": ["heartlands.L6.imperial_city", "heartlands.L9.council_factions", "cyrodiil.L9.throne_empty"]
+    },
+    "east_empire_company": {
+      "province": "cyrodiil",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["imperial_legion", "imperials", "elder_council", "house_hlaalu", "archein_brokers"],
+      "rivals": ["stormcloaks", "camonna_tong", "corsairs_of_abahs_landing", "renrijra_krin"],
+      "why": ["haafingar.L9.naval_power", "morrowind.L5.east_empire_charter", "solstheim.L9.company_claim"]
+    },
+    "order_of_the_virtuous_blood": {
+      "province": "cyrodiil",
+      "category": "order",
+      "dominantFaith": "nine_divines",
+      "allies": ["imperial_legion", "dawnguard", "vigilants_of_stendarr"],
+      "rivals": ["vampires", "volkihar"],
+      "why": ["heartlands.L8.temple_of_the_one", "heartlands.L9.watch_vs_guild"]
+    },
+    "blackwood_company": {
+      "province": "cyrodiil",
+      "category": "syndicate",
+      "dominantFaith": "nine_divines",
+      "allies": ["archein_brokers"],
+      "rivals": ["fighters_guild", "an_xileel", "hist_speakers"],
+      "why": ["blackwood.L9.mercenary_company", "cyrodiil.L9.guild_wars"]
+    },
+    "mythic_dawn": {
+      "province": "cyrodiil",
+      "category": "cult",
+      "dominantFaith": "daedric_veneration",
+      "allies": [],
+      "rivals": ["imperial_legion", "elder_council", "blades", "vigilants_of_stendarr", "fighters_guild", "mages_guild"],
+      "why": ["cyrodiil.L9.gate_scars", "gold_coast.L9.kvatch_rebuild"]
+    },
+    "daggerfall_covenant": {
+      "province": "high_rock",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["knights_of_the_dragon", "order_of_the_candle", "order_of_the_lily", "forebears", "clan_tumnosh"],
+      "rivals": ["thalmor", "forsworn"],
+      "why": ["high_rock.L6.fief_patchwork", "high_rock.L8.eight_and_patrons", "high_rock.L9.crowns_and_barons"]
+    },
+    "knights_of_the_dragon": {
+      "province": "high_rock",
+      "category": "order",
+      "dominantFaith": "eight_divines",
+      "allies": ["daggerfall_covenant", "order_of_the_lily"],
+      "rivals": ["order_of_the_candle", "bandits"],
+      "why": ["daggerfall.L6.capital_on_island", "daggerfall.L9.court_vs_barons", "daggerfall.L9.owl_vs_dragon"]
+    },
+    "order_of_the_candle": {
+      "province": "high_rock",
+      "category": "order",
+      "dominantFaith": "yokudan_pantheon",
+      "allies": ["crowns", "forebears", "lhotunics"],
+      "rivals": ["knights_of_the_dragon"],
+      "why": ["sentinel.L6.dome_capital", "sentinel.L9.candle_order", "sentinel.L9.betony_lever"]
+    },
+    "order_of_the_lily": {
+      "province": "high_rock",
+      "category": "order",
+      "dominantFaith": "eight_divines",
+      "allies": ["daggerfall_covenant", "knights_of_the_dragon"],
+      "rivals": ["glenmoril_wyrd", "clan_bagrakh"],
+      "why": ["wayrest.L6.harbour_capital", "wayrest.L8.akatosh_chantry", "wayrest.L9.crown_vs_guild"]
+    },
+    "glenmoril_wyrd": {
+      "province": "high_rock",
+      "category": "cult",
+      "dominantFaith": "old_gods",
+      "allies": ["forsworn"],
+      "rivals": ["order_of_the_lily", "daggerfall_covenant", "vigilants_of_stendarr"],
+      "why": ["glenumbra.L7.wyrd_sisters", "glenumbra.L8.wyrd_rites", "glenumbra.L9.wyrd_vs_clergy"]
+    },
+    "clan_tumnosh": {
+      "province": "high_rock",
+      "category": "clan",
+      "dominantFaith": "malacath_code",
+      "allies": ["orc_blood_kin", "clan_shatul", "daggerfall_covenant"],
+      "rivals": ["clan_bagrakh", "order_of_the_lily"],
+      "why": ["wrothgar.L6.orsinium_city", "wrothgar.L7.chief_and_wives", "wrothgar.L9.orsinium_succession"]
+    },
+    "clan_shatul": {
+      "province": "high_rock",
+      "category": "clan",
+      "dominantFaith": "malacath_code",
+      "allies": ["orc_blood_kin", "clan_tumnosh"],
+      "rivals": ["clan_bagrakh"],
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L8.malacath", "wrothgar.L9.ore_rights"]
+    },
+    "clan_bagrakh": {
+      "province": "high_rock",
+      "category": "clan",
+      "dominantFaith": "malacath_code",
+      "allies": ["orc_blood_kin"],
+      "rivals": ["clan_tumnosh", "clan_shatul", "order_of_the_lily", "daggerfall_covenant"],
+      "why": ["wrothgar.L8.malacath", "wrothgar.L9.orsinium_succession", "high_rock.L9.orsinium_question"]
+    },
+    "direnni_hegemony": {
+      "province": "high_rock",
+      "category": "polity",
+      "dominantFaith": "aldmeri_ancestors",
+      "allies": ["daggerfall_covenant", "mages_guild", "sapiarchs"],
+      "rivals": ["thalmor"],
+      "why": ["high_rock.L8.direnni_nostalgia", "wayrest.L8.direnni_awe"]
+    },
+    "crowns": {
+      "province": "hammerfell",
+      "category": "polity",
+      "dominantFaith": "yokudan_pantheon",
+      "allies": ["order_of_diagna", "ash_abah", "yokudan_ankh_wardens", "order_of_the_candle"],
+      "rivals": ["forebears", "imperial_legion", "imperials", "thalmor"],
+      "why": ["hammerfell.L7.crowns_and_forebears", "hammerfell.L8.yokudan_gods", "alikr_desert.L7.crown_oasis_lords", "hammerfell.L9.crown_forebear_rift"]
+    },
+    "forebears": {
+      "province": "hammerfell",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["lhotunics", "order_of_the_candle", "daggerfall_covenant", "imperial_legion"],
+      "rivals": ["crowns", "thalmor", "corsairs_of_abahs_landing"],
+      "why": ["hammerfell.L7.crowns_and_forebears", "sentinel.L7.quay_forebears", "hews_bane.L7.forebear_merchant_syndicates", "hammerfell.L9.crown_forebear_rift"]
+    },
+    "lhotunics": {
+      "province": "hammerfell",
+      "category": "polity",
+      "dominantFaith": "eight_divines",
+      "allies": ["forebears", "order_of_the_candle", "ash_abah"],
+      "rivals": ["thalmor"],
+      "why": ["sentinel.L7.palace_crowns", "sentinel.L7.quay_forebears", "sentinel.L9.court_rift"]
+    },
+    "order_of_diagna": {
+      "province": "hammerfell",
+      "category": "order",
+      "dominantFaith": "yokudan_pantheon",
+      "allies": ["crowns", "ash_abah"],
+      "rivals": ["clan_bagrakh", "thalmor"],
+      "why": ["hammerfell.L8.sword_path", "alikr_desert.L9.ra_gada_war_camps"]
+    },
+    "ash_abah": {
+      "province": "hammerfell",
+      "category": "order",
+      "dominantFaith": "yokudan_pantheon",
+      "allies": ["crowns", "forebears", "lhotunics"],
+      "rivals": ["vampires", "mythic_dawn"],
+      "why": ["hammerfell.L8.hate_necromancy", "hammerfell.L8.necropolis_dead", "sentinel.L8.arkay_patron"]
+    },
+    "corsairs_of_abahs_landing": {
+      "province": "hammerfell",
+      "category": "syndicate",
+      "dominantFaith": "yokudan_pantheon",
+      "allies": ["thieves_guild", "baandari_pedlars"],
+      "rivals": ["forebears", "east_empire_company", "imperial_legion"],
+      "why": ["hews_bane.L6.abahs_landing", "hews_bane.L7.dock_thieves_and_cutpurses", "hews_bane.L9.syndicate_vs_thieves"]
+    },
+    "psijic_order": {
+      "province": "summerset",
+      "category": "order",
+      "dominantFaith": "aldmeri_ancestors",
+      "allies": ["college_of_winterhold", "college", "sapiarchs"],
+      "rivals": ["thalmor", "sload_cabal", "maormer_armada"],
+      "why": ["artaeum.L6.ceporah_tower", "artaeum.L7.order_ranks", "artaeum.L8.old_ways_rite", "summerset.L9.psijic_apart"]
+    },
+    "sapiarchs": {
+      "province": "summerset",
+      "category": "order",
+      "dominantFaith": "aldmeri_ancestors",
+      "allies": ["thalmor", "divine_prosecution", "direnni_hegemony"],
+      "rivals": ["veiled_heritance", "maormer_armada", "sload_cabal"],
+      "why": ["summerset.L7.sapiarchs", "summerset_isle.L6.colleges", "summerset_isle.L8.tower_faith"]
+    },
+    "divine_prosecution": {
+      "province": "summerset",
+      "category": "order",
+      "dominantFaith": "aldmeri_ancestors",
+      "allies": ["thalmor", "sapiarchs"],
+      "rivals": ["veiled_heritance", "thieves_guild", "dark_brotherhood", "sload_cabal"],
+      "why": ["summerset.L7.thalmor_order", "summerset.L8.propriety", "auridon.L8.propriety_college"]
+    },
+    "veiled_heritance": {
+      "province": "summerset",
+      "category": "rebel",
+      "dominantFaith": "aldmeri_ancestors",
+      "allies": [],
+      "rivals": ["thalmor", "divine_prosecution", "sapiarchs", "camoran_dynasty"],
+      "why": ["summerset.L9.kinlord_resentment", "summerset_isle.L9.house_vs_thalmor", "auridon.L9.cult_denial"]
+    },
+    "camoran_dynasty": {
+      "province": "valenwood",
+      "category": "polity",
+      "dominantFaith": "green_pact",
+      "allies": ["thalmor", "treethanes", "green_pact_spinners", "green_pact"],
+      "rivals": ["maormer_armada", "colovian_highlands"],
+      "why": ["valenwood.L9.camoran_court", "grahtwood.L6.elden_root_capital", "grahtwood.L7.crown_court_thalmor"]
+    },
+    "green_pact": {
+      "province": "valenwood",
+      "category": "temple",
+      "dominantFaith": "green_pact",
+      "allies": ["green_pact_spinners", "treethanes", "wilderking_court", "camoran_dynasty"],
+      "rivals": ["east_empire_company"],
+      "why": ["valenwood.L7.spinners", "valenwood.L8.yffre_faith", "valenwood.L8.meat_mandate", "malabal_tor.L8.strictest_pact"]
+    },
+    "green_pact_spinners": {
+      "province": "valenwood",
+      "category": "temple",
+      "dominantFaith": "green_pact",
+      "allies": ["green_pact", "treethanes", "wilderking_court", "camoran_dynasty"],
+      "rivals": ["east_empire_company"],
+      "why": ["valenwood.L7.spinners", "valenwood.L8.yffre_faith", "greenshade.L8.spinners_of_greenshade", "malabal_tor.L8.strictest_pact"]
+    },
+    "treethanes": {
+      "province": "valenwood",
+      "category": "polity",
+      "dominantFaith": "green_pact",
+      "allies": ["camoran_dynasty", "green_pact_spinners", "green_pact"],
+      "rivals": ["maormer_armada"],
+      "why": ["valenwood.L7.treethanes", "valenwood.L6.tree_cities", "grahtwood.L9.court_vs_voice"]
+    },
+    "wilderking_court": {
+      "province": "valenwood",
+      "category": "order",
+      "dominantFaith": "green_pact",
+      "allies": ["green_pact_spinners", "green_pact"],
+      "rivals": ["thalmor", "maormer_armada"],
+      "why": ["valenwood.L8.wilderking", "greenshade.L8.wilderking_court", "greenshade.L9.wilderking_silent"]
+    },
+    "mane_clergy": {
+      "province": "elsweyr",
+      "category": "temple",
+      "dominantFaith": "two_moons_dance",
+      "allies": ["two_moons_adepts", "anequina_militia", "pellitine_merchant_lords"],
+      "rivals": ["dark_brotherhood"],
+      "why": ["elsweyr.L8.moons_path", "torval.L8.mane_seat", "torval.L8.two_moons_procession"]
+    },
+    "two_moons_adepts": {
+      "province": "elsweyr",
+      "category": "order",
+      "dominantFaith": "two_moons_dance",
+      "allies": ["mane_clergy", "anequina_militia"],
+      "rivals": ["thalmor"],
+      "why": ["elsweyr.L8.moons_path", "torval.L8.two_moons_procession", "anequina.L8.ridge_temples"]
+    },
+    "baandari_pedlars": {
+      "province": "elsweyr",
+      "category": "guild",
+      "dominantFaith": "two_moons_dance",
+      "allies": ["thieves_guild", "corsairs_of_abahs_landing"],
+      "rivals": ["guards", "east_empire_company"],
+      "why": ["elsweyr.L7.baandari", "rimmen.L7.baandari_camp", "whiterun.L7.caravans_outside"]
+    },
+    "renrijra_krin": {
+      "province": "elsweyr",
+      "category": "rebel",
+      "dominantFaith": "two_moons_dance",
+      "allies": ["baandari_pedlars"],
+      "rivals": ["imperial_legion", "imperials", "east_empire_company", "pellitine_merchant_lords", "thalmor"],
+      "why": ["elsweyr.L9.renrijra_krin", "elsweyr.L9.sugar_tax", "nibenay_valley.L9.elsweyr_gates"]
+    },
+    "anequina_militia": {
+      "province": "elsweyr",
+      "category": "polity",
+      "dominantFaith": "two_moons_dance",
+      "allies": ["mane_clergy", "two_moons_adepts"],
+      "rivals": ["imperial_legion", "pellitine_merchant_lords"],
+      "why": ["anequina.L7.well_clans", "anequina.L9.northern_crown", "rimmen.L8.imperial_grudge"]
+    },
+    "pellitine_merchant_lords": {
+      "province": "elsweyr",
+      "category": "polity",
+      "dominantFaith": "two_moons_dance",
+      "allies": ["mane_clergy", "thalmor", "camoran_dynasty"],
+      "rivals": ["renrijra_krin", "anequina_militia"],
+      "why": ["pellitine.L7.planter_houses", "pellitine.L9.planter_vs_crown", "senchal.L9.thalmor_embassy"]
+    },
+    "an_xileel": {
+      "province": "black_marsh",
+      "category": "polity",
+      "dominantFaith": "hist",
+      "allies": ["hist_speakers", "shadowscales", "bright_throat_tribe", "dead_water_tribe"],
+      "rivals": ["house_dres", "house_redoran", "house_telvanni", "imperial_legion", "east_empire_company", "archein_brokers"],
+      "why": ["black_marsh.L9.an_xileel_and_imperial_border", "black_marsh.L9.dres_slaver_remnants", "gideon.L9.lukiul_and_an_xileel"]
+    },
+    "hist_speakers": {
+      "province": "black_marsh",
+      "category": "temple",
+      "dominantFaith": "hist",
+      "allies": ["an_xileel", "bright_throat_tribe", "dead_water_tribe", "shadowscales"],
+      "rivals": ["house_dres", "blackwood_company"],
+      "why": ["black_marsh.L7.hist_communion", "black_marsh.L8.the_hist_and_sithis", "helstrom.L9.elder_tree_council"]
+    },
+    "shadowscales": {
+      "province": "black_marsh",
+      "category": "order",
+      "dominantFaith": "hist",
+      "allies": ["dark_brotherhood", "an_xileel", "hist_speakers"],
+      "rivals": ["house_dres", "imperial_legion"],
+      "why": ["black_marsh.L7.shadowscale_order", "stormhold.L8.shadow_sign_vigil"]
+    },
+    "archein_brokers": {
+      "province": "black_marsh",
+      "category": "guild",
+      "dominantFaith": "eight_divines",
+      "allies": ["east_empire_company", "blackwood_company", "imperial_legion"],
+      "rivals": ["an_xileel", "dead_water_tribe"],
+      "why": ["gideon.L7.lukiul_townsfolk", "lilmoth.L7.dock_syndicates_and_boatmen", "lilmoth.L9.customhouse_struggle"]
+    },
+    "bright_throat_tribe": {
+      "province": "black_marsh",
+      "category": "clan",
+      "dominantFaith": "hist",
+      "allies": ["hist_speakers", "an_xileel"],
+      "rivals": ["house_dres", "dead_water_tribe"],
+      "why": ["murkmire.L7.bright_throat_and_dead_water", "murkmire.L8.sithis_calendar_stones"]
+    },
+    "dead_water_tribe": {
+      "province": "black_marsh",
+      "category": "clan",
+      "dominantFaith": "hist",
+      "allies": ["an_xileel", "hist_speakers", "shadowscales"],
+      "rivals": ["house_dres", "archein_brokers", "imperial_legion"],
+      "why": ["murkmire.L7.bright_throat_and_dead_water", "murkmire.L9.calendar_stone_feud", "shadowfen.L7.chain_breaker_clans"]
+    },
+    "atmoran_remnant": {
+      "province": "foreign",
+      "category": "clan",
+      "dominantFaith": "dragon_totem",
+      "allies": ["stormcloaks", "companions"],
+      "rivals": ["thalmor"],
+      "why": ["atmora.L7.charter_crews_and_scholars", "ice_waste.L7.windhelm_charter_crews", "frozen_forest.L8.dragon_totem_orthodoxy"]
+    },
+    "tsaesci_immortal_guard": {
+      "province": "foreign",
+      "category": "polity",
+      "dominantFaith": "akaviri_coil",
+      "allies": ["blades"],
+      "rivals": ["kamal_host", "ka_po_tun_order"],
+      "why": ["tsaesci.L7.tally_seal_custodians", "tsaesci.L8.immortal_blood_lineage", "tsaesci.L9.eagle_standard_intrigue"]
+    },
+    "kamal_host": {
+      "province": "foreign",
+      "category": "polity",
+      "dominantFaith": "akaviri_coil",
+      "allies": [],
+      "rivals": ["tang_mo_monks", "tsaesci_immortal_guard", "ka_po_tun_order"],
+      "why": ["kamal.L7.winter_host_warbands", "kamal.L8.rite_of_the_spring_march", "kamal.L9.thaw_vanguard_incursion"]
+    },
+    "tang_mo_monks": {
+      "province": "foreign",
+      "category": "polity",
+      "dominantFaith": "akaviri_coil",
+      "allies": ["ka_po_tun_order"],
+      "rivals": ["kamal_host"],
+      "why": ["tang_mo.L7.island_ranger_clans", "tang_mo.L8.ancestral_spire_shrines", "tang_mo.L9.strait_bridge_defense"]
+    },
+    "ka_po_tun_order": {
+      "province": "foreign",
+      "category": "polity",
+      "dominantFaith": "akaviri_coil",
+      "allies": ["tang_mo_monks", "two_moons_adepts"],
+      "rivals": ["tsaesci_immortal_guard", "kamal_host"],
+      "why": ["ka_po_tun.L7.tiger_monk_retainers", "ka_po_tun.L8.tosh_raka_apotheosis", "ka_po_tun.L9.serpent_border_standoff"]
+    },
+    "yokudan_ankh_wardens": {
+      "province": "foreign",
+      "category": "order",
+      "dominantFaith": "yokudan_pantheon",
+      "allies": ["crowns", "order_of_diagna", "ash_abah"],
+      "rivals": ["thalmor", "bandits"],
+      "why": ["yokuda.L7.ankh_keepers_and_singers", "yokudan_desert.L7.ansei_pilgrims_and_keepers", "sunken_isles.L7.salvage_divers_and_wardens"]
+    },
+    "maormer_armada": {
+      "province": "foreign",
+      "category": "polity",
+      "dominantFaith": "coiled_king",
+      "allies": ["corsairs_of_abahs_landing"],
+      "rivals": ["thalmor", "sapiarchs", "divine_prosecution", "camoran_dynasty", "psijic_order"],
+      "why": ["pyandonea.L7.storm_caste_and_truce_captains", "maormer_isles.L7.truce_captains_and_storm_caste", "maormer_isles.L8.cult_of_immortal_orgnum"]
+    },
+    "sload_cabal": {
+      "province": "foreign",
+      "category": "polity",
+      "dominantFaith": "sload_mastery",
+      "allies": [],
+      "rivals": ["psijic_order", "sapiarchs", "divine_prosecution", "vigilants_of_stendarr", "daggerfall_covenant"],
+      "why": ["thras.L7.calculating_contractors", "coral_kingdom.L7.literal_contract_factors", "coral_kingdom.L8.unsentimental_mastery", "coral_kingdom.L9.plague_vat_cultivation"]
+    }
+  },
+  "regions": {
+    "skyrim/whiterun": {
+      "rulingFaction": "townsfolk",
+      "secondaryFactions": ["companions", "greybeards", "guards", "baandari_pedlars"],
+      "alliedFactions": ["companions", "greybeards", "guards", "imperial_legion"],
+      "rivalFactions": ["bandits", "vampires", "volkihar"],
+      "dominantFaith": "talos_cult",
+      "why": ["whiterun.L6.whiterun_seat", "whiterun.L7.warrior_hall", "whiterun.L8.open_preacher", "whiterun.L9.neutral_jarl"]
+    },
+    "skyrim/haafingar": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "bards_college", "east_empire_company", "thalmor"],
+      "alliedFactions": ["imperials", "elder_council", "east_empire_company", "bards_college"],
+      "rivalFactions": ["stormcloaks", "bandits", "volkihar", "vampires"],
+      "dominantFaith": "eight_divines",
+      "why": ["haafingar.L6.solitude_seat", "haafingar.L7.imperial_nobles", "haafingar.L8.divines_temple", "haafingar.L9.imperial_seat"]
+    },
+    "skyrim/eastmarch": {
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["orc_blood_kin", "east_empire_company"],
+      "alliedFactions": ["atmoran_remnant", "guards"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor"],
+      "dominantFaith": "talos_cult",
+      "why": ["eastmarch.L6.windhelm_seat", "eastmarch.L7.nord_first", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital"]
+    },
+    "skyrim/the_rift": {
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["thieves_guild", "dawnguard", "orc_blood_kin"],
+      "alliedFactions": ["thieves_guild", "dawnguard"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor", "volkihar"],
+      "dominantFaith": "eight_divines",
+      "why": ["the_rift.L6.riften_seat", "the_rift.L7.meadery_rule", "the_rift.L8.mara_temple", "the_rift.L9.rebel_leaning_jarl"]
+    },
+    "skyrim/the_reach": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "forsworn", "orc_blood_kin", "blades"],
+      "alliedFactions": ["imperials", "orc_blood_kin"],
+      "rivalFactions": ["forsworn", "stormcloaks"],
+      "dominantFaith": "eight_divines",
+      "why": ["the_reach.L6.markarth_seat", "the_reach.L7.silver_family", "the_reach.L8.old_gods", "the_reach.L9.imperial_jarl", "the_reach.L9.native_uprising"]
+    },
+    "skyrim/winterhold": {
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["college_of_winterhold", "college"],
+      "alliedFactions": ["college_of_winterhold", "college"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor"],
+      "dominantFaith": "talos_cult",
+      "why": ["winterhold.L6.winterhold_remnant", "winterhold.L6.college", "winterhold.L7.town_vs_college", "winterhold.L9.rebel_jarl"]
+    },
+    "skyrim/the_pale": {
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["vigilants_of_stendarr", "dark_brotherhood"],
+      "alliedFactions": ["vigilants_of_stendarr"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor"],
+      "dominantFaith": "talos_cult",
+      "why": ["the_pale.L6.dawnstar_seat", "the_pale.L7.miners_and_owners", "the_pale.L8.mara_priest", "the_pale.L9.rebel_jarl"]
+    },
+    "skyrim/falkreath": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "dark_brotherhood"],
+      "alliedFactions": ["imperials", "guards"],
+      "rivalFactions": ["stormcloaks", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["falkreath.L6.falkreath_graves", "falkreath.L7.town_of_mourners", "falkreath.L8.arkay_priests", "falkreath.L9.imperial_border"]
+    },
+    "skyrim/hjaalmarch": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "vigilants_of_stendarr"],
+      "alliedFactions": ["imperials", "dawnguard"],
+      "rivalFactions": ["volkihar", "vampires", "stormcloaks"],
+      "dominantFaith": "eight_divines",
+      "why": ["hjaalmarch.L6.morthal_seat", "hjaalmarch.L7.jarl_seer", "hjaalmarch.L8.arkay_dead", "hjaalmarch.L9.vampire_fear"]
+    },
+    "high_rock/daggerfall": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["knights_of_the_dragon", "fighters_guild", "mages_guild"],
+      "alliedFactions": ["knights_of_the_dragon", "order_of_the_lily", "forebears"],
+      "rivalFactions": ["order_of_the_candle", "bandits", "glenmoril_wyrd"],
+      "dominantFaith": "eight_divines",
+      "why": ["daggerfall.L6.capital_on_island", "daggerfall.L8.kynareth_patron", "daggerfall.L9.court_vs_barons", "daggerfall.L9.owl_vs_dragon"]
+    },
+    "high_rock/anticlere": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["knights_of_the_dragon", "order_of_the_lily"],
+      "alliedFactions": ["knights_of_the_dragon", "order_of_the_lily"],
+      "rivalFactions": ["glenmoril_wyrd", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["anticlere.L6.anticlere_meadow_city", "anticlere.L7.pious_burghers", "anticlere.L8.mara_patron", "anticlere.L9.flame_crusade"]
+    },
+    "high_rock/dwynnen": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["knights_of_the_dragon", "fighters_guild"],
+      "alliedFactions": ["knights_of_the_dragon"],
+      "rivalFactions": ["glenmoril_wyrd", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["dwynnen.L6.gorge_bridge_city", "dwynnen.L7.ex_soldiers", "dwynnen.L8.dibella_patron", "dwynnen.L9.two_crowns_squeeze"]
+    },
+    "high_rock/wayrest": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["order_of_the_lily", "east_empire_company", "direnni_hegemony"],
+      "alliedFactions": ["order_of_the_lily", "direnni_hegemony", "east_empire_company"],
+      "rivalFactions": ["clan_bagrakh", "corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "why": ["wayrest.L6.harbour_capital", "wayrest.L7.guild_lords", "wayrest.L8.akatosh_chantry", "wayrest.L9.crown_vs_guild"]
+    },
+    "high_rock/wrothgar": {
+      "rulingFaction": "clan_tumnosh",
+      "secondaryFactions": ["clan_shatul", "clan_bagrakh", "orc_blood_kin"],
+      "alliedFactions": ["clan_shatul", "orc_blood_kin", "daggerfall_covenant"],
+      "rivalFactions": ["clan_bagrakh", "order_of_the_lily", "forsworn"],
+      "dominantFaith": "malacath_code",
+      "why": ["wrothgar.L6.orsinium_city", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath", "wrothgar.L9.orsinium_succession"]
+    },
+    "high_rock/glenumbra": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["glenmoril_wyrd", "knights_of_the_dragon"],
+      "alliedFactions": ["knights_of_the_dragon", "fighters_guild"],
+      "rivalFactions": ["glenmoril_wyrd", "vampires"],
+      "dominantFaith": "eight_divines",
+      "why": ["glenumbra.L6.camlorn_city", "glenumbra.L7.camlorn_court", "glenumbra.L8.mara_cathedral", "glenumbra.L9.wyrd_vs_clergy"]
+    },
+    "high_rock/rivenspire": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["order_of_the_virtuous_blood", "vigilants_of_stendarr"],
+      "alliedFactions": ["daggerfall_covenant", "vigilants_of_stendarr"],
+      "rivalFactions": ["vampires", "volkihar", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["rivenspire.L6.shornhelm_city", "rivenspire.L7.three_houses", "rivenspire.L8.stendarr_and_arkay", "rivenspire.L9.house_rivalry"]
+    },
+    "high_rock/stormhaven": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["order_of_the_lily", "fighters_guild"],
+      "alliedFactions": ["order_of_the_lily", "daggerfall_covenant"],
+      "rivalFactions": ["bandits", "clan_bagrakh"],
+      "dominantFaith": "eight_divines",
+      "why": ["stormhaven.L6.abbey_prioris", "stormhaven.L7.abbey_stewards", "stormhaven.L8.mara_heartland", "stormhaven.L9.pilgrim_tolls"]
+    },
+    "high_rock/bjoulsae": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["fighters_guild", "clan_shatul"],
+      "alliedFactions": ["daggerfall_covenant", "forebears"],
+      "rivalFactions": ["forsworn", "clan_bagrakh"],
+      "dominantFaith": "eight_divines",
+      "why": ["bjoulsae.L6.evermor_city", "bjoulsae.L7.evermor_nobles", "bjoulsae.L8.horsemens_oaths", "bjoulsae.L9.reachfolk_raids"]
+    },
+    "hammerfell/sentinel": {
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["lhotunics", "order_of_the_candle", "crowns", "ash_abah"],
+      "alliedFactions": ["lhotunics", "order_of_the_candle", "daggerfall_covenant"],
+      "rivalFactions": ["thalmor", "corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "why": ["sentinel.L6.dome_capital", "sentinel.L7.palace_crowns", "sentinel.L7.quay_forebears", "sentinel.L9.court_rift"]
+    },
+    "hammerfell/alikr_desert": {
+      "rulingFaction": "crowns",
+      "secondaryFactions": ["order_of_diagna", "ash_abah", "yokudan_ankh_wardens"],
+      "alliedFactions": ["order_of_diagna", "ash_abah", "yokudan_ankh_wardens"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor", "forebears"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["alikr_desert.L6.caravanserai_city", "alikr_desert.L7.crown_oasis_lords", "alikr_desert.L8.yokudan_gods", "alikr_desert.L9.ra_gada_war_camps"]
+    },
+    "hammerfell/bangkorai": {
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["daggerfall_covenant", "fighters_guild"],
+      "alliedFactions": ["daggerfall_covenant", "lhotunics"],
+      "rivalFactions": ["corsairs_of_abahs_landing", "thalmor"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["bangkorai.L6.river_port_city", "bangkorai.L7.mixed_towns", "bangkorai.L8.na_totambu_reverence", "bangkorai.L9.forebear_ports"]
+    },
+    "hammerfell/dragontail": {
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["crowns", "fighters_guild", "order_of_diagna"],
+      "alliedFactions": ["lhotunics", "imperial_legion"],
+      "rivalFactions": ["thalmor", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["dragontail.L6.terrace_city", "dragontail.L7.ore_lords", "dragontail.L8.arkay_patron", "dragontail.L9.arms_for_both"]
+    },
+    "hammerfell/craglorn": {
+      "rulingFaction": "crowns",
+      "secondaryFactions": ["order_of_diagna", "mages_guild", "fighters_guild"],
+      "alliedFactions": ["order_of_diagna", "yokudan_ankh_wardens"],
+      "rivalFactions": ["thalmor", "imperial_legion"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["craglorn.L6.elinhir_city", "craglorn.L7.mage_patrons", "craglorn.L8.celestial_reverence", "craglorn.L9.border_friction"]
+    },
+    "hammerfell/hews_bane": {
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["corsairs_of_abahs_landing", "thieves_guild", "lhotunics"],
+      "alliedFactions": ["lhotunics", "thieves_guild"],
+      "rivalFactions": ["thalmor", "east_empire_company"],
+      "dominantFaith": "eight_divines",
+      "why": ["hews_bane.L6.abahs_landing", "hews_bane.L7.forebear_merchant_syndicates", "hews_bane.L8.no_forgiveness_oath", "hews_bane.L9.collaborator_hunt"]
+    },
+    "hammerfell/stros_mkai": {
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["crowns", "corsairs_of_abahs_landing", "east_empire_company"],
+      "alliedFactions": ["lhotunics", "crowns"],
+      "rivalFactions": ["thalmor", "imperial_legion"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["stros_mkai.L6.port_hunding", "stros_mkai.L7.harbour_lord_and_merchants", "stros_mkai.L8.hunding_memory", "stros_mkai.L9.treaty_ground"]
+    },
+    "cyrodiil/heartlands": {
+      "rulingFaction": "elder_council",
+      "secondaryFactions": ["imperial_legion", "synod", "college_of_whispers", "east_empire_company", "order_of_the_virtuous_blood"],
+      "alliedFactions": ["imperial_legion", "imperials", "synod", "college_of_whispers", "fighters_guild", "mages_guild"],
+      "rivalFactions": ["stormcloaks", "thalmor", "mythic_dawn"],
+      "dominantFaith": "eight_divines",
+      "why": ["heartlands.L6.imperial_city", "heartlands.L7.ward_ladder", "heartlands.L8.temple_of_the_one", "heartlands.L9.council_factions"]
+    },
+    "cyrodiil/jerall_mountains": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["blades", "fighters_guild", "companions"],
+      "alliedFactions": ["elder_council", "blades", "fighters_guild"],
+      "rivalFactions": ["thalmor", "mythic_dawn"],
+      "dominantFaith": "talos_cult",
+      "why": ["jerall_mountains.L6.bruma_on_the_pass", "jerall_mountains.L7.nord_imperial_mix", "jerall_mountains.L8.talos_first", "jerall_mountains.L9.blades_without_emperor"]
+    },
+    "cyrodiil/colovian_highlands": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["fighters_guild", "mages_guild", "synod"],
+      "alliedFactions": ["elder_council", "fighters_guild", "mages_guild"],
+      "rivalFactions": ["blackwood_company", "mythic_dawn", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["colovian_highlands.L6.chorrol_crossroads", "colovian_highlands.L7.colovian_pride", "colovian_highlands.L7.guild_town", "colovian_highlands.L8.stendarr_chapel"]
+    },
+    "cyrodiil/great_forest": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["mages_guild", "vigilants_of_stendarr", "order_of_the_virtuous_blood"],
+      "alliedFactions": ["elder_council", "mages_guild", "vigilants_of_stendarr"],
+      "rivalFactions": ["mythic_dawn", "vampires", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["great_forest.L6.priory", "great_forest.L7.woodfolk", "great_forest.L8.grove_spirits", "great_forest.L9.necromancer_war_front"]
+    },
+    "cyrodiil/nibenay_basin": {
+      "rulingFaction": "elder_council",
+      "secondaryFactions": ["house_hlaalu", "fighters_guild", "dark_brotherhood"],
+      "alliedFactions": ["imperial_legion", "house_hlaalu", "fighters_guild"],
+      "rivalFactions": ["mythic_dawn", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["nibenay_basin.L6.cheydinhal_on_the_corbolo", "nibenay_basin.L7.dunmer_quarter", "nibenay_basin.L8.dunmer_ancestor_rites", "nibenay_basin.L9.dunmer_count"]
+    },
+    "cyrodiil/west_weald": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["elder_council", "order_of_the_virtuous_blood", "synod"],
+      "alliedFactions": ["elder_council", "fighters_guild", "mages_guild"],
+      "rivalFactions": ["thalmor", "mythic_dawn"],
+      "dominantFaith": "eight_divines",
+      "why": ["west_weald.L6.skingrad_hill", "west_weald.L7.vintner_aristocracy", "west_weald.L8.julianos_chapel", "west_weald.L9.hidden_count"]
+    },
+    "cyrodiil/gold_coast": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["east_empire_company", "fighters_guild", "mages_guild"],
+      "alliedFactions": ["elder_council", "east_empire_company", "forebears"],
+      "rivalFactions": ["mythic_dawn", "corsairs_of_abahs_landing", "thalmor"],
+      "dominantFaith": "eight_divines",
+      "why": ["gold_coast.L6.anvil_harbour", "gold_coast.L6.kvatch_on_the_hill", "gold_coast.L7.merchant_wealth", "gold_coast.L9.kvatch_rebuild"]
+    },
+    "cyrodiil/nibenay_valley": {
+      "rulingFaction": "elder_council",
+      "secondaryFactions": ["thieves_guild", "dark_brotherhood", "renrijra_krin"],
+      "alliedFactions": ["imperial_legion"],
+      "rivalFactions": ["renrijra_krin", "bandits"],
+      "dominantFaith": "eight_divines",
+      "why": ["nibenay_valley.L6.bravil_ferry_city", "nibenay_valley.L7.slum_city", "nibenay_valley.L8.night_mother_crypt", "nibenay_valley.L9.elsweyr_gates"]
+    },
+    "cyrodiil/blackwood": {
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["blackwood_company", "fighters_guild", "archein_brokers"],
+      "alliedFactions": ["elder_council", "east_empire_company"],
+      "rivalFactions": ["an_xileel", "renrijra_krin", "shadowscales"],
+      "dominantFaith": "eight_divines",
+      "why": ["blackwood.L6.leyawiin_at_the_mouth", "blackwood.L7.imperial_core_vs_beastfolk_shanties", "blackwood.L8.argonian_hist_reverence", "blackwood.L9.mercenary_company"]
+    },
+    "morrowind/stonefalls": {
+      "rulingFaction": "house_indoril",
+      "secondaryFactions": ["house_redoran", "imperial_legion", "east_empire_company", "tribunal_temple"],
+      "alliedFactions": ["tribunal_temple", "house_redoran"],
+      "rivalFactions": ["an_xileel", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["stonefalls.L6.ebonheart_council_city", "stonefalls.L6.blacklight_border_city", "stonefalls.L7.imperial_district_vs_dunmer_quarter", "stonefalls.L9.grand_council"]
+    },
+    "morrowind/deshaan": {
+      "rulingFaction": "house_indoril",
+      "secondaryFactions": ["tribunal_temple", "house_dres", "morag_tong"],
+      "alliedFactions": ["tribunal_temple", "house_redoran", "morag_tong"],
+      "rivalFactions": ["an_xileel", "hist_speakers", "shadowscales", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["deshaan.L6.mournhold_capital", "deshaan.L6.tear_plantation_city", "deshaan.L7.priest_nobility", "deshaan.L9.indoril_vs_dres"]
+    },
+    "morrowind/molag_amur": {
+      "rulingFaction": "tribunal_temple",
+      "secondaryFactions": ["ashlanders", "house_redoran", "house_indoril"],
+      "alliedFactions": ["house_indoril", "house_redoran"],
+      "rivalFactions": ["sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["molag_amur.L6.molag_mar_cliff_town", "molag_amur.L6.erabenimsun_camp", "molag_amur.L7.warlike_nomads", "molag_amur.L8.holy_mountains"]
+    },
+    "morrowind/telvannis": {
+      "rulingFaction": "house_telvanni",
+      "secondaryFactions": ["morag_tong"],
+      "alliedFactions": ["morag_tong"],
+      "rivalFactions": ["mages_guild", "synod", "imperial_legion", "house_redoran", "house_hlaalu"],
+      "dominantFaith": "daedric_veneration",
+      "why": ["telvannis.L6.port_telvannis", "telvannis.L7.lord_and_thrall", "telvannis.L8.mephala_shrines", "telvannis.L9.wizard_feuds"]
+    },
+    "morrowind/sheogorad": {
+      "rulingFaction": "house_redoran",
+      "secondaryFactions": ["tribunal_temple", "house_telvanni"],
+      "alliedFactions": ["tribunal_temple"],
+      "rivalFactions": ["sixth_house", "bandits"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["sheogorad.L6.dagon_fel_harbour", "sheogorad.L7.nord_dunmer_mix", "sheogorad.L8.sanctus_shrine", "sheogorad.L9.wreckers_suspected"]
+    },
+    "morrowind/vvardenfell_ashlands": {
+      "rulingFaction": "house_redoran",
+      "secondaryFactions": ["tribunal_temple", "ashlanders", "imperial_legion"],
+      "alliedFactions": ["tribunal_temple", "morag_tong"],
+      "rivalFactions": ["sixth_house", "house_hlaalu", "house_telvanni"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["vvardenfell_ashlands.L6.aldruhn_under_the_skar", "vvardenfell_ashlands.L7.redoran_duty", "vvardenfell_ashlands.L8.redoran_temple_piety", "vvardenfell_ashlands.L9.council_of_ald_ruhn"]
+    },
+    "morrowind/grazelands": {
+      "rulingFaction": "house_telvanni",
+      "secondaryFactions": ["ashlanders"],
+      "alliedFactions": ["morag_tong"],
+      "rivalFactions": ["imperial_legion", "mages_guild", "house_redoran"],
+      "dominantFaith": "daedric_veneration",
+      "why": ["grazelands.L6.vos_and_tel_vos", "grazelands.L6.zainab_and_ahemmusa_camps", "grazelands.L7.nomads_vs_farmers", "grazelands.L8.ashlander_herd_rites"]
+    },
+    "morrowind/azuras_coast": {
+      "rulingFaction": "house_telvanni",
+      "secondaryFactions": ["tribunal_temple", "ashlanders"],
+      "alliedFactions": ["morag_tong"],
+      "rivalFactions": ["mages_guild", "imperial_legion", "sixth_house"],
+      "dominantFaith": "daedric_veneration",
+      "why": ["azuras_coast.L6.wizard_towers", "azuras_coast.L7.wizard_and_servant", "azuras_coast.L8.azura_shrine", "azuras_coast.L9.telvanni_rivalries"]
+    },
+    "morrowind/west_gash": {
+      "rulingFaction": "house_hlaalu",
+      "secondaryFactions": ["east_empire_company", "imperial_legion", "camonna_tong", "thieves_guild", "fighters_guild", "mages_guild"],
+      "alliedFactions": ["east_empire_company", "imperial_legion", "thieves_guild"],
+      "rivalFactions": ["house_redoran", "camonna_tong", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["west_gash.L6.balmora_on_the_odai", "west_gash.L7.merchant_city", "west_gash.L8.pragmatic_piety", "west_gash.L9.hlaalu_collaboration"]
+    },
+    "morrowind/bitter_coast": {
+      "rulingFaction": "house_hlaalu",
+      "secondaryFactions": ["camonna_tong", "east_empire_company", "thieves_guild"],
+      "alliedFactions": ["east_empire_company", "imperial_legion"],
+      "rivalFactions": ["house_redoran", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["bitter_coast.L6.customs_port", "bitter_coast.L7.smugglers_and_tax_men", "bitter_coast.L8.bitter_superstitions", "bitter_coast.L9.customs_corruption"]
+    },
+    "morrowind/ascadian_isles": {
+      "rulingFaction": "tribunal_temple",
+      "secondaryFactions": ["house_hlaalu", "house_dres", "morag_tong", "imperial_legion"],
+      "alliedFactions": ["house_indoril", "house_hlaalu", "house_redoran"],
+      "rivalFactions": ["sixth_house", "an_xileel"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["ascadian_isles.L6.vivec_cantons", "ascadian_isles.L7.canton_ranks", "ascadian_isles.L8.vivec_the_living_god", "ascadian_isles.L9.temple_secrets"]
+    },
+    "morrowind/red_mountain": {
+      "rulingFaction": "tribunal_temple",
+      "secondaryFactions": ["house_redoran", "sixth_house"],
+      "alliedFactions": ["house_redoran", "house_indoril"],
+      "rivalFactions": ["sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["red_mountain.L6.ghostgate", "red_mountain.L7.garrison_life", "red_mountain.L8.fence_of_the_dead", "red_mountain.L9.fence_weakening"]
+    },
+    "morrowind/solstheim": {
+      "rulingFaction": "house_redoran",
+      "secondaryFactions": ["house_telvanni", "east_empire_company", "tribunal_temple"],
+      "alliedFactions": ["tribunal_temple", "house_telvanni"],
+      "rivalFactions": ["bandits", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["solstheim.L6.raven_rock_bulwark", "solstheim.L7.redoran_duty", "solstheim.L8.all_maker", "solstheim.L9.two_houses"]
+    },
+    "black_marsh/shadowfen": {
+      "rulingFaction": "an_xileel",
+      "secondaryFactions": ["hist_speakers", "shadowscales", "dead_water_tribe"],
+      "alliedFactions": ["hist_speakers", "shadowscales", "dead_water_tribe"],
+      "rivalFactions": ["house_dres", "imperial_legion", "blackwood_company"],
+      "dominantFaith": "hist",
+      "why": ["shadowfen.L6.percolating_mire_posts", "shadowfen.L7.chain_breaker_clans", "shadowfen.L8.shackle_cairns", "shadowfen.L9.broken_chain_watch"]
+    },
+    "black_marsh/stormhold": {
+      "rulingFaction": "an_xileel",
+      "secondaryFactions": ["hist_speakers", "shadowscales"],
+      "alliedFactions": ["hist_speakers", "shadowscales", "bright_throat_tribe"],
+      "rivalFactions": ["house_dres", "house_redoran", "imperial_legion"],
+      "dominantFaith": "hist",
+      "why": ["stormhold.L6.stormhold_ring_over_ruin", "stormhold.L7.tree_minders_and_factors", "stormhold.L8.shadow_sign_vigil", "stormhold.L9.caravan_toll_dispute"]
+    },
+    "black_marsh/helstrom": {
+      "rulingFaction": "an_xileel",
+      "secondaryFactions": ["hist_speakers", "shadowscales"],
+      "alliedFactions": ["hist_speakers", "shadowscales", "bright_throat_tribe", "dead_water_tribe"],
+      "rivalFactions": ["house_dres", "imperial_legion", "east_empire_company", "archein_brokers"],
+      "dominantFaith": "hist",
+      "why": ["helstrom.L6.helstrom_ring_and_thorn_port", "helstrom.L7.root_heart_tribes", "helstrom.L8.sap_naming_rite", "helstrom.L9.elder_tree_council"]
+    },
+    "black_marsh/gideon": {
+      "rulingFaction": "archein_brokers",
+      "secondaryFactions": ["an_xileel", "hist_speakers", "blackwood_company"],
+      "alliedFactions": ["east_empire_company", "imperial_legion", "hist_speakers"],
+      "rivalFactions": ["house_dres", "dead_water_tribe"],
+      "dominantFaith": "hist",
+      "why": ["gideon.L6.gideon_walled_seat", "gideon.L7.lukiul_townsfolk", "gideon.L8.chapel_and_root_shrine", "gideon.L9.lukiul_and_an_xileel"]
+    },
+    "black_marsh/lilmoth": {
+      "rulingFaction": "archein_brokers",
+      "secondaryFactions": ["east_empire_company", "an_xileel", "thieves_guild"],
+      "alliedFactions": ["east_empire_company", "hist_speakers"],
+      "rivalFactions": ["house_dres", "corsairs_of_abahs_landing"],
+      "dominantFaith": "hist",
+      "why": ["lilmoth.L6.lilmoth_harbour", "lilmoth.L7.dock_syndicates_and_boatmen", "lilmoth.L8.kothringi_quarantine_shrines", "lilmoth.L9.customhouse_struggle"]
+    },
+    "black_marsh/murkmire": {
+      "rulingFaction": "bright_throat_tribe",
+      "secondaryFactions": ["dead_water_tribe", "hist_speakers", "an_xileel"],
+      "alliedFactions": ["hist_speakers", "an_xileel", "shadowscales"],
+      "rivalFactions": ["house_dres", "blackwood_company", "imperial_legion"],
+      "dominantFaith": "hist",
+      "why": ["murkmire.L6.soulrest_and_stilt_villages", "murkmire.L7.bright_throat_and_dead_water", "murkmire.L8.sithis_calendar_stones", "murkmire.L9.calendar_stone_feud"]
+    },
+    "elsweyr/anequina": {
+      "rulingFaction": "anequina_militia",
+      "secondaryFactions": ["two_moons_adepts", "baandari_pedlars", "mane_clergy"],
+      "alliedFactions": ["mane_clergy", "two_moons_adepts", "baandari_pedlars"],
+      "rivalFactions": ["imperial_legion", "imperials", "pellitine_merchant_lords"],
+      "dominantFaith": "two_moons_dance",
+      "why": ["anequina.L6.riverhold_seat", "anequina.L7.well_clans", "anequina.L8.ridge_temples", "anequina.L9.northern_crown"]
+    },
+    "elsweyr/rimmen": {
+      "rulingFaction": "anequina_militia",
+      "secondaryFactions": ["baandari_pedlars", "two_moons_adepts", "renrijra_krin"],
+      "alliedFactions": ["mane_clergy", "baandari_pedlars", "two_moons_adepts"],
+      "rivalFactions": ["imperial_legion", "imperials", "east_empire_company"],
+      "dominantFaith": "two_moons_dance",
+      "why": ["rimmen.L6.rimmen_seat", "rimmen.L7.baandari_camp", "rimmen.L8.imperial_grudge", "rimmen.L9.rimmen_claim"]
+    },
+    "elsweyr/torval": {
+      "rulingFaction": "mane_clergy",
+      "secondaryFactions": ["two_moons_adepts", "pellitine_merchant_lords", "anequina_militia"],
+      "alliedFactions": ["two_moons_adepts", "anequina_militia", "pellitine_merchant_lords"],
+      "rivalFactions": ["dark_brotherhood"],
+      "dominantFaith": "two_moons_dance",
+      "why": ["torval.L6.torval_capital", "torval.L7.priestly_quarter", "torval.L8.mane_seat", "torval.L8.two_moons_procession"]
+    },
+    "elsweyr/pellitine": {
+      "rulingFaction": "pellitine_merchant_lords",
+      "secondaryFactions": ["mane_clergy", "renrijra_krin", "thalmor"],
+      "alliedFactions": ["mane_clergy", "thalmor", "camoran_dynasty"],
+      "rivalFactions": ["renrijra_krin", "imperial_legion"],
+      "dominantFaith": "two_moons_dance",
+      "why": ["pellitine.L6.corinthe_seat", "pellitine.L7.planter_houses", "pellitine.L8.garden_priests", "pellitine.L9.planter_vs_crown"]
+    },
+    "elsweyr/senchal": {
+      "rulingFaction": "pellitine_merchant_lords",
+      "secondaryFactions": ["baandari_pedlars", "thalmor", "renrijra_krin", "east_empire_company"],
+      "alliedFactions": ["mane_clergy", "thalmor"],
+      "rivalFactions": ["renrijra_krin", "corsairs_of_abahs_landing"],
+      "dominantFaith": "two_moons_dance",
+      "why": ["senchal.L6.senchal_seat", "senchal.L7.sailors_and_boilers", "senchal.L8.khenarthi_winds", "senchal.L9.thalmor_embassy"]
+    },
+    "valenwood/malabal_tor": {
+      "rulingFaction": "green_pact_spinners",
+      "secondaryFactions": ["green_pact", "camoran_dynasty", "treethanes", "orc_blood_kin"],
+      "alliedFactions": ["green_pact", "camoran_dynasty", "treethanes", "wilderking_court"],
+      "rivalFactions": ["maormer_armada", "east_empire_company"],
+      "dominantFaith": "green_pact",
+      "why": ["malabal_tor.L6.silvenar_seat", "malabal_tor.L7.silvenar_court", "malabal_tor.L8.strictest_pact", "malabal_tor.L9.orc_truce"]
+    },
+    "valenwood/reapers_march": {
+      "rulingFaction": "treethanes",
+      "secondaryFactions": ["camoran_dynasty", "mane_clergy", "baandari_pedlars", "green_pact_spinners"],
+      "alliedFactions": ["camoran_dynasty", "mane_clergy", "green_pact_spinners"],
+      "rivalFactions": ["imperial_legion", "bandits"],
+      "dominantFaith": "green_pact",
+      "why": ["reapers_march.L6.arenthia_seat", "reapers_march.L7.truce_elders", "reapers_march.L8.bone_truce_rite", "reapers_march.L9.colovian_pressure"]
+    },
+    "valenwood/grahtwood": {
+      "rulingFaction": "camoran_dynasty",
+      "secondaryFactions": ["treethanes", "thalmor", "green_pact_spinners", "green_pact"],
+      "alliedFactions": ["treethanes", "thalmor", "green_pact_spinners"],
+      "rivalFactions": ["maormer_armada", "veiled_heritance"],
+      "dominantFaith": "green_pact",
+      "why": ["grahtwood.L6.elden_root_capital", "grahtwood.L7.crown_court_thalmor", "grahtwood.L8.elden_temple", "grahtwood.L9.court_vs_voice"]
+    },
+    "valenwood/greenshade": {
+      "rulingFaction": "wilderking_court",
+      "secondaryFactions": ["green_pact_spinners", "green_pact", "treethanes", "camoran_dynasty"],
+      "alliedFactions": ["green_pact_spinners", "green_pact", "treethanes"],
+      "rivalFactions": ["maormer_armada", "thalmor"],
+      "dominantFaith": "green_pact",
+      "why": ["greenshade.L6.woodhearth_seat", "greenshade.L8.wilderking_court", "greenshade.L8.spinners_of_greenshade", "greenshade.L9.maormer_shore"]
+    },
+    "summerset/summerset_isle": {
+      "rulingFaction": "thalmor",
+      "secondaryFactions": ["sapiarchs", "divine_prosecution"],
+      "alliedFactions": ["sapiarchs", "divine_prosecution", "camoran_dynasty"],
+      "rivalFactions": ["veiled_heritance", "maormer_armada", "sload_cabal", "stormcloaks", "blades", "crowns"],
+      "dominantFaith": "aldmeri_ancestors",
+      "why": ["summerset_isle.L6.alinor_capital", "summerset_isle.L7.alinor_houses", "summerset_isle.L8.tower_faith", "summerset_isle.L9.house_vs_thalmor"]
+    },
+    "summerset/auridon": {
+      "rulingFaction": "thalmor",
+      "secondaryFactions": ["divine_prosecution", "veiled_heritance", "sapiarchs"],
+      "alliedFactions": ["divine_prosecution", "sapiarchs"],
+      "rivalFactions": ["veiled_heritance", "maormer_armada"],
+      "dominantFaith": "aldmeri_ancestors",
+      "why": ["auridon.L6.firsthold_seat", "auridon.L7.vulkhel_outsiders", "auridon.L8.propriety_college", "auridon.L9.maormer_front"]
+    },
+    "summerset/artaeum": {
+      "rulingFaction": "psijic_order",
+      "secondaryFactions": ["sapiarchs"],
+      "alliedFactions": ["college_of_winterhold", "college", "sapiarchs"],
+      "rivalFactions": ["thalmor", "sload_cabal", "maormer_armada"],
+      "dominantFaith": "aldmeri_ancestors",
+      "why": ["artaeum.L6.ceporah_tower", "artaeum.L7.order_ranks", "artaeum.L8.old_ways_rite", "artaeum.L9.thalmor_want_relics"]
+    },
+    "atmora/ice_waste": {
+      "rulingFaction": "atmoran_remnant",
+      "secondaryFactions": ["stormcloaks", "companions"],
+      "alliedFactions": ["stormcloaks", "companions"],
+      "rivalFactions": ["thalmor"],
+      "dominantFaith": "dragon_totem",
+      "why": ["ice_waste.L6.kjolvik_camp", "ice_waste.L7.windhelm_charter_crews", "ice_waste.L8.whale_and_bear_totems", "ice_waste.L9.pack_ice_lock"]
+    },
+    "atmora/frozen_forest": {
+      "rulingFaction": "atmoran_remnant",
+      "secondaryFactions": ["college_of_winterhold", "stormcloaks"],
+      "alliedFactions": ["stormcloaks", "college_of_winterhold"],
+      "rivalFactions": ["thalmor"],
+      "dominantFaith": "dragon_totem",
+      "why": ["frozen_forest.L6.jylkurfyk_port_ruins", "frozen_forest.L7.chroniclers_and_delvers", "frozen_forest.L8.dragon_totem_orthodoxy", "frozen_forest.L9.barrow_king_stirring"]
+    },
+    "akavir/tsaesci": {
+      "rulingFaction": "tsaesci_immortal_guard",
+      "secondaryFactions": ["blades"],
+      "alliedFactions": ["blades"],
+      "rivalFactions": ["kamal_host", "ka_po_tun_order"],
+      "dominantFaith": "akaviri_coil",
+      "why": ["tsaesci.L6.tsaesci_factor_compound", "tsaesci.L7.tally_seal_custodians", "tsaesci.L8.immortal_blood_lineage", "tsaesci.L9.eagle_standard_intrigue"]
+    },
+    "akavir/kamal": {
+      "rulingFaction": "kamal_host",
+      "secondaryFactions": [],
+      "alliedFactions": [],
+      "rivalFactions": ["tang_mo_monks", "tsaesci_immortal_guard", "ka_po_tun_order"],
+      "dominantFaith": "akaviri_coil",
+      "why": ["kamal.L6.kamal_pass_watch", "kamal.L7.winter_host_warbands", "kamal.L8.rite_of_the_spring_march", "kamal.L9.thaw_vanguard_incursion"]
+    },
+    "akavir/tang_mo": {
+      "rulingFaction": "tang_mo_monks",
+      "secondaryFactions": ["ka_po_tun_order"],
+      "alliedFactions": ["ka_po_tun_order"],
+      "rivalFactions": ["kamal_host"],
+      "dominantFaith": "akaviri_coil",
+      "why": ["tang_mo.L6.tang_mo_treaty_harbor", "tang_mo.L7.island_ranger_clans", "tang_mo.L8.ancestral_spire_shrines", "tang_mo.L9.strait_bridge_defense"]
+    },
+    "akavir/ka_po_tun": {
+      "rulingFaction": "ka_po_tun_order",
+      "secondaryFactions": ["tang_mo_monks"],
+      "alliedFactions": ["tang_mo_monks", "two_moons_adepts"],
+      "rivalFactions": ["tsaesci_immortal_guard", "kamal_host"],
+      "dominantFaith": "akaviri_coil",
+      "why": ["ka_po_tun.L6.tiger_plains_shrine_town", "ka_po_tun.L7.tiger_monk_retainers", "ka_po_tun.L8.tosh_raka_apotheosis", "ka_po_tun.L9.serpent_border_standoff"]
+    },
+    "yokuda/yokudan_desert": {
+      "rulingFaction": "yokudan_ankh_wardens",
+      "secondaryFactions": ["crowns", "order_of_diagna"],
+      "alliedFactions": ["crowns", "order_of_diagna", "ash_abah"],
+      "rivalFactions": ["thalmor", "bandits"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["yokudan_desert.L6.new_tava_pilgrim_port", "yokudan_desert.L7.ansei_pilgrims_and_keepers", "yokudan_desert.L8.constellation_liturgy", "yokudan_desert.L9.fault_vault_seeker"]
+    },
+    "yokuda/sunken_isles": {
+      "rulingFaction": "yokudan_ankh_wardens",
+      "secondaryFactions": ["crowns", "forebears"],
+      "alliedFactions": ["crowns", "forebears"],
+      "rivalFactions": ["corsairs_of_abahs_landing", "bandits"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["sunken_isles.L6.riven_shoal_anchorage", "sunken_isles.L7.salvage_divers_and_wardens", "sunken_isles.L8.drowned_ancestor_vigil", "sunken_isles.L9.plunderers_in_the_shoals"]
+    },
+    "pyandonea/maormer_isles": {
+      "rulingFaction": "maormer_armada",
+      "secondaryFactions": ["corsairs_of_abahs_landing"],
+      "alliedFactions": ["corsairs_of_abahs_landing"],
+      "rivalFactions": ["thalmor", "sapiarchs", "divine_prosecution", "camoran_dynasty"],
+      "dominantFaith": "coiled_king",
+      "why": ["maormer_isles.L6.mistveil_and_fleet_anchorage", "maormer_isles.L7.truce_captains_and_storm_caste", "maormer_isles.L8.cult_of_immortal_orgnum", "maormer_isles.L9.storm_spire_sabotage"]
+    },
+    "thras/coral_kingdom": {
+      "rulingFaction": "sload_cabal",
+      "secondaryFactions": [],
+      "alliedFactions": [],
+      "rivalFactions": ["psijic_order", "sapiarchs", "divine_prosecution", "vigilants_of_stendarr"],
+      "dominantFaith": "sload_mastery",
+      "why": ["coral_kingdom.L6.quarantined_sandbar_camp", "coral_kingdom.L7.literal_contract_factors", "coral_kingdom.L8.unsentimental_mastery", "coral_kingdom.L9.plague_vat_cultivation"]
+    },
+    "sea/sea_of_ghosts": {
+      "rulingFaction": "east_empire_company",
+      "secondaryFactions": ["stormcloaks", "imperial_legion", "atmoran_remnant"],
+      "alliedFactions": ["imperial_legion", "house_redoran"],
+      "rivalFactions": ["corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "why": ["haafingar.L9.naval_power", "foreign.L6.beachhead_anchorages"]
+    },
+    "sea/iliac_bay": {
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["forebears", "order_of_the_lily", "knights_of_the_dragon"],
+      "alliedFactions": ["forebears", "lhotunics"],
+      "rivalFactions": ["corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "why": ["high_rock.L6.capitals_at_mouths", "sentinel.L6.dome_capital"]
+    },
+    "sea/abecean_sea": {
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["corsairs_of_abahs_landing", "east_empire_company", "thalmor"],
+      "alliedFactions": ["east_empire_company", "lhotunics"],
+      "rivalFactions": ["maormer_armada", "sload_cabal"],
+      "dominantFaith": "eight_divines",
+      "why": ["stros_mkai.L6.port_hunding", "gold_coast.L6.anvil_harbour"]
+    },
+    "sea/topal_bay": {
+      "rulingFaction": "east_empire_company",
+      "secondaryFactions": ["pellitine_merchant_lords", "archein_brokers", "imperial_legion"],
+      "alliedFactions": ["imperial_legion", "archein_brokers"],
+      "rivalFactions": ["renrijra_krin", "corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "why": ["blackwood.L6.leyawiin_at_the_mouth", "senchal.L6.senchal_seat"]
+    },
+    "sea/inner_sea": {
+      "rulingFaction": "house_hlaalu",
+      "secondaryFactions": ["house_telvanni", "house_indoril", "east_empire_company"],
+      "alliedFactions": ["tribunal_temple", "east_empire_company"],
+      "rivalFactions": ["camonna_tong"],
+      "dominantFaith": "tribunal_reclamations",
+      "why": ["morrowind.L3.inner_sea_coasts", "stonefalls.L6.ebonheart_council_city"]
+    },
+    "sea/padomaic_ocean": {
+      "rulingFaction": "east_empire_company",
+      "secondaryFactions": ["tsaesci_immortal_guard", "tang_mo_monks"],
+      "alliedFactions": ["elder_council"],
+      "rivalFactions": ["kamal_host"],
+      "dominantFaith": "eight_divines",
+      "why": ["foreign.L6.beachhead_anchorages", "foreign.L7.captains_factors_and_custodians"]
+    },
+    "sea/eltheric_ocean": {
+      "rulingFaction": "yokudan_ankh_wardens",
+      "secondaryFactions": ["sapiarchs", "psijic_order"],
+      "alliedFactions": ["crowns", "forebears"],
+      "rivalFactions": ["sload_cabal", "maormer_armada"],
+      "dominantFaith": "yokudan_pantheon",
+      "why": ["foreign.L6.beachhead_anchorages", "yokuda.L6.new_tava_anchorage"]
+    },
+    "sea/sea_of_pearls": {
+      "rulingFaction": "maormer_armada",
+      "secondaryFactions": ["thalmor"],
+      "alliedFactions": ["corsairs_of_abahs_landing"],
+      "rivalFactions": ["thalmor", "sapiarchs", "camoran_dynasty"],
+      "dominantFaith": "coiled_king",
+      "why": ["pyandonea.L6.pyandonean_fleet_anchorage", "maormer_isles.L7.truce_captains_and_storm_caste"]
+    },
+    "sea/open_ocean": {
+      "rulingFaction": "east_empire_company",
+      "secondaryFactions": ["corsairs_of_abahs_landing", "maormer_armada"],
+      "alliedFactions": ["imperial_legion", "forebears"],
+      "rivalFactions": ["maormer_armada", "sload_cabal"],
+      "dominantFaith": "eight_divines",
+      "why": ["foreign.L6.beachhead_anchorages", "foreign.L7.captains_factors_and_custodians"]
+    }
+  },
+  "settlements": {
+    "whiterun": {
+      "region": "skyrim/whiterun",
+      "rulingFaction": "townsfolk",
+      "secondaryFactions": ["companions", "greybeards", "baandari_pedlars"],
+      "alliedFactions": ["companions", "greybeards", "guards"],
+      "rivalFactions": ["bandits", "vampires"],
+      "dominantFaith": "talos_cult",
+      "orcStronghold": false,
+      "why": ["whiterun.L6.whiterun_seat", "whiterun.L7.warrior_hall", "whiterun.L8.open_preacher", "whiterun.L9.neutral_jarl"]
+    },
+    "solitude": {
+      "region": "skyrim/haafingar",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "bards_college", "east_empire_company"],
+      "alliedFactions": ["imperials", "elder_council", "east_empire_company", "bards_college"],
+      "rivalFactions": ["stormcloaks", "volkihar"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["haafingar.L6.solitude_seat", "haafingar.L7.imperial_nobles", "haafingar.L8.divines_temple", "haafingar.L9.imperial_seat"]
+    },
+    "windhelm": {
+      "region": "skyrim/eastmarch",
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["east_empire_company"],
+      "alliedFactions": ["atmoran_remnant", "guards"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor"],
+      "dominantFaith": "talos_cult",
+      "orcStronghold": false,
+      "why": ["eastmarch.L6.windhelm_seat", "eastmarch.L7.grey_quarter", "eastmarch.L7.docks_outside", "eastmarch.L7.nord_first", "eastmarch.L9.rebel_capital"]
+    },
+    "riften": {
+      "region": "skyrim/the_rift",
+      "rulingFaction": "thieves_guild",
+      "secondaryFactions": ["stormcloaks", "dawnguard"],
+      "alliedFactions": ["stormcloaks", "dawnguard", "dark_brotherhood"],
+      "rivalFactions": ["imperial_legion", "thalmor"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["the_rift.L6.riften_seat", "the_rift.L7.meadery_rule", "the_rift.L8.mara_temple", "the_rift.L8.shadow_patron"]
+    },
+    "markarth": {
+      "region": "skyrim/the_reach",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "forsworn"],
+      "alliedFactions": ["imperials", "elder_council"],
+      "rivalFactions": ["forsworn", "stormcloaks"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["the_reach.L6.markarth_seat", "the_reach.L7.silver_family", "the_reach.L7.reachfolk_outcast", "the_reach.L9.native_uprising"]
+    },
+    "winterhold": {
+      "region": "skyrim/winterhold",
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["college_of_winterhold"],
+      "alliedFactions": ["stormcloaks"],
+      "rivalFactions": ["imperial_legion", "thalmor"],
+      "dominantFaith": "talos_cult",
+      "orcStronghold": false,
+      "why": ["winterhold.L6.winterhold_remnant", "winterhold.L7.town_vs_college", "winterhold.L8.mage_blame", "winterhold.L9.rebel_jarl"]
+    },
+    "college_of_winterhold": {
+      "region": "skyrim/winterhold",
+      "rulingFaction": "college_of_winterhold",
+      "secondaryFactions": ["college", "psijic_order"],
+      "alliedFactions": ["college", "mages_guild", "psijic_order"],
+      "rivalFactions": ["thalmor", "synod"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L8.knowledge_seeker", "winterhold.L9.thalmor_at_college"]
+    },
+    "falkreath": {
+      "region": "skyrim/falkreath",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "dark_brotherhood"],
+      "alliedFactions": ["imperials", "guards"],
+      "rivalFactions": ["stormcloaks", "bandits"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["falkreath.L6.falkreath_graves", "falkreath.L7.town_of_mourners", "falkreath.L8.arkay_priests", "falkreath.L9.imperial_border"]
+    },
+    "morthal": {
+      "region": "skyrim/hjaalmarch",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["imperials", "vigilants_of_stendarr"],
+      "alliedFactions": ["imperials", "dawnguard"],
+      "rivalFactions": ["volkihar", "vampires", "stormcloaks"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["hjaalmarch.L6.morthal_seat", "hjaalmarch.L7.jarl_seer", "hjaalmarch.L8.arkay_dead", "hjaalmarch.L9.vampire_fear"]
+    },
+    "dawnstar": {
+      "region": "skyrim/the_pale",
+      "rulingFaction": "stormcloaks",
+      "secondaryFactions": ["vigilants_of_stendarr", "dark_brotherhood"],
+      "alliedFactions": ["vigilants_of_stendarr"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor"],
+      "dominantFaith": "talos_cult",
+      "orcStronghold": false,
+      "why": ["the_pale.L6.dawnstar_seat", "the_pale.L7.sleepless_town", "the_pale.L8.mara_priest", "the_pale.L9.rebel_jarl"]
+    },
+    "narzulbur": {
+      "region": "skyrim/eastmarch",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_tumnosh"],
+      "alliedFactions": ["clan_tumnosh", "clan_shatul", "clan_bagrakh"],
+      "rivalFactions": ["forsworn", "bandits"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["eastmarch.L6.narzulbur", "skyrim.L7.orc_strongholds"]
+    },
+    "mor_khazgur": {
+      "region": "skyrim/the_reach",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_shatul"],
+      "alliedFactions": ["clan_tumnosh", "clan_shatul", "clan_bagrakh"],
+      "rivalFactions": ["forsworn", "bandits"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"]
+    },
+    "dushnikh_yal": {
+      "region": "skyrim/the_reach",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_tumnosh"],
+      "alliedFactions": ["clan_tumnosh", "clan_shatul", "clan_bagrakh"],
+      "rivalFactions": ["forsworn", "bandits"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"]
+    },
+    "largashbur": {
+      "region": "skyrim/the_rift",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_bagrakh"],
+      "alliedFactions": ["clan_tumnosh", "clan_shatul", "clan_bagrakh"],
+      "rivalFactions": ["forsworn", "bandits"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["the_rift.L6.largashbur", "the_rift.L8.cursed_clan", "skyrim.L7.orc_strongholds"]
+    },
+    "orsinium": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_tumnosh",
+      "secondaryFactions": ["clan_shatul", "clan_bagrakh", "orc_blood_kin"],
+      "alliedFactions": ["orc_blood_kin", "clan_shatul", "daggerfall_covenant"],
+      "rivalFactions": ["clan_bagrakh", "order_of_the_lily"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": false,
+      "why": ["wrothgar.L6.orsinium_city", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath", "wrothgar.L9.orsinium_succession"]
+    },
+    "morkul_stronghold_high_rock": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_shatul",
+      "secondaryFactions": ["orc_blood_kin", "clan_tumnosh"],
+      "alliedFactions": ["orc_blood_kin", "clan_tumnosh"],
+      "rivalFactions": ["order_of_the_lily", "forsworn"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath"]
+    },
+    "fharun_stronghold": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_bagrakh",
+      "secondaryFactions": ["orc_blood_kin"],
+      "alliedFactions": ["orc_blood_kin"],
+      "rivalFactions": ["clan_tumnosh", "daggerfall_covenant"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L8.malacath", "wrothgar.L9.orsinium_succession"]
+    },
+    "tumnosh_stronghold": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_tumnosh",
+      "secondaryFactions": ["orc_blood_kin"],
+      "alliedFactions": ["orc_blood_kin", "clan_shatul"],
+      "rivalFactions": ["clan_bagrakh"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath"]
+    },
+    "drabul": {
+      "region": "valenwood/malabal_tor",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_shatul"],
+      "alliedFactions": ["green_pact_spinners", "orc_blood_kin"],
+      "rivalFactions": ["thalmor"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L7.orc_outsiders", "malabal_tor.L9.orc_truce"]
+    },
+    "jathsogur": {
+      "region": "valenwood/malabal_tor",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_bagrakh"],
+      "alliedFactions": ["orc_blood_kin"],
+      "rivalFactions": ["thalmor"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L7.orc_outsiders", "malabal_tor.L9.orc_truce"]
+    },
+    "camp_gushnukbur": {
+      "region": "valenwood/greenshade",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["clan_tumnosh"],
+      "alliedFactions": ["orc_blood_kin", "wilderking_court"],
+      "rivalFactions": ["thalmor"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["greenshade.L7.ground_camp", "valenwood.L8.outsiders"]
+    },
+    "shurgak_clan_estate": {
+      "region": "cyrodiil/nibenay_basin",
+      "rulingFaction": "orc_blood_kin",
+      "secondaryFactions": ["fighters_guild"],
+      "alliedFactions": ["orc_blood_kin", "imperial_legion"],
+      "rivalFactions": ["bandits"],
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "why": ["nibenay_basin.L6.border_keeps", "nibenay_basin.L7.knightly_dilettantes"]
+    },
+    "sadrith_mora": {
+      "region": "morrowind/telvannis",
+      "rulingFaction": "house_telvanni",
+      "secondaryFactions": ["morag_tong", "imperial_legion"],
+      "alliedFactions": ["morag_tong"],
+      "rivalFactions": ["mages_guild", "synod", "house_redoran", "house_hlaalu"],
+      "dominantFaith": "daedric_veneration",
+      "orcStronghold": false,
+      "why": ["zafirbel_bay.L6.sadrith_mora_towers", "zafirbel_bay.L7.power_is_rank", "zafirbel_bay.L9.council_of_masters", "telvannis.L7.lord_and_thrall"]
+    },
+    "aldruhn": {
+      "region": "morrowind/vvardenfell_ashlands",
+      "rulingFaction": "house_redoran",
+      "secondaryFactions": ["tribunal_temple", "morag_tong", "fighters_guild", "mages_guild"],
+      "alliedFactions": ["tribunal_temple", "morag_tong"],
+      "rivalFactions": ["house_hlaalu", "house_telvanni", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "why": ["vvardenfell_ashlands.L6.aldruhn_under_the_skar", "vvardenfell_ashlands.L7.redoran_duty", "vvardenfell_ashlands.L8.redoran_temple_piety", "vvardenfell_ashlands.L9.council_of_ald_ruhn"]
+    },
+    "balmora": {
+      "region": "morrowind/west_gash",
+      "rulingFaction": "house_hlaalu",
+      "secondaryFactions": ["thieves_guild", "camonna_tong", "fighters_guild", "mages_guild", "morag_tong"],
+      "alliedFactions": ["east_empire_company", "imperial_legion", "thieves_guild"],
+      "rivalFactions": ["house_redoran", "camonna_tong", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "why": ["west_gash.L6.balmora_on_the_odai", "west_gash.L7.merchant_city", "west_gash.L8.pragmatic_piety", "west_gash.L9.hlaalu_collaboration"]
+    },
+    "vivec": {
+      "region": "morrowind/ascadian_isles",
+      "rulingFaction": "tribunal_temple",
+      "secondaryFactions": ["house_hlaalu", "house_redoran", "house_telvanni", "morag_tong"],
+      "alliedFactions": ["house_indoril", "house_redoran", "house_hlaalu"],
+      "rivalFactions": ["sixth_house", "ashlanders"],
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "why": ["ascadian_isles.L6.vivec_cantons", "ascadian_isles.L7.canton_ranks", "ascadian_isles.L8.vivec_the_living_god", "ascadian_isles.L9.temple_secrets"]
+    },
+    "mournhold": {
+      "region": "morrowind/deshaan",
+      "rulingFaction": "house_indoril",
+      "secondaryFactions": ["tribunal_temple", "house_redoran", "morag_tong"],
+      "alliedFactions": ["tribunal_temple", "house_redoran"],
+      "rivalFactions": ["house_dres", "house_hlaalu", "sixth_house"],
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "why": ["deshaan.L6.mournhold_capital", "deshaan.L7.priest_nobility", "deshaan.L8.almalexia_mother", "deshaan.L9.indoril_vs_dres"]
+    },
+    "tear": {
+      "region": "morrowind/deshaan",
+      "rulingFaction": "house_dres",
+      "secondaryFactions": ["camonna_tong", "tribunal_temple"],
+      "alliedFactions": ["camonna_tong"],
+      "rivalFactions": ["an_xileel", "hist_speakers", "shadowscales", "house_indoril"],
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "why": ["deshaan.L6.tear_plantation_city", "deshaan.L7.slaves_of_tear", "morrowind.L9.argonian_grudge"]
+    },
+    "ebonheart": {
+      "region": "morrowind/stonefalls",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["east_empire_company", "house_hlaalu", "house_indoril"],
+      "alliedFactions": ["east_empire_company", "house_hlaalu", "elder_council"],
+      "rivalFactions": ["camonna_tong", "sixth_house"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["stonefalls.L6.ebonheart_council_city", "stonefalls.L7.imperial_district_vs_dunmer_quarter", "stonefalls.L8.imperial_chapels", "stonefalls.L9.grand_council"]
+    },
+    "raven_rock": {
+      "region": "morrowind/solstheim",
+      "rulingFaction": "house_redoran",
+      "secondaryFactions": ["tribunal_temple", "east_empire_company"],
+      "alliedFactions": ["tribunal_temple", "house_telvanni"],
+      "rivalFactions": ["bandits"],
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "why": ["raven_rock.L6.raven_rock_town", "raven_rock.L7.council_and_captain", "raven_rock.L8.temple_hall", "solstheim.L7.redoran_duty"]
+    },
+    "imperial_city": {
+      "region": "cyrodiil/heartlands",
+      "rulingFaction": "elder_council",
+      "secondaryFactions": ["imperial_legion", "synod", "college_of_whispers", "east_empire_company", "order_of_the_virtuous_blood"],
+      "alliedFactions": ["imperial_legion", "imperials", "synod", "college_of_whispers", "fighters_guild"],
+      "rivalFactions": ["stormcloaks", "thalmor", "mythic_dawn"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["heartlands.L6.imperial_city", "heartlands.L7.ward_ladder", "heartlands.L8.temple_of_the_one", "heartlands.L9.council_factions"]
+    },
+    "bruma": {
+      "region": "cyrodiil/jerall_mountains",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["blades", "fighters_guild"],
+      "alliedFactions": ["elder_council", "blades", "companions"],
+      "rivalFactions": ["thalmor", "mythic_dawn"],
+      "dominantFaith": "talos_cult",
+      "orcStronghold": false,
+      "why": ["jerall_mountains.L6.bruma_on_the_pass", "jerall_mountains.L7.nord_imperial_mix", "jerall_mountains.L8.talos_first", "jerall_mountains.L9.blades_without_emperor"]
+    },
+    "cheydinhal": {
+      "region": "cyrodiil/nibenay_basin",
+      "rulingFaction": "elder_council",
+      "secondaryFactions": ["house_hlaalu", "fighters_guild", "dark_brotherhood"],
+      "alliedFactions": ["imperial_legion", "house_hlaalu"],
+      "rivalFactions": ["mythic_dawn", "bandits"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["nibenay_basin.L6.cheydinhal_on_the_corbolo", "nibenay_basin.L7.dunmer_quarter", "nibenay_basin.L9.dunmer_count"]
+    },
+    "leyawiin": {
+      "region": "cyrodiil/blackwood",
+      "rulingFaction": "imperial_legion",
+      "secondaryFactions": ["blackwood_company", "fighters_guild"],
+      "alliedFactions": ["elder_council", "east_empire_company"],
+      "rivalFactions": ["an_xileel", "renrijra_krin"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["blackwood.L6.leyawiin_at_the_mouth", "blackwood.L7.imperial_core_vs_beastfolk_shanties", "blackwood.L9.mercenary_company"]
+    },
+    "daggerfall": {
+      "region": "high_rock/daggerfall",
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["knights_of_the_dragon", "fighters_guild", "mages_guild"],
+      "alliedFactions": ["knights_of_the_dragon", "order_of_the_lily", "forebears"],
+      "rivalFactions": ["order_of_the_candle", "glenmoril_wyrd"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["daggerfall.L6.capital_on_island", "daggerfall.L8.kynareth_patron", "daggerfall.L9.court_vs_barons", "daggerfall.L9.owl_vs_dragon"]
+    },
+    "wayrest": {
+      "region": "high_rock/wayrest",
+      "rulingFaction": "daggerfall_covenant",
+      "secondaryFactions": ["order_of_the_lily", "east_empire_company", "direnni_hegemony"],
+      "alliedFactions": ["order_of_the_lily", "direnni_hegemony", "east_empire_company"],
+      "rivalFactions": ["clan_bagrakh", "corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["wayrest.L6.harbour_capital", "wayrest.L7.guild_lords", "wayrest.L8.akatosh_chantry", "wayrest.L9.crown_vs_guild"]
+    },
+    "sentinel": {
+      "region": "hammerfell/sentinel",
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["lhotunics", "order_of_the_candle", "crowns", "ash_abah"],
+      "alliedFactions": ["lhotunics", "order_of_the_candle", "daggerfall_covenant"],
+      "rivalFactions": ["thalmor", "corsairs_of_abahs_landing"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["sentinel.L6.dome_capital", "sentinel.L7.palace_crowns", "sentinel.L7.quay_forebears", "sentinel.L9.court_rift"]
+    },
+    "hegathe": {
+      "region": "hammerfell/alikr_desert",
+      "rulingFaction": "crowns",
+      "secondaryFactions": ["order_of_diagna", "ash_abah", "yokudan_ankh_wardens"],
+      "alliedFactions": ["order_of_diagna", "ash_abah", "yokudan_ankh_wardens"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor", "forebears"],
+      "dominantFaith": "yokudan_pantheon",
+      "orcStronghold": false,
+      "why": ["alikr_desert.L6.south_coast_cities", "alikr_desert.L7.crown_oasis_lords", "alikr_desert.L8.yokudan_gods", "hammerfell.L8.distrust_empire"]
+    },
+    "skaven": {
+      "region": "hammerfell/alikr_desert",
+      "rulingFaction": "crowns",
+      "secondaryFactions": ["order_of_diagna", "ash_abah"],
+      "alliedFactions": ["order_of_diagna", "yokudan_ankh_wardens"],
+      "rivalFactions": ["imperial_legion", "imperials", "thalmor"],
+      "dominantFaith": "yokudan_pantheon",
+      "orcStronghold": false,
+      "why": ["alikr_desert.L6.caravanserai_city", "alikr_desert.L7.crown_oasis_lords", "alikr_desert.L8.yokudan_gods", "alikr_desert.L9.well_feud"]
+    },
+    "abahs_landing": {
+      "region": "hammerfell/hews_bane",
+      "rulingFaction": "forebears",
+      "secondaryFactions": ["corsairs_of_abahs_landing", "thieves_guild", "lhotunics"],
+      "alliedFactions": ["lhotunics", "thieves_guild"],
+      "rivalFactions": ["thalmor", "east_empire_company"],
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "why": ["hews_bane.L6.abahs_landing", "hews_bane.L7.forebear_merchant_syndicates", "hews_bane.L7.dock_thieves_and_cutpurses", "hews_bane.L9.syndicate_vs_thieves"]
+    },
+    "alinor": {
+      "region": "summerset/summerset_isle",
+      "rulingFaction": "thalmor",
+      "secondaryFactions": ["sapiarchs", "divine_prosecution"],
+      "alliedFactions": ["sapiarchs", "divine_prosecution"],
+      "rivalFactions": ["veiled_heritance", "maormer_armada", "sload_cabal", "stormcloaks", "blades", "crowns"],
+      "dominantFaith": "aldmeri_ancestors",
+      "orcStronghold": false,
+      "why": ["summerset_isle.L6.alinor_capital", "summerset_isle.L7.alinor_houses", "summerset_isle.L8.tower_faith", "summerset.L8.no_man_god"]
+    },
+    "vulkhel_guard": {
+      "region": "summerset/auridon",
+      "rulingFaction": "thalmor",
+      "secondaryFactions": ["divine_prosecution", "east_empire_company"],
+      "alliedFactions": ["divine_prosecution", "camoran_dynasty", "pellitine_merchant_lords"],
+      "rivalFactions": ["veiled_heritance", "maormer_armada"],
+      "dominantFaith": "aldmeri_ancestors",
+      "orcStronghold": false,
+      "why": ["auridon.L6.vulkhel_guard", "auridon.L7.vulkhel_outsiders", "auridon.L7.marines", "auridon.L9.maormer_front"]
+    },
+    "elden_root": {
+      "region": "valenwood/grahtwood",
+      "rulingFaction": "camoran_dynasty",
+      "secondaryFactions": ["treethanes", "thalmor", "green_pact_spinners", "green_pact"],
+      "alliedFactions": ["treethanes", "thalmor", "green_pact_spinners"],
+      "rivalFactions": ["maormer_armada", "veiled_heritance"],
+      "dominantFaith": "green_pact",
+      "orcStronghold": false,
+      "why": ["grahtwood.L6.elden_root_capital", "grahtwood.L7.crown_court_thalmor", "grahtwood.L8.elden_temple", "grahtwood.L9.court_vs_voice"]
+    },
+    "falinesti": {
+      "region": "valenwood/malabal_tor",
+      "rulingFaction": "green_pact_spinners",
+      "secondaryFactions": ["green_pact", "camoran_dynasty", "treethanes"],
+      "alliedFactions": ["green_pact", "camoran_dynasty", "treethanes"],
+      "rivalFactions": ["maormer_armada", "east_empire_company"],
+      "dominantFaith": "green_pact",
+      "orcStronghold": false,
+      "why": ["malabal_tor.L6.falinesti_summer_site", "malabal_tor.L7.silvenar_court", "malabal_tor.L8.strictest_pact"]
+    },
+    "rawlkha": {
+      "region": "valenwood/reapers_march",
+      "rulingFaction": "mane_clergy",
+      "secondaryFactions": ["treethanes", "two_moons_adepts", "baandari_pedlars"],
+      "alliedFactions": ["treethanes", "camoran_dynasty", "two_moons_adepts"],
+      "rivalFactions": ["imperial_legion", "bandits"],
+      "dominantFaith": "two_moons_dance",
+      "orcStronghold": false,
+      "why": ["reapers_march.L6.rawlkha", "reapers_march.L7.mixed_town_rank", "reapers_march.L8.moonmont"]
+    },
+    "torval": {
+      "region": "elsweyr/torval",
+      "rulingFaction": "mane_clergy",
+      "secondaryFactions": ["two_moons_adepts", "pellitine_merchant_lords", "anequina_militia"],
+      "alliedFactions": ["two_moons_adepts", "anequina_militia", "pellitine_merchant_lords"],
+      "rivalFactions": ["dark_brotherhood"],
+      "dominantFaith": "two_moons_dance",
+      "orcStronghold": false,
+      "why": ["torval.L6.torval_capital", "torval.L7.priestly_quarter", "torval.L8.mane_seat", "torval.L8.two_moons_procession"]
+    },
+    "rimmen": {
+      "region": "elsweyr/rimmen",
+      "rulingFaction": "anequina_militia",
+      "secondaryFactions": ["baandari_pedlars", "two_moons_adepts", "renrijra_krin"],
+      "alliedFactions": ["mane_clergy", "baandari_pedlars"],
+      "rivalFactions": ["imperial_legion", "imperials", "east_empire_company"],
+      "dominantFaith": "two_moons_dance",
+      "orcStronghold": false,
+      "why": ["rimmen.L6.rimmen_seat", "rimmen.L7.baandari_camp", "rimmen.L8.imperial_grudge", "rimmen.L9.rimmen_claim"]
+    },
+    "senchal": {
+      "region": "elsweyr/senchal",
+      "rulingFaction": "pellitine_merchant_lords",
+      "secondaryFactions": ["baandari_pedlars", "thalmor", "east_empire_company"],
+      "alliedFactions": ["mane_clergy", "thalmor"],
+      "rivalFactions": ["renrijra_krin", "corsairs_of_abahs_landing"],
+      "dominantFaith": "two_moons_dance",
+      "orcStronghold": false,
+      "why": ["senchal.L6.senchal_seat", "senchal.L7.sailors_and_boilers", "senchal.L8.khenarthi_winds", "senchal.L9.thalmor_embassy"]
+    },
+    "helstrom": {
+      "region": "black_marsh/helstrom",
+      "rulingFaction": "an_xileel",
+      "secondaryFactions": ["hist_speakers", "shadowscales"],
+      "alliedFactions": ["hist_speakers", "shadowscales", "bright_throat_tribe", "dead_water_tribe"],
+      "rivalFactions": ["house_dres", "imperial_legion", "east_empire_company", "archein_brokers"],
+      "dominantFaith": "hist",
+      "orcStronghold": false,
+      "why": ["helstrom.L6.helstrom_ring_and_thorn_port", "helstrom.L7.root_heart_tribes", "helstrom.L8.sap_naming_rite", "helstrom.L9.elder_tree_council"]
+    },
+    "stormhold": {
+      "region": "black_marsh/stormhold",
+      "rulingFaction": "an_xileel",
+      "secondaryFactions": ["hist_speakers", "shadowscales"],
+      "alliedFactions": ["hist_speakers", "shadowscales"],
+      "rivalFactions": ["house_dres", "house_redoran", "imperial_legion"],
+      "dominantFaith": "hist",
+      "orcStronghold": false,
+      "why": ["stormhold.L6.stormhold_ring_over_ruin", "stormhold.L7.tree_minders_and_factors", "stormhold.L8.shadow_sign_vigil"]
+    },
+    "gideon": {
+      "region": "black_marsh/gideon",
+      "rulingFaction": "archein_brokers",
+      "secondaryFactions": ["an_xileel", "hist_speakers", "blackwood_company"],
+      "alliedFactions": ["east_empire_company", "imperial_legion", "hist_speakers"],
+      "rivalFactions": ["house_dres", "dead_water_tribe"],
+      "dominantFaith": "hist",
+      "orcStronghold": false,
+      "why": ["gideon.L6.gideon_walled_seat", "gideon.L7.lukiul_townsfolk", "gideon.L8.chapel_and_root_shrine", "gideon.L9.lukiul_and_an_xileel"]
+    },
+    "lilmoth": {
+      "region": "black_marsh/lilmoth",
+      "rulingFaction": "archein_brokers",
+      "secondaryFactions": ["east_empire_company", "an_xileel", "thieves_guild"],
+      "alliedFactions": ["east_empire_company", "hist_speakers"],
+      "rivalFactions": ["house_dres", "corsairs_of_abahs_landing"],
+      "dominantFaith": "hist",
+      "orcStronghold": false,
+      "why": ["lilmoth.L6.lilmoth_harbour", "lilmoth.L7.dock_syndicates_and_boatmen", "lilmoth.L8.kothringi_quarantine_shrines", "lilmoth.L9.customhouse_struggle"]
+    }
+  }
+}

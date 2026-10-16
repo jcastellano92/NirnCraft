@@ -37,8 +37,8 @@
     {
       "id": "sea_stack",
       "at": [
-        0,
-        -14
+        -3,
+        -17
       ],
       "face": "south",
       "name": "saintsport_landmark",
@@ -51,7 +51,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        17,
         -12
       ],
       "face": "south",
@@ -62,8 +62,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        23,
-        -2
+        25,
+        6
       ],
       "face": "west",
       "name": "saintsport_tar_and_hemp"
@@ -73,8 +73,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        11,
-        11
+        13,
+        19
       ],
       "face": "north",
       "name": "saintsport_caulkers_iron_forge"
@@ -95,8 +95,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -12,
-        9
+        -15,
+        12
       ],
       "face": "east",
       "name": "saintsport_lime_and_rum_hut"

@@ -3,6 +3,7 @@ package com.skycraft.survival;
 import com.skycraft.Skycraft;
 import com.skycraft.core.Notifier;
 import com.skycraft.core.Skill;
+import com.skycraft.crafting.arcane.ArcaneRegistry;
 import com.skycraft.crafting.arcane.alchemy.Ingredients;
 import com.skycraft.crafting.arcane.block.IngredientPlantBlock;
 import com.skycraft.crime.Bounty;
@@ -244,13 +245,21 @@ public final class Harvesting {
             Progression.addSkillXp(player, Skill.ALCHEMY, 2.0f);
 
         // ------------------------------------------------------------------ 2. Alchemy Plants
-        } else if (block instanceof IngredientPlantBlock) {
+        } else if (block instanceof IngredientPlantBlock plantBlock) {
+            Item primaryItem = plantBlock.ingredientItem();
             if (placed) {
                 // A plant the player put down is picked back up as it was: no regrowing stems, XP or bonus
-                harvestedItems.add(new ItemStack(block.asItem(), 1));
+                Item pickupItem = block.asItem() != Items.AIR ? block.asItem() : primaryItem;
+                harvestedItems.add(new ItemStack(pickupItem, 1));
                 removeFlora(level, pos, state);
             } else {
-                harvestedItems.add(new ItemStack(block.asItem(), greenThumb ? 2 : 1));
+                List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, player.getMainHandItem());
+                harvestedItems.add(new ItemStack(primaryItem, greenThumb ? 2 : 1));
+                for (ItemStack drop : drops) {
+                    if (!drop.isEmpty() && !drop.is(primaryItem) && !drop.is(block.asItem())) {
+                        harvestedItems.add(drop.copy());
+                    }
+                }
                 level.setBlock(pos, state.setValue(IngredientPlantBlock.HARVESTED, true), Block.UPDATE_CLIENTS);
                 Progression.addSkillXp(player, Skill.ALCHEMY, 2.5f);
             }
@@ -258,10 +267,18 @@ public final class Harvesting {
 
         // ------------------------------------------------------------------ 3. Berry Bushes & Vines
         } else if (block instanceof SweetBerryBushBlock) {
+            List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, player.getMainHandItem());
             int age = state.getValue(SweetBerryBushBlock.AGE);
             int count = 1 + level.random.nextInt(2) + (age == 3 ? 1 : 0);
             if (greenThumb) count *= 2;
             harvestedItems.add(new ItemStack(Items.SWEET_BERRIES, count));
+            if (!placed) {
+                for (ItemStack drop : drops) {
+                    if (!drop.isEmpty() && !drop.is(Items.SWEET_BERRIES)) {
+                        harvestedItems.add(drop.copy());
+                    }
+                }
+            }
 
             level.setBlock(pos, state.setValue(SweetBerryBushBlock.AGE, 1), 3);
             if (placed) PlacedBlocks.mark(level, pos, true);
@@ -280,15 +297,45 @@ public final class Harvesting {
         // ------------------------------------------------------------------ 4. Flowers, Mushrooms, Flora
         } else {
             Item item = block.asItem();
-            if (item != Items.AIR) {
-                // placed flowers come back exactly as placed; wild ones may yield a Green Thumb bonus
-                int count = greenThumb && !placed ? 2 : 1;
-                harvestedItems.add(new ItemStack(item, count));
-            }
+            if (placed) {
+                if (item != Items.AIR) {
+                    harvestedItems.add(new ItemStack(item, 1));
+                }
+                removeFlora(level, pos, state);
+            } else {
+                // Evaluate block loot table + Forge Global Loot Modifiers (forage_plants / forage_fungi) before replacing state
+                List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, player.getMainHandItem());
+                if (drops.isEmpty() && item != Items.AIR) {
+                    harvestedItems.add(new ItemStack(item, greenThumb ? 2 : 1));
+                } else {
+                    boolean primaryAdded = false;
+                    for (ItemStack drop : drops) {
+                        if (drop.isEmpty()) continue;
+                        ItemStack copy = drop.copy();
+                        if (!primaryAdded && item != Items.AIR && copy.is(item)) {
+                            if (greenThumb) copy.grow(copy.getCount());
+                            primaryAdded = true;
+                        }
+                        harvestedItems.add(copy);
+                    }
+                    if (!primaryAdded && item != Items.AIR) {
+                        harvestedItems.add(new ItemStack(item, greenThumb ? 2 : 1));
+                    }
+                }
 
-            removeFlora(level, pos, state);
+                // Transition wild flora to a regrowing IngredientPlantBlock stem instead of permanently destroying to AIR
+                BlockPos stemPos = (block instanceof DoublePlantBlock
+                        && state.hasProperty(DoublePlantBlock.HALF)
+                        && state.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER)
+                        ? pos.below() : pos;
+                BlockState regrowState = regrowingStemFor(state);
+                removeFlora(level, pos, state);
+                if (regrowState.canSurvive(level, stemPos)) {
+                    level.setBlock(stemPos, regrowState, Block.UPDATE_CLIENTS);
+                }
+                Progression.addSkillXp(player, Skill.ALCHEMY, 1.5f);
+            }
             level.playSound(null, pos, SoundEvents.GRASS_BREAK, SoundSource.BLOCKS, 0.9f, 1.1f);
-            if (!placed) Progression.addSkillXp(player, Skill.ALCHEMY, 1.0f);
         }
 
         if (stolen) steal(player, pos, harvestedItems);
@@ -401,6 +448,37 @@ public final class Harvesting {
         return null;
     }
 
+    private static BlockState regrowingStemFor(BlockState state) {
+        Block target;
+        if (state.is(Blocks.RED_MUSHROOM)) {
+            target = ArcaneRegistry.floraBlock("fly_amanita");
+        } else if (state.is(Blocks.BROWN_MUSHROOM)) {
+            target = ArcaneRegistry.floraBlock("imp_stool");
+        } else if (state.is(Blocks.CRIMSON_FUNGUS)) {
+            target = ArcaneRegistry.floraBlock("bleeding_crown");
+        } else if (state.is(Blocks.WARPED_FUNGUS)) {
+            target = ArcaneRegistry.floraBlock("glowing_mushroom");
+        } else if (state.is(Blocks.WITHER_ROSE)) {
+            target = ArcaneRegistry.DEATHBELL.get();
+        } else if (state.is(Blocks.BLUE_ORCHID) || state.is(Blocks.LILY_OF_THE_VALLEY)) {
+            target = ArcaneRegistry.NIGHTSHADE.get();
+        } else if (state.is(Blocks.AZURE_BLUET) || state.is(Blocks.WHITE_TULIP) || state.is(Blocks.OXEYE_DAISY)) {
+            target = ArcaneRegistry.FROST_MIRRIAM.get();
+        } else if (state.is(Blocks.DANDELION) || state.is(Blocks.SUNFLOWER) || state.is(Blocks.TORCHFLOWER)) {
+            target = ArcaneRegistry.floraBlock("gold_kanet");
+        } else if (state.is(Blocks.POPPY) || state.is(Blocks.RED_TULIP) || state.is(Blocks.ROSE_BUSH)) {
+            target = ArcaneRegistry.floraBlock("comberry");
+        } else if (state.is(Blocks.ALLIUM) || state.is(Blocks.CORNFLOWER) || state.is(Blocks.LILAC) || state.is(Blocks.PEONY)) {
+            target = ArcaneRegistry.floraBlock("jazbay_grapes");
+        } else {
+            target = ArcaneRegistry.floraBlock("thistle_branch");
+        }
+        BlockState stem = target.defaultBlockState();
+        return stem.hasProperty(IngredientPlantBlock.HARVESTED)
+                ? stem.setValue(IngredientPlantBlock.HARVESTED, true)
+                : stem;
+    }
+
     /** Remembers whether the block being broken was player-placed before the dig module forgets it. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onBreakFirst(BlockEvent.BreakEvent event) {
@@ -430,6 +508,10 @@ public final class Harvesting {
             if (isReadyToHarvest(state)) {
                 doHarvest(player, level, pos, state, placed);
                 event.setCanceled(true); // Cancel vanilla break so drops aren't spawned twice or onto ground
+            } else if (!placed && state.getBlock() instanceof IngredientPlantBlock) {
+                // Wild regrowing stem: keep the stem intact in the world so it can regrow
+                notReady(player, state);
+                event.setCanceled(true);
             } else if (state.getBlock() instanceof CropBlock crop) {
                 // Immature crop broken with left-click: give seed back directly to bags
                 Item seedItem = getSeedItem(crop);

@@ -3,8 +3,8 @@
   "sil": "south-pass-gate-fortress-town",
   "base": "none",
   "overlay": "bangkorai",
-  "radius": 54,
-  "reach": 62,
+  "radius": 40,
+  "reach": 46,
   "fill_gap": 2,
   "inn_key": "hallins_stand_five_companions",
   "names": {
@@ -29,28 +29,28 @@
   "gates": [
     [
       0,
-      -50
+      -37
     ],
     [
-      50,
+      37,
       0
     ],
     [
       0,
-      50
+      37
     ],
     [
-      -50,
+      -37,
       0
     ]
   ],
   "walls": [
     {
-      "r": 50,
+      "r": 37,
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -63,7 +63,7 @@
       "id": "gate_hammer",
       "at": [
         0,
-        -22
+        -16
       ],
       "face": "south",
       "name": "hallins_stand_landmark",
@@ -76,8 +76,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        -19
+        26,
+        -14
       ],
       "face": "south",
       "name": "hallins_stand_citadel"
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        28,
+        13
       ],
       "face": "west",
       "name": "hallins_stand_five_companions"
@@ -98,8 +98,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        24,
-        2
+        9,
+        19
       ],
       "face": "west",
       "name": "hallins_stand_pass_commissary"
@@ -109,8 +109,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        30,
-        21
+        -1,
+        32
       ],
       "face": "west",
       "name": "hallins_stand_ansei_memorial_forge"
@@ -120,8 +120,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        10,
-        22
+        -5,
+        18
       ],
       "face": "north",
       "name": "hallins_stand_desert_sage_shop"
@@ -131,8 +131,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -3,
-        37
+        -22,
+        24
       ],
       "face": "north",
       "name": "hallins_stand_hall_of_virtues"
@@ -142,8 +142,8 @@
       "use": "hall_of_dead",
       "wealth": "common",
       "at": [
-        -13,
-        20
+        -19,
+        2
       ],
       "face": "north",
       "name": "hallins_stand_ansei_crypt"
@@ -153,8 +153,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -33,
-        16
+        -30,
+        -15
       ],
       "face": "east",
       "name": "hallins_stand_gate_garrison"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -33,
+        4
       ],
       "face": "east",
       "name": "hallins_stand_north_wall_watch"
@@ -175,8 +175,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -31,
-        -20
+        -7,
+        -33
       ],
       "face": "east",
       "name": "hallins_stand_remount_lines"
@@ -186,11 +186,11 @@
     {
       "from": [
         0,
-        -44
+        -33
       ],
       "to": [
         0,
-        44
+        33
       ],
       "width": 4,
       "major": true,
@@ -199,11 +199,11 @@
     },
     {
       "from": [
-        -44,
+        -33,
         0
       ],
       "to": [
-        44,
+        33,
         0
       ],
       "width": 4,
@@ -213,12 +213,12 @@
     },
     {
       "from": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "to": [
-        28,
-        -28
+        21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -227,12 +227,12 @@
     },
     {
       "from": [
-        28,
-        -28
+        21,
+        -21
       ],
       "to": [
-        28,
-        28
+        21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -241,12 +241,12 @@
     },
     {
       "from": [
-        28,
-        28
+        21,
+        21
       ],
       "to": [
-        -28,
-        28
+        -21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -255,12 +255,12 @@
     },
     {
       "from": [
-        -28,
-        28
+        -21,
+        21
       ],
       "to": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -273,7 +273,7 @@
     {
       "at": [
         0,
-        4
+        3
       ],
       "size": 9,
       "stalls": 3,
@@ -313,44 +313,33 @@
     {
       "ring": [
         0,
-        27
+        20
       ],
       "overlay": "bangkorai"
     },
     {
       "ring": [
-        27,
-        54
+        20,
+        40
       ],
       "overlay": "bangkorai"
     }
   ],
   "features": [
     {
-      "type": "well",
-      "count": 1
+      "type": "market",
+      "count": 1,
+      "where": "free"
     },
     {
-      "type": "lamps",
-      "count": 2
+      "type": "well",
+      "count": 2,
+      "where": "square"
     },
     {
       "type": "banners",
-      "count": 1
-    },
-    {
-      "type": "shrine",
-      "theme": "divine:zenithar",
-      "count": 1
-    },
-    {
-      "type": "great_tree",
-      "theme": "jungle",
-      "count": 1
-    },
-    {
-      "type": "gatehouse",
-      "count": 1
+      "count": 1,
+      "where": "gate"
     }
   ]
 }

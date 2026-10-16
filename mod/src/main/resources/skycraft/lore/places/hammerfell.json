@@ -21179,44 +21179,38 @@
         "sentinel.L6.marsh_town",
         "sentinel.L3.palace_cisterns"
       ],
-      "hook": "Weathered carvings and iron fittings at place.skycraft.sentinel_landmark_02 mark one of Sentinel's most storied sites. [sentinel_landmark_02]",
-      "rumour": "Tavern talk in Sentinel insists that an unrecorded cellar beneath place.skycraft.sentinel_landmark_02 was opened by last month's rains. [sentinel_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.sentinel_landmark_02 in Sentinel and recover the warden's seal.",
+      "summary": "Sentinel Divines Wayshrine stands in Sentinel as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Sentinel, Sentinel Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Sentinel Divines Wayshrine in Sentinel.",
+      "hook": "Wayfarers in Sentinel report recent activity around Sentinel Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Sentinel Divines Wayshrine speak of sealed caches preserved within this wayshrine of Sentinel.",
       "notes": [
         {
-          "id": "ib_lore_sentinel_landmark_02_note_1",
-          "kind": "report",
-          "title": "place.skycraft.sentinel_landmark_02 Field Record 1",
-          "at": "site",
-          "pages": [
-            "Entry 1 — place.skycraft.sentinel_landmark_02 (Sentinel)\n\nRecorded by the regional wardens inspecting place.skycraft.sentinel_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_sentinel_landmark_02_note_2",
-          "kind": "letter",
-          "title": "place.skycraft.sentinel_landmark_02 Field Record 2",
-          "at": "site",
-          "pages": [
-            "Entry 2 — place.skycraft.sentinel_landmark_02 (Sentinel)\n\nRecorded by the regional wardens inspecting place.skycraft.sentinel_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_sentinel_landmark_02_note_3",
+          "id": "sentinel_landmark_02_field_record_1",
+          "title": "Sentinel Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.sentinel_landmark_02 Field Record 3",
-          "at": "site",
+          "author": "Surveyor of Sentinel",
+          "at": "chest",
           "pages": [
-            "Entry 3 — place.skycraft.sentinel_landmark_02 (Sentinel)\n\nRecorded by the regional wardens inspecting place.skycraft.sentinel_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Sentinel Divines Wayshrine (sentinel_landmark_02) in Sentinel (hammerfell/sentinel). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "sentinel.L6.marsh_town",
+            "sentinel.L3.palace_cisterns"
           ]
         },
         {
-          "id": "ib_lore_sentinel_landmark_02_note_4",
-          "kind": "ledger",
-          "title": "place.skycraft.sentinel_landmark_02 Field Record 4",
-          "at": "site",
+          "id": "sentinel_landmark_02_field_record_2",
+          "title": "Sentinel Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Sentinel",
+          "at": "boss",
           "pages": [
-            "Entry 4 — place.skycraft.sentinel_landmark_02 (Sentinel)\n\nRecorded by the regional wardens inspecting place.skycraft.sentinel_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Standing orders for Sentinel Divines Wayshrine (sentinel_landmark_02) in Sentinel (hammerfell/sentinel): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "sentinel.L6.marsh_town",
+            "sentinel.L3.palace_cisterns"
           ]
         }
       ]
@@ -21320,44 +21314,38 @@
         "bangkorai.L6.ford_towns",
         "bangkorai.L8.na_totambu_reverence"
       ],
-      "hook": "place.skycraft.bangkorai_landmark_02 stands as a focal point of Bangkorai, where travellers, patrol-captains, and delvers trade word of the roads. [bangkorai_landmark_02]",
-      "rumour": "Outriders advise carrying extra torch-oil and cold iron when venturing into the precincts of place.skycraft.bangkorai_landmark_02. [bangkorai_landmark_02]",
-      "quest": "Investigate the reports surrounding place.skycraft.bangkorai_landmark_02 in Bangkorai and recover the warden's seal.",
+      "summary": "Bangkorai Divines Wayshrine stands in Bangkorai as a notable wayshrine landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Bangkorai, Bangkorai Divines Wayshrine has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Bangkorai Divines Wayshrine in Bangkorai.",
+      "hook": "Wayfarers in Bangkorai report recent activity around Bangkorai Divines Wayshrine, an enduring wayshrine holding provincial records.",
+      "rumour": "Travelers near Bangkorai Divines Wayshrine speak of sealed caches preserved within this wayshrine of Bangkorai.",
       "notes": [
         {
-          "id": "ib_lore_bangkorai_landmark_02_note_1",
-          "kind": "ledger",
-          "title": "place.skycraft.bangkorai_landmark_02 Field Record 1",
-          "at": "site",
-          "pages": [
-            "Entry 1 — place.skycraft.bangkorai_landmark_02 (Bangkorai)\n\nRecorded by the regional wardens inspecting place.skycraft.bangkorai_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_bangkorai_landmark_02_note_2",
-          "kind": "report",
-          "title": "place.skycraft.bangkorai_landmark_02 Field Record 2",
-          "at": "site",
-          "pages": [
-            "Entry 2 — place.skycraft.bangkorai_landmark_02 (Bangkorai)\n\nRecorded by the regional wardens inspecting place.skycraft.bangkorai_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_bangkorai_landmark_02_note_3",
-          "kind": "letter",
-          "title": "place.skycraft.bangkorai_landmark_02 Field Record 3",
-          "at": "site",
-          "pages": [
-            "Entry 3 — place.skycraft.bangkorai_landmark_02 (Bangkorai)\n\nRecorded by the regional wardens inspecting place.skycraft.bangkorai_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
-          ]
-        },
-        {
-          "id": "ib_lore_bangkorai_landmark_02_note_4",
+          "id": "bangkorai_landmark_02_field_record_1",
+          "title": "Bangkorai Divines Wayshrine Survey Dispatch",
           "kind": "journal",
-          "title": "place.skycraft.bangkorai_landmark_02 Field Record 4",
-          "at": "site",
+          "author": "Surveyor of Bangkorai",
+          "at": "chest",
           "pages": [
-            "Entry 4 — place.skycraft.bangkorai_landmark_02 (Bangkorai)\n\nRecorded by the regional wardens inspecting place.skycraft.bangkorai_landmark_02. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+            "Field entry recorded at Bangkorai Divines Wayshrine (bangkorai_landmark_02) in Bangkorai (hammerfell/bangkorai). Wardens inspecting this wayshrine catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "bangkorai.L6.ford_towns",
+            "bangkorai.L8.na_totambu_reverence"
+          ]
+        },
+        {
+          "id": "bangkorai_landmark_02_field_record_2",
+          "title": "Bangkorai Divines Wayshrine Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Bangkorai",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Bangkorai Divines Wayshrine (bangkorai_landmark_02) in Bangkorai (hammerfell/bangkorai): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the wayshrine."
+          ],
+          "why": [
+            "bangkorai.L6.ford_towns",
+            "bangkorai.L8.na_totambu_reverence"
           ]
         }
       ]
@@ -21687,6 +21675,252 @@
           "at": "site",
           "pages": [
             "Entry 4 — place.skycraft.stros_mkai_scorpion_pit (Stros Mkai)\n\nRecorded by the regional wardens inspecting place.skycraft.stros_mkai_scorpion_pit. Field markers and supply tallies confirm active movement along the approaches. Keep the watch-fires tended and report any broken seals to the nearest chapterhouse."
+          ]
+        }
+      ]
+    },
+    "abahs_fang_corsair_island": {
+      "why": [
+        "hews_bane.L1.abecean_headlands",
+        "hews_bane.L5.abecean_shipping"
+      ],
+      "summary": "Abah's-Fang Corsair Island stands in Hews Bane as a notable island landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Hews Bane, Abah's-Fang Corsair Island has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Abah's-Fang Corsair Island in Hews Bane.",
+      "hook": "Wayfarers in Hews Bane report recent activity around Abah's-Fang Corsair Island, an enduring island holding provincial records.",
+      "rumour": "Travelers near Abah's-Fang Corsair Island speak of sealed caches preserved within this island of Hews Bane.",
+      "notes": [
+        {
+          "id": "abahs_fang_corsair_island_field_record_1",
+          "title": "Abah's-Fang Corsair Island Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Hews Bane",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Abah's-Fang Corsair Island (abahs_fang_corsair_island) in Hews Bane (hammerfell/hews_bane). Wardens inspecting this island catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "hews_bane.L1.abecean_headlands",
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        {
+          "id": "abahs_fang_corsair_island_field_record_2",
+          "title": "Abah's-Fang Corsair Island Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Hews Bane",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Abah's-Fang Corsair Island (abahs_fang_corsair_island) in Hews Bane (hammerfell/hews_bane): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the island."
+          ],
+          "why": [
+            "hews_bane.L1.abecean_headlands",
+            "hews_bane.L5.abecean_shipping"
+          ]
+        }
+      ]
+    },
+    "no_shira_outer_shipwreck": {
+      "why": [
+        "hews_bane.L1.abecean_headlands",
+        "hews_bane.L5.abecean_shipping"
+      ],
+      "summary": "No Shira Outer Shipwreck stands in Hews Bane as a notable shipwreck landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Hews Bane, No Shira Outer Shipwreck has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of No Shira Outer Shipwreck in Hews Bane.",
+      "hook": "Wayfarers in Hews Bane report recent activity around No Shira Outer Shipwreck, an enduring shipwreck holding provincial records.",
+      "rumour": "Travelers near No Shira Outer Shipwreck speak of sealed caches preserved within this shipwreck of Hews Bane.",
+      "notes": [
+        {
+          "id": "no_shira_outer_shipwreck_field_record_1",
+          "title": "No Shira Outer Shipwreck Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Hews Bane",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at No Shira Outer Shipwreck (no_shira_outer_shipwreck) in Hews Bane (hammerfell/hews_bane). Wardens inspecting this shipwreck catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "hews_bane.L1.abecean_headlands",
+            "hews_bane.L5.abecean_shipping"
+          ]
+        },
+        {
+          "id": "no_shira_outer_shipwreck_field_record_2",
+          "title": "No Shira Outer Shipwreck Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Hews Bane",
+          "at": "boss",
+          "pages": [
+            "Standing orders for No Shira Outer Shipwreck (no_shira_outer_shipwreck) in Hews Bane (hammerfell/hews_bane): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the shipwreck."
+          ],
+          "why": [
+            "hews_bane.L1.abecean_headlands",
+            "hews_bane.L5.abecean_shipping"
+          ]
+        }
+      ]
+    },
+    "stros_mkai_chain_sea_cave": {
+      "why": [
+        "stros_mkai.L1.two_lobes",
+        "stros_mkai.L5.harbour_trade"
+      ],
+      "summary": "Stros M'Kai Chain Sea Cave stands in Stros Mkai as a notable sea cave landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Stros Mkai, Stros M'Kai Chain Sea Cave has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Stros M'Kai Chain Sea Cave in Stros Mkai.",
+      "hook": "Wayfarers in Stros Mkai report recent activity around Stros M'Kai Chain Sea Cave, an enduring sea cave holding provincial records.",
+      "rumour": "Travelers near Stros M'Kai Chain Sea Cave speak of sealed caches preserved within this sea cave of Stros Mkai.",
+      "notes": [
+        {
+          "id": "stros_mkai_chain_sea_cave_field_record_1",
+          "title": "Stros M'Kai Chain Sea Cave Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Stros Mkai",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Stros M'Kai Chain Sea Cave (stros_mkai_chain_sea_cave) in Stros Mkai (hammerfell/stros_mkai). Wardens inspecting this sea cave catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "stros_mkai.L1.two_lobes",
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        {
+          "id": "stros_mkai_chain_sea_cave_field_record_2",
+          "title": "Stros M'Kai Chain Sea Cave Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Stros Mkai",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Stros M'Kai Chain Sea Cave (stros_mkai_chain_sea_cave) in Stros Mkai (hammerfell/stros_mkai): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the sea cave."
+          ],
+          "why": [
+            "stros_mkai.L1.two_lobes",
+            "stros_mkai.L5.harbour_trade"
+          ]
+        }
+      ]
+    },
+    "bthzark_shoal_coral_reef": {
+      "why": [
+        "stros_mkai.L1.two_lobes",
+        "stros_mkai.L5.harbour_trade"
+      ],
+      "summary": "Bthzark Shoal Coral Reef stands in Stros Mkai as a notable reef landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Stros Mkai, Bthzark Shoal Coral Reef has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Bthzark Shoal Coral Reef in Stros Mkai.",
+      "hook": "Wayfarers in Stros Mkai report recent activity around Bthzark Shoal Coral Reef, an enduring reef holding provincial records.",
+      "rumour": "Travelers near Bthzark Shoal Coral Reef speak of sealed caches preserved within this reef of Stros Mkai.",
+      "notes": [
+        {
+          "id": "bthzark_shoal_coral_reef_field_record_1",
+          "title": "Bthzark Shoal Coral Reef Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Stros Mkai",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Bthzark Shoal Coral Reef (bthzark_shoal_coral_reef) in Stros Mkai (hammerfell/stros_mkai). Wardens inspecting this reef catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "stros_mkai.L1.two_lobes",
+            "stros_mkai.L5.harbour_trade"
+          ]
+        },
+        {
+          "id": "bthzark_shoal_coral_reef_field_record_2",
+          "title": "Bthzark Shoal Coral Reef Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Stros Mkai",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Bthzark Shoal Coral Reef (bthzark_shoal_coral_reef) in Stros Mkai (hammerfell/stros_mkai): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the reef."
+          ],
+          "why": [
+            "stros_mkai.L1.two_lobes",
+            "stros_mkai.L5.harbour_trade"
+          ]
+        }
+      ]
+    },
+    "sentinel_iliac_atoll_island": {
+      "why": [
+        "sentinel.L1.harbour_cliff",
+        "sentinel.L5.dye_works"
+      ],
+      "summary": "Sentinel Iliac Atoll Island stands in Sentinel as a notable island landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Sentinel, Sentinel Iliac Atoll Island has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Sentinel Iliac Atoll Island in Sentinel.",
+      "hook": "Wayfarers in Sentinel report recent activity around Sentinel Iliac Atoll Island, an enduring island holding provincial records.",
+      "rumour": "Travelers near Sentinel Iliac Atoll Island speak of sealed caches preserved within this island of Sentinel.",
+      "notes": [
+        {
+          "id": "sentinel_iliac_atoll_island_field_record_1",
+          "title": "Sentinel Iliac Atoll Island Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Sentinel",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Sentinel Iliac Atoll Island (sentinel_iliac_atoll_island) in Sentinel (hammerfell/sentinel). Wardens inspecting this island catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "sentinel.L1.harbour_cliff",
+            "sentinel.L5.dye_works"
+          ]
+        },
+        {
+          "id": "sentinel_iliac_atoll_island_field_record_2",
+          "title": "Sentinel Iliac Atoll Island Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Sentinel",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Sentinel Iliac Atoll Island (sentinel_iliac_atoll_island) in Sentinel (hammerfell/sentinel): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the island."
+          ],
+          "why": [
+            "sentinel.L1.harbour_cliff",
+            "sentinel.L5.dye_works"
+          ]
+        }
+      ]
+    },
+    "kairula_tidal_sea_vault": {
+      "why": [
+        "sentinel.L1.harbour_cliff",
+        "sentinel.L5.dye_works"
+      ],
+      "summary": "Kairula Tidal Sea Vault stands in Sentinel as a notable sea vault landmark tied to provincial charters and ancestral watches.",
+      "history": "Established along the ancient reaches of Sentinel, Kairula Tidal Sea Vault has weathered generations of regional stewardship.",
+      "inhabitants": "Maintained by the local wardens and denizens of Kairula Tidal Sea Vault in Sentinel.",
+      "hook": "Wayfarers in Sentinel report recent activity around Kairula Tidal Sea Vault, an enduring sea vault holding provincial records.",
+      "rumour": "Travelers near Kairula Tidal Sea Vault speak of sealed caches preserved within this sea vault of Sentinel.",
+      "notes": [
+        {
+          "id": "kairula_tidal_sea_vault_field_record_1",
+          "title": "Kairula Tidal Sea Vault Survey Dispatch",
+          "kind": "journal",
+          "author": "Surveyor of Sentinel",
+          "at": "chest",
+          "pages": [
+            "Field entry recorded at Kairula Tidal Sea Vault (kairula_tidal_sea_vault) in Sentinel (hammerfell/sentinel). Wardens inspecting this sea vault catalogued weathered boundary stones, supply tallies, and threshold seals."
+          ],
+          "why": [
+            "sentinel.L1.harbour_cliff",
+            "sentinel.L5.dye_works"
+          ]
+        },
+        {
+          "id": "kairula_tidal_sea_vault_field_record_2",
+          "title": "Kairula Tidal Sea Vault Warden's Ledger",
+          "kind": "orders",
+          "author": "Castellan of Sentinel",
+          "at": "boss",
+          "pages": [
+            "Standing orders for Kairula Tidal Sea Vault (kairula_tidal_sea_vault) in Sentinel (hammerfell/sentinel): maintain the inner lanterns, secure the charter chest, and log all coastal or border patrols passing the sea vault."
+          ],
+          "why": [
+            "sentinel.L1.harbour_cliff",
+            "sentinel.L5.dye_works"
           ]
         }
       ]

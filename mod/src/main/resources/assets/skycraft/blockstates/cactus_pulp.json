@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/cactus_pulp"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/cactus_pulp_harvested"
+    }
+  }
+}

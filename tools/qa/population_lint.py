@@ -28,6 +28,9 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DEFAULT_DIR = os.path.join(ROOT, 'mod', 'run', 'skycraft-previews')
 TRAINERS_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'society', 'trainers.json')
 COURTS_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'society', 'courts.json')
+RESIDENTS_GLOB = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'society', '*_residents.json')
+WORLDSHEETS_GLOB = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'world', '*.json')
+NPC_REGION_VOICE_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'npc', 'region_voice.json')
 SKYRIM_PLACES_JSON = os.path.join(ROOT, 'mod', 'src', 'main', 'resources', 'skycraft', 'tamriel', 'places', 'skyrim_settlements.json')
 
 BED_TYPES = {'bed', 'guild_bed', 'guest_bed'}
@@ -51,6 +54,115 @@ TRAINERS_DATA = load_json_safe(TRAINERS_JSON)
 COURTS_DATA = load_json_safe(COURTS_JSON)
 SKYRIM_PLACES_RAW = load_json_safe(SKYRIM_PLACES_JSON) if os.path.isfile(SKYRIM_PLACES_JSON) else []
 SKYRIM_PLACES = {p['id']: p for p in SKYRIM_PLACES_RAW if isinstance(p, dict) and 'id' in p}
+
+
+def load_worldsheet_ids():
+    """Collects all valid WorldSheets citation keys (<scope>.<layer>.<id> and <province>:<scope>:<layer>:<id>)."""
+    valid = set()
+    for wf in sorted(glob.glob(WORLDSHEETS_GLOB)):
+        data = load_json_safe(wf)
+        prov = data.get('province', os.path.splitext(os.path.basename(wf))[0])
+        for lk, items in (data.get('layers') or {}).items():
+            for it in items:
+                fid = it.get('id')
+                if fid:
+                    valid.add(f'{prov}.{lk}.{fid}')
+                    valid.add(f'{prov}:{prov}:{lk}.{fid}')
+                    valid.add(f'{prov}:{prov}:{lk}:{fid}')
+        for reg_key, rdata in (data.get('regions') or {}).items():
+            short_reg = reg_key.split('/')[-1]
+            for lk, items in (rdata.get('layers') or {}).items():
+                for it in items:
+                    fid = it.get('id')
+                    if fid:
+                        valid.add(f'{short_reg}.{lk}.{fid}')
+                        valid.add(f'{reg_key}.{lk}.{fid}')
+                        valid.add(f'{prov}:{short_reg}:{lk}:{fid}')
+    return valid
+
+
+def load_authored_residents():
+    """Loads all 10 *_residents.json files and returns (by_settlement, file_count, total_residents, errs)."""
+    errs = []
+    by_settlement = {}
+    files = sorted(glob.glob(RESIDENTS_GLOB))
+    if len(files) < 10:
+        errs.append(f'expected 10 *_residents.json files, found {len(files)}')
+    valid_ws = load_worldsheet_ids()
+    total_residents = 0
+
+    for rf in files:
+        fname = os.path.basename(rf)
+        try:
+            with open(rf, encoding='utf8') as f:
+                raw_text = f.read()
+                data = json.loads(raw_text)
+        except Exception as exc:
+            errs.append(f'{fname}: failed to parse JSON: {exc}')
+            continue
+
+        if 'place.skycraft.' in raw_text:
+            errs.append(f'{fname}: contains raw place.skycraft.<id> localization token')
+
+        settlements = data.get('settlements')
+        if not isinstance(settlements, dict) or not settlements:
+            errs.append(f'{fname}: missing or empty settlements object')
+            continue
+
+        for sid, sdata in settlements.items():
+            res_list = sdata.get('residents') if isinstance(sdata, dict) else None
+            if not isinstance(res_list, list) or len(res_list) < 1:
+                errs.append(f'{fname}:{sid}: settlement has 0 authored residents')
+                continue
+            bucket = by_settlement.setdefault(sid, [])
+            for idx, r in enumerate(res_list):
+                total_residents += 1
+                rid = r.get('id', '')
+                rname = r.get('name', '')
+                rrole = r.get('role', '')
+                rplace = r.get('place', '')
+                rwhy = r.get('why', [])
+                if not rid or not rname or not rrole or not rplace:
+                    errs.append(f'{fname}:{sid}[{idx}]: resident missing id/name/role/place')
+                if rplace != sid:
+                    errs.append(f'{fname}:{sid}[{idx}] ({rid}): place={rplace!r} does not match settlement {sid!r}')
+                if not isinstance(rwhy, list) or len(rwhy) == 0:
+                    errs.append(f'{fname}:{sid}[{idx}] ({rid}): empty why citation list')
+                else:
+                    for cite in rwhy:
+                        if cite not in valid_ws:
+                            errs.append(f'{fname}:{sid}[{idx}] ({rid}): unresolved WorldSheets why citation {cite!r}')
+                bucket.append(r)
+
+    if total_residents < 12000:
+        errs.append(f'authored residents total {total_residents} < 12000')
+    if len(by_settlement) < 446:
+        errs.append(f'authored resident settlements {len(by_settlement)} < 446')
+    return by_settlement, len(files), total_residents, errs
+
+
+AUTHORED_BY_SETTLEMENT, AUTHORED_FILE_COUNT, AUTHORED_TOTAL_RESIDENTS, AUTHORED_LINT_ERRS = load_authored_residents()
+
+
+def lint_region_voices():
+    """Verifies mod/src/main/resources/skycraft/npc/region_voice.json and society*.json coverage."""
+    errs = []
+    if not os.path.isfile(NPC_REGION_VOICE_JSON):
+        return ['missing mod/src/main/resources/skycraft/npc/region_voice.json']
+    rv = load_json_safe(NPC_REGION_VOICE_JSON)
+    provs = rv.get('provinces') or {}
+    regs = rv.get('regions') or {}
+    if len(provs) < 12:
+        errs.append(f'npc/region_voice.json has {len(provs)} provinces (need >= 12)')
+    if len(regs) < 75:
+        errs.append(f'npc/region_voice.json has {len(regs)} regions (need >= 75)')
+    for pid, pspec in provs.items():
+        if isinstance(pspec, dict) and pspec.get('gossip', 0) < 6:
+            errs.append(f'npc/region_voice.json province {pid} has gossip={pspec.get("gossip")} (need >= 6)')
+    for rid, rspec in regs.items():
+        if isinstance(rspec, dict) and rspec.get('gossip', 0) < 2:
+            errs.append(f'npc/region_voice.json region {rid} has gossip={rspec.get("gossip")} (need >= 2)')
+    return errs
 
 
 def resolve_settlement_kind(sid, tier):
@@ -103,6 +215,17 @@ def collect_services(sid, tier, people):
                 trainers_by_skill.append(sk)
         if job in COURT_ROLES and job not in court_roles:
             court_roles.append(job)
+
+    # Merge authored residents from *_residents.json (wired by SocietyResidents + Housing)
+    for ar in AUTHORED_BY_SETTLEMENT.get(sid, []):
+        rname = ar.get('name')
+        rrole = ar.get('role')
+        if rname and rname not in named_residents:
+            named_residents.append(rname)
+        if rrole:
+            roles.add(rrole)
+            if rrole in COURT_ROLES and rrole not in court_roles:
+                court_roles.append(rrole)
 
     # Merge configured trainers from trainers.json (which Housing.assignTrainers wires into the settlement)
     t_specs = TRAINERS_DATA.get('settlements', {}).get(sid, [])
@@ -271,7 +394,7 @@ def main(argv):
         bad += len(errs)
         rows.append(d)
 
-    roster_errs = lint_static_rosters(have)
+    roster_errs = lint_static_rosters(have) + AUTHORED_LINT_ERRS + lint_region_voices()
     for e in roster_errs:
         print('ERR  ' + e)
     bad += len(roster_errs)
@@ -307,6 +430,8 @@ def main(argv):
                      len(b['trainers']), ','.join(sorted(b['trainers'])) or 'none',
                      len(b['court']), ','.join(sorted(b['court'])) or 'none',
                      b['unstaffed']))
+    print('authored residents lint: %d files, %d settlements, %d residents, %d errors'
+          % (AUTHORED_FILE_COUNT, len(AUTHORED_BY_SETTLEMENT), AUTHORED_TOTAL_RESIDENTS, len(AUTHORED_LINT_ERRS)))
     print('population lint: %d settlements, %d errors' % (len(rows), bad))
     return 1 if bad else 0
 

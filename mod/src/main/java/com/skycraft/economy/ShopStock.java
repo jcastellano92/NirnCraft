@@ -84,11 +84,33 @@ public final class ShopStock {
         Region region = EconomyLoot.regionAt(world, pos);
         String key = RegionalGear.gearKey(region);
         String province = region == null ? "skyrim" : region.province();
+        String placeId = null;
+        if (pos != null) {
+            var near = com.skycraft.tamriel.Places.nearest(null, pos.getX(), pos.getZ(), 240);
+            if (near.isPresent() && near.get().type().isSettlement()) {
+                placeId = near.get().id();
+            }
+        }
+        generateForPlace(out, key, province, placeId, level, share, inn, t, rnd);
+    }
+
+    /** Generates deterministic shop stock for a given province gear key and optional settlement {@code placeId}. */
+    public static List<ItemStack> generateForPlace(String gearKey, @org.jetbrains.annotations.Nullable String placeId,
+                                                   int level, int share, boolean inn, ShopType t, long seed) {
+        BulkStore out = new BulkStore(ShopBook.MAX_ROWS, ShopBook.MAX_PER_ROW, null);
+        String key = TradeNetwork.canonProvince(gearKey);
+        String province = "solstheim".equals(key) ? "morrowind" : ("orsinium".equals(key) ? "high_rock" : key);
+        generateForPlace(out, key, province, placeId, level, share, inn, t, RandomSource.create(seed));
+        return out.entries();
+    }
+
+    static void generateForPlace(BulkStore out, String key, String province, @org.jetbrains.annotations.Nullable String placeId,
+                                 int level, int share, boolean inn, ShopType t, RandomSource rnd) {
         int gearLevel = 1 + 6 * (level - 1);
         Player customer = null;
 
         {
-            tagged(out, t, key, share, level, rnd);
+            tagged(out, t, key, placeId, share, level, rnd);
             switch (t) {
                 case BLACKSMITH -> {
                     int n = 3 + level;
@@ -139,21 +161,21 @@ public final class ShopStock {
                 case JEWELER -> jewelry(out, level, rnd, 3 + level);
                 case FOOD -> {
                     // an inn's own table (mead, ale, stews, sweetrolls...): the province's, from #skycraft:inn_goods
-                    if (inn) innGoods(out, key, rnd);
+                    if (inn) innGoods(out, key, placeId, rnd);
                 }
                 default -> {
                 }
             }
-            topUp(out, t, key, level, rnd);
+            topUp(out, t, key, placeId, level, rnd);
         }
     }
 
     /** The inn's own goods: 5 to 8 kinds of #skycraft:inn_goods this province serves, 1 to 4 each. */
-    private static void innGoods(BulkStore out, String gearKey, RandomSource rnd) {
+    private static void innGoods(BulkStore out, String gearKey, @org.jetbrains.annotations.Nullable String placeId, RandomSource rnd) {
         List<Item> goods = new ArrayList<>();
         for (Item item : items(com.skycraft.survival.inn.Innkeepers.INN_GOODS)) {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-            if (id != null && ShopTrades.servedIn(id.toString(), gearKey)) goods.add(item);
+            if (id != null && ShopTrades.servedAt(id.toString(), gearKey, placeId, ShopType.FOOD)) goods.add(item);
         }
         if (goods.isEmpty()) return;
         int entries = 5 + rnd.nextInt(4);
@@ -167,16 +189,34 @@ public final class ShopStock {
     // ------------------------------------------------------------------ pieces
 
     /** Random goods of the type's tag and of its province tag (province goods three times as likely). */
-    private static void tagged(BulkStore out, ShopType t, String key, int entries, int level, RandomSource rnd) {
+    private static void tagged(BulkStore out, ShopType t, String key, @org.jetbrains.annotations.Nullable String placeId,
+                               int entries, int level, RandomSource rnd) {
         ShopTrades.Trade trade = ShopTrades.trade(t);
         List<Item> base = t.stockItems();
-        // goods the data ties to other provinces or outside the trade's allowed categories are not on this shelf
+        // goods the data ties to other provinces, embargoed goods, or categories outside the trade are not on this shelf
         base.removeIf(i -> {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(i);
-            return (id != null && !ShopTrades.servedIn(id.toString(), key)) || !trade.allows(ItemCategory.of(new ItemStack(i)));
+            return (id != null && !ShopTrades.servedAt(id.toString(), key, placeId, t))
+                    || !trade.allows(ItemCategory.of(new ItemStack(i)));
         });
-        List<Item> local = t.provinceItems(key);
-        local.removeIf(i -> !trade.allows(ItemCategory.of(new ItemStack(i))));
+        List<Item> local = new ArrayList<>(t.provinceItems(key));
+        for (String expId : placeId != null && !TradeNetwork.localExports(placeId).isEmpty()
+                ? TradeNetwork.localExports(placeId) : TradeNetwork.provinceExports(key)) {
+            ResourceLocation rl = ResourceLocation.tryParse(expId);
+            if (rl == null) continue;
+            Item expItem = BuiltInRegistries.ITEM.get(rl);
+            if (expItem != null && expItem != net.minecraft.world.item.Items.AIR && !local.contains(expItem)) {
+                if (t == ShopType.GENERAL || t == ShopType.EXOTIC || base.contains(expItem)) {
+                    local.add(expItem);
+                }
+            }
+        }
+        local.removeIf(i -> {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(i);
+            return (id != null && !TradeNetwork.mayStock(t, key, placeId, id.toString()))
+                    || (id != null && t != ShopType.FENCE && t != ShopType.EXOTIC && !ShopTrades.servedAt(id.toString(), key, placeId, t))
+                    || !trade.allows(ItemCategory.of(new ItemStack(i)));
+        });
         if (base.isEmpty() && local.isEmpty()) return;
         for (int i = 0; i < entries; i++) {
             boolean fromLocal = !local.isEmpty() && (base.isEmpty() || rnd.nextInt(4) > 0);
@@ -197,14 +237,24 @@ public final class ShopStock {
     }
 
     /** Ensures the shop carries at least its trade's declared minimum number of rows when random draws merged or rejected. */
-    private static void topUp(BulkStore out, ShopType t, String key, int level, RandomSource rnd) {
+    private static void topUp(BulkStore out, ShopType t, String key, @org.jetbrains.annotations.Nullable String placeId,
+                              int level, RandomSource rnd) {
         ShopTrades.Trade trade = ShopTrades.trade(t);
         int min = trade.minRows();
         if (out.size() >= min) return;
-        List<Item> candidates = new ArrayList<>(t.provinceItems(key));
+        List<Item> candidates = new ArrayList<>();
+        for (Item item : t.provinceItems(key)) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            if (id != null && TradeNetwork.mayStock(t, key, placeId, id.toString())
+                    && (t == ShopType.FENCE || t == ShopType.EXOTIC || ShopTrades.servedAt(id.toString(), key, placeId, t))) {
+                candidates.add(item);
+            }
+        }
         for (Item item : t.stockItems()) {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-            if (id != null && ShopTrades.servedIn(id.toString(), key) && !candidates.contains(item)) candidates.add(item);
+            if (id != null && ShopTrades.servedAt(id.toString(), key, placeId, t) && !candidates.contains(item)) {
+                candidates.add(item);
+            }
         }
         candidates.removeIf(i -> i instanceof ArtifactItem || !trade.allows(ItemCategory.of(new ItemStack(i))));
         if (candidates.isEmpty()) return;

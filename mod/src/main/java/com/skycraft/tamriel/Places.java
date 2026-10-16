@@ -106,6 +106,22 @@ public final class Places {
         return Optional.ofNullable(found);
     }
 
+    /** Nearest settlement place within {@code maxDist} blocks of (x, z), or {@code null} if none. */
+    @org.jetbrains.annotations.Nullable
+    public static Place nearestSettlement(int x, int z, int maxDist) {
+        long best = (long) maxDist * maxDist;
+        Place found = null;
+        for (Place p : candidates(x - maxDist, z - maxDist, x + maxDist, z + maxDist, 0)) {
+            if (!p.type().isSettlement()) continue;
+            long d = p.distSqr(x, z);
+            if (d <= best) {
+                best = d;
+                found = p;
+            }
+        }
+        return found;
+    }
+
     /** Places whose anchor (x, z) lies in this chunk. */
     public static List<Place> inChunk(ChunkPos pos) {
         return BY_CHUNK.getOrDefault(pos.toLong(), List.of());

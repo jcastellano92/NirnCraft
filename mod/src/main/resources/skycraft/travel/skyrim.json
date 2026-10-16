@@ -524,7 +524,8 @@
       "z": -2455,
       "mode": "boat",
       "modes": [
-        "boat"
+        "boat",
+        "wayshrine"
       ],
       "kind": "port",
       "discoveredOnArrival": true,
@@ -679,7 +680,7 @@
       "place": "the_guardian_stones",
       "name": "stone.skycraft.warrior",
       "region": "skyrim/falkreath",
-      "x": -278,
+      "x": -274,
       "z": 824,
       "mode": "wayshrine",
       "modes": [
@@ -700,7 +701,7 @@
       "name": "stone.skycraft.mage",
       "region": "skyrim/falkreath",
       "x": -274,
-      "z": 828,
+      "z": 824,
       "mode": "wayshrine",
       "modes": [
         "wayshrine"
@@ -719,7 +720,7 @@
       "place": "the_guardian_stones",
       "name": "stone.skycraft.thief",
       "region": "skyrim/falkreath",
-      "x": -270,
+      "x": -274,
       "z": 824,
       "mode": "wayshrine",
       "modes": [
@@ -2353,6 +2354,21 @@
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
       ]
+    },
+    {
+      "id": "jylkurfyk",
+      "region": "atmora/frozen_forest",
+      "x": 300,
+      "z": -11300,
+      "modes": [
+        "boat",
+        "wayshrine"
+      ],
+      "why": [
+        "frozen_forest.L6.jylkurfyk_port_ruins",
+        "foreign.L6.beachhead_anchorages"
+      ],
+      "place": "jylkurfyk"
     }
   ],
   "routes": [
@@ -2360,10 +2376,8 @@
       "from": "whiterun",
       "to": "solitude",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 16,
+      "cost": 115,
       "path": "hjaal_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "haafingar.L5.toll_bridge"
@@ -2373,10 +2387,8 @@
       "from": "whiterun",
       "to": "windhelm",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 14,
+      "cost": 105,
       "path": "eastmarch_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "eastmarch.L6.windhelm_seat"
@@ -2386,10 +2398,8 @@
       "from": "whiterun",
       "to": "riften",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 16,
+      "cost": 146,
       "path": "treva_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "the_rift.L6.riften_seat"
@@ -2397,12 +2407,21 @@
     },
     {
       "from": "whiterun",
+      "to": "rorikstead",
+      "mode": "carriage",
+      "cost": 97,
+      "path": "reach_road",
+      "why": [
+        "skyrim.L5.road_hub",
+        "the_reach.L6.karth_road"
+      ]
+    },
+    {
+      "from": "rorikstead",
       "to": "markarth",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 18,
+      "cost": 85,
       "path": "reach_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "the_reach.L6.karth_road"
@@ -2412,10 +2431,8 @@
       "from": "whiterun",
       "to": "falkreath",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 12,
+      "cost": 91,
       "path": "falkreath_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "falkreath.L5.border_trade"
@@ -2425,10 +2442,8 @@
       "from": "whiterun",
       "to": "morthal",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 12,
+      "cost": 87,
       "path": "hjaal_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "hjaalmarch.L6.hjaal_road"
@@ -2438,10 +2453,8 @@
       "from": "whiterun",
       "to": "dawnstar",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 14,
+      "cost": 98,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "the_pale.L5.roadside_inn"
@@ -2451,10 +2464,8 @@
       "from": "whiterun",
       "to": "winterhold",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 16,
+      "cost": 117,
       "path": "winterhold_road",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.road_hub",
         "winterhold.L5.college_coin"
@@ -2464,10 +2475,8 @@
       "from": "solitude",
       "to": "morthal",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 10,
+      "cost": 48,
       "path": "hjaal_road",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "hjaalmarch.L6.hjaal_road"
@@ -2477,10 +2486,8 @@
       "from": "solitude",
       "to": "markarth",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 16,
+      "cost": 130,
       "path": "karth_road",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "the_reach.L6.karth_road"
@@ -2490,10 +2497,8 @@
       "from": "solitude",
       "to": "dawnstar",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 14,
+      "cost": 83,
       "path": "northern_coast_road",
-      "bidirectional": true,
       "why": [
         "haafingar.L6.solitude_seat",
         "the_pale.L6.dawnstar_seat"
@@ -2503,10 +2508,8 @@
       "from": "morthal",
       "to": "dawnstar",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 12,
+      "cost": 77,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "hjaalmarch.L6.hjaal_road",
         "the_pale.L6.dawnstar_seat"
@@ -2516,10 +2519,8 @@
       "from": "dawnstar",
       "to": "winterhold",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 12,
+      "cost": 76,
       "path": "winterhold_road",
-      "bidirectional": true,
       "why": [
         "the_pale.L6.dawnstar_seat",
         "winterhold.L6.winterhold_remnant"
@@ -2529,10 +2530,8 @@
       "from": "dawnstar",
       "to": "windhelm",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 14,
+      "cost": 109,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "the_pale.L5.roadside_inn",
         "eastmarch.L6.windhelm_seat"
@@ -2542,10 +2541,8 @@
       "from": "winterhold",
       "to": "windhelm",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 70,
       "path": "winterhold_road",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "eastmarch.L6.windhelm_seat"
@@ -2555,10 +2552,8 @@
       "from": "windhelm",
       "to": "riften",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 14,
+      "cost": 120,
       "path": "rift_road",
-      "bidirectional": true,
       "why": [
         "eastmarch.L6.windhelm_seat",
         "the_rift.L6.riften_seat"
@@ -2566,12 +2561,21 @@
     },
     {
       "from": "riften",
+      "to": "ivarstead",
+      "mode": "carriage",
+      "cost": 93,
+      "path": "south_jerall_road",
+      "why": [
+        "the_rift.L6.riften_seat",
+        "falkreath.L5.border_trade"
+      ]
+    },
+    {
+      "from": "ivarstead",
       "to": "falkreath",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 18,
+      "cost": 98,
       "path": "south_jerall_road",
-      "bidirectional": true,
       "why": [
         "the_rift.L6.riften_seat",
         "falkreath.L5.border_trade"
@@ -2581,10 +2585,8 @@
       "from": "falkreath",
       "to": "markarth",
       "mode": "carriage",
-      "fee": 50,
-      "duration": 18,
+      "cost": 142,
       "path": "reach_road",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "the_reach.L5.border_trade"
@@ -2594,10 +2596,8 @@
       "from": "whiterun",
       "to": "riverwood",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 50,
       "path": "white_river_road",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "whiterun.L6.riverwood"
@@ -2607,10 +2607,8 @@
       "from": "riverwood",
       "to": "helgen",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 45,
       "path": "white_river_road",
-      "bidirectional": true,
       "why": [
         "whiterun.L6.riverwood",
         "falkreath.L6.helgen_fort"
@@ -2620,10 +2618,8 @@
       "from": "helgen",
       "to": "falkreath",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 55,
       "path": "falkreath_road",
-      "bidirectional": true,
       "why": [
         "falkreath.L6.helgen_fort",
         "falkreath.L6.falkreath_graves"
@@ -2633,10 +2629,8 @@
       "from": "riverwood",
       "to": "ivarstead",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 61,
       "path": "treva_road",
-      "bidirectional": true,
       "why": [
         "whiterun.L6.riverwood",
         "the_rift.L6.ivarstead"
@@ -2646,36 +2640,19 @@
       "from": "ivarstead",
       "to": "riften",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 12,
+      "cost": 93,
       "path": "treva_road",
-      "bidirectional": true,
       "why": [
         "the_rift.L6.ivarstead",
         "the_rift.L6.riften_seat"
       ]
     },
     {
-      "from": "whiterun",
-      "to": "rorikstead",
-      "mode": "carriage",
-      "fee": 10,
-      "duration": 10,
-      "path": "reach_road",
-      "bidirectional": true,
-      "why": [
-        "whiterun.L5.crossroads_trade",
-        "whiterun.L6.rorikstead"
-      ]
-    },
-    {
       "from": "rorikstead",
       "to": "old_hroldan",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 44,
       "path": "reach_road",
-      "bidirectional": true,
       "why": [
         "whiterun.L6.rorikstead",
         "the_reach.L6.karth_road"
@@ -2685,10 +2662,8 @@
       "from": "old_hroldan",
       "to": "markarth",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 10,
+      "cost": 64,
       "path": "reach_road",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L6.markarth_seat"
@@ -2698,10 +2673,8 @@
       "from": "markarth",
       "to": "karthwasten",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 59,
       "path": "karth_road",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.markarth_seat",
         "the_reach.L6.mine_villages"
@@ -2711,10 +2684,8 @@
       "from": "karthwasten",
       "to": "dragon_bridge",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 58,
       "path": "karth_road",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "haafingar.L6.dragon_bridge"
@@ -2724,10 +2695,8 @@
       "from": "dragon_bridge",
       "to": "solitude",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 55,
       "path": "karth_road",
-      "bidirectional": true,
       "why": [
         "haafingar.L6.dragon_bridge",
         "haafingar.L6.solitude_seat"
@@ -2737,10 +2706,8 @@
       "from": "dragon_bridge",
       "to": "morthal",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 67,
       "path": "hjaal_road",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "hjaalmarch.L6.hjaal_road"
@@ -2750,10 +2717,8 @@
       "from": "morthal",
       "to": "stonehills",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 42,
       "path": "hjaal_road",
-      "bidirectional": true,
       "why": [
         "hjaalmarch.L6.morthal_seat",
         "hjaalmarch.L6.stonehills"
@@ -2763,10 +2728,8 @@
       "from": "stonehills",
       "to": "dawnstar",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 60,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "hjaalmarch.L6.stonehills",
         "the_pale.L6.dawnstar_seat"
@@ -2776,10 +2739,8 @@
       "from": "whiterun",
       "to": "nightgate_inn",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 70,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "the_pale.L6.nightgate"
@@ -2789,10 +2750,8 @@
       "from": "nightgate_inn",
       "to": "dawnstar",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 73,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "the_pale.L6.nightgate",
         "the_pale.L6.dawnstar_seat"
@@ -2802,10 +2761,8 @@
       "from": "nightgate_inn",
       "to": "windhelm",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 64,
       "path": "pale_road",
-      "bidirectional": true,
       "why": [
         "the_pale.L6.nightgate",
         "eastmarch.L6.windhelm_seat"
@@ -2815,10 +2772,8 @@
       "from": "whiterun",
       "to": "kynesgrove",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 12,
+      "cost": 100,
       "path": "eastmarch_road",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "eastmarch.L6.kynesgrove"
@@ -2828,10 +2783,8 @@
       "from": "kynesgrove",
       "to": "windhelm",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 39,
       "path": "eastmarch_road",
-      "bidirectional": true,
       "why": [
         "eastmarch.L6.kynesgrove",
         "eastmarch.L6.windhelm_seat"
@@ -2841,10 +2794,8 @@
       "from": "windhelm",
       "to": "darkwater_crossing",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 10,
+      "cost": 72,
       "path": "rift_road",
-      "bidirectional": true,
       "why": [
         "eastmarch.L6.windhelm_seat",
         "eastmarch.L6.darkwater_crossing"
@@ -2854,10 +2805,8 @@
       "from": "darkwater_crossing",
       "to": "shors_stone",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 56,
       "path": "rift_road",
-      "bidirectional": true,
       "why": [
         "eastmarch.L6.darkwater_crossing",
         "the_rift.L6.shors_stone"
@@ -2867,10 +2816,8 @@
       "from": "shors_stone",
       "to": "riften",
       "mode": "carriage",
-      "fee": 10,
-      "duration": 8,
+      "cost": 47,
       "path": "rift_road",
-      "bidirectional": true,
       "why": [
         "the_rift.L6.shors_stone",
         "the_rift.L6.riften_seat"
@@ -2880,10 +2827,8 @@
       "from": "solitude",
       "to": "dawnstar",
       "mode": "boat",
-      "fee": 50,
-      "duration": 14,
+      "cost": 0,
       "path": "sea_of_ghosts_west",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.sea_trade",
         "haafingar.L5.company_docks"
@@ -2893,10 +2838,8 @@
       "from": "dawnstar",
       "to": "winterhold",
       "mode": "boat",
-      "fee": 50,
-      "duration": 12,
+      "cost": 0,
       "path": "sea_of_ghosts_pale",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.sea_trade",
         "the_pale.L5.ore_ships"
@@ -2906,10 +2849,8 @@
       "from": "winterhold",
       "to": "windhelm",
       "mode": "boat",
-      "fee": 50,
-      "duration": 12,
+      "cost": 0,
       "path": "sea_of_ghosts_east",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.sea_trade",
         "eastmarch.L5.harbour"
@@ -2919,10 +2860,8 @@
       "from": "solitude",
       "to": "windhelm",
       "mode": "boat",
-      "fee": 75,
-      "duration": 18,
+      "cost": 0,
       "path": "sea_of_ghosts_lane",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.sea_trade",
         "haafingar.L5.company_docks"
@@ -2932,10 +2871,8 @@
       "from": "dawnstar",
       "to": "windhelm",
       "mode": "boat",
-      "fee": 50,
-      "duration": 14,
+      "cost": 0,
       "path": "sea_of_ghosts_central",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.sea_trade",
         "the_pale.L5.ore_ships"
@@ -2945,10 +2882,8 @@
       "from": "windhelm",
       "to": "raven_rock",
       "mode": "boat",
-      "fee": 250,
-      "duration": 20,
+      "cost": 0,
       "path": "solstheim_passage",
-      "bidirectional": true,
       "why": [
         "skyrim.L5.sea_trade",
         "eastmarch.L5.harbour"
@@ -2958,10 +2893,8 @@
       "from": "solitude",
       "to": "castle_volkihar",
       "mode": "boat",
-      "fee": 25,
-      "duration": 10,
+      "cost": 0,
       "path": "haafingar_skiff_channel",
-      "bidirectional": true,
       "why": [
         "haafingar.L1.island_rock",
         "haafingar.L10.volkihar_castle"
@@ -2971,10 +2904,8 @@
       "from": "riverwood",
       "to": "whiterun",
       "mode": "river_boat",
-      "fee": 15,
-      "duration": 10,
+      "cost": 0,
       "path": "white_river_upper",
-      "bidirectional": true,
       "why": [
         "skyrim.L3.white_river",
         "whiterun.L3.white_river_flats"
@@ -2984,10 +2915,8 @@
       "from": "whiterun",
       "to": "windhelm",
       "mode": "river_boat",
-      "fee": 25,
-      "duration": 14,
+      "cost": 0,
       "path": "white_river_lower",
-      "bidirectional": true,
       "why": [
         "skyrim.L3.white_river",
         "eastmarch.L1.white_river_mouth"
@@ -2997,10 +2926,8 @@
       "from": "riften",
       "to": "heartwood_mill",
       "mode": "river_boat",
-      "fee": 10,
-      "duration": 8,
+      "cost": 0,
       "path": "lake_honrich_ferry",
-      "bidirectional": true,
       "why": [
         "skyrim.L3.great_lakes",
         "the_rift.L3.honrich_city"
@@ -3010,10 +2937,8 @@
       "from": "heartwood_mill",
       "to": "ivarstead",
       "mode": "river_boat",
-      "fee": 10,
-      "duration": 8,
+      "cost": 0,
       "path": "lake_honrich_west",
-      "bidirectional": true,
       "why": [
         "skyrim.L3.great_lakes",
         "the_rift.L1.lake_floor"
@@ -3023,10 +2948,8 @@
       "from": "alftand",
       "to": "great_lift_at_alftand",
       "mode": "lift",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "alftand_blackreach_lift",
-      "bidirectional": true,
       "why": [
         "skyrim.L1.dwemer_bedrock",
         "the_pale.L10.great_lifts"
@@ -3036,10 +2959,8 @@
       "from": "mzinchaleft",
       "to": "great_lift_at_mzinchaleft",
       "mode": "lift",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "mzinchaleft_blackreach_lift",
-      "bidirectional": true,
       "why": [
         "skyrim.L1.dwemer_bedrock",
         "the_pale.L10.great_lifts"
@@ -3049,10 +2970,8 @@
       "from": "raldbthar",
       "to": "great_lift_at_raldbthar",
       "mode": "lift",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "raldbthar_blackreach_lift",
-      "bidirectional": true,
       "why": [
         "skyrim.L1.dwemer_bedrock",
         "the_pale.L10.great_lifts"
@@ -3062,10 +2981,8 @@
       "from": "great_lift_at_alftand",
       "to": "great_lift_at_mzinchaleft",
       "mode": "lift",
-      "fee": 0,
-      "duration": 10,
+      "cost": 0,
       "path": "blackreach_underway_west",
-      "bidirectional": true,
       "why": [
         "skyrim.L1.dwemer_bedrock",
         "the_pale.L10.great_lifts"
@@ -3075,10 +2992,8 @@
       "from": "great_lift_at_alftand",
       "to": "great_lift_at_raldbthar",
       "mode": "lift",
-      "fee": 0,
-      "duration": 10,
+      "cost": 0,
       "path": "blackreach_underway_south",
-      "bidirectional": true,
       "why": [
         "skyrim.L1.dwemer_bedrock",
         "the_pale.L10.great_lifts"
@@ -3088,10 +3003,8 @@
       "from": "guardian_stones",
       "to": "riverwood",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "white_river_pilgrim_path",
-      "bidirectional": true,
       "why": [
         "falkreath.L3.lake_ilinalta",
         "whiterun.L6.riverwood"
@@ -3101,10 +3014,8 @@
       "from": "guardian_stones",
       "to": "warrior_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 2,
+      "cost": 0,
       "path": "guardian_circle",
-      "bidirectional": true,
       "why": [
         "falkreath.L3.lake_ilinalta",
         "skyrim.L8.ancestor_barrows"
@@ -3114,10 +3025,8 @@
       "from": "guardian_stones",
       "to": "mage_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 2,
+      "cost": 0,
       "path": "guardian_circle",
-      "bidirectional": true,
       "why": [
         "falkreath.L3.lake_ilinalta",
         "skyrim.L8.ancestor_barrows"
@@ -3127,10 +3036,8 @@
       "from": "guardian_stones",
       "to": "thief_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 2,
+      "cost": 0,
       "path": "guardian_circle",
-      "bidirectional": true,
       "why": [
         "falkreath.L3.lake_ilinalta",
         "skyrim.L8.ancestor_barrows"
@@ -3140,10 +3047,8 @@
       "from": "lady_stone",
       "to": "falkreath",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "ilinalta_shore_path",
-      "bidirectional": true,
       "why": [
         "falkreath.L3.lake_ilinalta",
         "falkreath.L6.falkreath_graves"
@@ -3153,10 +3058,8 @@
       "from": "ritual_stone",
       "to": "whiterun",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "white_river_bluff_path",
-      "bidirectional": true,
       "why": [
         "whiterun.L3.white_river_flats",
         "whiterun.L6.whiterun_seat"
@@ -3166,10 +3069,8 @@
       "from": "high_hrothgar",
       "to": "ivarstead",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 8,
+      "cost": 0,
       "path": "seven_thousand_steps",
-      "bidirectional": true,
       "why": [
         "skyrim.L8.way_of_the_voice",
         "the_rift.L8.voice_pilgrims"
@@ -3179,10 +3080,8 @@
       "from": "gjukars_monument",
       "to": "rorikstead",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "whiterun_tundra_trail",
-      "bidirectional": true,
       "why": [
         "whiterun.L1.tundra_plain",
         "whiterun.L6.rorikstead"
@@ -3192,10 +3091,8 @@
       "from": "lover_stone",
       "to": "markarth",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "druadach_ridge_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L1.granite_gorges",
         "the_reach.L6.markarth_seat"
@@ -3205,10 +3102,8 @@
       "from": "sky_haven_temple",
       "to": "karthwasten",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "karth_spire_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L3.karth_upper",
         "the_reach.L6.mine_villages"
@@ -3218,10 +3113,8 @@
       "from": "shrine_to_peryite",
       "to": "karthwasten",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "reach_bluff_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L8.old_gods",
         "the_reach.L6.mine_villages"
@@ -3231,10 +3124,8 @@
       "from": "steed_stone",
       "to": "solitude",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_ridge_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L1.sea_cliffs",
         "haafingar.L6.solitude_seat"
@@ -3244,10 +3135,8 @@
       "from": "statue_to_meridia",
       "to": "dragon_bridge",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "kilkreath_steps",
-      "bidirectional": true,
       "why": [
         "haafingar.L8.meridia_light",
         "haafingar.L6.dragon_bridge"
@@ -3257,10 +3146,8 @@
       "from": "apprentice_stone",
       "to": "morthal",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "hjaal_marsh_causeway",
-      "bidirectional": true,
       "why": [
         "hjaalmarch.L3.hjaal_delta",
         "hjaalmarch.L6.morthal_seat"
@@ -3270,10 +3157,8 @@
       "from": "lord_stone",
       "to": "stonehills",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "mount_morthal_climb",
-      "bidirectional": true,
       "why": [
         "hjaalmarch.L1.stonehills_rise",
         "hjaalmarch.L6.stonehills"
@@ -3283,10 +3168,8 @@
       "from": "shrine_of_mehrunes_dagon",
       "to": "stonehills",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "pale_ridge_steps",
-      "bidirectional": true,
       "why": [
         "hjaalmarch.L8.ruined_shrines",
         "hjaalmarch.L6.stonehills"
@@ -3296,10 +3179,8 @@
       "from": "weynon_stones",
       "to": "nightgate_inn",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "pale_standing_circle",
-      "bidirectional": true,
       "why": [
         "the_pale.L1.snow_highland",
         "the_pale.L6.nightgate"
@@ -3309,10 +3190,8 @@
       "from": "tower_stone",
       "to": "dawnstar",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "ice_cape_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L3.frozen_sea",
         "the_pale.L6.dawnstar_seat"
@@ -3322,10 +3201,8 @@
       "from": "serpent_stone",
       "to": "winterhold",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "sea_of_ghosts_ice_floe",
-      "bidirectional": true,
       "why": [
         "winterhold.L3.frozen_sea",
         "winterhold.L6.winterhold_remnant"
@@ -3335,10 +3212,8 @@
       "from": "shrine_of_azura",
       "to": "winterhold",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "azura_mountain_steps",
-      "bidirectional": true,
       "why": [
         "winterhold.L8.azura_statue",
         "winterhold.L6.winterhold_remnant"
@@ -3348,10 +3223,8 @@
       "from": "college_of_winterhold",
       "to": "winterhold",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 4,
+      "cost": 0,
       "path": "college_bridge",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.college",
         "winterhold.L6.winterhold_remnant"
@@ -3361,10 +3234,8 @@
       "from": "atronach_stone",
       "to": "darkwater_crossing",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "fumarole_basin_path",
-      "bidirectional": true,
       "why": [
         "eastmarch.L1.steam_basin",
         "eastmarch.L6.darkwater_crossing"
@@ -3374,10 +3245,8 @@
       "from": "sacellum_of_boethiah",
       "to": "windhelm",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "velothi_foothill_climb",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.boethiah_cult",
         "eastmarch.L6.windhelm_seat"
@@ -3387,10 +3256,8 @@
       "from": "shadow_stone",
       "to": "riften",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "south_rift_birch_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.shadow_patron",
         "the_rift.L6.riften_seat"
@@ -3400,10 +3267,8 @@
       "from": "wayshrine_haafingar_1",
       "to": "wayshrine_the_reach_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3413,10 +3278,8 @@
       "from": "wayshrine_the_reach_1",
       "to": "wayshrine_the_reach_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3426,10 +3289,8 @@
       "from": "wayshrine_the_reach_2",
       "to": "wayshrine_the_reach_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3439,10 +3300,8 @@
       "from": "wayshrine_the_reach_3",
       "to": "wayshrine_the_reach_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3452,10 +3311,8 @@
       "from": "wayshrine_the_reach_4",
       "to": "wayshrine_the_reach_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3465,10 +3322,8 @@
       "from": "wayshrine_haafingar_2",
       "to": "wayshrine_haafingar_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3478,10 +3333,8 @@
       "from": "wayshrine_haafingar_3",
       "to": "castle_volkihar",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3491,10 +3344,8 @@
       "from": "wayshrine_the_reach_5",
       "to": "wayshrine_the_reach_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3504,10 +3355,8 @@
       "from": "wayshrine_the_reach_6",
       "to": "shrine_to_peryite",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3517,10 +3366,8 @@
       "from": "wayshrine_the_reach_7",
       "to": "markarth",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3530,10 +3377,8 @@
       "from": "wayshrine_the_reach_8",
       "to": "wayshrine_the_reach_12",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3543,10 +3388,8 @@
       "from": "wayshrine_the_reach_9",
       "to": "wayshrine_the_reach_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3556,10 +3399,8 @@
       "from": "wayshrine_haafingar_4",
       "to": "wayshrine_haafingar_5",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3569,10 +3410,8 @@
       "from": "wayshrine_haafingar_5",
       "to": "steed_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3582,10 +3421,8 @@
       "from": "wayshrine_the_reach_10",
       "to": "dragon_bridge",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3595,10 +3432,8 @@
       "from": "wayshrine_whiterun_1",
       "to": "old_hroldan",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "whiterun_cairn_trail",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "whiterun.L8.kynareth_tree"
@@ -3608,10 +3443,8 @@
       "from": "wayshrine_the_reach_11",
       "to": "wayshrine_the_reach_12",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3621,10 +3454,8 @@
       "from": "wayshrine_the_reach_12",
       "to": "wayshrine_the_reach_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3634,10 +3465,8 @@
       "from": "wayshrine_falkreath_1",
       "to": "wayshrine_falkreath_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3647,10 +3476,8 @@
       "from": "wayshrine_haafingar_6",
       "to": "wayshrine_haafingar_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3660,10 +3487,8 @@
       "from": "wayshrine_whiterun_2",
       "to": "wayshrine_whiterun_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "whiterun_cairn_trail",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "whiterun.L8.kynareth_tree"
@@ -3673,10 +3498,8 @@
       "from": "wayshrine_the_reach_13",
       "to": "gjukars_monument",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_reach_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_reach.L6.karth_road",
         "the_reach.L8.dibella_temple"
@@ -3686,10 +3509,8 @@
       "from": "wayshrine_falkreath_2",
       "to": "wayshrine_falkreath_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3699,10 +3520,8 @@
       "from": "wayshrine_falkreath_3",
       "to": "wayshrine_falkreath_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3712,10 +3531,8 @@
       "from": "wayshrine_falkreath_4",
       "to": "wayshrine_falkreath_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3725,10 +3542,8 @@
       "from": "wayshrine_haafingar_7",
       "to": "wayshrine_haafingar_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3738,10 +3553,8 @@
       "from": "wayshrine_haafingar_8",
       "to": "solitude",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "haafingar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "haafingar.L5.toll_bridge",
         "haafingar.L8.divines_temple"
@@ -3751,10 +3564,8 @@
       "from": "wayshrine_whiterun_3",
       "to": "gjukars_monument",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "whiterun_cairn_trail",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "whiterun.L8.kynareth_tree"
@@ -3764,10 +3575,8 @@
       "from": "wayshrine_falkreath_5",
       "to": "falkreath",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3777,10 +3586,8 @@
       "from": "wayshrine_falkreath_6",
       "to": "wayshrine_falkreath_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3790,10 +3597,8 @@
       "from": "wayshrine_the_pale_1",
       "to": "wayshrine_haafingar_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_pale_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_pale.L5.roadside_inn",
         "the_pale.L8.mara_priest"
@@ -3803,10 +3608,8 @@
       "from": "wayshrine_whiterun_4",
       "to": "whiterun",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "whiterun_cairn_trail",
-      "bidirectional": true,
       "why": [
         "whiterun.L5.crossroads_trade",
         "whiterun.L8.kynareth_tree"
@@ -3816,10 +3619,8 @@
       "from": "wayshrine_falkreath_7",
       "to": "warrior_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3829,10 +3630,8 @@
       "from": "wayshrine_falkreath_8",
       "to": "wayshrine_falkreath_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3842,10 +3641,8 @@
       "from": "wayshrine_falkreath_9",
       "to": "wayshrine_falkreath_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3855,10 +3652,8 @@
       "from": "wayshrine_winterhold_1",
       "to": "dawnstar",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "winterhold_cairn_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "winterhold.L8.azura_statue"
@@ -3868,10 +3663,8 @@
       "from": "wayshrine_the_pale_2",
       "to": "ritual_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_pale_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_pale.L5.roadside_inn",
         "the_pale.L8.mara_priest"
@@ -3881,10 +3674,8 @@
       "from": "wayshrine_falkreath_10",
       "to": "helgen",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "falkreath_cairn_trail",
-      "bidirectional": true,
       "why": [
         "falkreath.L5.border_trade",
         "falkreath.L8.arkay_priests"
@@ -3894,10 +3685,8 @@
       "from": "wayshrine_the_rift_1",
       "to": "wayshrine_the_rift_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -3907,10 +3696,8 @@
       "from": "wayshrine_winterhold_2",
       "to": "wayshrine_winterhold_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "winterhold_cairn_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "winterhold.L8.azura_statue"
@@ -3920,10 +3707,8 @@
       "from": "wayshrine_winterhold_3",
       "to": "college_of_winterhold",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "winterhold_cairn_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "winterhold.L8.azura_statue"
@@ -3933,10 +3718,8 @@
       "from": "wayshrine_eastmarch_1",
       "to": "darkwater_crossing",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -3946,10 +3729,8 @@
       "from": "wayshrine_the_rift_2",
       "to": "wayshrine_the_rift_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -3959,10 +3740,8 @@
       "from": "wayshrine_the_rift_3",
       "to": "wayshrine_the_rift_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -3972,10 +3751,8 @@
       "from": "wayshrine_winterhold_4",
       "to": "wayshrine_winterhold_5",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "winterhold_cairn_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "winterhold.L8.azura_statue"
@@ -3985,10 +3762,8 @@
       "from": "wayshrine_the_rift_4",
       "to": "darkwater_crossing",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -3998,10 +3773,8 @@
       "from": "wayshrine_the_rift_5",
       "to": "wayshrine_the_rift_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -4011,10 +3784,8 @@
       "from": "wayshrine_winterhold_5",
       "to": "serpent_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "winterhold_cairn_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "winterhold.L8.azura_statue"
@@ -4024,10 +3795,8 @@
       "from": "wayshrine_winterhold_6",
       "to": "serpent_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "winterhold_cairn_trail",
-      "bidirectional": true,
       "why": [
         "winterhold.L6.winterhold_remnant",
         "winterhold.L8.azura_statue"
@@ -4037,10 +3806,8 @@
       "from": "wayshrine_eastmarch_2",
       "to": "shors_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -4050,10 +3817,8 @@
       "from": "wayshrine_the_rift_6",
       "to": "shadow_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -4063,10 +3828,8 @@
       "from": "wayshrine_the_rift_7",
       "to": "wayshrine_the_rift_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -4076,10 +3839,8 @@
       "from": "wayshrine_eastmarch_3",
       "to": "wayshrine_winterhold_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -4089,10 +3850,8 @@
       "from": "wayshrine_eastmarch_4",
       "to": "wayshrine_eastmarch_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -4102,10 +3861,8 @@
       "from": "wayshrine_eastmarch_5",
       "to": "wayshrine_eastmarch_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -4115,10 +3872,8 @@
       "from": "wayshrine_the_rift_8",
       "to": "wayshrine_eastmarch_5",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -4128,10 +3883,8 @@
       "from": "wayshrine_the_rift_9",
       "to": "shadow_stone",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -4141,10 +3894,8 @@
       "from": "wayshrine_the_rift_10",
       "to": "wayshrine_the_rift_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
@@ -4154,10 +3905,8 @@
       "from": "wayshrine_the_pale_3",
       "to": "wayshrine_winterhold_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_pale_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_pale.L5.roadside_inn",
         "the_pale.L8.mara_priest"
@@ -4167,10 +3916,8 @@
       "from": "wayshrine_eastmarch_6",
       "to": "wayshrine_eastmarch_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -4180,10 +3927,8 @@
       "from": "wayshrine_eastmarch_7",
       "to": "wayshrine_eastmarch_5",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "eastmarch_cairn_trail",
-      "bidirectional": true,
       "why": [
         "eastmarch.L8.talos_open",
         "eastmarch.L3.darkwater_ford"
@@ -4193,13 +3938,99 @@
       "from": "wayshrine_the_rift_11",
       "to": "heartwood_mill",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "the_rift_cairn_trail",
-      "bidirectional": true,
       "why": [
         "the_rift.L8.mara_temple",
         "the_rift.L8.voice_pilgrims"
+      ]
+    },
+    {
+      "from": "falkreath",
+      "to": "helgen",
+      "mode": "carriage",
+      "cost": 55,
+      "path": "pinewatch_post_road",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "skyrim.L5.mining_wealth"
+      ]
+    },
+    {
+      "from": "helgen",
+      "to": "riverwood",
+      "mode": "carriage",
+      "cost": 45,
+      "path": "helgen_gorge_road",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "skyrim.L5.mining_wealth"
+      ]
+    },
+    {
+      "from": "windhelm",
+      "to": "winterhold",
+      "mode": "boat",
+      "cost": 54,
+      "path": "sea_of_ghosts_ice_packet",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "skyrim.L5.mining_wealth"
+      ]
+    },
+    {
+      "from": "winterhold",
+      "to": "dawnstar",
+      "mode": "boat",
+      "cost": 59,
+      "path": "pale_ice_pack_lane",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "skyrim.L5.mining_wealth"
+      ]
+    },
+    {
+      "from": "solitude",
+      "to": "jylkurfyk",
+      "mode": "boat",
+      "cost": 120,
+      "path": "sea_of_ghosts_atmora_expedition",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "jylkurfyk",
+      "to": "solitude",
+      "mode": "boat",
+      "cost": 120,
+      "path": "sea_of_ghosts_atmora_expedition",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "windhelm",
+      "to": "jylkurfyk",
+      "mode": "boat",
+      "cost": 110,
+      "path": "ysgramor_return_passage",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "jylkurfyk",
+      "to": "windhelm",
+      "mode": "boat",
+      "cost": 110,
+      "path": "ysgramor_return_passage",
+      "why": [
+        "skyrim.L6.nine_seats",
+        "foreign.L6.beachhead_anchorages"
       ]
     }
   ]

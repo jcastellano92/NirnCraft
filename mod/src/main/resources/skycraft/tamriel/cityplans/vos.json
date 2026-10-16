@@ -30,7 +30,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        9,
+        25,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -7,
-        5
+        -10,
+        8
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -78,8 +78,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        0,
+        -12
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -96,6 +96,10 @@
       "type": "banners",
       "theme": "vos_velothi",
       "count": 1
+    },
+    {
+      "type": "market",
+      "where": "free"
     }
   ],
   "titles": {
@@ -103,10 +107,147 @@
     "vos_b_2": "Varo Tradehouse",
     "vos_b_3": "Ulvil Llothas's Farmhouse",
     "vos_b_4": "Mandyn Ralas's Cottage",
-    "vos_b_5": "Vos Harbour Dock-Shed"
+    "vos_b_5": "Vos Harbour Dock-Shed",
+    "vos_varo_trade_court": "Varo Tradehouse Bluff Square"
   },
   "innKey": "vos_b_2",
   "names": {
     "inn": "vos_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -26,
+        -28,
+        26,
+        -4
+      ],
+      "level": 3,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        6,
+        6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "vos_varo_trade_court"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          -4,
+          -10
+        ],
+        [
+          -8,
+          -28
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "varo_chapel_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -30,
+          8
+        ],
+        [
+          -6,
+          6
+        ],
+        [
+          16,
+          10
+        ],
+        [
+          32,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "bluff_terrace_lane"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 22,
+      "rz": 20,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "wickwheat_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "kit": "velothi",
+      "on": "wickwheat_loop"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "kit": "velothi",
+      "on": "bluff_terrace_lane"
+    }
+  ]
 }

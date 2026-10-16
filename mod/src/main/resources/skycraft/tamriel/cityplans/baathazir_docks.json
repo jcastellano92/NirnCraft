@@ -48,8 +48,8 @@
     {
       "id": "twin_domes",
       "at": [
-        0,
-        -10
+        -1,
+        -22
       ],
       "name": "baathazir_docks_landmark",
       "overlay": "senchal"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          33
+        ],
+        [
+          6,
+          9
+        ],
+        [
+          6,
+          -18
+        ]
       ],
-      "r0": 7,
-      "r1": 34,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          10
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          26,
+          8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        6,
+        -2
+      ],
+      "rx": 21,
+      "rz": 17,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 1.55,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,7 +120,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        17,
-        21
+        11,
+        26
       ],
       "face": "north",
       "overlay": "senchal",
@@ -99,8 +144,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        13
+        -9,
+        23
       ],
       "face": "north",
       "overlay": "senchal",
@@ -123,7 +168,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -12,
+        -20,
         -6
       ],
       "face": "south",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        17,
+        -20
       ],
       "face": "south",
       "overlay": "senchal",
@@ -182,5 +227,47 @@
     "baathazir_docks_landmark": "High Seat of place.skycraft.baathazir_docks",
     "baathazir_docks_plaza": "place.skycraft.baathazir_docks Central Plaza"
   },
-  "innKey": "baathazir_docks_b_5"
+  "innKey": "baathazir_docks_b_5",
+  "zones": [
+    {
+      "at": [
+        6,
+        -14
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        13,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

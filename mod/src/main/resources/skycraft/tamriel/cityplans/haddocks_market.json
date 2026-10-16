@@ -37,8 +37,8 @@
     {
       "id": "awning_row",
       "at": [
-        0,
-        -10
+        15,
+        -5
       ],
       "face": "south",
       "name": "haddocks_market_landmark",
@@ -51,8 +51,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        6,
-        -8
+        0,
+        -13
       ],
       "face": "south",
       "name": "haddocks_market_dusty_flagon"
@@ -62,8 +62,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        16,
-        -1
+        -14,
+        9
       ],
       "face": "west",
       "name": "haddocks_market_salvage_stalls"
@@ -73,8 +73,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        7,
-        7
+        1,
+        17
       ],
       "face": "north",
       "name": "haddocks_market_tinker_anvil"
@@ -84,8 +84,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -1,
-        16
+        -16,
+        -7
       ],
       "face": "north",
       "name": "haddocks_market_scorpion_oil"

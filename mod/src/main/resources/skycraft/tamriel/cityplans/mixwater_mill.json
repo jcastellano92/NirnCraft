@@ -8,35 +8,215 @@
     "smithy": "mixwater_saw_shop"
   },
   "innKey": "mixwater_workers_hall",
-  "gates": [[0, 26]],
+  "gates": [
+    [
+      0,
+      26
+    ]
+  ],
   "buildings": [
-    {"kind": "mill", "at": [10, -8], "size": [9, 11], "face": "W", "margin": 3, "name": "mixwater_water_mill"},
-    {"kind": "building", "use": "sawmill", "wealth": "common", "at": [-12, -8], "size": [13, 11], "face": "E", "name": "mixwater_sawmill"},
-    {"kind": "house", "at": [14, 10], "size": [9, 11], "face": "W", "flags": ["upper"], "name": "mixwater_gilfres_house"},
-    {"kind": "lumber", "at": [-18, 12], "size": [7, 5], "face": "E"},
-    {"kind": "dock", "at": [16, -20], "size": [5, 11], "face": "N", "flags": ["no_beard"]}
+    {
+      "kind": "mill",
+      "at": [
+        14,
+        -8
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "margin": 3,
+      "name": "mixwater_water_mill"
+    },
+    {
+      "kind": "building",
+      "use": "sawmill",
+      "wealth": "common",
+      "at": [
+        -15,
+        -5
+      ],
+      "size": [
+        13,
+        11
+      ],
+      "face": "E",
+      "name": "mixwater_sawmill"
+    },
+    {
+      "kind": "house",
+      "at": [
+        14,
+        10
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "flags": [
+        "upper"
+      ],
+      "name": "mixwater_gilfres_house"
+    },
+    {
+      "kind": "lumber",
+      "at": [
+        -18,
+        12
+      ],
+      "size": [
+        7,
+        5
+      ],
+      "face": "E"
+    },
+    {
+      "kind": "dock",
+      "at": [
+        4,
+        -18
+      ],
+      "size": [
+        5,
+        11
+      ],
+      "face": "N",
+      "flags": [
+        "no_beard"
+      ]
+    }
   ],
   "plazas": [
-    {"at": [0, 4], "size": 9, "variant": 0, "stalls": 2, "name": "mixwater_green"}
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "variant": 0,
+      "stalls": 2,
+      "name": "mixwater_green"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 26], [0, 14], [0, 2], [0, -10]], "width": 3, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-14, 4], [0, 4], [14, 4]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          26
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          -10
+        ]
+      ],
+      "width": 3,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -14,
+          4
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          14,
+          4
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, -6], "r": 16, "zone": "craft"},
-    {"at": [0, 10], "r": 14, "zone": "poor"}
+    {
+      "at": [
+        0,
+        -6
+      ],
+      "r": 16,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        0,
+        10
+      ],
+      "r": 14,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 26, "target": 0.26, "fill_cap": 3, "yard_cap": 4},
+  "fabric": {
+    "radius": 26,
+    "target": 0.26,
+    "fill_cap": 3,
+    "yard_cap": 4
+  },
   "queue": [
-    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "mixwater_workers_hall", "on": "main"},
-    {"kind": "store", "size": [9, 9], "name": "mixwater_tally_house", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "mixwater_saw_shop", "on": "lane"},
-    {"kind": "house", "name": "mixwater_raftsmans_cabin", "on": "lane"}
+    {
+      "kind": "inn",
+      "size": [
+        11,
+        15
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "mixwater_workers_hall",
+      "on": "main"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        9
+      ],
+      "name": "mixwater_tally_house",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "mixwater_saw_shop",
+      "on": "lane"
+    },
+    {
+      "kind": "house",
+      "name": "mixwater_raftsmans_cabin",
+      "on": "lane"
+    }
   ],
   "features": [
-    {"type": "waterwheel", "where": "edge"},
-    {"type": "bench", "count": 2, "where": "free"}
+    {
+      "type": "waterwheel",
+      "where": "edge"
+    },
+    {
+      "type": "bench",
+      "count": 2,
+      "where": "free"
+    }
   ],
   "titles": {
     "mixwater_workers_hall": "Mixwater Workers' Hall",

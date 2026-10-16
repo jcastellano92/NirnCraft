@@ -30,7 +30,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        5,
-        14
+        2,
+        17
       ],
       "face": "south",
       "overlay": "colovian_highlands",
@@ -54,8 +54,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -6,
-        5
+        -16,
+        12
       ],
       "face": "south",
       "overlay": "colovian_highlands",
@@ -66,8 +66,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -12,
-        -9
+        -15,
+        -6
       ],
       "face": "south",
       "overlay": "colovian_highlands",
@@ -78,8 +78,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        2,
-        -8
+        1,
+        -20
       ],
       "face": "south",
       "overlay": "colovian_highlands",
@@ -96,6 +96,10 @@
       "type": "shrine",
       "theme": "deep_ones_bible",
       "count": 1
+    },
+    {
+      "type": "memorial",
+      "where": "free"
     }
   ],
   "titles": {
@@ -103,10 +107,121 @@
     "hackdirt_b_2": "Moslin's Dry Goods",
     "hackdirt_b_3": "Moslin's Inn",
     "hackdirt_b_4": "Jiv Hiriel's Ruined Shack",
-    "hackdirt_b_5": "Marlena Brussiner's House"
+    "hackdirt_b_5": "Marlena Brussiner's House",
+    "hackdirt_square": "Hackdirt Sunken Brethren Square"
   },
   "innKey": "hackdirt_b_3",
   "names": {
     "inn": "hackdirt_b_3"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 3,
+      "name": "hackdirt_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        33
+      ],
+      "to": [
+        -4,
+        -20
+      ],
+      "legs": 3,
+      "amp": 14,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "sunken_quarry_descent"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        -4
+      ],
+      "rx": 19,
+      "rz": 15,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "brethren_pit_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -33,
+          0
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          26,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "hackdirt_spur"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -14
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        13,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "brethren_pit_loop"
+    },
+    {
+      "kind": "temple",
+      "count": 1,
+      "on": "sunken_quarry_descent"
+    }
+  ]
 }

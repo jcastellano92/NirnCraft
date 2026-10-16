@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/powdered_mammoth_tusk"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/powdered_mammoth_tusk_harvested"
+    }
+  }
+}

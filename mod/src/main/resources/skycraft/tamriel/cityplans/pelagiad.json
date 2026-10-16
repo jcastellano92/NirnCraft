@@ -30,8 +30,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        9,
-        0
+        8,
+        -12
       ],
       "face": "south",
       "overlay": "ascadian_isles",
@@ -54,8 +54,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -7,
-        5
+        -10,
+        8
       ],
       "face": "south",
       "overlay": "ascadian_isles",
@@ -78,8 +78,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        -9,
+        -7
       ],
       "face": "south",
       "overlay": "ascadian_isles",
@@ -103,10 +103,150 @@
     "pelagiad_b_2": "Halfway Tavern",
     "pelagiad_b_3": "Mebestian Ence's Trader",
     "pelagiad_b_4": "Sadhil's Legion Smithy",
-    "pelagiad_b_5": "Ahnassi's House"
+    "pelagiad_b_5": "Ahnassi's House",
+    "pelagiad_halfway_green": "Halfway Crossroads Market Green"
   },
   "innKey": "pelagiad_b_2",
   "names": {
     "inn": "pelagiad_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        6
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 3,
+      "name": "pelagiad_halfway_green"
+    }
+  ],
+  "walls": [
+    {
+      "r": 34,
+      "sides": 8,
+      "h": 8,
+      "gates": [
+        0,
+        1.5708,
+        -1.5708
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          -18
+        ],
+        [
+          0,
+          -32
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "ascadian_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -32,
+          4
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          34,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "fort_crossroads"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        2
+      ],
+      "rx": 22,
+      "rz": 20,
+      "wobble": 1,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "village_green"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "culture": "imperial",
+      "flags": [
+        "upper"
+      ],
+      "on": "village_green"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "culture": "imperial",
+      "on": "fort_crossroads"
+    }
+  ]
 }

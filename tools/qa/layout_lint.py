@@ -34,8 +34,11 @@ MIN_SPACING = 24        # blocks, between any two non-complex places (their cent
 SETTLEMENT_TYPES = {"capital", "city", "town", "village", "farm"}
 HUBS = {"capital", "city", "town", "village"}
 MARINE_VARIANTS = {"shipwreck", "lighthouse", "island", "dock", "pier", "harbor", "harbour", "ship", "wreck", "sea_vault",
-                   "reef", "sea_cave", "ferry", "boat"}
-MARINE_WORDS = ("wreck", "shipwreck", "dock", "pier", "lighthouse", "_ship", "ship_", "reef", "island", "isle", "ferry")
+                   "reef", "sea_cave", "ferry", "boat", "atoll", "smuggler_cove", "coral_cove", "coastal_grotto",
+                   "sload_grotto", "sea_elf_anchorage", "maormer_anchorage", "sea_serpent_cove", "sload_coral_spire",
+                   "abyssal_reef", "grotto"}
+MARINE_WORDS = ("wreck", "shipwreck", "dock", "pier", "lighthouse", "_ship", "ship_", "reef", "island", "isle", "ferry",
+                "atoll", "anchorage", "shoal", "cay")
 SHORE_ERR = -24         # coast distance below which Landmass counts a column as sea
 REGION_SLACK = 250      # blocks a place may sit from the border of its declared region before it is an error
 MINOR_LINK, FARM_LINK = 2400, 3200

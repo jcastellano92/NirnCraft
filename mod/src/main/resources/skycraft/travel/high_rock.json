@@ -127,8 +127,8 @@
       "place": "northpoint",
       "name": "place.skycraft.northpoint",
       "region": "high_rock/rivenspire",
-      "x": -7600,
-      "z": -2600,
+      "x": -7450,
+      "z": -2450,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -171,8 +171,8 @@
       "place": "farrun",
       "name": "place.skycraft.farrun",
       "region": "high_rock/bjoulsae",
-      "x": -6550,
-      "z": -1500,
+      "x": -6152,
+      "z": -1688,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -193,8 +193,8 @@
       "place": "jehanna",
       "name": "place.skycraft.jehanna",
       "region": "high_rock/wrothgar",
-      "x": -5800,
-      "z": -2400,
+      "x": -4700,
+      "z": -1950,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -213,8 +213,8 @@
       "place": "glenpoint",
       "name": "place.skycraft.glenpoint",
       "region": "high_rock/daggerfall",
-      "x": -11050,
-      "z": 1650,
+      "x": -9465,
+      "z": 1926,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -234,8 +234,8 @@
       "place": "ilessan_hills",
       "name": "place.skycraft.ilessan_hills",
       "region": "high_rock/daggerfall",
-      "x": -8800,
-      "z": 1800,
+      "x": -9133,
+      "z": 1824,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -254,8 +254,8 @@
       "place": "tulune",
       "name": "place.skycraft.tulune",
       "region": "high_rock/daggerfall",
-      "x": -8200,
-      "z": 2600,
+      "x": -10010,
+      "z": 1940,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -274,8 +274,8 @@
       "place": "aldcroft",
       "name": "place.skycraft.aldcroft",
       "region": "high_rock/glenumbra",
-      "x": -9800,
-      "z": 1150,
+      "x": -9250,
+      "z": 650,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -294,8 +294,8 @@
       "place": "crosswych",
       "name": "place.skycraft.crosswych",
       "region": "high_rock/glenumbra",
-      "x": -8650,
-      "z": 950,
+      "x": -8840,
+      "z": -1336,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -314,8 +314,8 @@
       "place": "glenumbra_moors",
       "name": "place.skycraft.glenumbra_moors",
       "region": "high_rock/glenumbra",
-      "x": -10250,
-      "z": 450,
+      "x": -9820,
+      "z": 1740,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -334,8 +334,8 @@
       "place": "daenia",
       "name": "place.skycraft.daenia",
       "region": "high_rock/glenumbra",
-      "x": -10250,
-      "z": -1250,
+      "x": -7959,
+      "z": 1866,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -354,8 +354,8 @@
       "place": "northmoor",
       "name": "place.skycraft.northmoor",
       "region": "high_rock/glenumbra",
-      "x": -9750,
-      "z": -1600,
+      "x": -9098,
+      "z": 1597,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -394,8 +394,8 @@
       "place": "alcaire",
       "name": "place.skycraft.alcaire",
       "region": "high_rock/anticlere",
-      "x": -8050,
-      "z": 2250,
+      "x": -6135,
+      "z": 2366,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -414,8 +414,8 @@
       "place": "anticlere",
       "name": "place.skycraft.anticlere",
       "region": "high_rock/anticlere",
-      "x": -7950,
-      "z": 50,
+      "x": -8339,
+      "z": 2439,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -435,8 +435,8 @@
       "place": "shalgora",
       "name": "place.skycraft.shalgora",
       "region": "high_rock/anticlere",
-      "x": -7900,
-      "z": 1150,
+      "x": -8653,
+      "z": 2349,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -455,8 +455,8 @@
       "place": "urvaius",
       "name": "place.skycraft.urvaius",
       "region": "high_rock/anticlere",
-      "x": -7600,
-      "z": 650,
+      "x": -7740,
+      "z": 2270,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -475,8 +475,8 @@
       "place": "ykalon",
       "name": "place.skycraft.ykalon",
       "region": "high_rock/stormhaven",
-      "x": -7650,
-      "z": -300,
+      "x": -8292,
+      "z": 1573,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -495,8 +495,8 @@
       "place": "koeglin_village",
       "name": "place.skycraft.koeglin_village",
       "region": "high_rock/stormhaven",
-      "x": -7550,
-      "z": 2800,
+      "x": -7450,
+      "z": 950,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -516,8 +516,8 @@
       "place": "weeping_giant",
       "name": "place.skycraft.weeping_giant",
       "region": "high_rock/stormhaven",
-      "x": -7600,
-      "z": 1650,
+      "x": -7384,
+      "z": 1624,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -536,8 +536,8 @@
       "place": "dwynnen",
       "name": "place.skycraft.dwynnen",
       "region": "high_rock/dwynnen",
-      "x": -7100,
-      "z": 2600,
+      "x": -7417,
+      "z": 2041,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -556,8 +556,8 @@
       "place": "kambria",
       "name": "place.skycraft.kambria",
       "region": "high_rock/dwynnen",
-      "x": -6650,
-      "z": 2550,
+      "x": -6523,
+      "z": 1966,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -576,8 +576,8 @@
       "place": "bhoriane",
       "name": "place.skycraft.bhoriane",
       "region": "high_rock/dwynnen",
-      "x": -6500,
-      "z": 1300,
+      "x": -6966,
+      "z": 2299,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -597,8 +597,8 @@
       "place": "menevia",
       "name": "place.skycraft.menevia",
       "region": "high_rock/wayrest",
-      "x": -5947,
-      "z": 1866,
+      "x": -5576,
+      "z": 2907,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -618,8 +618,8 @@
       "place": "gavaudon",
       "name": "place.skycraft.gavaudon",
       "region": "high_rock/wrothgar",
-      "x": -5400,
-      "z": 1600,
+      "x": -4618,
+      "z": 3216,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -639,8 +639,8 @@
       "place": "phrygias",
       "name": "place.skycraft.phrygias",
       "region": "high_rock/bjoulsae",
-      "x": -5950,
-      "z": -700,
+      "x": -7667,
+      "z": 1690,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -660,8 +660,8 @@
       "place": "crestshade",
       "name": "place.skycraft.crestshade",
       "region": "high_rock/rivenspire",
-      "x": -9150,
-      "z": -1750,
+      "x": -7900,
+      "z": -650,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -720,8 +720,8 @@
       "place": "moiras_hope",
       "name": "place.skycraft.moiras_hope",
       "region": "high_rock/rivenspire",
-      "x": -8050,
-      "z": -1150,
+      "x": -8456,
+      "z": -888,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -740,8 +740,8 @@
       "place": "morkul_stronghold_high_rock",
       "name": "place.skycraft.morkul_stronghold_high_rock",
       "region": "high_rock/wrothgar",
-      "x": -5000,
-      "z": -700,
+      "x": -5150,
+      "z": -650,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -760,8 +760,8 @@
       "place": "fharun_stronghold",
       "name": "place.skycraft.fharun_stronghold",
       "region": "high_rock/wrothgar",
-      "x": -5000,
-      "z": 1200,
+      "x": -4200,
+      "z": -1720,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -780,8 +780,8 @@
       "place": "tumnosh_stronghold",
       "name": "place.skycraft.tumnosh_stronghold",
       "region": "high_rock/wrothgar",
-      "x": -3800,
-      "z": 1550,
+      "x": -4650,
+      "z": 950,
       "mode": "carriage",
       "modes": [
         "carriage",
@@ -800,8 +800,8 @@
       "place": "betony",
       "name": "place.skycraft.betony",
       "region": "high_rock/daggerfall",
-      "x": -8300,
-      "z": 2900,
+      "x": -9840,
+      "z": 2780,
       "mode": "boat",
       "modes": [
         "boat",
@@ -820,8 +820,8 @@
       "place": "isle_of_balfiera",
       "name": "place.skycraft.isle_of_balfiera",
       "region": "high_rock/wayrest",
-      "x": -7625,
-      "z": 3490,
+      "x": -6120,
+      "z": 2900,
       "mode": "boat",
       "modes": [
         "boat",
@@ -840,8 +840,8 @@
       "place": "shrine_azura_high_rock",
       "name": "place.skycraft.shrine_azura_high_rock",
       "region": "high_rock/wayrest",
-      "x": -5877,
-      "z": 2833,
+      "x": -5992,
+      "z": 2888,
       "mode": "wayshrine",
       "modes": [
         "wayshrine"
@@ -3234,6 +3234,35 @@
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
       ]
+    },
+    {
+      "id": "isle_of_balfiera",
+      "region": "high_rock/wayrest",
+      "x": -6120,
+      "z": 2900,
+      "modes": [
+        "boat",
+        "wayshrine"
+      ],
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ],
+      "place": "isle_of_balfiera"
+    },
+    {
+      "id": "sentinel",
+      "region": "hammerfell/sentinel",
+      "x": -7976,
+      "z": 4900,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "hammerfell.L6.harbour_and_oasis_cities",
+        "high_rock.L6.fief_patchwork"
+      ],
+      "place": "sentinel"
     }
   ],
   "routes": [
@@ -3241,10 +3270,8 @@
       "from": "daggerfall",
       "to": "tulune",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 64,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "high_rock.L5.tolls"
@@ -3252,12 +3279,21 @@
     },
     {
       "from": "tulune",
+      "to": "anticlere",
+      "mode": "carriage",
+      "cost": 98,
+      "path": "north_shore_road",
+      "why": [
+        "anticlere.L5.grain_and_mills",
+        "high_rock.L5.tolls"
+      ]
+    },
+    {
+      "from": "anticlere",
       "to": "alcaire",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 119,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "anticlere.L5.grain_and_mills",
         "high_rock.L5.tolls"
@@ -3267,10 +3303,8 @@
       "from": "alcaire",
       "to": "koeglin_village",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 107,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "stormhaven.L6.koeglin_village",
         "stormhaven.L5.pilgrim_hospitality"
@@ -3280,10 +3314,8 @@
       "from": "koeglin_village",
       "to": "dwynnen",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 69,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "dwynnen.L6.gorge_bridge_city",
         "dwynnen.L5.bridge_toll"
@@ -3293,10 +3325,8 @@
       "from": "dwynnen",
       "to": "kambria",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 60,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "dwynnen.L6.crossroads_jail",
         "dwynnen.L5.mercenary_trade"
@@ -3306,10 +3336,8 @@
       "from": "kambria",
       "to": "wayrest",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 101,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "wayrest.L6.harbour_capital",
         "high_rock.L5.tolls"
@@ -3317,12 +3345,21 @@
     },
     {
       "from": "daggerfall",
+      "to": "dwynnen",
+      "mode": "carriage",
+      "cost": 108,
+      "path": "north_shore_road",
+      "why": [
+        "daggerfall.L6.capital_on_island",
+        "wayrest.L6.harbour_capital"
+      ]
+    },
+    {
+      "from": "dwynnen",
       "to": "wayrest",
       "mode": "carriage",
-      "fee": 35,
-      "duration": 18,
+      "cost": 131,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.capital_on_island",
         "wayrest.L6.harbour_capital"
@@ -3332,10 +3369,8 @@
       "from": "daggerfall",
       "to": "anticlere",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 14,
+      "cost": 64,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "anticlere.L6.anticlere_meadow_city"
@@ -3345,36 +3380,19 @@
       "from": "anticlere",
       "to": "dwynnen",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 12,
+      "cost": 65,
       "path": "north_shore_road",
-      "bidirectional": true,
       "why": [
         "anticlere.L6.anticlere_meadow_city",
         "dwynnen.L6.gorge_bridge_city"
       ]
     },
     {
-      "from": "dwynnen",
-      "to": "wayrest",
-      "mode": "carriage",
-      "fee": 25,
-      "duration": 14,
-      "path": "north_shore_road",
-      "bidirectional": true,
-      "why": [
-        "dwynnen.L5.bridge_toll",
-        "wayrest.L6.harbour_capital"
-      ]
-    },
-    {
       "from": "daggerfall",
       "to": "ilessan_hills",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 56,
       "path": "glenumbra_road",
-      "bidirectional": true,
       "why": [
         "daggerfall.L1.ilessan_hills",
         "daggerfall.L5.hides_and_wool"
@@ -3382,12 +3400,21 @@
     },
     {
       "from": "ilessan_hills",
+      "to": "camlorn",
+      "mode": "carriage",
+      "cost": 111,
+      "path": "glenumbra_road",
+      "why": [
+        "glenumbra.L5.wool_and_cloth",
+        "daggerfall.L5.hides_and_wool"
+      ]
+    },
+    {
+      "from": "camlorn",
       "to": "crosswych",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 72,
       "path": "glenumbra_road",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "daggerfall.L5.hides_and_wool"
@@ -3397,10 +3424,8 @@
       "from": "crosswych",
       "to": "camlorn",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 72,
       "path": "glenumbra_road",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.camlorn_city",
         "glenumbra.L5.wool_and_cloth"
@@ -3408,12 +3433,21 @@
     },
     {
       "from": "daggerfall",
+      "to": "aldcroft",
+      "mode": "carriage",
+      "cost": 108,
+      "path": "glenumbra_road",
+      "why": [
+        "daggerfall.L6.capital_on_island",
+        "glenumbra.L6.camlorn_city"
+      ]
+    },
+    {
+      "from": "aldcroft",
       "to": "camlorn",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 16,
+      "cost": 60,
       "path": "glenumbra_road",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.capital_on_island",
         "glenumbra.L6.camlorn_city"
@@ -3423,10 +3457,8 @@
       "from": "camlorn",
       "to": "eagles_brook",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 53,
       "path": "glenumbra_road",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.camlorn_city",
         "glenumbra.L3.camlorn_stream"
@@ -3436,36 +3468,19 @@
       "from": "eagles_brook",
       "to": "northmoor",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 116,
       "path": "glenumbra_road",
-      "bidirectional": true,
       "why": [
         "glenumbra.L1.ocean_cliffs",
         "glenumbra.L6.cliff_villages"
       ]
     },
     {
-      "from": "daggerfall",
-      "to": "aldcroft",
-      "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
-      "path": "daggerfall_bluff_lane",
-      "bidirectional": true,
-      "why": [
-        "daggerfall.L5.salt_pans",
-        "glenumbra.L5.wool_and_cloth"
-      ]
-    },
-    {
       "from": "aldcroft",
       "to": "glenpoint",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 78,
       "path": "daggerfall_bluff_lane",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.glenpoint_watch",
         "daggerfall.L1.glenpoint_headland"
@@ -3475,10 +3490,8 @@
       "from": "daggerfall",
       "to": "glenpoint",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 51,
       "path": "daggerfall_bluff_lane",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.capital_on_island",
         "daggerfall.L6.glenpoint_watch"
@@ -3488,10 +3501,8 @@
       "from": "aldcroft",
       "to": "glenumbra_moors",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 75,
       "path": "glenumbra_moor_lane",
-      "bidirectional": true,
       "why": [
         "glenumbra.L1.western_moors",
         "glenumbra.L5.peat_cutting"
@@ -3501,10 +3512,8 @@
       "from": "glenumbra_moors",
       "to": "daenia",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 104,
       "path": "glenumbra_moor_lane",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.moor_steadings",
         "glenumbra.L5.peat_cutting"
@@ -3514,10 +3523,8 @@
       "from": "daenia",
       "to": "northmoor",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 73,
       "path": "glenumbra_moor_lane",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.moor_steadings",
         "glenumbra.L6.cliff_villages"
@@ -3527,10 +3534,8 @@
       "from": "alcaire",
       "to": "weeping_giant",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 85,
       "path": "anticlere_meadow_lane",
-      "bidirectional": true,
       "why": [
         "anticlere.L3.water_meadows",
         "stormhaven.L6.weeping_giant"
@@ -3540,10 +3545,8 @@
       "from": "weeping_giant",
       "to": "shalgora",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 86,
       "path": "anticlere_meadow_lane",
-      "bidirectional": true,
       "why": [
         "stormhaven.L6.weeping_giant",
         "anticlere.L6.settler_villages"
@@ -3553,10 +3556,8 @@
       "from": "shalgora",
       "to": "urvaius",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 61,
       "path": "anticlere_meadow_lane",
-      "bidirectional": true,
       "why": [
         "anticlere.L3.mill_chain",
         "anticlere.L6.scarp_keeps"
@@ -3566,10 +3567,8 @@
       "from": "urvaius",
       "to": "anticlere",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 48,
       "path": "anticlere_meadow_lane",
-      "bidirectional": true,
       "why": [
         "anticlere.L6.scarp_keeps",
         "anticlere.L6.anticlere_meadow_city"
@@ -3579,10 +3578,8 @@
       "from": "anticlere",
       "to": "ykalon",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 59,
       "path": "anticlere_meadow_lane",
-      "bidirectional": true,
       "why": [
         "anticlere.L6.anticlere_meadow_city",
         "stormhaven.L1.rolling_uplands"
@@ -3592,10 +3589,8 @@
       "from": "koeglin_village",
       "to": "weeping_giant",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 50,
       "path": "stormhaven_pilgrim_lane",
-      "bidirectional": true,
       "why": [
         "stormhaven.L6.koeglin_village",
         "stormhaven.L6.weeping_giant"
@@ -3605,10 +3600,8 @@
       "from": "camlorn",
       "to": "ykalon",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 106,
       "path": "high_rock_northern_backbone",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.camlorn_city",
         "stormhaven.L1.rolling_uplands"
@@ -3616,12 +3609,21 @@
     },
     {
       "from": "ykalon",
+      "to": "crestshade",
+      "mode": "carriage",
+      "cost": 122,
+      "path": "high_rock_northern_backbone",
+      "why": [
+        "stormhaven.L1.rolling_uplands",
+        "rivenspire.L6.shornhelm_city"
+      ]
+    },
+    {
+      "from": "crestshade",
       "to": "shornhelm",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 52,
       "path": "high_rock_northern_backbone",
-      "bidirectional": true,
       "why": [
         "stormhaven.L1.rolling_uplands",
         "rivenspire.L6.shornhelm_city"
@@ -3631,10 +3633,8 @@
       "from": "camlorn",
       "to": "shornhelm",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 16,
+      "cost": 100,
       "path": "high_rock_northern_backbone",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.camlorn_city",
         "rivenspire.L6.shornhelm_city"
@@ -3644,10 +3644,8 @@
       "from": "shornhelm",
       "to": "northpoint",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 72,
       "path": "high_rock_northern_backbone",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.shornhelm_city",
         "rivenspire.L6.northpoint_port"
@@ -3657,10 +3655,8 @@
       "from": "northpoint",
       "to": "farrun",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 14,
+      "cost": 88,
       "path": "high_rock_northern_backbone",
-      "bidirectional": true,
       "why": [
         "rivenspire.L5.northpoint_shipping",
         "bjoulsae.L6.druadach_border_fort"
@@ -3670,10 +3666,8 @@
       "from": "farrun",
       "to": "jehanna",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 86,
       "path": "high_rock_northern_backbone",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L6.druadach_border_fort",
         "wrothgar.L6.pass_inns"
@@ -3683,10 +3677,8 @@
       "from": "northmoor",
       "to": "crestshade",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 135,
       "path": "rivenspire_crag_lane",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.cliff_villages",
         "rivenspire.L1.dark_crags"
@@ -3696,10 +3688,8 @@
       "from": "crestshade",
       "to": "hoarfrost_downs",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 100,
       "path": "rivenspire_crag_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L1.dark_crags",
         "rivenspire.L5.quarry_and_iron"
@@ -3709,10 +3699,8 @@
       "from": "hoarfrost_downs",
       "to": "northpoint",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 63,
       "path": "rivenspire_crag_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L5.quarry_and_iron",
         "rivenspire.L6.northpoint_port"
@@ -3722,10 +3710,8 @@
       "from": "shornhelm",
       "to": "moiras_hope",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 63,
       "path": "rivenspire_crag_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.shornhelm_city",
         "rivenspire.L1.shornhelm_gap"
@@ -3735,10 +3721,8 @@
       "from": "moiras_hope",
       "to": "fells_run",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 8,
+      "cost": 25,
       "path": "rivenspire_crag_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L1.shornhelm_gap",
         "rivenspire.L5.goat_and_rye"
@@ -3748,10 +3732,8 @@
       "from": "fells_run",
       "to": "camlorn",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 61,
       "path": "rivenspire_crag_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L5.goat_and_rye",
         "glenumbra.L6.camlorn_city"
@@ -3761,10 +3743,8 @@
       "from": "wayrest",
       "to": "menevia",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 42,
       "path": "dwynnen_gorge_lane",
-      "bidirectional": true,
       "why": [
         "wayrest.L6.harbour_capital",
         "wayrest.L6.border_keep"
@@ -3774,10 +3754,8 @@
       "from": "menevia",
       "to": "gavaudon",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 65,
       "path": "wrothgar_pass_road",
-      "bidirectional": true,
       "why": [
         "wayrest.L6.border_keep",
         "wrothgar.L6.newing_shelf_city"
@@ -3787,10 +3765,8 @@
       "from": "gavaudon",
       "to": "bhoriane",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 133,
       "path": "wrothgar_pass_road",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.newing_shelf_city",
         "dwynnen.L5.bhoriane_mines"
@@ -3800,10 +3776,8 @@
       "from": "bhoriane",
       "to": "evermor",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 12,
+      "cost": 116,
       "path": "wrothgar_pass_road",
-      "bidirectional": true,
       "why": [
         "dwynnen.L5.bhoriane_mines",
         "bjoulsae.L6.evermor_city"
@@ -3811,12 +3785,21 @@
     },
     {
       "from": "wayrest",
+      "to": "kambria",
+      "mode": "carriage",
+      "cost": 101,
+      "path": "wrothgar_pass_road",
+      "why": [
+        "wayrest.L6.harbour_capital",
+        "bjoulsae.L6.evermor_city"
+      ]
+    },
+    {
+      "from": "kambria",
       "to": "evermor",
       "mode": "carriage",
-      "fee": 30,
-      "duration": 16,
+      "cost": 100,
       "path": "wrothgar_pass_road",
-      "bidirectional": true,
       "why": [
         "wayrest.L6.harbour_capital",
         "bjoulsae.L6.evermor_city"
@@ -3826,10 +3809,8 @@
       "from": "evermor",
       "to": "orsinium",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 14,
+      "cost": 124,
       "path": "wrothgar_pass_road",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L6.evermor_city",
         "wrothgar.L6.orsinium_city"
@@ -3839,10 +3820,8 @@
       "from": "evermor",
       "to": "phrygias",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 102,
       "path": "bjoulsae_towpath_lane",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L6.evermor_city",
         "bjoulsae.L5.horse_breeding"
@@ -3850,12 +3829,10 @@
     },
     {
       "from": "phrygias",
-      "to": "farrun",
+      "to": "evermor",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 102,
       "path": "bjoulsae_towpath_lane",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.horse_breeding",
         "bjoulsae.L6.druadach_border_fort"
@@ -3865,12 +3842,10 @@
       "from": "evermor",
       "to": "farrun",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 14,
-      "path": "druadach_highway",
-      "bidirectional": true,
+      "cost": 107,
+      "path": "bjoulsae_towpath_lane",
       "why": [
-        "bjoulsae.L6.evermor_city",
+        "bjoulsae.L5.horse_breeding",
         "bjoulsae.L6.druadach_border_fort"
       ]
     },
@@ -3878,10 +3853,8 @@
       "from": "orsinium",
       "to": "fharun_stronghold",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 111,
       "path": "wrothgar_stronghold_lane",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.orsinium_city",
         "wrothgar.L5.stronghold_mines"
@@ -3889,12 +3862,21 @@
     },
     {
       "from": "fharun_stronghold",
+      "to": "tumnosh_stronghold",
+      "mode": "carriage",
+      "cost": 142,
+      "path": "wrothgar_stronghold_lane",
+      "why": [
+        "wrothgar.L5.stronghold_mines",
+        "wrothgar.L6.newing_shelf_city"
+      ]
+    },
+    {
+      "from": "tumnosh_stronghold",
       "to": "gavaudon",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 122,
       "path": "wrothgar_stronghold_lane",
-      "bidirectional": true,
       "why": [
         "wrothgar.L5.stronghold_mines",
         "wrothgar.L6.newing_shelf_city"
@@ -3904,10 +3886,8 @@
       "from": "orsinium",
       "to": "morkul_stronghold_high_rock",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 10,
+      "cost": 77,
       "path": "wrothgar_stronghold_lane",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.orsinium_city",
         "wrothgar.L6.stronghold_per_mine"
@@ -3917,10 +3897,8 @@
       "from": "morkul_stronghold_high_rock",
       "to": "jehanna",
       "mode": "carriage",
-      "fee": 20,
-      "duration": 14,
+      "cost": 82,
       "path": "wrothgar_stronghold_lane",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.stronghold_per_mine",
         "wrothgar.L6.pass_inns"
@@ -3930,10 +3908,8 @@
       "from": "orsinium",
       "to": "tumnosh_stronghold",
       "mode": "carriage",
-      "fee": 15,
-      "duration": 12,
+      "cost": 53,
       "path": "wrothgar_east_lane",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.orsinium_city",
         "wrothgar.L5.orichalcum_forges"
@@ -3943,10 +3919,8 @@
       "from": "orsinium",
       "to": "jehanna",
       "mode": "carriage",
-      "fee": 25,
-      "duration": 16,
+      "cost": 123,
       "path": "wrothgar_pass_road",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.orsinium_city",
         "wrothgar.L6.pass_inns"
@@ -3956,10 +3930,8 @@
       "from": "wayrest",
       "to": "menevia",
       "mode": "barge",
-      "fee": 12,
-      "duration": 10,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "wayrest.L3.bjoulsae_artery",
         "wayrest.L5.chain_dues"
@@ -3969,10 +3941,8 @@
       "from": "menevia",
       "to": "gavaudon",
       "mode": "barge",
-      "fee": 12,
-      "duration": 10,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "wayrest.L3.bjoulsae_artery",
         "wrothgar.L6.newing_shelf_city"
@@ -3982,10 +3952,8 @@
       "from": "gavaudon",
       "to": "bhoriane",
       "mode": "barge",
-      "fee": 12,
-      "duration": 10,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L3.upper_bjoulsae",
         "dwynnen.L5.bhoriane_mines"
@@ -3995,10 +3963,8 @@
       "from": "bhoriane",
       "to": "evermor",
       "mode": "barge",
-      "fee": 15,
-      "duration": 12,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L6.barge_landings"
@@ -4008,10 +3974,8 @@
       "from": "wayrest",
       "to": "evermor",
       "mode": "barge",
-      "fee": 25,
-      "duration": 16,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "wayrest.L3.bjoulsae_artery",
         "bjoulsae.L5.barge_trade"
@@ -4021,10 +3985,8 @@
       "from": "evermor",
       "to": "phrygias",
       "mode": "barge",
-      "fee": 12,
-      "duration": 10,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L3.upper_bjoulsae",
         "bjoulsae.L6.barge_landings"
@@ -4034,10 +3996,8 @@
       "from": "phrygias",
       "to": "farrun",
       "mode": "barge",
-      "fee": 15,
-      "duration": 10,
+      "cost": 0,
       "path": "bjoulsae_river_barge",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L6.druadach_border_fort"
@@ -4047,10 +4007,8 @@
       "from": "daggerfall",
       "to": "wayrest",
       "mode": "boat",
-      "fee": 60,
-      "duration": 18,
+      "cost": 0,
       "path": "iliac_bay_sea_lane",
-      "bidirectional": true,
       "why": [
         "high_rock.L5.bay_shipping",
         "wayrest.L5.guild_shipping"
@@ -4060,10 +4018,8 @@
       "from": "daggerfall",
       "to": "betony",
       "mode": "boat",
-      "fee": 25,
-      "duration": 10,
+      "cost": 0,
       "path": "betony_strait_ferry",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.ferry_head",
         "high_rock.L9.betony_claim"
@@ -4073,10 +4029,8 @@
       "from": "daggerfall",
       "to": "balfiera",
       "mode": "boat",
-      "fee": 40,
-      "duration": 14,
+      "cost": 0,
       "path": "balfiera_pilgrim_ferry",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.ferry_head",
         "wayrest.L6.pilgrim_isle"
@@ -4086,10 +4040,8 @@
       "from": "wayrest",
       "to": "balfiera",
       "mode": "boat",
-      "fee": 30,
-      "duration": 12,
+      "cost": 0,
       "path": "balfiera_pilgrim_ferry",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "wayrest.L6.pilgrim_isle"
@@ -4099,10 +4051,8 @@
       "from": "wayrest",
       "to": "koeglin_village",
       "mode": "boat",
-      "fee": 20,
-      "duration": 10,
+      "cost": 0,
       "path": "stormhaven_bay_ferry",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "stormhaven.L6.koeglin_village"
@@ -4112,10 +4062,8 @@
       "from": "daggerfall",
       "to": "glenpoint",
       "mode": "boat",
-      "fee": 20,
-      "duration": 10,
+      "cost": 0,
       "path": "glenpoint_headland_ferry",
-      "bidirectional": true,
       "why": [
         "daggerfall.L6.ferry_head",
         "daggerfall.L6.glenpoint_watch"
@@ -4125,10 +4073,8 @@
       "from": "northpoint",
       "to": "daggerfall",
       "mode": "boat",
-      "fee": 65,
-      "duration": 18,
+      "cost": 0,
       "path": "western_ocean_sea_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L5.northpoint_shipping",
         "high_rock.L5.bay_shipping"
@@ -4138,10 +4084,8 @@
       "from": "northpoint",
       "to": "wayrest",
       "mode": "boat",
-      "fee": 75,
-      "duration": 20,
+      "cost": 0,
       "path": "northern_cape_sea_lane",
-      "bidirectional": true,
       "why": [
         "rivenspire.L5.northpoint_shipping",
         "wayrest.L5.guild_shipping"
@@ -4151,10 +4095,8 @@
       "from": "northpoint",
       "to": "farrun",
       "mode": "boat",
-      "fee": 30,
-      "duration": 12,
+      "cost": 0,
       "path": "ghost_sea_coaster",
-      "bidirectional": true,
       "why": [
         "rivenspire.L5.northpoint_shipping",
         "bjoulsae.L6.druadach_border_fort"
@@ -4164,10 +4106,8 @@
       "from": "daggerfall",
       "to": "wayrest",
       "mode": "guild_guide",
-      "fee": 45,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "high_rock.L8.direnni_nostalgia",
         "wayrest.L8.direnni_awe"
@@ -4177,10 +4117,8 @@
       "from": "daggerfall",
       "to": "camlorn",
       "mode": "guild_guide",
-      "fee": 35,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "high_rock.L8.direnni_nostalgia",
         "glenumbra.L6.camlorn_city"
@@ -4190,10 +4128,8 @@
       "from": "daggerfall",
       "to": "anticlere",
       "mode": "guild_guide",
-      "fee": 35,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "high_rock.L8.direnni_nostalgia",
         "anticlere.L6.anticlere_meadow_city"
@@ -4203,10 +4139,8 @@
       "from": "wayrest",
       "to": "shornhelm",
       "mode": "guild_guide",
-      "fee": 45,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "wayrest.L8.direnni_awe",
         "rivenspire.L6.shornhelm_city"
@@ -4216,10 +4150,8 @@
       "from": "wayrest",
       "to": "evermor",
       "mode": "guild_guide",
-      "fee": 40,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "wayrest.L8.direnni_awe",
         "bjoulsae.L6.evermor_city"
@@ -4229,10 +4161,8 @@
       "from": "shornhelm",
       "to": "northpoint",
       "mode": "guild_guide",
-      "fee": 35,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.shornhelm_city",
         "rivenspire.L6.northpoint_port"
@@ -4242,10 +4172,8 @@
       "from": "camlorn",
       "to": "shornhelm",
       "mode": "guild_guide",
-      "fee": 40,
-      "duration": 4,
+      "cost": 0,
       "path": "mages_guild_leyline",
-      "bidirectional": true,
       "why": [
         "glenumbra.L6.camlorn_city",
         "rivenspire.L6.shornhelm_city"
@@ -4255,10 +4183,8 @@
       "from": "shrine_azura_high_rock",
       "to": "wayshrine_dwynnen_2",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wayrest_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "wayrest.L8.akatosh_chantry"
@@ -4268,10 +4194,8 @@
       "from": "shrine_boethiah_high_rock",
       "to": "shrine_sanguine_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4281,10 +4205,8 @@
       "from": "shrine_clavicus_vile_high_rock",
       "to": "wayshrine_glenumbra_13",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -4294,10 +4216,8 @@
       "from": "shrine_hermaeus_mora_high_rock",
       "to": "ykalon",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -4307,10 +4227,8 @@
       "from": "shrine_hircine_high_rock",
       "to": "urvaius",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -4320,10 +4238,8 @@
       "from": "shrine_malacath_high_rock",
       "to": "shrine_nocturnal_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4333,10 +4249,8 @@
       "from": "shrine_mehrunes_dagon_high_rock",
       "to": "wayshrine_wrothgar_33",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wayrest_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "wayrest.L8.akatosh_chantry"
@@ -4346,10 +4260,8 @@
       "from": "shrine_mephala_high_rock",
       "to": "wayshrine_daggerfall_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "anticlere_cairn_trail",
-      "bidirectional": true,
       "why": [
         "anticlere.L5.grain_and_mills",
         "anticlere.L8.mara_patron"
@@ -4359,10 +4271,8 @@
       "from": "shrine_meridia_high_rock",
       "to": "crosswych",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -4372,10 +4282,8 @@
       "from": "shrine_molag_bal_high_rock",
       "to": "moiras_hope",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -4385,10 +4293,8 @@
       "from": "shrine_namira_high_rock",
       "to": "wayshrine_bjoulsae_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -4398,10 +4304,8 @@
       "from": "shrine_nocturnal_high_rock",
       "to": "shrine_malacath_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4411,10 +4315,8 @@
       "from": "shrine_peryite_high_rock",
       "to": "wayshrine_wrothgar_29",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4424,10 +4326,8 @@
       "from": "shrine_sanguine_high_rock",
       "to": "wayshrine_daggerfall_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4437,10 +4337,8 @@
       "from": "shrine_sheogorath_high_rock",
       "to": "wayshrine_glenumbra_18",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -4450,10 +4348,8 @@
       "from": "shrine_vaermina_high_rock",
       "to": "wayshrine_bjoulsae_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -4463,10 +4359,8 @@
       "from": "wayshrine_daggerfall_1",
       "to": "wayshrine_daggerfall_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4476,10 +4370,8 @@
       "from": "wayshrine_daggerfall_2",
       "to": "wayshrine_daggerfall_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4489,10 +4381,8 @@
       "from": "wayshrine_daggerfall_3",
       "to": "daggerfall",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4502,10 +4392,8 @@
       "from": "wayshrine_daggerfall_4",
       "to": "wayshrine_daggerfall_2",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4515,10 +4403,8 @@
       "from": "wayshrine_daggerfall_5",
       "to": "wayshrine_anticlere_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4528,10 +4414,8 @@
       "from": "wayshrine_daggerfall_6",
       "to": "shrine_mephala_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4541,10 +4425,8 @@
       "from": "wayshrine_daggerfall_7",
       "to": "shrine_sanguine_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4554,10 +4436,8 @@
       "from": "wayshrine_daggerfall_8",
       "to": "wayshrine_daggerfall_2",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "daggerfall_cairn_trail",
-      "bidirectional": true,
       "why": [
         "daggerfall.L5.river_toll",
         "daggerfall.L8.kynareth_patron"
@@ -4567,10 +4447,8 @@
       "from": "wayshrine_anticlere_1",
       "to": "wayshrine_dwynnen_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "anticlere_cairn_trail",
-      "bidirectional": true,
       "why": [
         "anticlere.L5.grain_and_mills",
         "anticlere.L8.mara_patron"
@@ -4580,10 +4458,8 @@
       "from": "wayshrine_anticlere_2",
       "to": "wayshrine_dwynnen_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "anticlere_cairn_trail",
-      "bidirectional": true,
       "why": [
         "anticlere.L5.grain_and_mills",
         "anticlere.L8.mara_patron"
@@ -4593,10 +4469,8 @@
       "from": "wayshrine_anticlere_3",
       "to": "wayshrine_daggerfall_5",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "anticlere_cairn_trail",
-      "bidirectional": true,
       "why": [
         "anticlere.L5.grain_and_mills",
         "anticlere.L8.mara_patron"
@@ -4606,10 +4480,8 @@
       "from": "wayshrine_dwynnen_1",
       "to": "wayshrine_bjoulsae_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "dwynnen_cairn_trail",
-      "bidirectional": true,
       "why": [
         "dwynnen.L5.bridge_toll",
         "dwynnen.L8.dibella_patron"
@@ -4619,10 +4491,8 @@
       "from": "wayshrine_dwynnen_2",
       "to": "wayshrine_dwynnen_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "dwynnen_cairn_trail",
-      "bidirectional": true,
       "why": [
         "dwynnen.L5.bridge_toll",
         "dwynnen.L8.dibella_patron"
@@ -4632,10 +4502,8 @@
       "from": "wayshrine_dwynnen_3",
       "to": "dwynnen",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "dwynnen_cairn_trail",
-      "bidirectional": true,
       "why": [
         "dwynnen.L5.bridge_toll",
         "dwynnen.L8.dibella_patron"
@@ -4645,10 +4513,8 @@
       "from": "wayshrine_wayrest_1",
       "to": "wayshrine_wayrest_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wayrest_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "wayrest.L8.akatosh_chantry"
@@ -4658,10 +4524,8 @@
       "from": "wayshrine_wayrest_2",
       "to": "kambria",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wayrest_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "wayrest.L8.akatosh_chantry"
@@ -4671,10 +4535,8 @@
       "from": "wayshrine_wayrest_3",
       "to": "wayrest",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wayrest_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wayrest.L5.guild_shipping",
         "wayrest.L8.akatosh_chantry"
@@ -4684,10 +4546,8 @@
       "from": "wayshrine_wrothgar_1",
       "to": "wayshrine_wrothgar_42",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4697,10 +4557,8 @@
       "from": "wayshrine_wrothgar_2",
       "to": "wayshrine_wrothgar_37",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4710,10 +4568,8 @@
       "from": "wayshrine_wrothgar_3",
       "to": "wayshrine_wrothgar_43",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4723,10 +4579,8 @@
       "from": "wayshrine_wrothgar_4",
       "to": "wayshrine_wrothgar_30",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4736,10 +4590,8 @@
       "from": "wayshrine_wrothgar_5",
       "to": "wayshrine_wrothgar_36",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4749,10 +4601,8 @@
       "from": "wayshrine_wrothgar_6",
       "to": "wayshrine_wrothgar_37",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4762,10 +4612,8 @@
       "from": "wayshrine_wrothgar_7",
       "to": "wayshrine_wrothgar_38",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4775,10 +4623,8 @@
       "from": "wayshrine_wrothgar_8",
       "to": "wayshrine_wrothgar_40",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4788,10 +4634,8 @@
       "from": "wayshrine_wrothgar_9",
       "to": "wayshrine_wrothgar_39",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4801,10 +4645,8 @@
       "from": "wayshrine_wrothgar_10",
       "to": "wayshrine_wrothgar_36",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4814,10 +4656,8 @@
       "from": "wayshrine_wrothgar_11",
       "to": "wayshrine_wrothgar_41",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4827,10 +4667,8 @@
       "from": "wayshrine_wrothgar_12",
       "to": "wayshrine_wrothgar_28",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4840,10 +4678,8 @@
       "from": "wayshrine_wrothgar_13",
       "to": "wayshrine_wrothgar_35",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4853,10 +4689,8 @@
       "from": "wayshrine_wrothgar_14",
       "to": "wayshrine_wrothgar_35",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4866,10 +4700,8 @@
       "from": "wayshrine_wrothgar_15",
       "to": "wayshrine_wrothgar_37",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4879,10 +4711,8 @@
       "from": "wayshrine_wrothgar_16",
       "to": "wayshrine_wrothgar_43",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4892,10 +4722,8 @@
       "from": "wayshrine_wrothgar_17",
       "to": "wayshrine_wrothgar_42",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4905,10 +4733,8 @@
       "from": "wayshrine_wrothgar_18",
       "to": "wayshrine_wrothgar_42",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4918,10 +4744,8 @@
       "from": "wayshrine_wrothgar_19",
       "to": "wayshrine_wrothgar_33",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4931,10 +4755,8 @@
       "from": "wayshrine_wrothgar_20",
       "to": "wayshrine_wrothgar_31",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4944,10 +4766,8 @@
       "from": "wayshrine_wrothgar_21",
       "to": "wayshrine_wrothgar_40",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4957,10 +4777,8 @@
       "from": "wayshrine_wrothgar_22",
       "to": "shrine_nocturnal_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4970,10 +4788,8 @@
       "from": "wayshrine_wrothgar_23",
       "to": "wayshrine_wrothgar_39",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4983,10 +4799,8 @@
       "from": "wayshrine_wrothgar_24",
       "to": "wayshrine_wrothgar_34",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -4996,10 +4810,8 @@
       "from": "wayshrine_wrothgar_25",
       "to": "jehanna",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5009,10 +4821,8 @@
       "from": "wayshrine_wrothgar_26",
       "to": "wayshrine_wrothgar_32",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5022,10 +4832,8 @@
       "from": "wayshrine_wrothgar_27",
       "to": "wayshrine_wrothgar_3",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5035,10 +4843,8 @@
       "from": "wayshrine_wrothgar_28",
       "to": "wayshrine_wrothgar_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5048,10 +4854,8 @@
       "from": "wayshrine_wrothgar_29",
       "to": "wayshrine_wrothgar_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5061,10 +4865,8 @@
       "from": "wayshrine_wrothgar_30",
       "to": "wayshrine_wrothgar_39",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5074,10 +4876,8 @@
       "from": "wayshrine_wrothgar_31",
       "to": "wayshrine_wrothgar_40",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5087,10 +4887,8 @@
       "from": "wayshrine_wrothgar_32",
       "to": "wayshrine_wrothgar_26",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5100,10 +4898,8 @@
       "from": "wayshrine_wrothgar_33",
       "to": "shrine_mehrunes_dagon_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5113,10 +4909,8 @@
       "from": "wayshrine_wrothgar_34",
       "to": "gavaudon",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5126,10 +4920,8 @@
       "from": "wayshrine_wrothgar_35",
       "to": "wayshrine_wrothgar_14",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5139,10 +4931,8 @@
       "from": "wayshrine_wrothgar_36",
       "to": "morkul_stronghold_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5152,10 +4942,8 @@
       "from": "wayshrine_wrothgar_37",
       "to": "wayshrine_wrothgar_2",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5165,10 +4953,8 @@
       "from": "wayshrine_wrothgar_38",
       "to": "wayshrine_wrothgar_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5178,10 +4964,8 @@
       "from": "wayshrine_wrothgar_39",
       "to": "wayshrine_wrothgar_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5191,10 +4975,8 @@
       "from": "wayshrine_wrothgar_40",
       "to": "wayshrine_wrothgar_21",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5204,10 +4986,8 @@
       "from": "wayshrine_wrothgar_41",
       "to": "tumnosh_stronghold",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5217,10 +4997,8 @@
       "from": "wayshrine_wrothgar_42",
       "to": "wayshrine_wrothgar_17",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5230,10 +5008,8 @@
       "from": "wayshrine_wrothgar_43",
       "to": "wayshrine_wrothgar_16",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "wrothgar_cairn_trail",
-      "bidirectional": true,
       "why": [
         "wrothgar.L6.pass_inns",
         "wrothgar.L8.kynareth_newing"
@@ -5243,10 +5019,8 @@
       "from": "wayshrine_glenumbra_1",
       "to": "wayshrine_glenumbra_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5256,10 +5030,8 @@
       "from": "wayshrine_glenumbra_2",
       "to": "wayshrine_glenumbra_17",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5269,10 +5041,8 @@
       "from": "wayshrine_glenumbra_3",
       "to": "wayshrine_glenumbra_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5282,10 +5052,8 @@
       "from": "wayshrine_glenumbra_4",
       "to": "wayshrine_glenumbra_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5295,10 +5063,8 @@
       "from": "wayshrine_glenumbra_5",
       "to": "shrine_sheogorath_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5308,10 +5074,8 @@
       "from": "wayshrine_glenumbra_6",
       "to": "wayshrine_glenumbra_14",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5321,10 +5085,8 @@
       "from": "wayshrine_glenumbra_7",
       "to": "wayshrine_glenumbra_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5334,10 +5096,8 @@
       "from": "wayshrine_glenumbra_8",
       "to": "eagles_brook",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5347,10 +5107,8 @@
       "from": "wayshrine_glenumbra_9",
       "to": "wayshrine_glenumbra_16",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5360,10 +5118,8 @@
       "from": "wayshrine_glenumbra_10",
       "to": "wayshrine_glenumbra_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5373,10 +5129,8 @@
       "from": "wayshrine_glenumbra_11",
       "to": "camlorn",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5386,10 +5140,8 @@
       "from": "wayshrine_glenumbra_12",
       "to": "wayshrine_glenumbra_2",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5399,10 +5151,8 @@
       "from": "wayshrine_glenumbra_13",
       "to": "shrine_clavicus_vile_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5412,10 +5162,8 @@
       "from": "wayshrine_glenumbra_14",
       "to": "crestshade",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5425,10 +5173,8 @@
       "from": "wayshrine_glenumbra_15",
       "to": "camlorn",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5438,10 +5184,8 @@
       "from": "wayshrine_glenumbra_16",
       "to": "wayshrine_glenumbra_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5451,10 +5195,8 @@
       "from": "wayshrine_glenumbra_17",
       "to": "wayshrine_glenumbra_2",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5464,10 +5206,8 @@
       "from": "wayshrine_glenumbra_18",
       "to": "glenumbra_moors",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5477,10 +5217,8 @@
       "from": "wayshrine_glenumbra_19",
       "to": "camlorn",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "glenumbra_cairn_trail",
-      "bidirectional": true,
       "why": [
         "glenumbra.L5.wool_and_cloth",
         "glenumbra.L8.mara_cathedral"
@@ -5490,10 +5228,8 @@
       "from": "wayshrine_rivenspire_1",
       "to": "wayshrine_rivenspire_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5503,10 +5239,8 @@
       "from": "wayshrine_rivenspire_2",
       "to": "wayshrine_rivenspire_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5516,10 +5250,8 @@
       "from": "wayshrine_rivenspire_3",
       "to": "wayshrine_rivenspire_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5529,10 +5261,8 @@
       "from": "wayshrine_rivenspire_4",
       "to": "shrine_molag_bal_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5542,10 +5272,8 @@
       "from": "wayshrine_rivenspire_5",
       "to": "wayshrine_rivenspire_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5555,10 +5283,8 @@
       "from": "wayshrine_rivenspire_6",
       "to": "wayshrine_rivenspire_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5568,10 +5294,8 @@
       "from": "wayshrine_rivenspire_7",
       "to": "wayshrine_bjoulsae_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5581,10 +5305,8 @@
       "from": "wayshrine_rivenspire_8",
       "to": "wayshrine_glenumbra_16",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5594,10 +5316,8 @@
       "from": "wayshrine_rivenspire_9",
       "to": "northpoint",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5607,10 +5327,8 @@
       "from": "wayshrine_rivenspire_10",
       "to": "wayshrine_rivenspire_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "rivenspire_cairn_trail",
-      "bidirectional": true,
       "why": [
         "rivenspire.L6.crag_watch_keeps",
         "rivenspire.L8.stendarr_and_arkay"
@@ -5620,10 +5338,8 @@
       "from": "wayshrine_stormhaven_1",
       "to": "wayshrine_stormhaven_5",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -5633,10 +5349,8 @@
       "from": "wayshrine_stormhaven_2",
       "to": "shalgora",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -5646,10 +5360,8 @@
       "from": "wayshrine_stormhaven_3",
       "to": "wayshrine_stormhaven_4",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -5659,10 +5371,8 @@
       "from": "wayshrine_stormhaven_4",
       "to": "shrine_hircine_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -5672,10 +5382,8 @@
       "from": "wayshrine_stormhaven_5",
       "to": "shalgora",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "stormhaven_cairn_trail",
-      "bidirectional": true,
       "why": [
         "stormhaven.L5.pilgrim_hospitality",
         "stormhaven.L8.mara_heartland"
@@ -5685,10 +5393,8 @@
       "from": "wayshrine_bjoulsae_1",
       "to": "wayshrine_bjoulsae_6",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5698,10 +5404,8 @@
       "from": "wayshrine_bjoulsae_2",
       "to": "wayshrine_bjoulsae_10",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5711,10 +5415,8 @@
       "from": "wayshrine_bjoulsae_3",
       "to": "wayshrine_bjoulsae_8",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5724,10 +5426,8 @@
       "from": "wayshrine_bjoulsae_4",
       "to": "farrun",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5737,10 +5437,8 @@
       "from": "wayshrine_bjoulsae_5",
       "to": "wayshrine_bjoulsae_9",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5750,10 +5448,8 @@
       "from": "wayshrine_bjoulsae_6",
       "to": "wayshrine_bjoulsae_1",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5763,10 +5459,8 @@
       "from": "wayshrine_bjoulsae_7",
       "to": "evermor",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5776,10 +5470,8 @@
       "from": "wayshrine_bjoulsae_8",
       "to": "menevia",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5789,10 +5481,8 @@
       "from": "wayshrine_bjoulsae_9",
       "to": "shrine_namira_high_rock",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
@@ -5802,13 +5492,99 @@
       "from": "wayshrine_bjoulsae_10",
       "to": "wayshrine_rivenspire_7",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
+      "cost": 0,
       "path": "bjoulsae_cairn_trail",
-      "bidirectional": true,
       "why": [
         "bjoulsae.L5.barge_trade",
         "bjoulsae.L8.water_relic_veneration"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "isle_of_balfiera",
+      "mode": "boat",
+      "cost": 127,
+      "path": "iliac_bay_adamantine_packet",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "isle_of_balfiera",
+      "to": "daggerfall",
+      "mode": "boat",
+      "cost": 127,
+      "path": "iliac_bay_adamantine_packet",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "isle_of_balfiera",
+      "mode": "boat",
+      "cost": 47,
+      "path": "bjoulsae_mouth_galley_lane",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "isle_of_balfiera",
+      "to": "wayrest",
+      "mode": "boat",
+      "cost": 47,
+      "path": "bjoulsae_mouth_galley_lane",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "daggerfall",
+      "to": "sentinel",
+      "mode": "boat",
+      "cost": 108,
+      "path": "iliac_straits_merchant_packet",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "sentinel",
+      "to": "daggerfall",
+      "mode": "boat",
+      "cost": 108,
+      "path": "iliac_straits_merchant_packet",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "wayrest",
+      "to": "sentinel",
+      "mode": "boat",
+      "cost": 124,
+      "path": "central_iliac_merchant_lane",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
+      ]
+    },
+    {
+      "from": "sentinel",
+      "to": "wayrest",
+      "mode": "boat",
+      "cost": 124,
+      "path": "central_iliac_merchant_lane",
+      "why": [
+        "high_rock.L6.capitals_at_mouths",
+        "high_rock.L6.fief_patchwork"
       ]
     }
   ]

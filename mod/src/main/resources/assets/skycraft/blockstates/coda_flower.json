@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/coda_flower"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/coda_flower_harvested"
+    }
+  }
+}

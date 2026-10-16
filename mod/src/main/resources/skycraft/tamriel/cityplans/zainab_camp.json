@@ -30,7 +30,7 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        9,
+        13,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        -7,
-        5
+        -13,
+        10
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -79,7 +79,7 @@
       "wealth": "common",
       "at": [
         3,
-        -9
+        -13
       ],
       "face": "south",
       "overlay": "grazelands",
@@ -103,6 +103,101 @@
     "zainab_camp_b_2": "Sonummu Zabamat's Wise Woman Yurt",
     "zainab_camp_b_3": "Ashibaal's Gulakhan Yurt",
     "zainab_camp_b_4": "Ababael Timsar-Dadisun's Trader Yurt",
-    "zainab_camp_b_5": "Zainab Herd Corral"
-  }
+    "zainab_camp_b_5": "Zainab Herd Corral",
+    "zainab_guar_commons": "Ashkhan Kaushad's Steppe Commons"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        2
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "zainab_guar_commons"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 24,
+      "rz": 18,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "steppe_guar_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          -6,
+          12
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          8,
+          -24
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "kaushad_trade_path"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.5
+  },
+  "queue": [
+    {
+      "kind": "tent",
+      "count": 6,
+      "on": "steppe_guar_ring"
+    }
+  ]
 }

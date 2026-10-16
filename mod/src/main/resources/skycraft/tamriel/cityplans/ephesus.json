@@ -50,7 +50,7 @@
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -76,7 +76,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         -19
       ],
       "face": "south",
@@ -87,7 +87,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
+        42,
         -15
       ],
       "face": "west",
@@ -142,8 +142,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -13,
-        20
+        -16,
+        17
       ],
       "face": "north",
       "name": "ephesus_tall_papa_dome"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -27,
+        -5
       ],
       "face": "east",
       "name": "ephesus_stair_gate_watch"

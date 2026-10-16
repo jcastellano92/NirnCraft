@@ -1080,7 +1080,7 @@
     ]
   },
   {
-    "id": "ex_alikr_desert_site_100",
+    "id": "ex_gilane_reliquary",
     "title": "Reliquary of place.skycraft.gilane",
     "kind": "shrine",
     "x": -8650,
@@ -1093,7 +1093,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_alikr_desert_site_101",
+    "id": "ex_hegathe_reliquary",
     "title": "Reliquary of place.skycraft.hegathe",
     "kind": "shrine",
     "x": -9150,
@@ -1106,7 +1106,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_bangkorai_site_100",
+    "id": "ex_kozanset_reliquary",
     "title": "Reliquary of place.skycraft.kozanset",
     "kind": "shrine",
     "x": -5950,
@@ -1119,7 +1119,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_craglorn_site_100",
+    "id": "ex_dragonstar_reliquary",
     "title": "Reliquary of place.skycraft.dragonstar",
     "kind": "shrine",
     "x": -4100,
@@ -1132,7 +1132,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_dragontail_site_100",
+    "id": "ex_ephesus_reliquary",
     "title": "Reliquary of place.skycraft.ephesus",
     "kind": "shrine",
     "x": -4806,
@@ -1145,7 +1145,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_hews_bane_site_100",
+    "id": "ex_abahs_landing_reliquary",
     "title": "Reliquary of place.skycraft.abahs_landing",
     "kind": "shrine",
     "x": -5350,
@@ -1158,7 +1158,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_sentinel_site_100",
+    "id": "ex_bergama_reliquary",
     "title": "Reliquary of place.skycraft.bergama",
     "kind": "shrine",
     "x": -7544,
@@ -1171,7 +1171,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_sentinel_site_101",
+    "id": "ex_antiphyllos_reliquary",
     "title": "Reliquary of place.skycraft.antiphyllos",
     "kind": "shrine",
     "x": -7640,

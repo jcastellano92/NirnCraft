@@ -1,6 +1,8 @@
 package com.skycraft.creatures.spawn;
 
 import com.skycraft.Skycraft;
+import com.skycraft.atmosphere.weather.RegionalWeather;
+import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.creatures.CreatureSpawns;
 import com.skycraft.creatures.CreaturesConfig;
 import com.skycraft.creatures.Leveling;
@@ -105,10 +107,25 @@ public final class RegionSpawner {
 
     // ------------------------------------------------------------------ one attempt
 
+    /** Maps a regional {@link WeatherKind} and vanilla rain/thunder flags to {@link SpawnTables.Weather}. */
+    public static SpawnTables.Weather toSpawnWeather(WeatherKind regional, boolean vanillaRaining, boolean vanillaThundering) {
+        if (regional != null) {
+            if (regional.severe() || regional == WeatherKind.STORM) return SpawnTables.Weather.STORM;
+            if (regional == WeatherKind.RAIN || regional == WeatherKind.DRIZZLE || regional == WeatherKind.SNOW
+                    || regional == WeatherKind.FOG || regional == WeatherKind.ASHFALL || regional == WeatherKind.DUST) {
+                return SpawnTables.Weather.RAIN;
+            }
+        }
+        return vanillaThundering ? SpawnTables.Weather.STORM
+                : vanillaRaining ? SpawnTables.Weather.RAIN : SpawnTables.Weather.CLEAR;
+    }
+
     private static void attempt(ServerLevel level, ServerPlayer player, SpawnTables.Kind kind, List<Mob> mine, RandomSource random) {
         boolean hostileKind = kind == SpawnTables.Kind.HOSTILE;
-        // daylight makes hostile attempts rarer; night is when the wild is dangerous
-        if (hostileKind && !level.isNight() && random.nextDouble() > CreaturesConfig.DAY_HOSTILE_FACTOR.get()) return;
+        // daylight makes hostile attempts rarer unless a severe regional storm darkens the sky
+        WeatherKind playerWeather = RegionalWeather.kindAt(level, player.blockPosition());
+        boolean severeAtPlayer = RegionalWeather.isSevere(playerWeather) || playerWeather == WeatherKind.STORM;
+        if (hostileKind && !level.isNight() && !severeAtPlayer && random.nextDouble() > CreaturesConfig.DAY_HOSTILE_FACTOR.get()) return;
         BlockPos column = pickColumn(level, player, random, hostileKind ? CreaturesConfig.MIN_HOSTILE_DISTANCE.get() : MIN_DIST);
         if (column == null) return;
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
@@ -119,6 +136,12 @@ public final class RegionSpawner {
         SpawnTables.Placement place = classify(level, spot, surface);
         if (place == SpawnTables.Placement.SURFACE && underground) return;
         if (inSettlement(level, spot)) return;
+        WeatherKind spotWeather = RegionalWeather.kindAt(level, spot);
+        // During severe surface storms (blizzard, sandstorm, ash storm, blight), most wildlife takes shelter
+        if (!hostileKind && place == SpawnTables.Placement.SURFACE && RegionalWeather.isSevere(spotWeather)
+                && random.nextFloat() < 0.65f) {
+            return;
+        }
         boolean roadSpot = false;
         if (hostileKind) {
             if (SpawnPacing.calm(level, spot)) return; // around the world spawn and towns
@@ -139,8 +162,7 @@ public final class RegionSpawner {
         boolean nearStart = SpawnPacing.nearStart(level, spot.getX(), spot.getZ());
         boolean night = level.isNight();
         long dayTime = level.getDayTime() % 24000L;
-        SpawnTables.Weather weather = level.isThundering() ? SpawnTables.Weather.STORM
-                : level.isRaining() ? SpawnTables.Weather.RAIN : SpawnTables.Weather.CLEAR;
+        SpawnTables.Weather weather = toSpawnWeather(spotWeather, level.isRaining(), level.isThundering());
         // road and settlement distances are only looked up when a rule asks for them (cached per attempt)
         Boolean roadHere = hostileKind ? Boolean.valueOf(roadSpot) : null;
         java.util.Map<Integer, Boolean> townNear = new java.util.HashMap<>();

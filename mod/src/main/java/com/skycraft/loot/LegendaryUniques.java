@@ -233,4 +233,22 @@ public final class LegendaryUniques {
         if (u.quality > 0) tag.putInt(ItemValues.QUALITY_NBT, u.quality);
         return s;
     }
+
+    /**
+     * Verifies that every registered {@link Unique} resolves to a non-empty {@link ItemStack} whose base item is
+     * registered in {@link ForgeRegistries#ITEMS}. Throws {@link IllegalStateException} if any unique fails.
+     */
+    public static int verifyAllNonEmpty() {
+        List<String> broken = new ArrayList<>();
+        for (Unique u : ALL.values()) {
+            ItemStack stack = create(u.id);
+            if (stack.isEmpty()) {
+                broken.add(u.id + " (" + u.base + ")");
+            }
+        }
+        if (!broken.isEmpty()) {
+            throw new IllegalStateException("LegendaryUniques has " + broken.size() + " empty unique(s): " + String.join(", ", broken));
+        }
+        return ALL.size();
+    }
 }

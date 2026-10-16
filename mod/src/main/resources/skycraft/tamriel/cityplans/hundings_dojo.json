@@ -48,8 +48,8 @@
     {
       "id": "dome_palace",
       "at": [
-        0,
-        -8
+        -25,
+        4
       ],
       "name": "hundings_dojo_landmark",
       "overlay": "hundings_dojo"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          27
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          2,
+          -17
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -22,
+          0
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          22,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
-        0,
+        -2,
         0
       ],
-      "r0": 6,
-      "r1": 28,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 15,
+      "rz": 13,
+      "wobble": 2,
+      "lobes": 3,
+      "phase": 1.26,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,7 +120,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        12,
+        24,
         0
       ],
       "face": "south",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        16,
-        16
+        3,
+        25
       ],
       "face": "north",
       "overlay": "hundings_dojo",
@@ -100,7 +145,7 @@
       "wealth": "noble",
       "at": [
         0,
-        12
+        -20
       ],
       "face": "north",
       "overlay": "hundings_dojo",
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -16,
-        16
+        -15,
+        -20
       ],
       "face": "north",
       "overlay": "hundings_dojo",
@@ -160,7 +205,7 @@
       "wealth": "common",
       "at": [
         16,
-        -16
+        -20
       ],
       "face": "south",
       "overlay": "hundings_dojo",
@@ -195,5 +240,47 @@
     "hundings_dojo_landmark": "High Seat of place.skycraft.hundings_dojo",
     "hundings_dojo_plaza": "place.skycraft.hundings_dojo Central Plaza"
   },
-  "innKey": "hundings_dojo_b_5"
+  "innKey": "hundings_dojo_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -12
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        11,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 27,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

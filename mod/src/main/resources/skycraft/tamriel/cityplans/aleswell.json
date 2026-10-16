@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        24,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        5,
-        14
+        8,
+        17
       ],
       "face": "south",
       "overlay": "heartlands",
@@ -78,8 +78,8 @@
       "use": "barn",
       "wealth": "common",
       "at": [
-        2,
-        -8
+        0,
+        -16
       ],
       "face": "south",
       "overlay": "heartlands",
@@ -96,6 +96,10 @@
       "type": "well",
       "theme": "aleswell_hill",
       "count": 1
+    },
+    {
+      "type": "basin",
+      "where": "edge"
     }
   ],
   "titles": {
@@ -103,10 +107,121 @@
     "aleswell_b_2": "Diram Serethi's Farmstead",
     "aleswell_b_3": "Adosi Serethi's Cottage",
     "aleswell_b_4": "Urnsi Serethi's House",
-    "aleswell_b_5": "Aleswell Apple Barn"
+    "aleswell_b_5": "Aleswell Apple Barn",
+    "aleswell_square": "Aleswell Hilltop Vista Green"
   },
   "innKey": "aleswell_b_1",
   "names": {
     "inn": "aleswell_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        8,
+        2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 3,
+      "name": "aleswell_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        35
+      ],
+      "to": [
+        4,
+        -20
+      ],
+      "legs": 3,
+      "amp": 15,
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "red_ring_climb"
+    },
+    {
+      "type": "loop",
+      "at": [
+        4,
+        0
+      ],
+      "rx": 19,
+      "rz": 16,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "garden_ridge_loop"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -35,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          27,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "aleswell_spur"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        4,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        8,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "garden_ridge_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "red_ring_climb"
+    }
+  ]
 }

@@ -222,6 +222,19 @@ public final class Cities {
         return buildJava(plan, p);
     }
 
+    /** True if {@link #buildJava} has a hand-written builder for {@code id}. */
+    public static boolean hasJavaBuilder(String id) {
+        if (id == null) return false;
+        return switch (id) {
+            case "whiterun", "solitude", "windhelm", "riften", "markarth",
+                 "winterhold", "falkreath", "morthal", "dawnstar", "college_of_winterhold",
+                 "helgen", "dragon_bridge", "imperial_city", "mournhold", "vivec",
+                 "raven_rock", "alinor", "orsinium", "sentinel", "torval",
+                 "wayrest", "elden_root", "lilmoth" -> true;
+            default -> false;
+        };
+    }
+
     /** The hand-written layouts (Skyrim's cities and the provincial capitals that have no plan file). */
     static boolean buildJava(Plan plan, Place p) {
         switch (key(p)) {
@@ -237,10 +250,15 @@ public final class Cities {
             case "college_of_winterhold" -> college(plan);
             case "helgen" -> helgen(plan);
             case "dragon_bridge" -> {
-                com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, Layouts.Size.TOWN, "", names(p));
-                Spec b = plan.line(Archetype.BRIDGE, -plan.radius - 30, 0, -plan.radius + 4, 0, 7);
-                b.variant = 1;
-                plan.put(b);
+                CityPlan cp = CityPlans.of(p);
+                if (cp == null || (cp.nets.isEmpty() && cp.streets.isEmpty())) {
+                    com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, Layouts.Size.TOWN, "", names(p));
+                }
+                if (cp == null || cp.lines.isEmpty()) {
+                    Spec b = plan.line(Archetype.BRIDGE, -plan.radius - 30, 0, -plan.radius + 4, 0, 7);
+                    b.variant = 1;
+                    plan.put(b);
+                }
             }
             case "imperial_city" -> imperialCity(plan);
             case "mournhold" -> mournhold(plan);
@@ -838,7 +856,10 @@ public final class Cities {
     // ------------------------------------------------------------------ Morrowind
 
     static void ravenRock(Plan plan, Place p) {
-        com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, Layouts.Size.TOWN, "", names(p));
+        CityPlan cp = CityPlans.of(p);
+        if (cp == null || (cp.nets.isEmpty() && cp.streets.isEmpty())) {
+            com.skycraft.tamriel.settlement.grammar.Zoning.generic(plan, Layouts.Size.TOWN, "", names(p));
+        }
         // the Bulwark: a stone wall round the landward side
         int from = plan.specs.size();
         plan.wallRing(Math.min(plan.radius - 4, 70), 12, 9, new double[]{0, Math.PI}, Spec.MAJOR, true);
@@ -919,6 +940,8 @@ public final class Cities {
 
     /** A domed capital (Sentinel, Torval) or a crystal-spired one (Alinor): signature landmark, domed palace, market, walls. */
     static void domedCapital(Plan plan, int landmark, int size, int height) {
+        CityPlan cp = plan.place != null ? CityPlans.of(plan.place) : null;
+        if (cp != null && cp.fabric != null && cp.nets.size() >= 4) return;
         int R = plan.radius;
         Spec palace = b(plan, Archetype.LANDMARK, 0, -R + 30, S, 27, 27);
         palace.variant = Landmarks.DOME_PALACE;
@@ -942,6 +965,8 @@ public final class Cities {
 
     /** A castle capital (Wayrest, Orsinium): the castle at the back, market, houses and walls. */
     static void castleCapital(Plan plan, int size) {
+        CityPlan cp = plan.place != null ? CityPlans.of(plan.place) : null;
+        if (cp != null && cp.fabric != null && cp.nets.size() >= 4) return;
         int R = plan.radius;
         Spec castle = b(plan, Archetype.LANDMARK, 0, -R + 30, S, size, size);
         castle.variant = Landmarks.CASTLE;

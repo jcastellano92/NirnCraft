@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/falmer_ear"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/falmer_ear_harvested"
+    }
+  }
+}

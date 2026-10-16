@@ -214,4 +214,74 @@ class TamrielPlanTest {
             assertTrue(typesSeen[t] > 0, "Expected at least one island of type " + t);
         }
     }
+
+    @Test
+    void peaksJsonHasOverSixtyAuthoredPeaksCalderasShelvesAndGradedPaths() {
+        assertTrue(MapPeaks.count() >= 60, "Expected >= 60 authored peaks in peaks.json, found " + MapPeaks.count());
+
+        // Red Mountain volcanic caldera: rim > 500 y and rim strictly higher than inner crater floor
+        assertTrue(MapPeaks.hasPeak("red_mountain"), "red_mountain must be present in peaks.json");
+        assertTrue(MapPeaks.calderaRadius("red_mountain") > 0, "red_mountain must have calderaRadius > 0");
+        assertTrue(MapPeaks.calderaDepth("red_mountain") > 0, "red_mountain must have calderaDepth > 0");
+        assertTrue(MapPeaks.shelfCount("red_mountain") >= 2, "red_mountain must have Ghostgate and Dagoth Ur shelves");
+        assertTrue(MapPeaks.pathCount("red_mountain") >= 2, "red_mountain must have Foyada graded ascent paths");
+
+        MapSample craterCenter = new MapSample();
+        MapSample craterRim = new MapSample();
+        TamrielMap.sample(7100, -400, craterCenter);
+        TamrielMap.sample(7175, -400, craterRim);
+        assertTrue(craterRim.elevation > 500f, "red_mountain crater rim must exceed y = 500, got " + craterRim.elevation);
+        assertTrue(craterCenter.elevation > 480f, "red_mountain crater floor must exceed y = 480, got " + craterCenter.elevation);
+        assertTrue(craterRim.elevation > craterCenter.elevation + 25f,
+                "red_mountain caldera rim (" + craterRim.elevation + ") must exceed inner crater floor (" + craterCenter.elevation + ")");
+
+        // Eton Nir (> 480 y) and Sunspire (> 450 y)
+        MapSample etonNir = new MapSample();
+        TamrielMap.sample(-12450, 12300, etonNir);
+        assertTrue(etonNir.elevation > 480f, "eton_nir summit must exceed y = 480, got " + etonNir.elevation);
+        assertTrue(MapPeaks.shelfCount("eton_nir") >= 1 && MapPeaks.pathCount("eton_nir") >= 1);
+
+        MapSample sunspire = new MapSample();
+        TamrielMap.sample(450, 11650, sunspire);
+        assertTrue(sunspire.elevation > 450f, "sunspire_peak summit must exceed y = 450, got " + sunspire.elevation);
+        assertTrue(MapPeaks.shelfCount("sunspire_peak") >= 1 && MapPeaks.pathCount("sunspire_peak") >= 1);
+
+        // Verify peaks across all 11 provinces
+        for (String peak : List.of(
+                "throat_of_the_world", "balfiera_summit", "skyreach_pinnacle_peak",
+                "red_mountain", "solstheim_mortrag_peak", "dive_rock_peak", "frostcrag_peak", "cloud_ruler_peak",
+                "eton_nir", "crystal_law_plateau", "falinesti_canopy_mesa", "sunspire_peak",
+                "helstrom_hist_dome", "jylkurfyk_frost_horn", "ka_po_tun_heaven_peak",
+                "orichalc_mesa", "coral_kingdom_pinnacle", "orgnum_storm_crag")) {
+            assertTrue(MapPeaks.hasPeak(peak), "Missing authored peak: " + peak);
+        }
+    }
+
+    @Test
+    void worldWonderLandmarksNeverMapToGenericMonumentOrClearing() {
+        List<String> wonderPlaces = List.of(
+                "red_mountain", "crystal_tower_summerset",
+                "falinesti_autumn_site", "falinesti_winter_site", "falinesti_spring_site", "falinesti_summer_site",
+                "eton_nir", "isle_of_balfiera", "direnni_tower",
+                "orichalc_tower_ruin", "coral_tower_of_thras", "two_moons_at_tenmar_temple"
+        );
+        for (String id : wonderPlaces) {
+            Place p = Places.byId(id).orElseThrow(() -> new AssertionError("Missing world-wonder place: " + id));
+            com.skycraft.dungeons.world.SiteParams.Style style = com.skycraft.dungeons.world.SiteParams.styleForPlace(p);
+            assertNotEquals(com.skycraft.dungeons.world.SiteParams.Style.MONUMENT, style, id + " must not map to generic MONUMENT");
+            assertNotEquals(com.skycraft.dungeons.world.SiteParams.Style.CLEARING, style, id + " must not map to generic CLEARING");
+            assertTrue(style.isWorldWonder(), id + " must resolve to a bespoke world-wonder style, got " + style);
+            int param = com.skycraft.dungeons.world.SiteParams.forPlace(com.skycraft.dungeons.world.Theme.LANDMARK, p);
+            assertEquals(style.ordinal(), param);
+        }
+
+        // Verify settlement LandmarkRegistry monumental world-wonder heights
+        assertTrue(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("white_gold_tower").h() >= 180);
+        assertTrue(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("crystal_tower").h() >= 140);
+        assertTrue(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("adamantine_tower").h() >= 140);
+        assertTrue(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("giant_tree").h() >= 120);
+        assertNotNull(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("baar_dau"));
+        assertNotNull(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("red_mountain_citadel"));
+        assertNotNull(com.skycraft.tamriel.settlement.build.LandmarkRegistry.of("sunspire_temple"));
+    }
 }

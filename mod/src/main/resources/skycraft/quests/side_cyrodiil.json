@@ -33700,8 +33700,8 @@
         },
         {
           "kind": "visit",
-          "place": "jerall_mountains_delve_25_kolskeggr_mine",
-          "text": "Survey Jerall Mountains Delve 25 Kolskeggr Mine",
+          "place": "vinda_white_ore_adit",
+          "text": "Survey Vinda White Ore-Adit",
           "type": "visit"
         },
         {
@@ -34610,8 +34610,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "jerall_mountains_delve_9_kolskeggr_mine",
-          "text": "Inspect the approaches to Jerall Mountains Delve 9 Kolskeggr Mine",
+          "place": "remans_crimson_ore_adit",
+          "text": "Inspect the approaches to Remans Crimson Ore-Adit",
           "type": "visit"
         },
         {
@@ -34640,8 +34640,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "jerall_mountains_delve_10_bleak_falls_barrow",
-          "text": "Inspect the approaches to Jerall Mountains Delve 10 Bleak Falls Barrow",
+          "place": "wendir_dawn_ayleid_reliquary",
+          "text": "Inspect the approaches to Wendir Dawn Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -37514,8 +37514,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "heartlands_delve_13_kolskeggr_mine",
-          "text": "Inspect the approaches to Heartlands Delve 13 Kolskeggr Mine",
+          "place": "strid_inner_ore_adit",
+          "text": "Inspect the approaches to Strid Inner Ore-Adit",
           "type": "visit"
         },
         {
@@ -37544,8 +37544,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "heartlands_delve_14_bleak_falls_barrow",
-          "text": "Inspect the approaches to Heartlands Delve 14 Bleak Falls Barrow",
+          "place": "fanacas_shrouded_ayleid_reliquary",
+          "text": "Inspect the approaches to Fanacas Shrouded Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -37874,8 +37874,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "heartlands_delve_25_kolskeggr_mine",
-          "text": "Inspect the approaches to Heartlands Delve 25 Kolskeggr Mine",
+          "place": "brena_silent_ore_adit",
+          "text": "Inspect the approaches to Brena Silent Ore-Adit",
           "type": "visit"
         },
         {
@@ -37904,8 +37904,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "heartlands_delve_26_bleak_falls_barrow",
-          "text": "Inspect the approaches to Heartlands Delve 26 Bleak Falls Barrow",
+          "place": "pelinal_upper_ayleid_reliquary",
+          "text": "Inspect the approaches to Pelinal Upper Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -38099,8 +38099,8 @@
         },
         {
           "kind": "visit",
-          "place": "great_forest_delve_15_kolskeggr_mine",
-          "text": "Survey Great Forest Delve 15 Kolskeggr Mine",
+          "place": "welke_dawn_ore_adit",
+          "text": "Survey Welke Dawn Ore-Adit",
           "type": "visit"
         },
         {
@@ -39143,8 +39143,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_basin_delve_12_kolskeggr_mine",
-          "text": "Survey Nibenay Basin Delve 12 Kolskeggr Mine",
+          "place": "panther_bronze_ore_adit",
+          "text": "Survey Panther Bronze Ore-Adit",
           "type": "visit"
         },
         {
@@ -39181,8 +39181,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_basin_delve_13_bleak_falls_barrow",
-          "text": "Survey Nibenay Basin Delve 13 Bleak Falls Barrow",
+          "place": "ninendava_silent_ayleid_reliquary",
+          "text": "Survey Ninendava Silent Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -39637,8 +39637,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_basin_delve_25_kolskeggr_mine",
-          "text": "Survey Nibenay Basin Delve 25 Kolskeggr Mine",
+          "place": "belda_basal_ore_adit",
+          "text": "Survey Belda Basal Ore-Adit",
           "type": "visit"
         },
         {
@@ -39675,8 +39675,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_basin_delve_26_bleak_falls_barrow",
-          "text": "Survey Nibenay Basin Delve 26 Bleak Falls Barrow",
+          "place": "mackament_twilight_ayleid_reliquary",
+          "text": "Survey Mackament Twilight Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -41851,8 +41851,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "gold_coast_delve_13_kolskeggr_mine",
-          "text": "Inspect the approaches to Gold Coast Delve 13 Kolskeggr Mine",
+          "place": "vilverin_white_ore_adit",
+          "text": "Inspect the approaches to Vilverin White Ore-Adit",
           "type": "visit"
         },
         {
@@ -41881,8 +41881,8 @@
       "objectives": [
         {
           "kind": "visit",
-          "place": "gold_coast_delve_14_bleak_falls_barrow",
-          "text": "Inspect the approaches to Gold Coast Delve 14 Bleak Falls Barrow",
+          "place": "telepe_upper_ayleid_reliquary",
+          "text": "Inspect the approaches to Telepe Upper Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -42427,8 +42427,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_valley_delve_13_kolskeggr_mine",
-          "text": "Survey Nibenay Valley Delve 13 Kolskeggr Mine",
+          "place": "rumare_silent_ore_adit",
+          "text": "Survey Rumare Silent Ore-Adit",
           "type": "visit"
         },
         {
@@ -42465,8 +42465,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_valley_delve_14_bleak_falls_barrow",
-          "text": "Survey Nibenay Valley Delve 14 Bleak Falls Barrow",
+          "place": "strid_twilight_ayleid_reliquary",
+          "text": "Survey Strid Twilight Ayleid Reliquary",
           "type": "visit"
         },
         {
@@ -42807,8 +42807,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_valley_delve_25_kolskeggr_mine",
-          "text": "Survey Nibenay Valley Delve 25 Kolskeggr Mine",
+          "place": "larsius_upper_ore_adit",
+          "text": "Survey Larsius Upper Ore-Adit",
           "type": "visit"
         },
         {
@@ -42845,8 +42845,8 @@
         },
         {
           "kind": "visit",
-          "place": "nibenay_valley_delve_26_bleak_falls_barrow",
-          "text": "Survey Nibenay Valley Delve 26 Bleak Falls Barrow",
+          "place": "alessian_iron_ayleid_reliquary",
+          "text": "Survey Alessian Iron Ayleid Reliquary",
           "type": "visit"
         },
         {

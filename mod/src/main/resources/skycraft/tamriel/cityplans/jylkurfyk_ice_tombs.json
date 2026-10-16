@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          0,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          0,
+          -4
+        ],
+        [
+          15,
+          4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 4,
-      "r1": 18,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 12,
+      "rz": 11,
+      "wobble": 2,
+      "lobes": 5,
+      "phase": 0.6,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -195,5 +240,47 @@
     "jylkurfyk_ice_tombs_landmark": "High Seat of place.skycraft.jylkurfyk_ice_tombs",
     "jylkurfyk_ice_tombs_plaza": "place.skycraft.jylkurfyk_ice_tombs Central Plaza"
   },
-  "innKey": "jylkurfyk_ice_tombs_b_5"
+  "innKey": "jylkurfyk_ice_tombs_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

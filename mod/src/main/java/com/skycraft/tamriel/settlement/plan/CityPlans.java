@@ -111,19 +111,19 @@ public final class CityPlans {
 
     /** Lays out a place from its plan. Returns true (the plan owns the layout). */
     static boolean build(Plan plan, Place p, CityPlan cp) {
+        String id = p != null ? p.id() : cp.id;
+        boolean hasJava = cp.base == CityPlan.Base.JAVA || Cities.hasJavaBuilder(id);
         switch (cp.base) {
-            case JAVA -> {
-                // the plan's pieces go in first: the hand layout's lot filling then packs round them
-                pins(plan, cp);
-                Cities.buildJava(plan, p);
-                fill(plan, cp);
-            }
             case ZONING -> {
+                if (hasJava) Cities.buildJava(plan, p);
                 pins(plan, cp);
-                Layouts.Size sz = Zoning.sizeOf(p, plan.radius);
-                Zoning.generic(plan, sz, p.variant(), cp.names);
+                if (!plan.zoned) {
+                    Layouts.Size sz = Zoning.sizeOf(p, plan.radius);
+                    Zoning.generic(plan, sz, p.variant(), cp.names);
+                }
             }
             default -> {
+                if (hasJava) Cities.buildJava(plan, p);
                 pins(plan, cp);
                 fill(plan, cp);
             }
@@ -133,26 +133,102 @@ public final class CityPlans {
 
     /** Terraces, walls, lines, landmarks, named buildings, streets, rings and plazas. */
     private static void pins(Plan plan, CityPlan cp) {
-        for (CityPlan.Terrace t : cp.terraces) Cities.terraces(plan, t.x0(), t.z0(), t.x1(), t.z1(), t.level(), t.parapet());
+        int javaCount = plan.specs.size();
+        for (CityPlan.Terrace t : cp.terraces) {
+            if (!hasTerrace(plan, t)) {
+                Cities.terraces(plan, t.x0(), t.z0(), t.x1(), t.z1(), t.level(), t.parapet());
+            }
+        }
         for (CityPlan.Wall w : cp.walls) {
+            if (hasWallRing(plan, w.r())) continue;
             int from = plan.specs.size();
             plan.wallRing(w.r(), w.sides(), w.h(), w.gates(), w.flags(), w.towers());
             if (w.raise() != 0) Cities.raiseFrom(plan, from, w.raise());
         }
         for (CityPlan.Line l : cp.lines) line(plan, l);
         for (CityPlan.Landmark l : cp.landmarks) landmark(plan, l);
-        for (CityPlan.Building b : cp.buildings) building(plan, b);
         for (CityPlan.Line l : cp.streets) line(plan, l);
         for (CityPlan.Ring r : cp.rings) ring(plan, r);
         Nets.apply(plan, cp);
         for (CityPlan.Plaza z : cp.plazas) {
-            Spec s = Cities.plaza(plan, z.x(), z.z(), z.size(), z.variant(), z.raise());
+            Spec ex = findPlaza(plan, z.x(), z.z(), 24);
+            if (ex != null) {
+                if (!z.name().isEmpty() && (ex.name == null || ex.name.isEmpty())) ex.name = z.name();
+                continue;
+            }
+            int px = z.x(), pz = z.z();
+            Spec probe = plan.at(Archetype.PLAZA, px, pz, Direction.SOUTH, z.size(), z.size());
+            probe.margin = 0;
+            if (anyNonLineCollision(plan, probe, 1)) {
+                int[] nudged = findClearSpot(plan, probe, px, pz, false);
+                if (nudged != null) {
+                    px = nudged[0];
+                    pz = nudged[1];
+                }
+            }
+            Spec s = Cities.plaza(plan, px, pz, z.size(), z.variant(), z.raise());
             if (!z.name().isEmpty()) s.name = z.name();
-            if (z.stalls() > 0) Cities.stalls(plan, z.x(), z.z(), z.stalls(), z.raise());
+            if (z.stalls() > 0) Cities.stalls(plan, px, pz, z.stalls(), z.raise());
         }
+        if (javaCount > 0) relocateCollidingJavaBuildings(plan, javaCount);
+        for (CityPlan.Building b : cp.buildings) building(plan, b);
+    }
+
+    private static boolean hasTerrace(Plan plan, CityPlan.Terrace t) {
+        int wx0 = Math.min(plan.wx(t.x0(), t.z0()), plan.wx(t.x1(), t.z1()));
+        int wx1 = Math.max(plan.wx(t.x0(), t.z0()), plan.wx(t.x1(), t.z1()));
+        int wz0 = Math.min(plan.wz(t.x0(), t.z0()), plan.wz(t.x1(), t.z1()));
+        int wz1 = Math.max(plan.wz(t.x0(), t.z0()), plan.wz(t.x1(), t.z1()));
+        for (Spec s : plan.specs) {
+            if (s.kind == Archetype.TERRACE && s.minFloor == t.level()
+                    && s.x >= wx0 - 8 && s.x <= wx1 + 8 && s.z >= wz0 - 8 && s.z <= wz1 + 8) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasWallRing(Plan plan, int r) {
+        for (Spec s : plan.specs) {
+            if (s.kind == Archetype.WALL && s.isLine()) {
+                double mx = (s.x + s.x2) * 0.5 - plan.cx;
+                double mz = (s.z + s.z2) * 0.5 - plan.cz;
+                double d = Math.hypot(mx, mz);
+                if (Math.abs(d - r) <= 18) return true;
+            }
+        }
+        return false;
+    }
+
+    private static Spec findPlaza(Plan plan, int lx, int lz, int tol) {
+        int wx = plan.wx(lx, lz), wz = plan.wz(lx, lz);
+        for (Spec s : plan.specs) {
+            if (s.kind == Archetype.PLAZA && Math.hypot(s.x - wx, s.z - wz) <= tol) return s;
+        }
+        return null;
+    }
+
+    private static boolean hasDuplicateLine(Plan plan, Archetype kind, int lx1, int lz1, int lx2, int lz2) {
+        int wx1 = plan.wx(lx1, lz1), wz1 = plan.wz(lx1, lz1);
+        int wx2 = plan.wx(lx2, lz2), wz2 = plan.wz(lx2, lz2);
+        for (Spec s : plan.specs) {
+            if (s.isLine() && s.kind == kind) {
+                boolean same = Math.hypot(s.x - wx1, s.z - wz1) <= 8 && Math.hypot(s.x2 - wx2, s.z2 - wz2) <= 8;
+                boolean rev = Math.hypot(s.x - wx2, s.z - wz2) <= 8 && Math.hypot(s.x2 - wx1, s.z2 - wz1) <= 8;
+                if (same || rev) return true;
+            }
+        }
+        return false;
     }
 
     private static void line(Plan plan, CityPlan.Line l) {
+        Archetype kind = switch (l.kind()) {
+            case "wall" -> Archetype.WALL;
+            case "bridge" -> Archetype.BRIDGE;
+            case "canal" -> Archetype.CANAL;
+            default -> Archetype.STREET;
+        };
+        if (hasDuplicateLine(plan, kind, l.x1(), l.z1(), l.x2(), l.z2())) return;
         Spec s;
         switch (l.kind()) {
             case "wall" -> {
@@ -209,6 +285,7 @@ public final class CityPlans {
         int[][] v = polygon(r);
         for (int i = 0; i < v.length; i++) {
             int[] a = v[i], b = v[(i + 1) % v.length];
+            if (hasDuplicateLine(plan, Archetype.STREET, a[0], a[1], b[0], b[1])) continue;
             Spec s = plan.street(a[0], a[1], b[0], b[1], r.width(), r.major());
             if (r.raise() != 0) s.minFloor = r.raise();
         }
@@ -230,7 +307,7 @@ public final class CityPlans {
             return;
         }
         int w = l.w() > 0 ? l.w() : def.w(), d = l.d() > 0 ? l.d() : def.d();
-        Spec s = Cities.b(plan, Archetype.LANDMARK, l.x(), l.z(), l.face(), w, d);
+        Spec s = plan.at(Archetype.LANDMARK, l.x(), l.z(), l.face(), w, d);
         s.variant = def.variant();
         s.h = l.h() > 0 ? l.h() : def.h();
         if (l.margin() >= 0) s.margin = l.margin();
@@ -245,6 +322,35 @@ public final class CityPlans {
         }
         if (l.raise() != 0) s.minFloor = l.raise();
         if (!l.kit().isEmpty() || !l.overlay().isEmpty()) s.style = styleOf(plan, s, "", l.kit(), l.overlay());
+
+        Spec dup = findMatchingLandmark(plan, s, lid);
+        if (dup != null) {
+            if (!l.name().isEmpty()) dup.name = l.name();
+            dup.flags |= s.flags;
+            if (!l.kit().isEmpty() || !l.overlay().isEmpty()) dup.style = styleOf(plan, dup, "", l.kit(), l.overlay());
+            return;
+        }
+        if (anyNonLineCollision(plan, s, 1)) {
+            int[] nudged = findClearSpot(plan, s, l.x(), l.z(), false);
+            if (nudged != null) {
+                s.x = plan.wx(nudged[0], nudged[1]);
+                s.z = plan.wz(nudged[0], nudged[1]);
+            }
+        }
+        plan.put(s);
+    }
+
+    private static Spec findMatchingLandmark(Plan plan, Spec cand, String lid) {
+        boolean multiAllowed = lid.contains("canton") || lid.contains("arch") || lid.contains("statue")
+                || lid.contains("wayshrine") || lid.contains("standing_stone") || lid.contains("obelisk");
+        for (Spec ex : plan.specs) {
+            if (ex.kind == Archetype.LANDMARK) {
+                double dist = Math.hypot(ex.x - cand.x, ex.z - cand.z);
+                if (ex.variant == cand.variant && (!multiAllowed || dist <= 28)) return ex;
+                if (cand.has(Spec.SEAT) && ex.has(Spec.SEAT) && !multiAllowed && dist <= 48) return ex;
+            }
+        }
+        return null;
     }
 
     private static void building(Plan plan, CityPlan.Building b) {
@@ -255,7 +361,8 @@ public final class CityPlans {
                 w = sz[0];
                 d = sz[1];
             }
-            Spec s = Cities.b(plan, b.kind(), b.x() + i * b.stepX(), b.z() + i * b.stepZ(), b.face(), w, d);
+            int lx = b.x() + i * b.stepX(), lz = b.z() + i * b.stepZ();
+            Spec s = plan.at(b.kind(), lx, lz, b.face(), w, d);
             s.flags |= b.flags();
             s.variant = b.variant();
             if (b.h() > 0) s.h = b.h();
@@ -282,6 +389,141 @@ public final class CityPlans {
             if (!b.culture().isEmpty() || !b.kit().isEmpty() || !b.overlay().isEmpty()) {
                 s.style = styleOf(plan, s, b.culture(), b.kit(), b.overlay());
             }
+            Spec dup = findMatchingBuilding(plan, s);
+            if (dup != null) {
+                if (s.name != null && !s.name.isEmpty()) {
+                    dup.name = s.name;
+                    dup.flag(Spec.SIGN);
+                }
+                dup.flags |= (s.flags & (Spec.SEAT | Spec.RICH | Spec.UPPER | Spec.SIGN));
+                if (!b.culture().isEmpty() || !b.kit().isEmpty() || !b.overlay().isEmpty()) {
+                    dup.style = styleOf(plan, dup, b.culture(), b.kit(), b.overlay());
+                }
+                if (!b.use().isEmpty() && !dup.grammar() && dup.kind != Archetype.LANDMARK) {
+                    grammarUse(plan, dup, b.use(), b.wealth());
+                }
+                continue;
+            }
+            placePin(plan, s, lx, lz);
+        }
+    }
+
+    private static Spec findMatchingBuilding(Plan plan, Spec cand) {
+        String cn = cand.name == null ? "" : cand.name.toLowerCase(java.util.Locale.ROOT);
+        for (Spec ex : plan.specs) {
+            if (!ex.kind.building && ex.kind != Archetype.LANDMARK) continue;
+            String en = ex.name == null ? "" : ex.name.toLowerCase(java.util.Locale.ROOT);
+            if (!cn.isEmpty() && !en.isEmpty() && (cn.equals(en) || cn.endsWith("_" + en) || en.endsWith("_" + cn))) {
+                return ex;
+            }
+            if (cand.has(Spec.SEAT) && ex.has(Spec.SEAT) && Math.hypot(ex.x - cand.x, ex.z - cand.z) <= 56) {
+                return ex;
+            }
+            if (ex.kind == cand.kind && Math.hypot(ex.x - cand.x, ex.z - cand.z) <= 10) {
+                return ex;
+            }
+        }
+        return null;
+    }
+
+    private static boolean anyCollision(Plan plan, Spec s, int gap) {
+        for (Spec o : plan.specs) {
+            if (o == s) continue;
+            if (Plan.collides(s, o, gap)) return true;
+        }
+        return false;
+    }
+
+    private static boolean anyNonLineCollision(Plan plan, Spec s, int gap) {
+        for (Spec o : plan.specs) {
+            if (o == s || o.isLine() || o.has(Spec.GROUND)) continue;
+            if (s.overlaps(o, gap)) return true;
+        }
+        return false;
+    }
+
+    private static boolean insideRadius(Plan plan, Spec s, int lx, int lz) {
+        if (plan.radius <= 0) return true;
+        int limit = Math.max(16, plan.radius - 2);
+        return Math.hypot(lx, lz) <= limit;
+    }
+
+    private static int[] findClearSpot(Plan plan, Spec probe, int lx, int lz, boolean checkLines) {
+        int origX = probe.x, origZ = probe.z;
+        int maxR = Math.max(64, plan.radius);
+        for (int gap : new int[]{1, 0}) {
+            for (int r = 3; r <= maxR; r += 3) {
+                int steps = Math.max(8, (int) Math.round(2 * Math.PI * r / 4.0));
+                for (int k = 0; k < steps; k++) {
+                    double a = 2 * Math.PI * k / steps;
+                    int nx = lx + (int) Math.round(Math.cos(a) * r);
+                    int nz = lz + (int) Math.round(Math.sin(a) * r);
+                    if (!insideRadius(plan, probe, nx, nz)) continue;
+                    probe.x = plan.wx(nx, nz);
+                    probe.z = plan.wz(nx, nz);
+                    boolean hit = checkLines ? anyCollision(plan, probe, gap) : anyNonLineCollision(plan, probe, gap);
+                    if (!hit) {
+                        probe.x = origX;
+                        probe.z = origZ;
+                        return new int[]{nx, nz};
+                    }
+                }
+            }
+        }
+        probe.x = origX;
+        probe.z = origZ;
+        return null;
+    }
+
+    private static void placePin(Plan plan, Spec s, int lx, int lz) {
+        if (insideRadius(plan, s, lx, lz) && !anyCollision(plan, s, 0)) {
+            plan.put(s);
+            return;
+        }
+        int[] spot = findClearSpot(plan, s, lx, lz, true);
+        if (spot == null && (lx != 0 || lz != 0)) {
+            spot = findClearSpot(plan, s, 0, 0, true);
+        }
+        if (spot != null) {
+            s.x = plan.wx(spot[0], spot[1]);
+            s.z = plan.wz(spot[0], spot[1]);
+            if (s.grammar()) {
+                s.slope = plan.terrain.spread(s.x, s.z, Math.max(1, s.halfX() - s.margin), Math.max(1, s.halfZ() - s.margin));
+            }
+            plan.put(s);
+        } else if ((s.name != null && !s.name.isEmpty()) || s.has(Spec.SEAT)) {
+            int[] nonLineSpot = findClearSpot(plan, s, lx, lz, false);
+            if (nonLineSpot != null) {
+                s.x = plan.wx(nonLineSpot[0], nonLineSpot[1]);
+                s.z = plan.wz(nonLineSpot[0], nonLineSpot[1]);
+            }
+            plan.put(s);
+        }
+    }
+
+    private static void relocateCollidingJavaBuildings(Plan plan, int javaCount) {
+        List<Spec> toRelocate = new ArrayList<>();
+        int limit = Math.min(javaCount, plan.specs.size());
+        for (int i = 0; i < limit; i++) {
+            Spec b = plan.specs.get(i);
+            if (!b.kind.building || b.kind == Archetype.LANDMARK) continue;
+            boolean hit = false;
+            for (int j = 0; j < plan.specs.size(); j++) {
+                if (i == j) continue;
+                Spec o = plan.specs.get(j);
+                if (j < i && b.kind.building && o.kind.building && !Plan.collides(b, o, 0)) continue;
+                if (Plan.collides(b, o, 0)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) toRelocate.add(b);
+        }
+        if (toRelocate.isEmpty()) return;
+        plan.specs.removeAll(toRelocate);
+        for (Spec b : toRelocate) {
+            int lx = Zoning.localX(plan, b.x, b.z), lz = Zoning.localZ(plan, b.x, b.z);
+            placePin(plan, b, lx, lz);
         }
     }
 

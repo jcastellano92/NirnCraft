@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/fly_amanita"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/fly_amanita_harvested"
+    }
+  }
+}

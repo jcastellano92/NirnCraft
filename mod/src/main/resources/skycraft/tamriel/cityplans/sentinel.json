@@ -132,8 +132,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        0,
-        -64
+        12,
+        -43
       ],
       "face": "south",
       "name": "sentinel_castle_sentinel"
@@ -143,7 +143,7 @@
       "use": "inn",
       "wealth": "wealthy",
       "at": [
-        -24,
+        -8,
         18
       ],
       "face": "east",
@@ -176,7 +176,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        36,
+        28,
         -14
       ],
       "face": "west",
@@ -187,7 +187,7 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -46,
+        -30,
         -34
       ],
       "face": "east",
@@ -198,8 +198,8 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        46,
-        -34
+        43,
+        -37
       ],
       "face": "west",
       "name": "sentinel_mages_astrologers"
@@ -220,8 +220,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -34,
-        -48
+        -28,
+        -53
       ],
       "face": "south",
       "name": "sentinel_camaron_villa"
@@ -231,8 +231,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        34,
-        -48
+        32,
+        -56
       ],
       "face": "south",
       "name": "sentinel_aya_court"
@@ -242,8 +242,8 @@
       "use": "jeweller",
       "wealth": "noble",
       "at": [
-        18,
-        -26
+        12,
+        -21
       ],
       "face": "west",
       "name": "sentinel_gold_suq"
@@ -253,7 +253,7 @@
       "use": "tailor",
       "wealth": "wealthy",
       "at": [
-        -18,
+        -14,
         -26
       ],
       "face": "east",
@@ -275,8 +275,8 @@
       "use": "alchemist",
       "wealth": "wealthy",
       "at": [
-        -48,
-        12
+        -54,
+        22
       ],
       "face": "east",
       "name": "sentinel_ambergris_shop"
@@ -286,8 +286,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -32,
-        52
+        -31,
+        72
       ],
       "face": "north",
       "name": "sentinel_crimson_dhow"
@@ -319,8 +319,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        54,
-        44
+        51,
+        47
       ],
       "face": "north",
       "name": "sentinel_mole_battery"
@@ -330,8 +330,8 @@
       "use": "hall_of_dead",
       "wealth": "noble",
       "at": [
-        -64,
-        -24
+        -61,
+        -21
       ],
       "face": "east",
       "name": "sentinel_na_totambu_crypt"
@@ -352,8 +352,8 @@
       "use": "townhouse",
       "wealth": "wealthy",
       "at": [
-        -22,
-        36
+        -5,
+        58
       ],
       "face": "east",
       "name": "sentinel_factors_arcade"

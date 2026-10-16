@@ -6,7 +6,7 @@
     "solstheim.L1.ebony_seam"
   ],
   "sil": "bulwark-mining-colony",
-  "base": "none",
+  "base": "java",
   "overlay": "raven_rock",
   "radius": 72,
   "reach": 88,
@@ -47,7 +47,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        14,
+        18,
         0
       ],
       "face": "south",
@@ -71,8 +71,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        7,
-        12
+        20,
+        21
       ],
       "face": "south",
       "overlay": "raven_rock",
@@ -95,7 +95,7 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        -7,
+        -15,
         12
       ],
       "face": "south",
@@ -119,8 +119,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -14,
-        0
+        -20,
+        -5
       ],
       "face": "south",
       "overlay": "raven_rock",
@@ -143,8 +143,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -7,
-        -12
+        -4,
+        -15
       ],
       "face": "south",
       "overlay": "raven_rock",
@@ -167,8 +167,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        7,
-        -12
+        9,
+        -20
       ],
       "face": "south",
       "overlay": "raven_rock",
@@ -217,12 +217,156 @@
     "raven_rock_b_9": "Caerellius House",
     "raven_rock_b_10": "Alor House",
     "raven_rock_b_11": "Ienth Farmstead",
-    "raven_rock_b_12": "East Empire Dock Warehouse"
+    "raven_rock_b_12": "East Empire Dock Warehouse",
+    "raven_rock_morvayn_square": "Morvayn Bulwark Market"
   },
   "innKey": "raven_rock_b_3",
   "names": {
     "inn": "raven_rock_b_3",
     "store": "raven_rock_b_6",
     "smithy": "raven_rock_b_4"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        24
+      ],
+      "size": 13,
+      "variant": 0,
+      "stalls": 5,
+      "name": "raven_rock_morvayn_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          64
+        ],
+        [
+          0,
+          28
+        ],
+        [
+          0,
+          -8
+        ],
+        [
+          0,
+          -48
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "mine_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -54,
+          18
+        ],
+        [
+          -24,
+          24
+        ],
+        [
+          0,
+          26
+        ],
+        [
+          28,
+          20
+        ],
+        [
+          62,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "bulwark_way"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        4
+      ],
+      "rx": 42,
+      "rz": 34,
+      "wobble": 3,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "colony_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -24,
+        -18
+      ],
+      "r": 24,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        24
+      ],
+      "r": 22,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        24,
+        -22
+      ],
+      "r": 26,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -28,
+        32
+      ],
+      "r": 24,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 60,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 7,
+      "kit": "redoran",
+      "on": "colony_ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "kit": "redoran",
+      "on": "mine_road"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "kit": "redoran",
+      "on": "bulwark_way"
+    }
+  ]
 }

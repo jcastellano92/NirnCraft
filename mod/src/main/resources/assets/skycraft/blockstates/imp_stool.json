@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/imp_stool"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/imp_stool_harvested"
+    }
+  }
+}

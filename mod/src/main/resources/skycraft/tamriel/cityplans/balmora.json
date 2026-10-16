@@ -34,7 +34,7 @@
     {
       "id": "awning_row",
       "at": [
-        -18,
+        -14,
         0
       ],
       "face": "south",
@@ -136,8 +136,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -17,
-        22
+        -14,
+        25
       ],
       "face": "south",
       "overlay": "balmora",
@@ -161,7 +161,7 @@
       "wealth": "common",
       "at": [
         -28,
-        5
+        21
       ],
       "face": "south",
       "overlay": "balmora",
@@ -184,7 +184,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -24,
+        -28,
         -15
       ],
       "face": "south",
@@ -256,8 +256,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        26,
-        -10
+        28,
+        -18
       ],
       "face": "south",
       "overlay": "balmora",
@@ -304,6 +304,303 @@
     "bm_nerano_manor": "Nerano Manor",
     "bm_hlaalo_manor": "Hlaalo Manor",
     "bm_caius_cosades_house": "Caius Cosades's House",
-    "bm_dura_gra_bol_house": "Dura gra-Bol's Tower House"
-  }
+    "bm_dura_gra_bol_house": "Dura gra-Bol's Tower House",
+    "balmora_odai_market_plaza": "Balmora West-Bank Commercial Plaza"
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        4,
+        -88
+      ],
+      "to": [
+        4,
+        88
+      ],
+      "width": 9
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        -28
+      ],
+      "to": [
+        14,
+        -28
+      ],
+      "width": 5,
+      "variant": 1
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        18
+      ],
+      "to": [
+        14,
+        18
+      ],
+      "width": 5,
+      "variant": 1
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        56
+      ],
+      "to": [
+        14,
+        56
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [
+    {
+      "rect": [
+        -78,
+        -74,
+        -22,
+        -26
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        -32,
+        4
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 6,
+      "name": "balmora_odai_market_plaza"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          -22,
+          86
+        ],
+        [
+          -22,
+          42
+        ],
+        [
+          -22,
+          0
+        ],
+        [
+          -22,
+          -42
+        ],
+        [
+          -12,
+          -84
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "west_bank"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          28,
+          84
+        ],
+        [
+          28,
+          42
+        ],
+        [
+          28,
+          0
+        ],
+        [
+          28,
+          -42
+        ],
+        [
+          22,
+          -82
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "east_bank"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          -16
+        ],
+        [
+          -46,
+          -16
+        ],
+        [
+          -22,
+          -16
+        ],
+        [
+          28,
+          -16
+        ],
+        [
+          64,
+          -12
+        ],
+        [
+          86,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "odai_cross"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          26
+        ],
+        [
+          -46,
+          26
+        ],
+        [
+          -22,
+          26
+        ],
+        [
+          28,
+          26
+        ],
+        [
+          66,
+          26
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "south_cross"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -54,
+          -64
+        ],
+        [
+          -54,
+          -28
+        ],
+        [
+          -54,
+          18
+        ],
+        [
+          -54,
+          62
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "high_terrace"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -54,
+        -48
+      ],
+      "r": 32,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -32,
+        4
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -36,
+        46
+      ],
+      "r": 28,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        42,
+        24
+      ],
+      "r": 36,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 82,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "store",
+      "count": 4,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "west_bank"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "kit": "hlaalu",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "high_terrace"
+    },
+    {
+      "kind": "house",
+      "count": 10,
+      "kit": "hlaalu",
+      "flags": [
+        "upper"
+      ],
+      "on": "east_bank"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "kit": "hlaalu",
+      "on": "odai_cross"
+    }
+  ]
 }

@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        24,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        0,
-        15
+        2,
+        23
       ],
       "face": "south",
       "overlay": "blackwood",
@@ -90,10 +90,141 @@
     "border_watch_b_1": "Border Watch Inn",
     "border_watch_b_2": "Ri'Bassa's Shrine Hut",
     "border_watch_b_3": "Bhisha's Cheese Shed",
-    "border_watch_b_4": "Tsrava's Weaving Hut"
+    "border_watch_b_4": "Tsrava's Weaving Hut",
+    "border_watch_square": "Border Watch Totem Terrace"
   },
   "innKey": "border_watch_b_1",
   "names": {
     "inn": "border_watch_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -20,
+        -27,
+        20,
+        -4
+      ],
+      "level": 3,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        8,
+        2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 3,
+      "name": "border_watch_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          -4,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "khajiit_totem_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          27,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "border_watch_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        4,
+        0
+      ],
+      "rx": 19,
+      "rz": 16,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "cheese_court_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        4,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        8,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "cheese_court_loop"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "khajiit_totem_way"
+    }
+  ]
 }

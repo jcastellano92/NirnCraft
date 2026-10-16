@@ -56,8 +56,8 @@
     {
       "id": "twin_domes",
       "at": [
-        0,
-        -16
+        -6,
+        -21
       ],
       "name": "torval_landmark",
       "overlay": "torval"
@@ -65,16 +65,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          91
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          -4,
+          -49
+        ]
       ],
-      "r0": 10,
-      "r1": 92,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -91,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          65,
+          -2
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        4,
+        2
+      ],
+      "rx": 50,
+      "rz": 42,
+      "wobble": 5,
+      "lobes": 3,
+      "phase": 0.89,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -108,7 +153,7 @@
       "wealth": "noble",
       "at": [
         28,
-        20
+        24
       ],
       "face": "north",
       "overlay": "torval",
@@ -251,8 +296,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -11,
-        -33
+        -13,
+        -41
       ],
       "face": "south",
       "overlay": "torval",
@@ -299,8 +344,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        28,
-        -20
+        25,
+        -23
       ],
       "face": "south",
       "overlay": "torval",
@@ -370,5 +415,47 @@
     "torval_landmark": "High Seat of place.skycraft.torval",
     "torval_plaza": "place.skycraft.torval Central Plaza"
   },
-  "innKey": "torval_b_5"
+  "innKey": "torval_b_5",
+  "zones": [
+    {
+      "at": [
+        4,
+        -36
+      ],
+      "r": 31,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        4,
+        2
+      ],
+      "r": 27,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        33,
+        8
+      ],
+      "r": 27,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 81,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "on": "main"
+    }
+  ]
 }

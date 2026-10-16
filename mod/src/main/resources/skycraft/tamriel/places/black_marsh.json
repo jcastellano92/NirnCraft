@@ -9483,15 +9483,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_1_barrow",
-    "name": "place.skycraft.shadowfen_site_1_barrow",
+    "id": "altan_crimson_step_xanmeer",
+    "name": "place.skycraft.altan_crimson_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5136,
-    "z": 4080,
+    "x": 9428,
+    "z": 5201,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9499,15 +9499,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_2_dwemer_ruin",
-    "name": "place.skycraft.shadowfen_site_2_dwemer_ruin",
+    "id": "hissm_dawn_hist_sap_grove",
+    "name": "place.skycraft.hissm_dawn_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 4944,
-    "z": 4112,
+    "x": 7409,
+    "z": 5264,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9515,63 +9515,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_3_keep",
-    "name": "place.skycraft.shadowfen_site_3_keep",
-    "type": "fort",
-    "variant": "keep",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 6960,
-    "z": 4112,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_site_4_fort_mage",
-    "name": "place.skycraft.shadowfen_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 4848,
-    "z": 4144,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_site_5_akaviri_fort",
-    "name": "place.skycraft.shadowfen_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 5392,
-    "z": 4144,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_site_6_daedric_ruin",
-    "name": "place.skycraft.shadowfen_site_6_daedric_ruin",
+    "id": "oko_white_sunken_stone_fane",
+    "name": "place.skycraft.oko_white_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7312,
-    "z": 4144,
+    "x": 7055,
+    "z": 4854,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9579,15 +9531,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_7_breton_keep_ruin",
-    "name": "place.skycraft.shadowfen_site_7_breton_keep_ruin",
+    "id": "vosh_upper_kothringi_silver_barrow",
+    "name": "place.skycraft.vosh_upper_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5008,
-    "z": 4176,
+    "x": 8553,
+    "z": 5064,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9595,15 +9547,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_8_bandit_cave",
-    "name": "place.skycraft.shadowfen_site_8_bandit_cave",
+    "id": "ten_maur_hollow_mud_wallows_cavern",
+    "name": "place.skycraft.ten_maur_hollow_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 6832,
-    "z": 4176,
+    "x": 5583,
+    "z": 5551,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9611,15 +9563,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_9_troll_cave",
-    "name": "place.skycraft.shadowfen_site_9_troll_cave",
+    "id": "fen_silver_reed_smuggler_cove",
+    "name": "place.skycraft.fen_silver_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 4976,
-    "z": 4208,
+    "x": 7255,
+    "z": 5235,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9627,15 +9579,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_10_ice_cave",
-    "name": "place.skycraft.shadowfen_site_10_ice_cave",
+    "id": "mudt_scarlet_penal_stockade",
+    "name": "place.skycraft.mudt_scarlet_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/shadowfen",
-    "x": 5520,
-    "z": 4208,
+    "x": 8311,
+    "z": 4632,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9643,15 +9595,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_11_sixth_house_base",
-    "name": "place.skycraft.shadowfen_site_11_sixth_house_base",
+    "id": "tzel_ashen_naga_kur_stake_camp",
+    "name": "place.skycraft.tzel_ashen_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 6576,
-    "z": 4208,
+    "x": 7513,
+    "z": 4469,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9659,15 +9611,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_12_scorpion_den",
-    "name": "place.skycraft.shadowfen_site_12_scorpion_den",
+    "id": "haj_sacred_sithis_fang_sanctum",
+    "name": "place.skycraft.haj_sacred_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7120,
-    "z": 4208,
+    "x": 7182,
+    "z": 4873,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9675,15 +9627,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_13_vampire_lair",
-    "name": "place.skycraft.shadowfen_site_13_vampire_lair",
+    "id": "dusk_cinder_wamasu_sinkhole",
+    "name": "place.skycraft.dusk_cinder_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "vampire_lair",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7664,
-    "z": 4208,
+    "x": 8043,
+    "z": 4714,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9691,15 +9643,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_14_hagraven_lair",
-    "name": "place.skycraft.shadowfen_site_14_hagraven_lair",
+    "id": "kothr_deep_step_xanmeer",
+    "name": "place.skycraft.kothr_deep_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5136,
-    "z": 4240,
+    "x": 5298,
+    "z": 5455,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9707,15 +9659,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_15_giant_camp",
-    "name": "place.skycraft.shadowfen_site_15_giant_camp",
+    "id": "root_obsidian_hist_sap_grove",
+    "name": "place.skycraft.root_obsidian_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5680,
-    "z": 4240,
+    "x": 7668,
+    "z": 4625,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9723,15 +9675,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_16_dragon_lair",
-    "name": "place.skycraft.shadowfen_site_16_dragon_lair",
+    "id": "tsofeer_dusk_sunken_stone_fane",
+    "name": "place.skycraft.tsofeer_dusk_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 6224,
-    "z": 4240,
+    "x": 5687,
+    "z": 5590,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9739,15 +9691,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_17_watchtower",
-    "name": "place.skycraft.shadowfen_site_17_watchtower",
+    "id": "bahlok_golden_kothringi_silver_barrow",
+    "name": "place.skycraft.bahlok_golden_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 6768,
-    "z": 4240,
+    "x": 7893,
+    "z": 4620,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9755,15 +9707,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_18_cabin",
-    "name": "place.skycraft.shadowfen_site_18_cabin",
+    "id": "ixtah_inner_mud_wallows_cavern",
+    "name": "place.skycraft.ixtah_inner_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7312,
-    "z": 4240,
+    "x": 6859,
+    "z": 5258,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9771,15 +9723,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_19_mage_tower",
-    "name": "place.skycraft.shadowfen_site_19_mage_tower",
+    "id": "pahar_shrouded_reed_smuggler_cove",
+    "name": "place.skycraft.pahar_shrouded_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7856,
-    "z": 4272,
+    "x": 8052,
+    "z": 5391,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9787,15 +9739,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_20_imperial_camp",
-    "name": "place.skycraft.shadowfen_site_20_imperial_camp",
+    "id": "wamas_basal_penal_stockade",
+    "name": "place.skycraft.wamas_basal_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/shadowfen",
-    "x": 8400,
-    "z": 4272,
+    "x": 9464,
+    "z": 4651,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9803,15 +9755,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_21_nordic_ruin",
-    "name": "place.skycraft.shadowfen_site_21_nordic_ruin",
+    "id": "sithis_iron_naga_kur_stake_camp",
+    "name": "place.skycraft.sithis_iron_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 4880,
-    "z": 4304,
+    "x": 9487,
+    "z": 4519,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9819,15 +9771,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_22_great_lift",
-    "name": "place.skycraft.shadowfen_site_22_great_lift",
+    "id": "gloom_gilded_sithis_fang_sanctum",
+    "name": "place.skycraft.gloom_gilded_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5424,
-    "z": 4304,
+    "x": 8470,
+    "z": 4392,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9835,15 +9787,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_23_kolskeggr_mine",
-    "name": "place.skycraft.shadowfen_site_23_kolskeggr_mine",
+    "id": "naga_forbidden_wamasu_sinkhole",
+    "name": "place.skycraft.naga_forbidden_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5968,
-    "z": 4304,
+    "x": 8567,
+    "z": 4695,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9851,15 +9803,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_site_24_bleak_falls_barrow",
-    "name": "place.skycraft.shadowfen_site_24_bleak_falls_barrow",
+    "id": "ulul_pale_step_xanmeer",
+    "name": "place.skycraft.ulul_pale_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 6512,
-    "z": 4304,
+    "x": 8463,
+    "z": 4689,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9867,14 +9819,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_1_standing_stone",
-    "name": "place.skycraft.shadowfen_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "vakka_high_hist_sap_grove",
+    "name": "place.skycraft.vakka_high_hist_sap_grove",
+    "type": "dungeon_fixed",
+    "variant": "hist_grove",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7056,
-    "z": 4304,
+    "x": 6453,
+    "z": 5079,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9882,14 +9835,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_2_word_wall",
-    "name": "place.skycraft.shadowfen_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "eskel_amber_sunken_stone_fane",
+    "name": "place.skycraft.eskel_amber_sunken_stone_fane",
+    "type": "dungeon_fixed",
+    "variant": "swamp_ruin",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7600,
-    "z": 4304,
+    "x": 8114,
+    "z": 4568,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9897,14 +9851,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_3_dragon_mound",
-    "name": "place.skycraft.shadowfen_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "lori_storm_kothringi_silver_barrow",
+    "name": "place.skycraft.lori_storm_kothringi_silver_barrow",
+    "type": "dungeon_fixed",
+    "variant": "kothringi_barrow",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 8144,
-    "z": 4304,
+    "x": 5142,
+    "z": 4344,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9912,59 +9867,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_4_azura",
-    "name": "place.skycraft.shadowfen_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 8688,
-    "z": 4304,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_5_boethiah",
-    "name": "place.skycraft.shadowfen_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 4752,
-    "z": 4368,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_6_mephala",
-    "name": "place.skycraft.shadowfen_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 5296,
-    "z": 4368,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_7_altar",
-    "name": "place.skycraft.shadowfen_marker_7_altar",
+    "id": "saps_jade_sub_mire_shrine",
+    "name": "place.skycraft.saps_jade_sub_mire_shrine",
     "type": "landmark",
-    "variant": "altar",
+    "variant": "sunken_shrine",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 5840,
-    "z": 4368,
+    "x": 6348,
+    "z": 4310,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9972,14 +9882,29 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_8_monument",
-    "name": "place.skycraft.shadowfen_marker_8_monument",
+    "id": "zuuk_outer_elder_hist_bowl",
+    "name": "place.skycraft.zuuk_outer_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 7289,
+    "z": 5042,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "chimar_ancient_dusk_fall_stele",
+    "name": "place.skycraft.chimar_ancient_dusk_fall_stele",
     "type": "landmark",
     "variant": "monument",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 6384,
-    "z": 4368,
+    "x": 7669,
+    "z": 4760,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -9987,29 +9912,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_9_ruin",
-    "name": "place.skycraft.shadowfen_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 7472,
-    "z": 4368,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_10_stones",
-    "name": "place.skycraft.shadowfen_marker_10_stones",
-    "type": "landmark",
+    "id": "jass_verdant_xanmeer_calendar_stones",
+    "name": "place.skycraft.jass_verdant_xanmeer_calendar_stones",
+    "type": "standing_stone",
     "variant": "stones",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 8560,
-    "z": 4368,
+    "x": 7636,
+    "z": 5419,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -10017,74 +9927,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_11_peak",
-    "name": "place.skycraft.shadowfen_marker_11_peak",
-    "type": "landmark",
-    "variant": "peak",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 9424,
-    "z": 4368,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_12_waterfall",
-    "name": "place.skycraft.shadowfen_marker_12_waterfall",
-    "type": "landmark",
-    "variant": "waterfall",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 4976,
-    "z": 4400,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_13_clearing",
-    "name": "place.skycraft.shadowfen_marker_13_clearing",
-    "type": "landmark",
-    "variant": "clearing",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 5520,
-    "z": 4400,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_14_campsite",
-    "name": "place.skycraft.shadowfen_marker_14_campsite",
-    "type": "landmark",
-    "variant": "campsite",
-    "culture": "argonian",
-    "region": "black_marsh/shadowfen",
-    "x": 6608,
-    "z": 4400,
-    "why": [
-      "shadowfen.L1.border_karst",
-      "shadowfen.L1.mire_peat_domes"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "shadowfen_marker_15_pass",
-    "name": "place.skycraft.shadowfen_marker_15_pass",
+    "id": "quag_bronze_root_bridge_causeway",
+    "name": "place.skycraft.quag_bronze_root_bridge_causeway",
     "type": "landmark",
     "variant": "pass",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 7152,
-    "z": 4400,
+    "x": 7015,
+    "z": 4729,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -10092,14 +9942,164 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "shadowfen_marker_16_eyrie",
-    "name": "place.skycraft.shadowfen_marker_16_eyrie",
+    "id": "xal_silent_cypress_hummock",
+    "name": "place.skycraft.xal_silent_cypress_hummock",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "peak",
     "culture": "argonian",
     "region": "black_marsh/shadowfen",
-    "x": 8240,
-    "z": 4400,
+    "x": 9194,
+    "z": 5329,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "altan_twilight_blackwater_weir",
+    "name": "place.skycraft.altan_twilight_blackwater_weir",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 9398,
+    "z": 4849,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "hissm_black_void_scale_altar",
+    "name": "place.skycraft.hissm_black_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 9519,
+    "z": 5108,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "oko_lower_sub_mire_shrine",
+    "name": "place.skycraft.oko_lower_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 7247,
+    "z": 4759,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "vosh_verdigris_elder_hist_bowl",
+    "name": "place.skycraft.vosh_verdigris_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8182,
+    "z": 4791,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ten_maur_ember_dusk_fall_stele",
+    "name": "place.skycraft.ten_maur_ember_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 9494,
+    "z": 5302,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fen_cobalt_xanmeer_calendar_stones",
+    "name": "place.skycraft.fen_cobalt_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8342,
+    "z": 5398,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "mudt_sunken_root_bridge_causeway",
+    "name": "place.skycraft.mudt_sunken_root_bridge_causeway",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 4760,
+    "z": 5269,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tzel_weathered_cypress_hummock",
+    "name": "place.skycraft.tzel_weathered_cypress_hummock",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8856,
+    "z": 4600,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "haj_whispering_blackwater_weir",
+    "name": "place.skycraft.haj_whispering_blackwater_weir",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 6872,
+    "z": 4949,
+    "why": [
+      "shadowfen.L1.border_karst",
+      "shadowfen.L1.mire_peat_domes"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "dusk_elder_void_scale_altar",
+    "name": "place.skycraft.dusk_elder_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/shadowfen",
+    "x": 8496,
+    "z": 5241,
     "why": [
       "shadowfen.L1.border_karst",
       "shadowfen.L1.mire_peat_domes"
@@ -10226,15 +10226,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_1_barrow",
-    "name": "place.skycraft.stormhold_site_1_barrow",
+    "id": "pazel_crimson_step_xanmeer",
+    "name": "place.skycraft.pazel_crimson_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6192,
-    "z": 5616,
+    "x": 6423,
+    "z": 7030,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10242,15 +10242,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_2_dwemer_ruin",
-    "name": "place.skycraft.stormhold_site_2_dwemer_ruin",
+    "id": "wolk_dawn_hist_sap_grove",
+    "name": "place.skycraft.wolk_dawn_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6960,
-    "z": 5616,
+    "x": 7184,
+    "z": 6265,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10258,14 +10258,110 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_3_fort",
-    "name": "place.skycraft.stormhold_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
+    "id": "saliach_white_sunken_stone_fane",
+    "name": "place.skycraft.saliach_white_sunken_stone_fane",
+    "type": "dungeon_fixed",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 4912,
+    "x": 6729,
+    "z": 7223,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "quix_upper_kothringi_silver_barrow",
+    "name": "place.skycraft.quix_upper_kothringi_silver_barrow",
+    "type": "dungeon_fixed",
+    "variant": "kothringi_barrow",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5037,
+    "z": 6856,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "xalte_hollow_mud_wallows_cavern",
+    "name": "place.skycraft.xalte_hollow_mud_wallows_cavern",
+    "type": "dungeon_fixed",
+    "variant": "mud_cavern",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5655,
+    "z": 7096,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "barsaeb_silver_reed_smuggler_cove",
+    "name": "place.skycraft.barsaeb_silver_reed_smuggler_cove",
+    "type": "dungeon_fixed",
+    "variant": "smuggler_cove",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5270,
+    "z": 6231,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "raka_scarlet_penal_stockade",
+    "name": "place.skycraft.raka_scarlet_penal_stockade",
+    "type": "dungeon_fixed",
+    "variant": "imperial_prison_fort",
+    "class": "minor",
+    "culture": "imperial",
+    "region": "black_marsh/stormhold",
+    "x": 5239,
+    "z": 6474,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yath_ashen_naga_kur_stake_camp",
+    "name": "place.skycraft.yath_ashen_naga_kur_stake_camp",
+    "type": "dungeon_fixed",
+    "variant": "naga_camp",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 7565,
+    "z": 6863,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "hist_sacred_sithis_fang_sanctum",
+    "name": "place.skycraft.hist_sacred_sithis_fang_sanctum",
+    "type": "dungeon_fixed",
+    "variant": "sunken_shrine",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 6425,
     "z": 5648,
     "why": [
       "stormhold.L1.stormhold_shelf",
@@ -10274,47 +10370,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_4_fort_mage",
-    "name": "place.skycraft.stormhold_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 5296,
-    "z": 5648,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_site_5_akaviri_fort",
-    "name": "place.skycraft.stormhold_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 5840,
-    "z": 5648,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_site_6_breton_keep_ruin",
-    "name": "place.skycraft.stormhold_site_6_breton_keep_ruin",
+    "id": "shalk_cinder_wamasu_sinkhole",
+    "name": "place.skycraft.shalk_cinder_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6224,
-    "z": 5648,
+    "x": 6741,
+    "z": 6633,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10322,15 +10386,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_7_bandit_cave",
-    "name": "place.skycraft.stormhold_site_7_bandit_cave",
+    "id": "zatz_deep_step_xanmeer",
+    "name": "place.skycraft.zatz_deep_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6608,
-    "z": 5648,
+    "x": 5581,
+    "z": 5675,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10338,15 +10402,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_8_troll_cave",
-    "name": "place.skycraft.stormhold_site_8_troll_cave",
+    "id": "morim_obsidian_hist_sap_grove",
+    "name": "place.skycraft.morim_obsidian_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6992,
-    "z": 5648,
+    "x": 5142,
+    "z": 6350,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10354,15 +10418,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_9_ice_cave",
-    "name": "place.skycraft.stormhold_site_9_ice_cave",
+    "id": "tlal_dusk_sunken_stone_fane",
+    "name": "place.skycraft.tlal_dusk_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 7376,
-    "z": 5648,
+    "x": 5485,
+    "z": 6004,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10370,15 +10434,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_10_sixth_house_base",
-    "name": "place.skycraft.stormhold_site_10_sixth_house_base",
+    "id": "abarp_golden_kothringi_silver_barrow",
+    "name": "place.skycraft.abarp_golden_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 7760,
-    "z": 5648,
+    "x": 6190,
+    "z": 7030,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10386,15 +10450,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_11_scorpion_den",
-    "name": "place.skycraft.stormhold_site_11_scorpion_den",
+    "id": "nuxal_inner_mud_wallows_cavern",
+    "name": "place.skycraft.nuxal_inner_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 5008,
-    "z": 5680,
+    "x": 6584,
+    "z": 6169,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10402,15 +10466,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_12_hagraven_lair",
-    "name": "place.skycraft.stormhold_site_12_hagraven_lair",
+    "id": "uxith_shrouded_reed_smuggler_cove",
+    "name": "place.skycraft.uxith_shrouded_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 5392,
-    "z": 5680,
+    "x": 7783,
+    "z": 5647,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10418,15 +10482,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_13_giant_camp",
-    "name": "place.skycraft.stormhold_site_13_giant_camp",
+    "id": "bogan_basal_penal_stockade",
+    "name": "place.skycraft.bogan_basal_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/stormhold",
-    "x": 5776,
-    "z": 5680,
+    "x": 5591,
+    "z": 6535,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10434,15 +10498,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_14_dragon_lair",
-    "name": "place.skycraft.stormhold_site_14_dragon_lair",
+    "id": "onku_iron_naga_kur_stake_camp",
+    "name": "place.skycraft.onku_iron_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6160,
-    "z": 5680,
+    "x": 6446,
+    "z": 6859,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10450,15 +10514,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_15_watchtower",
-    "name": "place.skycraft.stormhold_site_15_watchtower",
+    "id": "vakka_gilded_sithis_fang_sanctum",
+    "name": "place.skycraft.vakka_gilded_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6544,
-    "z": 5680,
+    "x": 5713,
+    "z": 6738,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10466,15 +10530,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_16_cabin",
-    "name": "place.skycraft.stormhold_site_16_cabin",
+    "id": "storm_forbidden_wamasu_sinkhole",
+    "name": "place.skycraft.storm_forbidden_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 7312,
-    "z": 5680,
+    "x": 7563,
+    "z": 5652,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10482,15 +10546,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_17_mage_tower",
-    "name": "place.skycraft.stormhold_site_17_mage_tower",
+    "id": "pazel_pale_step_xanmeer",
+    "name": "place.skycraft.pazel_pale_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 7696,
-    "z": 5680,
+    "x": 5106,
+    "z": 6760,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10498,15 +10562,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_18_imperial_camp",
-    "name": "place.skycraft.stormhold_site_18_imperial_camp",
+    "id": "wolk_high_hist_sap_grove",
+    "name": "place.skycraft.wolk_high_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 4912,
-    "z": 5712,
+    "x": 5710,
+    "z": 5934,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10514,243 +10578,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_site_19_nordic_ruin",
-    "name": "place.skycraft.stormhold_site_19_nordic_ruin",
-    "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 5296,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_site_20_great_lift",
-    "name": "place.skycraft.stormhold_site_20_great_lift",
-    "type": "dungeon_fixed",
-    "variant": "great_lift",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 5680,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_site_21_kolskeggr_mine",
-    "name": "place.skycraft.stormhold_site_21_kolskeggr_mine",
-    "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 6064,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_site_22_bleak_falls_barrow",
-    "name": "place.skycraft.stormhold_site_22_bleak_falls_barrow",
-    "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 6448,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_1_standing_stone",
-    "name": "place.skycraft.stormhold_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 6832,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_2_word_wall",
-    "name": "place.skycraft.stormhold_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 7216,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_3_dragon_mound",
-    "name": "place.skycraft.stormhold_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 7600,
-    "z": 5712,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_4_azura",
-    "name": "place.skycraft.stormhold_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 4848,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_5_boethiah",
-    "name": "place.skycraft.stormhold_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 5232,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_6_mephala",
-    "name": "place.skycraft.stormhold_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 5616,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_7_altar",
-    "name": "place.skycraft.stormhold_marker_7_altar",
-    "type": "landmark",
-    "variant": "altar",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 6000,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_8_monument",
-    "name": "place.skycraft.stormhold_marker_8_monument",
-    "type": "landmark",
-    "variant": "monument",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 6384,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_9_ruin",
-    "name": "place.skycraft.stormhold_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 6768,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_10_stones",
-    "name": "place.skycraft.stormhold_marker_10_stones",
-    "type": "landmark",
-    "variant": "stones",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 7152,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_11_peak",
-    "name": "place.skycraft.stormhold_marker_11_peak",
-    "type": "landmark",
-    "variant": "peak",
-    "culture": "argonian",
-    "region": "black_marsh/stormhold",
-    "x": 7536,
-    "z": 5744,
-    "why": [
-      "stormhold.L1.stormhold_shelf",
-      "stormhold.L1.sunken_plinths"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "stormhold_marker_12_waterfall",
-    "name": "place.skycraft.stormhold_marker_12_waterfall",
+    "id": "saliach_amber_blackwater_weir",
+    "name": "place.skycraft.saliach_amber_blackwater_weir",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 4784,
-    "z": 5776,
+    "x": 6920,
+    "z": 6382,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10758,14 +10593,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_marker_13_clearing",
-    "name": "place.skycraft.stormhold_marker_13_clearing",
-    "type": "landmark",
-    "variant": "clearing",
+    "id": "quix_storm_void_scale_altar",
+    "name": "place.skycraft.quix_storm_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 5168,
-    "z": 5776,
+    "x": 5261,
+    "z": 6962,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10773,14 +10608,74 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_marker_14_pass",
-    "name": "place.skycraft.stormhold_marker_14_pass",
+    "id": "xalte_jade_sub_mire_shrine",
+    "name": "place.skycraft.xalte_jade_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 6890,
+    "z": 6888,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "barsaeb_outer_elder_hist_bowl",
+    "name": "place.skycraft.barsaeb_outer_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5197,
+    "z": 5909,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "raka_ancient_dusk_fall_stele",
+    "name": "place.skycraft.raka_ancient_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 7442,
+    "z": 5781,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yath_verdant_xanmeer_calendar_stones",
+    "name": "place.skycraft.yath_verdant_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5259,
+    "z": 6062,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "hist_bronze_root_bridge_causeway",
+    "name": "place.skycraft.hist_bronze_root_bridge_causeway",
     "type": "landmark",
     "variant": "pass",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 5552,
-    "z": 5776,
+    "x": 4917,
+    "z": 6896,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10788,14 +10683,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_marker_15_source",
-    "name": "place.skycraft.stormhold_marker_15_source",
+    "id": "shalk_silent_cypress_hummock",
+    "name": "place.skycraft.shalk_silent_cypress_hummock",
     "type": "landmark",
-    "variant": "source",
+    "variant": "peak",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 5936,
-    "z": 5776,
+    "x": 5973,
+    "z": 6347,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10803,14 +10698,119 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "stormhold_marker_16_eyrie",
-    "name": "place.skycraft.stormhold_marker_16_eyrie",
+    "id": "zatz_twilight_blackwater_weir",
+    "name": "place.skycraft.zatz_twilight_blackwater_weir",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "waterfall",
     "culture": "argonian",
     "region": "black_marsh/stormhold",
-    "x": 6320,
-    "z": 5776,
+    "x": 5807,
+    "z": 6632,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "morim_black_void_scale_altar",
+    "name": "place.skycraft.morim_black_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 6408,
+    "z": 6551,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tlal_lower_sub_mire_shrine",
+    "name": "place.skycraft.tlal_lower_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5832,
+    "z": 6482,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "abarp_verdigris_elder_hist_bowl",
+    "name": "place.skycraft.abarp_verdigris_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 7288,
+    "z": 6508,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "nuxal_ember_dusk_fall_stele",
+    "name": "place.skycraft.nuxal_ember_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 5877,
+    "z": 6924,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "uxith_cobalt_xanmeer_calendar_stones",
+    "name": "place.skycraft.uxith_cobalt_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 6870,
+    "z": 6200,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "bogan_sunken_root_bridge_causeway",
+    "name": "place.skycraft.bogan_sunken_root_bridge_causeway",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 6610,
+    "z": 7175,
+    "why": [
+      "stormhold.L1.stormhold_shelf",
+      "stormhold.L1.sunken_plinths"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "onku_weathered_cypress_hummock",
+    "name": "place.skycraft.onku_weathered_cypress_hummock",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "argonian",
+    "region": "black_marsh/stormhold",
+    "x": 7343,
+    "z": 6772,
     "why": [
       "stormhold.L1.stormhold_shelf",
       "stormhold.L1.sunken_plinths"
@@ -10954,15 +10954,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_1_barrow",
-    "name": "place.skycraft.helstrom_site_1_barrow",
+    "id": "bogl_crimson_step_xanmeer",
+    "name": "place.skycraft.bogl_crimson_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9072,
-    "z": 5648,
+    "x": 9877,
+    "z": 6294,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -10970,15 +10970,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_2_dwemer_ruin",
-    "name": "place.skycraft.helstrom_site_2_dwemer_ruin",
+    "id": "ixul_dawn_hist_sap_grove",
+    "name": "place.skycraft.ixul_dawn_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9616,
-    "z": 5648,
+    "x": 7987,
+    "z": 7563,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -10986,63 +10986,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_3_fort",
-    "name": "place.skycraft.helstrom_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8144,
-    "z": 5680,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_4_fort_mage",
-    "name": "place.skycraft.helstrom_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8688,
-    "z": 5680,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_5_akaviri_fort",
-    "name": "place.skycraft.helstrom_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9232,
-    "z": 5680,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_6_daedric_ruin",
-    "name": "place.skycraft.helstrom_site_6_daedric_ruin",
+    "id": "rootw_white_sunken_stone_fane",
+    "name": "place.skycraft.rootw_white_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9776,
-    "z": 5680,
+    "x": 8693,
+    "z": 6190,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11050,15 +11002,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_7_breton_keep_ruin",
-    "name": "place.skycraft.helstrom_site_7_breton_keep_ruin",
+    "id": "chux_upper_kothringi_silver_barrow",
+    "name": "place.skycraft.chux_upper_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 8208,
-    "z": 5712,
+    "x": 7737,
+    "z": 7218,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11066,15 +11018,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_8_bandit_cave",
-    "name": "place.skycraft.helstrom_site_8_bandit_cave",
+    "id": "juxa_hollow_mud_wallows_cavern",
+    "name": "place.skycraft.juxa_hollow_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 8752,
-    "z": 5712,
+    "x": 10154,
+    "z": 6151,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11082,15 +11034,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_9_troll_cave",
-    "name": "place.skycraft.helstrom_site_9_troll_cave",
+    "id": "sapm_silver_reed_smuggler_cove",
+    "name": "place.skycraft.sapm_silver_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9296,
-    "z": 5712,
+    "x": 8244,
+    "z": 6643,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11098,159 +11050,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_10_ice_cave",
-    "name": "place.skycraft.helstrom_site_10_ice_cave",
+    "id": "drelm_scarlet_penal_stockade",
+    "name": "place.skycraft.drelm_scarlet_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9840,
-    "z": 5712,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_11_sixth_house_base",
-    "name": "place.skycraft.helstrom_site_11_sixth_house_base",
-    "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8240,
-    "z": 5744,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_12_scorpion_den",
-    "name": "place.skycraft.helstrom_site_12_scorpion_den",
-    "type": "dungeon_fixed",
-    "variant": "scorpion_den",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8784,
-    "z": 5744,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_13_hagraven_lair",
-    "name": "place.skycraft.helstrom_site_13_hagraven_lair",
-    "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9328,
-    "z": 5744,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_14_giant_camp",
-    "name": "place.skycraft.helstrom_site_14_giant_camp",
-    "type": "dungeon_fixed",
-    "variant": "giant_camp",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9872,
-    "z": 5744,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_15_dragon_lair",
-    "name": "place.skycraft.helstrom_site_15_dragon_lair",
-    "type": "dungeon_fixed",
-    "variant": "dragon_lair",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8176,
-    "z": 5808,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_16_watchtower",
-    "name": "place.skycraft.helstrom_site_16_watchtower",
-    "type": "dungeon_fixed",
-    "variant": "watchtower",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8720,
-    "z": 5808,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_17_cabin",
-    "name": "place.skycraft.helstrom_site_17_cabin",
-    "type": "dungeon_fixed",
-    "variant": "cabin",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9264,
-    "z": 5808,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_18_mage_tower",
-    "name": "place.skycraft.helstrom_site_18_mage_tower",
-    "type": "dungeon_fixed",
-    "variant": "mage_tower",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9808,
-    "z": 5808,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_site_19_imperial_camp",
-    "name": "place.skycraft.helstrom_site_19_imperial_camp",
-    "type": "dungeon_fixed",
-    "variant": "imperial_camp",
-    "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/helstrom",
     "x": 8112,
-    "z": 5840,
+    "z": 6257,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11258,15 +11066,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_20_nordic_ruin",
-    "name": "place.skycraft.helstrom_site_20_nordic_ruin",
+    "id": "kaxal_ashen_naga_kur_stake_camp",
+    "name": "place.skycraft.kaxal_ashen_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 8656,
-    "z": 5840,
+    "x": 9159,
+    "z": 8072,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11274,15 +11082,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_21_great_lift",
-    "name": "place.skycraft.helstrom_site_21_great_lift",
+    "id": "deepm_sacred_sithis_fang_sanctum",
+    "name": "place.skycraft.deepm_sacred_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9200,
-    "z": 5840,
+    "x": 10260,
+    "z": 7480,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11290,15 +11098,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_22_kolskeggr_mine",
-    "name": "place.skycraft.helstrom_site_22_kolskeggr_mine",
+    "id": "ekix_cinder_wamasu_sinkhole",
+    "name": "place.skycraft.ekix_cinder_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9744,
-    "z": 5840,
+    "x": 8136,
+    "z": 7128,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11306,15 +11114,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_site_23_bleak_falls_barrow",
-    "name": "place.skycraft.helstrom_site_23_bleak_falls_barrow",
+    "id": "lilm_deep_step_xanmeer",
+    "name": "place.skycraft.lilm_deep_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 7920,
-    "z": 5872,
+    "x": 10100,
+    "z": 5961,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11322,14 +11130,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_1_standing_stone",
-    "name": "place.skycraft.helstrom_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "koth_obsidian_hist_sap_grove",
+    "name": "place.skycraft.koth_obsidian_hist_sap_grove",
+    "type": "dungeon_fixed",
+    "variant": "hist_grove",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 8464,
-    "z": 5872,
+    "x": 9815,
+    "z": 7725,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11337,14 +11146,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_2_word_wall",
-    "name": "place.skycraft.helstrom_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "fenr_dusk_sunken_stone_fane",
+    "name": "place.skycraft.fenr_dusk_sunken_stone_fane",
+    "type": "dungeon_fixed",
+    "variant": "swamp_ruin",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9008,
-    "z": 5872,
+    "x": 9939,
+    "z": 6489,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11352,14 +11162,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_3_dragon_mound",
-    "name": "place.skycraft.helstrom_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "mirem_golden_kothringi_silver_barrow",
+    "name": "place.skycraft.mirem_golden_kothringi_silver_barrow",
+    "type": "dungeon_fixed",
+    "variant": "kothringi_barrow",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9552,
-    "z": 5872,
+    "x": 7863,
+    "z": 7065,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11367,59 +11178,158 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_4_azura",
-    "name": "place.skycraft.helstrom_marker_4_azura",
+    "id": "xanm_inner_mud_wallows_cavern",
+    "name": "place.skycraft.xanm_inner_mud_wallows_cavern",
+    "type": "dungeon_fixed",
+    "variant": "mud_cavern",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 10163,
+    "z": 7920,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "glor_shrouded_reed_smuggler_cove",
+    "name": "place.skycraft.glor_shrouded_reed_smuggler_cove",
+    "type": "dungeon_fixed",
+    "variant": "smuggler_cove",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9012,
+    "z": 8270,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "naxu_basal_penal_stockade",
+    "name": "place.skycraft.naxu_basal_penal_stockade",
+    "type": "dungeon_fixed",
+    "variant": "imperial_prison_fort",
+    "class": "minor",
+    "culture": "imperial",
+    "region": "black_marsh/helstrom",
+    "x": 10225,
+    "z": 7017,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "blackw_iron_naga_kur_stake_camp",
+    "name": "place.skycraft.blackw_iron_naga_kur_stake_camp",
+    "type": "dungeon_fixed",
+    "variant": "naga_camp",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 10061,
+    "z": 6505,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "histv_gilded_sithis_fang_sanctum",
+    "name": "place.skycraft.histv_gilded_sithis_fang_sanctum",
+    "type": "dungeon_fixed",
+    "variant": "sunken_shrine",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9111,
+    "z": 7629,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "helstr_forbidden_wamasu_sinkhole",
+    "name": "place.skycraft.helstr_forbidden_wamasu_sinkhole",
+    "type": "dungeon_fixed",
+    "variant": "marsh_cavern",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 7765,
+    "z": 6988,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "bogl_pale_step_xanmeer",
+    "name": "place.skycraft.bogl_pale_step_xanmeer",
+    "type": "dungeon_fixed",
+    "variant": "xanmeer",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 7921,
+    "z": 6292,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ixul_high_hist_sap_grove",
+    "name": "place.skycraft.ixul_high_hist_sap_grove",
+    "type": "dungeon_fixed",
+    "variant": "hist_grove",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 10165,
+    "z": 6481,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "rootw_amber_sunken_stone_fane",
+    "name": "place.skycraft.rootw_amber_sunken_stone_fane",
+    "type": "dungeon_fixed",
+    "variant": "swamp_ruin",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9257,
+    "z": 6732,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "chux_storm_void_scale_altar",
+    "name": "place.skycraft.chux_storm_void_scale_altar",
     "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 10096,
-    "z": 5872,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_5_boethiah",
-    "name": "place.skycraft.helstrom_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8208,
-    "z": 5904,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_6_mephala",
-    "name": "place.skycraft.helstrom_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8752,
-    "z": 5904,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_7_altar",
-    "name": "place.skycraft.helstrom_marker_7_altar",
-    "type": "landmark",
     "variant": "altar",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9296,
-    "z": 5904,
+    "x": 9295,
+    "z": 5975,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11427,14 +11337,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_8_monument",
-    "name": "place.skycraft.helstrom_marker_8_monument",
+    "id": "juxa_jade_sub_mire_shrine",
+    "name": "place.skycraft.juxa_jade_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9771,
+    "z": 7314,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "sapm_outer_elder_hist_bowl",
+    "name": "place.skycraft.sapm_outer_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 8169,
+    "z": 6962,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "drelm_ancient_dusk_fall_stele",
+    "name": "place.skycraft.drelm_ancient_dusk_fall_stele",
     "type": "landmark",
     "variant": "monument",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9840,
-    "z": 5904,
+    "x": 10325,
+    "z": 7728,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11442,29 +11382,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_9_ruin",
-    "name": "place.skycraft.helstrom_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 7824,
-    "z": 5936,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_10_stones",
-    "name": "place.skycraft.helstrom_marker_10_stones",
-    "type": "landmark",
+    "id": "kaxal_verdant_xanmeer_calendar_stones",
+    "name": "place.skycraft.kaxal_verdant_xanmeer_calendar_stones",
+    "type": "standing_stone",
     "variant": "stones",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 8368,
-    "z": 5936,
+    "x": 8181,
+    "z": 6489,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11472,59 +11397,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_11_peak",
-    "name": "place.skycraft.helstrom_marker_11_peak",
-    "type": "landmark",
-    "variant": "peak",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 8912,
-    "z": 5936,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_12_waterfall",
-    "name": "place.skycraft.helstrom_marker_12_waterfall",
-    "type": "landmark",
-    "variant": "waterfall",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 9456,
-    "z": 5936,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_13_campsite",
-    "name": "place.skycraft.helstrom_marker_13_campsite",
-    "type": "landmark",
-    "variant": "campsite",
-    "culture": "argonian",
-    "region": "black_marsh/helstrom",
-    "x": 7952,
-    "z": 5968,
-    "why": [
-      "helstrom.L1.helstrom_root_dome",
-      "helstrom.L1.thorn_coastal_spits"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "helstrom_marker_14_pass",
-    "name": "place.skycraft.helstrom_marker_14_pass",
+    "id": "deepm_bronze_root_bridge_causeway",
+    "name": "place.skycraft.deepm_bronze_root_bridge_causeway",
     "type": "landmark",
     "variant": "pass",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 8496,
-    "z": 5968,
+    "x": 9432,
+    "z": 7373,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11532,14 +11412,134 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "helstrom_marker_15_eyrie",
-    "name": "place.skycraft.helstrom_marker_15_eyrie",
+    "id": "ekix_silent_cypress_hummock",
+    "name": "place.skycraft.ekix_silent_cypress_hummock",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "peak",
     "culture": "argonian",
     "region": "black_marsh/helstrom",
-    "x": 9040,
-    "z": 5968,
+    "x": 9770,
+    "z": 6838,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "lilm_twilight_blackwater_weir",
+    "name": "place.skycraft.lilm_twilight_blackwater_weir",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 10453,
+    "z": 7318,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "koth_black_void_scale_altar",
+    "name": "place.skycraft.koth_black_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 8520,
+    "z": 7315,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fenr_lower_sub_mire_shrine",
+    "name": "place.skycraft.fenr_lower_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 8790,
+    "z": 5848,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "mirem_verdigris_elder_hist_bowl",
+    "name": "place.skycraft.mirem_verdigris_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 7673,
+    "z": 6449,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "xanm_ember_dusk_fall_stele",
+    "name": "place.skycraft.xanm_ember_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 8968,
+    "z": 8107,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "glor_cobalt_xanmeer_calendar_stones",
+    "name": "place.skycraft.glor_cobalt_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 9330,
+    "z": 5831,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "naxu_sunken_root_bridge_causeway",
+    "name": "place.skycraft.naxu_sunken_root_bridge_causeway",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 8938,
+    "z": 7243,
+    "why": [
+      "helstrom.L1.helstrom_root_dome",
+      "helstrom.L1.thorn_coastal_spits"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "blackw_weathered_cypress_hummock",
+    "name": "place.skycraft.blackw_weathered_cypress_hummock",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "argonian",
+    "region": "black_marsh/helstrom",
+    "x": 10060,
+    "z": 7311,
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
@@ -11666,15 +11666,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_1_barrow",
-    "name": "place.skycraft.gideon_site_1_barrow",
+    "id": "xal_i_crimson_step_xanmeer",
+    "name": "place.skycraft.xal_i_crimson_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5296,
-    "z": 7184,
+    "x": 6314,
+    "z": 8023,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11682,15 +11682,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_2_dwemer_ruin",
-    "name": "place.skycraft.gideon_site_2_dwemer_ruin",
+    "id": "fenw_dawn_hist_sap_grove",
+    "name": "place.skycraft.fenw_dawn_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 4656,
-    "z": 7216,
+    "x": 5875,
+    "z": 7467,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11698,47 +11698,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_3_fort_mage",
-    "name": "place.skycraft.gideon_site_3_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 5168,
-    "z": 7216,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_site_4_akaviri_fort",
-    "name": "place.skycraft.gideon_site_4_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 4560,
-    "z": 7248,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_site_5_breton_keep_ruin",
-    "name": "place.skycraft.gideon_site_5_breton_keep_ruin",
+    "id": "lejaw_white_sunken_stone_fane",
+    "name": "place.skycraft.lejaw_white_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5072,
-    "z": 7248,
+    "x": 6187,
+    "z": 8554,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11746,15 +11714,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_6_bandit_cave",
-    "name": "place.skycraft.gideon_site_6_bandit_cave",
+    "id": "zuuk_s_upper_kothringi_silver_barrow",
+    "name": "place.skycraft.zuuk_s_upper_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5584,
-    "z": 7248,
+    "x": 5353,
+    "z": 7723,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11762,15 +11730,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_7_troll_cave",
-    "name": "place.skycraft.gideon_site_7_troll_cave",
+    "id": "greym_hollow_mud_wallows_cavern",
+    "name": "place.skycraft.greym_hollow_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 4720,
-    "z": 7280,
+    "x": 7096,
+    "z": 9081,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11778,15 +11746,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_8_ice_cave",
-    "name": "place.skycraft.gideon_site_8_ice_cave",
+    "id": "blackw_silver_reed_smuggler_cove",
+    "name": "place.skycraft.blackw_silver_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5232,
-    "z": 7280,
+    "x": 6760,
+    "z": 7505,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11794,15 +11762,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_9_sixth_house_base",
-    "name": "place.skycraft.gideon_site_9_sixth_house_base",
+    "id": "amber_scarlet_penal_stockade",
+    "name": "place.skycraft.amber_scarlet_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/gideon",
-    "x": 5744,
-    "z": 7280,
+    "x": 5267,
+    "z": 8046,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11810,15 +11778,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_10_scorpion_den",
-    "name": "place.skycraft.gideon_site_10_scorpion_den",
+    "id": "hiss_ashen_naga_kur_stake_camp",
+    "name": "place.skycraft.hiss_ashen_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 4752,
-    "z": 7312,
+    "x": 7437,
+    "z": 8152,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11826,15 +11794,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_11_hagraven_lair",
-    "name": "place.skycraft.gideon_site_11_hagraven_lair",
+    "id": "topal_sacred_sithis_fang_sanctum",
+    "name": "place.skycraft.topal_sacred_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5264,
-    "z": 7312,
+    "x": 4778,
+    "z": 7527,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11842,15 +11810,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_12_giant_camp",
-    "name": "place.skycraft.gideon_site_12_giant_camp",
+    "id": "bogan_cinder_wamasu_sinkhole",
+    "name": "place.skycraft.bogan_cinder_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5776,
-    "z": 7312,
+    "x": 6933,
+    "z": 8151,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11858,15 +11826,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_13_dragon_lair",
-    "name": "place.skycraft.gideon_site_13_dragon_lair",
+    "id": "ironb_deep_step_xanmeer",
+    "name": "place.skycraft.ironb_deep_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 6448,
-    "z": 7344,
+    "x": 4948,
+    "z": 7929,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11874,15 +11842,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_14_watchtower",
-    "name": "place.skycraft.gideon_site_14_watchtower",
+    "id": "kothr_obsidian_hist_sap_grove",
+    "name": "place.skycraft.kothr_obsidian_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 7056,
-    "z": 7344,
+    "x": 4627,
+    "z": 8812,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11890,15 +11858,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_15_cabin",
-    "name": "place.skycraft.gideon_site_15_cabin",
+    "id": "cinder_dusk_sunken_stone_fane",
+    "name": "place.skycraft.cinder_dusk_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 4592,
-    "z": 7376,
+    "x": 5257,
+    "z": 8313,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11906,15 +11874,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_16_mage_tower",
-    "name": "place.skycraft.gideon_site_16_mage_tower",
+    "id": "jadew_golden_kothringi_silver_barrow",
+    "name": "place.skycraft.jadew_golden_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5104,
-    "z": 7376,
+    "x": 5831,
+    "z": 7736,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11922,15 +11890,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_17_imperial_camp",
-    "name": "place.skycraft.gideon_site_17_imperial_camp",
+    "id": "tsofe_inner_mud_wallows_cavern",
+    "name": "place.skycraft.tsofe_inner_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5616,
-    "z": 7376,
+    "x": 6154,
+    "z": 9164,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11938,15 +11906,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_18_nordic_ruin",
-    "name": "place.skycraft.gideon_site_18_nordic_ruin",
+    "id": "duskf_shrouded_reed_smuggler_cove",
+    "name": "place.skycraft.duskf_shrouded_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 6128,
-    "z": 7376,
+    "x": 5907,
+    "z": 9078,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11954,15 +11922,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_19_great_lift",
-    "name": "place.skycraft.gideon_site_19_great_lift",
+    "id": "kelpm_basal_penal_stockade",
+    "name": "place.skycraft.kelpm_basal_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/gideon",
-    "x": 6640,
-    "z": 7376,
+    "x": 6446,
+    "z": 9576,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11970,15 +11938,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_20_kolskeggr_mine",
-    "name": "place.skycraft.gideon_site_20_kolskeggr_mine",
+    "id": "vosh_iron_naga_kur_stake_camp",
+    "name": "place.skycraft.vosh_iron_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 7152,
-    "z": 7376,
+    "x": 5832,
+    "z": 8725,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -11986,15 +11954,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_site_21_bleak_falls_barrow",
-    "name": "place.skycraft.gideon_site_21_bleak_falls_barrow",
+    "id": "elder_gilded_sithis_fang_sanctum",
+    "name": "place.skycraft.elder_gilded_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 4688,
-    "z": 7408,
+    "x": 4853,
+    "z": 9265,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12002,14 +11970,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_marker_1_standing_stone",
-    "name": "place.skycraft.gideon_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "gideon_forbidden_wamasu_sinkhole",
+    "name": "place.skycraft.gideon_forbidden_wamasu_sinkhole",
+    "type": "dungeon_fixed",
+    "variant": "marsh_cavern",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5200,
-    "z": 7408,
+    "x": 6378,
+    "z": 7638,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12017,14 +11986,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_marker_2_word_wall",
-    "name": "place.skycraft.gideon_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "xal_i_pale_step_xanmeer",
+    "name": "place.skycraft.xal_i_pale_step_xanmeer",
+    "type": "dungeon_fixed",
+    "variant": "xanmeer",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5712,
-    "z": 7408,
+    "x": 6871,
+    "z": 8440,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12032,134 +12002,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_marker_3_dragon_mound",
-    "name": "place.skycraft.gideon_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 6224,
-    "z": 7408,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_4_azura",
-    "name": "place.skycraft.gideon_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 7248,
-    "z": 7408,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_5_boethiah",
-    "name": "place.skycraft.gideon_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 4784,
-    "z": 7440,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_6_mephala",
-    "name": "place.skycraft.gideon_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 5296,
-    "z": 7440,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_7_altar",
-    "name": "place.skycraft.gideon_marker_7_altar",
-    "type": "landmark",
-    "variant": "altar",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 5808,
-    "z": 7440,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_8_monument",
-    "name": "place.skycraft.gideon_marker_8_monument",
-    "type": "landmark",
-    "variant": "monument",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 6320,
-    "z": 7440,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_9_ruin",
-    "name": "place.skycraft.gideon_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 6832,
-    "z": 7440,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_10_stones",
-    "name": "place.skycraft.gideon_marker_10_stones",
-    "type": "landmark",
-    "variant": "stones",
-    "culture": "argonian",
-    "region": "black_marsh/gideon",
-    "x": 7344,
-    "z": 7440,
-    "why": [
-      "gideon.L1.blackrose_basin",
-      "gideon.L1.western_levee_plain"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "gideon_marker_11_peak",
-    "name": "place.skycraft.gideon_marker_11_peak",
+    "id": "fenw_high_cypress_hummock",
+    "name": "place.skycraft.fenw_high_cypress_hummock",
     "type": "landmark",
     "variant": "peak",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 4912,
-    "z": 7472,
+    "x": 5266,
+    "z": 7345,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12167,14 +12017,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_marker_12_waterfall",
-    "name": "place.skycraft.gideon_marker_12_waterfall",
+    "id": "lejaw_amber_blackwater_weir",
+    "name": "place.skycraft.lejaw_amber_blackwater_weir",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5424,
-    "z": 7472,
+    "x": 5320,
+    "z": 7566,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12182,14 +12032,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_marker_13_campsite",
-    "name": "place.skycraft.gideon_marker_13_campsite",
-    "type": "landmark",
-    "variant": "campsite",
+    "id": "zuuk_s_storm_void_scale_altar",
+    "name": "place.skycraft.zuuk_s_storm_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 5936,
-    "z": 7472,
+    "x": 5526,
+    "z": 9676,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12197,14 +12047,164 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "gideon_marker_14_eyrie",
-    "name": "place.skycraft.gideon_marker_14_eyrie",
+    "id": "greym_jade_sub_mire_shrine",
+    "name": "place.skycraft.greym_jade_sub_mire_shrine",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "sunken_shrine",
     "culture": "argonian",
     "region": "black_marsh/gideon",
-    "x": 6448,
-    "z": 7472,
+    "x": 7341,
+    "z": 8650,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "blackw_outer_elder_hist_bowl",
+    "name": "place.skycraft.blackw_outer_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 6155,
+    "z": 8663,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "amber_ancient_dusk_fall_stele",
+    "name": "place.skycraft.amber_ancient_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 4785,
+    "z": 8050,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "hiss_verdant_xanmeer_calendar_stones",
+    "name": "place.skycraft.hiss_verdant_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 5264,
+    "z": 9557,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "topal_bronze_root_bridge_causeway",
+    "name": "place.skycraft.topal_bronze_root_bridge_causeway",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 6509,
+    "z": 7498,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "bogan_silent_cypress_hummock",
+    "name": "place.skycraft.bogan_silent_cypress_hummock",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 4937,
+    "z": 8200,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ironb_twilight_blackwater_weir",
+    "name": "place.skycraft.ironb_twilight_blackwater_weir",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 5034,
+    "z": 9770,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "kothr_black_void_scale_altar",
+    "name": "place.skycraft.kothr_black_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 4760,
+    "z": 7655,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "cinder_lower_sub_mire_shrine",
+    "name": "place.skycraft.cinder_lower_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 6442,
+    "z": 8975,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "jadew_verdigris_elder_hist_bowl",
+    "name": "place.skycraft.jadew_verdigris_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 5940,
+    "z": 8081,
+    "why": [
+      "gideon.L1.blackrose_basin",
+      "gideon.L1.western_levee_plain"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tsofe_ember_dusk_fall_stele",
+    "name": "place.skycraft.tsofe_ember_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/gideon",
+    "x": 6799,
+    "z": 8051,
     "why": [
       "gideon.L1.blackrose_basin",
       "gideon.L1.western_levee_plain"
@@ -12348,15 +12348,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_1_barrow",
-    "name": "place.skycraft.lilmoth_site_1_barrow",
+    "id": "zenni_crimson_step_xanmeer",
+    "name": "place.skycraft.zenni_crimson_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7760,
-    "z": 7664,
+    "x": 7737,
+    "z": 8458,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12364,15 +12364,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_2_dwemer_ruin",
-    "name": "place.skycraft.lilmoth_site_2_dwemer_ruin",
+    "id": "gully_dawn_hist_sap_grove",
+    "name": "place.skycraft.gully_dawn_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7600,
-    "z": 7696,
+    "x": 8110,
+    "z": 9639,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12380,79 +12380,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_3_fort",
-    "name": "place.skycraft.lilmoth_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7952,
-    "z": 7696,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_4_keep",
-    "name": "place.skycraft.lilmoth_site_4_keep",
-    "type": "fort",
-    "variant": "keep",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7696,
-    "z": 7728,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_5_fort_mage",
-    "name": "place.skycraft.lilmoth_site_5_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7728,
-    "z": 7760,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_6_akaviri_fort",
-    "name": "place.skycraft.lilmoth_site_6_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 8080,
-    "z": 7760,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_7_daedric_ruin",
-    "name": "place.skycraft.lilmoth_site_7_daedric_ruin",
+    "id": "bright_white_sunken_stone_fane",
+    "name": "place.skycraft.bright_white_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7760,
-    "z": 7792,
+    "x": 9875,
+    "z": 8181,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12460,15 +12396,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_8_breton_keep_ruin",
-    "name": "place.skycraft.lilmoth_site_8_breton_keep_ruin",
+    "id": "argoni_upper_kothringi_silver_barrow",
+    "name": "place.skycraft.argoni_upper_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8112,
-    "z": 7792,
+    "x": 7305,
+    "z": 9074,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12476,15 +12412,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_9_bandit_cave",
-    "name": "place.skycraft.lilmoth_site_9_bandit_cave",
+    "id": "harb_hollow_mud_wallows_cavern",
+    "name": "place.skycraft.harb_hollow_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7728,
-    "z": 7856,
+    "x": 7561,
+    "z": 9363,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12492,15 +12428,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_10_troll_cave",
-    "name": "place.skycraft.lilmoth_site_10_troll_cave",
+    "id": "murk_silver_reed_smuggler_cove",
+    "name": "place.skycraft.murk_silver_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8080,
-    "z": 7856,
+    "x": 8205,
+    "z": 8330,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12508,15 +12444,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_11_ice_cave",
-    "name": "place.skycraft.lilmoth_site_11_ice_cave",
+    "id": "blackf_scarlet_penal_stockade",
+    "name": "place.skycraft.blackf_scarlet_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/lilmoth",
-    "x": 7664,
-    "z": 7888,
+    "x": 8018,
+    "z": 8562,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12524,15 +12460,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_12_sixth_house_base",
-    "name": "place.skycraft.lilmoth_site_12_sixth_house_base",
+    "id": "islet_ashen_naga_kur_stake_camp",
+    "name": "place.skycraft.islet_ashen_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8016,
-    "z": 7888,
+    "x": 7464,
+    "z": 9657,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12540,15 +12476,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_13_scorpion_den",
-    "name": "place.skycraft.lilmoth_site_13_scorpion_den",
+    "id": "reed_sacred_sithis_fang_sanctum",
+    "name": "place.skycraft.reed_sacred_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7568,
-    "z": 7920,
+    "x": 7257,
+    "z": 9875,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12556,15 +12492,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_14_vampire_lair",
-    "name": "place.skycraft.lilmoth_site_14_vampire_lair",
+    "id": "coral_cinder_wamasu_sinkhole",
+    "name": "place.skycraft.coral_cinder_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "vampire_lair",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7920,
-    "z": 7920,
+    "x": 8407,
+    "z": 9488,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12572,15 +12508,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_15_hagraven_lair",
-    "name": "place.skycraft.lilmoth_site_15_hagraven_lair",
+    "id": "jell_deep_step_xanmeer",
+    "name": "place.skycraft.jell_deep_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8272,
-    "z": 7920,
+    "x": 8824,
+    "z": 8369,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12588,15 +12524,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_16_giant_camp",
-    "name": "place.skycraft.lilmoth_site_16_giant_camp",
+    "id": "tidew_obsidian_hist_sap_grove",
+    "name": "place.skycraft.tidew_obsidian_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7824,
-    "z": 7952,
+    "x": 7705,
+    "z": 7892,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12604,15 +12540,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_17_dragon_lair",
-    "name": "place.skycraft.lilmoth_site_17_dragon_lair",
+    "id": "delt_dusk_sunken_stone_fane",
+    "name": "place.skycraft.delt_dusk_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8176,
-    "z": 7952,
+    "x": 9607,
+    "z": 8425,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12620,15 +12556,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_18_watchtower",
-    "name": "place.skycraft.lilmoth_site_18_watchtower",
+    "id": "koth_golden_kothringi_silver_barrow",
+    "name": "place.skycraft.koth_golden_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7664,
-    "z": 7984,
+    "x": 8050,
+    "z": 9260,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12636,15 +12572,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_19_cabin",
-    "name": "place.skycraft.lilmoth_site_19_cabin",
+    "id": "xi_tsei_inner_mud_wallows_cavern",
+    "name": "place.skycraft.xi_tsei_inner_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8016,
-    "z": 7984,
+    "x": 7723,
+    "z": 7689,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12652,62 +12588,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_20_mage_tower",
-    "name": "place.skycraft.lilmoth_site_20_mage_tower",
+    "id": "estu_shrouded_reed_smuggler_cove",
+    "name": "place.skycraft.estu_shrouded_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 7760,
-    "z": 8016,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_21_imperial_camp",
-    "name": "place.skycraft.lilmoth_site_21_imperial_camp",
-    "type": "dungeon_fixed",
-    "variant": "imperial_camp",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 8112,
-    "z": 8016,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_22_nordic_ruin",
-    "name": "place.skycraft.lilmoth_site_22_nordic_ruin",
-    "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 10064,
-    "z": 8016,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_site_23_great_lift",
-    "name": "place.skycraft.lilmoth_site_23_great_lift",
-    "type": "dungeon_fixed",
-    "variant": "great_lift",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7600,
+    "x": 7991,
     "z": 8048,
     "why": [
       "lilmoth.L1.topal_silt_delta",
@@ -12716,15 +12604,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_24_kolskeggr_mine",
-    "name": "place.skycraft.lilmoth_site_24_kolskeggr_mine",
+    "id": "lagoon_basal_penal_stockade",
+    "name": "place.skycraft.lagoon_basal_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/lilmoth",
-    "x": 7952,
-    "z": 8048,
+    "x": 9167,
+    "z": 9001,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12732,15 +12620,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_site_25_bleak_falls_barrow",
-    "name": "place.skycraft.lilmoth_site_25_bleak_falls_barrow",
+    "id": "yox_iron_naga_kur_stake_camp",
+    "name": "place.skycraft.yox_iron_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8304,
-    "z": 8048,
+    "x": 8377,
+    "z": 8211,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12748,119 +12636,156 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_marker_1_standing_stone",
-    "name": "place.skycraft.lilmoth_marker_1_standing_stone",
+    "id": "fogm_gilded_sithis_fang_sanctum",
+    "name": "place.skycraft.fogm_gilded_sithis_fang_sanctum",
+    "type": "dungeon_fixed",
+    "variant": "sunken_shrine",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 9173,
+    "z": 8490,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "lilmoth_forbidden_wamasu_sinkhole",
+    "name": "place.skycraft.lilmoth_forbidden_wamasu_sinkhole",
+    "type": "dungeon_fixed",
+    "variant": "marsh_cavern",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 9167,
+    "z": 8815,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "zenni_pale_step_xanmeer",
+    "name": "place.skycraft.zenni_pale_step_xanmeer",
+    "type": "dungeon_fixed",
+    "variant": "xanmeer",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7719,
+    "z": 9740,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "gully_high_hist_sap_grove",
+    "name": "place.skycraft.gully_high_hist_sap_grove",
+    "type": "dungeon_fixed",
+    "variant": "hist_grove",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 8598,
+    "z": 8366,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "bright_amber_sunken_stone_fane",
+    "name": "place.skycraft.bright_amber_sunken_stone_fane",
+    "type": "dungeon_fixed",
+    "variant": "swamp_ruin",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 9836,
+    "z": 8376,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "argoni_storm_kothringi_silver_barrow",
+    "name": "place.skycraft.argoni_storm_kothringi_silver_barrow",
+    "type": "dungeon_fixed",
+    "variant": "kothringi_barrow",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7661,
+    "z": 8780,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "harb_jade_mud_wallows_cavern",
+    "name": "place.skycraft.harb_jade_mud_wallows_cavern",
+    "type": "dungeon_fixed",
+    "variant": "mud_cavern",
+    "class": "minor",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 8721,
+    "z": 8527,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "murk_outer_elder_hist_bowl",
+    "name": "place.skycraft.murk_outer_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 8428,
+    "z": 8072,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "blackf_ancient_dusk_fall_stele",
+    "name": "place.skycraft.blackf_ancient_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 9779,
+    "z": 8527,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "islet_verdant_xanmeer_calendar_stones",
+    "name": "place.skycraft.islet_verdant_xanmeer_calendar_stones",
     "type": "standing_stone",
-    "variant": "standing_stone",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7632,
-    "z": 8080,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_2_word_wall",
-    "name": "place.skycraft.lilmoth_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7984,
-    "z": 8080,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_3_dragon_mound",
-    "name": "place.skycraft.lilmoth_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 8336,
-    "z": 8080,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_4_azura",
-    "name": "place.skycraft.lilmoth_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 9872,
-    "z": 8080,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_5_boethiah",
-    "name": "place.skycraft.lilmoth_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 10224,
-    "z": 8080,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_6_mephala",
-    "name": "place.skycraft.lilmoth_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7856,
-    "z": 8112,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_7_altar",
-    "name": "place.skycraft.lilmoth_marker_7_altar",
-    "type": "landmark",
-    "variant": "altar",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 8208,
-    "z": 8112,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_8_stones",
-    "name": "place.skycraft.lilmoth_marker_8_stones",
-    "type": "landmark",
     "variant": "stones",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 9616,
-    "z": 8112,
+    "x": 7478,
+    "z": 10126,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12868,59 +12793,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_marker_9_peak",
-    "name": "place.skycraft.lilmoth_marker_9_peak",
-    "type": "landmark",
-    "variant": "peak",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 9968,
-    "z": 8112,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_10_waterfall",
-    "name": "place.skycraft.lilmoth_marker_10_waterfall",
-    "type": "landmark",
-    "variant": "waterfall",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 7696,
-    "z": 8144,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_11_campsite",
-    "name": "place.skycraft.lilmoth_marker_11_campsite",
-    "type": "landmark",
-    "variant": "campsite",
-    "culture": "argonian",
-    "region": "black_marsh/lilmoth",
-    "x": 8048,
-    "z": 8144,
-    "why": [
-      "lilmoth.L1.topal_silt_delta",
-      "lilmoth.L10.drowned_customs_and_hulks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "lilmoth_marker_12_pass",
-    "name": "place.skycraft.lilmoth_marker_12_pass",
+    "id": "reed_bronze_root_bridge_causeway",
+    "name": "place.skycraft.reed_bronze_root_bridge_causeway",
     "type": "landmark",
     "variant": "pass",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 8400,
-    "z": 8144,
+    "x": 8299,
+    "z": 8018,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12928,14 +12808,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_marker_13_rock",
-    "name": "place.skycraft.lilmoth_marker_13_rock",
+    "id": "coral_silent_cypress_hummock",
+    "name": "place.skycraft.coral_silent_cypress_hummock",
     "type": "landmark",
-    "variant": "rock",
+    "variant": "peak",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 9584,
-    "z": 8144,
+    "x": 8847,
+    "z": 9045,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -12943,14 +12823,134 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "lilmoth_marker_14_eyrie",
-    "name": "place.skycraft.lilmoth_marker_14_eyrie",
+    "id": "jell_twilight_blackwater_weir",
+    "name": "place.skycraft.jell_twilight_blackwater_weir",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "waterfall",
     "culture": "argonian",
     "region": "black_marsh/lilmoth",
-    "x": 9936,
-    "z": 8144,
+    "x": 7417,
+    "z": 9300,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tidew_black_void_scale_altar",
+    "name": "place.skycraft.tidew_black_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7338,
+    "z": 9401,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "delt_lower_sub_mire_shrine",
+    "name": "place.skycraft.delt_lower_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 8558,
+    "z": 8505,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "koth_verdigris_elder_hist_bowl",
+    "name": "place.skycraft.koth_verdigris_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 8408,
+    "z": 9067,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "xi_tsei_ember_dusk_fall_stele",
+    "name": "place.skycraft.xi_tsei_ember_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7240,
+    "z": 9462,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "estu_cobalt_xanmeer_calendar_stones",
+    "name": "place.skycraft.estu_cobalt_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 9991,
+    "z": 8139,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "lagoon_sunken_root_bridge_causeway",
+    "name": "place.skycraft.lagoon_sunken_root_bridge_causeway",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7278,
+    "z": 10283,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yox_weathered_cypress_hummock",
+    "name": "place.skycraft.yox_weathered_cypress_hummock",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7986,
+    "z": 8662,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L10.drowned_customs_and_hulks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fogm_whispering_blackwater_weir",
+    "name": "place.skycraft.fogm_whispering_blackwater_weir",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 7952,
+    "z": 10026,
     "why": [
       "lilmoth.L1.topal_silt_delta",
       "lilmoth.L10.drowned_customs_and_hulks"
@@ -13094,15 +13094,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_1_barrow",
-    "name": "place.skycraft.murkmire_site_1_barrow",
+    "id": "dorg_crimson_step_xanmeer",
+    "name": "place.skycraft.dorg_crimson_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6800,
-    "z": 9616,
+    "x": 7127,
+    "z": 11179,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13110,15 +13110,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_2_dwemer_ruin",
-    "name": "place.skycraft.murkmire_site_2_dwemer_ruin",
+    "id": "kaxit_dawn_hist_sap_grove",
+    "name": "place.skycraft.kaxit_dawn_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4528,
-    "z": 9648,
+    "x": 4813,
+    "z": 9770,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13126,63 +13126,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_3_fort",
-    "name": "place.skycraft.murkmire_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 6768,
-    "z": 9648,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_site_4_fort_mage",
-    "name": "place.skycraft.murkmire_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 4464,
-    "z": 9680,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_site_5_akaviri_fort",
-    "name": "place.skycraft.murkmire_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 6608,
-    "z": 9680,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_site_6_daedric_ruin",
-    "name": "place.skycraft.murkmire_site_6_daedric_ruin",
+    "id": "dead_w_white_sunken_stone_fane",
+    "name": "place.skycraft.dead_w_white_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 7152,
-    "z": 9680,
+    "x": 7111,
+    "z": 9271,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13190,15 +13142,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_7_breton_keep_ruin",
-    "name": "place.skycraft.murkmire_site_7_breton_keep_ruin",
+    "id": "exith_upper_kothringi_silver_barrow",
+    "name": "place.skycraft.exith_upper_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6128,
-    "z": 9712,
+    "x": 6576,
+    "z": 11159,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13206,15 +13158,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_8_bandit_cave",
-    "name": "place.skycraft.murkmire_site_8_bandit_cave",
+    "id": "loxal_hollow_mud_wallows_cavern",
+    "name": "place.skycraft.loxal_hollow_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6768,
-    "z": 9712,
+    "x": 6611,
+    "z": 10282,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13222,15 +13174,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_9_troll_cave",
-    "name": "place.skycraft.murkmire_site_9_troll_cave",
+    "id": "tum_t_silver_reed_smuggler_cove",
+    "name": "place.skycraft.tum_t_silver_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4432,
-    "z": 9744,
+    "x": 6695,
+    "z": 11735,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13238,15 +13190,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_10_ice_cave",
-    "name": "place.skycraft.murkmire_site_10_ice_cave",
+    "id": "filg_scarlet_penal_stockade",
+    "name": "place.skycraft.filg_scarlet_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/murkmire",
-    "x": 6000,
-    "z": 9744,
+    "x": 4845,
+    "z": 11884,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13254,15 +13206,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_11_sixth_house_base",
-    "name": "place.skycraft.murkmire_site_11_sixth_house_base",
+    "id": "moxil_ashen_naga_kur_stake_camp",
+    "name": "place.skycraft.moxil_ashen_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6544,
-    "z": 9744,
+    "x": 6165,
+    "z": 9780,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13270,15 +13222,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_12_scorpion_den",
-    "name": "place.skycraft.murkmire_site_12_scorpion_den",
+    "id": "xoch_sacred_sithis_fang_sanctum",
+    "name": "place.skycraft.xoch_sacred_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 7088,
-    "z": 9744,
+    "x": 5299,
+    "z": 10952,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13286,15 +13238,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_13_mine",
-    "name": "place.skycraft.murkmire_site_13_mine",
+    "id": "gorg_cinder_wamasu_sinkhole",
+    "name": "place.skycraft.gorg_cinder_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "mine",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4752,
-    "z": 9776,
+    "x": 5743,
+    "z": 11345,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13302,15 +13254,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_14_hagraven_lair",
-    "name": "place.skycraft.murkmire_site_14_hagraven_lair",
+    "id": "noxat_deep_step_xanmeer",
+    "name": "place.skycraft.noxat_deep_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6448,
-    "z": 9776,
+    "x": 6514,
+    "z": 11913,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13318,15 +13270,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_15_giant_camp",
-    "name": "place.skycraft.murkmire_site_15_giant_camp",
+    "id": "vakka_obsidian_hist_sap_grove",
+    "name": "place.skycraft.vakka_obsidian_hist_sap_grove",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "hist_grove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6992,
-    "z": 9776,
+    "x": 5557,
+    "z": 10158,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13334,15 +13286,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_16_dragon_lair",
-    "name": "place.skycraft.murkmire_site_16_dragon_lair",
+    "id": "haxal_dusk_sunken_stone_fane",
+    "name": "place.skycraft.haxal_dusk_sunken_stone_fane",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "swamp_ruin",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4656,
-    "z": 9808,
+    "x": 4814,
+    "z": 10505,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13350,15 +13302,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_17_watchtower",
-    "name": "place.skycraft.murkmire_site_17_watchtower",
+    "id": "oxil_golden_kothringi_silver_barrow",
+    "name": "place.skycraft.oxil_golden_kothringi_silver_barrow",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "kothringi_barrow",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 5712,
-    "z": 9808,
+    "x": 7129,
+    "z": 10676,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13366,15 +13318,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_18_cabin",
-    "name": "place.skycraft.murkmire_site_18_cabin",
+    "id": "baxilt_inner_mud_wallows_cavern",
+    "name": "place.skycraft.baxilt_inner_mud_wallows_cavern",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "mud_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6256,
-    "z": 9808,
+    "x": 5942,
+    "z": 11976,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13382,15 +13334,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_19_mage_tower",
-    "name": "place.skycraft.murkmire_site_19_mage_tower",
+    "id": "ixtax_shrouded_reed_smuggler_cove",
+    "name": "place.skycraft.ixtax_shrouded_reed_smuggler_cove",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "smuggler_cove",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6800,
-    "z": 9808,
+    "x": 6897,
+    "z": 11432,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13398,15 +13350,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_20_imperial_camp",
-    "name": "place.skycraft.murkmire_site_20_imperial_camp",
+    "id": "poxal_basal_penal_stockade",
+    "name": "place.skycraft.poxal_basal_penal_stockade",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "imperial_prison_fort",
     "class": "minor",
-    "culture": "argonian",
+    "culture": "imperial",
     "region": "black_marsh/murkmire",
-    "x": 4432,
-    "z": 9840,
+    "x": 6317,
+    "z": 9866,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13414,15 +13366,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_21_nordic_ruin",
-    "name": "place.skycraft.murkmire_site_21_nordic_ruin",
+    "id": "chuxal_iron_naga_kur_stake_camp",
+    "name": "place.skycraft.chuxal_iron_naga_kur_stake_camp",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "naga_camp",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 5392,
-    "z": 9840,
+    "x": 5619,
+    "z": 11001,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13430,15 +13382,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_22_great_lift",
-    "name": "place.skycraft.murkmire_site_22_great_lift",
+    "id": "joxil_gilded_sithis_fang_sanctum",
+    "name": "place.skycraft.joxil_gilded_sithis_fang_sanctum",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "sunken_shrine",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 5936,
-    "z": 9840,
+    "x": 6312,
+    "z": 10540,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13446,15 +13398,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_23_kolskeggr_mine",
-    "name": "place.skycraft.murkmire_site_23_kolskeggr_mine",
+    "id": "murk_forbidden_wamasu_sinkhole",
+    "name": "place.skycraft.murk_forbidden_wamasu_sinkhole",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "marsh_cavern",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6480,
-    "z": 9840,
+    "x": 5234,
+    "z": 11764,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13462,15 +13414,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_site_24_bleak_falls_barrow",
-    "name": "place.skycraft.murkmire_site_24_bleak_falls_barrow",
+    "id": "dorg_pale_step_xanmeer",
+    "name": "place.skycraft.dorg_pale_step_xanmeer",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "xanmeer",
     "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 7024,
-    "z": 9840,
+    "x": 7079,
+    "z": 11082,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13478,14 +13430,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_1_standing_stone",
-    "name": "place.skycraft.murkmire_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "kaxit_high_hist_sap_grove",
+    "name": "place.skycraft.kaxit_high_hist_sap_grove",
+    "type": "dungeon_fixed",
+    "variant": "hist_grove",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4656,
-    "z": 9872,
+    "x": 6062,
+    "z": 11721,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13493,14 +13446,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_2_word_wall",
-    "name": "place.skycraft.murkmire_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "dead_w_amber_sunken_stone_fane",
+    "name": "place.skycraft.dead_w_amber_sunken_stone_fane",
+    "type": "dungeon_fixed",
+    "variant": "swamp_ruin",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4624,
-    "z": 9904,
+    "x": 5931,
+    "z": 10058,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13508,14 +13462,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_3_dragon_mound",
-    "name": "place.skycraft.murkmire_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "exith_storm_kothringi_silver_barrow",
+    "name": "place.skycraft.exith_storm_kothringi_silver_barrow",
+    "type": "dungeon_fixed",
+    "variant": "kothringi_barrow",
+    "class": "minor",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 5168,
-    "z": 9904,
+    "x": 6005,
+    "z": 9913,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13523,59 +13478,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_4_azura",
-    "name": "place.skycraft.murkmire_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 5712,
-    "z": 9904,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_marker_5_boethiah",
-    "name": "place.skycraft.murkmire_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 6256,
-    "z": 9904,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_marker_6_mephala",
-    "name": "place.skycraft.murkmire_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 6800,
-    "z": 9904,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_marker_7_altar",
-    "name": "place.skycraft.murkmire_marker_7_altar",
+    "id": "loxal_jade_sub_mire_shrine",
+    "name": "place.skycraft.loxal_jade_sub_mire_shrine",
     "type": "landmark",
-    "variant": "altar",
+    "variant": "sunken_shrine",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4432,
-    "z": 9936,
+    "x": 6622,
+    "z": 10089,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13583,14 +13493,29 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_8_monument",
-    "name": "place.skycraft.murkmire_marker_8_monument",
+    "id": "tum_t_outer_elder_hist_bowl",
+    "name": "place.skycraft.tum_t_outer_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 6631,
+    "z": 9941,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "filg_ancient_dusk_fall_stele",
+    "name": "place.skycraft.filg_ancient_dusk_fall_stele",
     "type": "landmark",
     "variant": "monument",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 4976,
-    "z": 9936,
+    "x": 6761,
+    "z": 10832,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13598,29 +13523,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_9_ruin",
-    "name": "place.skycraft.murkmire_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 5520,
-    "z": 9936,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_marker_10_stones",
-    "name": "place.skycraft.murkmire_marker_10_stones",
-    "type": "landmark",
+    "id": "moxil_verdant_xanmeer_calendar_stones",
+    "name": "place.skycraft.moxil_verdant_xanmeer_calendar_stones",
+    "type": "standing_stone",
     "variant": "stones",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 6064,
-    "z": 9936,
+    "x": 6633,
+    "z": 11017,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13628,44 +13538,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_11_peak",
-    "name": "place.skycraft.murkmire_marker_11_peak",
-    "type": "landmark",
-    "variant": "peak",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 6608,
-    "z": 9936,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_marker_12_waterfall",
-    "name": "place.skycraft.murkmire_marker_12_waterfall",
-    "type": "landmark",
-    "variant": "waterfall",
-    "culture": "argonian",
-    "region": "black_marsh/murkmire",
-    "x": 4752,
-    "z": 9968,
-    "why": [
-      "murkmire.L1.mangrove_shelf",
-      "murkmire.L10.grand_calendar_xanmeer"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "murkmire_marker_13_pass",
-    "name": "place.skycraft.murkmire_marker_13_pass",
+    "id": "xoch_bronze_root_bridge_causeway",
+    "name": "place.skycraft.xoch_bronze_root_bridge_causeway",
     "type": "landmark",
     "variant": "pass",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 5296,
-    "z": 9968,
+    "x": 6487,
+    "z": 11721,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13673,14 +13553,134 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "murkmire_marker_14_eyrie",
-    "name": "place.skycraft.murkmire_marker_14_eyrie",
+    "id": "gorg_silent_cypress_hummock",
+    "name": "place.skycraft.gorg_silent_cypress_hummock",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "peak",
     "culture": "argonian",
     "region": "black_marsh/murkmire",
-    "x": 5840,
-    "z": 9968,
+    "x": 6187,
+    "z": 12088,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "noxat_twilight_blackwater_weir",
+    "name": "place.skycraft.noxat_twilight_blackwater_weir",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 7288,
+    "z": 10807,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "vakka_black_void_scale_altar",
+    "name": "place.skycraft.vakka_black_void_scale_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 5012,
+    "z": 10023,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "haxal_lower_sub_mire_shrine",
+    "name": "place.skycraft.haxal_lower_sub_mire_shrine",
+    "type": "landmark",
+    "variant": "sunken_shrine",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 4400,
+    "z": 12490,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "oxil_verdigris_elder_hist_bowl",
+    "name": "place.skycraft.oxil_verdigris_elder_hist_bowl",
+    "type": "landmark",
+    "variant": "hist_grove",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 6993,
+    "z": 10449,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "baxilt_ember_dusk_fall_stele",
+    "name": "place.skycraft.baxilt_ember_dusk_fall_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 5577,
+    "z": 11506,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ixtax_cobalt_xanmeer_calendar_stones",
+    "name": "place.skycraft.ixtax_cobalt_xanmeer_calendar_stones",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 5748,
+    "z": 9936,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "poxal_sunken_root_bridge_causeway",
+    "name": "place.skycraft.poxal_sunken_root_bridge_causeway",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 5267,
+    "z": 11627,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L10.grand_calendar_xanmeer"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "chuxal_weathered_cypress_hummock",
+    "name": "place.skycraft.chuxal_weathered_cypress_hummock",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 5108,
+    "z": 10389,
     "why": [
       "murkmire.L1.mangrove_shelf",
       "murkmire.L10.grand_calendar_xanmeer"
@@ -13717,6 +13717,96 @@
     "why": [
       "helstrom.L1.helstrom_root_dome",
       "helstrom.L1.thorn_coastal_spits"
+    ]
+  },
+  {
+    "id": "lilmoth_barrier_reed_island",
+    "name": "place.skycraft.lilmoth_barrier_reed_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 10099,
+    "z": 8187,
+    "radius": 28,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L5.smuggler_and_spice_quays"
+    ]
+  },
+  {
+    "id": "black_fin_wreck_shoal",
+    "name": "place.skycraft.black_fin_wreck_shoal",
+    "type": "dungeon_fixed",
+    "variant": "shipwreck",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 10073,
+    "z": 8328,
+    "radius": 28,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L5.smuggler_and_spice_quays"
+    ]
+  },
+  {
+    "id": "padomaic_mangrove_sea_cave",
+    "name": "place.skycraft.padomaic_mangrove_sea_cave",
+    "type": "dungeon_fixed",
+    "variant": "sea_cave",
+    "culture": "argonian",
+    "region": "black_marsh/lilmoth",
+    "x": 10162,
+    "z": 8552,
+    "radius": 28,
+    "why": [
+      "lilmoth.L1.topal_silt_delta",
+      "lilmoth.L5.smuggler_and_spice_quays"
+    ]
+  },
+  {
+    "id": "murkmire_outer_coral_reef",
+    "name": "place.skycraft.murkmire_outer_coral_reef",
+    "type": "landmark",
+    "variant": "reef",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 4284,
+    "z": 10771,
+    "radius": 28,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L5.reed_canoe_and_reagent_craft"
+    ]
+  },
+  {
+    "id": "xochitl_castaway_cay_island",
+    "name": "place.skycraft.xochitl_castaway_cay_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 4248,
+    "z": 10229,
+    "radius": 28,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L5.reed_canoe_and_reagent_craft"
+    ]
+  },
+  {
+    "id": "topal_delta_sunken_sea_vault",
+    "name": "place.skycraft.topal_delta_sunken_sea_vault",
+    "type": "dungeon_fixed",
+    "variant": "sea_vault",
+    "culture": "argonian",
+    "region": "black_marsh/murkmire",
+    "x": 4250,
+    "z": 10500,
+    "radius": 28,
+    "why": [
+      "murkmire.L1.mangrove_shelf",
+      "murkmire.L5.reed_canoe_and_reagent_craft"
     ]
   }
 ]

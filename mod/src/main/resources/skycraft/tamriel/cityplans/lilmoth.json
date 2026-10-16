@@ -56,8 +56,8 @@
     {
       "id": "xanmeer",
       "at": [
-        0,
-        -16
+        -1,
+        -28
       ],
       "name": "lilmoth_landmark",
       "overlay": "lilmoth"
@@ -65,16 +65,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          91
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          -2,
+          -49
+        ]
       ],
-      "r0": 10,
-      "r1": 92,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -91,
+          0
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          65,
+          -6
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        6
+      ],
+      "rx": 49,
+      "rz": 43,
+      "wobble": 4,
+      "lobes": 3,
+      "phase": 1.14,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -108,7 +153,7 @@
       "wealth": "noble",
       "at": [
         28,
-        20
+        24
       ],
       "face": "north",
       "overlay": "lilmoth",
@@ -251,8 +296,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -11,
-        -33
+        -26,
+        -38
       ],
       "face": "south",
       "overlay": "lilmoth",
@@ -275,7 +320,7 @@
       "use": "townhouse",
       "wealth": "noble",
       "at": [
-        11,
+        23,
         -33
       ],
       "face": "south",
@@ -299,8 +344,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        28,
-        -20
+        36,
+        -29
       ],
       "face": "south",
       "overlay": "lilmoth",
@@ -370,5 +415,74 @@
     "lilmoth_landmark": "High Seat of place.skycraft.lilmoth",
     "lilmoth_plaza": "place.skycraft.lilmoth Central Plaza"
   },
-  "innKey": "lilmoth_b_5"
+  "innKey": "lilmoth_b_5",
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -65,
+        12
+      ],
+      "to": [
+        65,
+        2
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        2,
+        -2
+      ],
+      "to": [
+        2,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        2,
+        -36
+      ],
+      "r": 31,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        6
+      ],
+      "r": 27,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        33,
+        8
+      ],
+      "r": 27,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 81,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 9,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "on": "main"
+    }
+  ]
 }

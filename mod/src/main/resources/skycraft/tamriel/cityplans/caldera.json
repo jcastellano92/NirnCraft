@@ -23,8 +23,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        0
+        -20,
+        3
       ],
       "face": "south",
       "name": "caldera_landmark",
@@ -46,7 +46,7 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        5,
+        23
       ],
       "face": "south",
       "overlay": "west_gash",
@@ -82,8 +82,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -32,
-        16
+        -28,
+        27
       ],
       "face": "south",
       "overlay": "west_gash",
@@ -94,8 +94,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -18,
+        -21
       ],
       "face": "south",
       "overlay": "west_gash",
@@ -118,8 +118,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        6,
+        -14
       ],
       "face": "south",
       "overlay": "west_gash",
@@ -151,12 +151,161 @@
     "caldera_b_4": "Hodlismod's Armory",
     "caldera_b_5": "Verick Gemain's Trader",
     "caldera_b_6": "Falanaamo's Clothier",
-    "caldera_b_7": "Caldera Mining Guardhouse"
+    "caldera_b_7": "Caldera Mining Guardhouse",
+    "caldera_charter_square": "Caldera Mining Company Square"
   },
   "innKey": "caldera_b_2",
   "names": {
     "inn": "caldera_b_2",
     "store": "caldera_b_5",
     "smithy": "caldera_b_4"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        4
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 4,
+      "name": "caldera_charter_square"
+    }
+  ],
+  "walls": [
+    {
+      "r": 40,
+      "sides": 10,
+      "h": 9,
+      "gates": [
+        0,
+        3.1416
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
+  ],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          -14
+        ],
+        [
+          0,
+          -38
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "governor_street"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -36,
+          4
+        ],
+        [
+          -10,
+          4
+        ],
+        [
+          12,
+          0
+        ],
+        [
+          36,
+          -8
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "ebony_mine_road"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 26,
+      "rz": 24,
+      "wobble": 1,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "tudor_court"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -18
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        18,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 38,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "culture": "imperial",
+      "flags": [
+        "upper"
+      ],
+      "on": "tudor_court"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "culture": "imperial",
+      "on": "ebony_mine_road"
+    },
+    {
+      "kind": "store",
+      "count": 2,
+      "culture": "imperial",
+      "on": "governor_street"
+    }
+  ]
 }

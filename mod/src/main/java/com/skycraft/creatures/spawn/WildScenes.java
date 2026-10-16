@@ -121,14 +121,47 @@ public final class WildScenes {
             List<String> why,
             String questHook,
             List<String> props,
-            List<Actor> actors
+            List<Actor> actors,
+            Map<String, Integer> minFactionRep,
+            Map<String, Integer> maxFactionRep,
+            String requiredDeed,
+            Set<String> playerRaces,
+            Set<String> rulingFactions
     ) {
+        public Scene(
+                String id,
+                int weight,
+                boolean wonder,
+                String road,
+                String time,
+                double minWildness,
+                Set<String> provinces,
+                Set<String> regions,
+                Set<String> cultures,
+                Set<BiomeFamily> families,
+                String purpose,
+                List<String> needs,
+                List<String> why,
+                String questHook,
+                List<String> props,
+                List<Actor> actors
+        ) {
+            this(id, weight, wonder, road, time, minWildness, provinces, regions, cultures, families,
+                    purpose, needs, why, questHook, props, actors,
+                    Map.of(), Map.of(), "", Set.of(), Set.of());
+        }
+
         public boolean matchesHold(String holdShortOrFull) {
             String shortId = holdShortOrFull.contains("/")
                     ? holdShortOrFull.substring(holdShortOrFull.indexOf('/') + 1)
                     : holdShortOrFull;
             String fullId = "skyrim/" + shortId;
             return regions.contains(shortId) || regions.contains(fullId);
+        }
+
+        public boolean isPoliticalOrStateFiltered() {
+            return !minFactionRep.isEmpty() || !maxFactionRep.isEmpty() || !requiredDeed.isEmpty()
+                    || !playerRaces.isEmpty() || !rulingFactions.isEmpty();
         }
     }
 
@@ -177,6 +210,77 @@ public final class WildScenes {
     }
 
     /**
+     * Evaluates whether a scene's political, faction-reputation, deed, and player-race conditions match.
+     */
+    public static boolean matchesState(
+            Scene s,
+            @Nullable String regionOrPlaceId,
+            @Nullable String playerRace,
+            @Nullable Set<String> activeDeeds,
+            @Nullable java.util.function.ToIntFunction<String> repLookup
+    ) {
+        if (s == null) return false;
+        if (!s.rulingFactions.isEmpty()) {
+            String ruling = regionOrPlaceId != null ? com.skycraft.society.Reputation.rulingFaction(regionOrPlaceId) : null;
+            if (ruling == null || !s.rulingFactions.contains(ruling)) return false;
+        }
+        if (!s.playerRaces.isEmpty()) {
+            if (playerRace == null || playerRace.isEmpty()) return false;
+            if (!s.playerRaces.contains(playerRace.toLowerCase(Locale.ROOT))) return false;
+        }
+        if (!s.requiredDeed.isEmpty()) {
+            if (activeDeeds == null || !activeDeeds.contains(s.requiredDeed)) return false;
+        }
+        if (!s.minFactionRep.isEmpty()) {
+            for (Map.Entry<String, Integer> e : s.minFactionRep.entrySet()) {
+                int rep = repLookup != null ? repLookup.applyAsInt(e.getKey()) : 0;
+                if (rep < e.getValue()) return false;
+            }
+        }
+        if (!s.maxFactionRep.isEmpty()) {
+            for (Map.Entry<String, Integer> e : s.maxFactionRep.entrySet()) {
+                int rep = repLookup != null ? repLookup.applyAsInt(e.getKey()) : 0;
+                if (rep > e.getValue()) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Evaluates whether a scene's region and player/world-state conditions match {@code player} in {@code region}.
+     */
+    public static boolean matchesPlayerAndState(
+            Scene s,
+            @Nullable net.minecraft.world.entity.player.Player player,
+            @Nullable Region region
+    ) {
+        if (s == null) return false;
+        if (region != null && !matchesRegion(s, region)) return false;
+        String regionId = region != null ? region.id() : null;
+        if (player == null) {
+            return matchesState(s, regionId, null, Set.of(), f -> 0);
+        }
+        com.skycraft.core.Race r = com.skycraft.core.SkyData.get(player).getRace();
+        String pRace = r != null ? r.id() : "nord";
+        Set<String> deeds = (player instanceof ServerPlayer sp)
+                ? new HashSet<>(com.skycraft.society.ContextualDialogue.activeDeeds(sp, region != null ? region.shortId() : null))
+                : Set.of();
+        return matchesState(s, regionId, pRace, deeds, f -> com.skycraft.society.Reputation.get(player, f));
+    }
+
+    /**
+     * Returns all scenes eligible for {@code player} in {@code region} based on region and player/world-state filters.
+     */
+    public static List<Scene> eligibleFor(@Nullable net.minecraft.world.entity.player.Player player, Region region) {
+        if (region == null) return List.of();
+        List<Scene> out = new ArrayList<>();
+        for (Scene s : all()) {
+            if (matchesPlayerAndState(s, player, region)) out.add(s);
+        }
+        return out;
+    }
+
+    /**
      * Called by {@link RegionSpawner} when a spawn cycle has a free roll: has a small chance to place a multi-actor
      * scene instead of a plain pack. Returns the number of mobs spawned (0 when no scene rolled).
      */
@@ -194,15 +298,15 @@ public final class WildScenes {
         List<Scene> matching = new ArrayList<>();
         int total = 0;
         for (Scene s : all()) {
-            if (!matches(s, level, pos, region, family, wildness)) continue;
+            if (!matches(s, level, pos, region, family, wildness, player)) continue;
             matching.add(s);
-            total += s.weight;
+            total += effectiveWeight(s);
         }
         if (total <= 0) return 0;
         int r = random.nextInt(total);
         Scene chosen = matching.get(0);
         for (Scene s : matching) {
-            r -= s.weight;
+            r -= effectiveWeight(s);
             if (r < 0) {
                 chosen = s;
                 break;
@@ -211,6 +315,10 @@ public final class WildScenes {
         int made = spawn(level, pos, chosen, random, player);
         if (made > 0) COOLDOWN.put(player.getUUID(), now);
         return made;
+    }
+
+    private static int effectiveWeight(Scene s) {
+        return s.isPoliticalOrStateFiltered() ? Math.max(1, s.weight * 2) : Math.max(1, s.weight);
     }
 
     /**
@@ -236,15 +344,15 @@ public final class WildScenes {
             List<Scene> matching = new ArrayList<>();
             int total = 0;
             for (Scene s : all()) {
-                if (!matches(s, level, center, region, family, wild)) continue;
+                if (!matches(s, level, center, region, family, wild, player)) continue;
                 matching.add(s);
-                total += s.weight;
+                total += effectiveWeight(s);
             }
             if (total <= 0) return null;
             int r = random.nextInt(total);
             chosen = matching.get(0);
             for (Scene s : matching) {
-                r -= s.weight;
+                r -= effectiveWeight(s);
                 if (r < 0) {
                     chosen = s;
                     break;
@@ -283,9 +391,11 @@ public final class WildScenes {
         return true;
     }
 
-    private static boolean matches(Scene s, ServerLevel level, BlockPos pos, Region region, BiomeFamily family, double wild) {
+    private static boolean matches(Scene s, ServerLevel level, BlockPos pos, Region region, BiomeFamily family,
+                                   double wild, @Nullable ServerPlayer player) {
         if (wild < s.minWildness) return false;
         if (!matchesRegion(s, region)) return false;
+        if (!matchesPlayerAndState(s, player, region)) return false;
         if (!s.families.isEmpty() && !s.families.contains(family)) return false;
         if ("day".equals(s.time) && !level.isDay()) return false;
         if ("night".equals(s.time) && !level.isNight()) return false;
@@ -313,6 +423,14 @@ public final class WildScenes {
         if (center == null) return 0;
         placeProps(level, center, s.props, r);
 
+        boolean hasVictims = false;
+        for (Actor a : s.actors) {
+            if ("victims".equals(a.group)) {
+                hasVictims = true;
+                break;
+            }
+        }
+
         Map<String, List<Mob>> groups = new HashMap<>();
         List<Mob> spawnedAll = new ArrayList<>();
         int count = 0;
@@ -323,7 +441,7 @@ public final class WildScenes {
                 int dz = a.radius <= 0 ? 0 : r.nextInt(a.radius * 2 + 1) - a.radius;
                 BlockPos at = surface(level, center.getX() + dx, center.getZ() + dz, center.getY());
                 if (at == null) continue;
-                Mob m = spawnActor(level, at, a, s, r);
+                Mob m = spawnActor(level, at, a, s, r, nearPlayer, hasVictims);
                 if (m == null) continue;
                 count++;
                 spawnedAll.add(m);
@@ -354,11 +472,15 @@ public final class WildScenes {
     }
 
     @Nullable
-    private static Mob spawnActor(ServerLevel level, BlockPos pos, Actor a, Scene scene, RandomSource r) {
+    private static Mob spawnActor(ServerLevel level, BlockPos pos, Actor a, Scene scene, RandomSource r,
+                                  @Nullable ServerPlayer nearPlayer, boolean hasVictims) {
         Mob mob = null;
         if (a.npc != null) {
             var npc = Npcs.create(level, pos, a.npc);
             if (npc != null && level.addFreshEntity(npc)) {
+                if (a.hostile && nearPlayer != null && !hasVictims && ("attackers".equals(a.group) || a.group.isEmpty())) {
+                    npc.setHuntTarget(nearPlayer.getUUID());
+                }
                 mob = npc;
             }
         } else if (a.entity != null) {
@@ -388,6 +510,18 @@ public final class WildScenes {
         pairFight(groups.get("orcs"), groups.get("beast"));
         pairFight(groups.get("imperials"), groups.get("stormcloaks"));
         pairFight(groups.get("stormcloaks"), groups.get("imperials"));
+        pairFight(groups.get("crowns"), groups.get("forebears"));
+        pairFight(groups.get("forebears"), groups.get("crowns"));
+        pairFight(groups.get("redoran"), groups.get("ashlanders"));
+        pairFight(groups.get("ashlanders"), groups.get("redoran"));
+        pairFight(groups.get("telvanni"), groups.get("mages"));
+        pairFight(groups.get("mages"), groups.get("telvanni"));
+        pairFight(groups.get("an_xileel"), groups.get("slavers"));
+        pairFight(groups.get("slavers"), groups.get("an_xileel"));
+        pairFight(groups.get("thalmor"), groups.get("dissidents"));
+        pairFight(groups.get("dissidents"), groups.get("thalmor"));
+        pairFight(groups.get("vigilants"), groups.get("daedra"));
+        pairFight(groups.get("daedra"), groups.get("vigilants"));
     }
 
     private static void pairFight(@Nullable List<Mob> a, @Nullable List<Mob> b) {
@@ -681,10 +815,16 @@ public final class WildScenes {
                 actors.add(new Actor(npc, entity, min, max, radius, hostile, group, pose, leash));
             }
         }
+        Map<String, Integer> minFactionRep = intMap(o, "minFactionRep");
+        Map<String, Integer> maxFactionRep = intMap(o, "maxFactionRep");
+        String requiredDeed = str(o, "requiredDeed", "");
+        Set<String> playerRaces = strSet(o, "playerRaces");
+        Set<String> rulingFactions = strSet(o, "rulingFactions");
         return actors.isEmpty() ? null : new Scene(
                 id, weight, wonder, road, time, minWild,
                 provinces, regions, cultures, families,
-                purpose, needs, why, questHook, props, actors);
+                purpose, needs, why, questHook, props, actors,
+                minFactionRep, maxFactionRep, requiredDeed, playerRaces, rulingFactions);
     }
 
     private static String str(JsonObject o, String k, String def) {
@@ -704,4 +844,14 @@ public final class WildScenes {
         for (JsonElement el : o.getAsJsonArray(k)) s.add(el.getAsString());
         return Collections.unmodifiableList(s);
     }
+
+    private static Map<String, Integer> intMap(JsonObject o, String k) {
+        if (!o.has(k) || !o.get(k).isJsonObject()) return Map.of();
+        Map<String, Integer> m = new HashMap<>();
+        for (Map.Entry<String, JsonElement> e : o.getAsJsonObject(k).entrySet()) {
+            m.put(e.getKey(), e.getValue().getAsInt());
+        }
+        return Collections.unmodifiableMap(m);
+    }
 }
+

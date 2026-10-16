@@ -172,6 +172,12 @@ public class LeveledGear extends LootItemConditionalFunction {
 
     public static ItemStack weapon(int level, RandomSource random) {
         SmithingTier tier = com.skycraft.loot.LootTiers.weapon(level, random);
+        if (random.nextInt(5) == 0) {
+            com.skycraft.arsenal.item.PolearmKind pkind = com.skycraft.arsenal.item.PolearmKind.VALUES[
+                    random.nextInt(com.skycraft.arsenal.item.PolearmKind.VALUES.length)];
+            Item polearm = ArsenalItems.polearm(tier, pkind);
+            if (polearm != Items.AIR) return new ItemStack(polearm);
+        }
         for (int attempt = 0; attempt < 4; attempt++) {
             int total = 0;
             for (int w : MELEE_WEIGHT) total += w;
@@ -191,6 +197,13 @@ public class LeveledGear extends LootItemConditionalFunction {
     }
 
     public static ItemStack bow(int level, RandomSource random) {
+        if (level >= 6 && random.nextInt(5) == 0) {
+            Item xbow = level >= 27 && random.nextBoolean() ? ArsenalItems.ENHANCED_DWARVEN_CROSSBOW.get()
+                    : level >= 18 && random.nextBoolean() ? ArsenalItems.DWARVEN_CROSSBOW.get()
+                    : level >= 12 && random.nextBoolean() ? ArsenalItems.ENHANCED_CROSSBOW.get()
+                    : ArsenalItems.IMPERIAL_CROSSBOW.get();
+            return new ItemStack(xbow);
+        }
         Item bow = Items.AIR;
         for (int attempt = 0; attempt < 4 && bow == Items.AIR; attempt++) {
             bow = CraftingItems.weaponItem(com.skycraft.loot.LootTiers.weapon(level, random), WeaponType.BOW);
@@ -283,7 +296,8 @@ public class LeveledGear extends LootItemConditionalFunction {
         return switch (kind) {
             case WEAPON -> (item instanceof SkyMeleeItem || item instanceof SkyAxeItem || item instanceof PolearmItem)
                     && !(item instanceof ArtifactItem);
-            case BOW -> item instanceof SkyBowItem && !(item instanceof ArtifactItem);
+            case BOW -> (item instanceof SkyBowItem || item instanceof com.skycraft.arsenal.item.SkyCrossbowItem)
+                    && !(item instanceof ArtifactItem);
             case ARMOR -> item instanceof ArmorItem && !(item instanceof ArtifactItem);
             case SHIELD -> item instanceof SkyShieldItem;
             case ARROW -> item instanceof SkyArrowItem;

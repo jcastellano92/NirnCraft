@@ -158,7 +158,7 @@ final class CavernGen {
         this.wfTheta = Math.toRadians(45 + 90 * (rot + 1));
         this.setTheta = Math.toRadians(45 + 90 * (rot + 1));
         this.waterfall = lake && fk == FluidKind.WATER && switch (shape) {
-            case BOWL_BRIDGES, CANYON, AMPHITHEATRE, KARST, ROOT_CAVERN, SHAFT -> true;
+            case BOWL_BRIDGES, CANYON, AMPHITHEATRE, KARST, ROOT_CAVERN, SHAFT, CATHEDRAL, SEA_CAVE -> true;
             default -> false;
         };
         this.campTheta = Math.toRadians(45 + 90 * (rot + 3));
@@ -1057,7 +1057,7 @@ final class CavernGen {
             case COLLAPSED_CITY -> CavernDress.cityWalls(this, x0, x1, z0, z1);
             case HONEYCOMB -> CavernDress.hexWalls(this, x0, x1, z0, z1);
             case CATHEDRAL, BONE_CAVERN -> CavernDress.ribs(this);
-            case KARST -> CavernDress.lightShaft(this);
+            case KARST, ROOT_CAVERN, AMPHITHEATRE -> CavernDress.lightShaft(this);
             default -> {
             }
         }

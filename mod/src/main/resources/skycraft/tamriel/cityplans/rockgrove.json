@@ -56,8 +56,8 @@
     {
       "id": "xanmeer",
       "at": [
-        0,
-        -16
+        -1,
+        -28
       ],
       "name": "rockgrove_landmark",
       "overlay": "gideon"
@@ -67,14 +67,42 @@
     {
       "type": "radial",
       "at": [
-        0,
+        -2,
         0
       ],
-      "r0": 10,
-      "r1": 54,
-      "spokes": 4,
+      "spokes": 7,
+      "r0": 14,
+      "r1": 42,
+      "wobble": 7,
+      "offset": 0.52,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        31
+      ],
       "tag": "spoke",
       "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          53
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          2,
+          -29
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
     }
   ],
   "buildings": [
@@ -83,8 +111,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        21,
-        0
+        24,
+        3
       ],
       "face": "south",
       "overlay": "gideon",
@@ -95,7 +123,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        38,
+        46,
         18
       ],
       "face": "north",
@@ -107,8 +135,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        13,
-        16
+        17,
+        27
       ],
       "face": "north",
       "overlay": "gideon",
@@ -119,8 +147,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        9,
-        41
+        12,
+        44
       ],
       "face": "north",
       "overlay": "gideon",
@@ -155,8 +183,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -19,
-        9
+        -22,
+        12
       ],
       "face": "north",
       "overlay": "gideon",
@@ -179,8 +207,8 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -19,
-        -9
+        -17,
+        -1
       ],
       "face": "south",
       "overlay": "gideon",
@@ -203,8 +231,8 @@
       "use": "tailor",
       "wealth": "common",
       "at": [
-        -5,
-        -20
+        -25,
+        -17
       ],
       "face": "south",
       "overlay": "gideon",
@@ -215,7 +243,7 @@
       "use": "jeweller",
       "wealth": "noble",
       "at": [
-        9,
+        25,
         -41
       ],
       "face": "south",
@@ -227,8 +255,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        13,
-        -16
+        24,
+        -21
       ],
       "face": "south",
       "overlay": "gideon",
@@ -240,7 +268,7 @@
       "wealth": "common",
       "at": [
         38,
-        -18
+        -22
       ],
       "face": "south",
       "overlay": "gideon",
@@ -287,5 +315,74 @@
     "rockgrove_landmark": "High Seat of place.skycraft.rockgrove",
     "rockgrove_plaza": "place.skycraft.rockgrove Central Plaza"
   },
-  "innKey": "rockgrove_b_5"
+  "innKey": "rockgrove_b_5",
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -39,
+        6
+      ],
+      "to": [
+        39,
+        8
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -2,
+        -2
+      ],
+      "to": [
+        -2,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -2,
+        -21
+      ],
+      "r": 19,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        20,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 49,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

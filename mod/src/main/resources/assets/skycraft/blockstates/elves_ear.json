@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/elves_ear"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/elves_ear_harvested"
+    }
+  }
+}

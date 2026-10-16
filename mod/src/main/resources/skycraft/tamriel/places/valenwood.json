@@ -6011,15 +6011,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_site_1_barrow",
-    "name": "place.skycraft.malabal_tor_site_1_barrow",
+    "id": "hoarv_crimson_heartwood_tree_tomb",
+    "name": "place.skycraft.hoarv_crimson_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4464,
-    "z": 9136,
+    "x": -7129,
+    "z": 10092,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6027,15 +6027,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_site_2_dwemer_ruin",
-    "name": "place.skycraft.malabal_tor_site_2_dwemer_ruin",
+    "id": "ouze_dawn_green_pact_ossuary",
+    "name": "place.skycraft.ouze_dawn_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -5040,
-    "z": 9168,
+    "x": -5334,
+    "z": 9547,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6043,79 +6043,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_site_3_fort",
-    "name": "place.skycraft.malabal_tor_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4784,
-    "z": 9168,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_4_keep",
-    "name": "place.skycraft.malabal_tor_site_4_keep",
-    "type": "fort",
-    "variant": "keep",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5200,
-    "z": 9200,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_5_fort_mage",
-    "name": "place.skycraft.malabal_tor_site_5_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4944,
-    "z": 9200,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_6_akaviri_fort",
-    "name": "place.skycraft.malabal_tor_site_6_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4688,
-    "z": 9200,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_7_daedric_ruin",
-    "name": "place.skycraft.malabal_tor_site_7_daedric_ruin",
+    "id": "silven_white_graht_root_hollow",
+    "name": "place.skycraft.silven_white_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4432,
-    "z": 9200,
+    "x": -5996,
+    "z": 10732,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6123,15 +6059,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_site_8_breton_keep_ruin",
-    "name": "place.skycraft.malabal_tor_site_8_breton_keep_ruin",
+    "id": "ilaya_upper_ayleid_starlight_vault",
+    "name": "place.skycraft.ilaya_upper_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/malabal_tor",
-    "x": -5200,
-    "z": 9264,
+    "x": -5527,
+    "z": 10614,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6139,15 +6075,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_site_9_bandit_cave",
-    "name": "place.skycraft.malabal_tor_site_9_bandit_cave",
+    "id": "pact_hollow_sacred_graht_oak_grove",
+    "name": "place.skycraft.pact_hollow_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4944,
-    "z": 9264,
+    "x": -6953,
+    "z": 9993,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6155,315 +6091,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_site_10_troll_cave",
-    "name": "place.skycraft.malabal_tor_site_10_troll_cave",
+    "id": "baand_silver_wood_orc_timber_stockade",
+    "name": "place.skycraft.baand_silver_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4688,
-    "z": 9264,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_11_ice_cave",
-    "name": "place.skycraft.malabal_tor_site_11_ice_cave",
-    "type": "dungeon_fixed",
-    "variant": "ice_cave",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4976,
-    "z": 9296,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_12_sixth_house_base",
-    "name": "place.skycraft.malabal_tor_site_12_sixth_house_base",
-    "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4720,
-    "z": 9296,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_13_scorpion_den",
-    "name": "place.skycraft.malabal_tor_site_13_scorpion_den",
-    "type": "dungeon_fixed",
-    "variant": "scorpion_den",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4464,
-    "z": 9296,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_14_necromancer_lair",
-    "name": "place.skycraft.malabal_tor_site_14_necromancer_lair",
-    "type": "dungeon_fixed",
-    "variant": "necromancer_lair",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5008,
-    "z": 9328,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_15_hagraven_lair",
-    "name": "place.skycraft.malabal_tor_site_15_hagraven_lair",
-    "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4496,
-    "z": 9328,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_16_giant_camp",
-    "name": "place.skycraft.malabal_tor_site_16_giant_camp",
-    "type": "dungeon_fixed",
-    "variant": "giant_camp",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5328,
-    "z": 9360,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_17_dragon_lair",
-    "name": "place.skycraft.malabal_tor_site_17_dragon_lair",
-    "type": "dungeon_fixed",
-    "variant": "dragon_lair",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5072,
-    "z": 9360,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_18_watchtower",
-    "name": "place.skycraft.malabal_tor_site_18_watchtower",
-    "type": "dungeon_fixed",
-    "variant": "watchtower",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4816,
-    "z": 9360,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_19_cabin",
-    "name": "place.skycraft.malabal_tor_site_19_cabin",
-    "type": "dungeon_fixed",
-    "variant": "cabin",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4560,
-    "z": 9360,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_20_mage_tower",
-    "name": "place.skycraft.malabal_tor_site_20_mage_tower",
-    "type": "dungeon_fixed",
-    "variant": "mage_tower",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5168,
-    "z": 9392,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_21_imperial_camp",
-    "name": "place.skycraft.malabal_tor_site_21_imperial_camp",
-    "type": "dungeon_fixed",
-    "variant": "imperial_camp",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4912,
-    "z": 9392,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_22_nordic_ruin",
-    "name": "place.skycraft.malabal_tor_site_22_nordic_ruin",
-    "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4656,
-    "z": 9392,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_23_great_lift",
-    "name": "place.skycraft.malabal_tor_site_23_great_lift",
-    "type": "dungeon_fixed",
-    "variant": "great_lift",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4400,
-    "z": 9392,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_24_kolskeggr_mine",
-    "name": "place.skycraft.malabal_tor_site_24_kolskeggr_mine",
-    "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5392,
-    "z": 9424,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_site_25_bleak_falls_barrow",
-    "name": "place.skycraft.malabal_tor_site_25_bleak_falls_barrow",
-    "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5136,
-    "z": 9424,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_marker_1_standing_stone",
-    "name": "place.skycraft.malabal_tor_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4880,
-    "z": 9424,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_marker_2_word_wall",
-    "name": "place.skycraft.malabal_tor_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4624,
-    "z": 9424,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_marker_3_dragon_mound",
-    "name": "place.skycraft.malabal_tor_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -4368,
-    "z": 9424,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_marker_4_azura",
-    "name": "place.skycraft.malabal_tor_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/malabal_tor",
     "x": -5424,
-    "z": 9456,
+    "z": 9489,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6471,14 +6107,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_5_boethiah",
-    "name": "place.skycraft.malabal_tor_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
+    "id": "jodep_scarlet_hoarvor_hound_warren",
+    "name": "place.skycraft.jodep_scarlet_hoarvor_hound_warren",
+    "type": "dungeon_fixed",
+    "variant": "hound_den",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -5168,
-    "z": 9456,
+    "x": -6411,
+    "z": 10821,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6486,14 +6123,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_6_mephala",
-    "name": "place.skycraft.malabal_tor_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
+    "id": "quern_ashen_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.quern_ashen_y_ffre_canopy_sanctuary",
+    "type": "dungeon_fixed",
+    "variant": "canopy_shrine",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4912,
-    "z": 9456,
+    "x": -6769,
+    "z": 10444,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6501,14 +6139,286 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_7_altar",
-    "name": "place.skycraft.malabal_tor_marker_7_altar",
+    "id": "crimson_sacred_tree_sap_tracker_camp",
+    "name": "place.skycraft.crimson_sacred_tree_sap_tracker_camp",
+    "type": "dungeon_fixed",
+    "variant": "hunter_camp",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6857,
+    "z": 10764,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "kharp_cinder_treethane_bough_hall",
+    "name": "place.skycraft.kharp_cinder_treethane_bough_hall",
+    "type": "dungeon_fixed",
+    "variant": "treethane_seat",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4472,
+    "z": 10223,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ragn_deep_heartwood_tree_tomb",
+    "name": "place.skycraft.ragn_deep_heartwood_tree_tomb",
+    "type": "dungeon_fixed",
+    "variant": "tree_tomb",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4299,
+    "z": 9797,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "drubl_obsidian_green_pact_ossuary",
+    "name": "place.skycraft.drubl_obsidian_green_pact_ossuary",
+    "type": "dungeon_fixed",
+    "variant": "bosmer_ossuary",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6009,
+    "z": 9870,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "lorkh_dusk_graht_root_hollow",
+    "name": "place.skycraft.lorkh_dusk_graht_root_hollow",
+    "type": "dungeon_fixed",
+    "variant": "root_hollow",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5425,
+    "z": 10187,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "strid_golden_ayleid_starlight_vault",
+    "name": "place.skycraft.strid_golden_ayleid_starlight_vault",
+    "type": "dungeon_fixed",
+    "variant": "ayleid_ruin",
+    "class": "minor",
+    "culture": "ayleid",
+    "region": "valenwood/malabal_tor",
+    "x": -5449,
+    "z": 10539,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fullm_inner_sacred_graht_oak_grove",
+    "name": "place.skycraft.fullm_inner_sacred_graht_oak_grove",
+    "type": "dungeon_fixed",
+    "variant": "graht_grove",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5864,
+    "z": 10482,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "malab_shrouded_wood_orc_timber_stockade",
+    "name": "place.skycraft.malab_shrouded_wood_orc_timber_stockade",
+    "type": "dungeon_fixed",
+    "variant": "wood_orc_camp",
+    "class": "minor",
+    "culture": "orc",
+    "region": "valenwood/malabal_tor",
+    "x": -5544,
+    "z": 9623,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tempest_basal_hoarvor_hound_warren",
+    "name": "place.skycraft.tempest_basal_hoarvor_hound_warren",
+    "type": "dungeon_fixed",
+    "variant": "hound_den",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4564,
+    "z": 9777,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "galen_iron_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.galen_iron_y_ffre_canopy_sanctuary",
+    "type": "dungeon_fixed",
+    "variant": "canopy_shrine",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4555,
+    "z": 9260,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "naril_gilded_tree_sap_tracker_camp",
+    "name": "place.skycraft.naril_gilded_tree_sap_tracker_camp",
+    "type": "dungeon_fixed",
+    "variant": "hunter_camp",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6329,
+    "z": 10603,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "vulkw_forbidden_treethane_bough_hall",
+    "name": "place.skycraft.vulkw_forbidden_treethane_bough_hall",
+    "type": "dungeon_fixed",
+    "variant": "treethane_seat",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -4910,
+    "z": 9782,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "hoarv_pale_heartwood_tree_tomb",
+    "name": "place.skycraft.hoarv_pale_heartwood_tree_tomb",
+    "type": "dungeon_fixed",
+    "variant": "tree_tomb",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5780,
+    "z": 10100,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ouze_high_green_pact_ossuary",
+    "name": "place.skycraft.ouze_high_green_pact_ossuary",
+    "type": "dungeon_fixed",
+    "variant": "bosmer_ossuary",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6473,
+    "z": 9710,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "silven_amber_graht_root_hollow",
+    "name": "place.skycraft.silven_amber_graht_root_hollow",
+    "type": "dungeon_fixed",
+    "variant": "root_hollow",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6162,
+    "z": 10519,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ilaya_storm_ayleid_starlight_vault",
+    "name": "place.skycraft.ilaya_storm_ayleid_starlight_vault",
+    "type": "dungeon_fixed",
+    "variant": "ayleid_ruin",
+    "class": "minor",
+    "culture": "ayleid",
+    "region": "valenwood/malabal_tor",
+    "x": -5551,
+    "z": 10484,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pact_jade_sacred_graht_oak_grove",
+    "name": "place.skycraft.pact_jade_sacred_graht_oak_grove",
+    "type": "dungeon_fixed",
+    "variant": "graht_grove",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5081,
+    "z": 9684,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "baand_outer_wilderking_glade",
+    "name": "place.skycraft.baand_outer_wilderking_glade",
     "type": "landmark",
-    "variant": "altar",
+    "variant": "graht_grove",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4656,
-    "z": 9456,
+    "x": -6475,
+    "z": 10102,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6516,14 +6426,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_8_monument",
-    "name": "place.skycraft.malabal_tor_marker_8_monument",
+    "id": "jodep_ancient_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.jodep_ancient_camoran_dynasty_bough_stele",
     "type": "landmark",
     "variant": "monument",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4400,
-    "z": 9456,
+    "x": -4403,
+    "z": 9592,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6531,14 +6441,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_9_ruin",
-    "name": "place.skycraft.malabal_tor_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
+    "id": "quern_verdant_earth_bone_henge",
+    "name": "place.skycraft.quern_verdant_earth_bone_henge",
+    "type": "standing_stone",
+    "variant": "stones",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -5552,
-    "z": 9488,
+    "x": -4971,
+    "z": 10292,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6546,29 +6456,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_10_peak",
-    "name": "place.skycraft.malabal_tor_marker_10_peak",
-    "type": "landmark",
-    "variant": "peak",
-    "culture": "bosmer",
-    "region": "valenwood/malabal_tor",
-    "x": -5296,
-    "z": 9488,
-    "why": [
-      "malabal_tor.L1.jungle_floor",
-      "malabal_tor.L1.xylo_gorge"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "malabal_tor_marker_11_pass",
-    "name": "place.skycraft.malabal_tor_marker_11_pass",
+    "id": "crimson_bronze_canopy_rope_pass",
+    "name": "place.skycraft.crimson_bronze_canopy_rope_pass",
     "type": "landmark",
     "variant": "pass",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4784,
-    "z": 9488,
+    "x": -4490,
+    "z": 10087,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6576,14 +6471,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_12_source",
-    "name": "place.skycraft.malabal_tor_marker_12_source",
+    "id": "kharp_silent_crown_bough_lookout",
+    "name": "place.skycraft.kharp_silent_crown_bough_lookout",
     "type": "landmark",
-    "variant": "source",
+    "variant": "peak",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -4528,
-    "z": 9488,
+    "x": -5305,
+    "z": 10059,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6591,14 +6486,119 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "malabal_tor_marker_13_eyrie",
-    "name": "place.skycraft.malabal_tor_marker_13_eyrie",
+    "id": "ragn_twilight_fern_veil_cascade",
+    "name": "place.skycraft.ragn_twilight_fern_veil_cascade",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "waterfall",
     "culture": "bosmer",
     "region": "valenwood/malabal_tor",
-    "x": -6416,
-    "z": 9520,
+    "x": -5100,
+    "z": 10677,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "drubl_black_hircine_s_hunt_altar",
+    "name": "place.skycraft.drubl_black_hircine_s_hunt_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "daedric",
+    "region": "valenwood/malabal_tor",
+    "x": -5204,
+    "z": 9737,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "lorkh_lower_spinner_s_story_shrine",
+    "name": "place.skycraft.lorkh_lower_spinner_s_story_shrine",
+    "type": "landmark",
+    "variant": "canopy_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -7032,
+    "z": 10476,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "strid_verdigris_wilderking_glade",
+    "name": "place.skycraft.strid_verdigris_wilderking_glade",
+    "type": "landmark",
+    "variant": "graht_grove",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6699,
+    "z": 10160,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fullm_ember_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.fullm_ember_camoran_dynasty_bough_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6936,
+    "z": 10201,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "malab_cobalt_earth_bone_henge",
+    "name": "place.skycraft.malab_cobalt_earth_bone_henge",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5291,
+    "z": 10827,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tempest_sunken_canopy_rope_pass",
+    "name": "place.skycraft.tempest_sunken_canopy_rope_pass",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6483,
+    "z": 9895,
+    "why": [
+      "malabal_tor.L1.jungle_floor",
+      "malabal_tor.L1.xylo_gorge"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "galen_weathered_crown_bough_lookout",
+    "name": "place.skycraft.galen_weathered_crown_bough_lookout",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -6121,
+    "z": 10419,
     "why": [
       "malabal_tor.L1.jungle_floor",
       "malabal_tor.L1.xylo_gorge"
@@ -6725,15 +6725,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_1_barrow",
-    "name": "place.skycraft.reapers_march_site_1_barrow",
+    "id": "lunar_crimson_heartwood_tree_tomb",
+    "name": "place.skycraft.lunar_crimson_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -4112,
-    "z": 9200,
+    "x": -2509,
+    "z": 10599,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6741,15 +6741,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_2_dwemer_ruin",
-    "name": "place.skycraft.reapers_march_site_2_dwemer_ruin",
+    "id": "thib_dawn_green_pact_ossuary",
+    "name": "place.skycraft.thib_dawn_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3024,
-    "z": 9200,
+    "x": -3051,
+    "z": 9896,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6757,63 +6757,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_3_fort",
-    "name": "place.skycraft.reapers_march_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/reapers_march",
-    "x": -2576,
-    "z": 9200,
-    "why": [
-      "reapers_march.L1.knolls",
-      "reapers_march.L1.strid_valley"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "reapers_march_site_4_fort_mage",
-    "name": "place.skycraft.reapers_march_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/reapers_march",
-    "x": -2128,
-    "z": 9200,
-    "why": [
-      "reapers_march.L1.knolls",
-      "reapers_march.L1.strid_valley"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "reapers_march_site_5_akaviri_fort",
-    "name": "place.skycraft.reapers_march_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/reapers_march",
-    "x": -1680,
-    "z": 9200,
-    "why": [
-      "reapers_march.L1.knolls",
-      "reapers_march.L1.strid_valley"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "reapers_march_site_6_daedric_ruin",
-    "name": "place.skycraft.reapers_march_site_6_daedric_ruin",
+    "id": "rawlk_white_graht_root_hollow",
+    "name": "place.skycraft.rawlk_white_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3504,
-    "z": 9232,
+    "x": -2317,
+    "z": 9491,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6821,15 +6773,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_7_breton_keep_ruin",
-    "name": "place.skycraft.reapers_march_site_7_breton_keep_ruin",
+    "id": "moonm_upper_ayleid_starlight_vault",
+    "name": "place.skycraft.moonm_upper_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/reapers_march",
-    "x": -3056,
-    "z": 9232,
+    "x": -3272,
+    "z": 10223,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6837,15 +6789,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_8_bandit_cave",
-    "name": "place.skycraft.reapers_march_site_8_bandit_cave",
+    "id": "urcel_hollow_sacred_graht_oak_grove",
+    "name": "place.skycraft.urcel_hollow_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2608,
-    "z": 9232,
+    "x": -3754,
+    "z": 9970,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6853,15 +6805,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_9_troll_cave",
-    "name": "place.skycraft.reapers_march_site_9_troll_cave",
+    "id": "dune_v_silver_wood_orc_timber_stockade",
+    "name": "place.skycraft.dune_v_silver_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/reapers_march",
-    "x": -2160,
-    "z": 9232,
+    "x": -3959,
+    "z": 9896,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6869,15 +6821,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_10_ice_cave",
-    "name": "place.skycraft.reapers_march_site_10_ice_cave",
+    "id": "nothw_scarlet_hoarvor_hound_warren",
+    "name": "place.skycraft.nothw_scarlet_hoarvor_hound_warren",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "hound_den",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -1712,
-    "z": 9232,
+    "x": -2233,
+    "z": 11700,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6885,15 +6837,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_11_sixth_house_base",
-    "name": "place.skycraft.reapers_march_site_11_sixth_house_base",
+    "id": "vined_ashen_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.vined_ashen_y_ffre_canopy_sanctuary",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "canopy_shrine",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3952,
-    "z": 9264,
+    "x": -2925,
+    "z": 9171,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6901,15 +6853,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_12_scorpion_den",
-    "name": "place.skycraft.reapers_march_site_12_scorpion_den",
+    "id": "falin_sacred_tree_sap_tracker_camp",
+    "name": "place.skycraft.falin_sacred_tree_sap_tracker_camp",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "hunter_camp",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3920,
-    "z": 9296,
+    "x": -3335,
+    "z": 9846,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6917,15 +6869,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_13_hagraven_lair",
-    "name": "place.skycraft.reapers_march_site_13_hagraven_lair",
+    "id": "oldg_cinder_treethane_bough_hall",
+    "name": "place.skycraft.oldg_cinder_treethane_bough_hall",
     "type": "dungeon_fixed",
-    "variant": "hagraven_lair",
+    "variant": "treethane_seat",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3472,
-    "z": 9296,
+    "x": -2357,
+    "z": 10382,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6933,15 +6885,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_14_giant_camp",
-    "name": "place.skycraft.reapers_march_site_14_giant_camp",
+    "id": "willg_deep_heartwood_tree_tomb",
+    "name": "place.skycraft.willg_deep_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3024,
-    "z": 9296,
+    "x": -2992,
+    "z": 12089,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6949,15 +6901,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_15_dragon_lair",
-    "name": "place.skycraft.reapers_march_site_15_dragon_lair",
+    "id": "greenh_obsidian_green_pact_ossuary",
+    "name": "place.skycraft.greenh_obsidian_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2576,
-    "z": 9296,
+    "x": -1959,
+    "z": 9547,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6965,15 +6917,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_16_watchtower",
-    "name": "place.skycraft.reapers_march_site_16_watchtower",
+    "id": "paal_dusk_graht_root_hollow",
+    "name": "place.skycraft.paal_dusk_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2128,
-    "z": 9296,
+    "x": -1684,
+    "z": 9268,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6981,15 +6933,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_17_cabin",
-    "name": "place.skycraft.reapers_march_site_17_cabin",
+    "id": "xylo_golden_ayleid_starlight_vault",
+    "name": "place.skycraft.xylo_golden_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/reapers_march",
-    "x": -4304,
-    "z": 9328,
+    "x": -2446,
+    "z": 9225,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -6997,15 +6949,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_18_mage_tower",
-    "name": "place.skycraft.reapers_march_site_18_mage_tower",
+    "id": "jodew_inner_sacred_graht_oak_grove",
+    "name": "place.skycraft.jodew_inner_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3856,
-    "z": 9328,
+    "x": -3432,
+    "z": 9559,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7013,15 +6965,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_19_imperial_camp",
-    "name": "place.skycraft.reapers_march_site_19_imperial_camp",
+    "id": "reap_shrouded_wood_orc_timber_stockade",
+    "name": "place.skycraft.reap_shrouded_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/reapers_march",
-    "x": -3408,
-    "z": 9328,
+    "x": -3762,
+    "z": 9625,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7029,15 +6981,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_20_nordic_ruin",
-    "name": "place.skycraft.reapers_march_site_20_nordic_ruin",
+    "id": "yffr_basal_hoarvor_hound_warren",
+    "name": "place.skycraft.yffr_basal_hoarvor_hound_warren",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "hound_den",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2960,
-    "z": 9328,
+    "x": -3063,
+    "z": 11433,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7045,15 +6997,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_21_great_lift",
-    "name": "place.skycraft.reapers_march_site_21_great_lift",
+    "id": "khenp_iron_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.khenp_iron_y_ffre_canopy_sanctuary",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "canopy_shrine",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2512,
-    "z": 9328,
+    "x": -2998,
+    "z": 11286,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7061,15 +7013,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_22_kolskeggr_mine",
-    "name": "place.skycraft.reapers_march_site_22_kolskeggr_mine",
+    "id": "sench_gilded_tree_sap_tracker_camp",
+    "name": "place.skycraft.sench_gilded_tree_sap_tracker_camp",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "hunter_camp",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2064,
-    "z": 9328,
+    "x": -2295,
+    "z": 11154,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7077,15 +7029,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_site_23_bleak_falls_barrow",
-    "name": "place.skycraft.reapers_march_site_23_bleak_falls_barrow",
+    "id": "arenth_forbidden_treethane_bough_hall",
+    "name": "place.skycraft.arenth_forbidden_treethane_bough_hall",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "treethane_seat",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -4208,
-    "z": 9360,
+    "x": -2643,
+    "z": 10444,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7093,14 +7045,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_1_standing_stone",
-    "name": "place.skycraft.reapers_march_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "lunar_pale_heartwood_tree_tomb",
+    "name": "place.skycraft.lunar_pale_heartwood_tree_tomb",
+    "type": "dungeon_fixed",
+    "variant": "tree_tomb",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3760,
-    "z": 9360,
+    "x": -3399,
+    "z": 10346,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7108,14 +7061,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_2_word_wall",
-    "name": "place.skycraft.reapers_march_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "thib_high_green_pact_ossuary",
+    "name": "place.skycraft.thib_high_green_pact_ossuary",
+    "type": "dungeon_fixed",
+    "variant": "bosmer_ossuary",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3312,
-    "z": 9360,
+    "x": -2090,
+    "z": 10835,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7123,14 +7077,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_3_dragon_mound",
-    "name": "place.skycraft.reapers_march_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "rawlk_amber_graht_root_hollow",
+    "name": "place.skycraft.rawlk_amber_graht_root_hollow",
+    "type": "dungeon_fixed",
+    "variant": "root_hollow",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2864,
-    "z": 9360,
+    "x": -2326,
+    "z": 9911,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7138,59 +7093,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_4_azura",
-    "name": "place.skycraft.reapers_march_marker_4_azura",
+    "id": "moonm_storm_hircine_s_hunt_altar",
+    "name": "place.skycraft.moonm_storm_hircine_s_hunt_altar",
     "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "bosmer",
-    "region": "valenwood/reapers_march",
-    "x": -2416,
-    "z": 9360,
-    "why": [
-      "reapers_march.L1.knolls",
-      "reapers_march.L1.strid_valley"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "reapers_march_marker_5_boethiah",
-    "name": "place.skycraft.reapers_march_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "bosmer",
-    "region": "valenwood/reapers_march",
-    "x": -1968,
-    "z": 9360,
-    "why": [
-      "reapers_march.L1.knolls",
-      "reapers_march.L1.strid_valley"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "reapers_march_marker_6_mephala",
-    "name": "place.skycraft.reapers_march_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "bosmer",
-    "region": "valenwood/reapers_march",
-    "x": -4080,
-    "z": 9392,
-    "why": [
-      "reapers_march.L1.knolls",
-      "reapers_march.L1.strid_valley"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "reapers_march_marker_7_altar",
-    "name": "place.skycraft.reapers_march_marker_7_altar",
-    "type": "landmark",
     "variant": "altar",
-    "culture": "bosmer",
+    "culture": "daedric",
     "region": "valenwood/reapers_march",
-    "x": -3632,
-    "z": 9392,
+    "x": -3763,
+    "z": 10357,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7198,14 +7108,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_8_monument",
-    "name": "place.skycraft.reapers_march_marker_8_monument",
+    "id": "urcel_jade_spinner_s_story_shrine",
+    "name": "place.skycraft.urcel_jade_spinner_s_story_shrine",
+    "type": "landmark",
+    "variant": "canopy_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -1831,
+    "z": 11823,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "dune_v_outer_wilderking_glade",
+    "name": "place.skycraft.dune_v_outer_wilderking_glade",
+    "type": "landmark",
+    "variant": "graht_grove",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2823,
+    "z": 10713,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "nothw_ancient_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.nothw_ancient_camoran_dynasty_bough_stele",
     "type": "landmark",
     "variant": "monument",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3184,
-    "z": 9392,
+    "x": -2008,
+    "z": 10603,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7213,14 +7153,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_9_peak",
-    "name": "place.skycraft.reapers_march_marker_9_peak",
-    "type": "landmark",
-    "variant": "peak",
+    "id": "vined_verdant_earth_bone_henge",
+    "name": "place.skycraft.vined_verdant_earth_bone_henge",
+    "type": "standing_stone",
+    "variant": "stones",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -2736,
-    "z": 9392,
+    "x": -1930,
+    "z": 10889,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7228,14 +7168,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_10_pass",
-    "name": "place.skycraft.reapers_march_marker_10_pass",
+    "id": "falin_bronze_canopy_rope_pass",
+    "name": "place.skycraft.falin_bronze_canopy_rope_pass",
     "type": "landmark",
     "variant": "pass",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -1840,
-    "z": 9392,
+    "x": -2132,
+    "z": 10476,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7243,14 +7183,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_11_rock",
-    "name": "place.skycraft.reapers_march_marker_11_rock",
+    "id": "oldg_silent_crown_bough_lookout",
+    "name": "place.skycraft.oldg_silent_crown_bough_lookout",
     "type": "landmark",
-    "variant": "rock",
+    "variant": "peak",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3952,
-    "z": 9424,
+    "x": -2006,
+    "z": 9876,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7258,14 +7198,74 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "reapers_march_marker_12_eyrie",
-    "name": "place.skycraft.reapers_march_marker_12_eyrie",
+    "id": "willg_twilight_fern_veil_cascade",
+    "name": "place.skycraft.willg_twilight_fern_veil_cascade",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "waterfall",
     "culture": "bosmer",
     "region": "valenwood/reapers_march",
-    "x": -3056,
-    "z": 9424,
+    "x": -1838,
+    "z": 11945,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "greenh_black_hircine_s_hunt_altar",
+    "name": "place.skycraft.greenh_black_hircine_s_hunt_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "daedric",
+    "region": "valenwood/reapers_march",
+    "x": -3655,
+    "z": 9449,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "paal_lower_spinner_s_story_shrine",
+    "name": "place.skycraft.paal_lower_spinner_s_story_shrine",
+    "type": "landmark",
+    "variant": "canopy_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -1813,
+    "z": 12138,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "xylo_verdigris_wilderking_glade",
+    "name": "place.skycraft.xylo_verdigris_wilderking_glade",
+    "type": "landmark",
+    "variant": "graht_grove",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2039,
+    "z": 10229,
+    "why": [
+      "reapers_march.L1.knolls",
+      "reapers_march.L1.strid_valley"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "jodew_ember_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.jodew_ember_camoran_dynasty_bough_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "bosmer",
+    "region": "valenwood/reapers_march",
+    "x": -2187,
+    "z": 12322,
     "why": [
       "reapers_march.L1.knolls",
       "reapers_march.L1.strid_valley"
@@ -7392,15 +7392,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_1_barrow",
-    "name": "place.skycraft.grahtwood_site_1_barrow",
+    "id": "lael_crimson_heartwood_tree_tomb",
+    "name": "place.skycraft.lael_crimson_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3472,
-    "z": 10512,
+    "x": -5113,
+    "z": 11895,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7408,15 +7408,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_2_dwemer_ruin",
-    "name": "place.skycraft.grahtwood_site_2_dwemer_ruin",
+    "id": "sapw_dawn_green_pact_ossuary",
+    "name": "place.skycraft.sapw_dawn_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4112,
-    "z": 10544,
+    "x": -4568,
+    "z": 13607,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7424,63 +7424,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_3_fort",
-    "name": "place.skycraft.grahtwood_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -4912,
-    "z": 10576,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_site_4_fort_mage",
-    "name": "place.skycraft.grahtwood_site_4_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -4144,
-    "z": 10576,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_site_5_akaviri_fort",
-    "name": "place.skycraft.grahtwood_site_5_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -3376,
-    "z": 10576,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_site_6_daedric_ruin",
-    "name": "place.skycraft.grahtwood_site_6_daedric_ruin",
+    "id": "haven_white_graht_root_hollow",
+    "name": "place.skycraft.haven_white_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4272,
-    "z": 10608,
+    "x": -2740,
+    "z": 13654,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7488,15 +7440,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_7_breton_keep_ruin",
-    "name": "place.skycraft.grahtwood_site_7_breton_keep_ruin",
+    "id": "mobil_upper_ayleid_starlight_vault",
+    "name": "place.skycraft.mobil_upper_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/grahtwood",
-    "x": -3504,
-    "z": 10608,
+    "x": -3411,
+    "z": 12329,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7504,15 +7456,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_8_bandit_cave",
-    "name": "place.skycraft.grahtwood_site_8_bandit_cave",
+    "id": "tarla_hollow_sacred_graht_oak_grove",
+    "name": "place.skycraft.tarla_hollow_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4400,
-    "z": 10640,
+    "x": -4209,
+    "z": 12040,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7520,15 +7472,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_9_troll_cave",
-    "name": "place.skycraft.grahtwood_site_9_troll_cave",
+    "id": "southp_silver_wood_orc_timber_stockade",
+    "name": "place.skycraft.southp_silver_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/grahtwood",
-    "x": -3632,
-    "z": 10640,
+    "x": -4204,
+    "z": 10772,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7536,15 +7488,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_10_ice_cave",
-    "name": "place.skycraft.grahtwood_site_10_ice_cave",
+    "id": "ne_qu_scarlet_hoarvor_hound_warren",
+    "name": "place.skycraft.ne_qu_scarlet_hoarvor_hound_warren",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "hound_den",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4624,
-    "z": 10672,
+    "x": -4876,
+    "z": 10923,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7552,15 +7504,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_11_sixth_house_base",
-    "name": "place.skycraft.grahtwood_site_11_sixth_house_base",
+    "id": "ulv_ashen_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.ulv_ashen_y_ffre_canopy_sanctuary",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "canopy_shrine",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4848,
-    "z": 10704,
+    "x": -4465,
+    "z": 12366,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7568,15 +7520,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_12_scorpion_den",
-    "name": "place.skycraft.grahtwood_site_12_scorpion_den",
+    "id": "karth_sacred_tree_sap_tracker_camp",
+    "name": "place.skycraft.karth_sacred_tree_sap_tracker_camp",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "hunter_camp",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4080,
-    "z": 10704,
+    "x": -2094,
+    "z": 14125,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7584,15 +7536,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_13_giant_camp",
-    "name": "place.skycraft.grahtwood_site_13_giant_camp",
+    "id": "orrery_cinder_treethane_bough_hall",
+    "name": "place.skycraft.orrery_cinder_treethane_bough_hall",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "treethane_seat",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3312,
-    "z": 10704,
+    "x": -4054,
+    "z": 13199,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7600,15 +7552,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_14_dragon_lair",
-    "name": "place.skycraft.grahtwood_site_14_dragon_lair",
+    "id": "valen_deep_heartwood_tree_tomb",
+    "name": "place.skycraft.valen_deep_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4368,
-    "z": 10736,
+    "x": -2509,
+    "z": 12652,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7616,15 +7568,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_15_watchtower",
-    "name": "place.skycraft.grahtwood_site_15_watchtower",
+    "id": "corm_obsidian_green_pact_ossuary",
+    "name": "place.skycraft.corm_obsidian_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4688,
-    "z": 10768,
+    "x": -4499,
+    "z": 12598,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7632,15 +7584,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_16_mage_tower",
-    "name": "place.skycraft.grahtwood_site_16_mage_tower",
+    "id": "pali_dusk_graht_root_hollow",
+    "name": "place.skycraft.pali_dusk_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3920,
-    "z": 10768,
+    "x": -4535,
+    "z": 13335,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7648,15 +7600,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_17_imperial_camp",
-    "name": "place.skycraft.grahtwood_site_17_imperial_camp",
+    "id": "wormr_golden_ayleid_starlight_vault",
+    "name": "place.skycraft.wormr_golden_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "imperial_camp",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/grahtwood",
-    "x": -5008,
-    "z": 10800,
+    "x": -5110,
+    "z": 11436,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7664,15 +7616,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_18_nordic_ruin",
-    "name": "place.skycraft.grahtwood_site_18_nordic_ruin",
+    "id": "bough_inner_sacred_graht_oak_grove",
+    "name": "place.skycraft.bough_inner_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4240,
-    "z": 10800,
+    "x": -1974,
+    "z": 14196,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7680,15 +7632,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_19_great_lift",
-    "name": "place.skycraft.grahtwood_site_19_great_lift",
+    "id": "quend_shrouded_wood_orc_timber_stockade",
+    "name": "place.skycraft.quend_shrouded_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/grahtwood",
-    "x": -3472,
-    "z": 10800,
+    "x": -3399,
+    "z": 13305,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7696,15 +7648,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_20_kolskeggr_mine",
-    "name": "place.skycraft.grahtwood_site_20_kolskeggr_mine",
+    "id": "yffre_basal_hoarvor_hound_warren",
+    "name": "place.skycraft.yffre_basal_hoarvor_hound_warren",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "hound_den",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4560,
-    "z": 10832,
+    "x": -4274,
+    "z": 13807,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7712,15 +7664,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_site_21_bleak_falls_barrow",
-    "name": "place.skycraft.grahtwood_site_21_bleak_falls_barrow",
+    "id": "graht_iron_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.graht_iron_y_ffre_canopy_sanctuary",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "canopy_shrine",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3792,
-    "z": 10832,
+    "x": -2744,
+    "z": 13966,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7728,14 +7680,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_1_standing_stone",
-    "name": "place.skycraft.grahtwood_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "redf_gilded_tree_sap_tracker_camp",
+    "name": "place.skycraft.redf_gilded_tree_sap_tracker_camp",
+    "type": "dungeon_fixed",
+    "variant": "hunter_camp",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4880,
-    "z": 10864,
+    "x": -4075,
+    "z": 13927,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7743,14 +7696,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_2_word_wall",
-    "name": "place.skycraft.grahtwood_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "elden_forbidden_treethane_bough_hall",
+    "name": "place.skycraft.elden_forbidden_treethane_bough_hall",
+    "type": "dungeon_fixed",
+    "variant": "treethane_seat",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4112,
-    "z": 10864,
+    "x": -2956,
+    "z": 12423,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7758,14 +7712,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_3_dragon_mound",
-    "name": "place.skycraft.grahtwood_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "lael_pale_heartwood_tree_tomb",
+    "name": "place.skycraft.lael_pale_heartwood_tree_tomb",
+    "type": "dungeon_fixed",
+    "variant": "tree_tomb",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3344,
-    "z": 10864,
+    "x": -3370,
+    "z": 13077,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7773,119 +7728,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_4_azura",
-    "name": "place.skycraft.grahtwood_marker_4_azura",
-    "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -4496,
-    "z": 10896,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_5_boethiah",
-    "name": "place.skycraft.grahtwood_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -3728,
-    "z": 10896,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_6_mephala",
-    "name": "place.skycraft.grahtwood_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -4912,
-    "z": 10928,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_7_altar",
-    "name": "place.skycraft.grahtwood_marker_7_altar",
-    "type": "landmark",
-    "variant": "altar",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -4144,
-    "z": 10928,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_8_monument",
-    "name": "place.skycraft.grahtwood_marker_8_monument",
-    "type": "landmark",
-    "variant": "monument",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -3376,
-    "z": 10928,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_9_ruin",
-    "name": "place.skycraft.grahtwood_marker_9_ruin",
-    "type": "landmark",
-    "variant": "ruin",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -4560,
-    "z": 10960,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_10_stones",
-    "name": "place.skycraft.grahtwood_marker_10_stones",
-    "type": "landmark",
-    "variant": "stones",
-    "culture": "bosmer",
-    "region": "valenwood/grahtwood",
-    "x": -3792,
-    "z": 10960,
-    "why": [
-      "grahtwood.L1.elden_grove_soil",
-      "grahtwood.L1.grahtwood_sinks"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "grahtwood_marker_11_peak",
-    "name": "place.skycraft.grahtwood_marker_11_peak",
+    "id": "sapw_high_crown_bough_lookout",
+    "name": "place.skycraft.sapw_high_crown_bough_lookout",
     "type": "landmark",
     "variant": "peak",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4976,
-    "z": 10992,
+    "x": -4395,
+    "z": 13349,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7893,14 +7743,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_12_waterfall",
-    "name": "place.skycraft.grahtwood_marker_12_waterfall",
+    "id": "haven_amber_fern_veil_cascade",
+    "name": "place.skycraft.haven_amber_fern_veil_cascade",
     "type": "landmark",
     "variant": "waterfall",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4208,
-    "z": 10992,
+    "x": -5035,
+    "z": 14057,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7908,14 +7758,29 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_13_clearing",
-    "name": "place.skycraft.grahtwood_marker_13_clearing",
+    "id": "mobil_storm_hircine_s_hunt_altar",
+    "name": "place.skycraft.mobil_storm_hircine_s_hunt_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "daedric",
+    "region": "valenwood/grahtwood",
+    "x": -2184,
+    "z": 13621,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "tarla_jade_spinner_s_story_shrine",
+    "name": "place.skycraft.tarla_jade_spinner_s_story_shrine",
     "type": "landmark",
-    "variant": "clearing",
+    "variant": "canopy_shrine",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3440,
-    "z": 10992,
+    "x": -4018,
+    "z": 11887,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7923,14 +7788,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_14_campsite",
-    "name": "place.skycraft.grahtwood_marker_14_campsite",
+    "id": "southp_outer_wilderking_glade",
+    "name": "place.skycraft.southp_outer_wilderking_glade",
     "type": "landmark",
-    "variant": "campsite",
+    "variant": "graht_grove",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4624,
-    "z": 11024,
+    "x": -3737,
+    "z": 13771,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7938,14 +7803,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_15_pass",
-    "name": "place.skycraft.grahtwood_marker_15_pass",
+    "id": "ne_qu_ancient_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.ne_qu_ancient_camoran_dynasty_bough_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -2259,
+    "z": 14160,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "ulv_verdant_earth_bone_henge",
+    "name": "place.skycraft.ulv_verdant_earth_bone_henge",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4783,
+    "z": 13996,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "karth_bronze_canopy_rope_pass",
+    "name": "place.skycraft.karth_bronze_canopy_rope_pass",
     "type": "landmark",
     "variant": "pass",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3856,
-    "z": 11024,
+    "x": -3512,
+    "z": 11129,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7953,14 +7848,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_16_rock",
-    "name": "place.skycraft.grahtwood_marker_16_rock",
+    "id": "orrery_silent_crown_bough_lookout",
+    "name": "place.skycraft.orrery_silent_crown_bough_lookout",
     "type": "landmark",
-    "variant": "rock",
+    "variant": "peak",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -5040,
-    "z": 11056,
+    "x": -4081,
+    "z": 10573,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7968,14 +7863,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_17_source",
-    "name": "place.skycraft.grahtwood_marker_17_source",
+    "id": "valen_twilight_fern_veil_cascade",
+    "name": "place.skycraft.valen_twilight_fern_veil_cascade",
     "type": "landmark",
-    "variant": "source",
+    "variant": "waterfall",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -4272,
-    "z": 11056,
+    "x": -3305,
+    "z": 11350,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -7983,14 +7878,119 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "grahtwood_marker_18_eyrie",
-    "name": "place.skycraft.grahtwood_marker_18_eyrie",
+    "id": "corm_black_hircine_s_hunt_altar",
+    "name": "place.skycraft.corm_black_hircine_s_hunt_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "daedric",
+    "region": "valenwood/grahtwood",
+    "x": -3698,
+    "z": 11924,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "pali_lower_spinner_s_story_shrine",
+    "name": "place.skycraft.pali_lower_spinner_s_story_shrine",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "canopy_shrine",
     "culture": "bosmer",
     "region": "valenwood/grahtwood",
-    "x": -3504,
-    "z": 11056,
+    "x": -4749,
+    "z": 12399,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "wormr_verdigris_wilderking_glade",
+    "name": "place.skycraft.wormr_verdigris_wilderking_glade",
+    "type": "landmark",
+    "variant": "graht_grove",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4140,
+    "z": 12887,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "bough_ember_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.bough_ember_camoran_dynasty_bough_stele",
+    "type": "landmark",
+    "variant": "monument",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -3148,
+    "z": 12409,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "quend_cobalt_earth_bone_henge",
+    "name": "place.skycraft.quend_cobalt_earth_bone_henge",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -3021,
+    "z": 13207,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "yffre_sunken_canopy_rope_pass",
+    "name": "place.skycraft.yffre_sunken_canopy_rope_pass",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4884,
+    "z": 11382,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "graht_weathered_crown_bough_lookout",
+    "name": "place.skycraft.graht_weathered_crown_bough_lookout",
+    "type": "landmark",
+    "variant": "peak",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -2867,
+    "z": 13128,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L1.grahtwood_sinks"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "redf_whispering_fern_veil_cascade",
+    "name": "place.skycraft.redf_whispering_fern_veil_cascade",
+    "type": "landmark",
+    "variant": "waterfall",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -2221,
+    "z": 12876,
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
@@ -8134,15 +8134,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_1_barrow",
-    "name": "place.skycraft.greenshade_site_1_barrow",
+    "id": "boughw_crimson_heartwood_tree_tomb",
+    "name": "place.skycraft.boughw_crimson_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "barrow",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6704,
-    "z": 10896,
+    "x": -6028,
+    "z": 12689,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8150,15 +8150,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_2_dwemer_ruin",
-    "name": "place.skycraft.greenshade_site_2_dwemer_ruin",
+    "id": "ilmyr_dawn_green_pact_ossuary",
+    "name": "place.skycraft.ilmyr_dawn_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "dwemer_ruin",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6352,
-    "z": 10896,
+    "x": -5749,
+    "z": 12587,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8166,79 +8166,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_3_fort",
-    "name": "place.skycraft.greenshade_site_3_fort",
-    "type": "fort",
-    "variant": "fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -6000,
-    "z": 10896,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_site_4_keep",
-    "name": "place.skycraft.greenshade_site_4_keep",
-    "type": "fort",
-    "variant": "keep",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -5648,
-    "z": 10896,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_site_5_fort_mage",
-    "name": "place.skycraft.greenshade_site_5_fort_mage",
-    "type": "fort",
-    "variant": "fort_mage",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -5296,
-    "z": 10896,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_site_6_akaviri_fort",
-    "name": "place.skycraft.greenshade_site_6_akaviri_fort",
-    "type": "fort",
-    "variant": "akaviri_fort",
-    "class": "minor",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -6896,
-    "z": 10928,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_site_7_daedric_ruin",
-    "name": "place.skycraft.greenshade_site_7_daedric_ruin",
+    "id": "woodh_white_graht_root_hollow",
+    "name": "place.skycraft.woodh_white_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "daedric_ruin",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6544,
-    "z": 10928,
+    "x": -6580,
+    "z": 12396,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8246,15 +8182,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_8_breton_keep_ruin",
-    "name": "place.skycraft.greenshade_site_8_breton_keep_ruin",
+    "id": "canop_upper_ayleid_starlight_vault",
+    "name": "place.skycraft.canop_upper_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "breton_keep_ruin",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/greenshade",
-    "x": -6192,
-    "z": 10928,
+    "x": -6217,
+    "z": 12690,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8262,15 +8198,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_9_bandit_cave",
-    "name": "place.skycraft.greenshade_site_9_bandit_cave",
+    "id": "jungw_hollow_sacred_graht_oak_grove",
+    "name": "place.skycraft.jungw_hollow_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "bandit_cave",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5488,
-    "z": 10928,
+    "x": -5577,
+    "z": 13267,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8278,15 +8214,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_10_troll_cave",
-    "name": "place.skycraft.greenshade_site_10_troll_cave",
+    "id": "greenh_silver_wood_orc_timber_stockade",
+    "name": "place.skycraft.greenh_silver_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "troll_cave",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/greenshade",
-    "x": -5136,
-    "z": 10928,
+    "x": -6386,
+    "z": 12052,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8294,15 +8230,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_11_ice_cave",
-    "name": "place.skycraft.greenshade_site_11_ice_cave",
+    "id": "dril_scarlet_hoarvor_hound_warren",
+    "name": "place.skycraft.dril_scarlet_hoarvor_hound_warren",
     "type": "dungeon_fixed",
-    "variant": "ice_cave",
+    "variant": "hound_den",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6704,
-    "z": 10960,
+    "x": -6381,
+    "z": 11374,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8310,15 +8246,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_12_sixth_house_base",
-    "name": "place.skycraft.greenshade_site_12_sixth_house_base",
+    "id": "kors_ashen_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.kors_ashen_y_ffre_canopy_sanctuary",
     "type": "dungeon_fixed",
-    "variant": "sixth_house_base",
+    "variant": "canopy_shrine",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6352,
-    "z": 10960,
+    "x": -6343,
+    "z": 11787,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8326,15 +8262,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_13_scorpion_den",
-    "name": "place.skycraft.greenshade_site_13_scorpion_den",
+    "id": "longh_sacred_tree_sap_tracker_camp",
+    "name": "place.skycraft.longh_sacred_tree_sap_tracker_camp",
     "type": "dungeon_fixed",
-    "variant": "scorpion_den",
+    "variant": "hunter_camp",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6000,
-    "z": 10960,
+    "x": -5385,
+    "z": 11083,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8342,15 +8278,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_14_necromancer_lair",
-    "name": "place.skycraft.greenshade_site_14_necromancer_lair",
+    "id": "echop_cinder_treethane_bough_hall",
+    "name": "place.skycraft.echop_cinder_treethane_bough_hall",
     "type": "dungeon_fixed",
-    "variant": "necromancer_lair",
+    "variant": "treethane_seat",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5648,
-    "z": 10960,
+    "x": -6297,
+    "z": 11160,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8358,15 +8294,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_15_giant_camp",
-    "name": "place.skycraft.greenshade_site_15_giant_camp",
+    "id": "leafw_deep_heartwood_tree_tomb",
+    "name": "place.skycraft.leafw_deep_heartwood_tree_tomb",
     "type": "dungeon_fixed",
-    "variant": "giant_camp",
+    "variant": "tree_tomb",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6832,
-    "z": 10992,
+    "x": -5907,
+    "z": 11016,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8374,15 +8310,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_16_dragon_lair",
-    "name": "place.skycraft.greenshade_site_16_dragon_lair",
+    "id": "hectah_obsidian_green_pact_ossuary",
+    "name": "place.skycraft.hectah_obsidian_green_pact_ossuary",
     "type": "dungeon_fixed",
-    "variant": "dragon_lair",
+    "variant": "bosmer_ossuary",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6480,
-    "z": 10992,
+    "x": -5845,
+    "z": 12469,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8390,15 +8326,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_17_watchtower",
-    "name": "place.skycraft.greenshade_site_17_watchtower",
+    "id": "fernh_dusk_graht_root_hollow",
+    "name": "place.skycraft.fernh_dusk_graht_root_hollow",
     "type": "dungeon_fixed",
-    "variant": "watchtower",
+    "variant": "root_hollow",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5776,
-    "z": 10992,
+    "x": -5843,
+    "z": 11280,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8406,15 +8342,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_18_cabin",
-    "name": "place.skycraft.greenshade_site_18_cabin",
+    "id": "mistv_golden_ayleid_starlight_vault",
+    "name": "place.skycraft.mistv_golden_ayleid_starlight_vault",
     "type": "dungeon_fixed",
-    "variant": "cabin",
+    "variant": "ayleid_ruin",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "ayleid",
     "region": "valenwood/greenshade",
-    "x": -5424,
-    "z": 10992,
+    "x": -6385,
+    "z": 13163,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8422,15 +8358,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_19_mage_tower",
-    "name": "place.skycraft.greenshade_site_19_mage_tower",
+    "id": "veran_inner_sacred_graht_oak_grove",
+    "name": "place.skycraft.veran_inner_sacred_graht_oak_grove",
     "type": "dungeon_fixed",
-    "variant": "mage_tower",
+    "variant": "graht_grove",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6960,
-    "z": 11024,
+    "x": -5910,
+    "z": 11914,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8438,15 +8374,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_20_nordic_ruin",
-    "name": "place.skycraft.greenshade_site_20_nordic_ruin",
+    "id": "glade_shrouded_wood_orc_timber_stockade",
+    "name": "place.skycraft.glade_shrouded_wood_orc_timber_stockade",
     "type": "dungeon_fixed",
-    "variant": "nordic_ruin",
+    "variant": "wood_orc_camp",
     "class": "minor",
-    "culture": "bosmer",
+    "culture": "orc",
     "region": "valenwood/greenshade",
-    "x": -6608,
-    "z": 11024,
+    "x": -6218,
+    "z": 13353,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8454,15 +8390,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_21_great_lift",
-    "name": "place.skycraft.greenshade_site_21_great_lift",
+    "id": "netch_basal_hoarvor_hound_warren",
+    "name": "place.skycraft.netch_basal_hoarvor_hound_warren",
     "type": "dungeon_fixed",
-    "variant": "great_lift",
+    "variant": "hound_den",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6256,
-    "z": 11024,
+    "x": -5934,
+    "z": 12554,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8470,15 +8406,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_22_kolskeggr_mine",
-    "name": "place.skycraft.greenshade_site_22_kolskeggr_mine",
+    "id": "wilder_iron_y_ffre_canopy_sanctuary",
+    "name": "place.skycraft.wilder_iron_y_ffre_canopy_sanctuary",
     "type": "dungeon_fixed",
-    "variant": "kolskeggr_mine",
+    "variant": "canopy_shrine",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5904,
-    "z": 11024,
+    "x": -6155,
+    "z": 11847,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8486,15 +8422,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_site_23_bleak_falls_barrow",
-    "name": "place.skycraft.greenshade_site_23_bleak_falls_barrow",
+    "id": "hirc_gilded_tree_sap_tracker_camp",
+    "name": "place.skycraft.hirc_gilded_tree_sap_tracker_camp",
     "type": "dungeon_fixed",
-    "variant": "bleak_falls_barrow",
+    "variant": "hunter_camp",
     "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5552,
-    "z": 11024,
+    "x": -6247,
+    "z": 13065,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8502,14 +8438,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_1_standing_stone",
-    "name": "place.skycraft.greenshade_marker_1_standing_stone",
-    "type": "standing_stone",
-    "variant": "standing_stone",
+    "id": "marbr_forbidden_treethane_bough_hall",
+    "name": "place.skycraft.marbr_forbidden_treethane_bough_hall",
+    "type": "dungeon_fixed",
+    "variant": "treethane_seat",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5200,
-    "z": 11024,
+    "x": -6123,
+    "z": 13127,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8517,14 +8454,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_2_word_wall",
-    "name": "place.skycraft.greenshade_marker_2_word_wall",
-    "type": "word_wall",
-    "variant": "word_wall",
+    "id": "boughw_pale_heartwood_tree_tomb",
+    "name": "place.skycraft.boughw_pale_heartwood_tree_tomb",
+    "type": "dungeon_fixed",
+    "variant": "tree_tomb",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6768,
-    "z": 11056,
+    "x": -5590,
+    "z": 11688,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8532,14 +8470,15 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_3_dragon_mound",
-    "name": "place.skycraft.greenshade_marker_3_dragon_mound",
-    "type": "dragon_mound",
-    "variant": "dragon_mound",
+    "id": "ilmyr_high_green_pact_ossuary",
+    "name": "place.skycraft.ilmyr_high_green_pact_ossuary",
+    "type": "dungeon_fixed",
+    "variant": "bosmer_ossuary",
+    "class": "minor",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6416,
-    "z": 11056,
+    "x": -6265,
+    "z": 11446,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8547,59 +8486,30 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_4_azura",
-    "name": "place.skycraft.greenshade_marker_4_azura",
+    "id": "woodh_amber_graht_root_hollow",
+    "name": "place.skycraft.woodh_amber_graht_root_hollow",
+    "type": "dungeon_fixed",
+    "variant": "root_hollow",
+    "class": "minor",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -5137,
+    "z": 11089,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "canop_storm_hircine_s_hunt_altar",
+    "name": "place.skycraft.canop_storm_hircine_s_hunt_altar",
     "type": "daedric_shrine",
-    "variant": "azura",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -6064,
-    "z": 11056,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_marker_5_boethiah",
-    "name": "place.skycraft.greenshade_marker_5_boethiah",
-    "type": "daedric_shrine",
-    "variant": "boethiah",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -5712,
-    "z": 11056,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_marker_6_mephala",
-    "name": "place.skycraft.greenshade_marker_6_mephala",
-    "type": "daedric_shrine",
-    "variant": "mephala",
-    "culture": "bosmer",
-    "region": "valenwood/greenshade",
-    "x": -5360,
-    "z": 11056,
-    "why": [
-      "greenshade.L1.drowned_coast",
-      "greenshade.L1.mire_basins"
-    ],
-    "_r7_r12_v4": true
-  },
-  {
-    "id": "greenshade_marker_7_altar",
-    "name": "place.skycraft.greenshade_marker_7_altar",
-    "type": "landmark",
     "variant": "altar",
-    "culture": "bosmer",
+    "culture": "daedric",
     "region": "valenwood/greenshade",
-    "x": -6960,
-    "z": 11088,
+    "x": -6120,
+    "z": 13011,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8607,14 +8517,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_8_monument",
-    "name": "place.skycraft.greenshade_marker_8_monument",
+    "id": "jungw_jade_spinner_s_story_shrine",
+    "name": "place.skycraft.jungw_jade_spinner_s_story_shrine",
+    "type": "landmark",
+    "variant": "canopy_shrine",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6194,
+    "z": 12053,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "greenh_outer_wilderking_glade",
+    "name": "place.skycraft.greenh_outer_wilderking_glade",
+    "type": "landmark",
+    "variant": "graht_grove",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6068,
+    "z": 11380,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "dril_ancient_camoran_dynasty_bough_stele",
+    "name": "place.skycraft.dril_ancient_camoran_dynasty_bough_stele",
     "type": "landmark",
     "variant": "monument",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6608,
-    "z": 11088,
+    "x": -5329,
+    "z": 13069,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8622,14 +8562,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_9_peak",
-    "name": "place.skycraft.greenshade_marker_9_peak",
+    "id": "kors_verdant_earth_bone_henge",
+    "name": "place.skycraft.kors_verdant_earth_bone_henge",
+    "type": "standing_stone",
+    "variant": "stones",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -5742,
+    "z": 11373,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "longh_bronze_canopy_rope_pass",
+    "name": "place.skycraft.longh_bronze_canopy_rope_pass",
+    "type": "landmark",
+    "variant": "pass",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6771,
+    "z": 12271,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "echop_silent_crown_bough_lookout",
+    "name": "place.skycraft.echop_silent_crown_bough_lookout",
     "type": "landmark",
     "variant": "peak",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -6256,
-    "z": 11088,
+    "x": -5683,
+    "z": 13292,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8637,14 +8607,14 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_10_campsite",
-    "name": "place.skycraft.greenshade_marker_10_campsite",
+    "id": "leafw_twilight_fern_veil_cascade",
+    "name": "place.skycraft.leafw_twilight_fern_veil_cascade",
     "type": "landmark",
-    "variant": "campsite",
+    "variant": "waterfall",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5904,
-    "z": 11088,
+    "x": -5453,
+    "z": 13543,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8652,14 +8622,44 @@
     "_r7_r12_v4": true
   },
   {
-    "id": "greenshade_marker_11_eyrie",
-    "name": "place.skycraft.greenshade_marker_11_eyrie",
+    "id": "hectah_black_hircine_s_hunt_altar",
+    "name": "place.skycraft.hectah_black_hircine_s_hunt_altar",
+    "type": "daedric_shrine",
+    "variant": "altar",
+    "culture": "daedric",
+    "region": "valenwood/greenshade",
+    "x": -6664,
+    "z": 11959,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "fernh_lower_spinner_s_story_shrine",
+    "name": "place.skycraft.fernh_lower_spinner_s_story_shrine",
     "type": "landmark",
-    "variant": "eyrie",
+    "variant": "canopy_shrine",
     "culture": "bosmer",
     "region": "valenwood/greenshade",
-    "x": -5552,
-    "z": 11088,
+    "x": -5447,
+    "z": 12533,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L1.mire_basins"
+    ],
+    "_r7_r12_v4": true
+  },
+  {
+    "id": "mistv_verdigris_wilderking_glade",
+    "name": "place.skycraft.mistv_verdigris_wilderking_glade",
+    "type": "landmark",
+    "variant": "graht_grove",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -5753,
+    "z": 12975,
     "why": [
       "greenshade.L1.drowned_coast",
       "greenshade.L1.mire_basins"
@@ -8680,6 +8680,96 @@
     "why": [
       "grahtwood.L1.elden_grove_soil",
       "grahtwood.L1.grahtwood_sinks"
+    ]
+  },
+  {
+    "id": "haven_corsair_sea_cave",
+    "name": "place.skycraft.haven_corsair_sea_cave",
+    "type": "dungeon_fixed",
+    "variant": "sea_cave",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -4141,
+    "z": 14062,
+    "radius": 28,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L5.sap_tappers"
+    ]
+  },
+  {
+    "id": "southpoint_barrier_atoll",
+    "name": "place.skycraft.southpoint_barrier_atoll",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "bosmer",
+    "region": "valenwood/grahtwood",
+    "x": -2694,
+    "z": 14177,
+    "radius": 28,
+    "why": [
+      "grahtwood.L1.elden_grove_soil",
+      "grahtwood.L5.sap_tappers"
+    ]
+  },
+  {
+    "id": "woodhearth_shoal_shipwreck",
+    "name": "place.skycraft.woodhearth_shoal_shipwreck",
+    "type": "dungeon_fixed",
+    "variant": "shipwreck",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -7108,
+    "z": 10985,
+    "radius": 28,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L5.bridge_port"
+    ]
+  },
+  {
+    "id": "marbruk_outer_reef",
+    "name": "place.skycraft.marbruk_outer_reef",
+    "type": "landmark",
+    "variant": "reef",
+    "culture": "bosmer",
+    "region": "valenwood/greenshade",
+    "x": -6897,
+    "z": 11401,
+    "radius": 28,
+    "why": [
+      "greenshade.L1.drowned_coast",
+      "greenshade.L5.bridge_port"
+    ]
+  },
+  {
+    "id": "strid_mouth_castaway_island",
+    "name": "place.skycraft.strid_mouth_castaway_island",
+    "type": "landmark",
+    "variant": "island",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5228,
+    "z": 9004,
+    "radius": 28,
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L5.strict_hunters"
+    ]
+  },
+  {
+    "id": "faltonia_smuggler_sea_cave",
+    "name": "place.skycraft.faltonia_smuggler_sea_cave",
+    "type": "dungeon_fixed",
+    "variant": "sea_cave",
+    "culture": "bosmer",
+    "region": "valenwood/malabal_tor",
+    "x": -5001,
+    "z": 8904,
+    "radius": 28,
+    "why": [
+      "malabal_tor.L1.xylo_gorge",
+      "malabal_tor.L5.strict_hunters"
     ]
   }
 ]

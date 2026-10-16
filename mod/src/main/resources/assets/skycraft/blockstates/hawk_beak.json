@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/hawk_beak"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/hawk_beak_harvested"
+    }
+  }
+}

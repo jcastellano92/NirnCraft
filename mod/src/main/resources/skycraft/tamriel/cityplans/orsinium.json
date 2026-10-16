@@ -183,8 +183,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -22,
-        16
+        -42,
+        19
       ],
       "face": "east",
       "name": "orsinium_bone_and_ember"
@@ -194,8 +194,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        22,
-        16
+        20,
+        8
       ],
       "face": "west",
       "name": "orsinium_tradestone"
@@ -249,8 +249,8 @@
       "use": "longhouse",
       "wealth": "common",
       "at": [
-        -56,
-        8
+        -59,
+        11
       ],
       "face": "east",
       "name": "orsinium_shatul_hall"
@@ -271,8 +271,8 @@
       "use": "longhouse",
       "wealth": "common",
       "at": [
-        -38,
-        42
+        -25,
+        51
       ],
       "face": "north",
       "name": "orsinium_tumnosh_hall"
@@ -282,8 +282,8 @@
       "use": "longhouse",
       "wealth": "common",
       "at": [
-        38,
-        42
+        26,
+        44
       ],
       "face": "north",
       "name": "orsinium_igrun_hall"
@@ -293,8 +293,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        0,
-        -28
+        26,
+        -18
       ],
       "face": "south",
       "name": "orsinium_trinimac_chancery"
@@ -315,8 +315,8 @@
       "use": "butcher",
       "wealth": "common",
       "at": [
-        28,
-        -18
+        34,
+        1
       ],
       "face": "west",
       "name": "orsinium_echelitt_smoke"
@@ -326,8 +326,8 @@
       "use": "tannery",
       "wealth": "common",
       "at": [
-        -48,
-        28
+        -46,
+        36
       ],
       "face": "east",
       "name": "orsinium_hide_yard"
@@ -348,7 +348,7 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        -20,
+        -8,
         56
       ],
       "face": "north",
@@ -359,8 +359,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        20,
-        56
+        22,
+        64
       ],
       "face": "north",
       "name": "orsinium_hammer_gate_watch"
@@ -392,8 +392,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        24,
-        38
+        59,
+        48
       ],
       "face": "west",
       "name": "orsinium_frost_tusk_tavern"
@@ -474,7 +474,7 @@
       "rz": 60,
       "wobble": 6,
       "lobes": 4,
-      "phase": 1.0,
+      "phase": 1,
       "width": 3,
       "rank": 1,
       "tag": "mid",

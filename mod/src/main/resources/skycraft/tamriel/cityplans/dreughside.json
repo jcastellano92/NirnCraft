@@ -37,8 +37,8 @@
     {
       "id": "chain_tower",
       "at": [
-        0,
-        -14
+        -3,
+        -17
       ],
       "face": "south",
       "name": "dreughside_landmark",
@@ -51,7 +51,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        17,
         -12
       ],
       "face": "south",
@@ -62,8 +62,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        23,
-        -2
+        25,
+        6
       ],
       "face": "west",
       "name": "dreughside_shell_and_wax"
@@ -73,8 +73,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        11,
-        11
+        9,
+        19
       ],
       "face": "north",
       "name": "dreughside_purple_vat_works"
@@ -84,8 +84,8 @@
       "use": "fishery",
       "wealth": "common",
       "at": [
-        -2,
-        23
+        -5,
+        26
       ],
       "face": "north",
       "name": "dreughside_coracle_slips"
@@ -95,8 +95,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -12,
-        9
+        -15,
+        12
       ],
       "face": "east",
       "name": "dreughside_gaff_smithy"

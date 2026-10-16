@@ -136,7 +136,9 @@ public class RegionalGear extends LootItemConditionalFunction {
     private static boolean matches(Kind kind, Item item) {
         return switch (kind) {
             case ANY -> true;
-            case WEAPON -> item instanceof SkyMeleeItem || item instanceof SkyAxeItem || item instanceof SkyBowItem;
+            case WEAPON -> item instanceof SkyMeleeItem || item instanceof SkyAxeItem || item instanceof SkyBowItem
+                    || item instanceof com.skycraft.arsenal.item.PolearmItem
+                    || item instanceof com.skycraft.arsenal.item.SkyCrossbowItem;
             case ARMOR -> item instanceof ArmorItem;
             case SHIELD -> item instanceof SkyShieldItem;
         };

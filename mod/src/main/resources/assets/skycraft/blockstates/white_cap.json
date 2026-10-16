@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/white_cap"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/white_cap_harvested"
+    }
+  }
+}

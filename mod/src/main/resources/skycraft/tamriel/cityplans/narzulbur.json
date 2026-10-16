@@ -7,38 +7,244 @@
     "store": "narzulbur_apothecary",
     "smithy": "narzulbur_forge"
   },
-  "gates": [[0, 34]],
+  "gates": [
+    [
+      0,
+      34
+    ]
+  ],
   "walls": [
-    {"r": 32, "sides": 10, "h": 7, "gates": [0], "flags": ["palisade"], "towers": false}
+    {
+      "r": 32,
+      "sides": 10,
+      "h": 7,
+      "gates": [
+        0
+      ],
+      "flags": [
+        "palisade"
+      ],
+      "towers": false
+    }
   ],
   "buildings": [
-    {"kind": "longhouse", "at": [0, -14], "size": [13, 21], "face": "S", "flags": ["seat"], "name": "narzulbur_chief_longhouse"},
-    {"kind": "smithy", "at": [15, 8], "size": [11, 9], "face": "W", "name": "narzulbur_forge"},
-    {"kind": "alchemist", "at": [-15, 8], "size": [9, 11], "face": "E", "name": "narzulbur_apothecary"},
-    {"kind": "longhouse", "at": [-16, -8], "size": [9, 15], "face": "E", "name": "narzulbur_hunters_lodge"},
-    {"kind": "longhouse", "at": [17, -10], "size": [9, 15], "face": "W", "name": "narzulbur_warriors_lodge"},
-    {"kind": "mine", "at": [20, -24], "size": [7, 14], "face": "S", "variant": 3, "flags": ["no_beard"], "name": "gloombound_mine"},
-    {"kind": "pen", "at": [-6, 22], "size": [9, 9]}
+    {
+      "kind": "longhouse",
+      "at": [
+        0,
+        -14
+      ],
+      "size": [
+        13,
+        21
+      ],
+      "face": "S",
+      "flags": [
+        "seat"
+      ],
+      "name": "narzulbur_chief_longhouse"
+    },
+    {
+      "kind": "smithy",
+      "at": [
+        15,
+        8
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "W",
+      "name": "narzulbur_forge"
+    },
+    {
+      "kind": "alchemist",
+      "at": [
+        -15,
+        8
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "name": "narzulbur_apothecary"
+    },
+    {
+      "kind": "longhouse",
+      "at": [
+        -16,
+        -8
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "E",
+      "name": "narzulbur_hunters_lodge"
+    },
+    {
+      "kind": "longhouse",
+      "at": [
+        17,
+        -10
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "W",
+      "name": "narzulbur_warriors_lodge"
+    },
+    {
+      "kind": "mine",
+      "at": [
+        17,
+        -27
+      ],
+      "size": [
+        7,
+        14
+      ],
+      "face": "S",
+      "variant": 3,
+      "flags": [
+        "no_beard"
+      ],
+      "name": "gloombound_mine"
+    },
+    {
+      "kind": "pen",
+      "at": [
+        -6,
+        22
+      ],
+      "size": [
+        9,
+        9
+      ]
+    }
   ],
   "plazas": [
-    {"at": [0, 6], "size": 9, "variant": 3, "name": "narzulbur_brawl_ring"}
+    {
+      "at": [
+        0,
+        6
+      ],
+      "size": 9,
+      "variant": 3,
+      "name": "narzulbur_brawl_ring"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 34], [0, 22], [0, 10]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-8, 20], [-16, 14], [-20, 4]], "width": 2, "rank": 2, "tag": "lane"},
-    {"type": "path", "via": [[8, 20], [16, 14], [22, 4]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          0,
+          22
+        ],
+        [
+          0,
+          10
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -8,
+          20
+        ],
+        [
+          -16,
+          14
+        ],
+        [
+          -20,
+          4
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          8,
+          20
+        ],
+        [
+          16,
+          14
+        ],
+        [
+          22,
+          4
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, 18], "r": 20, "zone": "poor"},
-    {"at": [0, -12], "r": 16, "zone": "noble"}
+    {
+      "at": [
+        0,
+        18
+      ],
+      "r": 20,
+      "zone": "poor"
+    },
+    {
+      "at": [
+        0,
+        -12
+      ],
+      "r": 16,
+      "zone": "noble"
+    }
   ],
-  "fabric": {"radius": 30, "target": 0.22, "fill_cap": 2, "yard_cap": 4},
+  "fabric": {
+    "radius": 30,
+    "target": 0.22,
+    "fill_cap": 2,
+    "yard_cap": 4
+  },
   "queue": [
-    {"kind": "house", "size": [9, 11], "count": 2, "on": "main"}
+    {
+      "kind": "house",
+      "size": [
+        9,
+        11
+      ],
+      "count": 2,
+      "on": "main"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "daedric:malacath", "where": "square"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "main"}
+    {
+      "type": "statue",
+      "theme": "daedric:malacath",
+      "where": "square"
+    },
+    {
+      "type": "lamps",
+      "count": 2,
+      "where": "street",
+      "tag": "main"
+    }
   ],
   "titles": {
     "narzulbur_chief_longhouse": "Mauhulakh's Longhouse",

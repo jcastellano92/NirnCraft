@@ -264,7 +264,12 @@ public final class CreatureSpawns {
             net.minecraft.world.level.block.state.BlockState st = chunk.getBlockState(bePos);
             if (st.is(Blocks.SPAWNER)) {
                 chunk.removeBlockEntity(bePos);
-                chunk.setBlockState(bePos, Blocks.AIR.defaultBlockState(), false);
+                int secIdx = chunk.getSectionIndex(bePos.getY());
+                if (secIdx >= 0 && secIdx < chunk.getSections().length) {
+                    chunk.getSection(secIdx).setBlockState(
+                            bePos.getX() & 15, bePos.getY() & 15, bePos.getZ() & 15,
+                            Blocks.AIR.defaultBlockState(), false);
+                }
             } else if (st.is(Blocks.DISPENSER)) {
                 BlockEntity be = chunk.getBlockEntity(bePos);
                 if (be instanceof net.minecraft.world.level.block.entity.DispenserBlockEntity disp

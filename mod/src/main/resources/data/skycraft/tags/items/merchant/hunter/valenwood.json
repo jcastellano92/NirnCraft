@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "skycraft:raw_venison", "required": false},
+    {"id": "skycraft:venison_chop", "required": false},
+    {"id": "skycraft:hide", "required": false},
+    {"id": "skycraft:leather_strips", "required": false},
+    "minecraft:leather",
+    "minecraft:bone",
+    {"id": "skycraft:indrik_feather", "required": false},
+    {"id": "skycraft:large_antlers", "required": false},
+    {"id": "skycraft:small_antlers", "required": false}
+  ]
+}

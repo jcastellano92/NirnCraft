@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
+        -8,
         0
       ],
       "face": "south",
@@ -43,7 +43,7 @@
       "wealth": "noble",
       "at": [
         0,
-        15
+        19
       ],
       "face": "south",
       "overlay": "heartlands",
@@ -54,8 +54,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -7,
+        -20
       ],
       "face": "south",
       "overlay": "heartlands",
@@ -66,7 +66,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        0,
+        8,
         -15
       ],
       "face": "south",
@@ -84,16 +84,140 @@
       "type": "lamps",
       "theme": "pells_road",
       "count": 2
+    },
+    {
+      "type": "garden",
+      "where": "free"
     }
   ],
   "titles": {
     "pells_gate_b_1": "The Sleeping Mare",
     "pells_gate_b_2": "Irroke the Wide's Lodge",
     "pells_gate_b_3": "Grislylech's Cottage",
-    "pells_gate_b_4": "Pell's Gate Way-Smithy"
+    "pells_gate_b_4": "Pell's Gate Way-Smithy",
+    "pells_gate_square": "Pell's Gate Tollhouse Square"
   },
   "innKey": "pells_gate_b_1",
   "names": {
     "inn": "pells_gate_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        8,
+        2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "pells_gate_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          -4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "south_road_arch_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          19,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "pells_gate_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        4,
+        0
+      ],
+      "rx": 15,
+      "rz": 11,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "gatehouse_green_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        8,
+        2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "gatehouse_green_loop"
+    },
+    {
+      "kind": "house",
+      "count": 1,
+      "on": "south_road_arch_way"
+    }
+  ]
 }

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "skycraft:echatere_hide", "required": false},
+    {"id": "skycraft:durzog_hide", "required": false},
+    {"id": "skycraft:hide", "required": false},
+    {"id": "skycraft:leather_strips", "required": false}
+  ]
+}

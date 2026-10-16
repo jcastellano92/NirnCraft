@@ -26,6 +26,7 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -39,16 +40,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Skycraft's clouds and distant weather, drawn in vanilla's cloud pass ({@link OverworldClouds}) whenever
- * no shader pack is active.
+ * Skycraft's clouds and distant weather, drawn in vanilla's cloud pass ({@link OverworldClouds}) and compatible
+ * with Oculus shader packs unless {@link AtmosphereConfig#CLOUDS_SKIP_SHADERS} is enabled.
  *
  * <p>The meshes are built off the render thread by {@link CloudBuilder} about once a second (sooner when the camera
- * has moved), from a snapshot of the regional weather ({@link CloudClimate}); the render thread only uploads the
- * finished buffers and draws two static vertex buffers, so the per-frame cost is a couple of draw calls. Between
- * builds the sky mesh slides with the wind; the ground mesh (fog banks, peak caps, plumes, storm walls) stays put.
- * Clouds stay visible out to {@link AtmosphereConfig#CLOUD_DISTANCE} beyond the projection's far plane by drawing
- * with depth clamping: anything past the far plane lands on the far depth, behind all terrain but over the sky.
- * The GL state is restored afterwards (Embeddium and Oculus safe).</p>
+ * has moved), from a snapshot of the regional weather ({@link CloudClimate}) and moving {@link com.skycraft.atmosphere.WeatherFront}s;
+ * the render thread only uploads the finished buffers and draws two static vertex buffers, so the per-frame cost is a
+ * couple of draw calls. Between builds the sky mesh slides with the wind; the ground mesh (fog banks, peak caps,
+ * plumes, storm walls) stays put. Clouds stay visible out to {@link AtmosphereConfig#CLOUD_DISTANCE} beyond the
+ * projection's far plane by drawing with depth clamping: anything past the far plane lands on the far depth, behind
+ * all terrain but over the sky. The GL state is restored afterwards (Embeddium and Oculus safe).</p>
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CloudRenderer {
@@ -73,6 +74,7 @@ public final class CloudRenderer {
     private static boolean hasSky, hasGround;
     private static double anchorX, anchorY, anchorZ, builtDriftX, builtDriftZ;
     private static boolean textureLoaded;
+    private static boolean renderedThisFrame;
 
     // ---- wind drift (blocks), accumulated each tick
     private static double driftX, driftZ, driftXO, driftZO, highX, highZ;
@@ -92,6 +94,13 @@ public final class CloudRenderer {
     private CloudRenderer() {}
 
     // ================================================================== tick
+
+    @SubscribeEvent
+    public static void onRenderTickStart(TickEvent.RenderTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            renderedThisFrame = false;
+        }
+    }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -173,10 +182,27 @@ public final class CloudRenderer {
 
     // ================================================================== render
 
+    /**
+     * Fallback stage hook when an active Oculus shader pack suppresses vanilla's {@code DimensionSpecialEffects.renderClouds}
+     * pass even though {@code CLOUD_STYLE_DEFINE=0} (shader clouds off) and {@code CLOUDS_SKIP_SHADERS=false}.
+     */
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
+        if (renderedThisFrame) return;
+        if (!ShaderCompat.shadersActive() || AtmosphereConfig.CLOUDS_SKIP_SHADERS.get()) return;
+        Minecraft mc = Minecraft.getInstance();
+        ClientLevel level = mc.level;
+        if (level == null || !AtmosphereConfig.CLOUDS.get() || level.dimension() != Level.OVERWORLD) return;
+        Vec3 cam = event.getCamera().getPosition();
+        render(level, event.getPartialTick(), event.getPoseStack(), cam.x, cam.y, cam.z, event.getProjectionMatrix());
+    }
+
     /** Draws the clouds; false lets vanilla (or a shader pack) draw its own. */
     static boolean render(ClientLevel level, float pt, PoseStack pose, double camX, double camY, double camZ, Matrix4f proj) {
         if (!AtmosphereConfig.CLOUDS.get() || level.dimension() != Level.OVERWORLD) return false;
-        if (ShaderCompat.shadersActive()) return false;
+        if (AtmosphereConfig.CLOUDS_SKIP_SHADERS.get() && ShaderCompat.shadersActive()) return false;
+        renderedThisFrame = true;
         Minecraft mc = Minecraft.getInstance();
         Camera camera = mc.gameRenderer.getMainCamera();
         if (camera.getFluidInCamera() != FogType.NONE) return true;
@@ -267,7 +293,8 @@ public final class CloudRenderer {
                 AtmosphereConfig.DISTANT_WEATHER.get(), WeatherProfile.mistHour(level.getDayTime()),
                 (float) ((level.getGameTime() + pt) / 20.0), climate,
                 redMountain != null ? redMountain.x() : 0, redMountain != null ? redMountain.z() : 0, redMountain != null,
-                throat != null ? throat.x() : 0, throat != null ? throat.z() : 0, throat != null);
+                throat != null ? throat.x() : 0, throat != null ? throat.z() : 0, throat != null,
+                ClientWeather.fronts());
     }
 
     /**

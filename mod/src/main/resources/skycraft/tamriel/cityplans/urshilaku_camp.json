@@ -30,7 +30,7 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        9,
+        13,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "hovel",
       "wealth": "poor",
       "at": [
-        -7,
-        5
+        -13,
+        10
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -78,8 +78,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        0,
+        -12
       ],
       "face": "south",
       "overlay": "vvardenfell_ashlands",
@@ -103,6 +103,101 @@
     "urshilaku_camp_b_2": "Nibani Maesa's Wise Woman Yurt",
     "urshilaku_camp_b_3": "Zabamund's Gulakhan Yurt",
     "urshilaku_camp_b_4": "Kurapli's Hunter Yurt",
-    "urshilaku_camp_b_5": "Urshilaku Guar Pen"
-  }
+    "urshilaku_camp_b_5": "Urshilaku Guar Pen",
+    "urshilaku_ashkhan_fire": "Sul-Matuul's Prophecy Fire Circle"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "urshilaku_ashkhan_fire"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 22,
+      "rz": 18,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "ash_dune_circle"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          34
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -26
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "sul_matuul_way"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        15,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.48
+  },
+  "queue": [
+    {
+      "kind": "tent",
+      "count": 6,
+      "on": "ash_dune_circle"
+    }
+  ]
 }

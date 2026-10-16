@@ -31,12 +31,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/** Server-side state for keybind actions sent by clients (power attacks, weapon blocking, racial power, climbing, dodge, unstuck). */
+/** Server-side state for keybind actions sent by clients (power attacks, weapon blocking, climbing, dodge, unstuck). */
 public final class ActionHandler {
     private static final Map<UUID, Long> POWER_ATTACK_ARMED = new HashMap<>();
     private static final Set<UUID> BLOCKING = new HashSet<>();
     /** Last accepted CLIMB_TICK per player: {game time, y}. */
     private static final Map<UUID, double[]> LAST_CLIMB = new HashMap<>();
+    /** Last accepted DODGE_ROLL game time per player. */
+    private static final Map<UUID, Long> LAST_DODGE = new HashMap<>();
+    /** Last accepted SHIELD_BASH game time per player. */
+    private static final Map<UUID, Long> LAST_BASH = new HashMap<>();
 
     private ActionHandler() {}
 
@@ -69,6 +73,7 @@ public final class ActionHandler {
 
     private static void handleShieldBash(ServerPlayer player) {
         if (!Vitals.consumeStamina(player, 15f, false)) return;
+        LAST_BASH.put(player.getUUID(), player.level().getGameTime());
         net.minecraft.server.level.ServerLevel level = player.serverLevel();
         level.playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.9f);
         net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0f);
@@ -218,6 +223,7 @@ public final class ActionHandler {
     private static void handleDodgeRoll(ServerPlayer player) {
         if (!Perks.has(player, "athletics.dodge_roll")) return;
         if (Vitals.consumeStamina(player, 15f, false)) {
+            LAST_DODGE.put(player.getUUID(), player.level().getGameTime());
             player.invulnerableTime = 12; // ~0.6s i-frames
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8f, 1.4f);
             Progression.addSkillXp(player, Skill.ATHLETICS, 1.5f);
@@ -298,6 +304,26 @@ public final class ActionHandler {
         return until != null && until >= player.level().getGameTime();
     }
 
+    public static boolean isPowerAttacking(Player player) {
+        Long until = POWER_ATTACK_ARMED.get(player.getUUID());
+        return (until != null && until >= player.level().getGameTime()) || (player.isSprinting() && player.swinging);
+    }
+
+    public static boolean isClimbing(Player player) {
+        double[] last = LAST_CLIMB.get(player.getUUID());
+        return last != null && player.level().getGameTime() - (long) last[0] <= 10;
+    }
+
+    public static boolean isDodgeRolling(Player player) {
+        Long last = LAST_DODGE.get(player.getUUID());
+        return last != null && player.level().getGameTime() - last <= 12;
+    }
+
+    public static boolean isShieldBashing(Player player) {
+        Long last = LAST_BASH.get(player.getUUID());
+        return last != null && player.level().getGameTime() - last <= 10;
+    }
+
     public static boolean isWeaponBlocking(ServerPlayer player) {
         return BLOCKING.contains(player.getUUID());
     }
@@ -306,6 +332,8 @@ public final class ActionHandler {
         POWER_ATTACK_ARMED.remove(player);
         BLOCKING.remove(player);
         LAST_CLIMB.remove(player);
+        LAST_DODGE.remove(player);
+        LAST_BASH.remove(player);
     }
 
     // ------------------------------------------------------------------ Skyrim container screen (take / store)

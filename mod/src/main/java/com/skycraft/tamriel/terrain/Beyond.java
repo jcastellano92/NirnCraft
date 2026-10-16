@@ -223,7 +223,7 @@ public final class Beyond {
     }
 
     private static int seaRegion(int x, int z, double outside) {
-        if (outside > 7000) return 0;
+        if (outside > 14000) return 0;
         double dxw = TamrielMap.MIN_X - x, dxe = x - TamrielMap.MAX_X, dzn = TamrielMap.MIN_Z - z, dzs = z - TamrielMap.MAX_Z;
         double m = Math.max(Math.max(dxw, dxe), Math.max(dzn, dzs));
         if (m == dzn) return R_GHOSTS;

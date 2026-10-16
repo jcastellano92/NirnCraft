@@ -126,6 +126,10 @@ public final class Regions {
         return TamrielMap.region(pos.getX(), pos.getZ());
     }
 
+    public static Region at(int x, int z) {
+        return TamrielMap.region(x, z);
+    }
+
     private static Region dimensionRegion(String dim) {
         String path = dim.substring(dim.indexOf(':') + 1);
         String key = "region.skycraft.dimension." + path;
@@ -141,6 +145,16 @@ public final class Regions {
         Integer i = INDEX.get(id);
         if (i != null) return Optional.of(BY_INDEX[i]);
         return Beyond.generatedById(id);
+    }
+
+    public static Region get(String id) {
+        if (id == null || id.isBlank()) return fallback();
+        Optional<Region> exact = byId(id);
+        if (exact.isPresent()) return exact.get();
+        for (Region r : ALL) {
+            if (r.shortId().equalsIgnoreCase(id)) return r;
+        }
+        return fallback();
     }
 
     /** Authored regions only (generated regions are created on demand). */

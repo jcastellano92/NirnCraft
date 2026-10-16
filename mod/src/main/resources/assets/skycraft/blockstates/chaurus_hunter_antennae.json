@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/chaurus_hunter_antennae"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/chaurus_hunter_antennae_harvested"
+    }
+  }
+}

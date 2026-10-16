@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/hist_sap"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/hist_sap_harvested"
+    }
+  }
+}

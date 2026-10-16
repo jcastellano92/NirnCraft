@@ -34,8 +34,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        -44
+        -15,
+        -39
       ],
       "face": "south",
       "name": "bruma_castle_bruma",
@@ -44,8 +44,8 @@
     {
       "id": "chapel_spire",
       "at": [
-        18,
-        -12
+        21,
+        -9
       ],
       "face": "south",
       "name": "bruma_chapel_spire",
@@ -67,7 +67,7 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        28,
+        44,
         0
       ],
       "face": "south",
@@ -79,8 +79,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        54,
-        21
+        57,
+        24
       ],
       "face": "south",
       "overlay": "bruma",
@@ -187,8 +187,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -24,
-        -15
+        -21,
+        -12
       ],
       "face": "south",
       "overlay": "bruma",
@@ -199,8 +199,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -35,
-        -46
+        -38,
+        -43
       ],
       "face": "south",
       "overlay": "bruma",
@@ -211,8 +211,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -8,
-        -27
+        -3,
+        -12
       ],
       "face": "south",
       "overlay": "bruma",
@@ -223,7 +223,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        5,
+        9,
         -58
       ],
       "face": "south",
@@ -235,8 +235,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        12,
-        -25
+        30,
+        -35
       ],
       "face": "south",
       "overlay": "bruma",
@@ -259,8 +259,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        26,
-        -10
+        39,
+        -19
       ],
       "face": "south",
       "overlay": "bruma",
@@ -308,6 +308,212 @@
     "bruma_jghastas_house": "J'Ghasta's Training House",
     "bruma_arnoras_house": "Arnora Auria's Cottage",
     "bruma_honmunds_house": "Honmund's Timber Lodge",
-    "bruma_regners_house": "Regner's Hearth House"
-  }
+    "bruma_regners_house": "Regner's Hearth House",
+    "bruma_talos_ward_square": "Great Chapel of Talos Square"
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -64,
+        -76,
+        64,
+        -22
+      ],
+      "level": 5,
+      "parapet": 1
+    },
+    {
+      "rect": [
+        -72,
+        -22,
+        72,
+        26
+      ],
+      "level": 2,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        14,
+        -36
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 5,
+      "name": "bruma_talos_ward_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        84
+      ],
+      "to": [
+        0,
+        -64
+      ],
+      "legs": 4,
+      "amp": 26,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "alpine_climb"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -74,
+          -42
+        ],
+        [
+          -32,
+          -46
+        ],
+        [
+          0,
+          -44
+        ],
+        [
+          34,
+          -46
+        ],
+        [
+          74,
+          -42
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "upper_terrace"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -78,
+          4
+        ],
+        [
+          -36,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          84,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "mid_terrace"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -66,
+          44
+        ],
+        [
+          -26,
+          48
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          28,
+          48
+        ],
+        [
+          66,
+          42
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "lower_lane"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -52
+      ],
+      "r": 36,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        14,
+        -12
+      ],
+      "r": 30,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        42,
+        12
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -24,
+        48
+      ],
+      "r": 34,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 82,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 8,
+      "kit": "nord",
+      "on": "mid_terrace"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "upper_terrace"
+    },
+    {
+      "kind": "smithy",
+      "count": 2,
+      "on": "mid_terrace"
+    },
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "lower_lane"
+    }
+  ]
 }

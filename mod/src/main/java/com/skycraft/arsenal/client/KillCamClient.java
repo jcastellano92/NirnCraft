@@ -251,6 +251,61 @@ public final class KillCamClient {
         event.setRoll(event.getRoll() + roll * side);
     }
 
+    private static boolean pushedKillCamPose;
+
+    @SubscribeEvent
+    public static void onRenderLivingPre(net.minecraftforge.client.event.RenderLivingEvent.Pre<?, ?> event) {
+        pushedKillCamPose = false;
+        net.minecraft.world.entity.LivingEntity entity = event.getEntity();
+        float pt = event.getPartialTick();
+        float camProgress = active && duration > 0 ? Mth.clamp((tick + pt) / (float) duration, 0.0f, 1.0f) : 1.0f;
+
+        // 1. Dying CorpseEntity render dummy: smoothly topple from 0 degrees (upright) to 90 degrees (flat)
+        if (!entity.isAddedToWorld()) {
+            float fallProgress = com.skycraft.loot.CorpseEvents.getDeathFallProgress(entity, pt, active, camProgress);
+            if (fallProgress < 0.999f) {
+                var poseStack = event.getPoseStack();
+                poseStack.pushPose();
+                pushedKillCamPose = true;
+                float half = entity.getBbHeight() * 0.5f;
+                float lift = Math.min(entity.getBbWidth() * 0.5f, 0.75f);
+                // Undo CorpseRenderer's static 90-degree flat pose and interpolate smoothly by fallProgress
+                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90.0f));
+                poseStack.translate(-half, -lift, 0.0f);
+                poseStack.translate(half * fallProgress, lift * fallProgress, 0.0f);
+                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(90.0f * fallProgress));
+                entity.hurtTime = fallProgress < 0.35f ? 8 : 0;
+                if (event.getRenderer().getModel() instanceof net.minecraft.client.model.HumanoidModel<?> hm) {
+                    hm.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
+                    hm.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
+                }
+            }
+            return;
+        }
+
+        // 2. Player attacker during melee kill-cam: cinematic overhead cleave and finishing follow-through
+        if (active && kind == ArsenalPackets.KillCam.MELEE && entity == Minecraft.getInstance().player
+                && event.getRenderer().getModel() instanceof net.minecraft.client.model.PlayerModel<?> pm) {
+            pm.rightArmPose = camProgress < 0.38f
+                    ? net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR
+                    : net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
+            float lunge = Mth.sin(camProgress * (float) Math.PI);
+            var poseStack = event.getPoseStack();
+            poseStack.pushPose();
+            pushedKillCamPose = true;
+            double yawRad = Math.toRadians(Mth.rotLerp(pt, entity.yBodyRotO, entity.yBodyRot));
+            poseStack.translate(-Math.sin(yawRad) * 0.28 * lunge, 0.0, Math.cos(yawRad) * 0.28 * lunge);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderLivingPost(net.minecraftforge.client.event.RenderLivingEvent.Post<?, ?> event) {
+        if (pushedKillCamPose) {
+            event.getPoseStack().popPose();
+            pushedKillCamPose = false;
+        }
+    }
+
     @SubscribeEvent
     public static void onFov(ViewportEvent.ComputeFov event) {
         if (!active || marker == null || Minecraft.getInstance().getCameraEntity() != marker) return;
@@ -278,3 +333,4 @@ public final class KillCamClient {
         marker = null;
     }
 }
+

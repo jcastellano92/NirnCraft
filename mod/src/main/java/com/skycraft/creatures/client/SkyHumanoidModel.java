@@ -39,4 +39,28 @@ public class SkyHumanoidModel<T extends Mob> extends PlayerModel<T> {
         }
         super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTick);
     }
+
+    @Override
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        if (this.attackTime > 0.0F) {
+            float swing = net.minecraft.util.Mth.sin(this.attackTime * (float) Math.PI);
+            ItemStack main = entity.getMainHandItem();
+            boolean twoHanded = com.skycraft.combat.WeaponClass.of(main).twoHanded();
+            this.rightArm.xRot -= swing * (twoHanded ? 0.85F : 0.45F);
+            if (twoHanded) {
+                this.leftArm.xRot -= swing * 0.65F;
+                this.leftArm.yRot += swing * 0.25F;
+            }
+            this.body.yRot += swing * 0.20F;
+            this.jacket.copyFrom(this.body);
+            this.leftSleeve.copyFrom(this.leftArm);
+            this.rightSleeve.copyFrom(this.rightArm);
+        } else if (entity.isAggressive() && entity.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem) {
+            this.leftArm.xRot = -0.85F;
+            this.leftArm.yRot = 0.35F;
+            this.leftSleeve.copyFrom(this.leftArm);
+        }
+    }
 }
+

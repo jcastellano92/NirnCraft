@@ -41,16 +41,43 @@ public final class Homesteads {
         /** The plot's centre: {@link Places} if it knows the place, else the fallback. */
         public BlockPos center() {
             Optional<Place> p = Places.byId(id);
+            if (p.isEmpty()) p = Places.byId(canonPlotId(id));
             return p.map(place -> new BlockPos(place.x(), 0, place.z())).orElse(new BlockPos(x, 0, z));
         }
     }
 
-    public static final List<Plot> PLOTS = List.of(
-            new Plot("lakeview_manor", "falkreath", -468, 982),
-            new Plot("windstad_manor", "hjaalmarch", -690, -1699),
-            new Plot("heljarchen_hall", "the_pale", 184, -730));
+    public static final List<Plot> PLOTS = buildPlots();
     /** How close to a plot's centre the drafting table must stand. */
     public static final int PLOT_RADIUS = 64;
+
+    private static List<Plot> buildPlots() {
+        java.util.LinkedHashMap<String, Plot> map = new java.util.LinkedHashMap<>();
+        for (Place p : Places.all()) {
+            if ("homestead".equals(p.variant())) {
+                String region = p.regionId() != null ? p.regionId() : "";
+                String hold = region.contains("/") ? region.substring(region.indexOf('/') + 1) : region;
+                map.put(p.id(), new Plot(p.id(), hold, p.x(), p.z()));
+            }
+        }
+        // Fallback if Places is empty in a minimal environment
+        if (map.isEmpty()) {
+            map.put("lakeview", new Plot("lakeview", "falkreath", -468, 982));
+            map.put("windstad", new Plot("windstad", "hjaalmarch", -690, -1699));
+            map.put("heljarchen", new Plot("heljarchen", "the_pale", 184, -730));
+        }
+        return List.copyOf(map.values());
+    }
+
+    /** Normalizes legacy Skyrim Hearthfire plot IDs ({@code lakeview_manor -> lakeview}, etc.). */
+    public static String canonPlotId(String id) {
+        if (id == null) return "";
+        return switch (id.trim().toLowerCase(java.util.Locale.ROOT)) {
+            case "lakeview_manor" -> "lakeview";
+            case "windstad_manor" -> "windstad";
+            case "heljarchen_hall" -> "heljarchen";
+            default -> id.trim().toLowerCase(java.util.Locale.ROOT);
+        };
+    }
 
     /**
      * One homestead of a player.
@@ -82,7 +109,7 @@ public final class Homesteads {
 
     private static PlotOwnership plotOwnership = (player, plot) -> false;
 
-    /** The economy module registers how it records bought plots (place ids lakeview_manor, windstad_manor, heljarchen_hall). */
+    /** The economy module registers how it records bought plots. */
     public static void setPlotOwnership(PlotOwnership ownership) {
         plotOwnership = ownership == null ? (p, id) -> false : ownership;
     }
@@ -90,7 +117,10 @@ public final class Homesteads {
     /** True if {@code player} already bought plot {@code plotId} elsewhere (see {@link #setPlotOwnership}). */
     public static boolean ownsPlotElsewhere(ServerPlayer player, String plotId) {
         try {
-            return plotId != null && plotOwnership.owns(player, plotId);
+            if (plotId == null) return false;
+            if (plotOwnership.owns(player, plotId)) return true;
+            String canon = canonPlotId(plotId);
+            return !canon.equals(plotId) && plotOwnership.owns(player, canon);
         } catch (RuntimeException e) {
             return false;
         }
@@ -143,7 +173,29 @@ public final class Homesteads {
 
     @Nullable
     public static Plot plot(String id) {
-        for (Plot p : PLOTS) if (p.id().equals(id)) return p;
+        if (id == null) return null;
+        String canon = canonPlotId(id);
+        for (Plot p : PLOTS) {
+            if (p.id().equals(id) || p.id().equals(canon)) return p;
+        }
         return null;
     }
+
+    /** True when {@code id} (or its canonical alias) is a registered Hearthfire homestead plot. */
+    public static boolean isPlot(String id) {
+        return plot(id) != null;
+    }
+
+    /** All Hearthfire homestead plots in a given hold or region (e.g. {@code "falkreath"} or {@code "morrowind/west_gash"}). */
+    public static List<Plot> plotsInHold(String holdOrRegion) {
+        if (holdOrRegion == null || holdOrRegion.isBlank()) return List.of();
+        String h = holdOrRegion.trim().toLowerCase(java.util.Locale.ROOT);
+        String shortId = h.contains("/") ? h.substring(h.indexOf('/') + 1) : h;
+        List<Plot> out = new ArrayList<>();
+        for (Plot p : PLOTS) {
+            if (p.hold().equalsIgnoreCase(h) || p.hold().equalsIgnoreCase(shortId)) out.add(p);
+        }
+        return out;
+    }
 }
+

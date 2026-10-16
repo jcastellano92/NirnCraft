@@ -30,8 +30,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        8,
-        0
+        7,
+        -12
       ],
       "face": "south",
       "overlay": "jerall_mountains",
@@ -42,7 +42,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        -8,
         15
       ],
       "face": "south",
@@ -66,7 +66,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        -8,
         -15
       ],
       "face": "south",
@@ -84,16 +84,140 @@
       "type": "well",
       "theme": "bleakers_snow",
       "count": 1
+    },
+    {
+      "type": "market",
+      "where": "free"
     }
   ],
   "titles": {
     "bleakers_way_b_1": "Bleaker's Way Goodwill Inn",
     "bleakers_way_b_2": "Kirsten's Farmhouse",
     "bleakers_way_b_3": "Roliand Hanus's Cabin",
-    "bleakers_way_b_4": "Ulene Hlervu's Lodge"
+    "bleakers_way_b_4": "Ulene Hlervu's Lodge",
+    "bleakers_way_square": "Bleaker's Way Snowline Commons"
   },
   "innKey": "bleakers_way_b_1",
   "names": {
     "inn": "bleakers_way_b_1"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        6,
+        6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "bleakers_way_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          2,
+          7
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          -2,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "spruce_pass_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          4
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          19,
+          -4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "bleakers_way_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        4
+      ],
+      "rx": 16,
+      "rz": 12,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "snowline_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        6,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "snowline_loop"
+    },
+    {
+      "kind": "house",
+      "count": 1,
+      "on": "spruce_pass_road"
+    }
+  ]
 }

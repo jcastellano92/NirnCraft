@@ -27,44 +27,226 @@
   },
   "innKey": "candlehearth_hall",
   "buildings": [
-    {"kind": "manor", "at": [-52, -16], "size": [11, 13], "face": "E", "flags": ["upper", "rich"], "name": "windhelm_violas_house"},
-    {"kind": "house", "at": [-52, 22], "size": [9, 11], "face": "E", "flags": ["upper"], "name": "windhelm_brunwulfs_house"},
-    {"kind": "house", "at": [48, 36], "size": [9, 11], "face": "W", "culture": "dunmer", "name": "windhelm_atherons_house"},
-    {"kind": "house", "at": [48, -14], "size": [9, 11], "face": "W", "culture": "dunmer", "name": "windhelm_suvaris_house"}
+    {
+      "kind": "manor",
+      "at": [
+        -52,
+        -16
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "E",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "name": "windhelm_violas_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        -52,
+        22
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "flags": [
+        "upper"
+      ],
+      "name": "windhelm_brunwulfs_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        48,
+        36
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "culture": "dunmer",
+      "name": "windhelm_atherons_house"
+    },
+    {
+      "kind": "house",
+      "at": [
+        48,
+        -14
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "W",
+      "culture": "dunmer",
+      "name": "windhelm_suvaris_house"
+    }
   ],
   "plazas": [
-    {"at": [-26, 48], "size": 11, "variant": 0, "stalls": 2, "name": "windhelm_stone_quarter_market"},
-    {"at": [62, -22], "size": 9, "variant": 0, "stalls": 1, "name": "windhelm_grey_quarter_court"}
+    {
+      "at": [
+        -26,
+        48
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "windhelm_stone_quarter_market"
+    },
+    {
+      "at": [
+        62,
+        -22
+      ],
+      "size": 9,
+      "variant": 0,
+      "stalls": 1,
+      "name": "windhelm_grey_quarter_court"
+    }
   ],
   "nets": [
-    {"type": "loop", "at": [0, 10], "rx": 70, "rz": 66, "wobble": 6, "lobes": 3, "phase": 1.2, "width": 3, "rank": 1, "tag": "ring"}
+    {
+      "type": "loop",
+      "at": [
+        0,
+        10
+      ],
+      "rx": 70,
+      "rz": 66,
+      "wobble": 6,
+      "lobes": 3,
+      "phase": 1.2,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
+    }
   ],
   "zones": [
-    {"at": [0, -60], "r": 30, "zone": "noble"},
-    {"at": [0, 30], "r": 24, "zone": "centre"},
-    {"at": [66, 20], "r": 24, "zone": "poor"},
-    {"at": [-50, 50], "r": 22, "zone": "craft"}
+    {
+      "at": [
+        0,
+        -60
+      ],
+      "r": 30,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        30
+      ],
+      "r": 24,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        66,
+        20
+      ],
+      "r": 24,
+      "zone": "poor"
+    },
+    {
+      "at": [
+        -50,
+        50
+      ],
+      "r": 22,
+      "zone": "craft"
+    }
   ],
-  "fabric": {"radius": 92, "target": 0.55},
+  "fabric": {
+    "radius": 92,
+    "target": 0.55
+  },
   "queue": [
-    {"kind": "house", "name": "windhelm_belyn_hlaalus_house", "on": "ring"},
-    {"kind": "house", "name": "windhelm_avrusas_house", "on": "ring"},
-    {"kind": "house", "name": "windhelm_torstens_study", "on": "ring"},
-    {"kind": "house", "name": "windhelm_ulundils_lodging", "on": "ring"},
-    {"kind": "house", "name": "windhelm_arivanyas_quarters", "on": "ring"},
-    {"kind": "house", "name": "windhelm_revyn_sadris_house", "on": "ring"}
+    {
+      "kind": "house",
+      "name": "windhelm_belyn_hlaalus_house",
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "windhelm_avrusas_house",
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "windhelm_torstens_study",
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "windhelm_ulundils_lodging",
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "windhelm_arivanyas_quarters",
+      "on": "ring"
+    },
+    {
+      "kind": "house",
+      "name": "windhelm_revyn_sadris_house",
+      "on": "ring"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "divine:talos", "where": "square"},
-    {"type": "shrine", "theme": "divine:talos", "count": 2, "where": "free"},
-    {"type": "memorial", "where": "free"},
-    {"type": "great_tree", "theme": "spruce", "where": "free"},
-    {"type": "well", "count": 2, "where": "free"},
-    {"type": "banners", "count": 3, "where": "gate"},
-    {"type": "lamps", "count": 3, "where": "street", "tag": "ring"},
-    {"type": "market", "where": "free"},
-    {"type": "bench", "where": "square"},
-    {"type": "garden", "where": "free"}
+    {
+      "type": "statue",
+      "theme": "divine:talos",
+      "where": "square"
+    },
+    {
+      "type": "shrine",
+      "theme": "divine:talos",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    },
+    {
+      "type": "great_tree",
+      "theme": "spruce",
+      "where": "free"
+    },
+    {
+      "type": "well",
+      "count": 2,
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "count": 3,
+      "where": "gate"
+    },
+    {
+      "type": "lamps",
+      "count": 3,
+      "where": "street",
+      "tag": "ring"
+    },
+    {
+      "type": "market",
+      "where": "free"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    },
+    {
+      "type": "garden",
+      "where": "free"
+    }
   ],
   "titles": {
     "sadris_used_wares": "Grey Quarter Sundries",

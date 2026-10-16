@@ -8,35 +8,200 @@
     "smithy": "embassy_armory"
   },
   "innKey": "embassy_reception_hall",
-  "gates": [[0, 28]],
+  "gates": [
+    [
+      0,
+      28
+    ]
+  ],
   "walls": [
-    {"r": 28, "sides": 12, "h": 8, "gates": [0], "flags": ["major"], "towers": true}
+    {
+      "r": 28,
+      "sides": 12,
+      "h": 8,
+      "gates": [
+        0
+      ],
+      "flags": [
+        "major"
+      ],
+      "towers": true
+    }
   ],
   "buildings": [
-    {"kind": "palace", "at": [0, -12], "size": [15, 19], "face": "S", "culture": "altmer", "flags": ["upper", "seat"], "name": "embassy_reception_hall"},
-    {"kind": "manor", "at": [-16, -6], "size": [11, 13], "face": "E", "culture": "altmer", "flags": ["upper", "rich"], "name": "embassy_elenwens_solar"},
-    {"kind": "barracks", "at": [16, -4], "size": [9, 15], "face": "W", "culture": "altmer", "name": "embassy_justiciar_barracks"},
-    {"kind": "stables", "at": [-14, 14], "size": [9, 11], "face": "E", "culture": "altmer", "name": "embassy_stables"}
+    {
+      "kind": "palace",
+      "at": [
+        0,
+        -12
+      ],
+      "size": [
+        15,
+        19
+      ],
+      "face": "S",
+      "culture": "altmer",
+      "flags": [
+        "upper",
+        "seat"
+      ],
+      "name": "embassy_reception_hall"
+    },
+    {
+      "kind": "manor",
+      "at": [
+        -16,
+        -6
+      ],
+      "size": [
+        11,
+        13
+      ],
+      "face": "E",
+      "culture": "altmer",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "name": "embassy_elenwens_solar"
+    },
+    {
+      "kind": "barracks",
+      "at": [
+        16,
+        -4
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "W",
+      "culture": "altmer",
+      "name": "embassy_justiciar_barracks"
+    },
+    {
+      "kind": "stables",
+      "at": [
+        -14,
+        14
+      ],
+      "size": [
+        9,
+        11
+      ],
+      "face": "E",
+      "culture": "altmer",
+      "name": "embassy_stables"
+    }
   ],
   "plazas": [
-    {"at": [0, 8], "size": 11, "variant": 1, "stalls": 0, "name": "embassy_courtyard"}
+    {
+      "at": [
+        0,
+        8
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 0,
+      "name": "embassy_courtyard"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 28], [0, 16], [0, 4]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-14, 8], [0, 8], [14, 8]], "width": 3, "rank": 1, "tag": "row"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          28
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -14,
+          8
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          14,
+          8
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    }
   ],
   "zones": [
-    {"at": [0, -10], "r": 18, "zone": "noble"},
-    {"at": [0, 10], "r": 16, "zone": "centre"}
+    {
+      "at": [
+        0,
+        -10
+      ],
+      "r": 18,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        10
+      ],
+      "r": 16,
+      "zone": "centre"
+    }
   ],
-  "fabric": {"radius": 26, "target": 0.24, "fill_cap": 1, "yard_cap": 2},
+  "fabric": {
+    "radius": 26,
+    "target": 0.24,
+    "fill_cap": 1,
+    "yard_cap": 2
+  },
   "queue": [
-    {"kind": "store", "size": [9, 9], "name": "embassy_quartermaster", "on": "row"},
-    {"kind": "smithy", "size": [9, 9], "name": "embassy_armory", "on": "row"}
+    {
+      "kind": "store",
+      "size": [
+        9,
+        9
+      ],
+      "name": "embassy_quartermaster",
+      "on": "row"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        9,
+        9
+      ],
+      "name": "embassy_armory",
+      "on": "row"
+    }
   ],
   "features": [
-    {"type": "fountain", "where": "square"},
-    {"type": "banners", "count": 2, "where": "gate"}
+    {
+      "type": "fountain",
+      "where": "square"
+    },
+    {
+      "type": "banners",
+      "count": 2,
+      "where": "gate"
+    }
   ],
   "titles": {
     "embassy_reception_hall": "Embassy Reception Salon",

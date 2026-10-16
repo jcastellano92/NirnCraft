@@ -77,8 +77,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        20,
-        20
+        22,
+        28
       ],
       "face": "south",
       "overlay": "necrom",
@@ -101,8 +101,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        0,
-        28
+        2,
+        36
       ],
       "face": "south",
       "overlay": "necrom",
@@ -173,8 +173,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -20,
-        -20
+        -23,
+        -17
       ],
       "face": "south",
       "overlay": "necrom",
@@ -197,7 +197,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        0,
+        20,
         -28
       ],
       "face": "south",
@@ -221,7 +221,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        20,
+        32,
         -20
       ],
       "face": "south",
@@ -280,6 +280,218 @@
     "nc_urn_keeper_house": "Keeper of the Urns Quarters",
     "nc_lamplighter_house": "Lamplighter's White House",
     "nc_mourner_house": "Mourner's Terrace House",
-    "nc_barge_store": "Funeral Barge Store"
-  }
+    "nc_barge_store": "Funeral Barge Store",
+    "necrom_ancestors_court": "Courtyard of the Bone-Binders"
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -68,
+        -74,
+        68,
+        -18
+      ],
+      "level": 5,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        0,
+        14
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 4,
+      "name": "necrom_ancestors_court"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          86
+        ],
+        [
+          0,
+          46
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          -34
+        ],
+        [
+          0,
+          -74
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "processional"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -84,
+          0
+        ],
+        [
+          -42,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          42,
+          0
+        ],
+        [
+          78,
+          0
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "catacomb_cross"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -64,
+          -36
+        ],
+        [
+          0,
+          -36
+        ],
+        [
+          64,
+          -36
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "upper_crypt_walk"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -64,
+          38
+        ],
+        [
+          0,
+          38
+        ],
+        [
+          64,
+          38
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "pilgrim_tier"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 56,
+      "rz": 56,
+      "wobble": 0,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "cloister_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -48
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        14
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        42,
+        18
+      ],
+      "r": 28,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -42,
+        38
+      ],
+      "r": 28,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 82,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "temple",
+      "count": 3,
+      "kit": "velothi",
+      "on": "upper_crypt_walk"
+    },
+    {
+      "kind": "hall_of_dead",
+      "count": 3,
+      "kit": "velothi",
+      "on": "cloister_ring"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "kit": "velothi",
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "processional"
+    },
+    {
+      "kind": "house",
+      "count": 8,
+      "kit": "velothi",
+      "flags": [
+        "upper"
+      ],
+      "on": "pilgrim_tier"
+    }
+  ]
 }

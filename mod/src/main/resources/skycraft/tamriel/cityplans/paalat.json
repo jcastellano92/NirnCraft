@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          0,
+          -19
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          10
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          27,
+          9
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
       "at": [
         0,
-        0
+        -4
       ],
-      "r0": 8,
-      "r1": 36,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 22,
+      "rz": 17,
+      "wobble": 5,
+      "lobes": 5,
+      "phase": 3.03,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,8 +120,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        0
+        9,
+        32
       ],
       "face": "south",
       "overlay": "reapers_march",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        18,
-        23
+        -14,
+        28
       ],
       "face": "north",
       "overlay": "reapers_march",
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -26,
-        12
+        33,
+        2
       ],
       "face": "north",
       "overlay": "reapers_march",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        -33,
+        1
       ],
       "face": "south",
       "overlay": "reapers_march",
@@ -182,5 +227,47 @@
     "paalat_landmark": "High Seat of place.skycraft.paalat",
     "paalat_plaza": "place.skycraft.paalat Central Plaza"
   },
-  "innKey": "paalat_b_5"
+  "innKey": "paalat_b_5",
+  "zones": [
+    {
+      "at": [
+        0,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

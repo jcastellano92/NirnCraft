@@ -11,6 +11,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
@@ -51,6 +53,22 @@ public class TamrielBiomeSource extends BiomeSource {
     private final Palette forced;
     private final boolean grid;
 
+    // 14 regional subterranean biomes
+    private final Holder<Biome> nordicKarstCaverns;
+    private final Holder<Biome> iceCaves;
+    private final Holder<Biome> dwemerCaverns;
+    private final Holder<Biome> falmerGlowCaves;
+    private final Holder<Biome> lavaCaves;
+    private final Holder<Biome> mushroomGrottos;
+    private final Holder<Biome> ayleidLimestoneCaverns;
+    private final Holder<Biome> valenwoodRootWarrens;
+    private final Holder<Biome> blackMarshHistCaverns;
+    private final Holder<Biome> elsweyrSandstoneCaverns;
+    private final Holder<Biome> summersetCrystalGrottoes;
+    private final Holder<Biome> yokudanSandVaults;
+    private final Holder<Biome> submergedSeaCaverns;
+    private final Holder<Biome> abyssalTrenchCaves;
+
     private static final ThreadLocal<Column[]> COLUMNS = ThreadLocal.withInitial(() -> {
         Column[] c = new Column[16];
         for (int i = 0; i < c.length; i++) c[i] = new Column();
@@ -80,7 +98,25 @@ public class TamrielBiomeSource extends BiomeSource {
         this.palettes = Palettes.compile(biomes);
         this.grid = "grid".equals(TEST);
         this.forced = TEST != null && !grid ? palettes.byKey(TEST) : null;
+        this.nordicKarstCaverns = lookupBiome(biomes, "nordic_karst_caverns");
+        this.iceCaves = lookupBiome(biomes, "ice_caves");
+        this.dwemerCaverns = lookupBiome(biomes, "dwemer_caverns");
+        this.falmerGlowCaves = lookupBiome(biomes, "falmer_glow_caves");
+        this.lavaCaves = lookupBiome(biomes, "lava_caves");
+        this.mushroomGrottos = lookupBiome(biomes, "mushroom_grottos");
+        this.ayleidLimestoneCaverns = lookupBiome(biomes, "ayleid_limestone_caverns");
+        this.valenwoodRootWarrens = lookupBiome(biomes, "valenwood_root_warrens");
+        this.blackMarshHistCaverns = lookupBiome(biomes, "black_marsh_hist_caverns");
+        this.elsweyrSandstoneCaverns = lookupBiome(biomes, "elsweyr_sandstone_caverns");
+        this.summersetCrystalGrottoes = lookupBiome(biomes, "summerset_crystal_grottoes");
+        this.yokudanSandVaults = lookupBiome(biomes, "yokudan_sand_vaults");
+        this.submergedSeaCaverns = lookupBiome(biomes, "submerged_sea_caverns");
+        this.abyssalTrenchCaves = lookupBiome(biomes, "abyssal_trench_caves");
         if (TEST != null) com.skycraft.Skycraft.LOGGER.warn("Tamriel biome source TEST MODE: {}", TEST);
+    }
+
+    private static Holder<Biome> lookupBiome(HolderGetter<Biome> biomes, String path) {
+        return biomes.get(ResourceKey.create(Registries.BIOME, new ResourceLocation("skycraft", path))).orElse(null);
     }
 
     @Override
@@ -151,7 +187,9 @@ public class TamrielBiomeSource extends BiomeSource {
         float c = Climate.unquantizeCoord(tp.continentalness());
         float erosion = Climate.unquantizeCoord(tp.erosion());
         float weird = Climate.unquantizeCoord(tp.weirdness());
-        if (depth > 0.2f) return y < 0 || depth > 1.0f ? Context.DEEP_CAVE : Context.CAVE;
+        if (depth > 0.2f || (s.coastDistance < 24f && y < SEA - 4 && depth > 0.14f)) {
+            return y < 0 || depth > 1.0f ? Context.DEEP_CAVE : Context.CAVE;
+        }
         // the surface height of this column, from the router's depth (depth ~ 0 at the surface, 1/128 per block)
         float h = y + depth * 128f;
         boolean sea = s.coastDistance < 0 || c < -0.19f;
@@ -179,14 +217,87 @@ public class TamrielBiomeSource extends BiomeSource {
         }
         double v;
         if (ctx == Context.CAVE || ctx == Context.DEEP_CAVE) {
+            int y = qy << 2;
             v = BiomeNoise.cdf(BiomeNoise.value3(qx / 24.0, qy / 12.0, qz / 24.0, 505) / 0.33);
+            Holder<Biome> override = pickSubterraneanOverride(col, ctx, y, v, tp);
+            if (override != null) return override;
         } else {
             v = palette.bias(climate(col, tp), qx << 2, qz << 2);
         }
         Holder<Biome> b = palette.get(ctx).pick(v);
         if (b != null) return b;
+        if (ctx == Context.CAVE || ctx == Context.DEEP_CAVE) {
+            Holder<Biome> regional = pickProvinceCaveBiome(col, ctx, qy << 2, v);
+            if (regional != null) return regional;
+        }
         // "@surface": the biome of the land above this cave
         return surfaceBiome(col, palette, tp);
+    }
+
+    private Holder<Biome> pickSubterraneanOverride(Column col, Context ctx, int y, double v, Climate.TargetPoint tp) {
+        MapSample s = col.sample;
+        float c = Climate.unquantizeCoord(tp.continentalness());
+        boolean deepOceanCol = (s.coastDistance < -36f || c < -0.455f || col.surface < 36f);
+        if (deepOceanCol && y < 20 && abyssalTrenchCaves != null) {
+            return abyssalTrenchCaves;
+        }
+        if (s.coastDistance < 24f && y < SEA && (s.coastDistance < 0f || v < 0.58) && submergedSeaCaverns != null) {
+            return submergedSeaCaverns;
+        }
+        if (s.heat > 0.35f && v < 0.72) {
+            if (ctx == Context.DEEP_CAVE && v < 0.32 && dwemerCaverns != null) return dwemerCaverns;
+            if (lavaCaves != null) return lavaCaves;
+        }
+        return null;
+    }
+
+    private Holder<Biome> pickProvinceCaveBiome(Column col, Context ctx, int y, double v) {
+        // Keep ~35% of shallow "@surface" slots as surface biome for natural entrance grading
+        if (ctx == Context.CAVE && y > 24 && v > 0.65) return null;
+        String r = col.regionId != null ? col.regionId : "";
+        boolean deep = ctx == Context.DEEP_CAVE || y < 8;
+        if (r.startsWith("skyrim/") || r.equals("province/skyrim")) {
+            if (r.contains("winterhold") || r.contains("the_pale") || col.sample.elevation > 220f) {
+                return deep && v < 0.4 ? falmerGlowCaves : iceCaves;
+            }
+            if (deep) return v < 0.5 ? falmerGlowCaves : dwemerCaverns;
+            return v < 0.7 ? nordicKarstCaverns : mushroomGrottos;
+        }
+        if (r.startsWith("high_rock/") || r.equals("province/high_rock")) {
+            return deep && v < 0.4 ? dwemerCaverns : nordicKarstCaverns;
+        }
+        if (r.startsWith("cyrodiil/") || r.equals("province/cyrodiil")) {
+            return ayleidLimestoneCaverns;
+        }
+        if (r.startsWith("morrowind/") || r.equals("province/morrowind")) {
+            if (r.contains("telvannis") || r.contains("bitter_coast")) return mushroomGrottos;
+            return deep && v < 0.55 ? dwemerCaverns : lavaCaves;
+        }
+        if (r.startsWith("valenwood/") || r.equals("province/valenwood")) {
+            return valenwoodRootWarrens;
+        }
+        if (r.startsWith("black_marsh/") || r.equals("province/black_marsh")) {
+            return blackMarshHistCaverns;
+        }
+        if (r.startsWith("elsweyr/") || r.equals("province/elsweyr")) {
+            return elsweyrSandstoneCaverns;
+        }
+        if (r.startsWith("summerset/") || r.equals("province/summerset")) {
+            return summersetCrystalGrottoes;
+        }
+        if (r.startsWith("hammerfell/") || r.equals("province/hammerfell")) {
+            return deep && v < 0.5 ? dwemerCaverns : yokudanSandVaults;
+        }
+        if (r.startsWith("yokuda/") || r.equals("province/yokuda")) {
+            return yokudanSandVaults;
+        }
+        if (r.startsWith("atmora/") || r.equals("province/atmora") || r.contains("kamal")) {
+            return iceCaves;
+        }
+        if (r.startsWith("sea/") || r.equals("province/sea") || r.startsWith("thras/") || r.startsWith("pyandonea/")) {
+            return deep && y < 20 ? abyssalTrenchCaves : submergedSeaCaverns;
+        }
+        return null;
     }
 
     private double climate(Column col, Climate.TargetPoint tp) {

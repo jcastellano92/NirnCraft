@@ -43,18 +43,99 @@ import java.util.List;
  * Travel moves the player, their horse and followers, advances time, and plays the travel fade.
  */
 public final class Carriages {
+    /** Maximum single-stage overland carriage distance in blocks (~2.8 km). */
+    public static final int MAX_CARRIAGE_DISTANCE = 2800;
+
     /** At most this many destinations in the dialogue besides the capitals (nearest first). */
     private static final int MAX_DESTINATIONS = 18;
 
+    private static final java.util.Set<String> ISLAND_PROVINCES = java.util.Set.of(
+            "solstheim", "summerset", "atmora", "yokuda", "akavir", "pyandonea", "thras"
+    );
+
     private Carriages() {}
 
-    /** A destination offered by a driver. */
+    /** A destination offered by a driver, with distance-scaled fare and stage distance in blocks. */
     public record Destination(Place place, int fare, double distance) {
+        public int hours() {
+            return estimateHours(distance);
+        }
+
+        public String formattedDistance() {
+            return formatDistance(distance);
+        }
+
+        public String formattedDuration() {
+            return formatDuration(distance);
+        }
+
+        public Component label() {
+            return Component.translatable(
+                    "travel.skycraft.offer.carriage",
+                    place.name(),
+                    formattedDistance(),
+                    formattedDuration(),
+                    fare
+            );
+        }
     }
 
     public static void register() {
         com.skycraft.travel.TravelSelftest.init();
         Dialogue.registerProvider(Carriages::addOptions);
+    }
+
+    /**
+     * Distance-scaled carriage fare in gold:
+     * {@code base = 20 + round(distanceBlocks * 0.045f)}, with a 25% discount (min 15g) if already discovered.
+     */
+    public static int fareForDistance(int distanceBlocks, boolean discovered) {
+        int d = Math.max(0, distanceBlocks);
+        int base = 20 + Math.round(d * 0.045f);
+        return discovered ? Math.max(15, Math.round(base * 0.75f)) : base;
+    }
+
+    public static int fareForDistance(double distanceBlocks, boolean discovered) {
+        return fareForDistance((int) Math.round(distanceBlocks), discovered);
+    }
+
+    public static String formatDistance(int distanceBlocks) {
+        int d = Math.max(0, distanceBlocks);
+        if (d >= 1000) {
+            return String.format(java.util.Locale.ROOT, "%.1f km", d / 1000.0);
+        }
+        return d + "m";
+    }
+
+    public static String formatDistance(double distanceBlocks) {
+        return formatDistance((int) Math.round(distanceBlocks));
+    }
+
+    public static int estimateHours(int distanceBlocks) {
+        return Math.max(1, Math.round(Math.max(0, distanceBlocks) / 350.0f));
+    }
+
+    public static int estimateHours(double distanceBlocks) {
+        return estimateHours((int) Math.round(distanceBlocks));
+    }
+
+    public static String formatDuration(int distanceBlocks) {
+        return estimateHours(distanceBlocks) + "h";
+    }
+
+    public static String formatDuration(double distanceBlocks) {
+        return formatDuration((int) Math.round(distanceBlocks));
+    }
+
+    public static String formatOffer(Destination dest) {
+        return String.format(
+                java.util.Locale.ROOT,
+                "%s (%s, %s) \u2014 %dg",
+                dest.place().id(),
+                dest.formattedDistance(),
+                dest.formattedDuration(),
+                dest.fare()
+        );
     }
 
     public static boolean isCarriageDriver(LivingEntity npc) {
@@ -70,46 +151,121 @@ public final class Carriages {
         return false;
     }
 
+    /** Offline/testable overload returning carriage destinations from a given {@link Place}. */
+    public static List<Destination> destinations(Place from) {
+        return destinations(from, null);
+    }
+
+    /** Returns carriage destinations from a {@link Place}, optionally applying discovery discounts for {@code player}. */
+    public static List<Destination> destinations(Place from, @org.jetbrains.annotations.Nullable ServerPlayer player) {
+        if (from == null) return List.of();
+        return computeDestinations(from.x(), from.z(), from.id(), provinceOf(from), from.regionId(), player);
+    }
+
     /** The destinations a driver at {@code from} offers this player, nearest first. */
     public static List<Destination> destinations(ServerPlayer player, BlockPos from) {
-        List<Destination> out = new ArrayList<>();
-        if (player.level().dimension() != Level.OVERWORLD) return out;
-        String province = Holds.province(Holds.holdAt(player.level(), from));
-        int baseFare = RoadsConfig.CARRIAGE_COST.get();
-        var data = SkyData.get(player);
+        if (player != null && player.level().dimension() != Level.OVERWORLD) return List.of();
+        Place nearest = Places.nearestSettlement(from.getX(), from.getZ(), 320);
+        String fromId = nearest != null ? nearest.id() : "";
+        String fromRegion = nearest != null ? nearest.regionId() : TamrielMap.region(from.getX(), from.getZ()).id();
+        String province = player != null
+                ? Holds.province(Holds.holdAt(player.level(), from))
+                : (nearest != null ? provinceOf(nearest) : TamrielMap.region(from.getX(), from.getZ()).province());
+        return computeDestinations(from.getX(), from.getZ(), fromId, province, fromRegion, player);
+    }
 
-        // First consult the data-driven provincial travel network (skycraft/travel/<province>.json)
+    private static List<Destination> computeDestinations(
+            int fromX,
+            int fromZ,
+            String fromPlaceId,
+            String province,
+            String fromRegionId,
+            @org.jetbrains.annotations.Nullable ServerPlayer player
+    ) {
+        List<Destination> out = new ArrayList<>();
+        com.skycraft.core.PlayerData data = player != null ? SkyData.get(player) : null;
         java.util.Set<String> addedIds = new java.util.HashSet<>();
-        com.skycraft.travel.TravelNode originNode = com.skycraft.travel.TravelNetworks
-                .nearestNode(from.getX(), from.getZ(), com.skycraft.travel.TravelMode.CARRIAGE, 320.0)
-                .orElse(null);
+        if (fromPlaceId != null && !fromPlaceId.isEmpty()) {
+            addedIds.add(fromPlaceId);
+        }
+
+        com.skycraft.travel.TravelNode originNode = null;
+        if (fromPlaceId != null && !fromPlaceId.isEmpty()) {
+            originNode = com.skycraft.travel.TravelNetworks.nodeForPlace(fromPlaceId)
+                    .filter(n -> n.supports(com.skycraft.travel.TravelMode.CARRIAGE))
+                    .orElse(null);
+        }
+        if (originNode == null) {
+            originNode = com.skycraft.travel.TravelNetworks
+                    .nearestNode(fromX, fromZ, com.skycraft.travel.TravelMode.CARRIAGE, 320.0)
+                    .orElse(null);
+        }
+
         if (originNode != null) {
-            for (com.skycraft.travel.TravelNetworks.Offer offer : com.skycraft.travel.TravelNetworks.offersFrom(
-                    originNode.id(), com.skycraft.travel.TravelMode.CARRIAGE)) {
+            // 1. Direct carriage routes from the data-driven provincial travel network (<= MAX_CARRIAGE_DISTANCE)
+            List<com.skycraft.travel.TravelNetworks.Offer> directOffers =
+                    com.skycraft.travel.TravelNetworks.offersFrom(originNode.id(), com.skycraft.travel.TravelMode.CARRIAGE);
+            for (com.skycraft.travel.TravelNetworks.Offer offer : directOffers) {
                 String placeId = offer.destination().place() != null ? offer.destination().place() : offer.destination().id();
                 Place p = Places.byId(placeId).orElse(null);
-                if (p == null || !addedIds.add(p.id())) continue;
-                double dist = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
-                out.add(new Destination(p, offer.fee() > 0 ? offer.fee() : fare(baseFare, dist, "skyrim".equals(province)), dist));
+                if (p == null || addedIds.contains(p.id())) continue;
+                if (!canReachByOverlandCarriage(fromX, fromZ, province, fromRegionId, p)) continue;
+                double dist = Math.hypot(p.x() - fromX, p.z() - fromZ);
+                if (dist > MAX_CARRIAGE_DISTANCE) continue;
+                addedIds.add(p.id());
+                boolean discovered = data != null && WorldData.discoveredPlace(data, p.id());
+                int fare = fareForDistance(dist, discovered);
+                out.add(new Destination(p, fare, dist));
+            }
+
+            // 2. Two-hop relay to same-province capitals when each stage is <= MAX_CARRIAGE_DISTANCE
+            //    (e.g. Whiterun -> Rorikstead -> Markarth along the Reach Road).
+            for (com.skycraft.travel.TravelNetworks.Offer firstLeg : directOffers) {
+                double leg1 = Math.hypot(firstLeg.destination().x() - fromX, firstLeg.destination().z() - fromZ);
+                if (leg1 > MAX_CARRIAGE_DISTANCE) continue;
+                for (com.skycraft.travel.TravelNetworks.Offer secondLeg : com.skycraft.travel.TravelNetworks.offersFrom(
+                        firstLeg.destination().id(), com.skycraft.travel.TravelMode.CARRIAGE)) {
+                    String placeId = secondLeg.destination().place() != null
+                            ? secondLeg.destination().place()
+                            : secondLeg.destination().id();
+                    Place p = Places.byId(placeId).orElse(null);
+                    if (p == null || addedIds.contains(p.id())) continue;
+                    if (p.type() != PlaceType.CAPITAL || !provinceOf(p).equals(province)) continue;
+                    if (!canReachByOverlandCarriage(fromX, fromZ, province, fromRegionId, p)) continue;
+                    double leg2 = Math.hypot(
+                            secondLeg.destination().x() - firstLeg.destination().x(),
+                            secondLeg.destination().z() - firstLeg.destination().z()
+                    );
+                    if (leg2 > MAX_CARRIAGE_DISTANCE) continue;
+                    double effectiveStageDist = Math.min(MAX_CARRIAGE_DISTANCE, Math.hypot(p.x() - fromX, p.z() - fromZ));
+                    addedIds.add(p.id());
+                    boolean discovered = data != null && WorldData.discoveredPlace(data, p.id());
+                    out.add(new Destination(p, fareForDistance(effectiveStageDist, discovered), effectiveStageDist));
+                }
             }
         }
 
+        // 3. Nearby overland capitals/cities within MAX_CARRIAGE_DISTANCE on the same connected landmass
         List<Destination> cities = new ArrayList<>();
         boolean hasDataNetwork = !out.isEmpty();
         for (Place p : Places.all()) {
             if (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) continue;
             if (addedIds.contains(p.id())) continue;
-            double dist = Math.sqrt(p.distSqr(from.getX(), from.getZ()));
-            if (dist < p.radius() + 200) continue; // the town you are at
-            // the road network reaches every place on this landmass; islands need a ship
-            if (!Landmass.connected(from.getX(), from.getZ(), p.x(), p.z())) continue;
+            double dist = Math.hypot(p.x() - fromX, p.z() - fromZ);
+            if (dist < p.radius() + 200 || dist > MAX_CARRIAGE_DISTANCE) continue;
+            if (!canReachByOverlandCarriage(fromX, fromZ, province, fromRegionId, p)) continue;
             String destProvince = provinceOf(p);
             boolean sameProvince = destProvince.equals(province);
-            if (hasDataNetwork && sameProvince) continue; // intra-province routes come from travel/<province>.json
-            Destination d = new Destination(p, fare(baseFare, dist, sameProvince && "skyrim".equals(province)), dist);
-            // every capital the roads reach is offered; other provinces' cities once you have been there
-            if (p.type() == PlaceType.CAPITAL) out.add(d);
-            else if (sameProvince || WorldData.discoveredPlace(data, p.id())) cities.add(d);
+            if (hasDataNetwork && sameProvince && p.type() != PlaceType.CAPITAL) continue;
+            boolean discovered = data != null && WorldData.discoveredPlace(data, p.id());
+            Destination d = new Destination(p, fareForDistance(dist, discovered), dist);
+            if (p.type() == PlaceType.CAPITAL) {
+                addedIds.add(p.id());
+                out.add(d);
+            } else if (sameProvince || discovered || data == null) {
+                addedIds.add(p.id());
+                cities.add(d);
+            }
         }
         cities.sort(Comparator.comparingDouble(Destination::distance));
         for (Destination d : cities) {
@@ -120,14 +276,35 @@ public final class Carriages {
         return out;
     }
 
-    /** Skyrim: 20 Septims for a neighbouring hold up to 50 across the province; elsewhere it grows with the road. */
+    private static boolean canReachByOverlandCarriage(
+            int fromX, int fromZ, String fromProvince, String fromRegionId, Place dest
+    ) {
+        String destProvince = provinceOf(dest);
+        String destRegion = dest.regionId();
+        boolean fromSolstheim = "solstheim".equals(fromProvince) || (fromRegionId != null && fromRegionId.contains("solstheim"));
+        boolean destSolstheim = "solstheim".equals(destProvince) || (destRegion != null && destRegion.contains("solstheim"));
+        if (fromSolstheim || destSolstheim) return false; // Solstheim uses Silt Striders, Boats, and Foot trails
+        if ("stros_mkai".equals(dest.id()) || (destRegion != null && destRegion.contains("stros_mkai"))
+                || (fromRegionId != null && fromRegionId.contains("stros_mkai"))) {
+            return false; // Island port of Stros M'Kai requires a ship
+        }
+        if ("isle_of_balfiera".equals(dest.id()) || "balfiera".equals(dest.id())) {
+            return false; // Balfiera in Iliac Bay requires a packet ship
+        }
+        if (ISLAND_PROVINCES.contains(fromProvince) || ISLAND_PROVINCES.contains(destProvince)) {
+            if (!fromProvince.equals(destProvince)) return false;
+        }
+        return Landmass.connected(fromX, fromZ, dest.x(), dest.z());
+    }
+
+    /** Legacy fare helper delegating to {@link #fareForDistance(double, boolean)}. */
     static int fare(int baseFare, double dist, boolean withinSkyrim) {
-        if (withinSkyrim) return Mth.clamp((int) Math.round(baseFare + (dist - 1200) / 100.0), baseFare, (int) Math.round(baseFare * 2.5));
-        return Math.max(baseFare, (int) Math.round(baseFare * (1 + dist / 1500.0)));
+        return fareForDistance(dist, false);
     }
 
     private static String provinceOf(Place p) {
         if (!p.regionId().isEmpty()) {
+            if (p.regionId().contains("solstheim")) return "solstheim";
             return Regions.byId(p.regionId()).map(r -> r.province())
                     .orElse(p.regionId().contains("/") ? p.regionId().substring(0, p.regionId().indexOf('/')) : p.regionId());
         }
@@ -141,26 +318,37 @@ public final class Carriages {
         for (Destination dest : destinations(player, npc.blockPosition())) {
             out.add(new DialogueOption(
                     "roads.carriage.dest." + dest.place().id(),
-                    Component.translatable("dialogue.skycraft.carriage.destination", dest.place().name(), dest.fare()),
+                    dest.label(),
                     order++,
                     (p, n) -> travelToDestination(p, n, dest.place(), dest.fare())
             ));
         }
     }
 
-    private static void travelToDestination(ServerPlayer player, LivingEntity npc, Place dest, int fare) {
+    public static void ride(ServerPlayer player, Place dest, int fare) {
+        ride(player, null, dest, fare);
+    }
+
+    public static void ride(ServerPlayer player, @org.jetbrains.annotations.Nullable LivingEntity npc, Place dest, int fare) {
+        travelToDestination(player, npc, dest, fare);
+    }
+
+    private static void travelToDestination(ServerPlayer player, @org.jetbrains.annotations.Nullable LivingEntity npc, Place dest, int fare) {
         if (Vitals.inCombat(player)) {
-            Dialogue.open(player, npc, Component.translatable("world.skycraft.travel.combat"));
+            if (npc != null) Dialogue.open(player, npc, Component.translatable("world.skycraft.travel.combat"));
+            else Notifier.message(player, Component.translatable("world.skycraft.travel.combat"));
             return;
         }
         if (com.skycraft.inventory.CarryWeight.isOverencumbered(player)) {
-            Dialogue.open(player, npc, Component.translatable("world.skycraft.travel.encumbered"));
+            if (npc != null) Dialogue.open(player, npc, Component.translatable("world.skycraft.travel.encumbered"));
+            else Notifier.message(player, Component.translatable("world.skycraft.travel.encumbered"));
             return;
         }
-        if (player.distanceToSqr(npc) > 8 * 8) return;
+        if (npc != null && player.distanceToSqr(npc) > 8 * 8) return;
 
         if (!Currency.take(player, fare)) {
-            Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
+            if (npc != null) Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
+            else Notifier.message(player, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
             return;
         }
 

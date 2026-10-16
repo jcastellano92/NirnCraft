@@ -30,7 +30,7 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        8,
+        16,
         0
       ],
       "face": "south",
@@ -54,7 +54,7 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -8,
+        -16,
         0
       ],
       "face": "south",
@@ -66,8 +66,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        0,
-        -15
+        -3,
+        -18
       ],
       "face": "south",
       "overlay": "nibenay_basin",
@@ -90,6 +90,126 @@
     "knights_of_the_thorn_lodge_b_1": "Knights of the Thorn Lodge",
     "knights_of_the_thorn_lodge_b_2": "Squires' Dormitory",
     "knights_of_the_thorn_lodge_b_3": "Thorn Destrier Stables",
-    "knights_of_the_thorn_lodge_b_4": "Heraldic Armoury Shed"
-  }
+    "knights_of_the_thorn_lodge_b_4": "Heraldic Armoury Shed",
+    "knights_of_the_thorn_lodge_square": "Knights of the Thorn Tilting Yard"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "knights_of_the_thorn_lodge_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -4,
+          7
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "thorn_lists_avenue"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          -4
+        ],
+        [
+          -4,
+          -4
+        ],
+        [
+          19,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "knights_of_the_thorn_lodge_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        -4
+      ],
+      "rx": 15,
+      "rz": 11,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "chivalric_court_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        -2
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "chivalric_court_loop"
+    },
+    {
+      "kind": "barracks",
+      "count": 1,
+      "on": "thorn_lists_avenue"
+    }
+  ]
 }

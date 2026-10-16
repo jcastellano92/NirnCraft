@@ -1,8 +1,10 @@
 package com.skycraft.scatter;
 
 import com.skycraft.arsenal.LeveledGear;
+import com.skycraft.crafting.arcane.ArcaneRegistry;
 import com.skycraft.explore.ExploreLoot;
 import com.skycraft.scatter.ScatterRules.Kind;
+import com.skycraft.tamriel.biome.BiomeBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -273,6 +275,13 @@ public final class Builders {
     static boolean mushroomRing(Brush br, Kind k) {
         int rad = p(k, "radius", 3);
         boolean red = br.r.nextInt(3) > 0;
+        Block alchemyFungus = switch (br.r.nextInt(5)) {
+            case 0 -> ArcaneRegistry.floraBlock("fly_amanita");
+            case 1 -> ArcaneRegistry.floraBlock("imp_stool");
+            case 2 -> ArcaneRegistry.floraBlock("bleeding_crown");
+            case 3 -> ArcaneRegistry.floraBlock("mora_tapinella");
+            default -> ArcaneRegistry.floraBlock("namiras_rot");
+        };
         boolean any = false;
         int steps = 8 + rad * 3;
         for (int i = 0; i < steps; i++) {
@@ -280,7 +289,8 @@ public final class Builders {
             int dx = (int) Math.round(Math.cos(a) * rad), dz = (int) Math.round(Math.sin(a) * rad);
             if (br.b.waterAt(dx, dz)) continue;
             if (soilBelow(br, dx, dz)) br.force(dx, br.gy(dx, dz) - 1, dz, Blocks.PODZOL.defaultBlockState());
-            any |= br.top(dx, dz, 0, red ? Blocks.RED_MUSHROOM : Blocks.BROWN_MUSHROOM);
+            Block chosen = br.r.nextInt(3) == 0 ? alchemyFungus : (red ? Blocks.RED_MUSHROOM : Blocks.BROWN_MUSHROOM);
+            any |= br.top(dx, dz, 0, chosen);
         }
 
         return any;
@@ -290,9 +300,12 @@ public final class Builders {
         int n = br.range(p(k, "min", 8), p(k, "max", 14)), rad = p(k, "radius", 3);
         Terrain.Ground g = Terrain.ground(br.b.level.getBlockState(br.b.at(0, -1, 0)));
         Block[] set = g == Terrain.Ground.SNOW
-                ? new Block[]{Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.AZURE_BLUET}
-                : g == Terrain.Ground.MUD ? new Block[]{Blocks.BLUE_ORCHID, Blocks.FERN, Blocks.ALLIUM}
-                : new Block[]{Blocks.DANDELION, Blocks.POPPY, Blocks.AZURE_BLUET, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.ALLIUM};
+                ? new Block[]{Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.AZURE_BLUET,
+                        ArcaneRegistry.FROST_MIRRIAM.get(), ArcaneRegistry.floraBlock("snowberries"), ArcaneRegistry.floraBlock("thistle_branch")}
+                : g == Terrain.Ground.MUD ? new Block[]{Blocks.BLUE_ORCHID, Blocks.FERN, Blocks.ALLIUM,
+                        ArcaneRegistry.DEATHBELL.get(), ArcaneRegistry.floraBlock("swamp_fungal_pod"), ArcaneRegistry.floraBlock("canis_root")}
+                : new Block[]{Blocks.DANDELION, Blocks.POPPY, Blocks.AZURE_BLUET, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.ALLIUM,
+                        ArcaneRegistry.NIGHTSHADE.get(), ArcaneRegistry.floraBlock("jazbay_grapes"), ArcaneRegistry.floraBlock("juniper_berries")};
         Block main = set[br.r.nextInt(set.length)];
         boolean any = false;
         for (int i = 0; i < n; i++) {
@@ -357,10 +370,30 @@ public final class Builders {
                 for (int y = 0; y <= 1; y++) br.force(dx, br.gy(dx, dz) + y, dz, br.air());
         for (int dz = 1; dz <= 3; dz++) br.force(0, br.gy(0, dz), dz, br.air());
         br.force(0, br.gy(0, 2) + 1, 2, br.air());
+
+        // Anchor the living DenBlockEntity in the floor of the hollow so regional residents spawn and tether here
+        br.force(0, br.gy(0, 0) - 1, 0, BiomeBlocks.CREATURE_DEN.get().defaultBlockState());
+
+        // Fallen timber / root overhang framing the den mouth
+        Block log = br.b.pal.log();
+        br.top(-1, 2, 1, pillar(log, Direction.Axis.X));
+        br.top(1, 2, 1, pillar(log, Direction.Axis.X));
+
+        // Nesting mat, gnawed bones, skulls, cave fungi, and a predator's victim cache
         br.top(-1, -1, 0, Blocks.BROWN_CARPET);
         br.b.lying(0, br.gy(0, 0), 0, new ItemStack(Items.BONE));
         if (br.r.nextBoolean()) br.b.lying(-1, br.gy(-1, 0), 0, new ItemStack(Items.BONE));
         br.top(0, 4, 0, Blocks.BONE_BLOCK);
+        int skullY = br.gy(1, 3);
+        if (br.b.free(1, skullY, 3)) br.b.skull(1, skullY, 3);
+        if (br.r.nextInt(3) == 0) br.top(-1, 1, 1, Blocks.COBWEB);
+        br.top(2, -1, 0, ArcaneRegistry.floraBlock(br.r.nextBoolean() ? "imp_stool" : "namiras_rot"));
+        if (br.r.nextInt(2) == 0) {
+            int chestY = br.gy(-1, 0);
+            if (br.b.free(-1, chestY, 0)) {
+                br.b.chest(-1, chestY, 0, Direction.SOUTH, ExploreLoot.table("cache"));
+            }
+        }
         return true;
     }
 

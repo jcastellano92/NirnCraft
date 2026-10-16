@@ -3,8 +3,8 @@
   "sil": "terraced-Downs-shepherd-keep",
   "base": "none",
   "overlay": "anticlere",
-  "radius": 54,
-  "reach": 62,
+  "radius": 40,
+  "reach": 46,
   "fill_gap": 2,
   "inn_key": "urvaius_ram_and_bell",
   "names": {
@@ -29,28 +29,28 @@
   "gates": [
     [
       0,
-      -50
+      -37
     ],
     [
-      50,
+      37,
       0
     ],
     [
       0,
-      50
+      37
     ],
     [
-      -50,
+      -37,
       0
     ]
   ],
   "walls": [
     {
-      "r": 50,
+      "r": 37,
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -62,8 +62,8 @@
     {
       "id": "castle",
       "at": [
-        0,
-        -22
+        -2,
+        -24
       ],
       "face": "south",
       "name": "urvaius_landmark",
@@ -76,8 +76,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        -19
+        30,
+        -14
       ],
       "face": "south",
       "name": "urvaius_downs_keep"
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        28,
+        13
       ],
       "face": "west",
       "name": "urvaius_ram_and_bell"
@@ -98,8 +98,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        24,
-        2
+        9,
+        19
       ],
       "face": "west",
       "name": "urvaius_fleece_hall"
@@ -109,8 +109,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        30,
-        21
+        -1,
+        32
       ],
       "face": "west",
       "name": "urvaius_bell_founders"
@@ -120,8 +120,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        10,
-        22
+        -5,
+        18
       ],
       "face": "north",
       "name": "urvaius_lanolin_salve_shop"
@@ -131,8 +131,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -3,
-        37
+        -22,
+        24
       ],
       "face": "north",
       "name": "urvaius_mara_shepherds_chapel"
@@ -142,8 +142,8 @@
       "use": "tailor",
       "wealth": "common",
       "at": [
-        -13,
-        20
+        -19,
+        2
       ],
       "face": "north",
       "name": "urvaius_broadcloth_fullers"
@@ -153,8 +153,8 @@
       "use": "manor",
       "wealth": "wealthy",
       "at": [
-        -33,
-        16
+        -30,
+        -15
       ],
       "face": "east",
       "name": "urvaius_castellan_grange"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -33,
+        4
       ],
       "face": "east",
       "name": "urvaius_ridge_watch"
@@ -175,8 +175,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -31,
-        -20
+        -23,
+        -15
       ],
       "face": "east",
       "name": "urvaius_drover_stables"
@@ -186,11 +186,11 @@
     {
       "from": [
         0,
-        -44
+        -33
       ],
       "to": [
         0,
-        44
+        33
       ],
       "width": 4,
       "major": true,
@@ -199,11 +199,11 @@
     },
     {
       "from": [
-        -44,
+        -33,
         0
       ],
       "to": [
-        44,
+        33,
         0
       ],
       "width": 4,
@@ -213,12 +213,12 @@
     },
     {
       "from": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "to": [
-        28,
-        -28
+        21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -227,12 +227,12 @@
     },
     {
       "from": [
-        28,
-        -28
+        21,
+        -21
       ],
       "to": [
-        28,
-        28
+        21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -241,12 +241,12 @@
     },
     {
       "from": [
-        28,
-        28
+        21,
+        21
       ],
       "to": [
-        -28,
-        28
+        -21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -255,12 +255,12 @@
     },
     {
       "from": [
-        -28,
-        28
+        -21,
+        21
       ],
       "to": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -273,7 +273,7 @@
     {
       "at": [
         0,
-        4
+        3
       ],
       "size": 9,
       "stalls": 3,
@@ -313,14 +313,14 @@
     {
       "ring": [
         0,
-        27
+        20
       ],
       "overlay": "anticlere"
     },
     {
       "ring": [
-        27,
-        54
+        20,
+        40
       ],
       "overlay": "anticlere"
     }
@@ -331,26 +331,12 @@
       "count": 1
     },
     {
-      "type": "lamps",
-      "count": 2
+      "type": "bench",
+      "count": 2,
+      "where": "square"
     },
     {
-      "type": "banners",
-      "count": 2
-    },
-    {
-      "type": "shrine",
-      "theme": "divine:stendarr",
-      "count": 1
-    },
-    {
-      "type": "great_tree",
-      "theme": "spruce",
-      "count": 1
-    },
-    {
-      "type": "memorial",
-      "count": 1
+      "type": "banners"
     }
   ]
 }

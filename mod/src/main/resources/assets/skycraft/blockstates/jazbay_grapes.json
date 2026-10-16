@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/jazbay_grapes"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/jazbay_grapes_harvested"
+    }
+  }
+}

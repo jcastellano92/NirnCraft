@@ -3,8 +3,8 @@
   "sil": "river-bluff-scholars-town",
   "base": "none",
   "overlay": "bjoulsae",
-  "radius": 54,
-  "reach": 62,
+  "radius": 40,
+  "reach": 46,
   "fill_gap": 2,
   "inn_key": "bhoriane_inkhorn_and_cup",
   "names": {
@@ -29,28 +29,28 @@
   "gates": [
     [
       0,
-      -50
+      -37
     ],
     [
-      50,
+      37,
       0
     ],
     [
       0,
-      50
+      37
     ],
     [
-      -50,
+      -37,
       0
     ]
   ],
   "walls": [
     {
-      "r": 50,
+      "r": 37,
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -63,7 +63,7 @@
       "id": "library_terrace",
       "at": [
         0,
-        -22
+        -16
       ],
       "face": "south",
       "name": "bhoriane_landmark",
@@ -76,8 +76,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        -19
+        26,
+        -14
       ],
       "face": "south",
       "name": "bhoriane_bluff_keep"
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        28,
+        13
       ],
       "face": "west",
       "name": "bhoriane_inkhorn_and_cup"
@@ -98,8 +98,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        24,
-        2
+        9,
+        19
       ],
       "face": "west",
       "name": "bhoriane_parchment_chandler"
@@ -109,8 +109,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        30,
-        21
+        -1,
+        32
       ],
       "face": "west",
       "name": "bhoriane_astrolabe_brass_forge"
@@ -120,8 +120,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        10,
-        22
+        -5,
+        18
       ],
       "face": "north",
       "name": "bhoriane_aludel_house"
@@ -131,8 +131,8 @@
       "use": "bookseller",
       "wealth": "wealthy",
       "at": [
-        -3,
-        37
+        -18,
+        27
       ],
       "face": "north",
       "name": "bhoriane_bluff_bindery"
@@ -142,8 +142,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -13,
-        20
+        -20,
+        8
       ],
       "face": "north",
       "name": "bhoriane_julianos_oratory"
@@ -153,8 +153,8 @@
       "use": "manor",
       "wealth": "wealthy",
       "at": [
-        -33,
-        16
+        -30,
+        -15
       ],
       "face": "east",
       "name": "bhoriane_chancellors_villa"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -18,
+        -1
       ],
       "face": "east",
       "name": "bhoriane_ferry_steps_watch"
@@ -175,8 +175,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -31,
-        -20
+        -7,
+        -33
       ],
       "face": "east",
       "name": "bhoriane_post_stables"
@@ -186,11 +186,11 @@
     {
       "from": [
         0,
-        -44
+        -33
       ],
       "to": [
         0,
-        44
+        33
       ],
       "width": 4,
       "major": true,
@@ -199,11 +199,11 @@
     },
     {
       "from": [
-        -44,
+        -33,
         0
       ],
       "to": [
-        44,
+        33,
         0
       ],
       "width": 4,
@@ -213,12 +213,12 @@
     },
     {
       "from": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "to": [
-        28,
-        -28
+        21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -227,12 +227,12 @@
     },
     {
       "from": [
-        28,
-        -28
+        21,
+        -21
       ],
       "to": [
-        28,
-        28
+        21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -241,12 +241,12 @@
     },
     {
       "from": [
-        28,
-        28
+        21,
+        21
       ],
       "to": [
-        -28,
-        28
+        -21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -255,12 +255,12 @@
     },
     {
       "from": [
-        -28,
-        28
+        -21,
+        21
       ],
       "to": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -272,12 +272,12 @@
     {
       "kind": "bridge",
       "from": [
-        -8,
-        32
+        -6,
+        24
       ],
       "to": [
-        8,
-        32
+        6,
+        24
       ],
       "width": 4
     }
@@ -286,7 +286,7 @@
     {
       "at": [
         0,
-        4
+        3
       ],
       "size": 9,
       "stalls": 3,
@@ -326,14 +326,14 @@
     {
       "ring": [
         0,
-        27
+        20
       ],
       "overlay": "bjoulsae"
     },
     {
       "ring": [
-        27,
-        54
+        20,
+        40
       ],
       "overlay": "bjoulsae"
     }
@@ -344,26 +344,12 @@
       "count": 1
     },
     {
-      "type": "lamps",
-      "count": 2
-    },
-    {
       "type": "banners",
-      "count": 2
+      "count": 2,
+      "where": "gate"
     },
     {
-      "type": "shrine",
-      "theme": "divine:arkay",
-      "count": 1
-    },
-    {
-      "type": "great_tree",
-      "theme": "oak",
-      "count": 1
-    },
-    {
-      "type": "basin",
-      "count": 1
+      "type": "banners"
     }
   ]
 }

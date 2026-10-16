@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/snowberries"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/snowberries_harvested"
+    }
+  }
+}

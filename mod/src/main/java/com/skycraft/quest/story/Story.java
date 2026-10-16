@@ -403,7 +403,7 @@ public final class Story {
 
         Objective o;
         switch (od.type) {
-            case "go" -> {
+            case "go", "visit", "reach" -> {
                 o = new Objective(Objective.Type.GO_TO, text(od, "go", where));
                 if (pos != null) o.at(pos, dim, radius).guessY();
                 else if (!od.dim.isEmpty()) {

@@ -59,14 +59,42 @@
     {
       "type": "radial",
       "at": [
-        0,
-        0
+        -4,
+        4
       ],
-      "r0": 4,
-      "r1": 20,
-      "spokes": 4,
+      "spokes": 6,
+      "r0": 10,
+      "r1": 22,
+      "wobble": 6,
+      "offset": 0.11,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
       "tag": "spoke",
       "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          19
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -12
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
     }
   ],
   "buildings": [
@@ -182,5 +210,47 @@
     "roadside_wandering_root_landmark": "High Seat of place.skycraft.roadside_wandering_root",
     "roadside_wandering_root_plaza": "place.skycraft.roadside_wandering_root Central Plaza"
   },
-  "innKey": "roadside_wandering_root_b_5"
+  "innKey": "roadside_wandering_root_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -9
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 20,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

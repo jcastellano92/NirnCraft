@@ -112,10 +112,6 @@ public final class Houses {
             out.add(new HouseDef(h.id(), pretty(h.id()), p.get().regionId(), h.cost(), h.place(), new BlockPos(w[0], 64, w[1]),
                     Math.max(h.w(), h.d()) / 2 + 1, false));
         }
-        for (String id : new String[]{"lakeview", "windstad", "heljarchen"}) {
-            Places.byId(id).ifPresent(p -> out.add(new HouseDef(id, pretty(id), p.regionId(), 5000, id,
-                    new BlockPos(p.x(), 64, p.z()), 12, true)));
-        }
         // the other provinces' homes: plots reserved in their cities, built by economy.homes (approxPos is the
         // preferred spot; the plot may have moved a little, so lookups go through the recorded site)
         for (HousePlots.Plot h : HousePlots.PLOTS) {
@@ -124,6 +120,12 @@ public final class Houses {
             int[] w = Cities.world(p.get(), h.lx(), h.lz());
             out.add(new HouseDef(h.id(), pretty(h.id()), p.get().regionId(), h.cost(), h.place(), new BlockPos(w[0], 64, w[1]),
                     Math.max(h.w(), h.d()) / 2 + 1, false));
+        }
+        // Hearthfire homestead land plots across all provinces (Skyrim's 9 holds + all provincial regions)
+        for (var plot : com.skycraft.homestead.Homesteads.PLOTS) {
+            String id = plot.id();
+            Places.byId(id).ifPresent(p -> out.add(new HouseDef(id, pretty(id), p.regionId(), 5000, id,
+                    new BlockPos(p.x(), 64, p.z()), 12, true)));
         }
         return List.copyOf(out);
     }
@@ -159,18 +161,34 @@ public final class Houses {
         return null;
     }
 
-    /** The homes sold in the settlement at {@code pos} (cities with two, like the Imperial City, list both). */
+    /** The homes sold in the settlement at {@code pos} (city homes in that settlement plus homestead plots in its region). */
     public static List<HouseDef> housesFor(Level level, BlockPos pos) {
         List<HouseDef> out = new ArrayList<>();
         Optional<Place> here = Places.nearest(null, pos.getX(), pos.getZ(), 260);
         if (here.isPresent() && here.get().type().isSettlement()) {
             for (HouseDef d : HOUSES) if (!d.homestead() && d.placeId().equals(here.get().id())) out.add(d);
+            for (HouseDef d : HOUSES) {
+                if (d.homestead() && d.hold().equals(here.get().regionId()) && !out.contains(d)) out.add(d);
+            }
         }
         if (out.isEmpty()) {
             HouseDef d = houseFor(level, pos);
             if (d != null) out.add(d);
         }
         return out;
+    }
+
+    /** All homes (city homes and homestead plots) sold in a hold/region. */
+    public static List<HouseDef> housesForHold(String hold) {
+        if (hold == null || hold.isEmpty()) return List.of();
+        String h = hold.toLowerCase(Locale.ROOT);
+        List<HouseDef> out = new ArrayList<>();
+        for (HouseDef d : HOUSES) {
+            String region = d.hold();
+            String shortId = region.substring(region.lastIndexOf('/') + 1);
+            if (region.equals(h) || shortId.equals(h) || h.endsWith("/" + shortId)) out.add(d);
+        }
+        return List.copyOf(out);
     }
 
     /** Where a married player's spouse should live: inside the home the player owns nearest to them (or null). */
@@ -203,7 +221,9 @@ public final class Houses {
 
     @Nullable
     public static HouseDef byId(String id) {
-        for (HouseDef h : HOUSES) if (h.id().equals(id)) return h;
+        if (id == null) return null;
+        String canon = com.skycraft.homestead.Homesteads.canonPlotId(id);
+        for (HouseDef h : HOUSES) if (h.id().equals(id) || h.id().equals(canon)) return h;
         return null;
     }
 

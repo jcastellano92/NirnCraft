@@ -10,45 +10,321 @@
     "haldis": "darkwater_haldis_house"
   },
   "innKey": "darkwater_fords_rest",
-  "gates": [[0, 24], [-2, -24]],
+  "gates": [
+    [
+      0,
+      24
+    ],
+    [
+      -2,
+      -24
+    ]
+  ],
   "lines": [
-    {"kind": "bridge", "from": [-2, -24], "to": [0, 24], "width": 3, "variant": 0}
+    {
+      "kind": "bridge",
+      "from": [
+        -2,
+        -24
+      ],
+      "to": [
+        0,
+        24
+      ],
+      "width": 3,
+      "variant": 0
+    }
   ],
   "buildings": [
-    {"kind": "mine", "at": [-42, -4], "size": [7, 14], "face": "E", "variant": 0, "flags": ["no_beard"], "name": "darkwater_mine"},
-    {"kind": "dock", "at": [1, 4], "size": [5, 11], "face": "E", "flags": ["no_beard"], "name": "darkwater_south_ferry_dock"},
-    {"kind": "dock", "at": [1, -8], "size": [5, 11], "face": "E", "flags": ["no_beard"], "name": "darkwater_north_ferry_dock"}
+    {
+      "kind": "mine",
+      "at": [
+        -30,
+        -4
+      ],
+      "size": [
+        7,
+        14
+      ],
+      "face": "E",
+      "variant": 0,
+      "flags": [
+        "no_beard"
+      ],
+      "name": "darkwater_mine"
+    },
+    {
+      "kind": "dock",
+      "at": [
+        1,
+        4
+      ],
+      "size": [
+        5,
+        11
+      ],
+      "face": "E",
+      "flags": [
+        "no_beard"
+      ],
+      "name": "darkwater_south_ferry_dock"
+    },
+    {
+      "kind": "dock",
+      "at": [
+        -2,
+        -11
+      ],
+      "size": [
+        5,
+        11
+      ],
+      "face": "E",
+      "flags": [
+        "no_beard"
+      ],
+      "name": "darkwater_north_ferry_dock"
+    }
   ],
   "plazas": [
-    {"at": [-14, 4], "size": 11, "variant": 0, "stalls": 3, "name": "darkwater_landing"}
+    {
+      "at": [
+        -14,
+        4
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "darkwater_landing"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 24], [-8, 20], [-14, 10], [-14, -4], [-10, -16], [-2, -24]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-40, 6], [-28, 4], [-14, 4]], "width": 3, "rank": 1, "tag": "row"},
-    {"type": "path", "via": [[-28, 4], [-30, -8], [-36, -14]], "width": 2, "rank": 2, "tag": "mine"},
-    {"type": "path", "via": [[-2, -24], [14, -30], [30, -34], [46, -30]], "width": 3, "rank": 1, "tag": "east"},
-    {"type": "path", "via": [[0, 24], [16, 30], [34, 28], [46, 34]], "width": 3, "rank": 1, "tag": "southeast"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          24
+        ],
+        [
+          -8,
+          20
+        ],
+        [
+          -14,
+          10
+        ],
+        [
+          -14,
+          -4
+        ],
+        [
+          -10,
+          -16
+        ],
+        [
+          -2,
+          -24
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -40,
+          6
+        ],
+        [
+          -28,
+          4
+        ],
+        [
+          -14,
+          4
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "row"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          4
+        ],
+        [
+          -30,
+          -8
+        ],
+        [
+          -36,
+          -14
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "mine"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -2,
+          -24
+        ],
+        [
+          14,
+          -30
+        ],
+        [
+          30,
+          -34
+        ],
+        [
+          46,
+          -30
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "east"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          24
+        ],
+        [
+          16,
+          30
+        ],
+        [
+          34,
+          28
+        ],
+        [
+          46,
+          34
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "southeast"
+    }
   ],
   "zones": [
-    {"at": [-16, 4], "r": 18, "zone": "centre"},
-    {"at": [-32, -6], "r": 14, "zone": "craft"}
+    {
+      "at": [
+        -16,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -32,
+        -6
+      ],
+      "r": 14,
+      "zone": "craft"
+    }
   ],
-  "fabric": {"radius": 38, "target": 0.34, "fill_cap": 6, "yard_cap": 5},
+  "fabric": {
+    "radius": 38,
+    "target": 0.34,
+    "fill_cap": 6,
+    "yard_cap": 5
+  },
   "queue": [
-    {"kind": "inn", "size": [13, 15], "flags": ["upper"], "name": "darkwater_fords_rest", "on": "main"},
-    {"kind": "store", "size": [9, 9], "name": "darkwater_trader", "on": "main"},
-    {"kind": "smithy", "size": [11, 9], "name": "darkwater_smithy", "on": "row"},
-    {"kind": "house", "name": "darkwater_ferrymans_house", "on": "main"},
-    {"kind": "house", "name": "darkwater_haldis_house", "on": "mine"},
-    {"kind": "house", "name": "darkwater_helas_house", "on": "row"},
-    {"kind": "farmhouse", "size": [9, 11], "name": "darkwater_hotspring_farmhouse", "on": "east"},
-    {"kind": "house", "count": 3, "on": "east"},
-    {"kind": "house", "count": 3, "on": "southeast"}
+    {
+      "kind": "inn",
+      "size": [
+        13,
+        15
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "darkwater_fords_rest",
+      "on": "main"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        9
+      ],
+      "name": "darkwater_trader",
+      "on": "main"
+    },
+    {
+      "kind": "smithy",
+      "size": [
+        11,
+        9
+      ],
+      "name": "darkwater_smithy",
+      "on": "row"
+    },
+    {
+      "kind": "house",
+      "name": "darkwater_ferrymans_house",
+      "on": "main"
+    },
+    {
+      "kind": "house",
+      "name": "darkwater_haldis_house",
+      "on": "mine"
+    },
+    {
+      "kind": "house",
+      "name": "darkwater_helas_house",
+      "on": "row"
+    },
+    {
+      "kind": "farmhouse",
+      "size": [
+        9,
+        11
+      ],
+      "name": "darkwater_hotspring_farmhouse",
+      "on": "east"
+    },
+    {
+      "kind": "house",
+      "count": 3,
+      "on": "east"
+    },
+    {
+      "kind": "house",
+      "count": 3,
+      "on": "southeast"
+    }
   ],
   "features": [
-    {"type": "well", "where": "free"},
-    {"type": "lamps", "count": 2, "where": "street", "tag": "main"},
-    {"type": "bench", "where": "square"}
+    {
+      "type": "well",
+      "where": "free"
+    },
+    {
+      "type": "lamps",
+      "count": 2,
+      "where": "street",
+      "tag": "main"
+    },
+    {
+      "type": "bench",
+      "where": "square"
+    }
   ],
   "titles": {
     "darkwater_fords_rest": "Ford's Rest",

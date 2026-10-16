@@ -50,8 +50,8 @@ public final class Housing {
     /** Extra pairs of hands one workplace takes from the households. */
     private static final int HANDS = 2;
 
-    /** Persistent-data keys on a spawned resident: job id, workplace anchor position (packed), and MS22 causal why field IDs. */
-    public static final String JOB_KEY = "skycraft_job", WORK_KEY = "skycraft_work", WHY_KEY = "SkycraftWhy";
+    /** Persistent-data keys on a spawned resident: job id, workplace anchor position (packed), MS22 causal why field IDs, and authored resident ID. */
+    public static final String JOB_KEY = "skycraft_job", WORK_KEY = "skycraft_work", WHY_KEY = "SkycraftWhy", RESIDENT_ID_KEY = SocietyResidents.RESIDENT_ID_KEY;
     /** Persistent-data key: {@code "<settlement>#<anchor index>"}, the housing-plan slot this person fills (one each). */
     public static final String SLOT_KEY = "skycraft_slot";
 
@@ -70,6 +70,20 @@ public final class Housing {
     public record Resident(String job, @Nullable NpcRole role, AnchorType slotType, int slot, int work, int bed, BedKind bedKind, int leisure) {
         public boolean household() {
             return work < 0;
+        }
+
+        /** Matches this housing slot against an authored resident in {@link SocietyResidents} for {@code settlementId}. */
+        @Nullable
+        public SocietyResidents.Entry matchAuthored(@Nullable String settlementId, @Nullable Set<String> usedIds) {
+            return SocietyResidents.matchForSlot(settlementId, job, role, slot, usedIds);
+        }
+
+        /** Causal world-sheet field IDs explaining why this resident's job exists in {@code regionId}, preferring authored resident citations. */
+        public List<String> why(@Nullable String regionId, @Nullable SocietyResidents.Entry authored) {
+            if (authored != null && !authored.why().isEmpty()) {
+                return authored.why();
+            }
+            return why(regionId);
         }
 
         /** Causal world-sheet field IDs explaining why this resident's job exists in {@code regionId} (empty when no sheet). */
@@ -98,6 +112,20 @@ public final class Housing {
         /** Household residents per MEETING anchor index (the idle clusters). */
         public final Map<Integer, Integer> idleAt = new TreeMap<>();
         public int householdIdle;
+
+        /** Deterministically assigns authored {@link SocietyResidents.Entry} records to each housing slot in {@code settlementId}. */
+        public Map<Integer, SocietyResidents.Entry> resolveAuthoredResidents(@Nullable String settlementId) {
+            if (settlementId == null || settlementId.isBlank()) return Map.of();
+            Map<Integer, SocietyResidents.Entry> out = new LinkedHashMap<>();
+            Set<String> used = new HashSet<>();
+            for (Map.Entry<Integer, Resident> e : bySlot.entrySet()) {
+                SocietyResidents.Entry m = e.getValue().matchAuthored(settlementId, used);
+                if (m != null) {
+                    out.put(e.getKey(), m);
+                }
+            }
+            return out;
+        }
 
         /** Beds that can hold a resident (not rooms for travellers, not player houses). */
         public int capacity() {

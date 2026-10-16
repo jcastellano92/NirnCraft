@@ -30,7 +30,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -42,7 +42,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        0,
+        -16,
         15
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        -5
       ],
       "face": "south",
       "overlay": "west_weald",
@@ -84,16 +84,140 @@
       "type": "fountain",
       "theme": "wine_press_basin",
       "count": 1
+    },
+    {
+      "type": "bench",
+      "where": "square"
     }
   ],
   "titles": {
     "ivy_shade_b_1": "Ivy Shade Pressing House",
     "ivy_shade_b_2": "The Arbor Cup",
     "ivy_shade_b_3": "Cask-Aging Cellar",
-    "ivy_shade_b_4": "Cooper's Workshop"
+    "ivy_shade_b_4": "Cooper's Workshop",
+    "ivy_shade_square": "Ivy Shade Vineyard Arbour Court"
   },
   "innKey": "ivy_shade_b_2",
   "names": {
     "inn": "ivy_shade_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        2,
+        4
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 2,
+      "name": "ivy_shade_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          23
+        ],
+        [
+          -2,
+          7
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          2,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "pergola_arbour_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -19,
+          2
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          19,
+          -2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "ivy_shade_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        2
+      ],
+      "rx": 16,
+      "rz": 11,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "wine_press_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        10,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 24,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "wine_press_loop"
+    },
+    {
+      "kind": "farmhouse",
+      "count": 1,
+      "on": "pergola_arbour_lane"
+    }
+  ]
 }

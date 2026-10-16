@@ -531,7 +531,7 @@
       "use": "inn",
       "wealth": "wealthy",
       "at": [
-        -24,
+        -32,
         14
       ],
       "face": "east",
@@ -542,7 +542,7 @@
       "use": "general_store",
       "wealth": "wealthy",
       "at": [
-        24,
+        32,
         14
       ],
       "face": "west",
@@ -575,8 +575,8 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        -48,
-        -36
+        -51,
+        -33
       ],
       "face": "east",
       "name": "rihad_fighters_chapter"
@@ -586,7 +586,7 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        48,
+        56,
         -36
       ],
       "face": "west",
@@ -597,8 +597,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -34,
-        -52
+        -40,
+        -62
       ],
       "face": "south",
       "name": "rihad_forebear_factor"
@@ -609,7 +609,7 @@
       "wealth": "wealthy",
       "at": [
         34,
-        -52
+        -56
       ],
       "face": "south",
       "name": "rihad_colovian_embassy"
@@ -729,8 +729,8 @@
       "use": "tannery",
       "wealth": "common",
       "at": [
-        -46,
-        32
+        -49,
+        35
       ],
       "face": "east",
       "name": "rihad_cordovan_leather"
@@ -751,7 +751,7 @@
       "use": "townhouse",
       "wealth": "wealthy",
       "at": [
-        20,
+        32,
         32
       ],
       "face": "west",
@@ -762,7 +762,7 @@
       "use": "townhouse",
       "wealth": "common",
       "at": [
-        -20,
+        -4,
         32
       ],
       "face": "east",

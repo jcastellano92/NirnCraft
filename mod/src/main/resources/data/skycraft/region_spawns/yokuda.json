@@ -3,6 +3,81 @@
     "provinces": [
       "yokuda"
     ],
+    "biomes": [
+      "skycraft:yokudan_sand_vaults",
+      "skycraft:submerged_sea_caverns",
+      "skycraft:abyssal_trench_caves"
+    ],
+    "why": [
+      "yokudan_desert.L4.date_palm_and_lynx_scrub",
+      "foreign.L10.wonder_sanctums",
+      "foreign.L11.sundered_origins"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:giant_scorpion",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher",
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 10,
+        "levels": [
+          3,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:sand_serpent",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:dreugh",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "yokuda"
+    ],
     "regions": [
       "yokuda/yokudan_desert"
     ],

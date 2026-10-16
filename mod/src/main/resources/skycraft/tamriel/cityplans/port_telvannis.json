@@ -23,8 +23,8 @@
     {
       "id": "mushroom_spire",
       "at": [
-        0,
-        0
+        -6,
+        -10
       ],
       "face": "south",
       "name": "port_telvannis_landmark",
@@ -46,7 +46,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -70,8 +70,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -3,
-        14
+        2,
+        29
       ],
       "face": "south",
       "overlay": "telvannis",
@@ -94,8 +94,8 @@
       "use": "bookseller",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -28,
+        -1
       ],
       "face": "south",
       "overlay": "telvannis",
@@ -118,8 +118,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        18,
+        -24
       ],
       "face": "south",
       "overlay": "telvannis",
@@ -151,12 +151,155 @@
     "port_telvannis_b_4": "Spore-Master's Alembic",
     "port_telvannis_b_5": "Archmagister's Grimoire Hall",
     "port_telvannis_b_6": "Chitin & Enchanted Edge",
-    "port_telvannis_b_7": "Zafirbel Sea-Wharf"
+    "port_telvannis_b_7": "Zafirbel Sea-Wharf",
+    "port_telvannis_spice_wharf": "Port Telvannis Cephalopod Spice Wharf"
   },
   "innKey": "port_telvannis_b_2",
   "names": {
     "inn": "port_telvannis_b_2",
     "store": "port_telvannis_b_3",
     "smithy": "port_telvannis_b_6"
-  }
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -22,
+        14
+      ],
+      "to": [
+        4,
+        24
+      ],
+      "width": 4,
+      "variant": 0
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        12,
+        -16
+      ],
+      "to": [
+        28,
+        -4
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        -4,
+        14
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 4,
+      "name": "port_telvannis_spice_wharf"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "radial",
+      "at": [
+        -4,
+        -6
+      ],
+      "spokes": 6,
+      "r0": 14,
+      "r1": 42,
+      "wobble": 8,
+      "offset": 0.2,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        24,
+        38
+      ],
+      "tag": "spoke",
+      "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          44
+        ],
+        [
+          -8,
+          22
+        ],
+        [
+          -4,
+          -6
+        ],
+        [
+          14,
+          -34
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cephalopod_quay"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -21
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        21,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 44,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 3,
+      "kit": "telvanni",
+      "flags": [
+        "rich"
+      ],
+      "on": "ring"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "kit": "telvanni",
+      "on": "spoke"
+    },
+    {
+      "kind": "house",
+      "count": 6,
+      "kit": "telvanni",
+      "on": "cephalopod_quay"
+    }
+  ]
 }

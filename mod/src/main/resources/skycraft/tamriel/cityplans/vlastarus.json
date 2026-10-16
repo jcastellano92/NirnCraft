@@ -30,7 +30,7 @@
       "use": "sawmill",
       "wealth": "common",
       "at": [
-        8,
+        20,
         0
       ],
       "face": "south",
@@ -42,8 +42,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        0,
-        15
+        2,
+        23
       ],
       "face": "south",
       "overlay": "great_forest",
@@ -54,8 +54,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -8,
-        0
+        -14,
+        5
       ],
       "face": "south",
       "overlay": "great_forest",
@@ -84,16 +84,140 @@
       "type": "tree_row",
       "theme": "great_forest_oak",
       "count": 2
+    },
+    {
+      "type": "garden",
+      "where": "free"
     }
   ],
   "titles": {
     "vlastarus_b_1": "Vlastarus Timber Sawmill",
     "vlastarus_b_2": "The Split-Oak Tavern",
     "vlastarus_b_3": "Vlastarus Axe & Wedge",
-    "vlastarus_b_4": "Foreman Marus's Lodge"
+    "vlastarus_b_4": "Foreman Marus's Lodge",
+    "vlastarus_square": "Vlastarus Timber-Camp Yard"
   },
   "innKey": "vlastarus_b_2",
   "names": {
     "inn": "vlastarus_b_2"
-  }
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        2,
+        4
+      ],
+      "size": 11,
+      "variant": 1,
+      "stalls": 3,
+      "name": "vlastarus_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          -2,
+          9
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          2,
+          -20
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "great_forest_logging_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          2
+        ],
+        [
+          -2,
+          2
+        ],
+        [
+          27,
+          -2
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "vlastarus_cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -2,
+        2
+      ],
+      "rx": 21,
+      "rz": 16,
+      "wobble": 4,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "palisade_mill_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -2,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        6
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "on": "palisade_mill_loop"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "great_forest_logging_road"
+    }
+  ]
 }

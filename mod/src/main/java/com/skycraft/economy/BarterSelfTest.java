@@ -149,6 +149,7 @@ public final class BarterSelfTest {
         sharedShops(server, level, p, c);
         tradeLint(level, p, c);
         valueDensity(c);
+        tradeNetworkAndHomesteads(level, c);
     }
 
     // ------------------------------------------------------------------ shared shops, resale, kept goods
@@ -473,5 +474,126 @@ public final class BarterSelfTest {
             if (ValueDensity.format(r).length() > 4) short4 = false;
         }
         c.check("V/W: never wider than four characters", short4, "checked 10 magnitudes");
+    }
+
+    // ------------------------------------------------------------------ causal trade network, crops & all-province homesteads (T5)
+
+    private static void tradeNetworkAndHomesteads(ServerLevel level, PackSelfTest.Checks c) {
+        // 1. WorldSheets causal citations for every province in TradeNetwork
+        List<String> brokenCitations = new java.util.ArrayList<>();
+        for (var entry : TradeNetwork.citations().entrySet()) {
+            for (var ref : entry.getValue()) {
+                if (!com.skycraft.tamriel.world.WorldSheets.resolves(ref)) {
+                    brokenCitations.add(entry.getKey() + ":" + ref);
+                }
+            }
+        }
+        c.check("trade: every province's L5/L7 WorldSheets citations resolve", brokenCitations.isEmpty() && !TradeNetwork.citations().isEmpty(),
+                brokenCitations.isEmpty() ? TradeNetwork.citations().size() + " provinces cited" : String.join(", ", brokenCitations));
+
+        // 2. Local exports & 1..3 hop import graph across all provinces
+        String[] provinces = {"skyrim", "solstheim", "cyrodiil", "morrowind", "high_rock", "orsinium", "hammerfell", "summerset", "valenwood", "elsweyr", "black_marsh"};
+        List<String> emptyProv = new java.util.ArrayList<>();
+        for (String prov : provinces) {
+            if (TradeNetwork.provinceExports(prov).isEmpty()) emptyProv.add(prov);
+        }
+        c.check("trade: every province declares causal local exports", emptyProv.isEmpty(),
+                emptyProv.isEmpty() ? provinces.length + " provinces" : "missing: " + emptyProv);
+
+        String[] hubs = {"whiterun", "solitude", "windhelm", "riften", "imperial_city", "anvil", "balmora", "vivec", "raven_rock",
+                "wayrest", "sentinel", "alinor", "elden_root", "torval", "lilmoth"};
+        List<String> disconnected = new java.util.ArrayList<>();
+        for (String hub : hubs) {
+            TradeNetwork.SettlementNode n = TradeNetwork.place(hub);
+            if (n == null || n.localExports().isEmpty() || n.imports().isEmpty()) {
+                disconnected.add(hub);
+            }
+        }
+        c.check("trade: every major provincial hub has local exports and 1..3-hop import routes", disconnected.isEmpty(),
+                disconnected.isEmpty() ? hubs.length + " hubs connected (" + TradeNetwork.nodes().size() + " total nodes)" : "disconnected: " + disconnected);
+
+        // 3. Embargoes, contraband & Green Pact enforcement
+        boolean contrabandBlocked = TradeNetwork.isContraband("skyrim", "whiterun", "skycraft:skooma")
+                && TradeNetwork.isContraband("cyrodiil", "imperial_city", "skycraft:moon_sugar")
+                && !TradeNetwork.isContraband("elsweyr", "torval", "skycraft:moon_sugar")
+                && !ShopTrades.servedAt("skycraft:skooma", "skyrim", "whiterun", ShopType.GENERAL)
+                && !ShopTrades.servedAt("skycraft:skooma", "skyrim", "whiterun", ShopType.APOTHECARY)
+                && ShopTrades.servedAt("skycraft:skooma", "skyrim", "whiterun", ShopType.FENCE)
+                && ShopTrades.servedAt("skycraft:moon_sugar", "elsweyr", "torval", ShopType.FOOD);
+        c.check("trade: skooma and moon sugar are contraband outside Elsweyr (stocked only by fences/exotic traders)", contrabandBlocked,
+                "skooma/moon_sugar embargo check");
+
+        boolean greenPact = TradeNetwork.isGreenPactViolation("valenwood", "elden_root", "skycraft:sawn_log")
+                && !ShopTrades.servedAt("skycraft:cabbage", "valenwood", "elden_root", ShopType.FOOD)
+                && !ShopTrades.servedAt("minecraft:wheat", "valenwood", "elden_root", ShopType.FOOD);
+        c.check("trade: Valenwood Green Pact forbids local timber and plant produce at Bosmer food/hunter stalls", greenPact,
+                "elden_root Green Pact check");
+
+        // 4. Supply-and-demand PriceEngine multipliers
+        float localWheat = PriceEngine.supplyMultiplier("skyrim", "whiterun", "minecraft:wheat");
+        float localSaltrice = PriceEngine.supplyMultiplier("morrowind", "balmora", "skycraft:saltrice");
+        float contrabandSkooma = PriceEngine.supplyMultiplier("skyrim", "whiterun", "skycraft:skooma");
+        float alinorSkooma = PriceEngine.supplyMultiplier("summerset", "alinor", "skycraft:skooma");
+        int wheatWhiterun = PriceEngine.regionalValue("skyrim", "whiterun", new ItemStack(Items.WHEAT), 20);
+        int wheatBalmora = PriceEngine.regionalValue("morrowind", "balmora", new ItemStack(Items.WHEAT), 20);
+        c.check("trade: PriceEngine discounts local surplus (0.75x-0.85x) and marks up imports and contraband (1.60x-2.20x)",
+                localWheat >= 0.75f && localWheat <= 0.85f
+                        && localSaltrice >= 0.75f && localSaltrice <= 0.85f
+                        && contrabandSkooma >= 1.60f && alinorSkooma >= 1.90f
+                        && wheatWhiterun < wheatBalmora,
+                String.format(java.util.Locale.ROOT, "local=%.2f, skooma=%.2f/%.2f, wheat %d vs %d",
+                        localWheat, contrabandSkooma, alinorSkooma, wheatWhiterun, wheatBalmora));
+
+        // 5. 3D regional crops & native livestock
+        String[] regionalCrops = {"carrots", "potatoes", "beetroots", "cabbage", "leek", "garlic", "tomato", "ash_yam",
+                "saltrice", "marshmerrow", "comberry", "wickwheat", "hackle_lo", "scathecraw", "coda_flower", "sugar",
+                "vines", "melon", "gourd", "orchard", "honey", "kwama"};
+        List<String> wheatFallbacks = new java.util.ArrayList<>();
+        for (String crop : regionalCrops) {
+            int v = com.skycraft.tamriel.settlement.grammar.Zoning.cropVariant(crop);
+            if (v <= 0 || com.skycraft.tamriel.settlement.build.Works.crop(v).defaultBlockState().isAir()) {
+                wheatFallbacks.add(crop + "->" + v);
+            }
+        }
+        c.check("crops: every non-wheat cultural crop maps to a distinct 3D crop variant", wheatFallbacks.isEmpty(),
+                wheatFallbacks.isEmpty() ? regionalCrops.length + " regional crops verified" : "fallback: " + wheatFallbacks);
+
+        String[] nativeLivestock = {"guar", "netch", "kwama_forager", "nix_hound", "silt_strider", "echatere", "durzog",
+                "senche_tiger", "indrik", "horker", "mammoth", "camel"};
+        List<String> chickenFallbacks = new java.util.ArrayList<>();
+        for (String animal : nativeLivestock) {
+            if (com.skycraft.tamriel.settlement.grammar.Outdoors.animalType(animal) == EntityType.CHICKEN) {
+                chickenFallbacks.add(animal);
+            }
+        }
+        c.check("livestock: native Tamriel livestock resolve to real creature entities (never Chicken fallback)", chickenFallbacks.isEmpty(),
+                chickenFallbacks.isEmpty() ? nativeLivestock.length + " species verified" : "chicken fallback: " + chickenFallbacks);
+
+        // 6. All-province Hearthfire homesteads & provincial city homes
+        int homesteadPlots = com.skycraft.homestead.Homesteads.PLOTS.size();
+        int registeredHomesteads = 0;
+        for (Houses.HouseDef h : Houses.HOUSES) if (h.homestead()) registeredHomesteads++;
+        boolean aliasesWork = com.skycraft.homestead.Homesteads.isPlot("lakeview_manor")
+                && Houses.byId("lakeview_manor") != null
+                && Houses.byId("windstad_manor") != null
+                && Houses.byId("heljarchen_hall") != null;
+        c.check("homesteads: all 107+ provincial homestead places are registered in Homesteads and Houses",
+                homesteadPlots >= 107 && registeredHomesteads == homesteadPlots && aliasesWork,
+                homesteadPlots + " plots, " + registeredHomesteads + " in Houses, aliases=" + aliasesWork);
+
+        String[] homeProvinces = {"skyrim", "cyrodiil", "morrowind", "high_rock", "hammerfell", "summerset", "valenwood", "elsweyr", "black_marsh"};
+        List<String> missingHomes = new java.util.ArrayList<>();
+        for (String prov : homeProvinces) {
+            boolean hasCityHome = false, hasHomestead = false;
+            for (Houses.HouseDef h : Houses.HOUSES) {
+                if (h.hold().startsWith(prov + "/") || h.hold().equals(prov)) {
+                    if (h.homestead()) hasHomestead = true;
+                    else hasCityHome = true;
+                }
+            }
+            if (!hasCityHome || !hasHomestead) missingHomes.add(prov + "(city=" + hasCityHome + ",homestead=" + hasHomestead + ")");
+        }
+        c.check("homes: every mainland province has both purchasable city homes and Hearthfire homestead plots",
+                missingHomes.isEmpty(), missingHomes.isEmpty() ? Houses.HOUSES.size() + " total homes/plots across 9 provinces" : String.join(", ", missingHomes));
     }
 }

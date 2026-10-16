@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        21,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "shack",
       "wealth": "poor",
       "at": [
-        -7,
-        5
+        -10,
+        8
       ],
       "face": "south",
       "overlay": "bitter_coast",
@@ -103,10 +103,157 @@
     "hla_oad_b_2": "Murudius Flaeus's House",
     "hla_oad_b_3": "Relien Rirne's Shanty",
     "hla_oad_b_4": "Shurkul gro-Sharga's Hut",
-    "hla_oad_b_5": "Swamp-Ferry Pier Shed"
+    "hla_oad_b_5": "Swamp-Ferry Pier Shed",
+    "hla_oad_ferry_platform": "Fat Leg's Drop Off Swamp Pier"
   },
   "innKey": "hla_oad_b_1",
   "names": {
     "inn": "hla_oad_b_1"
-  }
+  },
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -28,
+        -4
+      ],
+      "to": [
+        28,
+        6
+      ],
+      "width": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        -8
+      ],
+      "to": [
+        6,
+        8
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        4,
+        8
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "hla_oad_ferry_platform"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          -4,
+          -8
+        ],
+        [
+          -10,
+          -26
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "fat_leg_boardwalk"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -26,
+          8
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          28,
+          0
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "swamp_footbridge"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 20,
+      "rz": 16,
+      "wobble": 5,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "shanty_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "on": "shanty_ring"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "poor",
+      "count": 2,
+      "on": "fat_leg_boardwalk"
+    }
+  ]
 }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/bog_beacon"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/bog_beacon_harvested"
+    }
+  }
+}

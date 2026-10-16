@@ -3,8 +3,8 @@
   "sil": "karst-hollow-walled-fief",
   "base": "none",
   "overlay": "anticlere",
-  "radius": 54,
-  "reach": 62,
+  "radius": 40,
+  "reach": 46,
   "fill_gap": 2,
   "inn_key": "shalgora_cuckoo_and_crown",
   "names": {
@@ -29,28 +29,28 @@
   "gates": [
     [
       0,
-      -50
+      -37
     ],
     [
-      50,
+      37,
       0
     ],
     [
       0,
-      50
+      37
     ],
     [
-      -50,
+      -37,
       0
     ]
   ],
   "walls": [
     {
-      "r": 50,
+      "r": 37,
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -62,8 +62,8 @@
     {
       "id": "chapel_spire",
       "at": [
-        0,
-        -22
+        -3,
+        -19
       ],
       "face": "south",
       "name": "shalgora_landmark",
@@ -76,8 +76,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        -19
+        22,
+        -14
       ],
       "face": "south",
       "name": "shalgora_fief_keep"
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        28,
+        13
       ],
       "face": "west",
       "name": "shalgora_cuckoo_and_crown"
@@ -98,8 +98,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        24,
-        2
+        9,
+        19
       ],
       "face": "west",
       "name": "shalgora_bailiwick_store"
@@ -109,8 +109,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        30,
-        21
+        -1,
+        32
       ],
       "face": "west",
       "name": "shalgora_horseshoe_forge"
@@ -120,8 +120,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        10,
-        22
+        -5,
+        18
       ],
       "face": "north",
       "name": "shalgora_cave_moss_still"
@@ -131,8 +131,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -3,
-        37
+        -22,
+        24
       ],
       "face": "north",
       "name": "shalgora_julianos_priory"
@@ -142,8 +142,8 @@
       "use": "manor",
       "wealth": "wealthy",
       "at": [
-        -13,
-        20
+        -26,
+        3
       ],
       "face": "north",
       "name": "shalgora_vidame_manor"
@@ -153,8 +153,8 @@
       "use": "tailor",
       "wealth": "common",
       "at": [
-        -33,
-        16
+        -30,
+        -15
       ],
       "face": "east",
       "name": "shalgora_tapestry_looms"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -18,
+        -1
       ],
       "face": "east",
       "name": "shalgora_pass_watch"
@@ -175,8 +175,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -31,
-        -20
+        -23,
+        -15
       ],
       "face": "east",
       "name": "shalgora_post_mews"
@@ -186,11 +186,11 @@
     {
       "from": [
         0,
-        -44
+        -33
       ],
       "to": [
         0,
-        44
+        33
       ],
       "width": 4,
       "major": true,
@@ -199,11 +199,11 @@
     },
     {
       "from": [
-        -44,
+        -33,
         0
       ],
       "to": [
-        44,
+        33,
         0
       ],
       "width": 4,
@@ -213,12 +213,12 @@
     },
     {
       "from": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "to": [
-        28,
-        -28
+        21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -227,12 +227,12 @@
     },
     {
       "from": [
-        28,
-        -28
+        21,
+        -21
       ],
       "to": [
-        28,
-        28
+        21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -241,12 +241,12 @@
     },
     {
       "from": [
-        28,
-        28
+        21,
+        21
       ],
       "to": [
-        -28,
-        28
+        -21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -255,12 +255,12 @@
     },
     {
       "from": [
-        -28,
-        28
+        -21,
+        21
       ],
       "to": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -273,7 +273,7 @@
     {
       "at": [
         0,
-        4
+        3
       ],
       "size": 9,
       "stalls": 3,
@@ -313,14 +313,14 @@
     {
       "ring": [
         0,
-        27
+        20
       ],
       "overlay": "anticlere"
     },
     {
       "ring": [
-        27,
-        54
+        20,
+        40
       ],
       "overlay": "anticlere"
     }
@@ -331,8 +331,9 @@
       "count": 1
     },
     {
-      "type": "lamps",
-      "count": 1
+      "type": "bench",
+      "count": 1,
+      "where": "square"
     },
     {
       "type": "banners",
@@ -341,15 +342,6 @@
     {
       "type": "shrine",
       "theme": "divine:zenithar",
-      "count": 1
-    },
-    {
-      "type": "great_tree",
-      "theme": "oak",
-      "count": 1
-    },
-    {
-      "type": "pool",
       "count": 1
     }
   ]

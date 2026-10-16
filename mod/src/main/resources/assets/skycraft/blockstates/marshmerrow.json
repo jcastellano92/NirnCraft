@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/marshmerrow"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/marshmerrow_harvested"
+    }
+  }
+}

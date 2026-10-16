@@ -3,8 +3,8 @@
   "sil": "hedgerow-manor-crossroads",
   "base": "none",
   "overlay": "daggerfall",
-  "radius": 54,
-  "reach": 62,
+  "radius": 40,
+  "reach": 46,
   "fill_gap": 2,
   "inn_key": "tulune_gilded_spur",
   "names": {
@@ -29,28 +29,28 @@
   "gates": [
     [
       0,
-      -50
+      -37
     ],
     [
-      50,
+      37,
       0
     ],
     [
       0,
-      50
+      37
     ],
     [
-      -50,
+      -37,
       0
     ]
   ],
   "walls": [
     {
-      "r": 50,
+      "r": 37,
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -62,8 +62,8 @@
     {
       "id": "chapel_spire",
       "at": [
-        0,
-        -22
+        -3,
+        -19
       ],
       "face": "south",
       "name": "tulune_landmark",
@@ -76,8 +76,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        -19
+        22,
+        -14
       ],
       "face": "south",
       "name": "tulune_chivalric_keep"
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        28,
+        13
       ],
       "face": "west",
       "name": "tulune_gilded_spur"
@@ -98,8 +98,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        24,
-        2
+        9,
+        19
       ],
       "face": "west",
       "name": "tulune_bailiff_chandler"
@@ -109,8 +109,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        30,
-        21
+        -1,
+        32
       ],
       "face": "west",
       "name": "tulune_tilting_lance_forge"
@@ -120,8 +120,8 @@
       "use": "alchemist",
       "wealth": "common",
       "at": [
-        10,
-        22
+        -5,
+        18
       ],
       "face": "north",
       "name": "tulune_rosewater_distillery"
@@ -131,8 +131,8 @@
       "use": "temple",
       "wealth": "wealthy",
       "at": [
-        -3,
-        37
+        -22,
+        24
       ],
       "face": "north",
       "name": "tulune_priory_of_akatosh"
@@ -142,8 +142,8 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        -13,
-        20
+        -23,
+        0
       ],
       "face": "north",
       "name": "tulune_heralds_college"
@@ -153,8 +153,8 @@
       "use": "manor",
       "wealth": "wealthy",
       "at": [
-        -33,
-        16
+        -24,
+        -20
       ],
       "face": "east",
       "name": "tulune_orchard_grange"
@@ -164,8 +164,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -24,
-        -2
+        -18,
+        -1
       ],
       "face": "east",
       "name": "tulune_turnpike_watch"
@@ -175,8 +175,8 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        -31,
-        -20
+        -23,
+        -15
       ],
       "face": "east",
       "name": "tulune_palfrey_mews"
@@ -186,11 +186,11 @@
     {
       "from": [
         0,
-        -44
+        -33
       ],
       "to": [
         0,
-        44
+        33
       ],
       "width": 4,
       "major": true,
@@ -199,11 +199,11 @@
     },
     {
       "from": [
-        -44,
+        -33,
         0
       ],
       "to": [
-        44,
+        33,
         0
       ],
       "width": 4,
@@ -213,12 +213,12 @@
     },
     {
       "from": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "to": [
-        28,
-        -28
+        21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -227,12 +227,12 @@
     },
     {
       "from": [
-        28,
-        -28
+        21,
+        -21
       ],
       "to": [
-        28,
-        28
+        21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -241,12 +241,12 @@
     },
     {
       "from": [
-        28,
-        28
+        21,
+        21
       ],
       "to": [
-        -28,
-        28
+        -21,
+        21
       ],
       "width": 4,
       "major": false,
@@ -255,12 +255,12 @@
     },
     {
       "from": [
-        -28,
-        28
+        -21,
+        21
       ],
       "to": [
-        -28,
-        -28
+        -21,
+        -21
       ],
       "width": 4,
       "major": false,
@@ -273,7 +273,7 @@
     {
       "at": [
         0,
-        4
+        3
       ],
       "size": 9,
       "stalls": 3,
@@ -313,14 +313,14 @@
     {
       "ring": [
         0,
-        27
+        20
       ],
       "overlay": "daggerfall"
     },
     {
       "ring": [
-        27,
-        54
+        20,
+        40
       ],
       "overlay": "daggerfall"
     }
@@ -341,15 +341,6 @@
     {
       "type": "shrine",
       "theme": "divine:mara",
-      "count": 1
-    },
-    {
-      "type": "great_tree",
-      "theme": "spruce",
-      "count": 1
-    },
-    {
-      "type": "gatehouse",
       "count": 1
     }
   ]

@@ -48,8 +48,8 @@
     {
       "id": "sea_stack",
       "at": [
-        0,
-        -11
+        -6,
+        -21
       ],
       "name": "mistveil_village_landmark",
       "overlay": "maormer_isles"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -20
+        ]
       ],
-      "r0": 8,
-      "r1": 36,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          0
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          27,
+          -4
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -4,
+        4
+      ],
+      "rx": 20,
+      "rz": 19,
+      "wobble": 3,
+      "lobes": 5,
+      "phase": 1.41,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,7 +120,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        22,
         0
       ],
       "face": "south",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        18,
-        23
+        21,
+        26
       ],
       "face": "north",
       "overlay": "maormer_isles",
@@ -99,8 +144,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        -1,
+        22
       ],
       "face": "north",
       "overlay": "maormer_isles",
@@ -123,8 +168,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -25,
+        -4
       ],
       "face": "south",
       "overlay": "maormer_isles",
@@ -135,7 +180,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -6,
+        14,
         -28
       ],
       "face": "south",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        -25,
+        -23
       ],
       "face": "south",
       "overlay": "maormer_isles",
@@ -182,5 +227,47 @@
     "mistveil_village_landmark": "High Seat of place.skycraft.mistveil_village",
     "mistveil_village_plaza": "place.skycraft.mistveil_village Central Plaza"
   },
-  "innKey": "mistveil_village_b_5"
+  "innKey": "mistveil_village_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

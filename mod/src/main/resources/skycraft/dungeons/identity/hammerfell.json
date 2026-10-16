@@ -5895,6 +5895,70 @@
    "why": [
     "stros_mkai.L4.island_palm_coast"
    ]
+  },
+  "no_shira_outer_shipwreck": {
+   "family": "wreck",
+   "variant": "shipwreck",
+   "boss": "Old Gullcry of the Wreck",
+   "person": "Surveyor of Hews Bane",
+   "sign": [
+    "No Shira Outer",
+    "Shipwreck",
+    "Last seen:",
+    "Surveyor of"
+   ],
+   "motif": "crate_stack",
+   "loot": "wreck",
+   "entrance": "no_shira_outer_shipwreck_field_record_1",
+   "entranceKind": "journal",
+   "bossNote": "no_shira_outer_shipwreck_field_record_2",
+   "story": "",
+   "why": [
+    "hews_bane.L5.abecean_shipping"
+   ]
+  },
+  "stros_mkai_chain_sea_cave": {
+   "family": "smuggler",
+   "variant": "sea_cave",
+   "boss": "First Mate Rum-Cask the Contrabandist",
+   "person": "Surveyor of Stros Mkai",
+   "sign": [
+    "Stros M'Kai",
+    "Chain Sea Cave",
+    "Last seen:",
+    "Surveyor of"
+   ],
+   "motif": "bedroll_row",
+   "loot": "smuggler",
+   "entrance": "stros_mkai_chain_sea_cave_field_record_1",
+   "entranceKind": "journal",
+   "bossNote": "stros_mkai_chain_sea_cave_field_record_2",
+   "story": "",
+   "why": [
+    "stros_mkai.L10.waterfall_hideout",
+    "stros_mkai.L5.harbour_trade"
+   ]
+  },
+  "kairula_tidal_sea_vault": {
+   "family": "ruin",
+   "variant": "sea_vault",
+   "boss": "Aelric of the Lion Guard",
+   "person": "Surveyor of Sentinel",
+   "sign": [
+    "Kairula Tidal",
+    "Sea Vault",
+    "Guarded by",
+    "Aelric of the"
+   ],
+   "motif": "offering_bowl",
+   "loot": "ruin",
+   "entrance": "kairula_tidal_sea_vault_field_record_1",
+   "entranceKind": "journal",
+   "bossNote": "kairula_tidal_sea_vault_field_record_2",
+   "story": "",
+   "why": [
+    "sentinel.L10.cistern_undercroft"
+   ]
   }
  }
 }

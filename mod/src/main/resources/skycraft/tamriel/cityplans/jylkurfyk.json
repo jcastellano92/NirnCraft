@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
+      "type": "path",
+      "via": [
+        [
+          0,
+          17
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          2,
+          -11
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -15,
+          0
+        ],
+        [
+          -2,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "cross"
+    },
+    {
+      "type": "loop",
       "at": [
-        0,
+        -2,
         0
       ],
-      "r0": 4,
-      "r1": 18,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "rx": 13,
+      "rz": 11,
+      "wobble": 5,
+      "lobes": 4,
+      "phase": 0.29,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -195,5 +240,47 @@
     "jylkurfyk_landmark": "High Seat of place.skycraft.jylkurfyk",
     "jylkurfyk_plaza": "place.skycraft.jylkurfyk Central Plaza"
   },
-  "innKey": "jylkurfyk_b_5"
+  "innKey": "jylkurfyk_b_5",
+  "zones": [
+    {
+      "at": [
+        -2,
+        -8
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -2,
+        0
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        8,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 18,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

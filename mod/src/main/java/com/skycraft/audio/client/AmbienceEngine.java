@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The ambience engine: looping environment beds mixed by where you are, plus random positional calls around you.
@@ -38,13 +39,15 @@ import java.util.Map;
  */
 public final class AmbienceEngine {
     private static final int MAX_BEDS = 3;
+    public static final Set<String> SILENCED_BEDS = Set.of();
+    public static final Set<String> SILENCED_CALLS = Set.of();
     /**
-     * Foliage and grass beds carry synthesised leaf/grass crackle (a rustle or shuffle when loud): their level is
-     * capped, whatever the habitat asks for. Playtest 2: a loud rustling on the plains/forest at spawn.
+     * Foliage and grass beds carry warm low-passed breeze and reed/leaf chorus modulation: their level is
+     * balanced so they blend naturally with regional exploration music.
      */
     private static final Map<String, Float> BED_CAP = Map.of(
-            "forest_day", 0.35f, "forest_night", 0.4f, "plains_day", 0.3f, "plains_night", 0.45f,
-            "wind_light", 0.4f, "savanna_day", 0.35f, "jungle_day", 0.4f, "marsh_day", 0.4f);
+            "forest_day", 0.45f, "forest_night", 0.45f, "plains_day", 0.4f, "plains_night", 0.45f,
+            "wind_light", 0.4f, "savanna_day", 0.45f, "jungle_day", 0.45f, "marsh_day", 0.45f);
     /** Game ticks since the last positional call started, and calls started in the last few seconds. */
     private static int lastCallTick = -100;
     private static final int CALL_COOLDOWN_TICKS = 30;
@@ -201,8 +204,17 @@ public final class AmbienceEngine {
         float cold = h.snowy;
         float warmSwamp = h.swamp;
 
-        // Playtest 3: the leaf rustle / insect chitter beds (forest, plains, savanna, jungle, marsh) and the cricket, cicada
-        // and insect calls are removed on purpose: wind, water, weather, birds and the cave beds remain.
+        // Warm low-passed breeze & tonal biome beds (resynthesized without raw white-noise bursts)
+        TARGET.put("forest_day", h.forest * day * wet * (1f - cold * 0.6f) * 0.7f);
+        TARGET.put("forest_night", h.forest * h.night * wet * (1f - cold * 0.7f) * 0.65f);
+        TARGET.put("plains_day", h.plains * day * wet * (1f - cold * 0.7f) * 0.6f);
+        TARGET.put("plains_night", h.plains * h.night * wet * (1f - cold * 0.8f) * 0.6f);
+        TARGET.put("savanna_day", h.savanna * day * wet * 0.65f);
+        TARGET.put("marsh_day", h.marsh * day * wet * 0.65f);
+        TARGET.put("marsh_night", h.marsh * h.night * wet * 0.7f);
+        TARGET.put("swamp_night", warmSwamp * h.night * wet * 0.7f);
+        TARGET.put("jungle_day", h.jungle * day * (1f - 0.5f * h.rain) * 0.7f);
+        TARGET.put("jungle_night", h.jungle * h.night * (1f - 0.5f * h.rain) * 0.7f);
         TARGET.put("wind_light", Mth.clamp((0.25f + 0.25f * h.rain + 0.3f * h.plains + 0.2f * cold + 0.2f * h.glacier) * open
                 * (1f - h.altitude), 0f, 0.7f));
         TARGET.put("wind_strong", Mth.clamp((h.altitude * 1.1f + h.mountain * 0.35f + h.glacier * 0.3f + h.thunder * 0.4f) * open, 0f, 1f));
@@ -217,6 +229,7 @@ public final class AmbienceEngine {
         TARGET.put("coast_waves", h.coast * (h.onWater ? 0.5f : 1f) * 0.85f);
         TARGET.put("open_ocean", h.ocean > 0.9f && h.onWater ? 0.8f : h.ocean * 0.3f * (h.onWater ? 1f : 0f));
         TARGET.put("river", Mth.clamp(h.river * 1.4f, 0f, 0.7f));
+        SILENCED_BEDS.forEach(TARGET::remove);
     }
 
     // ------------------------------------------------------------------ tick
@@ -307,6 +320,9 @@ public final class AmbienceEngine {
             pool.add(new Call("owl", 2f * h.night * dry * h.forest, 12, 32, 8, 0.7f));
             pool.add(new Call("wolf_howl", 0.6f * h.night * (h.forest + h.snowy + h.plains * 0.5f) * (h.skyrim ? 1f : 0.4f), 60, 120, 6, 1f));
             pool.add(new Call("frog", 6f * wetland * (0.4f + h.night), 5, 20, 0, 0.7f));
+            pool.add(new Call("cricket", 4f * h.night * dry * (h.forest + h.plains + 0.5f * wetland) * (1f - h.snowy), 4, 16, 0, 0.45f));
+            pool.add(new Call("insect", 3.5f * dry * (0.6f * day + 0.4f * h.night) * (h.marsh + h.swamp + 0.5f * h.jungle), 4, 14, 1, 0.4f));
+            pool.add(new Call("cicada", 3f * day * dry * (h.savanna + 0.7f * h.jungle + 0.3f * h.forest * (1f - h.snowy)), 6, 22, 5, 0.45f));
             pool.add(new Call("loon", 1f * (h.river + h.marsh * 0.6f) * (0.4f + h.night) * (1f - h.desert), 40, 90, 2, 0.8f));
             pool.add(new Call("jungle_bird", 5f * h.jungle * (0.3f + day) * dry, 10, 32, 8, 0.8f));
             pool.add(new Call("gull", 3f * (h.coast + h.ocean * 0.6f) * day * dry, 12, 36, 10, 0.8f));
@@ -328,6 +344,7 @@ public final class AmbienceEngine {
             }
         }
         for (Call c : pool) {
+            if (SILENCED_CALLS.contains(c.event)) continue;
             // master cooldown: never more than one call every 1.5 s, however busy the habitat
             if (ticks - lastCallTick < CALL_COOLDOWN_TICKS) break;
             if (c.perMinute <= 0f || RANDOM.nextFloat() >= c.perMinute / 60f) continue;

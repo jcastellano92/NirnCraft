@@ -282,8 +282,13 @@ public final class Encounters {
         }
         NEXT.put(id, SocietyConfig.between(SocietyConfig.ENCOUNTER_MIN_SECONDS.get(), SocietyConfig.ENCOUNTER_MAX_SECONDS.get(), random));
         try {
-            if (random.nextInt(3) == 0 && wilderness(player)) {
-                if (com.skycraft.creatures.spawn.WildScenes.rollNearPlayer(player, null) != null) return;
+            if (wilderness(player)) {
+                com.skycraft.tamriel.Region region = com.skycraft.tamriel.Regions.at(player.serverLevel(), player.blockPosition());
+                boolean hasStateScene = com.skycraft.creatures.spawn.WildScenes.eligibleFor(player, region).stream()
+                        .anyMatch(com.skycraft.creatures.spawn.WildScenes.Scene::isPoliticalOrStateFiltered);
+                if (random.nextInt(hasStateScene ? 2 : 3) == 0) {
+                    if (com.skycraft.creatures.spawn.WildScenes.rollNearPlayer(player, null) != null) return;
+                }
             }
             trySpawn(player, null);
         } catch (RuntimeException e) {
@@ -360,16 +365,30 @@ public final class Encounters {
         ServerLevel level = player.serverLevel();
         BlockPos pos = player.blockPosition();
         Holder<Biome> biome = level.getBiome(pos);
-        String hold = com.skycraft.tamriel.Regions.at(level, pos).shortId();
+        com.skycraft.tamriel.Region region = com.skycraft.tamriel.Regions.at(level, pos);
+        String hold = region.shortId();
+        String ruling = Reputation.rulingFaction(region.id());
         boolean forest = biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA)
                 || "falkreath".equals(hold) || "the_rift".equals(hold);
         boolean mountain = biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL)
-                || "the_reach".equals(hold);
+                || "the_reach".equals(hold) || "western_reach".equals(hold) || "wrothgar".equals(hold);
         boolean snowy = biome.value().coldEnoughToSnow(pos)
                 || "winterhold".equals(hold) || "the_pale".equals(hold) || "eastmarch".equals(hold);
         boolean night = Npcs.isNight(level);
         int lvl = SkyData.get(player).getLevel();
         long lastLetter = Cosmetics.persistedTag(player).getLong("skycraft_letter_time");
+
+        boolean imperialPolity = Reputation.IMPERIAL_LEGION.equals(ruling)
+                || Reputation.ELDER_COUNCIL.equals(ruling)
+                || Reputation.COLOVIAN_ESTATES.equals(ruling);
+        boolean stormcloakPolity = Reputation.STORMCLOAKS.equals(ruling);
+        boolean dominionPolity = Reputation.THALMOR.equals(ruling)
+                || Reputation.ALDMERI_DOMINION.equals(ruling)
+                || Reputation.alliedFactions(region.id()).contains(Reputation.THALMOR);
+        int thalmorRep = Reputation.get(player, Reputation.THALMOR);
+        int stormRep = Reputation.get(player, Reputation.STORMCLOAKS);
+        int legionRep = Reputation.get(player, Reputation.IMPERIAL_LEGION);
+        int forswornRep = Reputation.get(player, Reputation.FORSWORN);
 
         Map<Kind, Integer> w = new EnumMap<>(Kind.class);
         w.put(Kind.HUNTER, forest ? 10 : 5);
@@ -377,25 +396,28 @@ public final class Encounters {
         // two hold guards chasing a thief across open country would be guards in the wilderness (owner, playtest 5):
         // the scene stays available when forced (the intro, /skycraft-dev), it is not rolled on the road
         w.put(Kind.THIEF, 0);
-        w.put(Kind.IMPERIAL_ESCORT, ("haafingar".equals(hold) || "falkreath".equals(hold) || "the_reach".equals(hold)) ? 8 : 5);
-        w.put(Kind.STORMCLOAK_ESCORT, ("eastmarch".equals(hold) || "the_pale".equals(hold) || "winterhold".equals(hold)) ? 8 : (snowy ? 6 : 3));
-        w.put(Kind.THALMOR_ESCORT, ("haafingar".equals(hold) || "the_reach".equals(hold)) ? 6 : 3);
+        w.put(Kind.IMPERIAL_ESCORT, (imperialPolity || "haafingar".equals(hold) || "falkreath".equals(hold) || "the_reach".equals(hold)) ? 9 : 4);
+        w.put(Kind.STORMCLOAK_ESCORT, (stormcloakPolity || "eastmarch".equals(hold) || "the_pale".equals(hold) || "winterhold".equals(hold)) ? 9 : (snowy ? 6 : 3));
+        w.put(Kind.THALMOR_ESCORT, (dominionPolity || "haafingar".equals(hold) || "the_reach".equals(hold)) ? 7 : 3);
         w.put(Kind.MAGE_VS_NECROMANCER, lvl >= 3 ? ("winterhold".equals(hold) || "falkreath".equals(hold) ? 7 : (night ? 5 : 3)) : 0);
         w.put(Kind.ADVENTURERS_VS_BANDITS, 5);
         w.put(Kind.GIANT_VS_HUNTER, lvl >= 5 ? (("whiterun".equals(hold) || "eastmarch".equals(hold) || "the_pale".equals(hold)) ? 6 : (mountain ? 4 : 2)) : 0);
         w.put(Kind.WOLF_PACK, forest || snowy ? 6 : 3);
-        w.put(Kind.VAMPIRES, night ? (("hjaalmarch".equals(hold) || "haafingar".equals(hold)) ? 10 : 7) : 0);
+        w.put(Kind.VAMPIRES, night ? (("hjaalmarch".equals(hold) || "haafingar".equals(hold) || "rivenspire".equals(hold)) ? 10 : 7) : 0);
         w.put(Kind.COURIER, level.getGameTime() - lastLetter > 36000 || lastLetter == 0 ? (night ? 1 : 4) : 0);
         w.put(Kind.BEGGAR, night ? 1 : 3);
         w.put(Kind.STRANDED_MERCHANT, night ? 1 : 4);
         w.put(Kind.DRAGON, lvl >= 10 ? 1 : 0);
-        w.put(Kind.FORSWORN_AMBUSH, "the_reach".equals(hold) ? 10 : (mountain ? 4 : 1));
+        w.put(Kind.FORSWORN_AMBUSH, ("the_reach".equals(hold) || "western_reach".equals(hold))
+                ? (forswornRep < 0 ? 14 : 10) : (mountain ? 4 : 1));
         w.put(Kind.ADVENTURER, 4);
-        w.put(Kind.THALMOR_PATROL, ("haafingar".equals(hold) || "the_reach".equals(hold)) ? 5 : 2);
-        w.put(Kind.SKIRMISH, snowy ? 4 : 3);
-        w.put(Kind.OLD_ORC, ("the_rift".equals(hold) || "the_reach".equals(hold) || "eastmarch".equals(hold)) ? 7 : (mountain || snowy ? 5 : 2));
+        w.put(Kind.THALMOR_PATROL, (dominionPolity || "haafingar".equals(hold) || "the_reach".equals(hold))
+                ? (thalmorRep <= -20 ? 10 : 6) : (thalmorRep <= -20 ? 5 : 2));
+        w.put(Kind.SKIRMISH, (legionRep >= 25 || stormRep >= 25) ? 7 : (snowy ? 4 : 3));
+        w.put(Kind.OLD_ORC, ("the_rift".equals(hold) || "the_reach".equals(hold) || "eastmarch".equals(hold) || "wrothgar".equals(hold))
+                ? 7 : (mountain || snowy ? 5 : 2));
         w.put(Kind.FUGITIVE_AND_HUNTER, 4);
-        w.put(Kind.REVELERS, night ? 2 : ("whiterun".equals(hold) || "the_rift".equals(hold) ? 7 : 5));
+        w.put(Kind.REVELERS, night ? 2 : ("whiterun".equals(hold) || "the_rift".equals(hold)) ? 7 : 5);
         w.put(Kind.BANDIT_AMBUSH, lvl >= 2 ? 2 : 0);
 
         int total = 0;
@@ -694,11 +716,19 @@ public final class Encounters {
             case THALMOR_PATROL -> {
                 NpcEntity leader = g.npc(NpcRole.THALMOR, g.center);
                 if (leader == null) return false;
-                leader.setDestination(g.pastPlayer());
+                boolean hunted = Reputation.get(g.player, Reputation.THALMOR) <= -20;
+                if (hunted) {
+                    leader.setHuntTarget(g.player.getUUID());
+                } else {
+                    leader.setDestination(g.pastPlayer());
+                }
                 int n = 1 + g.random.nextInt(2);
                 for (int i = 0; i < n; i++) {
                     NpcEntity f = g.npcNear(NpcRole.THALMOR, 3);
-                    if (f != null) f.setLeader(leader.getUUID());
+                    if (f != null) {
+                        if (hunted) f.setHuntTarget(g.player.getUUID());
+                        else f.setLeader(leader.getUUID());
+                    }
                 }
                 return true;
             }

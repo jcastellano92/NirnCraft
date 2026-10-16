@@ -40,7 +40,7 @@
     {
       "id": "chapel_spire",
       "at": [
-        18,
+        38,
         -12
       ],
       "face": "south",
@@ -73,8 +73,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        28,
-        0
+        33,
+        15
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -97,7 +97,7 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        20,
+        16,
         20
       ],
       "face": "south",
@@ -145,8 +145,8 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -20,
-        20
+        -1,
+        15
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -157,8 +157,8 @@
       "use": "barracks",
       "wealth": "common",
       "at": [
-        -54,
-        22
+        -57,
+        25
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -169,8 +169,8 @@
       "use": "guardhouse",
       "wealth": "common",
       "at": [
-        -28,
-        0
+        -29,
+        -12
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -193,7 +193,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -20,
+        -12,
         -20
       ],
       "face": "south",
@@ -205,8 +205,8 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        -22,
-        -54
+        -25,
+        -51
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -218,7 +218,7 @@
       "wealth": "common",
       "at": [
         0,
-        -28
+        -12
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -229,7 +229,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        22,
+        26,
         -54
       ],
       "face": "south",
@@ -241,8 +241,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        20,
-        -20
+        25,
+        -35
       ],
       "face": "south",
       "overlay": "kvatch",
@@ -253,7 +253,7 @@
       "use": "stables",
       "wealth": "common",
       "at": [
-        54,
+        58,
         -22
       ],
       "face": "south",
@@ -307,6 +307,187 @@
     "kvatch_oletas_sanctuary": "Oleta's Relief Sanctuary",
     "kvatch_berich_inian_hall": "Berich Inian's Guard Hall",
     "kvatch_rebuild_yard": "Kvatch Timber & Stone Yard",
-    "kvatch_jesan_rilian_corral": "Jesan Rilian's Wagon Corral"
-  }
+    "kvatch_jesan_rilian_corral": "Jesan Rilian's Wagon Corral",
+    "kvatch_akatosh_square": "Chapel of Akatosh Forecourt"
+  },
+  "lines": [],
+  "terraces": [
+    {
+      "rect": [
+        -66,
+        -72,
+        66,
+        18
+      ],
+      "level": 6,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        16,
+        -8
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 5,
+      "name": "kvatch_akatosh_square"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "switchback",
+      "from": [
+        0,
+        86
+      ],
+      "to": [
+        0,
+        18
+      ],
+      "legs": 3,
+      "amp": 28,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "mesa_switchback"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          18
+        ],
+        [
+          0,
+          -16
+        ],
+        [
+          0,
+          -52
+        ],
+        [
+          0,
+          -76
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "acropolis_spine"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -68,
+          -14
+        ],
+        [
+          -32,
+          -16
+        ],
+        [
+          0,
+          -16
+        ],
+        [
+          36,
+          -12
+        ],
+        [
+          82,
+          0
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "arena_way"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -18
+      ],
+      "rx": 48,
+      "rz": 38,
+      "wobble": 2,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "mesa_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -54
+      ],
+      "r": 32,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        16,
+        -8
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -42,
+        -18
+      ],
+      "r": 30,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        0,
+        48
+      ],
+      "r": 32,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 82,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 8,
+      "flags": [
+        "upper"
+      ],
+      "on": "mesa_ring"
+    },
+    {
+      "kind": "manor",
+      "count": 4,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "acropolis_spine"
+    },
+    {
+      "kind": "store",
+      "count": 3,
+      "on": "arena_way"
+    },
+    {
+      "kind": "barracks",
+      "count": 2,
+      "on": "arena_way"
+    }
+  ]
 }

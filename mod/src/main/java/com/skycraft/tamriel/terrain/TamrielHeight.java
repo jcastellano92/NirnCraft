@@ -62,7 +62,10 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
             double floor = Math.min(h + (hillsN * 5 + detailN * 1.5) * (0.4 + 0.6 * MapNoise.smoothstep(-600, 0, cd)), TamrielMap.SEA_LEVEL - 1);
             if (cd < -96) {
                 double isle = OceanIsles.surfaceHeight(x, z, cd, hillsN, detailN);
-                if (!Double.isNaN(isle)) return Math.max(floor, isle);
+                if (!Double.isNaN(isle)) {
+                    double w = MapNoise.smoothstep(-96, -136, cd);
+                    return Math.max(floor, floor + (isle - floor) * w);
+                }
             }
             return floor;
         }

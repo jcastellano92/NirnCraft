@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/blisterwort"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/blisterwort_harvested"
+    }
+  }
+}

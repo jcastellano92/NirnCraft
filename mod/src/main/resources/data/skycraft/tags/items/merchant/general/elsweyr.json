@@ -1,19 +1,11 @@
 {
   "replace": false,
   "values": [
-    {
-      "id": "skycraft:moon_sugar",
-      "required": false
-    },
+    {"id": "skycraft:moon_sugar", "required": false},
+    {"id": "skycraft:skooma", "required": false},
     "minecraft:sugar",
-    {
-      "id": "skycraft:elsweyr_fondue",
-      "required": false
-    },
-    {
-      "id": "skycraft:jazbay_grapes",
-      "required": false
-    },
+    {"id": "skycraft:elsweyr_fondue", "required": false},
+    {"id": "skycraft:jazbay_grapes", "required": false},
     "minecraft:cocoa_beans"
   ]
 }

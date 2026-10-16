@@ -44,8 +44,8 @@
     {
       "id": "chapel_spire",
       "at": [
-        -22,
-        -14
+        -25,
+        -11
       ],
       "face": "south",
       "name": "chorrol_chapel_spire",
@@ -91,8 +91,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        21,
-        19
+        24,
+        22
       ],
       "face": "south",
       "overlay": "chorrol",
@@ -115,8 +115,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        3,
-        28
+        6,
+        31
       ],
       "face": "south",
       "overlay": "chorrol",
@@ -140,7 +140,7 @@
       "wealth": "common",
       "at": [
         -17,
-        22
+        26
       ],
       "face": "south",
       "overlay": "chorrol",
@@ -163,8 +163,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -28,
-        5
+        -34,
+        15
       ],
       "face": "south",
       "overlay": "chorrol",
@@ -187,7 +187,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -24,
+        -4,
         -15
       ],
       "face": "south",
@@ -211,7 +211,7 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -8,
+        28,
         -27
       ],
       "face": "south",
@@ -223,8 +223,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        5,
-        -58
+        0,
+        -73
       ],
       "face": "south",
       "overlay": "chorrol",
@@ -236,7 +236,7 @@
       "wealth": "common",
       "at": [
         12,
-        -25
+        -21
       ],
       "face": "south",
       "overlay": "chorrol",
@@ -259,7 +259,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        26,
+        46,
         -10
       ],
       "face": "south",
@@ -313,6 +313,201 @@
     "chorrol_vilena_donton_manor": "Vilena Donton's Manor",
     "chorrol_honditars_house": "Honditar's Cottage",
     "chorrol_jirolin_doran_house": "Jirolin Doran's House",
-    "chorrol_rimalus_bruiant_house": "Rimalus Bruiant's House"
-  }
+    "chorrol_rimalus_bruiant_house": "Rimalus Bruiant's House",
+    "chorrol_great_oak_plaza": "The Great Oak Green"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        8
+      ],
+      "size": 17,
+      "variant": 1,
+      "stalls": 6,
+      "name": "chorrol_great_oak_plaza"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        8
+      ],
+      "rx": 26,
+      "rz": 26,
+      "wobble": 1,
+      "lobes": 4,
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "great_oak_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          86
+        ],
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "south_gate"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          -18
+        ],
+        [
+          0,
+          -52
+        ],
+        [
+          0,
+          -86
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "guild_avenue"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -86,
+          0
+        ],
+        [
+          -54,
+          4
+        ],
+        [
+          -26,
+          8
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "west_gate"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          26,
+          8
+        ],
+        [
+          52,
+          -16
+        ],
+        [
+          68,
+          -48
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "castle_road"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        0
+      ],
+      "rx": 58,
+      "rz": 56,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 1,
+      "tag": "colovian_ring"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        38,
+        -42
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        8
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        -38,
+        -28
+      ],
+      "r": 32,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -38,
+        42
+      ],
+      "r": 30,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 84,
+    "target": 0.62
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 5,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "great_oak_ring"
+    },
+    {
+      "kind": "store",
+      "count": 4,
+      "flags": [
+        "upper"
+      ],
+      "on": "guild_avenue"
+    },
+    {
+      "kind": "house",
+      "count": 9,
+      "flags": [
+        "upper"
+      ],
+      "on": "colovian_ring"
+    }
+  ]
 }

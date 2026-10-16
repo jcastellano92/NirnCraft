@@ -59,14 +59,42 @@
     {
       "type": "radial",
       "at": [
-        0,
-        0
+        -4,
+        4
       ],
-      "r0": 5,
+      "spokes": 6,
+      "r0": 10,
       "r1": 22,
-      "spokes": 4,
+      "wobble": 6,
+      "offset": 2.37,
+      "width": 3,
+      "ring_width": 3,
+      "rings": [
+        18
+      ],
       "tag": "spoke",
       "ring_tag": "ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          4,
+          -14
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
     }
   ],
   "buildings": [
@@ -182,5 +210,47 @@
     "fullers_break_landmark": "High Seat of place.skycraft.fullers_break",
     "fullers_break_plaza": "place.skycraft.fullers_break Central Plaza"
   },
-  "innKey": "fullers_break_b_5"
+  "innKey": "fullers_break_b_5",
+  "zones": [
+    {
+      "at": [
+        -4,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -4,
+        4
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.6
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

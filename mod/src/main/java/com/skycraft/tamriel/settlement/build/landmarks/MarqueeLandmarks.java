@@ -37,6 +37,10 @@ public final class MarqueeLandmarks {
             case 112 -> awningRow(c, p, s);
             case 113 -> canopyPlatform(c, p, s);
             case 114 -> glassDome(c, p, s);
+            case 115 -> adamantineTower(c, p, s);
+            case 116 -> baarDau(c, p, s);
+            case 117 -> redMountainCitadel(c, p, s);
+            case 118 -> sunspireTemple(c, p, s);
             default -> {
             }
         }
@@ -729,5 +733,193 @@ public final class MarqueeLandmarks {
         }
         c.set(cx, dh + 1, cz, rib);
         for (int y = 1; y <= 3; y++) for (int x = cx - 1; x <= cx + 1; x++) c.air(x, y, cz - (int) R);
+    }
+
+    // ------------------------------------------------------------------ World Wonders (115..118)
+
+    /**
+     * Adamantine Tower (Direnni Tower / Ur-Tower, Isle of Balfiera):
+     * a monumental 144-block fluted metallic cylinder-spire of polished deepslate, iron ribs, and smooth quartz
+     * rising out of an octagonal Direnni bastion courtyard with the Aedric Zero-Stone core inside.
+     */
+    static void adamantineTower(Canvas c, Palette p, Spec s) {
+        int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(120, s.h);
+        double R = Math.min(s.w, s.d) / 2.0 - 1;
+        if (c.recording()) {
+            c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
+            return;
+        }
+        pave(c, p, s.w, s.d, Math.min(h, 48));
+        BlockState metal = B.s(Blocks.POLISHED_DEEPSLATE);
+        BlockState rib = B.s(Blocks.IRON_BLOCK);
+        BlockState band = B.s(Blocks.SMOOTH_QUARTZ);
+        BlockState core = B.s(Blocks.SEA_LANTERN);
+        // Octagonal Direnni outer curtain wall
+        for (int x = 0; x < s.w; x++) for (int z = 0; z < s.d; z++) {
+            double dist = Math.hypot(x - cx, z - cz);
+            if (Math.abs(dist - R) < 1.1 && !(z < cz && Math.abs(x - cx) <= 1)) {
+                for (int y = 1; y <= 9; y++) {
+                    c.set(x, y, z, y == 9 ? band : B.s(Blocks.DEEPSLATE_BRICKS));
+                }
+            }
+        }
+        // Fluted metallic Ur-Tower shaft (0..h)
+        double r0 = Math.max(6.5, R - 4.0);
+        for (int y = 1; y <= h; y++) {
+            double t = y / (double) h;
+            double rad = r0 * (1.0 - 0.55 * t * t);
+            int ri = (int) Math.ceil(rad + 1);
+            for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
+                double dist = Math.hypot(dx, dz);
+                double ang = Math.atan2(dz, dx);
+                double flute = rad * (1.0 + 0.1 * Math.cos(8 * ang));
+                if (dist > flute) continue;
+                if (dist <= 1.2) {
+                    c.set(cx + dx, y, cz + dz, y % 4 == 0 ? core : rib);
+                } else if (dist >= flute - 1.15) {
+                    if (y <= 4 && dz < 0 && Math.abs(dx) <= 1) continue;
+                    boolean isRib = Math.cos(8 * ang) > 0.65;
+                    c.set(cx + dx, y, cz + dz, isRib ? rib : (y % 16 == 0 ? band : metal));
+                } else if (y % 16 == 0) {
+                    c.set(cx + dx, y, cz + dz, B.s(Blocks.DEEPSLATE_TILES));
+                } else if (y < 24) {
+                    c.air(cx + dx, y, cz + dz);
+                }
+            }
+        }
+        c.set(cx, h + 1, cz, core);
+        c.set(cx, h + 2, cz, B.s(Blocks.LIGHTNING_ROD));
+    }
+
+    /**
+     * Baar Dau (The Ministry of Truth, Vivec):
+     * a hollowed levitating meteor suspended above Vivec's Temple plaza with mooring chains, Velothi wooden
+     * catwalks, prison cells, and Ordinator watch-posts.
+     */
+    static void baarDau(Canvas c, Palette p, Spec s) {
+        int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(48, s.h);
+        if (c.recording()) {
+            c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
+            return;
+        }
+        pave(c, p, s.w, s.d, h);
+        double R = Math.min(s.w, s.d) / 2.0 - 1.5;
+        // Temple plaza pedestal & 4 mooring chain pylons at the corners
+        int off = Math.max(4, (int) (R * 0.6));
+        int[][] pylons = {{cx - off, cz - off}, {cx + off, cz - off}, {cx - off, cz + off}, {cx + off, cz + off}};
+        for (int[] py : pylons) {
+            for (int y = 1; y <= 20; y++) {
+                c.set(py[0], y, py[1], y <= 4 ? B.s(Blocks.WAXED_COPPER_BLOCK) : B.s(Blocks.CHAIN));
+            }
+        }
+        // Suspended volcanic meteor (y = 14..h-2)
+        int yMid = 14 + (h - 16) / 2;
+        double ry = (h - 16) / 2.0;
+        for (int y = 14; y <= h - 2; y++) {
+            double ny = (y - yMid) / ry;
+            double baseR = R * Math.sqrt(Math.max(0, 1.0 - ny * ny));
+            int ri = (int) Math.ceil(baseR + 1.5);
+            for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
+                double ang = Math.atan2(dz, dx);
+                double crag = baseR + 1.2 * Math.sin(ang * 5 + y * 0.35) + 0.7 * Math.cos(ang * 9 - y * 0.5);
+                double dist = Math.hypot(dx, dz);
+                if (dist > crag) continue;
+                if (dist >= crag - 2.0) {
+                    int roll = (dx * 19 + dz * 31 + y * 7) & 7;
+                    BlockState rock = roll == 0 ? B.s(Blocks.MAGMA_BLOCK)
+                            : roll < 3 ? B.s(Blocks.BLACKSTONE) : B.s(Blocks.DEEPSLATE);
+                    c.set(cx + dx, y, cz + dz, rock);
+                } else if (y == yMid - 5 || y == yMid || y == yMid + 5) {
+                    c.set(cx + dx, y, cz + dz, dist < 2.5 ? B.s(Blocks.SOUL_LANTERN) : B.s(Blocks.POLISHED_DEEPSLATE));
+                } else if (Math.abs(dist - (baseR * 0.55)) < 0.7 && y > yMid - 5 && y < yMid + 5) {
+                    c.set(cx + dx, y, cz + dz, B.s(Blocks.IRON_BARS));
+                } else {
+                    c.air(cx + dx, y, cz + dz);
+                }
+            }
+        }
+        // Central suspended Ordinator lift scaffold from plaza into the belly of Baar Dau
+        for (int y = 1; y <= yMid; y++) {
+            c.set(cx, y, cz, B.s(Blocks.SCAFFOLDING));
+        }
+    }
+
+    /**
+     * Red Mountain Citadel & Ghostfence Bastion:
+     * volcanic blackstone-and-brass Dwemer citadel keep flanked by glowing Ghostfence bone-and-copper energy pylons.
+     */
+    static void redMountainCitadel(Canvas c, Palette p, Spec s) {
+        int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(36, s.h);
+        if (c.recording()) {
+            c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
+            return;
+        }
+        pave(c, p, s.w, s.d, h);
+        double R = Math.min(s.w, s.d) / 2.0 - 2.0;
+        BlockState dark = B.s(Blocks.POLISHED_BLACKSTONE_BRICKS);
+        BlockState brass = B.s(Blocks.WAXED_COPPER_BLOCK);
+        BlockState bone = B.s(Blocks.BONE_BLOCK);
+        BlockState glow = B.s(Blocks.SEA_LANTERN);
+        // Central stepped Dwemer-volcanic keep
+        for (int y = 1; y <= h; y++) {
+            double rad = (y < h / 2) ? R * 0.58 : R * 0.36;
+            int ri = (int) Math.ceil(rad);
+            for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
+                double dist = Math.hypot(dx, dz);
+                if (dist > rad) continue;
+                if (dist >= rad - 1.1) {
+                    if (y <= 4 && dz < 0 && Math.abs(dx) <= 1) continue;
+                    c.set(cx + dx, y, cz + dz, y % 6 == 0 ? brass : dark);
+                } else if (y == h / 2 || y == h) {
+                    c.set(cx + dx, y, cz + dz, brass);
+                }
+            }
+        }
+        // 4 corner Ghostfence Pylons with arcane barrier beams
+        int off = (int) Math.round(R - 1);
+        int[][] corners = {{cx - off, cz - off}, {cx + off, cz - off}, {cx - off, cz + off}, {cx + off, cz + off}};
+        for (int[] q : corners) {
+            for (int y = 1; y <= 20; y++) {
+                c.set(q[0], y, q[1], y >= 18 ? glow : (y % 4 == 0 ? brass : bone));
+            }
+        }
+        for (int i = -off + 1; i <= off - 1; i++) {
+            c.set(cx + i, 16, cz - off, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx + i, 16, cz + off, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx - off, 16, cz + i, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx + off, 16, cz + i, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
+        }
+    }
+
+    /**
+     * Sunspire Dragon-Temple of Alkosh:
+     * stepped sandstone-and-gold temple crowned by a gleaming golden dome and solar-prism obelisks.
+     */
+    static void sunspireTemple(Canvas c, Palette p, Spec s) {
+        int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(36, s.h);
+        if (c.recording()) {
+            c.entrance(cx, 1, 0, p.door, Direction.SOUTH);
+            return;
+        }
+        pave(c, p, s.w, s.d, h);
+        double R = Math.min(s.w, s.d) / 2.0 - 1.5;
+        BlockState sand = B.s(Blocks.SMOOTH_SANDSTONE);
+        BlockState gold = B.s(Blocks.GOLD_BLOCK);
+        BlockState light = B.s(Blocks.SHROOMLIGHT);
+        for (int y = 1; y <= h; y++) {
+            double t = y / (double) h;
+            double rad = (t < 0.45) ? R * (1.0 - t * 0.5) : R * 0.77 * Math.pow(1.0 - (t - 0.45) / 0.55, 0.65);
+            int ri = (int) Math.ceil(rad);
+            for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
+                double dist = Math.hypot(dx, dz);
+                if (dist > rad) continue;
+                if (dist >= rad - 1.15) {
+                    if (y <= 5 && (Math.abs(dx) <= 1 || Math.abs(dz) <= 1)) continue;
+                    c.set(cx + dx, y, cz + dz, t >= 0.45 ? (y % 5 == 0 ? light : gold) : (y % 4 == 0 ? gold : sand));
+                }
+            }
+        }
+        c.set(cx, h + 1, cz, light);
+        c.set(cx, 1, cz, B.s(Blocks.BEACON));
     }
 }

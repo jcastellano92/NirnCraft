@@ -50,7 +50,7 @@
       "sides": 8,
       "h": 7,
       "gates": [
-        0.0,
+        0,
         1.57,
         3.14,
         4.71
@@ -76,7 +76,7 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
+        30,
         -19
       ],
       "face": "south",
@@ -87,8 +87,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        34,
-        -15
+        35,
+        5
       ],
       "face": "west",
       "name": "anticlere_golden_chalice"
@@ -98,7 +98,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        24,
+        20,
         2
       ],
       "face": "west",
@@ -132,7 +132,7 @@
       "wealth": "wealthy",
       "at": [
         -3,
-        37
+        41
       ],
       "face": "north",
       "name": "anticlere_dibella_rotunda"
@@ -142,8 +142,8 @@
       "use": "guild_hall",
       "wealth": "wealthy",
       "at": [
-        -13,
-        20
+        -16,
+        17
       ],
       "face": "north",
       "name": "anticlere_vintners_guild"
@@ -364,6 +364,10 @@
     {
       "type": "waterwheel",
       "count": 1
+    },
+    {
+      "type": "well",
+      "where": "square"
     }
   ]
 }

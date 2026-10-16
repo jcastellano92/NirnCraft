@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/ashen_grass_pod"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/ashen_grass_pod_harvested"
+    }
+  }
+}

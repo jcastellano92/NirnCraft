@@ -44,7 +44,7 @@
       "use": "longhouse",
       "wealth": "noble",
       "at": [
-        9,
+        17,
         0
       ],
       "face": "south",
@@ -68,7 +68,7 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        -7,
+        -15,
         5
       ],
       "face": "south",
@@ -92,7 +92,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        3,
+        -1,
         -9
       ],
       "face": "south",
@@ -117,6 +117,128 @@
     "skaal_village_b_2": "Shaman Storn's Hut",
     "skaal_village_b_3": "Baldret's Nordic Forge",
     "skaal_village_b_4": "Wulf Wild-Blood's Lodge",
-    "skaal_village_b_5": "Morwen's Hunter Cabin"
-  }
+    "skaal_village_b_5": "Morwen's Hunter Cabin",
+    "skaal_greathall_hearth": "Skaal Greathall Honour Clearing"
+  },
+  "lines": [],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        0,
+        8
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 2,
+      "name": "skaal_greathall_hearth"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -2
+      ],
+      "rx": 22,
+      "rz": 20,
+      "wobble": 3,
+      "lobes": 4,
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "greathall_ring"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          36
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -28
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "all_maker_way"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          4
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          28,
+          -4
+        ]
+      ],
+      "width": 3,
+      "rank": 1,
+      "tag": "shaman_trail"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -16
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        16,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 36,
+    "target": 0.54
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 6,
+      "culture": "nord",
+      "on": "greathall_ring"
+    },
+    {
+      "kind": "smithy",
+      "count": 1,
+      "culture": "nord",
+      "on": "all_maker_way"
+    }
+  ]
 }

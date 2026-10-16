@@ -30,7 +30,7 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        9,
+        13,
         0
       ],
       "face": "south",
@@ -54,8 +54,8 @@
       "use": "shack",
       "wealth": "poor",
       "at": [
-        -7,
-        5
+        -19,
+        7
       ],
       "face": "south",
       "overlay": "west_gash",
@@ -78,8 +78,8 @@
       "use": "warehouse",
       "wealth": "common",
       "at": [
-        3,
-        -9
+        -3,
+        -14
       ],
       "face": "south",
       "overlay": "west_gash",
@@ -103,10 +103,150 @@
     "khuul_b_2": "Aldos Braven's Shack",
     "khuul_b_3": "Endris Dilmyn's Hut",
     "khuul_b_4": "Svadstar's Boat-Shed",
-    "khuul_b_5": "Solstheim Ferry Pier"
+    "khuul_b_5": "Solstheim Ferry Pier",
+    "khuul_harbor_jetty": "Thongar's Tradehouse Fishing Wharf"
   },
   "innKey": "khuul_b_1",
   "names": {
     "inn": "khuul_b_1"
-  }
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -10,
+        12
+      ],
+      "to": [
+        10,
+        16
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "terraces": [],
+  "plazas": [
+    {
+      "at": [
+        -4,
+        6
+      ],
+      "size": 11,
+      "variant": 0,
+      "stalls": 3,
+      "name": "khuul_harbor_jetty"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          32
+        ],
+        [
+          -4,
+          14
+        ],
+        [
+          2,
+          -4
+        ],
+        [
+          8,
+          -26
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "thongar_pier_lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -28,
+          6
+        ],
+        [
+          -4,
+          8
+        ],
+        [
+          18,
+          4
+        ],
+        [
+          28,
+          -4
+        ]
+      ],
+      "width": 3,
+      "rank": 0,
+      "major": true,
+      "tag": "ash_fish_quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        0,
+        -4
+      ],
+      "rx": 20,
+      "rz": 16,
+      "wobble": 4,
+      "lobes": 3,
+      "width": 3,
+      "rank": 1,
+      "tag": "netch_shack_loop"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        0,
+        -14
+      ],
+      "r": 20,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 18,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 18,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 32,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 5,
+      "on": "netch_shack_loop"
+    },
+    {
+      "kind": "building",
+      "use": "fishery",
+      "wealth": "poor",
+      "count": 2,
+      "on": "ash_fish_quay"
+    }
+  ]
 }

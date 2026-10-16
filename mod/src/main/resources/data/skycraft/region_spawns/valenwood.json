@@ -3,6 +3,100 @@
     "provinces": [
       "valenwood"
     ],
+    "biomes": [
+      "skycraft:valenwood_root_warrens",
+      "skycraft:mushroom_grottos"
+    ],
+    "why": [
+      "valenwood.L4.graht_oaks",
+      "valenwood.L10.root_tombs",
+      "valenwood.L11.dawn_pact"
+    ],
+    "groups": [
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          1,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:spriggan",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 12,
+        "levels": [
+          2,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:frostbite_spider",
+        "count": [
+          1,
+          3
+        ],
+        "tag": "predator",
+        "roles": [
+          "ambusher",
+          "skirmisher"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          4,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:gnarl",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "nature",
+        "roles": [
+          "vanguard"
+        ]
+      },
+      {
+        "kind": "hostile",
+        "weight": 8,
+        "levels": [
+          5,
+          999
+        ],
+        "time": "any",
+        "place": "cave",
+        "entity": "skycraft:senche_tiger",
+        "count": [
+          1,
+          2
+        ],
+        "tag": "predator",
+        "roles": [
+          "vanguard",
+          "ambusher"
+        ]
+      }
+    ]
+  },
+  {
+    "provinces": [
+      "valenwood"
+    ],
     "regions": [
       "valenwood/malabal_tor"
     ],

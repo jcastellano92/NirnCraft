@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/briar_heart"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/briar_heart_harvested"
+    }
+  }
+}

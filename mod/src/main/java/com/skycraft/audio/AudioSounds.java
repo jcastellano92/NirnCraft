@@ -151,6 +151,7 @@ public final class AudioSounds {
 
     public static void init(IEventBus modBus) {
         SOUNDS.register(modBus);
+        AudioItems.init(modBus);
     }
 
     /** The registered event {@code skycraft:<name>}, or a harmless vanilla fallback if the name is unknown. */

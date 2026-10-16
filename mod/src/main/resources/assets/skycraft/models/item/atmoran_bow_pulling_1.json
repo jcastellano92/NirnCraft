@@ -1,0 +1,6 @@
+{
+  "parent": "skycraft:item/atmoran_bow",
+  "textures": {
+    "layer0": "skycraft:item/atmoran_bow_pulling_1"
+  }
+}

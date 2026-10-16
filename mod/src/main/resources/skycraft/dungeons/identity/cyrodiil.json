@@ -12425,24 +12425,26 @@
    ]
   },
   "jerall_mountains_delve_3_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Thane Runolf Night-Sworn",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Prelate Gaston the Iron Castellan",
    "person": "",
    "sign": [
     "Jerall",
     "Mountains",
-    "Here lies",
-    "Thane Runolf"
+    "Guarded by",
+    "Prelate Gaston"
    ],
-   "motif": "weapon_rack",
-   "loot": "barrow",
+   "motif": "watch_brazier",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "jerall_mountains.L10.sancre_tor_barrow"
+    "jerall_mountains.L10.sancre_tor_barrow",
+    "jerall_mountains.L8.talos_first",
+    "jerall_mountains.L8.dragon_blood_lore"
    ]
   },
   "jerall_mountains_delve_4_dwemer_ruin": {
@@ -12509,24 +12511,24 @@
    ]
   },
   "jerall_mountains_delve_7_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Yurrg Tree-Splitter",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Nessa Black-Boots",
    "person": "",
    "sign": [
     "Jerall",
     "Mountains",
     "Held by:",
-    "Old Yurrg"
+    "Nessa"
    ],
-   "motif": "bone_heap",
-   "loot": "giant",
+   "motif": "trophy_wall",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "jerall_mountains.L4.scree_heath"
+    "jerall_mountains.L5.smuggling"
    ]
   },
   "jerall_mountains_delve_8_dragon_lair": {
@@ -12550,18 +12552,18 @@
     "jerall_mountains.L9.blades_without_emperor"
    ]
   },
-  "jerall_mountains_delve_9_kolskeggr_mine": {
+  "remans_crimson_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Foreman Seamripper the Pit-Boss",
+   "variant": "mine",
+   "boss": "Overseer Orebreaker of the Deep Adit",
    "person": "",
    "sign": [
-    "Jerall",
-    "Mountains",
+    "Remans Crimson",
+    "Ore-Adit",
     "Held by:",
-    "Foreman"
+    "Overseer"
    ],
-   "motif": "collapsed_timber",
+   "motif": "foreman_desk",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -12572,25 +12574,27 @@
     "jerall_mountains.L1.silver_seams"
    ]
   },
-  "jerall_mountains_delve_10_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Haldor the Unburied",
+  "wendir_dawn_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Castellan Rashid of the First Ansei",
    "person": "",
    "sign": [
-    "Jerall",
-    "Mountains",
-    "Here lies",
-    "Haldor the"
+    "Wendir Dawn",
+    "Ayleid",
+    "Guarded by",
+    "Castellan"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "jerall_mountains.L10.sancre_tor_barrow"
+    "jerall_mountains.L10.sancre_tor_barrow",
+    "jerall_mountains.L8.talos_first",
+    "jerall_mountains.L8.dragon_blood_lore"
    ]
   },
   "jerall_mountains_delve_11_ice_cave": {
@@ -12636,24 +12640,26 @@
    ]
   },
   "jerall_mountains_delve_13_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Haldor the Oathbreaker",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Prelate Qasim the Shrine-Warden",
    "person": "",
    "sign": [
     "Jerall",
     "Mountains",
-    "Here lies",
-    "Haldor the"
+    "Guarded by",
+    "Prelate Qasim"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "watch_brazier",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "jerall_mountains.L10.sancre_tor_barrow"
+    "jerall_mountains.L10.sancre_tor_barrow",
+    "jerall_mountains.L8.talos_first",
+    "jerall_mountains.L8.dragon_blood_lore"
    ]
   },
   "jerall_mountains_delve_14_dwemer_ruin": {
@@ -12847,24 +12853,24 @@
    ]
   },
   "jerall_mountains_delve_23_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Durgash Mammoth-Walker",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Nessa the Highwayman",
    "person": "",
    "sign": [
     "Jerall",
     "Mountains",
     "Held by:",
-    "Old Durgash"
+    "Nessa the"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "bedroll_row",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "jerall_mountains.L4.scree_heath"
+    "jerall_mountains.L5.smuggling"
    ]
   },
   "jerall_mountains_delve_24_dragon_lair": {
@@ -12888,16 +12894,16 @@
     "jerall_mountains.L9.blades_without_emperor"
    ]
   },
-  "jerall_mountains_delve_25_kolskeggr_mine": {
+  "vinda_white_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "The Pickback the Pit-Boss",
+   "variant": "mine",
+   "boss": "Foreman Orebreaker of the Deep Adit",
    "person": "",
    "sign": [
-    "Jerall",
-    "Mountains",
+    "Vinda White",
+    "Ore-Adit",
     "Held by:",
-    "The Pickback"
+    "Foreman"
    ],
    "motif": "collapsed_timber",
    "loot": "mine",
@@ -12953,24 +12959,26 @@
    ]
   },
   "colovian_highlands_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "The Frostmaw of the Glacier",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "Deep Dripstone",
    "person": "",
    "sign": [
     "Colovian",
     "Highlands",
     "Held by:",
-    "The Frostmaw"
+    "Deep Dripstone"
    ],
-   "motif": "frozen_dead",
-   "loot": "ice",
+   "motif": "hermit_camp",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "colovian_highlands.L10.goblin_wars"
+    "colovian_highlands.L10.goblin_wars",
+    "colovian_highlands.L1.karst_valleys",
+    "colovian_highlands.L1.limestone_caves"
    ]
   },
   "colovian_highlands_delve_4_sixth_house_base": {
@@ -12995,24 +13003,24 @@
    ]
   },
   "colovian_highlands_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Ottrik Rime-Crowned",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Castellan Harun the Tomb-Warden",
    "person": "",
    "sign": [
     "Colovian",
     "Highlands",
-    "Here lies",
-    "Ottrik"
+    "Guarded by",
+    "Castellan"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "colovian_highlands.L10.goblin_wars"
+    "colovian_highlands.L10.ridge_keeps"
    ]
   },
   "colovian_highlands_delve_6_dwemer_ruin": {
@@ -13143,18 +13151,18 @@
    ]
   },
   "colovian_highlands_delve_12_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Thundrak Ridge-Strider",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Orla of the Red Sails",
    "person": "",
    "sign": [
     "Colovian",
     "Highlands",
     "Held by:",
-    "Old Thundrak"
+    "Orla of the"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -13184,18 +13192,18 @@
     "colovian_highlands.L10.goblin_wars"
    ]
   },
-  "colovian_highlands_delve_14_kolskeggr_mine": {
+  "telepe_verdant_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "The Pickback of the Lower Drift",
+   "variant": "mine",
+   "boss": "Overseer Slagheart the Pit-Boss",
    "person": "",
    "sign": [
-    "Colovian",
-    "Highlands",
+    "Telepe Verdant",
+    "Ore-Adit",
     "Held by:",
-    "The Pickback"
+    "Overseer"
    ],
-   "motif": "collapsed_timber",
+   "motif": "ore_cart",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -13206,25 +13214,25 @@
     "colovian_highlands.L1.iron_seams"
    ]
   },
-  "colovian_highlands_delve_15_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Warchief Svartkel the Bitter",
+  "colovian_bronze_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Aethel Rune-Keeper",
    "person": "",
    "sign": [
     "Colovian",
-    "Highlands",
-    "Here lies",
-    "Warchief"
+    "Bronze Ayleid",
+    "Guarded by",
+    "Aethel"
    ],
-   "motif": "ossuary",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "colovian_highlands.L10.goblin_wars"
+    "colovian_highlands.L10.ridge_keeps"
    ]
   },
   "colovian_highlands_delve_16_imperial_camp": {
@@ -13397,24 +13405,24 @@
    ]
   },
   "heartlands_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "Old Rimeheart",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "Blind Duskmaw",
    "person": "",
    "sign": [
     "Heartlands",
-    "Delve 3 Ice",
+    "Limestone",
     "Held by:",
-    "Old Rimeheart"
+    "Blind Duskmaw"
    ],
-   "motif": "frozen_dead",
-   "loot": "ice",
+   "motif": "hermit_camp",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "heartlands.L10.ring_beneath_the_rings"
+    "heartlands.L10.lake_cult_caves"
    ]
   },
   "heartlands_delve_4_sixth_house_base": {
@@ -13439,18 +13447,18 @@
    ]
   },
   "heartlands_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Bergthor the Oathbreaker",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Ansei Haldris of the Lion Guard",
    "person": "",
    "sign": [
     "Heartlands",
-    "Delve 5 Barrow",
-    "Here lies",
-    "Bergthor the"
+    "Ancestral",
+    "Guarded by",
+    "Ansei Haldris"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "watch_brazier",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -13565,24 +13573,24 @@
    ]
   },
   "heartlands_delve_11_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Murzol Boulder-Hand",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Kolgrim the Highwayman",
    "person": "",
    "sign": [
     "Heartlands",
-    "Delve 11 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Murzol"
+    "Kolgrim the"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "heartlands.L4.heath_and_grain"
+    "heartlands.L10.ring_beneath_the_rings"
    ]
   },
   "heartlands_delve_12_dragon_lair": {
@@ -13606,18 +13614,18 @@
     "heartlands.L10.ring_beneath_the_rings"
    ]
   },
-  "heartlands_delve_13_kolskeggr_mine": {
+  "strid_inner_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Overseer Cinderjaw of the Deep Adit",
+   "variant": "mine",
+   "boss": "Old Rubblefist the Vein-Claimer",
    "person": "",
    "sign": [
-    "Heartlands",
-    "Delve 13",
+    "Strid Inner",
+    "Ore-Adit",
     "Held by:",
-    "Overseer"
+    "Old Rubblefist"
    ],
-   "motif": "foreman_desk",
+   "motif": "ore_cart",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -13629,19 +13637,19 @@
     "heartlands.L10.lake_cult_caves"
    ]
   },
-  "heartlands_delve_14_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Thane Kettil Night-Sworn",
+  "fanacas_shrouded_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Castellan Gaston of the Sand-Shrine",
    "person": "",
    "sign": [
-    "Heartlands",
-    "Delve 14 Bleak",
-    "Here lies",
-    "Thane Kettil"
+    "Fanacas",
+    "Shrouded",
+    "Guarded by",
+    "Castellan"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -13819,24 +13827,24 @@
    ]
   },
   "heartlands_delve_23_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Gruvuk Tree-Splitter",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Boss Reynard Toll-Master",
    "person": "",
    "sign": [
     "Heartlands",
-    "Delve 23 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Old Gruvuk"
+    "Boss Reynard"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "heartlands.L4.heath_and_grain"
+    "heartlands.L10.ring_beneath_the_rings"
    ]
   },
   "heartlands_delve_24_dragon_lair": {
@@ -13860,18 +13868,18 @@
     "heartlands.L10.ring_beneath_the_rings"
    ]
   },
-  "heartlands_delve_25_kolskeggr_mine": {
+  "brena_silent_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "The Slagheart the Pit-Boss",
+   "variant": "mine",
+   "boss": "Old Shaftwarden of the Lower Drift",
    "person": "",
    "sign": [
-    "Heartlands",
-    "Delve 25",
+    "Brena Silent",
+    "Ore-Adit",
     "Held by:",
-    "The Slagheart"
+    "Old"
    ],
-   "motif": "collapsed_timber",
+   "motif": "foreman_desk",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -13883,19 +13891,19 @@
     "heartlands.L10.lake_cult_caves"
    ]
   },
-  "heartlands_delve_26_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Jarl Grimvald Ember-Eyed",
+  "pelinal_upper_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Castellan Rashid Ward-Sworn",
    "person": "",
    "sign": [
-    "Heartlands",
-    "Delve 26 Bleak",
-    "Here lies",
-    "Jarl Grimvald"
+    "Pelinal Upper",
+    "Ayleid",
+    "Guarded by",
+    "Castellan"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -14052,24 +14060,24 @@
    ]
   },
   "great_forest_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "Old Icegrip of the Glacier",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "Blind blind-Claw the Lurker",
    "person": "",
    "sign": [
     "Great Forest",
-    "Delve 3 Ice",
+    "Limestone",
     "Held by:",
-    "Old Icegrip of"
+    "Blind"
    ],
-   "motif": "ice_shrine",
-   "loot": "ice",
+   "motif": "bone_heap",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "great_forest.L4.charcoal_clearing"
+    "great_forest.L4.old_oakwood"
    ]
   },
   "great_forest_delve_4_sixth_house_base": {
@@ -14094,24 +14102,25 @@
    ]
   },
   "great_forest_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Warchief Torvald the Bitter",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Ansei Haldris of the Sand-Shrine",
    "person": "",
    "sign": [
     "Great Forest",
-    "Delve 5 Barrow",
-    "Here lies",
-    "Warchief"
+    "Ancestral",
+    "Guarded by",
+    "Ansei Haldris"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "great_forest.L10.lich_ruins"
+    "great_forest.L10.lich_ruins",
+    "great_forest.L8.forest_daedric_shrines"
    ]
   },
   "great_forest_delve_6_dwemer_ruin": {
@@ -14264,18 +14273,18 @@
    ]
   },
   "great_forest_delve_13_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Chieftain Brogul Stone-Elbow",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Reaver Jarek the Freebooter",
    "person": "",
    "sign": [
     "Great Forest",
-    "Delve 13 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Chieftain"
+    "Reaver Jarek"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -14305,18 +14314,18 @@
     "great_forest.L10.lich_ruins"
    ]
   },
-  "great_forest_delve_15_kolskeggr_mine": {
+  "welke_dawn_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Old Shaftwarden the Vein-Claimer",
+   "variant": "mine",
+   "boss": "The Deeppick the Pit-Boss",
    "person": "",
    "sign": [
-    "Great Forest",
-    "Delve 15",
+    "Welke Dawn",
+    "Ore-Adit",
     "Held by:",
-    "Old"
+    "The Deeppick"
    ],
-   "motif": "collapsed_timber",
+   "motif": "ore_cart",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -14326,25 +14335,26 @@
     "great_forest.L1.forest_loam_hills"
    ]
   },
-  "great_forest_delve_16_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Warchief Gunnhild Cold-Hand",
+  "morihaus_white_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Keeper Evrard of the First Ansei",
    "person": "",
    "sign": [
-    "Great Forest",
-    "Delve 16 Bleak",
-    "Here lies",
-    "Warchief"
+    "Morihaus White",
+    "Ayleid",
+    "Guarded by",
+    "Keeper Evrard"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "great_forest.L10.lich_ruins"
+    "great_forest.L10.lich_ruins",
+    "great_forest.L8.forest_daedric_shrines"
    ]
   },
   "great_forest_delve_17_watchtower": {
@@ -14412,24 +14422,26 @@
    ]
   },
   "nibenay_basin_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "The Glasswing the Rime-Stalker",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "Great Nightcrawler of the Dark Grotto",
    "person": "",
    "sign": [
     "Nibenay Basin",
-    "Delve 3 Ice",
+    "Limestone",
     "Held by:",
-    "The Glasswing"
+    "Great"
    ],
-   "motif": "ice_shrine",
-   "loot": "ice",
+   "motif": "bone_heap",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_basin.L4.valus_pine"
+    "nibenay_basin.L10.arrius_cult_cells",
+    "nibenay_basin.L10.valus_keeps",
+    "nibenay_basin.L1.foothill_gold"
    ]
   },
   "nibenay_basin_delve_4_sixth_house_base": {
@@ -14454,24 +14466,25 @@
    ]
   },
   "nibenay_basin_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Thane Ingrun Ember-Eyed",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Warden Varnak of the Broken Wall",
    "person": "",
    "sign": [
     "Nibenay Basin",
-    "Delve 5 Barrow",
-    "Here lies",
-    "Thane Ingrun"
+    "Ancestral",
+    "Guarded by",
+    "Warden Varnak"
    ],
-   "motif": "weapon_rack",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_basin.L10.sanctuary_under_the_house"
+    "nibenay_basin.L10.arrius_cult_cells",
+    "nibenay_basin.L8.dunmer_ancestor_rites"
    ]
   },
   "nibenay_basin_delve_6_dwemer_ruin": {
@@ -14559,24 +14572,24 @@
    ]
   },
   "nibenay_basin_delve_10_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Maghor Ridge-Strider",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Boss Zayd Hook-Thumb",
    "person": "",
    "sign": [
     "Nibenay Basin",
-    "Delve 10 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Old Maghor"
+    "Boss Zayd"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_basin.L10.sanctuary_under_the_house"
+    "nibenay_basin.L10.valus_keeps"
    ]
   },
   "nibenay_basin_delve_11_dragon_lair": {
@@ -14600,18 +14613,18 @@
     "nibenay_basin.L10.sanctuary_under_the_house"
    ]
   },
-  "nibenay_basin_delve_12_kolskeggr_mine": {
+  "panther_bronze_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Overseer Orebreaker",
+   "variant": "mine",
+   "boss": "Old Dustlung of the Deep Adit",
    "person": "",
    "sign": [
-    "Nibenay Basin",
-    "Delve 12",
+    "Panther Bronze",
+    "Ore-Adit",
     "Held by:",
-    "Overseer"
+    "Old Dustlung"
    ],
-   "motif": "foreman_desk",
+   "motif": "collapsed_timber",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -14621,25 +14634,26 @@
     "nibenay_basin.L5.orchards_and_grain"
    ]
   },
-  "nibenay_basin_delve_13_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Jarl Kettil the Silent King",
+  "ninendava_silent_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Castellan Aethel the Iron Castellan",
    "person": "",
    "sign": [
-    "Nibenay Basin",
-    "Delve 13 Bleak",
-    "Here lies",
-    "Jarl Kettil"
+    "Ninendava",
+    "Silent Ayleid",
+    "Guarded by",
+    "Castellan"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_basin.L10.sanctuary_under_the_house"
+    "nibenay_basin.L10.arrius_cult_cells",
+    "nibenay_basin.L8.dunmer_ancestor_rites"
    ]
   },
   "nibenay_basin_delve_14_dwemer_ruin": {
@@ -14832,24 +14846,24 @@
    ]
   },
   "nibenay_basin_delve_23_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Bolgrum Tree-Splitter",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Boss Tariq the Lamplighter",
    "person": "",
    "sign": [
     "Nibenay Basin",
-    "Delve 23 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Old Bolgrum"
+    "Boss Tariq the"
    ],
-   "motif": "bone_heap",
-   "loot": "giant",
+   "motif": "prisoner_cage",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_basin.L10.sanctuary_under_the_house"
+    "nibenay_basin.L10.valus_keeps"
    ]
   },
   "nibenay_basin_delve_24_dragon_lair": {
@@ -14873,18 +14887,18 @@
     "nibenay_basin.L10.sanctuary_under_the_house"
    ]
   },
-  "nibenay_basin_delve_25_kolskeggr_mine": {
+  "belda_basal_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Foreman Quarrymaster of the Lower Drift",
+   "variant": "mine",
+   "boss": "Overseer Lodestone of the Lower Drift",
    "person": "",
    "sign": [
-    "Nibenay Basin",
-    "Delve 25",
+    "Belda Basal",
+    "Ore-Adit",
     "Held by:",
-    "Foreman"
+    "Overseer"
    ],
-   "motif": "collapsed_timber",
+   "motif": "ore_cart",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -14894,25 +14908,26 @@
     "nibenay_basin.L5.orchards_and_grain"
    ]
   },
-  "nibenay_basin_delve_26_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Vestri the Bitter",
+  "mackament_twilight_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Ansei Soraya of the Broken Wall",
    "person": "",
    "sign": [
-    "Nibenay Basin",
-    "Delve 26 Bleak",
-    "Here lies",
-    "Vestri the"
+    "Mackament",
+    "Twilight",
+    "Guarded by",
+    "Ansei Soraya"
    ],
-   "motif": "ossuary",
-   "loot": "barrow",
+   "motif": "watch_brazier",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_basin.L10.sanctuary_under_the_house"
+    "nibenay_basin.L10.arrius_cult_cells",
+    "nibenay_basin.L8.dunmer_ancestor_rites"
    ]
   },
   "nibenay_basin_delve_27_ayleid_ruin": {
@@ -15044,18 +15059,18 @@
    ]
   },
   "west_weald_delve_5_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "The Coldwhisper of the Glacier",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "The Hollowback the Lurker",
    "person": "",
    "sign": [
     "West Weald",
-    "Delve 5 Ice",
+    "Limestone",
     "Held by:",
-    "The"
+    "The Hollowback"
    ],
-   "motif": "ice_shrine",
-   "loot": "ice",
+   "motif": "bone_heap",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -15086,18 +15101,18 @@
    ]
   },
   "west_weald_delve_7_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Jarl Arnkel the Barrow-Lord",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Warden Ysolt the Fallen Priest",
    "person": "",
    "sign": [
     "West Weald",
-    "Delve 7 Barrow",
-    "Here lies",
-    "Jarl Arnkel"
+    "Ancestral",
+    "Guarded by",
+    "Warden Ysolt"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -15233,24 +15248,24 @@
    ]
   },
   "west_weald_delve_14_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Chieftain Maghor Stone-Elbow",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Captain Corinne Cutpurse",
    "person": "",
    "sign": [
     "West Weald",
-    "Delve 14 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Chieftain"
+    "Captain"
    ],
-   "motif": "bone_heap",
-   "loot": "giant",
+   "motif": "prisoner_cage",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "west_weald.L10.vampire_count"
+    "west_weald.L5.gold_road_traffic"
    ]
   },
   "west_weald_delve_15_dragon_lair": {
@@ -15274,16 +15289,16 @@
     "west_weald.L10.vampire_count"
    ]
   },
-  "west_weald_delve_16_kolskeggr_mine": {
+  "valus_shrouded_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Old Shaftwarden of the Lower Drift",
+   "variant": "mine",
+   "boss": "The Deeppick of the Deep Adit",
    "person": "",
    "sign": [
-    "West Weald",
-    "Delve 16",
+    "Valus Shrouded",
+    "Ore-Adit",
     "Held by:",
-    "Old"
+    "The Deeppick"
    ],
    "motif": "collapsed_timber",
    "loot": "mine",
@@ -15295,19 +15310,19 @@
     "west_weald.L5.wine_estates"
    ]
   },
-  "west_weald_delve_17_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Warchief Haldor the Sleepless",
+  "remans_basal_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Ansei Bertrand of the Direnni Sigil",
    "person": "",
    "sign": [
-    "West Weald",
-    "Delve 17 Bleak",
-    "Here lies",
-    "Warchief"
+    "Remans Basal",
+    "Ayleid",
+    "Guarded by",
+    "Ansei Bertrand"
    ],
-   "motif": "ossuary",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -15359,24 +15374,25 @@
    ]
   },
   "gold_coast_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "The Frozen Rimeheart the Rime-Stalker",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "Blind Hollowback",
    "person": "",
    "sign": [
     "Gold Coast",
-    "Delve 3 Ice",
+    "Limestone",
     "Held by:",
-    "The Frozen"
+    "Blind"
    ],
-   "motif": "ice_shrine",
-   "loot": "ice",
+   "motif": "bone_heap",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "gold_coast.L10.smuggler_coves"
+    "gold_coast.L10.smuggler_coves",
+    "gold_coast.L1.sea_caves"
    ]
   },
   "gold_coast_delve_4_sixth_house_base": {
@@ -15401,24 +15417,25 @@
    ]
   },
   "gold_coast_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Jarl Eirmund the Barrow-Lord",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Ansei Azad of the Direnni Sigil",
    "person": "",
    "sign": [
     "Gold Coast",
-    "Delve 5 Barrow",
-    "Here lies",
-    "Jarl Eirmund"
+    "Ancestral",
+    "Guarded by",
+    "Ansei Azad of"
    ],
-   "motif": "urn_wall",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "gold_coast.L10.smuggler_coves"
+    "gold_coast.L10.smuggler_coves",
+    "gold_coast.L8.akatosh_chapel"
    ]
   },
   "gold_coast_delve_6_dwemer_ruin": {
@@ -15527,18 +15544,18 @@
    ]
   },
   "gold_coast_delve_11_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Haggarn Mammoth-Walker",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Corsair Rurik Crow-Bait",
    "person": "",
    "sign": [
     "Gold Coast",
-    "Delve 11 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Haggarn"
+    "Corsair Rurik"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -15568,18 +15585,18 @@
     "gold_coast.L10.smuggler_coves"
    ]
   },
-  "gold_coast_delve_13_kolskeggr_mine": {
+  "vilverin_white_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Old Slagheart of the Lower Drift",
+   "variant": "mine",
+   "boss": "Overseer Pickback the Pit-Boss",
    "person": "",
    "sign": [
-    "Gold Coast",
-    "Delve 13",
+    "Vilverin White",
+    "Ore-Adit",
     "Held by:",
-    "Old Slagheart"
+    "Overseer"
    ],
-   "motif": "ore_cart",
+   "motif": "collapsed_timber",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -15589,25 +15606,26 @@
     "gold_coast.L5.anvil_shipping"
    ]
   },
-  "gold_coast_delve_14_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Jarl Hakon the Sleepless",
+  "telepe_upper_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Warden Varnak the Iron Castellan",
    "person": "",
    "sign": [
-    "Gold Coast",
-    "Delve 14 Bleak",
-    "Here lies",
-    "Jarl Hakon the"
+    "Telepe Upper",
+    "Ayleid",
+    "Guarded by",
+    "Warden Varnak"
    ],
-   "motif": "ossuary",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "gold_coast.L10.smuggler_coves"
+    "gold_coast.L10.smuggler_coves",
+    "gold_coast.L8.akatosh_chapel"
    ]
   },
   "nibenay_valley_delve_1_akaviri_fort": {
@@ -15653,24 +15671,25 @@
    ]
   },
   "nibenay_valley_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "Old Frostmaw of the Glacier",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "Deep Hollowback of the Caverns",
    "person": "",
    "sign": [
     "Nibenay Valley",
-    "Delve 3 Ice",
+    "Limestone",
     "Held by:",
-    "Old Frostmaw"
+    "Deep"
    ],
-   "motif": "ice_shrine",
-   "loot": "ice",
+   "motif": "bone_heap",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_valley.L10.skooma_dens"
+    "nibenay_valley.L10.smuggler_caves",
+    "nibenay_valley.L1.riverbank_caves"
    ]
   },
   "nibenay_valley_delve_4_sixth_house_base": {
@@ -15695,18 +15714,18 @@
    ]
   },
   "nibenay_valley_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Hjalmar the Pale Marshal",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Warden Evrard the Shrine-Warden",
    "person": "",
    "sign": [
     "Nibenay Valley",
-    "Delve 5 Barrow",
-    "Here lies",
-    "Hjalmar the"
+    "Ancestral",
+    "Guarded by",
+    "Warden Evrard"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "watch_brazier",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -15821,24 +15840,24 @@
    ]
   },
   "nibenay_valley_delve_11_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Old Kharzug Ridge-Strider",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Thibault Black-Boots",
    "person": "",
    "sign": [
     "Nibenay Valley",
-    "Delve 11 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Old Kharzug"
+    "Thibault"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "bedroll_row",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_valley.L10.skooma_dens"
+    "nibenay_valley.L10.smuggler_caves"
    ]
   },
   "nibenay_valley_delve_12_dragon_lair": {
@@ -15862,18 +15881,18 @@
     "nibenay_valley.L10.skooma_dens"
    ]
   },
-  "nibenay_valley_delve_13_kolskeggr_mine": {
+  "rumare_silent_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Overseer Deepdelver the Vein-Claimer",
+   "variant": "mine",
+   "boss": "Foreman Orebreaker of the Lower Drift",
    "person": "",
    "sign": [
-    "Nibenay Valley",
-    "Delve 13",
+    "Rumare Silent",
+    "Ore-Adit",
     "Held by:",
-    "Overseer"
+    "Foreman"
    ],
-   "motif": "ore_cart",
+   "motif": "foreman_desk",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -15883,19 +15902,19 @@
     "nibenay_valley.L5.river_labour"
    ]
   },
-  "nibenay_valley_delve_14_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Vigfus the Silent King",
+  "strid_twilight_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Ansei Aelric the Iron Castellan",
    "person": "",
    "sign": [
-    "Nibenay Valley",
-    "Delve 14 Bleak",
-    "Here lies",
-    "Vigfus the"
+    "Strid Twilight",
+    "Ayleid",
+    "Guarded by",
+    "Ansei Aelric"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -16073,24 +16092,24 @@
    ]
   },
   "nibenay_valley_delve_23_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Chieftain Haggarn Mammoth-Walker",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Reaver Bram Two-Knives",
    "person": "",
    "sign": [
     "Nibenay Valley",
-    "Delve 23 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Chieftain"
+    "Reaver Bram"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "bedroll_row",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "nibenay_valley.L10.skooma_dens"
+    "nibenay_valley.L10.smuggler_caves"
    ]
   },
   "nibenay_valley_delve_24_dragon_lair": {
@@ -16114,14 +16133,14 @@
     "nibenay_valley.L10.skooma_dens"
    ]
   },
-  "nibenay_valley_delve_25_kolskeggr_mine": {
+  "larsius_upper_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Overseer Pickback the Pit-Boss",
+   "variant": "mine",
+   "boss": "Overseer Copperjaw the Pit-Boss",
    "person": "",
    "sign": [
-    "Nibenay Valley",
-    "Delve 25",
+    "Larsius Upper",
+    "Ore-Adit",
     "Held by:",
     "Overseer"
    ],
@@ -16135,19 +16154,19 @@
     "nibenay_valley.L5.river_labour"
    ]
   },
-  "nibenay_valley_delve_26_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Jarl Haldor the Last Thane",
+  "alessian_iron_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Warden Sulaiman the Sunken Lord",
    "person": "",
    "sign": [
-    "Nibenay Valley",
-    "Delve 26 Bleak",
-    "Here lies",
-    "Jarl Haldor"
+    "Alessian Iron",
+    "Ayleid",
+    "Guarded by",
+    "Warden"
    ],
-   "motif": "king_throne",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
@@ -16243,24 +16262,24 @@
    ]
   },
   "blackwood_delve_3_ice_cave": {
-   "family": "ice",
-   "variant": "ice_cave",
-   "boss": "Old Coldwhisper the Rime-Stalker",
+   "family": "cave",
+   "variant": "cave",
+   "boss": "The Dripstone",
    "person": "",
    "sign": [
     "Blackwood",
-    "Delve 3 Ice",
+    "Limestone",
     "Held by:",
-    "Old"
+    "The Dripstone"
    ],
-   "motif": "frozen_dead",
-   "loot": "ice",
+   "motif": "hermit_camp",
+   "loot": "cave",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "blackwood.L10.stolen_sap"
+    "blackwood.L10.mangrove_vampires"
    ]
   },
   "blackwood_delve_4_sixth_house_base": {
@@ -16285,24 +16304,24 @@
    ]
   },
   "blackwood_delve_5_barrow": {
-   "family": "barrow",
-   "variant": "barrow",
-   "boss": "Thane Arnkel the Bitter",
+   "family": "ruin",
+   "variant": "imperial_crypt",
+   "boss": "Tormund the Sword-Singer",
    "person": "",
    "sign": [
     "Blackwood",
-    "Delve 5 Barrow",
-    "Here lies",
-    "Thane Arnkel"
+    "Ancestral",
+    "Guarded by",
+    "Tormund the"
    ],
-   "motif": "ossuary",
-   "loot": "barrow",
+   "motif": "offering_bowl",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "blackwood.L11.ayleid_marsh_retreat"
+    "blackwood.L10.stolen_sap"
    ]
   },
   "blackwood_delve_6_dwemer_ruin": {
@@ -16432,24 +16451,24 @@
    ]
   },
   "blackwood_delve_12_giant_camp": {
-   "family": "giant",
-   "variant": "giant_camp",
-   "boss": "Durgash Cairn-Kicker",
+   "family": "bandit",
+   "variant": "bandit_camp",
+   "boss": "Corsair Ketil Split-Lip",
    "person": "",
    "sign": [
     "Blackwood",
-    "Delve 12 Giant",
+    "Brigand Camp",
     "Held by:",
-    "Durgash"
+    "Corsair Ketil"
    ],
-   "motif": "mammoth_bones",
-   "loot": "giant",
+   "motif": "loot_heap",
+   "loot": "bandit",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "blackwood.L4.cypress_swamp"
+    "blackwood.L10.stolen_sap"
    ]
   },
   "blackwood_delve_13_dragon_lair": {
@@ -16473,18 +16492,18 @@
     "blackwood.L10.stolen_sap"
    ]
   },
-  "blackwood_delve_14_kolskeggr_mine": {
+  "lindai_basal_ore_adit": {
    "family": "mine",
-   "variant": "kolskeggr_mine",
-   "boss": "Old Deeppick the Vein-Claimer",
+   "variant": "mine",
+   "boss": "Old Pitboss of the Lower Drift",
    "person": "",
    "sign": [
-    "Blackwood",
-    "Delve 14",
+    "Lindai Basal",
+    "Ore-Adit",
     "Held by:",
-    "Old Deeppick"
+    "Old Pitboss of"
    ],
-   "motif": "foreman_desk",
+   "motif": "collapsed_timber",
    "loot": "mine",
    "entrance": "",
    "entranceKind": "",
@@ -16494,25 +16513,25 @@
     "blackwood.L5.river_mouth_port"
    ]
   },
-  "blackwood_delve_15_bleak_falls_barrow": {
-   "family": "barrow",
-   "variant": "bleak_falls_barrow",
-   "boss": "Thane Vestri the Sleepless",
+  "welke_iron_ayleid_reliquary": {
+   "family": "ruin",
+   "variant": "ayleid_ruin",
+   "boss": "Valdrek the Iron Castellan",
    "person": "",
    "sign": [
-    "Blackwood",
-    "Delve 15 Bleak",
-    "Here lies",
-    "Thane Vestri"
+    "Welke Iron",
+    "Ayleid",
+    "Guarded by",
+    "Valdrek the"
    ],
-   "motif": "offering_bowl",
-   "loot": "barrow",
+   "motif": "rune_pillar",
+   "loot": "ruin",
    "entrance": "",
    "entranceKind": "",
    "bossNote": "",
    "story": "",
    "why": [
-    "blackwood.L11.ayleid_marsh_retreat"
+    "blackwood.L10.stolen_sap"
    ]
   }
  }

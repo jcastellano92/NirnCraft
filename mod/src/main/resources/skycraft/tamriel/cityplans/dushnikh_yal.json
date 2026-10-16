@@ -7,32 +7,240 @@
     "store": "",
     "smithy": "dushnikh_murbols_forge"
   },
-  "gates": [[0, 38]],
+  "gates": [
+    [
+      0,
+      38
+    ]
+  ],
   "walls": [
-    {"r": 35, "sides": 10, "h": 7, "gates": [0], "flags": ["palisade"], "towers": false}
+    {
+      "r": 35,
+      "sides": 10,
+      "h": 7,
+      "gates": [
+        0
+      ],
+      "flags": [
+        "palisade"
+      ],
+      "towers": false
+    }
   ],
   "buildings": [
-    {"kind": "longhouse", "at": [0, -14], "size": [13, 21], "face": "S", "flags": ["seat"], "name": "chief_longhouse"},
-    {"kind": "smithy", "at": [15, 8], "size": [11, 9], "face": "W", "name": "dushnikh_murbols_forge"},
-    {"kind": "longhouse", "at": [-14, 4], "size": [9, 15], "face": "E"},
-    {"kind": "longhouse", "at": [17, -10], "size": [9, 15], "face": "W"},
-    {"kind": "mine", "at": [22, -26], "size": [7, 14], "face": "S", "variant": 5, "flags": ["no_beard"], "name": "dushnikh_yal_mine"},
-    {"kind": "pen", "at": [-4, 26], "size": [9, 9]},
-    {"kind": "pen", "at": [-22, -22], "size": [9, 9]},
-    {"kind": "camp", "at": [-28, -8], "size": [11, 11], "variant": 2},
-    {"kind": "shrine", "at": [-30, 14], "size": [5, 5], "face": "E", "variant": 2, "name": "dushnikh_yal_shrine"}
+    {
+      "kind": "longhouse",
+      "at": [
+        0,
+        -14
+      ],
+      "size": [
+        13,
+        21
+      ],
+      "face": "S",
+      "flags": [
+        "seat"
+      ],
+      "name": "chief_longhouse"
+    },
+    {
+      "kind": "smithy",
+      "at": [
+        15,
+        8
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "W",
+      "name": "dushnikh_murbols_forge"
+    },
+    {
+      "kind": "longhouse",
+      "at": [
+        -14,
+        4
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "E"
+    },
+    {
+      "kind": "longhouse",
+      "at": [
+        17,
+        -10
+      ],
+      "size": [
+        9,
+        15
+      ],
+      "face": "W"
+    },
+    {
+      "kind": "mine",
+      "at": [
+        28,
+        -7
+      ],
+      "size": [
+        7,
+        14
+      ],
+      "face": "S",
+      "variant": 5,
+      "flags": [
+        "no_beard"
+      ],
+      "name": "dushnikh_yal_mine"
+    },
+    {
+      "kind": "pen",
+      "at": [
+        -4,
+        26
+      ],
+      "size": [
+        9,
+        9
+      ]
+    },
+    {
+      "kind": "pen",
+      "at": [
+        -22,
+        -22
+      ],
+      "size": [
+        9,
+        9
+      ]
+    },
+    {
+      "kind": "camp",
+      "at": [
+        -28,
+        -8
+      ],
+      "size": [
+        11,
+        11
+      ],
+      "variant": 2
+    },
+    {
+      "kind": "shrine",
+      "at": [
+        -26,
+        14
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "face": "E",
+      "variant": 2,
+      "name": "dushnikh_yal_shrine"
+    }
   ],
   "plazas": [
-    {"at": [0, 6], "size": 9, "variant": 3, "name": "dushnikh_yal_fire_ring"}
+    {
+      "at": [
+        0,
+        6
+      ],
+      "size": 9,
+      "variant": 3,
+      "name": "dushnikh_yal_fire_ring"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 38], [0, 28], [1, 18], [0, 11]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-8, 24], [-18, 18], [-22, 10]], "width": 2, "rank": 2, "tag": "lane"},
-    {"type": "path", "via": [[8, 24], [18, 20], [26, 12]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          38
+        ],
+        [
+          0,
+          28
+        ],
+        [
+          1,
+          18
+        ],
+        [
+          0,
+          11
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -8,
+          24
+        ],
+        [
+          -18,
+          18
+        ],
+        [
+          -22,
+          10
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          8,
+          24
+        ],
+        [
+          18,
+          20
+        ],
+        [
+          26,
+          12
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, 22], "r": 22, "zone": "poor"},
-    {"at": [0, -12], "r": 16, "zone": "noble"}
+    {
+      "at": [
+        0,
+        22
+      ],
+      "r": 22,
+      "zone": "poor"
+    },
+    {
+      "at": [
+        0,
+        -12
+      ],
+      "r": 16,
+      "zone": "noble"
+    }
   ],
   "fabric": {
     "radius": 32,
@@ -41,12 +249,33 @@
     "yard_cap": 4
   },
   "queue": [
-    {"kind": "house", "size": [9, 11], "count": 3, "on": "main"}
+    {
+      "kind": "house",
+      "size": [
+        9,
+        11
+      ],
+      "count": 3,
+      "on": "main"
+    }
   ],
   "features": [
-    {"type": "statue", "theme": "daedric:malacath", "at": [0, -1]},
-    {"type": "banners", "where": "gate"},
-    {"type": "well", "where": "free"}
+    {
+      "type": "statue",
+      "theme": "daedric:malacath",
+      "at": [
+        0,
+        -1
+      ]
+    },
+    {
+      "type": "banners",
+      "where": "gate"
+    },
+    {
+      "type": "well",
+      "where": "free"
+    }
   ],
   "titles": {
     "dushnikh_yal_fire_ring": "The Fire Ring",

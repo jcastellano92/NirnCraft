@@ -189,4 +189,27 @@ public final class ShopTrades {
         Set<String> where = GOODS_BY_PROVINCE.get(itemId);
         return where == null || where.contains(province);
     }
+
+    /**
+     * Whether a shop of {@code shopType} in {@code province} (at optional {@code placeId}) may stock {@code itemId}:
+     * enforces {@link TradeNetwork#mayStock} embargoes/monopolies (e.g. skooma &amp; moon sugar only at fences/exotic
+     * traders outside Elsweyr; Valenwood Green Pact) and allows local province goods plus {@code <= 3}-hop imports.
+     */
+    public static boolean servedAt(String itemId, String province, @Nullable String placeId, ShopType shopType) {
+        load();
+        if (!TradeNetwork.mayStock(shopType, province, placeId, itemId)) return false;
+        if (shopType == ShopType.FENCE || shopType == ShopType.EXOTIC) return true;
+        if (servedIn(itemId, province)) return true;
+        if (shopType == ShopType.FOOD || shopType == ShopType.HUNTER || shopType == ShopType.FISHER) return false;
+        if (placeId == null) return false;
+        TradeNetwork.ImportRoute route = TradeNetwork.importsFor(placeId).get(itemId);
+        return route != null && route.hops() <= 1;
+    }
+
+    /** Unmodifiable view of the declared province-specific goods table. */
+    public static Map<String, Set<String>> goodsByProvince() {
+        load();
+        return Collections.unmodifiableMap(GOODS_BY_PROVINCE);
+    }
 }
+

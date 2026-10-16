@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/kresh_fiber"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/kresh_fiber_harvested"
+    }
+  }
+}

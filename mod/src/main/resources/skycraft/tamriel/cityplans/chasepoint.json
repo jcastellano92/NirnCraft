@@ -49,7 +49,7 @@
       "id": "xanmeer",
       "at": [
         0,
-        -11
+        -27
       ],
       "name": "chasepoint_landmark",
       "overlay": "murkmire"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          35
+        ],
+        [
+          -6,
+          9
+        ],
+        [
+          -6,
+          -19
+        ]
       ],
-      "r0": 8,
-      "r1": 36,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -27,
+          10
+        ],
+        [
+          -6,
+          12
+        ],
+        [
+          27,
+          9
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        -6,
+        -6
+      ],
+      "rx": 19,
+      "rz": 16,
+      "wobble": 2,
+      "lobes": 5,
+      "phase": 0.54,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -75,8 +120,8 @@
       "use": "keep",
       "wealth": "noble",
       "at": [
-        14,
-        0
+        25,
+        5
       ],
       "face": "south",
       "overlay": "murkmire",
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        18,
-        23
+        5,
+        32
       ],
       "face": "north",
       "overlay": "murkmire",
@@ -99,8 +144,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        -3,
-        14
+        -13,
+        21
       ],
       "face": "north",
       "overlay": "murkmire",
@@ -111,8 +156,8 @@
       "use": "mage_tower",
       "wealth": "noble",
       "at": [
-        -26,
-        12
+        -29,
+        15
       ],
       "face": "north",
       "overlay": "murkmire",
@@ -123,8 +168,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -13,
-        -6
+        -25,
+        -4
       ],
       "face": "south",
       "overlay": "murkmire",
@@ -135,8 +180,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        -6,
-        -28
+        24,
+        -18
       ],
       "face": "south",
       "overlay": "murkmire",
@@ -147,8 +192,8 @@
       "use": "smithy",
       "wealth": "common",
       "at": [
-        9,
-        -11
+        -25,
+        -23
       ],
       "face": "south",
       "overlay": "murkmire",
@@ -182,5 +227,74 @@
     "chasepoint_landmark": "High Seat of place.skycraft.chasepoint",
     "chasepoint_plaza": "place.skycraft.chasepoint Central Plaza"
   },
-  "innKey": "chasepoint_b_5"
+  "innKey": "chasepoint_b_5",
+  "lines": [
+    {
+      "kind": "canal",
+      "from": [
+        -27,
+        0
+      ],
+      "to": [
+        27,
+        14
+      ],
+      "width": 6
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        -6,
+        -2
+      ],
+      "to": [
+        -6,
+        14
+      ],
+      "width": 4,
+      "variant": 0
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -6,
+        -15
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        -6,
+        -6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        14,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 34,
+    "target": 0.56
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

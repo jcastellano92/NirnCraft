@@ -8,34 +8,204 @@
     "smithy": "soljunds_smelter"
   },
   "innKey": "soljunds_miners_bunkhouse",
-  "gates": [[0, 28]],
+  "gates": [
+    [
+      0,
+      28
+    ]
+  ],
   "buildings": [
-    {"kind": "mine", "at": [0, -16], "size": [7, 14], "face": "S", "variant": 4, "flags": ["no_beard"], "name": "soljunds_sinkhole_mine"},
-    {"kind": "smithy", "at": [16, -2], "size": [11, 9], "face": "W", "name": "soljunds_smelter"},
-    {"kind": "house", "at": [-16, -4], "size": [9, 9], "face": "E", "name": "soljunds_perths_cottage"},
-    {"kind": "house", "at": [-16, 12], "size": [9, 9], "face": "E", "name": "soljunds_tuthuls_cottage"},
-    {"kind": "camp", "at": [18, 16], "size": [11, 11], "variant": 1}
+    {
+      "kind": "mine",
+      "at": [
+        0,
+        -16
+      ],
+      "size": [
+        7,
+        14
+      ],
+      "face": "S",
+      "variant": 4,
+      "flags": [
+        "no_beard"
+      ],
+      "name": "soljunds_sinkhole_mine"
+    },
+    {
+      "kind": "smithy",
+      "at": [
+        16,
+        -2
+      ],
+      "size": [
+        11,
+        9
+      ],
+      "face": "W",
+      "name": "soljunds_smelter"
+    },
+    {
+      "kind": "house",
+      "at": [
+        -16,
+        -4
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "E",
+      "name": "soljunds_perths_cottage"
+    },
+    {
+      "kind": "house",
+      "at": [
+        -16,
+        12
+      ],
+      "size": [
+        9,
+        9
+      ],
+      "face": "E",
+      "name": "soljunds_tuthuls_cottage"
+    },
+    {
+      "kind": "camp",
+      "at": [
+        18,
+        16
+      ],
+      "size": [
+        11,
+        11
+      ],
+      "variant": 1
+    }
   ],
   "plazas": [
-    {"at": [0, 4], "size": 9, "variant": 0, "stalls": 2, "name": "soljunds_hoist_yard"}
+    {
+      "at": [
+        0,
+        4
+      ],
+      "size": 9,
+      "variant": 0,
+      "stalls": 2,
+      "name": "soljunds_hoist_yard"
+    }
   ],
   "nets": [
-    {"type": "path", "via": [[0, 28], [0, 14], [0, 2], [0, -8]], "width": 4, "major": true, "tag": "main"},
-    {"type": "path", "via": [[-16, 4], [-6, 4], [6, 4], [16, 4]], "width": 2, "rank": 2, "tag": "lane"}
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          28
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "width": 4,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -16,
+          4
+        ],
+        [
+          -6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          16,
+          4
+        ]
+      ],
+      "width": 2,
+      "rank": 2,
+      "tag": "lane"
+    }
   ],
   "zones": [
-    {"at": [0, 4], "r": 16, "zone": "craft"},
-    {"at": [-14, 6], "r": 14, "zone": "poor"}
+    {
+      "at": [
+        0,
+        4
+      ],
+      "r": 16,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -14,
+        6
+      ],
+      "r": 14,
+      "zone": "poor"
+    }
   ],
-  "fabric": {"radius": 28, "target": 0.24, "fill_cap": 2, "yard_cap": 4},
+  "fabric": {
+    "radius": 28,
+    "target": 0.24,
+    "fill_cap": 2,
+    "yard_cap": 4
+  },
   "queue": [
-    {"kind": "inn", "size": [11, 15], "flags": ["upper"], "name": "soljunds_miners_bunkhouse", "on": "main"},
-    {"kind": "store", "size": [9, 9], "name": "soljunds_assay_shed", "on": "main"}
+    {
+      "kind": "inn",
+      "size": [
+        11,
+        15
+      ],
+      "flags": [
+        "upper"
+      ],
+      "name": "soljunds_miners_bunkhouse",
+      "on": "main"
+    },
+    {
+      "kind": "store",
+      "size": [
+        9,
+        9
+      ],
+      "name": "soljunds_assay_shed",
+      "on": "main"
+    }
   ],
   "features": [
-    {"type": "well", "where": "square"},
-    {"type": "memorial", "where": "free"},
-    {"type": "banners", "where": "gate"}
+    {
+      "type": "well",
+      "where": "square"
+    },
+    {
+      "type": "memorial",
+      "where": "free"
+    },
+    {
+      "type": "banners",
+      "where": "gate"
+    }
   ],
   "titles": {
     "soljunds_sinkhole_mine": "Soljund's Moonstone Pit",

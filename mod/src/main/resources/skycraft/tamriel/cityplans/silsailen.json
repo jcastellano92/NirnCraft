@@ -48,8 +48,8 @@
     {
       "id": "crystal_tower",
       "at": [
-        0,
-        -7
+        -1,
+        -19
       ],
       "name": "silsailen_landmark",
       "overlay": "auridon"
@@ -57,16 +57,61 @@
   ],
   "nets": [
     {
-      "type": "radial",
-      "at": [
-        0,
-        0
+      "type": "path",
+      "via": [
+        [
+          0,
+          21
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          -13
+        ]
       ],
-      "r0": 5,
-      "r1": 22,
-      "spokes": 4,
-      "tag": "spoke",
-      "ring_tag": "ring"
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "main"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -18,
+          7
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          18,
+          6
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "quay"
+    },
+    {
+      "type": "loop",
+      "at": [
+        2,
+        6
+      ],
+      "rx": 13,
+      "rz": 14,
+      "wobble": 3,
+      "lobes": 4,
+      "phase": 1.83,
+      "width": 3,
+      "rank": 1,
+      "tag": "ring"
     }
   ],
   "buildings": [
@@ -87,8 +132,8 @@
       "use": "temple",
       "wealth": "noble",
       "at": [
-        12,
-        15
+        -18,
+        5
       ],
       "face": "north",
       "overlay": "auridon",
@@ -182,5 +227,47 @@
     "silsailen_landmark": "High Seat of place.skycraft.silsailen",
     "silsailen_plaza": "place.skycraft.silsailen Central Plaza"
   },
-  "innKey": "silsailen_b_5"
+  "innKey": "silsailen_b_5",
+  "zones": [
+    {
+      "at": [
+        2,
+        -10
+      ],
+      "r": 16,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        2,
+        6
+      ],
+      "r": 16,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        9,
+        8
+      ],
+      "r": 16,
+      "zone": "craft"
+    }
+  ],
+  "fabric": {
+    "radius": 22,
+    "target": 0.58
+  },
+  "queue": [
+    {
+      "kind": "house",
+      "count": 4,
+      "on": "ring"
+    },
+    {
+      "kind": "store",
+      "count": 1,
+      "on": "main"
+    }
+  ]
 }

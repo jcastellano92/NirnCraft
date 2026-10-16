@@ -1,5 +1,7 @@
 package com.skycraft.society;
 
+import com.skycraft.atmosphere.weather.RegionalWeather;
+import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.society.entity.NpcEntity;
 import net.minecraft.world.level.Level;
 
@@ -7,15 +9,25 @@ import net.minecraft.world.level.Level;
  * The daily routines of townsfolk, Radiant-AI style: sleep, breakfast, work, lunch at the inn or at home, an
  * afternoon of work, an evening stroll and chat, the inn while the bard plays, then bed. Each trade keeps its own
  * hours (shopkeepers follow the economy's shop hours, innkeepers keep the inn open late, bards play into the night,
- * children play all day). Pure function of time and role, so it costs nothing to ask.
+ * children play all day). Pure function of time, role, and severe regional weather.
  */
 public final class Schedule {
     public enum Activity {
         IDLE, SLEEP, EAT, WORK, LUNCH, WANDER, INN, HOME, PLAY;
 
+        /** Alias for {@link #HOME} used by shelter checks. */
+        public static final Activity REST = HOME;
+        /** Alias for {@link #INN} used by shelter checks. */
+        public static final Activity SOCIAL = INN;
+
         /** Activities during which a townsperson may stop for a chat. */
         public boolean social() {
             return this == WANDER || this == INN || this == LUNCH || this == PLAY;
+        }
+
+        /** True when the activity takes place inside a home, inn, or hall rather than exposed outdoors. */
+        public boolean isIndoors() {
+            return this == SLEEP || this == EAT || this == LUNCH || this == INN || this == HOME;
         }
     }
 
@@ -27,8 +39,20 @@ public final class Schedule {
         return (int) ((t / 1000L + 6) % 24);
     }
 
-    /** What {@code npc} should be doing now. */
+    /** What {@code npc} should be doing now, factoring in local {@link RegionalWeather}. */
     public static Activity activity(NpcEntity npc) {
+        Level level = npc.level();
+        WeatherKind weather = RegionalWeather.at(level, npc.blockPosition());
+        return activityAt(npc, weather);
+    }
+
+    /** Alias for {@link #activity(NpcEntity)}. */
+    public static Activity activityAt(NpcEntity npc) {
+        return activity(npc);
+    }
+
+    /** What {@code npc} should be doing now under the given {@code weather}. */
+    public static Activity activityAt(NpcEntity npc, WeatherKind weather) {
         Level level = npc.level();
         int h = hour(level);
         long day = level.getDayTime() / 24000L;
@@ -40,8 +64,23 @@ public final class Schedule {
         String job = npc.getPersistentData().getString(Housing.JOB_KEY);
         if (role == NpcRole.CITIZEN && !job.isEmpty()) {
             if (job.equals("cook") || job.equals("server")) return h >= 1 && h < 8 ? Activity.SLEEP : Activity.WORK;
-            return household(h, social);
+            return shelterIfSevere(role, household(h, social), social, weather);
         }
+        return activityAt(role, h, social, weather);
+    }
+
+    /** Pure schedule lookup for a {@code role} and clock hour {@code h} under {@code weather}. */
+    public static Activity activityAt(NpcRole role, int h, WeatherKind weather) {
+        return activityAt(role, h, true, weather);
+    }
+
+    /** Pure schedule lookup for a {@code role}, clock hour {@code h}, social preference, and {@code weather}. */
+    public static Activity activityAt(NpcRole role, int h, boolean social, WeatherKind weather) {
+        Activity base = baseActivity(role, h, social);
+        return shelterIfSevere(role, base, social, weather);
+    }
+
+    private static Activity baseActivity(NpcRole role, int h, boolean social) {
         return switch (role) {
             case INNKEEPER -> Activity.WORK;
             case BARD -> h >= 2 && h < 10 ? Activity.SLEEP : h < 12 ? Activity.WANDER : h < 14 ? Activity.WORK
@@ -58,6 +97,32 @@ public final class Schedule {
                     : h < 13 ? (social ? Activity.LUNCH : Activity.EAT) : h < 18 ? Activity.WANDER
                     : h < 22 ? (social ? Activity.INN : Activity.HOME) : Activity.SLEEP;
             default -> h >= 22 || h < 6 ? Activity.SLEEP : h >= 19 ? Activity.INN : Activity.WANDER;
+        };
+    }
+
+    /**
+     * Routes non-guard outdoor daytime workers, strollers, and children indoors ({@link Activity#INN} or
+     * {@link Activity#HOME}) when a severe storm ({@code BLIZZARD}, {@code SANDSTORM}, {@code ASH_STORM}, {@code BLIGHT})
+     * hits the settlement.
+     */
+    private static Activity shelterIfSevere(NpcRole role, Activity base, boolean social, WeatherKind weather) {
+        if (!RegionalWeather.isSevere(weather)) return base;
+        if (role != null && (role.protector || role == NpcRole.HOUSECARL)) return base;
+        if (base == Activity.WANDER || base == Activity.PLAY) {
+            if (role == NpcRole.CHILD) return Activity.HOME;
+            return social ? Activity.INN : Activity.HOME;
+        }
+        if (base == Activity.WORK && isOutdoorWorker(role)) {
+            return social ? Activity.INN : Activity.HOME;
+        }
+        return base;
+    }
+
+    private static boolean isOutdoorWorker(NpcRole role) {
+        if (role == null) return false;
+        return switch (role) {
+            case FARMER, MINER, LUMBERJACK, HUNTER, FISHER, TRAINER, BEGGAR -> true;
+            default -> false;
         };
     }
 

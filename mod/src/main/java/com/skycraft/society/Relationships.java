@@ -73,13 +73,21 @@ public final class Relationships {
         return Npcs.sub(npc.social(), "disp");
     }
 
-    public static int disposition(NpcEntity npc, Player player) {
+    public static int personalDisposition(NpcEntity npc, Player player) {
         CompoundTag d = npc.social().getCompound("disp");
         int base = d.getInt(player.getStringUUID());
-        // a spouse always loves you; the town's opinion of you colours a stranger's first impression
-        if (Marriage.isSpouseOf(npc, player)) return 100;
-        if (!d.contains(player.getStringUUID())) base = Math.max(-30, Math.min(20, Reputation.get(player, Reputation.TOWNSFOLK) / 3));
+        if (!d.contains(player.getStringUUID())) {
+            base = Math.max(-30, Math.min(20, Reputation.get(player, Reputation.TOWNSFOLK) / 3));
+        }
         return base;
+    }
+
+    public static int disposition(NpcEntity npc, Player player) {
+        // a spouse always loves you; the town's opinion and regional/racial attitudes colour first impressions
+        if (Marriage.isSpouseOf(npc, player)) return 100;
+        int base = personalDisposition(npc, player);
+        int attitudeDelta = RaceAttitudes.evaluate(npc, player).dispositionDelta();
+        return Math.max(-100, Math.min(100, base + attitudeDelta));
     }
 
     public static Rank rank(NpcEntity npc, Player player) {
@@ -90,8 +98,10 @@ public final class Relationships {
     public static void adjust(NpcEntity npc, Player player, int delta) {
         if (delta == 0 || npc.level().isClientSide) return;
         int before = disposition(npc, player);
-        int after = Math.max(-100, Math.min(100, before + delta));
-        disp(npc).putInt(player.getStringUUID(), after);
+        int personalBefore = personalDisposition(npc, player);
+        int personalAfter = Math.max(-100, Math.min(100, personalBefore + delta));
+        disp(npc).putInt(player.getStringUUID(), personalAfter);
+        int after = disposition(npc, player);
         Rank was = Rank.of(before);
         Rank now = Rank.of(after);
         if (was != now && player instanceof ServerPlayer sp) {

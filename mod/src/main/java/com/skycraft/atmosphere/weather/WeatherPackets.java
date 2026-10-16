@@ -1,5 +1,6 @@
 package com.skycraft.atmosphere.weather;
 
+import com.skycraft.atmosphere.WeatherFront;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** Server -> client sync of the regional weather table (a few bytes per region, sent only when a spell changes). */
+/** Server -> client sync of the regional weather table and active moving synoptic {@link WeatherFront}s. */
 public final class WeatherPackets {
     private WeatherPackets() {}
 
@@ -23,12 +24,18 @@ public final class WeatherPackets {
     public record Entry(String region, int kind, int wind) {}
 
     /**
-     * @param full replace the client's whole table (login, dimension change) instead of patching it
+     * @param full   replace the client's whole table (login, dimension change) instead of patching it
+     * @param fronts current server-authoritative moving weather fronts (null when unchanged)
      */
-    public record Sync(boolean full, List<Entry> entries) {
+    public record Sync(boolean full, List<Entry> entries, List<WeatherFront> fronts) {
         private static final int MAX_ENTRIES = 4096;
+        private static final int MAX_FRONTS = 128;
 
-        static void encode(Sync m, FriendlyByteBuf buf) {
+        public Sync(boolean full, List<Entry> entries) {
+            this(full, entries, null);
+        }
+
+        public static void encode(Sync m, FriendlyByteBuf buf) {
             buf.writeBoolean(m.full);
             buf.writeVarInt(m.entries.size());
             for (Entry e : m.entries) {
@@ -36,16 +43,32 @@ public final class WeatherPackets {
                 buf.writeByte(e.kind);
                 buf.writeShort(e.wind);
             }
+            boolean hasFronts = m.fronts != null;
+            buf.writeBoolean(hasFronts);
+            if (hasFronts) {
+                buf.writeVarInt(m.fronts.size());
+                for (WeatherFront f : m.fronts) {
+                    f.write(buf);
+                }
+            }
         }
 
-        static Sync decode(FriendlyByteBuf buf) {
+        public static Sync decode(FriendlyByteBuf buf) {
             boolean full = buf.readBoolean();
             int n = Math.min(buf.readVarInt(), MAX_ENTRIES);
             List<Entry> list = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {
                 list.add(new Entry(buf.readUtf(128), buf.readByte(), buf.readShort()));
             }
-            return new Sync(full, list);
+            List<WeatherFront> fronts = null;
+            if (buf.isReadable() && buf.readBoolean()) {
+                int fn = Math.min(buf.readVarInt(), MAX_FRONTS);
+                fronts = new ArrayList<>(fn);
+                for (int i = 0; i < fn; i++) {
+                    fronts.add(WeatherFront.read(buf));
+                }
+            }
+            return new Sync(full, list, fronts);
         }
 
         static void handle(Sync m, Supplier<NetworkEvent.Context> ctx) {

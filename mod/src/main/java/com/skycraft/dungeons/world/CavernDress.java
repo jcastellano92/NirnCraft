@@ -1,5 +1,6 @@
 package com.skycraft.dungeons.world;
 
+import com.skycraft.crafting.arcane.ArcaneRegistry;
 import com.skycraft.dungeons.world.cavern.CavernProfile;
 import com.skycraft.dungeons.world.cavern.CavernProfile.Feature;
 import com.skycraft.dungeons.world.cavern.CavernProfile.Flora;
@@ -124,7 +125,6 @@ final class CavernDress {
 
     private static void flora(CavernGen g, int x0, int x1, int z0, int z1) {
         List<Flora> rules = g.prof.flora;
-        if (rules.isEmpty()) return;
         Painter p = g.p;
         int[] start = new int[rules.size()];
         int acc = 0;
@@ -135,17 +135,37 @@ final class CavernDress {
         for (int x = x0 - 3; x <= x1 + 3; x++) {
             for (int z = z0 - 3; z <= z1 + 3; z++) {
                 if (!g.inside(x, z)) continue;
-                long h = p.hash(x, 9, z, 1310);
-                int roll = (int) Math.floorMod(h, 1000L);
-                if (roll >= acc) continue;
-                int ri = 0;
-                for (int i = 0; i < rules.size(); i++) if (roll >= start[i]) ri = i;
-                Flora fl = rules.get(ri);
                 int f = g.floorAt(x, z), c = g.ceilAt(x, z, f);
                 int w = g.walk(x, z);
                 boolean dry = w != Integer.MIN_VALUE && g.free(x, z);
-                int sub = roll - start[ri];
-                place(g, fl, x, z, f, c, w, dry, h, sub);
+                if (acc > 0) {
+                    long h = p.hash(x, 9, z, 1310);
+                    int roll = (int) Math.floorMod(h, 1000L);
+                    if (roll < acc) {
+                        int ri = 0;
+                        for (int i = 0; i < rules.size(); i++) if (roll >= start[i]) ri = i;
+                        Flora fl = rules.get(ri);
+                        int sub = roll - start[ri];
+                        place(g, fl, x, z, f, c, w, dry, h, sub);
+                    }
+                }
+                // Subterranean 3D alchemy fungi & Blackreach-style crimson nirnroot colonies
+                if (dry && p.ok(x, w, z)) {
+                    long fh = p.hash(x, 11, z, 1319);
+                    int froll = (int) Math.floorMod(fh, 1000L);
+                    if (froll < 18) {
+                        boolean nearLake = g.lake && Math.abs(f - g.lakeTop) <= 2;
+                        String fungusId = nearLake && froll < 4 ? "crimson_nirnroot" : switch (froll % 6) {
+                            case 0 -> "glowing_mushroom";
+                            case 1 -> "imp_stool";
+                            case 2 -> "namiras_rot";
+                            case 3 -> "white_cap";
+                            case 4 -> "bleeding_crown";
+                            default -> "blisterwort";
+                        };
+                        p.setIfOpen(x, w, z, ArcaneRegistry.floraState(fungusId));
+                    }
+                }
             }
         }
     }
@@ -508,13 +528,15 @@ final class CavernDress {
 
     // ------------------------------------------------------------------ shape structures
 
-    /** Waterfall: a spring in the wall high above the floor, falling to the ledges and the lake. */
+    /** Waterfall: an upper aquifer spring niche cascading down stepped mossy ledges into a mist plunge pool. */
     static void waterfall(CavernGen g) {
         Painter p = g.p;
         double cs = Math.cos(g.wfTheta), sn = Math.sin(g.wfTheta);
         int sx0 = g.cx + (int) Math.round(cs * 0.6 * g.ex), sz0 = g.cz + (int) Math.round(sn * 0.6 * g.ez);
         int stepX = Math.abs(cs) >= Math.abs(sn) ? (cs >= 0 ? 1 : -1) : 0;
         int stepZ = stepX == 0 ? (sn >= 0 ? 1 : -1) : 0;
+        int latX = stepZ != 0 ? 1 : 0;
+        int latZ = stepX != 0 ? 1 : 0;
         int xi = sx0, zi = sz0, xe = g.cx, ze = g.cz;
         for (int k = 0; k < 40; k++) {
             int x = sx0 + stepX * k, z = sz0 + stepZ * k;
@@ -528,19 +550,86 @@ final class CavernDress {
         }
         if (xe == g.cx && ze == g.cz) return;
         int fi = g.floorAt(xi, zi);
-        int y0 = Math.min(g.ceilAt(xi, zi, fi) - 3, fi + 12);
-        if (y0 > fi + 5 && p.ok(xe, y0, ze)) {
-            p.set(xe, y0, ze, Blocks.WATER.defaultBlockState());
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
-                int sx = xe + dir.getStepX(), sz = ze + dir.getStepZ();
-                if (sx == xi && sz == zi) continue;
-                if (p.ok(sx, y0, sz) && Painter.open(p.get(sx, y0, sz))) p.set(sx, y0, sz, g.rock(y0));
+        int y0 = Math.min(g.ceilAt(xi, zi, fi) - 3, fi + 14);
+        if (y0 <= fi + 5 || !p.ok(xe, y0, ze)) return;
+
+        // 1. Upper aquifer niche recessed into the wall with mossy stone and dripstone framing
+        for (int w = -1; w <= 1; w++) {
+            int nx = xe + latX * w, nz = ze + latZ * w;
+            if (p.ok(nx, y0 + 1, nz)) p.set(nx, y0 + 1, nz, Blocks.DRIPSTONE_BLOCK.defaultBlockState());
+            if (p.ok(nx, y0 - 1, nz)) p.set(nx, y0 - 1, nz, Blocks.MOSSY_COBBLESTONE.defaultBlockState());
+            int backX = nx + stepX, backZ = nz + stepZ;
+            if (p.ok(backX, y0, backZ)) p.set(backX, y0, backZ, g.rock(y0));
+            if (p.ok(nx, y0, nz)) {
+                if (w == 0 || p.roll(nx, y0, nz, 1510, 2) == 0) {
+                    p.set(nx, y0, nz, Blocks.WATER.defaultBlockState());
+                    p.scheduleFluid(nx, y0, nz);
+                } else {
+                    p.set(nx, y0, nz, Blocks.MOSS_BLOCK.defaultBlockState());
+                }
             }
-            if (p.ok(xe, y0 + 1, ze)) p.set(xe, y0 + 1, ze, g.rock(y0 + 1));
-            if (p.ok(xe, y0 - 1, ze)) p.set(xe, y0 - 1, ze, g.rock(y0 - 1));
-            p.scheduleFluid(xe, y0, ze);
-            p.feature("setpiece:grand_waterfall");
         }
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            int sx = xe + dir.getStepX(), sz = ze + dir.getStepZ();
+            if (sx == xi && sz == zi) continue;
+            if (p.ok(sx, y0, sz) && Painter.open(p.get(sx, y0, sz))) p.set(sx, y0, sz, g.rock(y0));
+        }
+
+        // 2. Stepped rock/moss ledges (2-3 tiers) and cascading water columns down to the floor/lake
+        int drop = y0 - fi;
+        int tiers = drop >= 10 ? 3 : 2;
+        int prevY = y0;
+        for (int t = 1; t <= tiers; t++) {
+            int lx = xe - stepX * t, lz = ze - stepZ * t;
+            int ly = y0 - (drop * t) / (tiers + 1);
+            if (!g.inside(lx, lz) || g.lane(lx, lz, 2) || g.cross(lx, lz)) continue;
+            for (int w = -1; w <= 1; w++) {
+                int px = lx + latX * w, pz = lz + latZ * w;
+                if (!p.ok(px, ly, pz)) continue;
+                BlockState ledge = (w == 0)
+                        ? Blocks.MOSSY_COBBLESTONE.defaultBlockState()
+                        : (t % 2 == 0 ? Blocks.MOSS_BLOCK.defaultBlockState() : Blocks.TUFF.defaultBlockState());
+                p.set(px, ly - 1, pz, ledge);
+                if (p.ok(px, ly - 2, pz)) p.set(px, ly - 2, pz, g.rock(ly - 2));
+                if (w == 0) {
+                    for (int wy = ly; wy <= prevY; wy++) {
+                        if (p.ok(px, wy, pz)) p.set(px, wy, pz, Blocks.WATER.defaultBlockState());
+                    }
+                    p.scheduleFluid(px, ly, pz);
+                } else if (p.ok(px, ly, pz) && Painter.open(p.get(px, ly, pz))) {
+                    p.set(px, ly, pz, Blocks.MOSS_CARPET.defaultBlockState());
+                }
+            }
+            prevY = ly;
+        }
+
+        // 3. Mist plunge pool at the base of the cascade
+        int bx = xe - stepX * (tiers + 1), bz = ze - stepZ * (tiers + 1);
+        if (g.inside(bx, bz) && !g.lane(bx, bz, 2) && !g.cross(bx, bz)) {
+            int bf = g.floorAt(bx, bz);
+            for (int wy = bf; wy <= prevY; wy++) {
+                if (p.ok(bx, wy, bz)) p.set(bx, wy, bz, Blocks.WATER.defaultBlockState());
+            }
+            p.scheduleFluid(bx, bf, bz);
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 > 5) continue;
+                    int px = bx + dx, pz = bz + dz;
+                    if (!g.inside(px, pz) || g.lane(px, pz, 1) || g.cross(px, pz)) continue;
+                    int pf = g.floorAt(px, pz);
+                    if (!p.ok(px, pf - 1, pz)) continue;
+                    if (d2 <= 2) {
+                        p.set(px, pf - 1, pz, Blocks.WATER.defaultBlockState());
+                        if (p.ok(px, pf - 2, pz)) p.set(px, pf - 2, pz, d2 == 0 ? Blocks.SEA_LANTERN.defaultBlockState() : Blocks.MOSSY_COBBLESTONE.defaultBlockState());
+                    } else {
+                        p.set(px, pf - 1, pz, (dx + dz) % 2 == 0 ? Blocks.MOSS_BLOCK.defaultBlockState() : Blocks.MOSSY_COBBLESTONE.defaultBlockState());
+                    }
+                }
+            }
+        }
+        p.feature("setpiece:grand_waterfall");
+        p.feature("setpiece:tiered_waterfall");
     }
 
     // ---- the shaft's spiral ramp
@@ -728,7 +817,7 @@ final class CavernDress {
         p.feature("setpiece:giant_skull");
     }
 
-    // ---- the karst's shaft of light
+    // ---- the karst's shaft of light (true surface-piercing skylight / god-rays when near surface)
 
     static void lightShaft(CavernGen g) {
         Painter p = g.p;
@@ -738,6 +827,96 @@ final class CavernDress {
         int c = g.ceilAt(sx, sz, f);
         int top = g.top;
         if (top - c < 3) return;
+
+        int surf = p.ownsColumn(sx, sz)
+                ? p.surfaceAt(sx, sz)
+                : (int) Math.round(com.skycraft.tamriel.TamrielMap.elevation(sx, sz));
+        com.skycraft.tamriel.MapSample ms = com.skycraft.tamriel.TamrielMap.sampleScratch(sx, sz);
+        boolean pierceSurface = surf > com.skycraft.tamriel.TamrielMap.SEA_LEVEL + 2
+                && surf - c <= 96
+                && !ms.inWater()
+                && !com.skycraft.tamriel.terrain.TerrainDensity.isRoadOrPlot(sx, sz);
+
+        if (pierceSurface) {
+            net.minecraft.core.BlockPos.MutableBlockPos mpos = new net.minecraft.core.BlockPos.MutableBlockPos();
+            for (int dx = -5; dx <= 5; dx++) {
+                for (int dz = -5; dz <= 5; dz++) {
+                    int x = sx + dx, z = sz + dz;
+                    if (com.skycraft.tamriel.terrain.TerrainDensity.isRoadOrPlot(x, z)) continue;
+                    int colSurf = p.ownsColumn(x, z)
+                            ? p.surfaceAt(x, z)
+                            : (int) Math.round(com.skycraft.tamriel.TamrielMap.elevation(x, z));
+                    int maxCarveY = Math.max(top, colSurf + 2);
+                    double dist = Math.sqrt(dx * dx + dz * dz);
+                    for (int y = c - 1; y <= maxCarveY; y++) {
+                        double t = (double) (y - c) / Math.max(1, maxCarveY - c);
+                        // Funnel widens slightly at cavern roof and flares at the surface sinkhole lip
+                        double rad = 3.6 - 0.9 * Math.sin(Math.PI * t) + (y >= colSurf - 2 ? 0.8 : 0.0);
+                        if (dist <= rad) {
+                            if (y <= p.maxY()) {
+                                p.air(x, y, z);
+                            } else if (p.ownsColumn(x, z)) {
+                                p.level.setBlock(mpos.set(x, y, z), Blocks.AIR.defaultBlockState(), 2);
+                            }
+                        } else if (dist <= rad + 1.25 && y >= colSurf - 3 && y <= colSurf && p.ownsColumn(x, z)) {
+                            // Weathered sinkhole rim at the surface
+                            BlockState rim = (dx + dz + y) % 3 == 0
+                                    ? Blocks.MOSS_BLOCK.defaultBlockState()
+                                    : ((dx * dz) % 2 == 0 ? Blocks.MOSSY_COBBLESTONE.defaultBlockState() : Blocks.TUFF.defaultBlockState());
+                            p.level.setBlock(mpos.set(x, y, z), rim, 2);
+                            if (y == colSurf && p.roll(x, y, z, 1520, 2) == 0) {
+                                p.level.setBlock(mpos.set(x, y + 1, z), Blocks.MOSS_CARPET.defaultBlockState(), 2);
+                            }
+                        }
+                    }
+                    // Hanging glow-berry cave vines around the skylight throat
+                    if (dist >= 2.2 && dist <= 3.8 && p.roll(x, c, z, 1521, 3) == 0) {
+                        int vLen = 2 + p.roll(x, c, z, 1522, 4);
+                        for (int vy = 0; vy < vLen; vy++) {
+                            int py = c - vy;
+                            if (!p.ok(x, py, z) || !Painter.open(p.get(x, py, z))) break;
+                            BlockState vine = (vy == vLen - 1)
+                                    ? Blocks.CAVE_VINES.defaultBlockState().setValue(net.minecraft.world.level.block.CaveVines.BERRIES, true)
+                                    : Blocks.CAVE_VINES_PLANT.defaultBlockState().setValue(net.minecraft.world.level.block.CaveVines.BERRIES, vy % 2 == 0);
+                            p.set(x, py, z, vine);
+                        }
+                    }
+                }
+            }
+            // Sunlit mossy oasis & spring pool directly below the skylight on the cavern floor
+            for (int dx = -4; dx <= 4; dx++) {
+                for (int dz = -4; dz <= 4; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 > 16) continue;
+                    int x = sx + dx, z = sz + dz;
+                    if (!g.inside(x, z) || g.lane(x, z, 1) || g.cross(x, z) || g.onPlatform(x, z)) continue;
+                    int fl = g.floorAt(x, z);
+                    if (g.lake && fl <= g.lakeTop) continue;
+                    if (!p.ok(x, fl - 1, z)) continue;
+                    if (d2 <= 2) {
+                        p.set(x, fl - 1, z, Blocks.WATER.defaultBlockState());
+                        if (p.ok(x, fl - 2, z)) p.set(x, fl - 2, z, Blocks.MOSS_BLOCK.defaultBlockState());
+                    } else {
+                        p.set(x, fl - 1, z, d2 <= 9 ? Blocks.MOSS_BLOCK.defaultBlockState() : Blocks.PODZOL.defaultBlockState());
+                        if (p.ok(x, fl, z) && Painter.open(p.get(x, fl, z))) {
+                            int r = p.roll(x, fl, z, 1523, 6);
+                            BlockState plant = switch (r) {
+                                case 0 -> Blocks.FLOWERING_AZALEA.defaultBlockState();
+                                case 1 -> Blocks.AZALEA.defaultBlockState();
+                                case 2, 3 -> Blocks.FERN.defaultBlockState();
+                                default -> Blocks.MOSS_CARPET.defaultBlockState();
+                            };
+                            p.set(x, fl, z, plant);
+                        }
+                    }
+                }
+            }
+            p.feature("setpiece:surface_skylight");
+            p.feature("setpiece:light_shaft");
+            return;
+        }
+
+        // Fallback for deep underworld caverns: sealed glowing shaft
         for (int y = c; y <= top - 2; y++) {
             double t = (double) (y - c) / Math.max(1, top - 2 - c);
             double rad = 3.4 - 1.2 * t;
@@ -748,7 +927,6 @@ final class CavernDress {
                 }
             }
         }
-        // the sun: a disc of light at the top of the shaft
         BlockState sun = !g.prof.lights.roof().isEmpty() ? g.prof.lights.roof().first() : Blocks.SEA_LANTERN.defaultBlockState();
         if (sun == null) sun = Blocks.SEA_LANTERN.defaultBlockState();
         for (int dx = -2; dx <= 2; dx++) {
@@ -810,6 +988,114 @@ final class CavernDress {
         g.p.container(x, g.walk(x, z), z, s, loot);
     }
 
+    /** Places a regional cultural subterranean shrine, hermitage, or ruined outpost on an alcove ledge. */
+    private static void culturalSanctuary(CavernGen g) {
+        Painter p = g.p;
+        int[] spot = spotNear(g, g.campTheta + Math.PI * 0.5, 0.52, 0.78, 95);
+        if (spot == null) return;
+        int x = spot[0], y = spot[1], z = spot[2];
+        com.skycraft.tamriel.Region reg = com.skycraft.tamriel.TamrielMap.region(g.cx, g.cz);
+        String prov = reg != null ? reg.province() : "skyrim";
+        ResourceLocation loot = g.prof.lootMinor != null ? g.prof.lootMinor : Deco.LOOT_MINOR;
+
+        switch (prov) {
+            case "morrowind" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.SOUL_LANTERN.defaultBlockState());
+                put(g, x + 1, z, Deco.barrel(Direction.UP), loot);
+                p.feature("subterranean:velothi_shrine");
+            }
+            case "cyrodiil" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.QUARTZ_BRICKS.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.SEA_LANTERN.defaultBlockState());
+                p.set(x - 1, y, z - 1, Blocks.QUARTZ_PILLAR.defaultBlockState());
+                p.set(x + 1, y, z - 1, Blocks.QUARTZ_PILLAR.defaultBlockState());
+                p.feature("subterranean:ayleid_wayshrine");
+            }
+            case "valenwood" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.MOSS_BLOCK.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.MANGROVE_WOOD.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.BONE_BLOCK.defaultBlockState());
+                p.set(x, y + 2, z, Blocks.LANTERN.defaultBlockState());
+                p.feature("subterranean:bosmer_root_shrine");
+            }
+            case "black_marsh" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.MUD_BRICKS.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.MANGROVE_ROOTS.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.OCHRE_FROGLIGHT.defaultBlockState());
+                p.feature("subterranean:hist_sap_altar");
+            }
+            case "elsweyr" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.CUT_RED_SANDSTONE.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.CHISELED_RED_SANDSTONE.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.AMETHYST_CLUSTER.defaultBlockState());
+                p.feature("subterranean:khajiit_moon_shrine");
+            }
+            case "summerset" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.CALCITE.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.AMETHYST_BLOCK.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.END_ROD.defaultBlockState());
+                p.feature("subterranean:altmer_crystal_shrine");
+            }
+            case "hammerfell", "yokuda" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.CUT_SANDSTONE.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.CHISELED_SANDSTONE.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.LANTERN.defaultBlockState());
+                p.feature("subterranean:yokudan_sword_shrine");
+            }
+            case "high_rock" -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.MOSSY_STONE_BRICKS.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.COBBLESTONE_WALL.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.SOUL_LANTERN.defaultBlockState());
+                p.feature("subterranean:breton_wyrd_shrine");
+            }
+            default -> {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (p.ok(x + dx, y - 1, z + dz)) p.set(x + dx, y - 1, z + dz, Blocks.MOSSY_STONE_BRICKS.defaultBlockState());
+                    }
+                }
+                p.set(x, y, z, Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
+                p.set(x, y + 1, z, Blocks.SOUL_LANTERN.defaultBlockState());
+                p.feature("subterranean:nordic_shrine");
+            }
+        }
+    }
+
     static void populate(CavernGen g) {
         Painter p = g.p;
         Room room = g.room;
@@ -849,6 +1135,7 @@ final class CavernDress {
             }
         }
         setPiece(g);
+        culturalSanctuary(g);
         // the platform: a chest, the lore on a lectern and a guardian
         ResourceLocation platLoot = prof.lootPlatform != null ? prof.lootPlatform
                 : room.piece.theme == Theme.MINE ? Deco.LOOT_MINE : Deco.LOOT_COMMON;

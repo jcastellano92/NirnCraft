@@ -2,11 +2,14 @@ package com.skycraft.atmosphere.client;
 
 import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.AtmosphereConfig;
+import com.skycraft.atmosphere.WeatherFront;
 import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.atmosphere.weather.WeatherPackets;
 import com.skycraft.atmosphere.weather.WeatherProfile;
+import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
+import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -24,13 +27,16 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * The regional weather where the camera is, rendered locally. The server syncs a small table of region -> weather
- * ({@link WeatherPackets}); every half second this class blends the weather of the player's region with the regions
- * just across any nearby border, and every tick eases the presentation parameters toward that blend. It then
+ * and moving synoptic {@link WeatherFront}s ({@link WeatherPackets}); every half second this class blends the weather
+ * of the player's region across a 9-point spatial Gaussian kernel ({@code ±96} blocks) with {@link TamrielMap}
+ * microclimate data and approaching fronts, and every tick eases the presentation parameters toward that blend. It then
  * <ul>
  *   <li>overrides the client level's rain and thunder levels, so vanilla's rain/snow, sky darkening, rain sounds
  *       and splashes only appear where it is actually raining (vanilla still decides rain vs snow per column);</li>
@@ -42,14 +48,22 @@ import java.util.Map;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientWeather {
-    private static final int[][] SAMPLES = {{0, 0}, {64, 0}, {-64, 0}, {0, 64}, {0, -64}};
-    private static final float[] SAMPLE_WEIGHT = {2f, 1f, 1f, 1f, 1f};
+    private static final int[][] SAMPLES = {
+            {0, 0}, {96, 0}, {-96, 0}, {0, 96}, {0, -96},
+            {96, 96}, {96, -96}, {-96, 96}, {-96, -96}
+    };
+    private static final float[] SAMPLE_WEIGHT = {
+            4f, 2f, 2f, 2f, 2f,
+            1f, 1f, 1f, 1f
+    };
     /** Fraction of the remaining distance covered per tick (about a 10 second transition). */
     private static final float EASE = 0.01f;
 
     private record Spell(WeatherKind kind, int wind) {}
 
     private static final Map<String, Spell> TABLE = new HashMap<>();
+    private static final List<WeatherFront> FRONTS = new ArrayList<>();
+    private static final MapSample MAP_SAMPLE = new MapSample();
     private static boolean snap = true;
     private static int ticks;
 
@@ -88,7 +102,7 @@ public final class ClientWeather {
 
     /** The server is running regional weather and the client option is on. */
     public static boolean active() {
-        return !TABLE.isEmpty() && AtmosphereConfig.LOCAL_WEATHER.get();
+        return (!TABLE.isEmpty() || !FRONTS.isEmpty()) && AtmosphereConfig.LOCAL_WEATHER.get();
     }
 
     public static float snow() { return cur[P.SNOW]; }
@@ -115,6 +129,43 @@ public final class ClientWeather {
     /** Wind direction (where it blows towards, degrees) as eased on the client. */
     public static float windDegrees() { return windDeg; }
 
+    /** Thread-safe snapshot of active moving weather fronts synced from the server. */
+    public static List<WeatherFront> fronts() {
+        List<WeatherFront> copy = new ArrayList<>(FRONTS.size());
+        for (WeatherFront f : FRONTS) {
+            copy.add(new WeatherFront(f.id, f.x, f.z, f.radius, f.vx, f.vz, f.kind, f.intensity, f.ticksLeft));
+        }
+        return copy;
+    }
+
+    /** Dominant moving weather front covering {@code (x, z)}, or {@code null} if none. */
+    public static WeatherFront sampleFront(double x, double z) {
+        WeatherFront best = null;
+        float bestI = 0.01f;
+        for (WeatherFront f : FRONTS) {
+            float i = f.intensityAt(x, z);
+            if (i > bestI) {
+                bestI = i;
+                best = f;
+            }
+        }
+        return best;
+    }
+
+    /** Strongest weather front approaching within 200..1,600 blocks of {@code (x, z)}, or {@code null}. */
+    public static WeatherFront nearestApproachingFront(double x, double z) {
+        WeatherFront best = null;
+        float bestA = 0.01f;
+        for (WeatherFront f : FRONTS) {
+            float a = f.approachFactor(x, z);
+            if (a > bestA) {
+                bestA = a;
+                best = f;
+            }
+        }
+        return best;
+    }
+
     /** Test hook (visual autotest): jump the eased weather and the cloud climate to the synced table right away. */
     public static void snapForTest() {
         snap = true;
@@ -130,12 +181,19 @@ public final class ClientWeather {
             if (e.kind() < 0) TABLE.remove(e.region());
             else TABLE.put(e.region(), new Spell(WeatherKind.byOrdinal(e.kind()), e.wind()));
         }
+        if (msg.fronts() != null && (!msg.fronts().isEmpty() || msg.full())) {
+            FRONTS.clear();
+            for (WeatherFront f : msg.fronts()) {
+                FRONTS.add(new WeatherFront(f.id, f.x, f.z, f.radius, f.vx, f.vz, f.kind, f.intensity, f.ticksLeft));
+            }
+        }
         if (msg.full()) snap = true;
     }
 
     @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         TABLE.clear();
+        FRONTS.clear();
         snap = true;
         region = null;
         java.util.Arrays.fill(cur, 0f);
@@ -159,8 +217,11 @@ public final class ClientWeather {
             java.util.Arrays.fill(target, 0f);
             profile = WeatherProfile.NONE;
             region = Regions.at(level, player.blockPosition());
-        } else if (snap || ++ticks % 10 == 0) {
-            computeTarget(level, player);
+        } else {
+            FRONTS.removeIf(WeatherFront::tick);
+            if (snap || ++ticks % 10 == 0) {
+                sample(level, player);
+            }
         }
         for (int i = 0; i < P.COUNT; i++) {
             cur[i] = snap ? target[i] : cur[i] + (target[i] - cur[i]) * EASE;
@@ -186,6 +247,17 @@ public final class ClientWeather {
         level.setThunderLevel(Mth.clamp(cur[P.THUNDER], 0f, 1f) * rain);
     }
 
+    public static void sample(ClientLevel level, Player player) {
+        computeTarget(level, player);
+    }
+
+    private static float localHeat;
+    private static float localWetland;
+    private static float localDunes;
+    private static float localCoastDist = 1000f;
+    private static float localElevation = 63f;
+    private static boolean summersetPrismatic;
+
     private static void computeTarget(ClientLevel level, Player player) {
         java.util.Arrays.fill(target, 0f);
         BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
@@ -194,24 +266,65 @@ public final class ClientWeather {
         Biome.Precipitation biomePrecip = biome.getPrecipitationAt(here);
         float total = 0f;
         float tintW = 0f;
+        float heatSum = 0f, wetSum = 0f, duneSum = 0f, coastSum = 0f, elevSum = 0f;
         for (int i = 0; i < SAMPLES.length; i++) {
-            probe.set(here.getX() + SAMPLES[i][0], here.getY(), here.getZ() + SAMPLES[i][1]);
+            int px = here.getX() + SAMPLES[i][0];
+            int pz = here.getZ() + SAMPLES[i][1];
+            probe.set(px, here.getY(), pz);
             Region r = Regions.at(level, probe);
             WeatherProfile prof = WeatherProfile.of(r);
             Spell spell = TABLE.get(r.id());
             WeatherKind k = spell == null || prof == WeatherProfile.NONE ? WeatherKind.CLEAR : spell.kind;
+
+            // Sample continuous TamrielMap terrain & climate attributes at the kernel point
+            TamrielMap.sample(px, pz, MAP_SAMPLE);
+            TamrielMap.deriveStrengths(MAP_SAMPLE);
+            float coastDist = MAP_SAMPLE.coastDistance;
+            float mapElev = Math.max(MAP_SAMPLE.elevation, TamrielMap.SEA_LEVEL);
+            float mapHeat = MAP_SAMPLE.heat;
+            float rainshadow = MAP_SAMPLE.rainshadow;
+            float wetland = MAP_SAMPLE.wetland;
+            float dunes = MAP_SAMPLE.dunes;
+
+            // Check moving synoptic WeatherFronts covering this sample point
+            WeatherFront front = sampleFront(px, pz);
+            float frontWeight = front != null && prof != WeatherProfile.NONE ? front.intensityAt(px, pz) : 0f;
+            if (front != null && frontWeight > 0.35f) {
+                k = front.kind;
+            }
+
             float w = SAMPLE_WEIGHT[i];
             if (i == 0) {
                 region = r;
                 profile = prof;
                 centerKind = k;
-                if (spell != null) windTargetDeg = spell.wind;
+                String rid = r.id();
+                summersetPrismatic = "summerset_isles".equals(r.province())
+                        || "summerset".equals(rid) || "auridon".equals(rid) || "arteum".equals(rid);
+                if (front != null && frontWeight > 0.35f) {
+                    windTargetDeg = front.windDegrees();
+                } else if (spell != null) {
+                    windTargetDeg = spell.wind;
+                }
             }
             total += w;
-            float amount = k.amount;
+            heatSum += w * mapHeat;
+            wetSum += w * wetland;
+            duneSum += w * dunes;
+            coastSum += w * coastDist;
+            elevSum += w * mapElev;
+
+            // Rainshadow attenuates mild precipitation; coastal & orographic lift intensify mist and clouds
+            float dryAtten = (frontWeight > 0.25f) ? 1f : (1f - 0.25f * Mth.clamp((rainshadow - 0.45f) * 1.8f, 0f, 1f));
+            float amount = k.amount * dryAtten;
+            if (front != null && frontWeight > 0.01f) {
+                amount = Mth.lerp(frontWeight, amount, front.kind.amount * Mth.clamp(front.intensity, 0.5f, 1.25f));
+            }
+            double lat = com.skycraft.atmosphere.AtmosphereMath.latitudeFactor(pz);
+            boolean aboveSnowLine = here.getY() > prof.snowLine || mapElev > prof.snowLine || (lat > 0.72 && mapHeat < 0.15f);
+
             switch (k.precip) {
                 case RAIN -> {
-                    boolean aboveSnowLine = here.getY() > prof.snowLine;
                     if (biomePrecip == Biome.Precipitation.NONE) {
                         // a desert or other dry biome inside a rainy region: no rain here
                     } else if (aboveSnowLine && biomePrecip == Biome.Precipitation.RAIN) {
@@ -233,18 +346,59 @@ public final class ClientWeather {
                 case SAND -> target[P.SAND] += w * amount;
                 default -> {}
             }
-            target[P.CLOUDS] += w * k.clouds;
-            target[P.FOG] += w * k.fog;
-            target[P.WIND] += w * k.wind;
-            target[P.THUNDER] += w * k.thunder;
-            if (k.fogColor != 0) {
-                float tw = w * Math.max(k.clouds, k.fog);
-                target[P.TINT_R] += tw * ((k.fogColor >> 16) & 0xFF) / 255f;
-                target[P.TINT_G] += tw * ((k.fogColor >> 8) & 0xFF) / 255f;
-                target[P.TINT_B] += tw * (k.fogColor & 0xFF) / 255f;
+
+            // Volcanic geothermal ash drift in Vvardenfell / Stonefalls / Ashlands even between major storms
+            if (prof == WeatherProfile.VOLCANIC || mapHeat > 0.35f) {
+                target[P.ASH] += w * Math.max(0.08f, mapHeat * 0.22f);
+            }
+            // Desert amber dust drift in Alik'r / Anequina dune fields
+            if (prof == WeatherProfile.ARID || dunes > 0.25f) {
+                target[P.SAND] += w * Math.max(0.06f, dunes * 0.18f);
+            }
+
+            float coastalMist = coastDist < 280f ? Mth.clamp(1f - coastDist / 280f, 0f, 1f) * 0.16f : 0f;
+            float orographic = mapElev > 150f ? Mth.clamp((mapElev - 150f) / 240f, 0f, 0.20f) : 0f;
+            float marshMist = (prof == WeatherProfile.SWAMP || wetland > 0.3f) ? Math.max(0.12f, wetland * 0.28f) : 0f;
+            float heatHaze = (prof == WeatherProfile.ARID || dunes > 0.25f) ? 0.10f + 0.12f * dunes : 0f;
+
+            float sampleClouds = Mth.clamp(k.clouds * dryAtten + orographic * 0.6f + coastalMist * 0.4f, 0f, 1f);
+            float sampleFog = Mth.clamp(k.fog + coastalMist + orographic * 0.5f + marshMist + heatHaze, 0f, 1f);
+            if (summersetPrismatic && k == WeatherKind.CLEAR) {
+                sampleFog *= 0.55f; // crisp high-altitude air over Summerset & Eton Nir
+            }
+            float sampleWind = k.wind + (coastDist < 180f ? 0.08f : 0f);
+            float sampleThunder = k.thunder;
+            if (front != null && frontWeight > 0.01f) {
+                sampleClouds = Mth.lerp(frontWeight, sampleClouds, front.kind.clouds);
+                sampleFog = Mth.lerp(frontWeight, sampleFog, front.kind.fog);
+                sampleWind = Mth.lerp(frontWeight, sampleWind, front.kind.wind);
+                sampleThunder = Mth.lerp(frontWeight, sampleThunder, front.kind.thunder);
+            }
+
+            target[P.CLOUDS] += w * sampleClouds;
+            target[P.FOG] += w * sampleFog;
+            target[P.WIND] += w * sampleWind;
+            target[P.THUNDER] += w * sampleThunder;
+            int fogColor = (front != null && frontWeight > 0.35f && front.kind.fogColor != 0) ? front.kind.fogColor : k.fogColor;
+            if (fogColor == 0) {
+                if (prof == WeatherProfile.VOLCANIC || mapHeat > 0.4f) fogColor = 0x5E4A42;
+                else if (prof == WeatherProfile.ARID || dunes > 0.3f) fogColor = 0xC9A878;
+                else if (prof == WeatherProfile.SWAMP || wetland > 0.4f) fogColor = 0x74887A;
+            }
+            if (fogColor != 0) {
+                float tw = w * Math.max(0.18f, Math.max(sampleClouds, sampleFog));
+                target[P.TINT_R] += tw * ((fogColor >> 16) & 0xFF) / 255f;
+                target[P.TINT_G] += tw * ((fogColor >> 8) & 0xFF) / 255f;
+                target[P.TINT_B] += tw * (fogColor & 0xFF) / 255f;
                 tintW += tw;
             }
         }
+        localHeat = heatSum / total;
+        localWetland = wetSum / total;
+        localDunes = duneSum / total;
+        localCoastDist = coastSum / total;
+        localElevation = elevSum / total;
+
         for (int i = 0; i < P.COUNT; i++) {
             if (i == P.TINT_R || i == P.TINT_G || i == P.TINT_B) continue;
             target[i] /= total;
@@ -259,6 +413,13 @@ public final class ClientWeather {
             target[P.TINT_R] = cur[P.TINT_R];
             target[P.TINT_G] = cur[P.TINT_G];
             target[P.TINT_B] = cur[P.TINT_B];
+        }
+        // Pre-frontal wind and horizon haze swell as a severe weather front approaches within 200..1,600 blocks
+        WeatherFront approaching = nearestApproachingFront(here.getX(), here.getZ());
+        if (approaching != null) {
+            float app = approaching.approachFactor(here.getX(), here.getZ());
+            target[P.CLOUDS] = Math.max(target[P.CLOUDS], Mth.lerp(app * 0.45f, target[P.CLOUDS], approaching.kind.clouds));
+            target[P.WIND] = Math.max(target[P.WIND], Mth.lerp(app * 0.5f, target[P.WIND], approaching.kind.wind));
         }
         // Morning mist (and a little at night) where the climate breeds it, thickest down by the water.
         float mist = profile.dawnMist * WeatherProfile.mistHour(level.getDayTime());
@@ -306,14 +467,63 @@ public final class ClientWeather {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFogColor(ViewportEvent.ComputeFogColor event) {
         Minecraft mc = Minecraft.getInstance();
-        if (fogApplies(event.getCamera()) && cur[P.TINT] > 0.01f) {
+        if (fogApplies(event.getCamera())) {
             float pt = (float) event.getPartialTick();
-            float day = Mth.clamp(Mth.cos(mc.level.getTimeOfDay(pt) * Mth.TWO_PI) * 2.0f + 0.5f, 0f, 1f);
+            float angle = mc.level.getTimeOfDay(pt) * Mth.TWO_PI;
+            float sunY = Mth.cos(angle);
+            float day = Mth.clamp(sunY * 2.0f + 0.5f, 0f, 1f);
             float light = 0.06f + 0.94f * day;
-            float t = Mth.clamp(cur[P.TINT], 0f, 1f) * 0.85f;
-            event.setRed(Mth.lerp(t, event.getRed(), cur[P.TINT_R] * light));
-            event.setGreen(Mth.lerp(t, event.getGreen(), cur[P.TINT_G] * light));
-            event.setBlue(Mth.lerp(t, event.getBlue(), cur[P.TINT_B] * light));
+            float r = event.getRed();
+            float g = event.getGreen();
+            float b = event.getBlue();
+            if (cur[P.TINT] > 0.01f) {
+                float t = Mth.clamp(cur[P.TINT], 0f, 1f) * 0.85f;
+                r = Mth.lerp(t, r, cur[P.TINT_R] * light);
+                g = Mth.lerp(t, g, cur[P.TINT_G] * light);
+                b = Mth.lerp(t, b, cur[P.TINT_B] * light);
+            }
+            // Regional & latitude-driven twilight Rayleigh/Mie scattering so horizon fog is never generic
+            double camZ = event.getCamera().getPosition().z;
+            float lat = (float) com.skycraft.atmosphere.AtmosphereMath.latitudeFactor(camZ);
+            float twilightSpan = 0.24f + 0.10f * lat; // polar latitudes have longer lingering twilight
+            float twilight = Mth.clamp(1f - Math.abs(sunY - 0.02f) / twilightSpan, 0f, 1f);
+            twilight = twilight * twilight * (3f - 2f * twilight) * (1f - 0.55f * cur[P.FOG]);
+            if (twilight > 0.01f) {
+                float warmPhase = Mth.clamp((sunY + 0.12f) / 0.30f, 0f, 1f);
+                float mieR = Mth.lerp(warmPhase, 0.48f - 0.10f * lat, 0.94f);
+                float mieG = Mth.lerp(warmPhase, 0.46f + 0.06f * lat, 0.58f);
+                float mieB = Mth.lerp(warmPhase, 0.74f + 0.12f * lat, 0.44f);
+                if (profile == WeatherProfile.VOLCANIC || localHeat > 0.35f || cur[P.ASH] > 0.05f) {
+                    // Vvardenfell / Stonefalls volcanic ash-ember twilight
+                    mieR = 0.78f;
+                    mieG = 0.35f;
+                    mieB = 0.26f;
+                } else if (profile == WeatherProfile.ARID || localDunes > 0.25f || cur[P.SAND] > 0.05f) {
+                    // Alik'r / Anequina warm amber desert horizon scattering
+                    mieR = 0.96f;
+                    mieG = 0.72f;
+                    mieB = 0.45f;
+                } else if (summersetPrismatic || localElevation > 220f) {
+                    // Summerset / Eton Nir crisp prismatic high-altitude light
+                    mieR = Mth.lerp(warmPhase, 0.68f, 0.96f);
+                    mieG = Mth.lerp(warmPhase, 0.62f, 0.74f);
+                    mieB = Mth.lerp(warmPhase, 0.92f, 0.86f);
+                }
+                float scatter = twilight * 0.38f;
+                r = Mth.lerp(scatter, r, mieR);
+                g = Mth.lerp(scatter, g, mieG);
+                b = Mth.lerp(scatter, b, mieB);
+            }
+            // Black Marsh / Bitter Coast / Hjaalmarch low bioluminescent humid mist undertone at dusk/night
+            if ((profile == WeatherProfile.SWAMP || localWetland > 0.35f) && day < 0.55f) {
+                float bio = (1f - day / 0.55f) * Math.max(0.25f, localWetland) * 0.22f;
+                r = Mth.lerp(bio, r, 0.36f);
+                g = Mth.lerp(bio, g, 0.62f);
+                b = Mth.lerp(bio, b, 0.52f);
+            }
+            event.setRed(r);
+            event.setGreen(g);
+            event.setBlue(b);
         }
         fogR = event.getRed();
         fogG = event.getGreen();

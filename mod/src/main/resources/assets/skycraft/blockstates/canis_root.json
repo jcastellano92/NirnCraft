@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/canis_root"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/canis_root_harvested"
+    }
+  }
+}

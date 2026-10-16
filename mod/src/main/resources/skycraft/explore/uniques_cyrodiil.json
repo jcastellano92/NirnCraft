@@ -803,16 +803,16 @@
       "jerall_mountains.L5.silver_mines",
       "jerall_mountains.L6.bruma_on_the_pass"
     ],
-    "place": "jerall_mountains_delve_9_kolskeggr_mine",
-    "x": 1776,
-    "z": 2416,
+    "place": "remans_crimson_ore_adit",
+    "x": 1730,
+    "z": 2850,
     "kind": "pedestal",
     "item": "skycraft:dwarven_warhammer",
     "enchant": {
       "smite": 3,
       "knockback": 2
     },
-    "note": "Recovered from Jerall Mountains Delve 9 Kolskeggr Mine in Jerall Mountains."
+    "note": "Recovered from Remans Crimson Ore-Adit in Jerall Mountains."
   },
   {
     "id": "cyrodiil_jerall_mountains_relic_10",
@@ -822,16 +822,16 @@
       "jerall_mountains.L5.goat_and_fur",
       "jerall_mountains.L6.foothill_villages"
     ],
-    "place": "jerall_mountains_delve_10_bleak_falls_barrow",
-    "x": -2960,
-    "z": 2480,
+    "place": "wendir_dawn_ayleid_reliquary",
+    "x": 1712,
+    "z": 3152,
     "kind": "corpse",
     "item": "skycraft:akaviri_sword",
     "enchant": {
       "sharpness": 4,
       "sweeping": 2
     },
-    "note": "Recovered from Jerall Mountains Delve 10 Bleak Falls Barrow in Jerall Mountains."
+    "note": "Recovered from Wendir Dawn Ayleid Reliquary in Jerall Mountains."
   },
   {
     "id": "cyrodiil_jerall_mountains_relic_11",
@@ -1100,15 +1100,15 @@
       "jerall_mountains.L11.pass_battles",
       "cyrodiil.L1.valus_ridge"
     ],
-    "place": "jerall_mountains_delve_25_kolskeggr_mine",
-    "x": 912,
-    "z": 3152,
+    "place": "vinda_white_ore_adit",
+    "x": 1489,
+    "z": 2946,
     "kind": "pedestal",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Jerall Mountains Delve 25 Kolskeggr Mine in Jerall Mountains."
+    "note": "Recovered from Vinda White Ore-Adit in Jerall Mountains."
   },
   {
     "id": "cyrodiil_colovian_highlands_relic_1",
@@ -1359,15 +1359,15 @@
       "colovian_highlands.L7.colovian_pride",
       "colovian_highlands.L8.oak_reverence"
     ],
-    "place": "colovian_highlands_delve_14_kolskeggr_mine",
-    "x": -2416,
-    "z": 4528,
+    "place": "telepe_verdant_ore_adit",
+    "x": -2978,
+    "z": 4638,
     "kind": "sarcophagus",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 4
     },
-    "note": "Recovered from Colovian Highlands Delve 14 Kolskeggr Mine in Colovian Highlands."
+    "note": "Recovered from Telepe Verdant Ore-Adit in Colovian Highlands."
   },
   {
     "id": "cyrodiil_colovian_highlands_relic_15",
@@ -1377,15 +1377,15 @@
       "colovian_highlands.L7.guild_town",
       "colovian_highlands.L9.guild_rivalry"
     ],
-    "place": "colovian_highlands_delve_15_bleak_falls_barrow",
-    "x": -2416,
-    "z": 4624,
+    "place": "colovian_bronze_ayleid_reliquary",
+    "x": -3394,
+    "z": 3742,
     "kind": "scholar_satchel",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Colovian Highlands Delve 15 Bleak Falls Barrow in Colovian Highlands."
+    "note": "Recovered from Colovian Bronze Ayleid Reliquary in Colovian Highlands."
   },
   {
     "id": "cyrodiil_colovian_highlands_relic_16",
@@ -1731,15 +1731,15 @@
       "heartlands.L7.beggar_eyes",
       "heartlands.L8.university_rationalism"
     ],
-    "place": "heartlands_delve_13_kolskeggr_mine",
-    "x": 1904,
-    "z": 4752,
+    "place": "strid_inner_ore_adit",
+    "x": 646,
+    "z": 6938,
     "kind": "weapon_rack",
     "item": "skycraft:elven_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Heartlands Delve 13 Kolskeggr Mine in Heartlands."
+    "note": "Recovered from Strid Inner Ore-Adit in Heartlands."
   },
   {
     "id": "cyrodiil_heartlands_relic_14",
@@ -1749,15 +1749,15 @@
       "heartlands.L8.temple_of_the_one",
       "heartlands.L9.council_factions"
     ],
-    "place": "heartlands_delve_14_bleak_falls_barrow",
-    "x": 1456,
-    "z": 4848,
+    "place": "fanacas_shrouded_ayleid_reliquary",
+    "x": 849,
+    "z": 5918,
     "kind": "sarcophagus",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 4
     },
-    "note": "Recovered from Heartlands Delve 14 Bleak Falls Barrow in Heartlands."
+    "note": "Recovered from Fanacas Shrouded Ayleid Reliquary in Heartlands."
   },
   {
     "id": "cyrodiil_heartlands_relic_15",
@@ -1953,15 +1953,15 @@
       "cyrodiil.L1.jerall_wall",
       "cyrodiil.L1.rumare_basin"
     ],
-    "place": "heartlands_delve_25_kolskeggr_mine",
-    "x": 1328,
-    "z": 6000,
+    "place": "brena_silent_ore_adit",
+    "x": 354,
+    "z": 6946,
     "kind": "pedestal",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Heartlands Delve 25 Kolskeggr Mine in Heartlands."
+    "note": "Recovered from Brena Silent Ore-Adit in Heartlands."
   },
   {
     "id": "cyrodiil_heartlands_relic_26",
@@ -1971,16 +1971,16 @@
       "cyrodiil.L1.valus_ridge",
       "cyrodiil.L1.nibenay_alluvium"
     ],
-    "place": "heartlands_delve_26_bleak_falls_barrow",
-    "x": 2064,
-    "z": 6096,
+    "place": "pelinal_upper_ayleid_reliquary",
+    "x": 518,
+    "z": 7066,
     "kind": "corpse",
     "item": "skycraft:silver_mace",
     "enchant": {
       "smite": 4,
       "knockback": 1
     },
-    "note": "Recovered from Heartlands Delve 26 Bleak Falls Barrow in Heartlands."
+    "note": "Recovered from Pelinal Upper Ayleid Reliquary in Heartlands."
   },
   {
     "id": "cyrodiil_heartlands_relic_27",
@@ -2343,15 +2343,15 @@
       "great_forest.L8.grove_spirits",
       "great_forest.L10.minotaur_lairs"
     ],
-    "place": "great_forest_delve_15_kolskeggr_mine",
-    "x": -976,
-    "z": 6992,
+    "place": "welke_dawn_ore_adit",
+    "x": -400,
+    "z": 5469,
     "kind": "scholar_satchel",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Great Forest Delve 15 Kolskeggr Mine in Great Forest."
+    "note": "Recovered from Welke Dawn Ore-Adit in Great Forest."
   },
   {
     "id": "cyrodiil_great_forest_relic_16",
@@ -2361,16 +2361,16 @@
       "great_forest.L9.necromancer_war_front",
       "great_forest.L11.ayleid_heartwood"
     ],
-    "place": "great_forest_delve_16_bleak_falls_barrow",
-    "x": -848,
-    "z": 7120,
+    "place": "morihaus_white_ayleid_reliquary",
+    "x": -322,
+    "z": 7614,
     "kind": "legion_strongbox",
     "item": "skycraft:silver_mace",
     "enchant": {
       "smite": 4,
       "knockback": 1
     },
-    "note": "Recovered from Great Forest Delve 16 Bleak Falls Barrow in Great Forest."
+    "note": "Recovered from Morihaus White Ayleid Reliquary in Great Forest."
   },
   {
     "id": "cyrodiil_great_forest_relic_17",
@@ -2603,16 +2603,16 @@
       "nibenay_basin.L6.blue_road_villages",
       "nibenay_basin.L7.nibenese_gentry"
     ],
-    "place": "nibenay_basin_delve_12_kolskeggr_mine",
-    "x": 3664,
-    "z": 4400,
+    "place": "panther_bronze_ore_adit",
+    "x": 4038,
+    "z": 4346,
     "kind": "locked_coffer",
     "item": "skycraft:imperial_greatsword",
     "enchant": {
       "sharpness": 4,
       "sweeping": 2
     },
-    "note": "Recovered from Nibenay Basin Delve 12 Kolskeggr Mine in Nibenay Basin."
+    "note": "Recovered from Panther Bronze Ore-Adit in Nibenay Basin."
   },
   {
     "id": "cyrodiil_nibenay_basin_relic_13",
@@ -2622,15 +2622,15 @@
       "nibenay_basin.L6.border_keeps",
       "nibenay_basin.L7.knightly_dilettantes"
     ],
-    "place": "nibenay_basin_delve_13_bleak_falls_barrow",
-    "x": 3792,
-    "z": 4528,
+    "place": "ninendava_silent_ayleid_reliquary",
+    "x": 4155,
+    "z": 5206,
     "kind": "weapon_rack",
     "item": "skycraft:elven_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Nibenay Basin Delve 13 Bleak Falls Barrow in Nibenay Basin."
+    "note": "Recovered from Ninendava Silent Ayleid Reliquary in Nibenay Basin."
   },
   {
     "id": "cyrodiil_nibenay_basin_relic_14",
@@ -2844,15 +2844,15 @@
       "nibenay_basin.L11.border_wars_with_morrowind",
       "cyrodiil.L1.colovian_plateau"
     ],
-    "place": "nibenay_basin_delve_25_kolskeggr_mine",
-    "x": 3440,
-    "z": 6064,
+    "place": "belda_basal_ore_adit",
+    "x": 3518,
+    "z": 5342,
     "kind": "pedestal",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Nibenay Basin Delve 25 Kolskeggr Mine in Nibenay Basin."
+    "note": "Recovered from Belda Basal Ore-Adit in Nibenay Basin."
   },
   {
     "id": "cyrodiil_nibenay_basin_relic_26",
@@ -2862,16 +2862,16 @@
       "cyrodiil.L1.jerall_wall",
       "cyrodiil.L1.rumare_basin"
     ],
-    "place": "nibenay_basin_delve_26_bleak_falls_barrow",
-    "x": 3568,
-    "z": 6192,
+    "place": "mackament_twilight_ayleid_reliquary",
+    "x": 3002,
+    "z": 4998,
     "kind": "corpse",
     "item": "skycraft:silver_mace",
     "enchant": {
       "smite": 4,
       "knockback": 1
     },
-    "note": "Recovered from Nibenay Basin Delve 26 Bleak Falls Barrow in Nibenay Basin."
+    "note": "Recovered from Mackament Twilight Ayleid Reliquary in Nibenay Basin."
   },
   {
     "id": "cyrodiil_nibenay_basin_relic_27",
@@ -3196,16 +3196,16 @@
       "west_weald.L9.wine_feud",
       "west_weald.L10.name_vault_under_the_vines"
     ],
-    "place": "west_weald_delve_16_kolskeggr_mine",
-    "x": -1936,
-    "z": 7024,
+    "place": "valus_shrouded_ore_adit",
+    "x": -3452,
+    "z": 5743,
     "kind": "legion_strongbox",
     "item": "skycraft:silver_mace",
     "enchant": {
       "smite": 4,
       "knockback": 1
     },
-    "note": "Recovered from West Weald Delve 16 Kolskeggr Mine in West Weald."
+    "note": "Recovered from Valus Shrouded Ore-Adit in West Weald."
   },
   {
     "id": "cyrodiil_west_weald_relic_17",
@@ -3215,16 +3215,16 @@
       "west_weald.L9.hidden_count",
       "west_weald.L11.knightly_order_of_the_nine"
     ],
-    "place": "west_weald_delve_17_bleak_falls_barrow",
-    "x": -1072,
-    "z": 7088,
+    "place": "remans_basal_ayleid_reliquary",
+    "x": -3420,
+    "z": 5846,
     "kind": "pedestal",
     "item": "skycraft:glass_dagger",
     "enchant": {
       "sharpness": 3,
       "looting": 2
     },
-    "note": "Recovered from West Weald Delve 17 Bleak Falls Barrow in West Weald."
+    "note": "Recovered from Remans Basal Ayleid Reliquary in West Weald."
   },
   {
     "id": "cyrodiil_gold_coast_relic_1",
@@ -3457,15 +3457,15 @@
       "gold_coast.L6.gold_road_inns",
       "gold_coast.L7.dock_labour"
     ],
-    "place": "gold_coast_delve_13_kolskeggr_mine",
-    "x": -4240,
-    "z": 8560,
+    "place": "vilverin_white_ore_adit",
+    "x": -4190,
+    "z": 7874,
     "kind": "weapon_rack",
     "item": "skycraft:elven_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Gold Coast Delve 13 Kolskeggr Mine in Gold Coast."
+    "note": "Recovered from Vilverin White Ore-Adit in Gold Coast."
   },
   {
     "id": "cyrodiil_gold_coast_relic_14",
@@ -3475,15 +3475,15 @@
       "gold_coast.L6.refugee_camp",
       "gold_coast.L7.kvatch_refugees"
     ],
-    "place": "gold_coast_delve_14_bleak_falls_barrow",
-    "x": -1744,
-    "z": 8624,
+    "place": "telepe_upper_ayleid_reliquary",
+    "x": -4266,
+    "z": 8295,
     "kind": "sarcophagus",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 4
     },
-    "note": "Recovered from Gold Coast Delve 14 Bleak Falls Barrow in Gold Coast."
+    "note": "Recovered from Telepe Upper Ayleid Reliquary in Gold Coast."
   },
   {
     "id": "cyrodiil_nibenay_valley_relic_1",
@@ -3716,15 +3716,15 @@
       "nibenay_valley.L7.addiction",
       "nibenay_valley.L8.night_mother_crypt"
     ],
-    "place": "nibenay_valley_delve_13_kolskeggr_mine",
-    "x": 2672,
-    "z": 8048,
+    "place": "rumare_silent_ore_adit",
+    "x": 502,
+    "z": 8184,
     "kind": "weapon_rack",
     "item": "skycraft:elven_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Nibenay Valley Delve 13 Kolskeggr Mine in Nibenay Valley."
+    "note": "Recovered from Rumare Silent Ore-Adit in Nibenay Valley."
   },
   {
     "id": "cyrodiil_nibenay_valley_relic_14",
@@ -3734,15 +3734,15 @@
       "nibenay_valley.L8.mara_chapel",
       "nibenay_valley.L9.corrupt_clerk"
     ],
-    "place": "nibenay_valley_delve_14_bleak_falls_barrow",
-    "x": 2928,
-    "z": 8112,
+    "place": "strid_twilight_ayleid_reliquary",
+    "x": 1712,
+    "z": 8400,
     "kind": "sarcophagus",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 4
     },
-    "note": "Recovered from Nibenay Valley Delve 14 Bleak Falls Barrow in Nibenay Valley."
+    "note": "Recovered from Strid Twilight Ayleid Reliquary in Nibenay Valley."
   },
   {
     "id": "cyrodiil_nibenay_valley_relic_15",
@@ -3938,15 +3938,15 @@
       "cyrodiil.L1.valus_ridge",
       "cyrodiil.L1.nibenay_alluvium"
     ],
-    "place": "nibenay_valley_delve_25_kolskeggr_mine",
-    "x": -688,
-    "z": 8848,
+    "place": "larsius_upper_ore_adit",
+    "x": 548,
+    "z": 8896,
     "kind": "pedestal",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Nibenay Valley Delve 25 Kolskeggr Mine in Nibenay Valley."
+    "note": "Recovered from Larsius Upper Ore-Adit in Nibenay Valley."
   },
   {
     "id": "cyrodiil_nibenay_valley_relic_26",
@@ -3956,16 +3956,16 @@
       "cyrodiil.L1.colovian_plateau",
       "cyrodiil.L1.gold_coast_cliffs"
     ],
-    "place": "nibenay_valley_delve_26_bleak_falls_barrow",
-    "x": -304,
-    "z": 8912,
+    "place": "alessian_iron_ayleid_reliquary",
+    "x": 2249,
+    "z": 9414,
     "kind": "corpse",
     "item": "skycraft:silver_mace",
     "enchant": {
       "smite": 4,
       "knockback": 1
     },
-    "note": "Recovered from Nibenay Valley Delve 26 Bleak Falls Barrow in Nibenay Valley."
+    "note": "Recovered from Alessian Iron Ayleid Reliquary in Nibenay Valley."
   },
   {
     "id": "cyrodiil_nibenay_valley_relic_27",
@@ -4254,15 +4254,15 @@
       "blackwood.L7.khajiit_border_village",
       "blackwood.L9.mercenary_company"
     ],
-    "place": "blackwood_delve_14_kolskeggr_mine",
-    "x": 3184,
-    "z": 9232,
+    "place": "lindai_basal_ore_adit",
+    "x": 3970,
+    "z": 8034,
     "kind": "sarcophagus",
     "item": "skycraft:elven_bow",
     "enchant": {
       "power": 4
     },
-    "note": "Recovered from Blackwood Delve 14 Kolskeggr Mine in Blackwood."
+    "note": "Recovered from Lindai Basal Ore-Adit in Blackwood."
   },
   {
     "id": "cyrodiil_blackwood_relic_15",
@@ -4272,14 +4272,14 @@
       "blackwood.L8.zenithar_chapel",
       "blackwood.L9.marsh_border"
     ],
-    "place": "blackwood_delve_15_bleak_falls_barrow",
-    "x": 3504,
-    "z": 9360,
+    "place": "welke_iron_ayleid_reliquary",
+    "x": 4531,
+    "z": 7712,
     "kind": "scholar_satchel",
     "item": "skycraft:silver_sword",
     "enchant": {
       "smite": 4
     },
-    "note": "Recovered from Blackwood Delve 15 Bleak Falls Barrow in Blackwood."
+    "note": "Recovered from Welke Iron Ayleid Reliquary in Blackwood."
   }
 ]

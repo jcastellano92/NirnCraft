@@ -45,15 +45,15 @@ public enum SmithingTier implements Tier {
     SKYFORGE("skyforge", "steel", 820, 7.8f, 4.0f, 3, 16, 2.65f, "smithing.advanced_armors", "smithing.steel_smithing", Rarity.UNCOMMON, false, "skycraft:steel_ingot", "skycraft:corundum_ingot*1,skycraft:silver_ingot*1", "dsamgbhw", 19),
     AKAVIRI("akaviri", "foreign", 900, 7.8f, 4.0f, 3, 16, 2.65f, "smithing.advanced_armors", "smithing.advanced_armors", Rarity.UNCOMMON, false, "skycraft:steel_ingot", "skycraft:refined_moonstone*1", "dsamgbhw", 19),
     STALHRIM("stalhrim", "stalhrim", 1800, 8.93f, 5.25f, 4, 20, 3.2f, "smithing.ebony_smithing", "smithing.ebony_smithing", Rarity.RARE, false, "skycraft:stalhrim", "", "dsamgbhw", 40),
-    CHITIN("chitin", "morrowind", 500, 6.9f, 3.0f, 2, 16, 2.3f, "smithing.elven_smithing", "smithing.elven_smithing", Rarity.COMMON, false, "skycraft:chitin_plate", "", "dsamw", 3),
-    REDGUARD("redguard", "tamriel", 650, 7.35f, 3.5f, 3, 14, 2.45f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.COMMON, false, "skycraft:steel_ingot", "skycraft:corundum_ingot*1", "dsamgw", 6),
-    YOKUDAN("yokudan", "foreign", 950, 8.25f, 4.5f, 3, 18, 2.8f, "smithing.advanced_armors", "smithing.advanced_armors", Rarity.UNCOMMON, false, "skycraft:steel_ingot", "skycraft:refined_moonstone*1", "dsgbw", 19),
-    KHAJIIT("khajiit", "tamriel", 600, 7.12f, 3.25f, 3, 16, 2.35f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.COMMON, false, "skycraft:steel_ingot", "minecraft:gold_ingot*1", "dsagw", 6),
-    BOSMER("bosmer", "tamriel", 460, 6.9f, 3.0f, 2, 18, 2.6f, null, "smithing.steel_smithing", Rarity.COMMON, false, "minecraft:bone", "skycraft:hide*1", "dsamw", 3),
-    BRETON("breton", "tamriel", 680, 7.35f, 3.5f, 3, 16, 2.4f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.COMMON, false, "skycraft:steel_ingot", "skycraft:silver_ingot*1", "dsmghw", 6),
-    ARGONIAN("argonian", "tamriel", 480, 6.9f, 3.0f, 2, 18, 2.35f, null, "smithing.elven_smithing", Rarity.COMMON, false, "skycraft:chitin_plate", "minecraft:bone*1", "dsamw", 3),
-    ATMORAN("atmoran", "foreign", 750, 7.35f, 3.5f, 3, 14, 2.45f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.UNCOMMON, false, "skycraft:steel_ingot", "skycraft:corundum_ingot*1", "dsagbh", 12),
-    MAORMER("maormer", "foreign", 700, 7.8f, 4.0f, 3, 20, 2.7f, "smithing.elven_smithing", "smithing.elven_smithing", Rarity.UNCOMMON, false, "skycraft:refined_moonstone", "minecraft:prismarine_shard*1", "dsaw", 15);
+    CHITIN("chitin", "morrowind", 500, 6.9f, 3.0f, 2, 16, 2.3f, "smithing.elven_smithing", "smithing.elven_smithing", Rarity.COMMON, false, "skycraft:chitin_plate", "", "dsamgbhw", 3),
+    REDGUARD("redguard", "tamriel", 650, 7.35f, 3.5f, 3, 14, 2.45f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.COMMON, false, "skycraft:steel_ingot", "skycraft:corundum_ingot*1", "dsamgbhw", 6),
+    YOKUDAN("yokudan", "foreign", 950, 8.25f, 4.5f, 3, 18, 2.8f, "smithing.advanced_armors", "smithing.advanced_armors", Rarity.UNCOMMON, false, "skycraft:steel_ingot", "skycraft:refined_moonstone*1", "dsamgbhw", 19),
+    KHAJIIT("khajiit", "tamriel", 600, 7.12f, 3.25f, 3, 16, 2.35f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.COMMON, false, "skycraft:steel_ingot", "minecraft:gold_ingot*1", "dsamgbhw", 6),
+    BOSMER("bosmer", "tamriel", 460, 6.9f, 3.0f, 2, 18, 2.6f, null, "smithing.steel_smithing", Rarity.COMMON, false, "minecraft:bone", "skycraft:hide*1", "dsamgbhw", 3),
+    BRETON("breton", "tamriel", 680, 7.35f, 3.5f, 3, 16, 2.4f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.COMMON, false, "skycraft:steel_ingot", "skycraft:silver_ingot*1", "dsamgbhw", 6),
+    ARGONIAN("argonian", "tamriel", 480, 6.9f, 3.0f, 2, 18, 2.35f, null, "smithing.elven_smithing", Rarity.COMMON, false, "skycraft:chitin_plate", "minecraft:bone*1", "dsamgbhw", 3),
+    ATMORAN("atmoran", "foreign", 750, 7.35f, 3.5f, 3, 14, 2.45f, "smithing.steel_smithing", "smithing.steel_smithing", Rarity.UNCOMMON, false, "skycraft:steel_ingot", "skycraft:corundum_ingot*1", "dsamgbhw", 12),
+    MAORMER("maormer", "foreign", 700, 7.8f, 4.0f, 3, 20, 2.7f, "smithing.elven_smithing", "smithing.elven_smithing", Rarity.UNCOMMON, false, "skycraft:refined_moonstone", "minecraft:prismarine_shard*1", "dsamgbhw", 15);
     // </gear:tiers>
 
     public final String id;

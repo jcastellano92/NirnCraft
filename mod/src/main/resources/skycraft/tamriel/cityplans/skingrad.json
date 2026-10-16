@@ -91,8 +91,8 @@
       "use": "guild_hall",
       "wealth": "noble",
       "at": [
-        21,
-        19
+        27,
+        24
       ],
       "face": "south",
       "overlay": "skingrad",
@@ -115,8 +115,8 @@
       "use": "inn",
       "wealth": "common",
       "at": [
-        3,
-        28
+        1,
+        20
       ],
       "face": "south",
       "overlay": "skingrad",
@@ -127,7 +127,7 @@
       "use": "general_store",
       "wealth": "common",
       "at": [
-        -16,
+        -24,
         56
       ],
       "face": "south",
@@ -211,8 +211,8 @@
       "use": "manor",
       "wealth": "noble",
       "at": [
-        -8,
-        -27
+        -13,
+        -42
       ],
       "face": "south",
       "overlay": "skingrad",
@@ -235,7 +235,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        12,
+        40,
         -25
       ],
       "face": "south",
@@ -259,7 +259,7 @@
       "use": "house",
       "wealth": "common",
       "at": [
-        26,
+        46,
         -10
       ],
       "face": "south",
@@ -308,6 +308,255 @@
     "skingrad_nerastarel_house": "Nerastarel's Manor",
     "skingrad_glarthirs_house": "Glarthir's Townhouse",
     "skingrad_salmos_bakery": "Salmo the Baker's House",
-    "skingrad_toutius_sextius_house": "Toutius Sextius's House"
-  }
+    "skingrad_toutius_sextius_house": "Toutius Sextius's House",
+    "skingrad_julianos_court": "Chapel of Julianos Wine-Merchants Court"
+  },
+  "lines": [
+    {
+      "kind": "bridge",
+      "from": [
+        -28,
+        -14
+      ],
+      "to": [
+        -28,
+        14
+      ],
+      "width": 5,
+      "variant": 1,
+      "lift": 5
+    },
+    {
+      "kind": "bridge",
+      "from": [
+        26,
+        -14
+      ],
+      "to": [
+        26,
+        14
+      ],
+      "width": 5,
+      "variant": 1,
+      "lift": 5
+    }
+  ],
+  "terraces": [
+    {
+      "rect": [
+        -76,
+        -68,
+        76,
+        -12
+      ],
+      "level": 4,
+      "parapet": 1
+    },
+    {
+      "rect": [
+        -76,
+        12,
+        76,
+        62
+      ],
+      "level": 4,
+      "parapet": 1
+    }
+  ],
+  "plazas": [
+    {
+      "at": [
+        22,
+        -34
+      ],
+      "size": 15,
+      "variant": 1,
+      "stalls": 6,
+      "name": "skingrad_julianos_court"
+    }
+  ],
+  "walls": [],
+  "nets": [
+    {
+      "type": "path",
+      "via": [
+        [
+          -88,
+          0
+        ],
+        [
+          -42,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          42,
+          0
+        ],
+        [
+          88,
+          0
+        ]
+      ],
+      "width": 5,
+      "rank": 0,
+      "major": true,
+      "tag": "ravine_road"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          -34
+        ],
+        [
+          -28,
+          -34
+        ],
+        [
+          18,
+          -34
+        ],
+        [
+          68,
+          -34
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "north_ward"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          -72,
+          34
+        ],
+        [
+          -28,
+          34
+        ],
+        [
+          18,
+          34
+        ],
+        [
+          68,
+          34
+        ]
+      ],
+      "width": 4,
+      "rank": 0,
+      "major": true,
+      "tag": "south_ward"
+    },
+    {
+      "type": "path",
+      "via": [
+        [
+          0,
+          88
+        ],
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          34
+        ],
+        [
+          -28,
+          0
+        ],
+        [
+          -28,
+          -34
+        ],
+        [
+          0,
+          -58
+        ]
+      ],
+      "width": 4,
+      "rank": 1,
+      "tag": "castle_climb"
+    }
+  ],
+  "zones": [
+    {
+      "at": [
+        -32,
+        -38
+      ],
+      "r": 34,
+      "zone": "noble"
+    },
+    {
+      "at": [
+        22,
+        -34
+      ],
+      "r": 28,
+      "zone": "centre"
+    },
+    {
+      "at": [
+        28,
+        34
+      ],
+      "r": 32,
+      "zone": "craft"
+    },
+    {
+      "at": [
+        -36,
+        36
+      ],
+      "r": 30,
+      "zone": "poor"
+    }
+  ],
+  "fabric": {
+    "radius": 84,
+    "target": 0.64
+  },
+  "queue": [
+    {
+      "kind": "manor",
+      "count": 6,
+      "flags": [
+        "upper",
+        "rich"
+      ],
+      "on": "north_ward"
+    },
+    {
+      "kind": "store",
+      "count": 4,
+      "flags": [
+        "upper"
+      ],
+      "on": "south_ward"
+    },
+    {
+      "kind": "house",
+      "count": 8,
+      "flags": [
+        "upper"
+      ],
+      "on": "south_ward"
+    },
+    {
+      "kind": "alchemist",
+      "count": 2,
+      "on": "north_ward"
+    }
+  ]
 }

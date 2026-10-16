@@ -265,41 +265,78 @@ public final class Works {
     public static void field(Canvas c, Palette p, Spec s) {
         int w = s.w, d = s.d;
         if (!c.recording()) c.clearPlants(-1, 1, -1, w, 6, d);
-        Block crop = crop(s.variant);
+        int v = Math.floorMod(s.variant, 23);
+        Block crop = crop(v);
+        boolean paddy = v == 9 || v == 10 || v == 16; // saltrice, marshmerrow, sugar/moon_sugar
+        boolean ashBed = v == 8 || v == 12 || v == 14 || v == 22; // ash_yam, wickwheat, scathecraw, kwama
+        boolean bushOrFlower = v == 11 || v == 13 || v == 15 || v == 17 || v == 20 || v == 21;
         for (int x = 0; x < w; x++) {
             for (int z = 0; z < d; z++) {
                 boolean border = x == 0 || z == 0 || x == w - 1 || z == d - 1;
                 c.foundation(x, -1, z, B.s(Blocks.DIRT), 6);
                 if (border) {
-                    c.set(x, 0, z, B.s(Blocks.DIRT_PATH));
+                    c.set(x, 0, z, B.s(ashBed ? Blocks.COARSE_DIRT : Blocks.DIRT_PATH));
                     boolean gate = z == 0 && x == (w - 1) / 2;
                     c.set(x, 1, z, gate ? B.face(p.gate, Direction.NORTH) : p.fence);
                     continue;
                 }
-                boolean water = (x - 1) % 5 == 2;
+                boolean water = paddy ? (x - 1) % 3 == 1 : (x - 1) % 5 == 2;
                 if (water) {
                     c.set(x, 0, z, B.s(Blocks.WATER));
-                    c.set(x, -1, z, B.s(Blocks.DIRT));
+                    c.set(x, -1, z, B.s(paddy ? Blocks.MUD : Blocks.DIRT));
                     continue;
                 }
-                c.set(x, 0, z, B.s(Blocks.FARMLAND).setValue(FarmBlock.MOISTURE, 7));
-                BlockState plant = crop.defaultBlockState();
-                if (crop instanceof CropBlock cb) {
-                    int age = c.chance(x, 0, z, 23, 4) ? cb.getMaxAge() - 1 - c.roll(x, 0, z, 29, 3) : cb.getMaxAge();
-                    plant = cb.getStateForAge(Math.max(0, age));
+                if (paddy) {
+                    c.set(x, 0, z, B.s(v == 9 ? Blocks.MUD : Blocks.SAND));
+                } else if (ashBed) {
+                    c.set(x, 0, z, B.s(v == 8 ? Blocks.FARMLAND : Blocks.PODZOL).trySetValue(FarmBlock.MOISTURE, 7));
+                } else if (bushOrFlower) {
+                    c.set(x, 0, z, B.s(Blocks.PODZOL));
+                } else {
+                    c.set(x, 0, z, B.s(Blocks.FARMLAND).setValue(FarmBlock.MOISTURE, 7));
                 }
-                c.set(x, 1, z, plant);
+                placeCropPlant(c, p, x, z, v, crop);
             }
         }
-        // scarecrow
-        c.set(1, 1, d - 2, p.fence);
-        c.set(1, 2, d - 2, B.s(Blocks.HAY_BLOCK));
-        c.set(1, 3, d - 2, B.face(B.s(Blocks.CARVED_PUMPKIN), c.dir(Direction.NORTH)));
+        // scarecrow or apiary hive
+        if (v == 21) {
+            c.set(1, 1, d - 2, B.face(B.s(Blocks.BEEHIVE), c.dir(Direction.NORTH)));
+        } else {
+            c.set(1, 1, d - 2, p.fence);
+            c.set(1, 2, d - 2, B.s(Blocks.HAY_BLOCK));
+            c.set(1, 3, d - 2, B.face(B.s(Blocks.CARVED_PUMPKIN), c.dir(Direction.NORTH)));
+        }
         c.anchor(AnchorType.FARMER, (w - 1) / 2, 1, 1);
     }
 
-    static Block crop(int v) {
-        return switch (Math.floorMod(v, 8)) {
+    private static void placeCropPlant(Canvas c, Palette p, int x, int z, int v, Block crop) {
+        if ((v == 18 || v == 19) && (x + z) % 3 == 0) {
+            c.set(x, 1, z, B.s(v == 18 ? Blocks.MELON : Blocks.PUMPKIN));
+            return;
+        }
+        if (v == 17 && z % 3 == 1) {
+            // Vineyard trellis post with leaf canopy
+            c.set(x, 1, z, p.fence);
+            c.set(x, 2, z, B.s(Blocks.AZALEA_LEAVES).trySetValue(BlockStateProperties.PERSISTENT, true));
+            return;
+        }
+        BlockState plant = crop.defaultBlockState();
+        if (crop instanceof CropBlock cb) {
+            int age = c.chance(x, 0, z, 23, 4) ? cb.getMaxAge() - 1 - c.roll(x, 0, z, 29, 3) : cb.getMaxAge();
+            plant = cb.getStateForAge(Math.max(0, age));
+        } else if (plant.hasProperty(BlockStateProperties.AGE_3)) {
+            plant = plant.setValue(BlockStateProperties.AGE_3, 3);
+        } else if (plant.hasProperty(BlockStateProperties.AGE_7)) {
+            plant = plant.setValue(BlockStateProperties.AGE_7, 7);
+        }
+        c.set(x, 1, z, plant);
+        if ((v == 10 || v == 16) && crop == Blocks.SUGAR_CANE) {
+            c.set(x, 2, z, plant);
+        }
+    }
+
+    public static Block crop(int v) {
+        return switch (Math.floorMod(v, 23)) {
             case 1 -> Blocks.CARROTS;
             case 2 -> Blocks.POTATOES;
             case 3 -> Blocks.BEETROOTS;
@@ -307,8 +344,41 @@ public final class Works {
             case 5 -> B.id("skycraft:leek_crop", Blocks.CARROTS).getBlock();
             case 6 -> B.id("skycraft:garlic_crop", Blocks.POTATOES).getBlock();
             case 7 -> B.id("skycraft:tomato_crop", Blocks.BEETROOTS).getBlock();
+            case 8 -> Blocks.POTATOES; // ash_yam (grown in volcanic ash/coarse dirt beds)
+            case 9 -> B.id("skycraft:swamp_reeds", Blocks.SUGAR_CANE).getBlock(); // saltrice / rice
+            case 10 -> Blocks.SUGAR_CANE; // marshmerrow reeds
+            case 11 -> Blocks.SWEET_BERRY_BUSH; // comberry
+            case 12 -> B.id("skycraft:scathecraw", Blocks.FERN).getBlock(); // wickwheat
+            case 13 -> Blocks.FERN; // hackle_lo
+            case 14 -> B.id("skycraft:scathecraw", Blocks.DEAD_BUSH).getBlock(); // scathecraw
+            case 15 -> Blocks.ALLIUM; // coda_flower
+            case 16 -> Blocks.SUGAR_CANE; // sugar / moon_sugar
+            case 17 -> Blocks.SWEET_BERRY_BUSH; // vines / jazbay_grapes
+            case 18 -> Blocks.MELON_STEM; // melon
+            case 19 -> Blocks.PUMPKIN_STEM; // gourd
+            case 20 -> Blocks.SWEET_BERRY_BUSH; // orchard bush rows
+            case 21 -> Blocks.OXEYE_DAISY; // honey clover rows
+            case 22 -> Blocks.CRIMSON_FUNGUS; // kwama fungal beds
             default -> Blocks.WHEAT;
         };
+    }
+
+    static int gardenRowVariant(int baseVariant, int row) {
+        int v = Math.floorMod(baseVariant, 23);
+        if (v >= 8 && v <= 15) {
+            // Morrowind / Solstheim / Black Marsh native crops: rotate within Dunmer/Argonian flora (8..15), never Skyrim cabbage/leeks
+            int[] dunmerCrops = {8, 9, 10, 11, 12, 13, 14, 15};
+            return dunmerCrops[Math.floorMod(v - 8 + row, dunmerCrops.length)];
+        }
+        if (v >= 16) {
+            // Southern / desert / orchard crops: keep the chosen specialty crop or pair with gourd/melon
+            return row % 2 == 0 ? v : (v == 16 ? 16 : (v == 18 ? 19 : v));
+        }
+        if (v >= 4 && v <= 7) {
+            // Skyrim / northern kitchen garden: cabbage, leek, garlic, tomato
+            return 4 + Math.floorMod(v - 4 + row, 4);
+        }
+        return Math.floorMod(v + row, 4);
     }
 
     public static void garden(Canvas c, Palette p, Spec s) {
@@ -320,10 +390,11 @@ public final class Works {
                 c.set(x, 0, z, B.s(Blocks.GRASS_BLOCK));
                 c.set(x, 1, z, z == 0 && x == (w - 1) / 2 ? B.face(p.gate, Direction.NORTH) : p.fence);
             } else {
-                c.set(x, 0, z, B.s(Blocks.FARMLAND).setValue(FarmBlock.MOISTURE, 7));
-                Block crop = crop(s.variant + x);
-                BlockState st = crop instanceof CropBlock cb ? cb.getStateForAge(cb.getMaxAge()) : crop.defaultBlockState();
-                c.set(x, 1, z, st);
+                int rv = gardenRowVariant(s.variant, x);
+                Block crop = crop(rv);
+                boolean podzolSoil = rv >= 9 && rv != 18 && rv != 19;
+                c.set(x, 0, z, podzolSoil ? B.s(Blocks.PODZOL) : B.s(Blocks.FARMLAND).setValue(FarmBlock.MOISTURE, 7));
+                placeCropPlant(c, p, x, z, rv, crop);
             }
         }
         c.set((w - 1) / 2, -1, (d - 1) / 2, B.s(Blocks.WATER));

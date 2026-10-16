@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "harvested=false": {
+      "model": "skycraft:block/namiras_rot"
+    },
+    "harvested=true": {
+      "model": "skycraft:block/namiras_rot_harvested"
+    }
+  }
+}

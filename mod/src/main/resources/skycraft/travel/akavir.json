@@ -11,7 +11,8 @@
   "modes": [
     "boat",
     "caravan",
-    "wayshrine"
+    "wayshrine",
+    "foot"
   ],
   "nodes": [
     {
@@ -451,7 +452,8 @@
       "modes": [
         "caravan",
         "boat",
-        "wayshrine"
+        "wayshrine",
+        "foot"
       ],
       "kind": "hub",
       "discoveredOnArrival": true,
@@ -472,7 +474,8 @@
       "modes": [
         "caravan",
         "boat",
-        "wayshrine"
+        "wayshrine",
+        "foot"
       ],
       "kind": "hub",
       "discoveredOnArrival": true,
@@ -595,6 +598,62 @@
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
       ]
+    },
+    {
+      "id": "port_telvannis",
+      "region": "morrowind/telvannis",
+      "x": 11450,
+      "z": -400,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tang_mo_harbor_village"
+      ],
+      "place": "port_telvannis"
+    },
+    {
+      "id": "tear",
+      "region": "morrowind/deshaan",
+      "x": 7300,
+      "z": 3850,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tsaesci_treaty_post"
+      ],
+      "place": "tear"
+    },
+    {
+      "id": "vivec",
+      "region": "morrowind/ascadian_isles",
+      "x": 7400,
+      "z": 1300,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tang_mo_harbor_village"
+      ],
+      "place": "vivec"
+    },
+    {
+      "id": "lilmoth",
+      "region": "black_marsh/lilmoth",
+      "x": 7700,
+      "z": 10000,
+      "modes": [
+        "boat"
+      ],
+      "why": [
+        "foreign.L6.beachhead_anchorages",
+        "akavir.L6.tang_mo_harbor_village"
+      ],
+      "place": "lilmoth"
     }
   ],
   "routes": [
@@ -602,19 +661,8 @@
       "from": "black_lacquer_pagoda",
       "to": "wayshrine_tsaesci_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16400,
-          6200
-        ],
-        [
-          16448,
-          6152
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_black_lacquer_pagoda_to_wayshrine_tsaesci_04",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -624,19 +672,8 @@
       "from": "black_lacquer_pagoda",
       "to": "wayshrine_tsaesci_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16400,
-          6200
-        ],
-        [
-          16752,
-          6976
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_black_lacquer_pagoda_to_wayshrine_tsaesci_05",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -646,19 +683,8 @@
       "from": "wayshrine_tsaesci_01",
       "to": "wayshrine_tsaesci_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15000,
-          4000
-        ],
-        [
-          15176,
-          5376
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_01_to_wayshrine_tsaesci_06",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -668,19 +694,8 @@
       "from": "wayshrine_tsaesci_01",
       "to": "wayshrine_tsaesci_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15000,
-          4000
-        ],
-        [
-          15200,
-          5400
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_01_to_wayshrine_tsaesci_02",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -690,19 +705,8 @@
       "from": "wayshrine_tsaesci_02",
       "to": "wayshrine_tsaesci_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15200,
-          5400
-        ],
-        [
-          15176,
-          5376
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_02_to_wayshrine_tsaesci_06",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -712,19 +716,8 @@
       "from": "wayshrine_tsaesci_02",
       "to": "wayshrine_tsaesci_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15200,
-          5400
-        ],
-        [
-          15000,
-          4000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_02_to_wayshrine_tsaesci_01",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -734,19 +727,8 @@
       "from": "wayshrine_tsaesci_03",
       "to": "wayshrine_tsaesci_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16800,
-          7000
-        ],
-        [
-          16752,
-          6976
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_03_to_wayshrine_tsaesci_05",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -756,19 +738,8 @@
       "from": "wayshrine_tsaesci_03",
       "to": "black_lacquer_pagoda",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16800,
-          7000
-        ],
-        [
-          16400,
-          6200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_03_to_black_lacquer_pagoda",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -778,19 +749,8 @@
       "from": "wayshrine_tsaesci_04",
       "to": "black_lacquer_pagoda",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16448,
-          6152
-        ],
-        [
-          16400,
-          6200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_04_to_black_lacquer_pagoda",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -800,19 +760,8 @@
       "from": "wayshrine_tsaesci_04",
       "to": "wayshrine_tsaesci_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16448,
-          6152
-        ],
-        [
-          16752,
-          6976
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_04_to_wayshrine_tsaesci_05",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -822,19 +771,8 @@
       "from": "wayshrine_tsaesci_05",
       "to": "wayshrine_tsaesci_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16752,
-          6976
-        ],
-        [
-          16800,
-          7000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_05_to_wayshrine_tsaesci_03",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -844,19 +782,8 @@
       "from": "wayshrine_tsaesci_05",
       "to": "black_lacquer_pagoda",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16752,
-          6976
-        ],
-        [
-          16400,
-          6200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_05_to_black_lacquer_pagoda",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -866,19 +793,8 @@
       "from": "wayshrine_tsaesci_06",
       "to": "wayshrine_tsaesci_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15176,
-          5376
-        ],
-        [
-          15200,
-          5400
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_06_to_wayshrine_tsaesci_02",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -888,19 +804,8 @@
       "from": "wayshrine_tsaesci_06",
       "to": "wayshrine_tsaesci_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15176,
-          5376
-        ],
-        [
-          15000,
-          4000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tsaesci_06_to_wayshrine_tsaesci_01",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -910,19 +815,8 @@
       "from": "adasooms_gate",
       "to": "wayshrine_kamal_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16800,
-          -800
-        ],
-        [
-          16776,
-          -824
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_adasooms_gate_to_wayshrine_kamal_06",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -932,19 +826,8 @@
       "from": "adasooms_gate",
       "to": "wayshrine_kamal_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16800,
-          -800
-        ],
-        [
-          16824,
-          -848
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_adasooms_gate_to_wayshrine_kamal_03",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -954,19 +837,8 @@
       "from": "wayshrine_kamal_01",
       "to": "wayshrine_kamal_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15200,
-          300
-        ],
-        [
-          15248,
-          252
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_01_to_wayshrine_kamal_04",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -976,19 +848,8 @@
       "from": "wayshrine_kamal_01",
       "to": "wayshrine_kamal_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15200,
-          300
-        ],
-        [
-          16776,
-          -824
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_01_to_wayshrine_kamal_06",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -998,19 +859,8 @@
       "from": "wayshrine_kamal_02",
       "to": "wayshrine_kamal_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          18803,
-          -1584
-        ],
-        [
-          18755,
-          -1608
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_02_to_wayshrine_kamal_05",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1020,19 +870,8 @@
       "from": "wayshrine_kamal_02",
       "to": "wayshrine_kamal_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          18803,
-          -1584
-        ],
-        [
-          16824,
-          -848
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_02_to_wayshrine_kamal_03",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1042,19 +881,8 @@
       "from": "wayshrine_kamal_03",
       "to": "adasooms_gate",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16824,
-          -848
-        ],
-        [
-          16800,
-          -800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_03_to_adasooms_gate",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1064,19 +892,8 @@
       "from": "wayshrine_kamal_03",
       "to": "wayshrine_kamal_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16824,
-          -848
-        ],
-        [
-          16776,
-          -824
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_03_to_wayshrine_kamal_06",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1086,19 +903,8 @@
       "from": "wayshrine_kamal_04",
       "to": "wayshrine_kamal_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15248,
-          252
-        ],
-        [
-          15200,
-          300
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_04_to_wayshrine_kamal_01",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1108,19 +914,8 @@
       "from": "wayshrine_kamal_04",
       "to": "wayshrine_kamal_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          15248,
-          252
-        ],
-        [
-          16776,
-          -824
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_04_to_wayshrine_kamal_06",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1130,19 +925,8 @@
       "from": "wayshrine_kamal_05",
       "to": "wayshrine_kamal_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          18755,
-          -1608
-        ],
-        [
-          18803,
-          -1584
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_05_to_wayshrine_kamal_02",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1152,19 +936,8 @@
       "from": "wayshrine_kamal_05",
       "to": "wayshrine_kamal_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          18755,
-          -1608
-        ],
-        [
-          16824,
-          -848
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_05_to_wayshrine_kamal_03",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1174,19 +947,8 @@
       "from": "wayshrine_kamal_06",
       "to": "adasooms_gate",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16776,
-          -824
-        ],
-        [
-          16800,
-          -800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_06_to_adasooms_gate",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1196,19 +958,8 @@
       "from": "wayshrine_kamal_06",
       "to": "wayshrine_kamal_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          16776,
-          -824
-        ],
-        [
-          16824,
-          -848
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_kamal_06_to_wayshrine_kamal_03",
       "why": [
         "kamal.L1.volcanic_ice_peaks",
         "kamal.L2.annual_thaw_gale"
@@ -1218,19 +969,8 @@
       "from": "tang_mo_harbor_village",
       "to": "wayshrine_tang_mo_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22600,
-          6000
-        ],
-        [
-          22576,
-          5976
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_tang_mo_harbor_village_to_wayshrine_tang_mo_06",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1240,19 +980,8 @@
       "from": "tang_mo_harbor_village",
       "to": "wayshrine_tang_mo_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22600,
-          6000
-        ],
-        [
-          22624,
-          5952
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_tang_mo_harbor_village_to_wayshrine_tang_mo_03",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1262,19 +991,8 @@
       "from": "wayshrine_tang_mo_01",
       "to": "wayshrine_tang_mo_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          21198,
-          4444
-        ],
-        [
-          21246,
-          4396
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_01_to_wayshrine_tang_mo_04",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1284,19 +1002,8 @@
       "from": "wayshrine_tang_mo_01",
       "to": "wayshrine_tang_mo_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          21198,
-          4444
-        ],
-        [
-          22159,
-          4644
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_01_to_wayshrine_tang_mo_05",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1306,19 +1013,8 @@
       "from": "wayshrine_tang_mo_02",
       "to": "wayshrine_tang_mo_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22207,
-          4668
-        ],
-        [
-          22159,
-          4644
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_02_to_wayshrine_tang_mo_05",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1328,19 +1024,8 @@
       "from": "wayshrine_tang_mo_02",
       "to": "wayshrine_tang_mo_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22207,
-          4668
-        ],
-        [
-          21246,
-          4396
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_02_to_wayshrine_tang_mo_04",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1350,19 +1035,8 @@
       "from": "wayshrine_tang_mo_03",
       "to": "tang_mo_harbor_village",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22624,
-          5952
-        ],
-        [
-          22600,
-          6000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_03_to_tang_mo_harbor_village",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1372,19 +1046,8 @@
       "from": "wayshrine_tang_mo_03",
       "to": "wayshrine_tang_mo_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22624,
-          5952
-        ],
-        [
-          22576,
-          5976
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_03_to_wayshrine_tang_mo_06",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1394,19 +1057,8 @@
       "from": "wayshrine_tang_mo_04",
       "to": "wayshrine_tang_mo_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          21246,
-          4396
-        ],
-        [
-          21198,
-          4444
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_04_to_wayshrine_tang_mo_01",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1416,19 +1068,8 @@
       "from": "wayshrine_tang_mo_04",
       "to": "wayshrine_tang_mo_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          21246,
-          4396
-        ],
-        [
-          22159,
-          4644
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_04_to_wayshrine_tang_mo_05",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1438,19 +1079,8 @@
       "from": "wayshrine_tang_mo_05",
       "to": "wayshrine_tang_mo_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22159,
-          4644
-        ],
-        [
-          22207,
-          4668
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_05_to_wayshrine_tang_mo_02",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1460,19 +1090,8 @@
       "from": "wayshrine_tang_mo_05",
       "to": "wayshrine_tang_mo_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22159,
-          4644
-        ],
-        [
-          21246,
-          4396
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_05_to_wayshrine_tang_mo_04",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1482,19 +1101,8 @@
       "from": "wayshrine_tang_mo_06",
       "to": "tang_mo_harbor_village",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22576,
-          5976
-        ],
-        [
-          22600,
-          6000
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_06_to_tang_mo_harbor_village",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1504,19 +1112,8 @@
       "from": "wayshrine_tang_mo_06",
       "to": "wayshrine_tang_mo_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          22576,
-          5976
-        ],
-        [
-          22624,
-          5952
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_tang_mo_06_to_wayshrine_tang_mo_03",
       "why": [
         "tang_mo.L1.karst_spire_isles",
         "tang_mo.L2.monsoon_cloud_mist"
@@ -1526,19 +1123,8 @@
       "from": "ka_po_tun_steppe_fort",
       "to": "wayshrine_ka_po_tun_06",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19600,
-          5800
-        ],
-        [
-          19576,
-          5776
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_ka_po_tun_steppe_fort_to_wayshrine_ka_po_tun_06",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1548,19 +1134,8 @@
       "from": "ka_po_tun_steppe_fort",
       "to": "tiger_plains_village",
       "mode": "caravan",
-      "fee": 80,
-      "duration": 90,
-      "path": [
-        [
-          19600,
-          5800
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_ka_po_tun_steppe_fort_to_tiger_plains_village",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1570,19 +1145,8 @@
       "from": "tiger_plains_village",
       "to": "wayshrine_ka_po_tun_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          20000,
-          3600
-        ],
-        [
-          20048,
-          3552
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_tiger_plains_village_to_wayshrine_ka_po_tun_04",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1592,19 +1156,8 @@
       "from": "tiger_plains_village",
       "to": "tosh_rakas_palace",
       "mode": "caravan",
-      "fee": 80,
-      "duration": 90,
-      "path": [
-        [
-          20000,
-          3600
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tiger_plains_village_to_tosh_rakas_palace",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1614,19 +1167,8 @@
       "from": "tosh_rakas_palace",
       "to": "tiger_plains_village",
       "mode": "caravan",
-      "fee": 80,
-      "duration": 90,
-      "path": [
-        [
-          18200,
-          3600
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tosh_rakas_palace_to_tiger_plains_village",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1636,19 +1178,8 @@
       "from": "tosh_rakas_palace",
       "to": "wayshrine_ka_po_tun_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          18200,
-          3600
-        ],
-        [
-          17000,
-          2200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_tosh_rakas_palace_to_wayshrine_ka_po_tun_02",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1658,19 +1189,8 @@
       "from": "wayshrine_ka_po_tun_01",
       "to": "wayshrine_ka_po_tun_05",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19448,
-          1319
-        ],
-        [
-          19400,
-          1295
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_01_to_wayshrine_ka_po_tun_05",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1680,19 +1200,8 @@
       "from": "wayshrine_ka_po_tun_01",
       "to": "wayshrine_ka_po_tun_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19448,
-          1319
-        ],
-        [
-          20048,
-          3552
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_01_to_wayshrine_ka_po_tun_04",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1702,19 +1211,8 @@
       "from": "wayshrine_ka_po_tun_02",
       "to": "wayshrine_ka_po_tun_03",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          17000,
-          2200
-        ],
-        [
-          17024,
-          2152
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_02_to_wayshrine_ka_po_tun_03",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1724,19 +1222,8 @@
       "from": "wayshrine_ka_po_tun_02",
       "to": "tosh_rakas_palace",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          17000,
-          2200
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_02_to_tosh_rakas_palace",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1746,19 +1233,8 @@
       "from": "wayshrine_ka_po_tun_03",
       "to": "wayshrine_ka_po_tun_02",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          17024,
-          2152
-        ],
-        [
-          17000,
-          2200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_03_to_wayshrine_ka_po_tun_02",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1768,19 +1244,8 @@
       "from": "wayshrine_ka_po_tun_03",
       "to": "tosh_rakas_palace",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          17024,
-          2152
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_03_to_tosh_rakas_palace",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1790,19 +1255,8 @@
       "from": "wayshrine_ka_po_tun_04",
       "to": "tiger_plains_village",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          20048,
-          3552
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_04_to_tiger_plains_village",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1812,19 +1266,8 @@
       "from": "wayshrine_ka_po_tun_04",
       "to": "tosh_rakas_palace",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          20048,
-          3552
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_04_to_tosh_rakas_palace",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1834,19 +1277,8 @@
       "from": "wayshrine_ka_po_tun_05",
       "to": "wayshrine_ka_po_tun_01",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19400,
-          1295
-        ],
-        [
-          19448,
-          1319
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_05_to_wayshrine_ka_po_tun_01",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1856,19 +1288,8 @@
       "from": "wayshrine_ka_po_tun_05",
       "to": "wayshrine_ka_po_tun_04",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19400,
-          1295
-        ],
-        [
-          20048,
-          3552
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_05_to_wayshrine_ka_po_tun_04",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1878,19 +1299,8 @@
       "from": "wayshrine_ka_po_tun_06",
       "to": "ka_po_tun_steppe_fort",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19576,
-          5776
-        ],
-        [
-          19600,
-          5800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_06_to_ka_po_tun_steppe_fort",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1900,19 +1310,8 @@
       "from": "wayshrine_ka_po_tun_06",
       "to": "tiger_plains_village",
       "mode": "wayshrine",
-      "fee": 0,
-      "duration": 6,
-      "path": [
-        [
-          19576,
-          5776
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_wayshrine_wayshrine_ka_po_tun_06_to_tiger_plains_village",
       "why": [
         "ka_po_tun.L1.golden_steppe_mesa",
         "ka_po_tun.L2.continental_sun_heat"
@@ -1922,19 +1321,8 @@
       "from": "black_lacquer_pagoda",
       "to": "tosh_rakas_palace",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          16400,
-          6200
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_black_lacquer_pagoda_to_tosh_rakas_palace",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -1944,19 +1332,8 @@
       "from": "black_lacquer_pagoda",
       "to": "ka_po_tun_steppe_fort",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          16400,
-          6200
-        ],
-        [
-          19600,
-          5800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_black_lacquer_pagoda_to_ka_po_tun_steppe_fort",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -1966,19 +1343,8 @@
       "from": "black_lacquer_pagoda",
       "to": "tiger_plains_village",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          16400,
-          6200
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_black_lacquer_pagoda_to_tiger_plains_village",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -1988,19 +1354,8 @@
       "from": "adasooms_gate",
       "to": "tosh_rakas_palace",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          16800,
-          -800
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_adasooms_gate_to_tosh_rakas_palace",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2010,19 +1365,8 @@
       "from": "adasooms_gate",
       "to": "tiger_plains_village",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          16800,
-          -800
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_adasooms_gate_to_tiger_plains_village",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2032,19 +1376,8 @@
       "from": "adasooms_gate",
       "to": "black_lacquer_pagoda",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          16800,
-          -800
-        ],
-        [
-          16400,
-          6200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_adasooms_gate_to_black_lacquer_pagoda",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2054,19 +1387,8 @@
       "from": "tang_mo_harbor_village",
       "to": "ka_po_tun_steppe_fort",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          22600,
-          6000
-        ],
-        [
-          19600,
-          5800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tang_mo_harbor_village_to_ka_po_tun_steppe_fort",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2076,19 +1398,8 @@
       "from": "tang_mo_harbor_village",
       "to": "tiger_plains_village",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          22600,
-          6000
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tang_mo_harbor_village_to_tiger_plains_village",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2098,41 +1409,8 @@
       "from": "tang_mo_harbor_village",
       "to": "tosh_rakas_palace",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          22600,
-          6000
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
-      "why": [
-        "tsaesci.L1.red_earth_basin",
-        "tsaesci.L2.warm_monsoon_haze"
-      ]
-    },
-    {
-      "from": "ka_po_tun_steppe_fort",
-      "to": "tiger_plains_village",
-      "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          19600,
-          5800
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tang_mo_harbor_village_to_tosh_rakas_palace",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2142,19 +1420,8 @@
       "from": "ka_po_tun_steppe_fort",
       "to": "tosh_rakas_palace",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          19600,
-          5800
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_ka_po_tun_steppe_fort_to_tosh_rakas_palace",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2164,41 +1431,8 @@
       "from": "ka_po_tun_steppe_fort",
       "to": "tang_mo_harbor_village",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          19600,
-          5800
-        ],
-        [
-          22600,
-          6000
-        ]
-      ],
-      "bidirectional": true,
-      "why": [
-        "tsaesci.L1.red_earth_basin",
-        "tsaesci.L2.warm_monsoon_haze"
-      ]
-    },
-    {
-      "from": "tiger_plains_village",
-      "to": "tosh_rakas_palace",
-      "mode": "caravan",
-      "fee": 90,
-      "duration": 110,
-      "path": [
-        [
-          20000,
-          3600
-        ],
-        [
-          18200,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_ka_po_tun_steppe_fort_to_tang_mo_harbor_village",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2208,19 +1442,8 @@
       "from": "tiger_plains_village",
       "to": "ka_po_tun_steppe_fort",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          20000,
-          3600
-        ],
-        [
-          19600,
-          5800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tiger_plains_village_to_ka_po_tun_steppe_fort",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2230,41 +1453,8 @@
       "from": "tiger_plains_village",
       "to": "tang_mo_harbor_village",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          20000,
-          3600
-        ],
-        [
-          22600,
-          6000
-        ]
-      ],
-      "bidirectional": true,
-      "why": [
-        "tsaesci.L1.red_earth_basin",
-        "tsaesci.L2.warm_monsoon_haze"
-      ]
-    },
-    {
-      "from": "tosh_rakas_palace",
-      "to": "tiger_plains_village",
-      "mode": "caravan",
-      "fee": 90,
-      "duration": 110,
-      "path": [
-        [
-          18200,
-          3600
-        ],
-        [
-          20000,
-          3600
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tiger_plains_village_to_tang_mo_harbor_village",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2274,19 +1464,8 @@
       "from": "tosh_rakas_palace",
       "to": "ka_po_tun_steppe_fort",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          18200,
-          3600
-        ],
-        [
-          19600,
-          5800
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tosh_rakas_palace_to_ka_po_tun_steppe_fort",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
@@ -2296,22 +1475,143 @@
       "from": "tosh_rakas_palace",
       "to": "black_lacquer_pagoda",
       "mode": "caravan",
-      "fee": 95,
-      "duration": 110,
-      "path": [
-        [
-          18200,
-          3600
-        ],
-        [
-          16400,
-          6200
-        ]
-      ],
-      "bidirectional": true,
+      "cost": 0,
+      "path": "akavir_caravan_tosh_rakas_palace_to_black_lacquer_pagoda",
       "why": [
         "tsaesci.L1.red_earth_basin",
         "tsaesci.L2.warm_monsoon_haze"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "port_telvannis",
+      "mode": "boat",
+      "cost": 125,
+      "path": "padomaic_spice_junk_passage",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "port_telvannis",
+      "to": "tang_mo_harbor_village",
+      "mode": "boat",
+      "cost": 125,
+      "path": "padomaic_spice_junk_passage",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "adasooms_gate",
+      "to": "tear",
+      "mode": "boat",
+      "cost": 130,
+      "path": "ionith_expedition_sea_lane",
+      "why": [
+        "akavir.L6.kamal_watch_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "tear",
+      "to": "adasooms_gate",
+      "mode": "boat",
+      "cost": 130,
+      "path": "ionith_expedition_sea_lane",
+      "why": [
+        "akavir.L6.kamal_watch_camp",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "vivec",
+      "mode": "boat",
+      "cost": 135,
+      "path": "serpent_treaty_carrack_route",
+      "why": [
+        "akavir.L6.tsaesci_treaty_post",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "vivec",
+      "to": "black_lacquer_pagoda",
+      "mode": "boat",
+      "cost": 135,
+      "path": "serpent_treaty_carrack_route",
+      "why": [
+        "akavir.L6.tsaesci_treaty_post",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "lilmoth",
+      "mode": "boat",
+      "cost": 120,
+      "path": "southern_padomaic_monsoon_route",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "lilmoth",
+      "to": "tang_mo_harbor_village",
+      "mode": "boat",
+      "cost": 120,
+      "path": "southern_padomaic_monsoon_route",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "foreign.L6.beachhead_anchorages"
+      ]
+    },
+    {
+      "from": "tang_mo_harbor_village",
+      "to": "black_lacquer_pagoda",
+      "mode": "boat",
+      "cost": 45,
+      "path": "thousand_monkey_archipelago_junk",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "akavir.L6.tsaesci_treaty_post"
+      ]
+    },
+    {
+      "from": "black_lacquer_pagoda",
+      "to": "tang_mo_harbor_village",
+      "mode": "boat",
+      "cost": 45,
+      "path": "thousand_monkey_archipelago_junk",
+      "why": [
+        "akavir.L6.tang_mo_harbor_village",
+        "akavir.L6.tsaesci_treaty_post"
+      ]
+    },
+    {
+      "from": "tiger_plains_village",
+      "to": "tosh_rakas_palace",
+      "mode": "foot",
+      "cost": 0,
+      "path": "golden_steppe_dragon_tiger_way",
+      "why": [
+        "ka_po_tun.L6.tiger_plains_shrine_town",
+        "ka_po_tun.L5.bronze_and_jade_tribute"
+      ]
+    },
+    {
+      "from": "tosh_rakas_palace",
+      "to": "tiger_plains_village",
+      "mode": "foot",
+      "cost": 0,
+      "path": "golden_steppe_dragon_tiger_way",
+      "why": [
+        "ka_po_tun.L6.tiger_plains_shrine_town",
+        "ka_po_tun.L5.bronze_and_jade_tribute"
       ]
     }
   ]

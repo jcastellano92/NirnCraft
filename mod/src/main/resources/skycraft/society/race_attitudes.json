@@ -1,0 +1,2777 @@
+{
+  "regions": {
+    "skyrim/eastmarch": {
+      "rulingFaction": "stormcloaks",
+      "dominantFaith": "talos_cult",
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.08,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["eastmarch.L7.nord_first", "eastmarch.L7.grey_quarter", "eastmarch.L7.docks_outside", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital", "eastmarch.L9.refugee_tension"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["eastmarch.L7.nord_first", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital"]
+        },
+        "atmoran": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["eastmarch.L8.kings_city", "eastmarch.L7.nord_first"]
+        },
+        "dunmer": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.13,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "wary_outlander",
+          "why": ["eastmarch.L7.grey_quarter", "eastmarch.L8.refugee_faith", "eastmarch.L9.refugee_tension"]
+        },
+        "argonian": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.16,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "wary_outlander",
+          "why": ["eastmarch.L7.docks_outside", "eastmarch.L7.nord_first", "eastmarch.L9.refugee_tension"]
+        },
+        "altmer": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.21,
+          "guardScrutiny": 1.40,
+          "attitudeKey": "heretic_suspect",
+          "why": ["eastmarch.L7.nord_first", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital", "skyrim.L9.thalmor_watch"]
+        },
+        "imperial": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "imperial_suspect",
+          "why": ["eastmarch.L7.nord_first", "eastmarch.L9.rebel_capital", "skyrim.L9.civil_war"]
+        },
+        "khajiit": {
+          "dispositionDelta": -20,
+          "priceMultiplier": 1.15,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "wary_outlander",
+          "why": ["eastmarch.L7.nord_first", "skyrim.L7.outsiders"]
+        }
+      }
+    },
+    "skyrim/haafingar": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["haafingar.L6.solitude_seat", "haafingar.L7.imperial_nobles", "haafingar.L8.divines_temple", "haafingar.L9.imperial_seat"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["haafingar.L7.imperial_nobles", "haafingar.L9.imperial_seat", "haafingar.L9.naval_power"]
+        },
+        "nord": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "kin_welcome",
+          "why": ["haafingar.L6.solitude_seat", "haafingar.L8.divines_temple"]
+        },
+        "breton": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L7.imperial_nobles", "haafingar.L9.naval_power"]
+        },
+        "altmer": {
+          "dispositionDelta": 2,
+          "priceMultiplier": 0.99,
+          "guardScrutiny": 1.00,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L6.embassy", "haafingar.L9.thalmor_embassy"]
+        },
+        "dunmer": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 1.00,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L7.dockworkers", "haafingar.L9.naval_power"]
+        },
+        "argonian": {
+          "dispositionDelta": 2,
+          "priceMultiplier": 0.99,
+          "guardScrutiny": 1.00,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L7.dockworkers", "haafingar.L9.naval_power"]
+        },
+        "khajiit": {
+          "dispositionDelta": -6,
+          "priceMultiplier": 1.04,
+          "guardScrutiny": 1.10,
+          "attitudeKey": "wary_outlander",
+          "why": ["skyrim.L7.outsiders", "haafingar.L7.public_justice"]
+        }
+      }
+    },
+    "skyrim/whiterun": {
+      "rulingFaction": "townsfolk",
+      "dominantFaith": "talos_cult",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["whiterun.L6.whiterun_seat", "whiterun.L7.three_districts", "whiterun.L7.warrior_hall", "whiterun.L9.neutral_jarl"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["whiterun.L7.warrior_hall", "whiterun.L8.honour_and_sovngarde", "whiterun.L8.open_preacher"]
+        },
+        "imperial": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["whiterun.L7.clan_feud", "whiterun.L9.neutral_jarl"]
+        },
+        "khajiit": {
+          "dispositionDelta": -12,
+          "priceMultiplier": 1.08,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "wary_outlander",
+          "why": ["whiterun.L6.caravan_ground", "whiterun.L7.caravans_outside", "skyrim.L7.outsiders"]
+        },
+        "altmer": {
+          "dispositionDelta": -10,
+          "priceMultiplier": 1.06,
+          "guardScrutiny": 1.15,
+          "attitudeKey": "wary_outlander",
+          "why": ["whiterun.L8.open_preacher", "skyrim.L9.talos_ban"]
+        }
+      }
+    },
+    "skyrim/the_reach": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": -6,
+      "defaultPriceMultiplier": 1.04,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["the_reach.L6.markarth_seat", "the_reach.L7.silver_family", "the_reach.L7.reachfolk_outcast", "the_reach.L9.native_uprising", "the_reach.L9.silver_power"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_reach.L7.silver_family", "the_reach.L9.silver_power"]
+        },
+        "imperial": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["the_reach.L9.imperial_jarl", "the_reach.L6.markarth_seat"]
+        },
+        "breton": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "rebel_suspect",
+          "why": ["the_reach.L7.reachfolk_outcast", "the_reach.L8.old_gods", "the_reach.L9.native_uprising"]
+        },
+        "orc": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"]
+        }
+      }
+    },
+    "skyrim/winterhold": {
+      "rulingFaction": "stormcloaks",
+      "dominantFaith": "talos_cult",
+      "defaultDisposition": -8,
+      "defaultPriceMultiplier": 1.05,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["winterhold.L6.winterhold_remnant", "winterhold.L7.town_vs_college", "winterhold.L8.mage_blame", "winterhold.L9.rebel_jarl"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["winterhold.L6.winterhold_remnant", "winterhold.L9.rebel_jarl"]
+        },
+        "altmer": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.16,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "wary_outlander",
+          "why": ["winterhold.L7.town_vs_college", "winterhold.L8.mage_blame", "winterhold.L9.thalmor_at_college"]
+        },
+        "dunmer": {
+          "dispositionDelta": -12,
+          "priceMultiplier": 1.08,
+          "guardScrutiny": 1.15,
+          "attitudeKey": "wary_outlander",
+          "why": ["winterhold.L7.town_vs_college", "winterhold.L8.azura_statue", "winterhold.L8.mage_blame"]
+        },
+        "breton": {
+          "dispositionDelta": -12,
+          "priceMultiplier": 1.08,
+          "guardScrutiny": 1.15,
+          "attitudeKey": "wary_outlander",
+          "why": ["winterhold.L7.town_vs_college", "winterhold.L8.mage_blame"]
+        }
+      }
+    },
+    "skyrim/the_rift": {
+      "rulingFaction": "stormcloaks",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 0,
+      "defaultPriceMultiplier": 1.02,
+      "defaultScrutiny": 1.05,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["the_rift.L6.riften_seat", "the_rift.L7.meadery_rule", "the_rift.L8.mara_temple", "the_rift.L9.rebel_leaning_jarl"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_rift.L6.riften_seat", "the_rift.L9.rebel_leaning_jarl"]
+        },
+        "dunmer": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["the_rift.L8.mara_temple", "the_rift.L6.lake_farms"]
+        },
+        "argonian": {
+          "dispositionDelta": 2,
+          "priceMultiplier": 0.99,
+          "guardScrutiny": 1.00,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["the_rift.L7.canal_poor", "the_rift.L8.mara_temple"]
+        },
+        "altmer": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "wary_outlander",
+          "why": ["the_rift.L9.rebel_leaning_jarl", "skyrim.L9.thalmor_watch"]
+        }
+      }
+    },
+    "skyrim/falkreath": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 0,
+      "defaultPriceMultiplier": 1.00,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["falkreath.L6.falkreath_graves", "falkreath.L7.town_of_mourners", "falkreath.L8.arkay_priests", "falkreath.L9.imperial_border"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["falkreath.L6.falkreath_graves", "falkreath.L7.town_of_mourners"]
+        },
+        "imperial": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["falkreath.L7.young_jarl", "falkreath.L9.imperial_border"]
+        },
+        "bosmer": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["falkreath.L6.hunters_camps", "falkreath.L8.huntsman_cult"]
+        }
+      }
+    },
+    "skyrim/hjaalmarch": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": -6,
+      "defaultPriceMultiplier": 1.04,
+      "defaultScrutiny": 1.12,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["hjaalmarch.L6.morthal_seat", "hjaalmarch.L7.wizard_suspected", "hjaalmarch.L8.fear_of_the_dark", "hjaalmarch.L9.vampire_fear"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["hjaalmarch.L6.morthal_seat", "hjaalmarch.L7.jarl_seer"]
+        },
+        "redguard": {
+          "dispositionDelta": -8,
+          "priceMultiplier": 1.05,
+          "guardScrutiny": 1.15,
+          "attitudeKey": "wary_outlander",
+          "why": ["hjaalmarch.L7.wizard_suspected", "hjaalmarch.L8.fear_of_the_dark"]
+        },
+        "altmer": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "wary_outlander",
+          "why": ["hjaalmarch.L7.wizard_suspected", "skyrim.L8.distrust_of_magic"]
+        }
+      }
+    },
+    "skyrim/the_pale": {
+      "rulingFaction": "stormcloaks",
+      "dominantFaith": "talos_cult",
+      "defaultDisposition": -8,
+      "defaultPriceMultiplier": 1.05,
+      "defaultScrutiny": 1.12,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["the_pale.L6.dawnstar_seat", "the_pale.L7.sleepless_town", "the_pale.L8.dream_dread", "the_pale.L9.rebel_jarl"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_pale.L6.dawnstar_seat", "the_pale.L9.rebel_jarl"]
+        },
+        "imperial": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "imperial_suspect",
+          "why": ["the_pale.L9.rebel_jarl", "skyrim.L9.civil_war"]
+        },
+        "altmer": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.16,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "heretic_suspect",
+          "why": ["the_pale.L9.rebel_jarl", "skyrim.L9.thalmor_watch"]
+        }
+      }
+    },
+    "morrowind/telvannis": {
+      "rulingFaction": "house_telvanni",
+      "dominantFaith": "daedric_veneration",
+      "defaultDisposition": -20,
+      "defaultPriceMultiplier": 1.15,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["telvannis.L6.port_telvannis", "telvannis.L7.lord_and_thrall", "telvannis.L8.mephala_shrines", "telvannis.L9.wizard_feuds", "morrowind.L7.outlander_scorn"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["telvannis.L7.lord_and_thrall", "morrowind.L7.house_order"]
+        },
+        "argonian": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["telvannis.L7.lord_and_thrall", "morrowind.L7.slavery", "morrowind.L9.argonian_grudge"]
+        },
+        "khajiit": {
+          "dispositionDelta": -24,
+          "priceMultiplier": 1.18,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "wary_outlander",
+          "why": ["telvannis.L7.lord_and_thrall", "morrowind.L7.slavery", "morrowind.L7.outlander_scorn"]
+        },
+        "imperial": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.16,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "wary_outlander",
+          "why": ["zafirbel_bay.L9.imperial_enclave_tension", "morrowind.L7.outlander_scorn", "morrowind.L9.imperial_presence"]
+        }
+      }
+    },
+    "morrowind/azuras_coast": {
+      "rulingFaction": "house_telvanni",
+      "dominantFaith": "daedric_veneration",
+      "defaultDisposition": -18,
+      "defaultPriceMultiplier": 1.14,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["azuras_coast.L6.wizard_towers", "azuras_coast.L7.wizard_and_servant", "azuras_coast.L8.azura_shrine", "azuras_coast.L9.telvanni_rivalries"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["azuras_coast.L8.azura_shrine", "azuras_coast.L7.wizard_and_servant"]
+        },
+        "argonian": {
+          "dispositionDelta": -26,
+          "priceMultiplier": 1.20,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["azuras_coast.L7.wizard_and_servant", "morrowind.L9.argonian_grudge"]
+        }
+      }
+    },
+    "morrowind/grazelands": {
+      "rulingFaction": "house_telvanni",
+      "dominantFaith": "daedric_veneration",
+      "defaultDisposition": -16,
+      "defaultPriceMultiplier": 1.12,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["grazelands.L6.vos_and_tel_vos", "grazelands.L6.zainab_and_ahemmusa_camps", "grazelands.L7.nomads_vs_farmers", "grazelands.L8.ashlander_herd_rites"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["grazelands.L8.ashlander_herd_rites", "morrowind.L7.ashlanders"]
+        }
+      }
+    },
+    "morrowind/vvardenfell_ashlands": {
+      "rulingFaction": "house_redoran",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -14,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["vvardenfell_ashlands.L6.aldruhn_under_the_skar", "vvardenfell_ashlands.L7.redoran_duty", "vvardenfell_ashlands.L8.redoran_temple_piety", "vvardenfell_ashlands.L9.council_of_ald_ruhn"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 15,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["vvardenfell_ashlands.L7.redoran_duty", "vvardenfell_ashlands.L8.redoran_temple_piety"]
+        },
+        "imperial": {
+          "dispositionDelta": -12,
+          "priceMultiplier": 1.09,
+          "guardScrutiny": 1.15,
+          "attitudeKey": "wary_outlander",
+          "why": ["vvardenfell_ashlands.L6.buckmoth_fort", "morrowind.L9.imperial_presence"]
+        },
+        "argonian": {
+          "dispositionDelta": -20,
+          "priceMultiplier": 1.15,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["morrowind.L9.argonian_grudge", "morrowind.L7.outlander_scorn"]
+        }
+      }
+    },
+    "morrowind/west_gash": {
+      "rulingFaction": "house_hlaalu",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["west_gash.L6.balmora_on_the_odai", "west_gash.L7.merchant_city", "west_gash.L8.pragmatic_piety", "west_gash.L9.hlaalu_collaboration"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["west_gash.L6.balmora_on_the_odai", "west_gash.L7.merchant_city"]
+        },
+        "imperial": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["west_gash.L6.caldera_company_town", "west_gash.L9.hlaalu_collaboration"]
+        },
+        "argonian": {
+          "dispositionDelta": -8,
+          "priceMultiplier": 1.06,
+          "guardScrutiny": 1.12,
+          "attitudeKey": "wary_outlander",
+          "why": ["west_gash.L7.dockside_syndicate", "morrowind.L9.argonian_grudge"]
+        }
+      }
+    },
+    "morrowind/bitter_coast": {
+      "rulingFaction": "house_hlaalu",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["bitter_coast.L6.customs_port", "bitter_coast.L7.smugglers_and_tax_men", "bitter_coast.L9.customs_corruption"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["bitter_coast.L6.fishing_villages", "morrowind.L7.house_order"]
+        },
+        "imperial": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["bitter_coast.L6.customs_port", "morrowind.L9.imperial_presence"]
+        }
+      }
+    },
+    "morrowind/ascadian_isles": {
+      "rulingFaction": "tribunal_temple",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -4,
+      "defaultPriceMultiplier": 1.02,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["ascadian_isles.L6.vivec_cantons", "ascadian_isles.L7.canton_ranks", "ascadian_isles.L8.vivec_the_living_god", "ascadian_isles.L9.temple_secrets"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["ascadian_isles.L8.vivec_the_living_god", "ascadian_isles.L8.seven_graces"]
+        },
+        "imperial": {
+          "dispositionDelta": 2,
+          "priceMultiplier": 0.99,
+          "guardScrutiny": 1.00,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["ascadian_isles.L6.pelagiad_garrison", "morrowind.L9.imperial_presence"]
+        },
+        "argonian": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["ascadian_isles.L7.plantation_slaves", "ascadian_isles.L9.twin_lamps_underground"]
+        },
+        "khajiit": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "wary_outlander",
+          "why": ["ascadian_isles.L7.plantation_slaves", "ascadian_isles.L9.twin_lamps_underground"]
+        }
+      }
+    },
+    "morrowind/deshaan": {
+      "rulingFaction": "house_indoril",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -16,
+      "defaultPriceMultiplier": 1.12,
+      "defaultScrutiny": 1.25,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["deshaan.L6.mournhold_capital", "deshaan.L7.priest_nobility", "deshaan.L8.almalexia_mother", "deshaan.L9.indoril_vs_dres"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["deshaan.L7.priest_nobility", "deshaan.L8.almalexia_mother"]
+        },
+        "argonian": {
+          "dispositionDelta": -30,
+          "priceMultiplier": 1.23,
+          "guardScrutiny": 1.45,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["deshaan.L6.tear_plantation_city", "deshaan.L7.slaves_of_tear", "morrowind.L9.argonian_grudge"]
+        },
+        "khajiit": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.17,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "wary_outlander",
+          "why": ["deshaan.L7.slaves_of_tear", "morrowind.L7.slavery"]
+        }
+      }
+    },
+    "morrowind/stonefalls": {
+      "rulingFaction": "house_indoril",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -4,
+      "defaultPriceMultiplier": 1.02,
+      "defaultScrutiny": 1.05,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["stonefalls.L6.ebonheart_council_city", "stonefalls.L6.blacklight_border_city", "stonefalls.L7.imperial_district_vs_dunmer_quarter", "stonefalls.L9.grand_council"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["stonefalls.L6.blacklight_border_city", "stonefalls.L9.grand_council"]
+        },
+        "imperial": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["stonefalls.L6.ebonheart_council_city", "stonefalls.L7.imperial_district_vs_dunmer_quarter"]
+        },
+        "nord": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["stonefalls.L7.nord_settlers", "stonefalls.L9.border_watch"]
+        },
+        "argonian": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.16,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["morrowind.L9.argonian_grudge", "stonefalls.L9.border_watch"]
+        }
+      }
+    },
+    "morrowind/molag_amur": {
+      "rulingFaction": "tribunal_temple",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -16,
+      "defaultPriceMultiplier": 1.12,
+      "defaultScrutiny": 1.20,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["molag_amur.L6.molag_mar_cliff_town", "molag_amur.L7.warlike_nomads", "molag_amur.L8.holy_mountains", "molag_amur.L9.erabenimsun_raids"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["molag_amur.L8.holy_mountains", "necrom.L8.city_of_the_dead"]
+        }
+      }
+    },
+    "morrowind/sheogorad": {
+      "rulingFaction": "house_redoran",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -6,
+      "defaultPriceMultiplier": 1.04,
+      "defaultScrutiny": 1.05,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["sheogorad.L6.dagon_fel_harbour", "sheogorad.L7.nord_dunmer_mix", "sheogorad.L8.sanctus_shrine"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["sheogorad.L7.nord_dunmer_mix", "sheogorad.L8.sanctus_shrine"]
+        },
+        "nord": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["sheogorad.L6.dagon_fel_harbour", "sheogorad.L7.nord_dunmer_mix"]
+        }
+      }
+    },
+    "morrowind/red_mountain": {
+      "rulingFaction": "tribunal_temple",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -15,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.35,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["red_mountain.L6.ghostgate", "red_mountain.L7.garrison_life", "red_mountain.L8.fence_of_the_dead", "red_mountain.L9.fence_weakening"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["red_mountain.L7.garrison_life", "red_mountain.L8.fence_of_the_dead"]
+        }
+      }
+    },
+    "morrowind/solstheim": {
+      "rulingFaction": "house_redoran",
+      "dominantFaith": "tribunal_reclamations",
+      "defaultDisposition": -6,
+      "defaultPriceMultiplier": 1.04,
+      "defaultScrutiny": 1.08,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["solstheim.L6.raven_rock_bulwark", "solstheim.L7.refugee_colony", "solstheim.L7.redoran_duty", "solstheim.L8.all_maker", "solstheim.L9.colony_and_skaal"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["solstheim.L7.refugee_colony", "solstheim.L7.redoran_duty", "raven_rock.L8.temple_hall"]
+        },
+        "nord": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["solstheim.L6.skaal_ring", "solstheim.L7.skaal_commons", "solstheim.L8.all_maker"]
+        },
+        "argonian": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["solstheim.L7.redoran_duty", "morrowind.L9.argonian_grudge"]
+        }
+      }
+    },
+    "cyrodiil/heartlands": {
+      "rulingFaction": "elder_council",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["heartlands.L6.imperial_city", "heartlands.L7.ward_ladder", "heartlands.L8.temple_of_the_one", "heartlands.L9.council_factions"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 15,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["heartlands.L6.imperial_city", "heartlands.L8.temple_of_the_one", "cyrodiil.L7.rule_of_law"]
+        },
+        "breton": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["heartlands.L8.university_rationalism", "cyrodiil.L7.guilds_everywhere"]
+        }
+      }
+    },
+    "cyrodiil/jerall_mountains": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "talos_cult",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["jerall_mountains.L6.bruma_on_the_pass", "jerall_mountains.L7.nord_imperial_mix", "jerall_mountains.L8.talos_first", "jerall_mountains.L9.blades_without_emperor"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 15,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["jerall_mountains.L6.bruma_on_the_pass", "jerall_mountains.L7.nord_imperial_mix", "jerall_mountains.L8.talos_first"]
+        },
+        "imperial": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["jerall_mountains.L7.nord_imperial_mix", "jerall_mountains.L8.dragon_blood_lore"]
+        },
+        "altmer": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "heretic_suspect",
+          "why": ["jerall_mountains.L8.talos_first", "jerall_mountains.L9.blades_without_emperor"]
+        }
+      }
+    },
+    "cyrodiil/colovian_highlands": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["colovian_highlands.L6.chorrol_crossroads", "colovian_highlands.L7.colovian_pride", "colovian_highlands.L7.guild_town", "colovian_highlands.L8.stendarr_chapel"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["colovian_highlands.L7.colovian_pride", "colovian_highlands.L8.stendarr_chapel"]
+        },
+        "nord": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["colovian_highlands.L7.colovian_pride", "cyrodiil.L7.colovian_nibenese_split"]
+        },
+        "redguard": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["colovian_highlands.L7.guild_town", "colovian_highlands.L6.chorrol_crossroads"]
+        }
+      }
+    },
+    "cyrodiil/great_forest": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["great_forest.L6.road_hamlets", "great_forest.L7.woodfolk", "great_forest.L8.grove_spirits", "great_forest.L9.necromancer_war_front"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["great_forest.L6.priory", "great_forest.L7.woodfolk"]
+        },
+        "bosmer": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["great_forest.L7.woodfolk", "great_forest.L8.grove_spirits"]
+        }
+      }
+    },
+    "cyrodiil/nibenay_basin": {
+      "rulingFaction": "elder_council",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["nibenay_basin.L6.cheydinhal_on_the_corbolo", "nibenay_basin.L7.dunmer_quarter", "nibenay_basin.L7.nibenese_gentry", "nibenay_basin.L9.dunmer_count"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 15,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["nibenay_basin.L7.dunmer_quarter", "nibenay_basin.L8.dunmer_ancestor_rites", "nibenay_basin.L9.dunmer_count"]
+        },
+        "imperial": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["nibenay_basin.L7.nibenese_gentry", "nibenay_basin.L8.arkay_chapel"]
+        },
+        "orc": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["nibenay_basin.L7.knightly_dilettantes", "nibenay_basin.L6.border_keeps"]
+        }
+      }
+    },
+    "cyrodiil/west_weald": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["west_weald.L6.skingrad_hill", "west_weald.L7.vintner_aristocracy", "west_weald.L8.julianos_chapel", "west_weald.L9.wine_feud"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["west_weald.L7.vintner_aristocracy", "west_weald.L8.crusader_relic_cult"]
+        }
+      }
+    },
+    "cyrodiil/gold_coast": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.96,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["gold_coast.L6.anvil_harbour", "gold_coast.L6.kvatch_on_the_hill", "gold_coast.L7.merchant_wealth", "gold_coast.L8.dibella_chapel"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["gold_coast.L7.merchant_wealth", "gold_coast.L8.akatosh_chapel"]
+        },
+        "redguard": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["gold_coast.L6.anvil_harbour", "gold_coast.L7.dock_labour"]
+        }
+      }
+    },
+    "cyrodiil/nibenay_valley": {
+      "rulingFaction": "elder_council",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": -4,
+      "defaultPriceMultiplier": 1.03,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["nibenay_valley.L6.bravil_ferry_city", "nibenay_valley.L7.slum_city", "nibenay_valley.L8.mara_chapel", "nibenay_valley.L9.elsweyr_gates"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["nibenay_valley.L6.bravil_ferry_city", "nibenay_valley.L8.mara_chapel"]
+        },
+        "khajiit": {
+          "dispositionDelta": -12,
+          "priceMultiplier": 1.09,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "wary_outlander",
+          "why": ["nibenay_valley.L7.slum_city", "nibenay_valley.L9.elsweyr_gates"]
+        }
+      }
+    },
+    "cyrodiil/blackwood": {
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": -4,
+      "defaultPriceMultiplier": 1.02,
+      "defaultScrutiny": 1.08,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["blackwood.L6.leyawiin_at_the_mouth", "blackwood.L7.imperial_core_vs_beastfolk_shanties", "blackwood.L8.zenithar_chapel", "blackwood.L9.marsh_border"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["blackwood.L6.leyawiin_at_the_mouth", "blackwood.L7.imperial_core_vs_beastfolk_shanties"]
+        },
+        "argonian": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "wary_outlander",
+          "why": ["blackwood.L7.imperial_core_vs_beastfolk_shanties", "blackwood.L9.marsh_border"]
+        },
+        "khajiit": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "wary_outlander",
+          "why": ["blackwood.L7.imperial_core_vs_beastfolk_shanties", "blackwood.L7.khajiit_border_village"]
+        }
+      }
+    },
+    "high_rock/daggerfall": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["daggerfall.L6.capital_on_island", "daggerfall.L7.toll_families", "daggerfall.L8.kynareth_patron", "daggerfall.L9.court_vs_barons"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 15,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["daggerfall.L6.capital_on_island", "high_rock.L7.feudal_ladder", "daggerfall.L8.kynareth_patron"]
+        },
+        "redguard": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["daggerfall.L6.ferry_head", "daggerfall.L9.betony_garrison"]
+        },
+        "orc": {
+          "dispositionDelta": -10,
+          "priceMultiplier": 1.06,
+          "guardScrutiny": 1.15,
+          "attitudeKey": "wary_outlander",
+          "why": ["high_rock.L9.orsinium_question", "high_rock.L7.feudal_ladder"]
+        }
+      }
+    },
+    "high_rock/wayrest": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["wayrest.L6.harbour_capital", "wayrest.L7.guild_lords", "wayrest.L8.akatosh_chantry", "wayrest.L9.crown_vs_guild"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["wayrest.L7.guild_lords", "wayrest.L8.akatosh_chantry"]
+        },
+        "orc": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["wayrest.L9.orsinium_area_claim", "high_rock.L9.orsinium_question"]
+        }
+      }
+    },
+    "high_rock/wrothgar": {
+      "rulingFaction": "clan_tumnosh",
+      "dominantFaith": "malacath_code",
+      "defaultDisposition": -16,
+      "defaultPriceMultiplier": 1.12,
+      "defaultScrutiny": 1.25,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["wrothgar.L6.orsinium_city", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath", "wrothgar.L9.orsinium_succession", "wrothgar.L9.recognition"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["wrothgar.L6.orsinium_city", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath", "wrothgar.L8.names_matter"]
+        },
+        "breton": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["wrothgar.L9.recognition", "high_rock.L9.orsinium_question"]
+        },
+        "redguard": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["wrothgar.L9.recognition", "high_rock.L9.orsinium_question"]
+        }
+      }
+    },
+    "high_rock/glenumbra": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["glenumbra.L6.camlorn_city", "glenumbra.L7.camlorn_court", "glenumbra.L8.mara_cathedral", "glenumbra.L9.wyrd_vs_clergy"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["glenumbra.L7.camlorn_court", "glenumbra.L9.northern_pride"]
+        }
+      }
+    },
+    "high_rock/rivenspire": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": -4,
+      "defaultPriceMultiplier": 1.02,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["rivenspire.L6.shornhelm_city", "rivenspire.L7.three_houses", "rivenspire.L8.stendarr_and_arkay", "rivenspire.L9.house_rivalry"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["rivenspire.L7.three_houses", "rivenspire.L8.stendarr_and_arkay"]
+        }
+      }
+    },
+    "high_rock/stormhaven": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["stormhaven.L6.abbey_prioris", "stormhaven.L7.abbey_stewards", "stormhaven.L8.mara_heartland", "stormhaven.L9.pilgrim_tolls"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["stormhaven.L7.abbey_stewards", "stormhaven.L8.mara_heartland"]
+        }
+      }
+    },
+    "high_rock/anticlere": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["anticlere.L6.anticlere_meadow_city", "anticlere.L7.pious_burghers", "anticlere.L8.mara_patron", "anticlere.L9.flame_crusade"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["anticlere.L7.pious_burghers", "anticlere.L8.mara_patron"]
+        }
+      }
+    },
+    "high_rock/dwynnen": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 0,
+      "defaultPriceMultiplier": 1.00,
+      "defaultScrutiny": 1.02,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["dwynnen.L6.gorge_bridge_city", "dwynnen.L7.ex_soldiers", "dwynnen.L8.dibella_patron", "dwynnen.L9.two_crowns_squeeze"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["dwynnen.L7.ex_soldiers", "dwynnen.L8.dibella_patron"]
+        }
+      }
+    },
+    "high_rock/bjoulsae": {
+      "rulingFaction": "daggerfall_covenant",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 0,
+      "defaultPriceMultiplier": 1.00,
+      "defaultScrutiny": 1.05,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["bjoulsae.L6.evermor_city", "bjoulsae.L7.evermor_nobles", "bjoulsae.L8.horsemens_oaths", "bjoulsae.L9.reachfolk_raids"],
+      "raceModifiers": {
+        "breton": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["bjoulsae.L7.evermor_nobles", "bjoulsae.L8.horsemens_oaths"]
+        },
+        "redguard": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.94,
+          "attitudeKey": "kin_welcome",
+          "why": ["bjoulsae.L7.barge_men_and_riders", "bjoulsae.L8.horsemens_oaths"]
+        }
+      }
+    },
+    "hammerfell/alikr_desert": {
+      "rulingFaction": "crowns",
+      "dominantFaith": "yokudan_pantheon",
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.08,
+      "defaultScrutiny": 1.18,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["alikr_desert.L6.caravanserai_city", "alikr_desert.L7.crown_oasis_lords", "alikr_desert.L8.yokudan_gods", "hammerfell.L8.distrust_empire", "hammerfell.L8.hate_thalmor"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["alikr_desert.L7.crown_oasis_lords", "alikr_desert.L8.yokudan_gods", "hammerfell.L8.sword_path"]
+        },
+        "yokudan": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["alikr_desert.L8.yokudan_gods", "hammerfell.L8.sword_path"]
+        },
+        "imperial": {
+          "dispositionDelta": -20,
+          "priceMultiplier": 1.15,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "imperial_suspect",
+          "why": ["hammerfell.L8.distrust_empire", "alikr_desert.L7.crown_oasis_lords", "hammerfell.L9.crown_forebear_rift"]
+        },
+        "altmer": {
+          "dispositionDelta": -30,
+          "priceMultiplier": 1.23,
+          "guardScrutiny": 1.45,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["hammerfell.L8.hate_thalmor", "alikr_desert.L7.crown_oasis_lords", "alikr_desert.L9.ra_gada_war_camps"]
+        }
+      }
+    },
+    "hammerfell/sentinel": {
+      "rulingFaction": "forebears",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["sentinel.L6.dome_capital", "sentinel.L7.palace_crowns", "sentinel.L7.quay_forebears", "sentinel.L9.court_rift"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 15,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["sentinel.L6.dome_capital", "sentinel.L7.palace_crowns", "sentinel.L7.quay_forebears"]
+        },
+        "yokudan": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.86,
+          "attitudeKey": "kin_welcome",
+          "why": ["sentinel.L7.palace_crowns", "hammerfell.L8.yokudan_gods"]
+        },
+        "breton": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["sentinel.L7.quay_forebears", "sentinel.L6.ferry_head"]
+        },
+        "imperial": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.96,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["sentinel.L7.quay_forebears", "hammerfell.L8.eight_with_yokudan_faces"]
+        },
+        "altmer": {
+          "dispositionDelta": -20,
+          "priceMultiplier": 1.15,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["hammerfell.L8.hate_thalmor", "hammerfell.L9.collaborators"]
+        }
+      }
+    },
+    "hammerfell/hews_bane": {
+      "rulingFaction": "forebears",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["hews_bane.L6.abahs_landing", "hews_bane.L7.forebear_merchant_syndicates", "hews_bane.L8.no_forgiveness_oath", "hews_bane.L9.collaborator_hunt"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["hews_bane.L6.taneth_city", "hews_bane.L7.forebear_merchant_syndicates"]
+        },
+        "khajiit": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.96,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["hews_bane.L6.abahs_landing", "hews_bane.L8.nocturnal_coin_custom"]
+        },
+        "altmer": {
+          "dispositionDelta": -24,
+          "priceMultiplier": 1.18,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["hews_bane.L8.no_forgiveness_oath", "hews_bane.L9.collaborator_hunt"]
+        }
+      }
+    },
+    "hammerfell/stros_mkai": {
+      "rulingFaction": "forebears",
+      "dominantFaith": "yokudan_pantheon",
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.95,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["stros_mkai.L6.port_hunding", "stros_mkai.L7.harbour_lord_and_merchants", "stros_mkai.L8.treaty_pride", "stros_mkai.L9.treaty_ground"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["stros_mkai.L8.hunding_memory", "stros_mkai.L8.treaty_pride"]
+        },
+        "altmer": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.16,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["stros_mkai.L8.treaty_pride", "hammerfell.L8.hate_thalmor"]
+        }
+      }
+    },
+    "hammerfell/bangkorai": {
+      "rulingFaction": "forebears",
+      "dominantFaith": "yokudan_pantheon",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["bangkorai.L6.river_port_city", "bangkorai.L7.mixed_towns", "bangkorai.L8.na_totambu_reverence", "bangkorai.L9.forebear_ports"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["bangkorai.L8.na_totambu_reverence", "bangkorai.L9.forebear_ports"]
+        },
+        "breton": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.94,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["bangkorai.L7.mixed_towns", "bangkorai.L6.garrison_pass"]
+        }
+      }
+    },
+    "hammerfell/dragontail": {
+      "rulingFaction": "forebears",
+      "dominantFaith": "eight_divines",
+      "defaultDisposition": 0,
+      "defaultPriceMultiplier": 1.00,
+      "defaultScrutiny": 1.02,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["dragontail.L6.terrace_city", "dragontail.L7.ore_lords", "dragontail.L8.arkay_patron", "dragontail.L9.arms_for_both"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["dragontail.L6.terrace_city", "dragontail.L8.arkay_patron"]
+        },
+        "orc": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.96,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["dragontail.L7.debt_miners", "dragontail.L9.arms_for_both"]
+        }
+      }
+    },
+    "hammerfell/craglorn": {
+      "rulingFaction": "crowns",
+      "dominantFaith": "yokudan_pantheon",
+      "defaultDisposition": -6,
+      "defaultPriceMultiplier": 1.04,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["craglorn.L6.elinhir_city", "craglorn.L7.mage_patrons", "craglorn.L8.celestial_reverence", "craglorn.L9.border_friction"],
+      "raceModifiers": {
+        "redguard": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["craglorn.L6.elinhir_city", "craglorn.L8.celestial_reverence"]
+        },
+        "nord": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["craglorn.L6.dragonstar_city", "craglorn.L8.arena_glory"]
+        },
+        "imperial": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "imperial_suspect",
+          "why": ["hammerfell.L8.distrust_empire", "craglorn.L9.border_friction"]
+        }
+      }
+    },
+    "summerset/summerset_isle": {
+      "rulingFaction": "thalmor",
+      "dominantFaith": "aldmeri_ancestors",
+      "defaultDisposition": -22,
+      "defaultPriceMultiplier": 1.18,
+      "defaultScrutiny": 1.35,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["summerset_isle.L6.alinor_capital", "summerset.L7.thalmor_order", "summerset.L7.permit_outsiders", "summerset.L8.no_man_god", "summerset.L8.outsiders_lesser", "summerset.L9.thalmor_rule"],
+      "raceModifiers": {
+        "altmer": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["summerset.L7.lineage_registry", "summerset.L8.ancestor_faith", "summerset_isle.L8.tower_faith"]
+        },
+        "bosmer": {
+          "dispositionDelta": 2,
+          "priceMultiplier": 1.00,
+          "guardScrutiny": 1.05,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["summerset.L9.dominion_clients", "summerset_isle.L7.shimmerene_permit_quarter"]
+        },
+        "khajiit": {
+          "dispositionDelta": 0,
+          "priceMultiplier": 1.02,
+          "guardScrutiny": 1.10,
+          "attitudeKey": "wary_outlander",
+          "why": ["summerset.L9.dominion_clients", "summerset_isle.L7.shimmerene_permit_quarter"]
+        },
+        "nord": {
+          "dispositionDelta": -30,
+          "priceMultiplier": 1.24,
+          "guardScrutiny": 1.48,
+          "attitudeKey": "heretic_suspect",
+          "why": ["summerset.L8.no_man_god", "summerset.L8.outsiders_lesser", "summerset.L7.thalmor_order"]
+        },
+        "imperial": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.45,
+          "attitudeKey": "heretic_suspect",
+          "why": ["summerset.L8.no_man_god", "summerset.L8.outsiders_lesser", "summerset.L7.thalmor_order"]
+        },
+        "redguard": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.45,
+          "attitudeKey": "heretic_suspect",
+          "why": ["summerset.L8.no_man_god", "summerset.L8.outsiders_lesser", "summerset.L9.thalmor_rule"]
+        },
+        "breton": {
+          "dispositionDelta": -24,
+          "priceMultiplier": 1.18,
+          "guardScrutiny": 1.38,
+          "attitudeKey": "heretic_suspect",
+          "why": ["summerset.L8.no_man_god", "summerset.L8.outsiders_lesser"]
+        },
+        "maormer": {
+          "dispositionDelta": -34,
+          "priceMultiplier": 1.25,
+          "guardScrutiny": 1.50,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["summerset.L9.maormer_war", "summerset.L6.auridon_frontline"]
+        }
+      }
+    },
+    "summerset/auridon": {
+      "rulingFaction": "thalmor",
+      "dominantFaith": "aldmeri_ancestors",
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.08,
+      "defaultScrutiny": 1.20,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["auridon.L6.firsthold_seat", "auridon.L6.vulkhel_guard", "auridon.L7.vulkhel_outsiders", "auridon.L8.propriety_college", "auridon.L9.maormer_front"],
+      "raceModifiers": {
+        "altmer": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["auridon.L6.firsthold_seat", "auridon.L8.propriety_college"]
+        },
+        "bosmer": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["auridon.L7.vulkhel_outsiders", "summerset.L9.dominion_clients"]
+        },
+        "khajiit": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["auridon.L7.vulkhel_outsiders", "summerset.L9.dominion_clients"]
+        },
+        "nord": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.30,
+          "attitudeKey": "heretic_suspect",
+          "why": ["summerset.L8.no_man_god", "auridon.L8.propriety_college"]
+        },
+        "imperial": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "heretic_suspect",
+          "why": ["summerset.L8.no_man_god", "auridon.L8.propriety_college"]
+        },
+        "maormer": {
+          "dispositionDelta": -32,
+          "priceMultiplier": 1.24,
+          "guardScrutiny": 1.50,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["auridon.L9.maormer_front", "summerset.L9.maormer_war"]
+        }
+      }
+    },
+    "summerset/artaeum": {
+      "rulingFaction": "psijic_order",
+      "dominantFaith": "aldmeri_ancestors",
+      "defaultDisposition": 10,
+      "defaultPriceMultiplier": 0.94,
+      "defaultScrutiny": 0.90,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["artaeum.L6.ceporah_tower", "artaeum.L7.order_ranks", "artaeum.L8.old_ways_rite", "summerset.L9.psijic_apart"],
+      "raceModifiers": {
+        "altmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["artaeum.L8.syrabane_statue", "artaeum.L8.old_ways_rite"]
+        },
+        "sload": {
+          "dispositionDelta": -30,
+          "priceMultiplier": 1.24,
+          "guardScrutiny": 1.45,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["summerset.L9.sload_shadow", "artaeum.L7.order_ranks"]
+        }
+      }
+    },
+    "valenwood/malabal_tor": {
+      "rulingFaction": "green_pact_spinners",
+      "dominantFaith": "green_pact",
+      "defaultDisposition": -14,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.22,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["malabal_tor.L6.silvenar_seat", "malabal_tor.L7.silvenar_court", "malabal_tor.L8.strictest_pact", "valenwood.L8.yffre_faith", "valenwood.L8.meat_mandate"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["malabal_tor.L7.silvenar_court", "malabal_tor.L8.strictest_pact", "valenwood.L8.yffre_faith"]
+        },
+        "orc": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L9.orc_truce"]
+        },
+        "altmer": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.96,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["valenwood.L9.thalmor_in_the_crown", "valenwood.L9.camoran_court"]
+        },
+        "imperial": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.28,
+          "attitudeKey": "wary_outlander",
+          "why": ["malabal_tor.L8.strictest_pact", "valenwood.L8.outsiders"]
+        }
+      }
+    },
+    "valenwood/grahtwood": {
+      "rulingFaction": "camoran_dynasty",
+      "dominantFaith": "green_pact",
+      "defaultDisposition": -8,
+      "defaultPriceMultiplier": 1.05,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["grahtwood.L6.elden_root_capital", "grahtwood.L7.crown_court_thalmor", "grahtwood.L8.elden_temple", "grahtwood.L9.court_vs_voice"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["grahtwood.L6.elden_root_capital", "grahtwood.L8.elden_temple", "valenwood.L7.treethanes"]
+        },
+        "altmer": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["grahtwood.L7.crown_court_thalmor", "valenwood.L9.thalmor_in_the_crown"]
+        },
+        "khajiit": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["grahtwood.L6.redfur_post", "grahtwood.L7.delta_merchants"]
+        }
+      }
+    },
+    "valenwood/greenshade": {
+      "rulingFaction": "wilderking_court",
+      "dominantFaith": "green_pact",
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.09,
+      "defaultScrutiny": 1.20,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["greenshade.L6.woodhearth_seat", "greenshade.L8.wilderking_court", "greenshade.L8.spinners_of_greenshade", "greenshade.L9.wilderking_silent"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["greenshade.L8.wilderking_court", "greenshade.L8.spinners_of_greenshade"]
+        },
+        "altmer": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.96,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["greenshade.L6.marbruk", "greenshade.L6.woodhearth_seat"]
+        }
+      }
+    },
+    "valenwood/reapers_march": {
+      "rulingFaction": "treethanes",
+      "dominantFaith": "green_pact",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["reapers_march.L6.arenthia_seat", "reapers_march.L6.rawlkha", "reapers_march.L7.mixed_town_rank", "reapers_march.L8.bone_truce_rite"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["reapers_march.L7.truce_elders", "reapers_march.L8.bone_truce_rite"]
+        },
+        "khajiit": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["reapers_march.L6.rawlkha", "reapers_march.L7.mixed_town_rank", "reapers_march.L8.moonmont"]
+        },
+        "imperial": {
+          "dispositionDelta": -12,
+          "priceMultiplier": 1.08,
+          "guardScrutiny": 1.18,
+          "attitudeKey": "imperial_suspect",
+          "why": ["reapers_march.L9.colovian_pressure", "valenwood.L9.strid_border"]
+        }
+      }
+    },
+    "elsweyr/anequina": {
+      "rulingFaction": "anequina_militia",
+      "dominantFaith": "two_moons_dance",
+      "defaultDisposition": -8,
+      "defaultPriceMultiplier": 1.05,
+      "defaultScrutiny": 1.12,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["anequina.L6.riverhold_seat", "anequina.L7.well_clans", "anequina.L8.ridge_temples", "anequina.L9.northern_crown"],
+      "raceModifiers": {
+        "khajiit": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["anequina.L7.well_clans", "anequina.L8.ridge_temples", "elsweyr.L8.moons_path"]
+        },
+        "imperial": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.28,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["rimmen.L8.imperial_grudge", "anequina.L9.northern_crown"]
+        }
+      }
+    },
+    "elsweyr/rimmen": {
+      "rulingFaction": "anequina_militia",
+      "dominantFaith": "two_moons_dance",
+      "defaultDisposition": -10,
+      "defaultPriceMultiplier": 1.06,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["rimmen.L6.rimmen_seat", "rimmen.L7.master_artisans", "rimmen.L8.imperial_grudge", "rimmen.L9.rimmen_claim"],
+      "raceModifiers": {
+        "khajiit": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["rimmen.L7.master_artisans", "rimmen.L8.mask_makers", "rimmen.L7.baandari_camp"]
+        },
+        "akaviri": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["rimmen.L6.hakoshae_tombs", "rimmen.L6.rimmen_seat"]
+        },
+        "imperial": {
+          "dispositionDelta": -24,
+          "priceMultiplier": 1.18,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["rimmen.L8.imperial_grudge", "rimmen.L9.rimmen_claim"]
+        }
+      }
+    },
+    "elsweyr/torval": {
+      "rulingFaction": "mane_clergy",
+      "dominantFaith": "two_moons_dance",
+      "defaultDisposition": -8,
+      "defaultPriceMultiplier": 1.05,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["torval.L6.torval_capital", "torval.L7.priestly_quarter", "torval.L8.mane_seat", "torval.L8.two_moons_procession"],
+      "raceModifiers": {
+        "khajiit": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["torval.L8.mane_seat", "torval.L8.two_moons_procession", "elsweyr.L7.clan_mothers"]
+        },
+        "bosmer": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["torval.L6.pilgrim_villages", "elsweyr.L9.thalmor_in_court"]
+        }
+      }
+    },
+    "elsweyr/pellitine": {
+      "rulingFaction": "pellitine_merchant_lords",
+      "dominantFaith": "two_moons_dance",
+      "defaultDisposition": 2,
+      "defaultPriceMultiplier": 0.99,
+      "defaultScrutiny": 1.02,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["pellitine.L6.corinthe_seat", "pellitine.L7.planter_houses", "pellitine.L7.pact_merchants", "pellitine.L8.garden_priests"],
+      "raceModifiers": {
+        "khajiit": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["pellitine.L7.planter_houses", "pellitine.L8.garden_priests"]
+        },
+        "altmer": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["pellitine.L7.pact_merchants", "elsweyr.L9.thalmor_in_court"]
+        }
+      }
+    },
+    "elsweyr/senchal": {
+      "rulingFaction": "pellitine_merchant_lords",
+      "dominantFaith": "two_moons_dance",
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.96,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["senchal.L6.senchal_seat", "senchal.L7.sailors_and_boilers", "senchal.L8.khenarthi_winds", "senchal.L9.thalmor_embassy"],
+      "raceModifiers": {
+        "khajiit": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["senchal.L6.senchal_seat", "senchal.L8.khenarthi_winds"]
+        }
+      }
+    },
+    "black_marsh/helstrom": {
+      "rulingFaction": "an_xileel",
+      "dominantFaith": "hist",
+      "defaultDisposition": -22,
+      "defaultPriceMultiplier": 1.18,
+      "defaultScrutiny": 1.38,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["helstrom.L6.helstrom_ring_and_thorn_port", "helstrom.L7.root_heart_tribes", "helstrom.L8.sap_naming_rite", "helstrom.L9.elder_tree_council", "black_marsh.L9.an_xileel_and_imperial_border"],
+      "raceModifiers": {
+        "argonian": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.87,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["helstrom.L7.root_heart_tribes", "helstrom.L8.sap_naming_rite", "black_marsh.L7.hist_communion"]
+        },
+        "dunmer": {
+          "dispositionDelta": -34,
+          "priceMultiplier": 1.25,
+          "guardScrutiny": 1.50,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["black_marsh.L7.freed_and_scarred", "black_marsh.L9.dres_slaver_remnants", "helstrom.L7.root_heart_tribes"]
+        },
+        "imperial": {
+          "dispositionDelta": -22,
+          "priceMultiplier": 1.17,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "imperial_suspect",
+          "why": ["black_marsh.L9.an_xileel_and_imperial_border", "helstrom.L9.elder_tree_council"]
+        }
+      }
+    },
+    "black_marsh/stormhold": {
+      "rulingFaction": "an_xileel",
+      "dominantFaith": "hist",
+      "defaultDisposition": -16,
+      "defaultPriceMultiplier": 1.12,
+      "defaultScrutiny": 1.25,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["stormhold.L6.stormhold_ring_over_ruin", "stormhold.L7.tree_minders_and_factors", "stormhold.L8.shadow_sign_vigil", "stormhold.L9.caravan_toll_dispute"],
+      "raceModifiers": {
+        "argonian": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["stormhold.L7.tree_minders_and_factors", "stormhold.L8.shadow_sign_vigil"]
+        },
+        "dunmer": {
+          "dispositionDelta": -32,
+          "priceMultiplier": 1.24,
+          "guardScrutiny": 1.48,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["black_marsh.L7.freed_and_scarred", "black_marsh.L9.dres_slaver_remnants", "stormhold.L9.caravan_toll_dispute"]
+        }
+      }
+    },
+    "black_marsh/shadowfen": {
+      "rulingFaction": "an_xileel",
+      "dominantFaith": "hist",
+      "defaultDisposition": -18,
+      "defaultPriceMultiplier": 1.14,
+      "defaultScrutiny": 1.30,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["shadowfen.L6.percolating_mire_posts", "shadowfen.L7.chain_breaker_clans", "shadowfen.L8.shackle_cairns", "shadowfen.L9.broken_chain_watch"],
+      "raceModifiers": {
+        "argonian": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["shadowfen.L7.chain_breaker_clans", "shadowfen.L8.shackle_cairns"]
+        },
+        "dunmer": {
+          "dispositionDelta": -34,
+          "priceMultiplier": 1.25,
+          "guardScrutiny": 1.50,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["shadowfen.L7.chain_breaker_clans", "shadowfen.L8.shackle_cairns", "black_marsh.L9.dres_slaver_remnants"]
+        }
+      }
+    },
+    "black_marsh/murkmire": {
+      "rulingFaction": "bright_throat_tribe",
+      "dominantFaith": "hist",
+      "defaultDisposition": -14,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.22,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["murkmire.L6.soulrest_and_stilt_villages", "murkmire.L7.bright_throat_and_dead_water", "murkmire.L8.sithis_calendar_stones", "murkmire.L9.calendar_stone_feud"],
+      "raceModifiers": {
+        "argonian": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["murkmire.L7.bright_throat_and_dead_water", "murkmire.L8.sithis_calendar_stones"]
+        },
+        "dunmer": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.40,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["black_marsh.L7.freed_and_scarred", "black_marsh.L9.dres_slaver_remnants"]
+        }
+      }
+    },
+    "black_marsh/gideon": {
+      "rulingFaction": "archein_brokers",
+      "dominantFaith": "hist",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["gideon.L6.gideon_walled_seat", "gideon.L7.lukiul_townsfolk", "gideon.L8.chapel_and_root_shrine", "gideon.L9.lukiul_and_an_xileel"],
+      "raceModifiers": {
+        "argonian": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["gideon.L7.lukiul_townsfolk", "gideon.L8.chapel_and_root_shrine"]
+        },
+        "imperial": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["gideon.L7.lukiul_townsfolk", "gideon.L8.chapel_and_root_shrine"]
+        },
+        "dunmer": {
+          "dispositionDelta": -16,
+          "priceMultiplier": 1.12,
+          "guardScrutiny": 1.25,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["black_marsh.L9.dres_slaver_remnants", "gideon.L9.lukiul_and_an_xileel"]
+        }
+      }
+    },
+    "black_marsh/lilmoth": {
+      "rulingFaction": "archein_brokers",
+      "dominantFaith": "hist",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["lilmoth.L6.lilmoth_harbour", "lilmoth.L7.dock_syndicates_and_boatmen", "lilmoth.L8.kothringi_quarantine_shrines", "lilmoth.L9.customhouse_struggle"],
+      "raceModifiers": {
+        "argonian": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["lilmoth.L6.lilmoth_harbour", "lilmoth.L7.dock_syndicates_and_boatmen"]
+        },
+        "dunmer": {
+          "dispositionDelta": -14,
+          "priceMultiplier": 1.10,
+          "guardScrutiny": 1.20,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["black_marsh.L9.dres_slaver_remnants", "lilmoth.L9.customhouse_struggle"]
+        }
+      }
+    },
+    "atmora/ice_waste": {
+      "rulingFaction": "atmoran_remnant",
+      "dominantFaith": "dragon_totem",
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.08,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["ice_waste.L6.kjolvik_camp", "ice_waste.L7.windhelm_charter_crews", "ice_waste.L8.whale_and_bear_totems", "ice_waste.L9.pack_ice_lock"],
+      "raceModifiers": {
+        "atmoran": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["ice_waste.L8.whale_and_bear_totems", "atmora.L8.totem_ancestors"]
+        },
+        "nord": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["ice_waste.L7.windhelm_charter_crews", "ice_waste.L8.whale_and_bear_totems"]
+        },
+        "altmer": {
+          "dispositionDelta": -24,
+          "priceMultiplier": 1.18,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["atmora.L8.totem_ancestors", "ice_waste.L7.windhelm_charter_crews"]
+        }
+      }
+    },
+    "atmora/frozen_forest": {
+      "rulingFaction": "atmoran_remnant",
+      "dominantFaith": "dragon_totem",
+      "defaultDisposition": -10,
+      "defaultPriceMultiplier": 1.06,
+      "defaultScrutiny": 1.12,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["frozen_forest.L6.jylkurfyk_port_ruins", "frozen_forest.L7.chroniclers_and_delvers", "frozen_forest.L8.dragon_totem_orthodoxy", "frozen_forest.L9.barrow_king_stirring"],
+      "raceModifiers": {
+        "atmoran": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["frozen_forest.L8.dragon_totem_orthodoxy", "atmora.L8.totem_ancestors"]
+        },
+        "nord": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["frozen_forest.L7.chroniclers_and_delvers", "frozen_forest.L8.dragon_totem_orthodoxy"]
+        }
+      }
+    },
+    "akavir/tsaesci": {
+      "rulingFaction": "tsaesci_immortal_guard",
+      "dominantFaith": "akaviri_coil",
+      "defaultDisposition": -14,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.30,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["tsaesci.L6.tsaesci_factor_compound", "tsaesci.L7.tally_seal_custodians", "tsaesci.L8.immortal_blood_lineage", "tsaesci.L9.eagle_standard_intrigue"],
+      "raceModifiers": {
+        "akaviri": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["tsaesci.L7.tally_seal_custodians", "tsaesci.L8.immortal_blood_lineage"]
+        },
+        "imperial": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 1.00,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["tsaesci.L6.tsaesci_factor_compound", "tsaesci.L9.eagle_standard_intrigue"]
+        }
+      }
+    },
+    "akavir/kamal": {
+      "rulingFaction": "kamal_host",
+      "dominantFaith": "akaviri_coil",
+      "defaultDisposition": -18,
+      "defaultPriceMultiplier": 1.14,
+      "defaultScrutiny": 1.35,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["kamal.L6.kamal_pass_watch", "kamal.L7.winter_host_warbands", "kamal.L8.rite_of_the_spring_march", "kamal.L9.thaw_vanguard_incursion"],
+      "raceModifiers": {
+        "akaviri": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["kamal.L7.winter_host_warbands", "kamal.L8.rite_of_the_spring_march"]
+        }
+      }
+    },
+    "akavir/tang_mo": {
+      "rulingFaction": "tang_mo_monks",
+      "dominantFaith": "akaviri_coil",
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 1.00,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["tang_mo.L6.tang_mo_treaty_harbor", "tang_mo.L7.island_ranger_clans", "tang_mo.L8.ancestral_spire_shrines", "tang_mo.L9.strait_bridge_defense"],
+      "raceModifiers": {
+        "akaviri": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["tang_mo.L7.island_ranger_clans", "tang_mo.L8.ancestral_spire_shrines"]
+        },
+        "khajiit": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["tang_mo.L6.tang_mo_treaty_harbor", "akavir.L7.four_court_protocol"]
+        }
+      }
+    },
+    "akavir/ka_po_tun": {
+      "rulingFaction": "ka_po_tun_order",
+      "dominantFaith": "akaviri_coil",
+      "defaultDisposition": -6,
+      "defaultPriceMultiplier": 1.04,
+      "defaultScrutiny": 1.10,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["ka_po_tun.L6.tiger_plains_shrine_town", "ka_po_tun.L7.tiger_monk_retainers", "ka_po_tun.L8.tosh_raka_apotheosis", "ka_po_tun.L9.serpent_border_standoff"],
+      "raceModifiers": {
+        "akaviri": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["ka_po_tun.L7.tiger_monk_retainers", "ka_po_tun.L8.tosh_raka_apotheosis"]
+        },
+        "khajiit": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["ka_po_tun.L7.tiger_monk_retainers", "ka_po_tun.L8.tosh_raka_apotheosis"]
+        }
+      }
+    },
+    "yokuda/yokudan_desert": {
+      "rulingFaction": "yokudan_ankh_wardens",
+      "dominantFaith": "yokudan_pantheon",
+      "defaultDisposition": -14,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.25,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["yokudan_desert.L6.new_tava_pilgrim_port", "yokudan_desert.L7.ansei_pilgrims_and_keepers", "yokudan_desert.L8.constellation_liturgy", "yokudan_desert.L9.fault_vault_seeker"],
+      "raceModifiers": {
+        "yokudan": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["yokudan_desert.L7.ansei_pilgrims_and_keepers", "yokudan_desert.L8.constellation_liturgy"]
+        },
+        "redguard": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["yokudan_desert.L7.ansei_pilgrims_and_keepers", "yokuda.L8.way_of_the_sword_and_stars"]
+        }
+      }
+    },
+    "yokuda/sunken_isles": {
+      "rulingFaction": "yokudan_ankh_wardens",
+      "dominantFaith": "yokudan_pantheon",
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.08,
+      "defaultScrutiny": 1.20,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["sunken_isles.L6.riven_shoal_anchorage", "sunken_isles.L7.salvage_divers_and_wardens", "sunken_isles.L8.drowned_ancestor_vigil", "sunken_isles.L9.plunderers_in_the_shoals"],
+      "raceModifiers": {
+        "yokudan": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["sunken_isles.L7.salvage_divers_and_wardens", "sunken_isles.L8.drowned_ancestor_vigil"]
+        },
+        "redguard": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["sunken_isles.L7.salvage_divers_and_wardens", "sunken_isles.L8.drowned_ancestor_vigil"]
+        }
+      }
+    },
+    "pyandonea/maormer_isles": {
+      "rulingFaction": "maormer_armada",
+      "dominantFaith": "coiled_king",
+      "defaultDisposition": -14,
+      "defaultPriceMultiplier": 1.10,
+      "defaultScrutiny": 1.25,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["maormer_isles.L6.mistveil_and_fleet_anchorage", "maormer_isles.L7.truce_captains_and_storm_caste", "maormer_isles.L8.cult_of_immortal_orgnum", "maormer_isles.L9.storm_spire_sabotage"],
+      "raceModifiers": {
+        "maormer": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.87,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["maormer_isles.L7.truce_captains_and_storm_caste", "maormer_isles.L8.cult_of_immortal_orgnum"]
+        },
+        "altmer": {
+          "dispositionDelta": -34,
+          "priceMultiplier": 1.25,
+          "guardScrutiny": 1.50,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["maormer_isles.L8.cult_of_immortal_orgnum", "pyandonea.L8.orgnum_and_the_coiled_king", "summerset.L9.maormer_war"]
+        }
+      }
+    },
+    "thras/coral_kingdom": {
+      "rulingFaction": "sload_cabal",
+      "dominantFaith": "sload_mastery",
+      "defaultDisposition": -18,
+      "defaultPriceMultiplier": 1.15,
+      "defaultScrutiny": 1.35,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["coral_kingdom.L6.quarantined_sandbar_camp", "coral_kingdom.L7.literal_contract_factors", "coral_kingdom.L8.unsentimental_mastery", "coral_kingdom.L9.plague_vat_cultivation"],
+      "raceModifiers": {
+        "sload": {
+          "dispositionDelta": 20,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["coral_kingdom.L7.literal_contract_factors", "coral_kingdom.L8.unsentimental_mastery"]
+        },
+        "altmer": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.45,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["coral_kingdom.L9.plague_vat_cultivation", "summerset.L9.sload_shadow"]
+        }
+      }
+    }
+  },
+  "settlements": {
+    "windhelm": {
+      "region": "skyrim/eastmarch",
+      "rulingFaction": "stormcloaks",
+      "dominantFaith": "talos_cult",
+      "orcStronghold": false,
+      "defaultDisposition": -12,
+      "defaultPriceMultiplier": 1.08,
+      "defaultScrutiny": 1.15,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["eastmarch.L6.windhelm_seat", "eastmarch.L7.grey_quarter", "eastmarch.L7.docks_outside", "eastmarch.L7.nord_first", "eastmarch.L9.rebel_capital"],
+      "raceModifiers": {
+        "nord": {
+          "dispositionDelta": 18,
+          "priceMultiplier": 0.90,
+          "guardScrutiny": 0.82,
+          "attitudeKey": "kin_welcome",
+          "why": ["eastmarch.L7.nord_first", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital"]
+        },
+        "dunmer": {
+          "dispositionDelta": -20,
+          "priceMultiplier": 1.14,
+          "guardScrutiny": 1.28,
+          "attitudeKey": "wary_outlander",
+          "why": ["eastmarch.L7.grey_quarter", "eastmarch.L8.refugee_faith", "eastmarch.L9.refugee_tension"]
+        },
+        "argonian": {
+          "dispositionDelta": -24,
+          "priceMultiplier": 1.18,
+          "guardScrutiny": 1.32,
+          "attitudeKey": "wary_outlander",
+          "why": ["eastmarch.L7.docks_outside", "eastmarch.L9.refugee_tension"]
+        },
+        "altmer": {
+          "dispositionDelta": -30,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.42,
+          "attitudeKey": "heretic_suspect",
+          "why": ["eastmarch.L7.nord_first", "eastmarch.L8.talos_open", "eastmarch.L9.rebel_capital"]
+        },
+        "imperial": {
+          "dispositionDelta": -18,
+          "priceMultiplier": 1.13,
+          "guardScrutiny": 1.28,
+          "attitudeKey": "imperial_suspect",
+          "why": ["eastmarch.L7.nord_first", "eastmarch.L9.rebel_capital"]
+        }
+      }
+    },
+    "solitude": {
+      "region": "skyrim/haafingar",
+      "rulingFaction": "imperial_legion",
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["haafingar.L6.solitude_seat", "haafingar.L7.imperial_nobles", "haafingar.L8.divines_temple", "haafingar.L9.imperial_seat"],
+      "raceModifiers": {
+        "imperial": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["haafingar.L7.imperial_nobles", "haafingar.L9.imperial_seat"]
+        },
+        "nord": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "kin_welcome",
+          "why": ["haafingar.L6.solitude_seat", "haafingar.L8.divines_temple"]
+        },
+        "altmer": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L6.embassy", "haafingar.L9.thalmor_embassy"]
+        },
+        "dunmer": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.96,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L7.dockworkers", "haafingar.L9.naval_power"]
+        },
+        "argonian": {
+          "dispositionDelta": 4,
+          "priceMultiplier": 0.98,
+          "guardScrutiny": 0.98,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["haafingar.L7.dockworkers", "haafingar.L9.naval_power"]
+        }
+      }
+    },
+    "college_of_winterhold": {
+      "region": "skyrim/winterhold",
+      "rulingFaction": "college_of_winterhold",
+      "dominantFaith": "eight_divines",
+      "orcStronghold": false,
+      "defaultDisposition": 12,
+      "defaultPriceMultiplier": 0.93,
+      "defaultScrutiny": 0.88,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L8.knowledge_seeker"],
+      "raceModifiers": {
+        "altmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L8.knowledge_seeker"]
+        },
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart", "winterhold.L8.azura_statue"]
+        },
+        "breton": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["winterhold.L6.college", "winterhold.L7.scholars_apart"]
+        }
+      }
+    },
+    "narzulbur": {
+      "region": "skyrim/eastmarch",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["eastmarch.L6.narzulbur", "skyrim.L7.orc_strongholds"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["eastmarch.L6.narzulbur", "skyrim.L7.orc_strongholds"]
+        }
+      }
+    },
+    "mor_khazgur": {
+      "region": "skyrim/the_reach",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"]
+        }
+      }
+    },
+    "dushnikh_yal": {
+      "region": "skyrim/the_reach",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_reach.L6.two_strongholds", "skyrim.L7.orc_strongholds"]
+        }
+      }
+    },
+    "largashbur": {
+      "region": "skyrim/the_rift",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["the_rift.L6.largashbur", "the_rift.L8.cursed_clan", "skyrim.L7.orc_strongholds"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["the_rift.L6.largashbur", "skyrim.L7.orc_strongholds"]
+        }
+      }
+    },
+    "morkul_stronghold_high_rock": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_shatul",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L8.malacath"]
+        }
+      }
+    },
+    "fharun_stronghold": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_bagrakh",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L8.malacath", "wrothgar.L9.orsinium_succession"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L8.malacath"]
+        }
+      }
+    },
+    "tumnosh_stronghold": {
+      "region": "high_rock/wrothgar",
+      "rulingFaction": "clan_tumnosh",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L7.chief_and_wives", "wrothgar.L8.malacath"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["wrothgar.L6.stronghold_per_mine", "wrothgar.L8.malacath"]
+        }
+      }
+    },
+    "drabul": {
+      "region": "valenwood/malabal_tor",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L7.orc_outsiders", "malabal_tor.L9.orc_truce"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L9.orc_truce"]
+        }
+      }
+    },
+    "jathsogur": {
+      "region": "valenwood/malabal_tor",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L7.orc_outsiders", "malabal_tor.L9.orc_truce"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["malabal_tor.L6.orc_enclaves", "malabal_tor.L9.orc_truce"]
+        }
+      }
+    },
+    "camp_gushnukbur": {
+      "region": "valenwood/greenshade",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["greenshade.L7.ground_camp", "valenwood.L8.outsiders"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["greenshade.L7.ground_camp", "valenwood.L8.outsiders"]
+        }
+      }
+    },
+    "shurgak_clan_estate": {
+      "region": "cyrodiil/nibenay_basin",
+      "rulingFaction": "orc_blood_kin",
+      "dominantFaith": "malacath_code",
+      "orcStronghold": true,
+      "defaultDisposition": -25,
+      "defaultPriceMultiplier": 1.20,
+      "defaultScrutiny": 1.40,
+      "defaultAttitudeKey": "blood_kin_required",
+      "why": ["nibenay_basin.L6.border_keeps", "nibenay_basin.L7.knightly_dilettantes"],
+      "raceModifiers": {
+        "orc": {
+          "dispositionDelta": 22,
+          "priceMultiplier": 0.88,
+          "guardScrutiny": 0.80,
+          "attitudeKey": "kin_welcome",
+          "why": ["nibenay_basin.L6.border_keeps", "nibenay_basin.L7.knightly_dilettantes"]
+        }
+      }
+    },
+    "sadrith_mora": {
+      "region": "morrowind/telvannis",
+      "rulingFaction": "house_telvanni",
+      "dominantFaith": "daedric_veneration",
+      "orcStronghold": false,
+      "defaultDisposition": -20,
+      "defaultPriceMultiplier": 1.15,
+      "defaultScrutiny": 1.12,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["zafirbel_bay.L6.sadrith_mora_towers", "zafirbel_bay.L7.power_is_rank", "zafirbel_bay.L9.council_of_masters", "telvannis.L7.lord_and_thrall"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.92,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["zafirbel_bay.L6.sadrith_mora_towers", "zafirbel_bay.L7.power_is_rank"]
+        },
+        "argonian": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.22,
+          "guardScrutiny": 1.35,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["telvannis.L7.lord_and_thrall", "morrowind.L9.argonian_grudge"]
+        }
+      }
+    },
+    "balmora": {
+      "region": "morrowind/west_gash",
+      "rulingFaction": "house_hlaalu",
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.96,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["west_gash.L6.balmora_on_the_odai", "west_gash.L7.merchant_city", "west_gash.L8.pragmatic_piety", "west_gash.L9.hlaalu_collaboration"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["west_gash.L6.balmora_on_the_odai", "west_gash.L7.merchant_city"]
+        },
+        "imperial": {
+          "dispositionDelta": 10,
+          "priceMultiplier": 0.95,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["west_gash.L7.merchant_city", "west_gash.L9.hlaalu_collaboration"]
+        }
+      }
+    },
+    "tear": {
+      "region": "morrowind/deshaan",
+      "rulingFaction": "house_dres",
+      "dominantFaith": "tribunal_reclamations",
+      "orcStronghold": false,
+      "defaultDisposition": -18,
+      "defaultPriceMultiplier": 1.14,
+      "defaultScrutiny": 1.30,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["deshaan.L6.tear_plantation_city", "deshaan.L7.slaves_of_tear", "morrowind.L9.argonian_grudge"],
+      "raceModifiers": {
+        "dunmer": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["deshaan.L6.tear_plantation_city", "deshaan.L7.slaves_of_tear"]
+        },
+        "argonian": {
+          "dispositionDelta": -34,
+          "priceMultiplier": 1.25,
+          "guardScrutiny": 1.50,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["deshaan.L7.slaves_of_tear", "morrowind.L9.argonian_grudge"]
+        },
+        "khajiit": {
+          "dispositionDelta": -28,
+          "priceMultiplier": 1.21,
+          "guardScrutiny": 1.40,
+          "attitudeKey": "ancestral_grudge",
+          "why": ["deshaan.L7.slaves_of_tear", "morrowind.L7.slavery"]
+        }
+      }
+    },
+    "vulkhel_guard": {
+      "region": "summerset/auridon",
+      "rulingFaction": "thalmor",
+      "dominantFaith": "aldmeri_ancestors",
+      "orcStronghold": false,
+      "defaultDisposition": -4,
+      "defaultPriceMultiplier": 1.03,
+      "defaultScrutiny": 1.08,
+      "defaultAttitudeKey": "wary_outlander",
+      "why": ["auridon.L6.vulkhel_guard", "auridon.L7.vulkhel_outsiders", "auridon.L7.marines"],
+      "raceModifiers": {
+        "altmer": {
+          "dispositionDelta": 16,
+          "priceMultiplier": 0.91,
+          "guardScrutiny": 0.85,
+          "attitudeKey": "kin_welcome",
+          "why": ["auridon.L6.vulkhel_guard", "auridon.L7.marines"]
+        },
+        "bosmer": {
+          "dispositionDelta": 8,
+          "priceMultiplier": 0.96,
+          "guardScrutiny": 0.92,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["auridon.L7.vulkhel_outsiders", "summerset.L9.dominion_clients"]
+        },
+        "khajiit": {
+          "dispositionDelta": 6,
+          "priceMultiplier": 0.97,
+          "guardScrutiny": 0.95,
+          "attitudeKey": "cosmopolitan_neutral",
+          "why": ["auridon.L7.vulkhel_outsiders", "summerset.L9.dominion_clients"]
+        }
+      }
+    },
+    "haven": {
+      "region": "valenwood/grahtwood",
+      "rulingFaction": "camoran_dynasty",
+      "dominantFaith": "green_pact",
+      "orcStronghold": false,
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.96,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["grahtwood.L6.haven_port", "grahtwood.L7.delta_merchants", "valenwood.L6.delta_ports"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["grahtwood.L6.haven_port", "valenwood.L6.delta_ports"]
+        }
+      }
+    },
+    "redfur_trading_post": {
+      "region": "valenwood/grahtwood",
+      "rulingFaction": "camoran_dynasty",
+      "dominantFaith": "green_pact",
+      "orcStronghold": false,
+      "defaultDisposition": 6,
+      "defaultPriceMultiplier": 0.97,
+      "defaultScrutiny": 0.96,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["grahtwood.L6.redfur_post", "grahtwood.L7.delta_merchants", "valenwood.L7.outsider_traders"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["grahtwood.L6.redfur_post", "valenwood.L7.outsider_traders"]
+        },
+        "khajiit": {
+          "dispositionDelta": 12,
+          "priceMultiplier": 0.94,
+          "guardScrutiny": 0.90,
+          "attitudeKey": "kin_welcome",
+          "why": ["grahtwood.L6.redfur_post", "valenwood.L7.outsider_traders"]
+        }
+      }
+    },
+    "velyn_harbor": {
+      "region": "valenwood/malabal_tor",
+      "rulingFaction": "green_pact_spinners",
+      "dominantFaith": "green_pact",
+      "orcStronghold": false,
+      "defaultDisposition": 4,
+      "defaultPriceMultiplier": 0.98,
+      "defaultScrutiny": 0.98,
+      "defaultAttitudeKey": "cosmopolitan_neutral",
+      "why": ["malabal_tor.L6.velyn_harbor", "valenwood.L6.delta_ports", "valenwood.L7.outsider_traders"],
+      "raceModifiers": {
+        "bosmer": {
+          "dispositionDelta": 14,
+          "priceMultiplier": 0.93,
+          "guardScrutiny": 0.88,
+          "attitudeKey": "kin_welcome",
+          "why": ["malabal_tor.L6.velyn_harbor", "valenwood.L7.outsider_traders"]
+        }
+      }
+    }
+  }
+}

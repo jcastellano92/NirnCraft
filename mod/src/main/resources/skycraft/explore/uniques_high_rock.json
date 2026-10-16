@@ -1587,7 +1587,7 @@
     ]
   },
   {
-    "id": "ex_anticlere_site_100",
+    "id": "ex_daenia_reliquary",
     "title": "Reliquary of place.skycraft.daenia",
     "kind": "shrine",
     "x": -7959,
@@ -1600,7 +1600,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_bjoulsae_site_100",
+    "id": "ex_crosshelm_wyrd_grove_reliquary",
     "title": "Reliquary of place.skycraft.crosshelm_wyrd_grove",
     "kind": "shrine",
     "x": -6745,
@@ -1613,7 +1613,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_daggerfall_site_100",
+    "id": "ex_glenpoint_reliquary",
     "title": "Reliquary of place.skycraft.glenpoint",
     "kind": "shrine",
     "x": -9465,
@@ -1626,7 +1626,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_dwynnen_site_100",
+    "id": "ex_alcaire_reliquary",
     "title": "Reliquary of place.skycraft.alcaire",
     "kind": "shrine",
     "x": -6135,
@@ -1639,7 +1639,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_glenumbra_site_100",
+    "id": "ex_aldcroft_reliquary",
     "title": "Reliquary of place.skycraft.aldcroft",
     "kind": "shrine",
     "x": -9250,
@@ -1652,7 +1652,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_rivenspire_site_100",
+    "id": "ex_crestshade_reliquary",
     "title": "Reliquary of place.skycraft.crestshade",
     "kind": "shrine",
     "x": -7900,
@@ -1665,7 +1665,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_stormhaven_site_100",
+    "id": "ex_koeglin_village_reliquary",
     "title": "Reliquary of place.skycraft.koeglin_village",
     "kind": "shrine",
     "x": -7450,
@@ -1678,7 +1678,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_stormhaven_site_101",
+    "id": "ex_dreughside_reliquary",
     "title": "Reliquary of place.skycraft.dreughside",
     "kind": "shrine",
     "x": -6950,
@@ -1691,7 +1691,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_wrothgar_site_100",
+    "id": "ex_fharun_stronghold_reliquary",
     "title": "Reliquary of place.skycraft.fharun_stronghold",
     "kind": "shrine",
     "x": -4200,
@@ -1704,7 +1704,7 @@
     "item": "skycraft:elven_sword"
   },
   {
-    "id": "ex_wrothgar_site_101",
+    "id": "ex_tumnosh_stronghold_reliquary",
     "title": "Reliquary of place.skycraft.tumnosh_stronghold",
     "kind": "shrine",
     "x": -4650,
