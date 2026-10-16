@@ -51,6 +51,7 @@ public final class Shells {
         /** Leave the left {@code openLeft} columns as an open lean-to (smithy yard). */
         public int openLeft;
         public boolean ruined;
+        public int variant;
     }
 
     public static List<Room> build(Canvas c, Palette p, Frame f) {
@@ -157,7 +158,7 @@ public final class Shells {
                     else if (p.timber && (y % floorH == f.wallH % floorH) && y > 1) s = B.axis(p.beam, z == 0 || z == d - 1 ? Direction.Axis.X : Direction.Axis.Z);
                     else if (isLogWall(p)) s = B.axis(p.wall, z == 0 || z == d - 1 ? Direction.Axis.X : Direction.Axis.Z);
                     else s = wallBlock(c, p, x, y, z);
-                    if (f.ruined && y > 2 && c.chance(x, y, z, 5, 3 + (wallTop - y))) continue;
+                    if (f.ruined && y >= wallTop && !corner && !post && c.chance(x, y, z, 5, 6)) continue;
                     c.set(x, y, z, s);
                 }
             }
@@ -734,7 +735,8 @@ public final class Shells {
         int levels = Math.max(2, f.storeys);
         int lh = 5;
         int top = levels * lh;
-        clearVolume(c, w, d, top + w + 3, 1);
+        int v = Math.floorMod(f.variant, 4);
+        clearVolume(c, w, d, top + w + 5, 2);
         base(c, p, w, d, false);
         int cx = (w - 1) / 2, cz = (d - 1) / 2;
         for (int y = 1; y <= top; y++) {
@@ -742,9 +744,20 @@ public final class Shells {
                 for (int z = 0; z < d; z++) {
                     boolean edge = x == 0 || z == 0 || x == w - 1 || z == d - 1;
                     if (edge) {
+                        boolean corner = (x == 0 || x == w - 1) && (z == 0 || z == d - 1);
                         boolean slit = (y % lh == 3) && (x == cx || z == cz);
-                        if (f.ruined && y > top - 6 && c.chance(x, y, z, 9, 2)) continue;
-                        c.set(x, y, z, slit ? p.window : (c.chance(x, y, z, 23, 6) ? p.cityWall2 : p.cityWall));
+                        if (f.ruined && y >= top - 1 && !corner && c.chance(x, y, z, 9, 4)) continue;
+                        if (v == 2 && y > top - lh) {
+                            // Variant 2: half-timbered upper watch cabin
+                            BlockState cab = corner ? B.axis(p.post, Direction.Axis.Y)
+                                    : (y == top ? B.axis(p.beam, z == 0 || z == d - 1 ? Direction.Axis.X : Direction.Axis.Z) : p.planks);
+                            c.set(x, y, z, slit ? p.window : cab);
+                        } else if (v == 1 && y % lh == 0) {
+                            // Variant 1: dressed stone belt courses at floor levels
+                            c.set(x, y, z, p.wallLow);
+                        } else {
+                            c.set(x, y, z, slit ? p.window : (corner ? p.wallLow : (c.chance(x, y, z, 23, 6) ? p.cityWall2 : p.cityWall)));
+                        }
                     } else if (y % lh == 0) {
                         c.set(x, y, z, p.floor2);
                     } else {
@@ -753,12 +766,32 @@ public final class Shells {
                 }
             }
         }
+        // Variant 0: stepped stone corner buttresses around the base
+        if (v == 0) {
+            int bh = Math.min(lh + 1, top - 2);
+            int[][] corners = {{-1, 0}, {w, 0}, {0, -1}, {w - 1, -1}, {-1, d - 1}, {w, d - 1}, {0, d}, {w - 1, d}};
+            for (int[] cr : corners) {
+                c.foundation(cr[0], 0, cr[1], p.foundation, SettlementPieceDepth.DEPTH);
+                for (int y = 1; y <= bh; y++) c.set(cr[0], y, cr[1], p.cityWall);
+                c.set(cr[0], bh + 1, cr[1], B.slab(p.trimSlab, false));
+            }
+        }
+        // Variant 3: cantilevered wooden hoarding gallery around the upper floor
+        if (v == 3 && top >= 2 * lh) {
+            int hy = top - lh;
+            for (int x = -1; x <= w; x++) {
+                for (int z = -1; z <= d; z++) {
+                    if (x >= 0 && x < w && z >= 0 && z < d) continue;
+                    c.set(x, hy, z, B.slab(p.slab, true));
+                    c.set(x, hy + 1, z, p.fence);
+                }
+            }
+        }
         // ladder in the back-left corner through every floor
         for (int y = 1; y <= top; y++) {
             c.set(1, y, d - 2, B.face(B.s(Blocks.LADDER), Direction.NORTH));
         }
         door(c, p, cx, 0);
-        if (f.ruined) return List.of(new Room(1, 1, w - 2, d - 2, 1, lh));
         if (p.towerShell == Shell.TOWER && (p.name.equals("altmer") || p.name.equals("redguard") || p.name.equals("breton")
                 || p.name.equals("maormer") || p.name.equals("imperial") || p.name.equals("imperial_city"))) {
             // pointed spire
@@ -776,23 +809,66 @@ public final class Shells {
             c.set(cx, sy + w + 2, cz, p.column);
             c.set(cx, sy + w + 3, cz, p.name.equals("altmer") ? B.s(Blocks.AMETHYST_CLUSTER) : B.s(Blocks.LIGHTNING_ROD));
         } else {
-            // open fighting platform with merlons
+            // overhanging parapet deck
             for (int x = -1; x <= w; x++) {
                 for (int z = -1; z <= d; z++) {
                     boolean edge = x == -1 || z == -1 || x == w || z == d;
                     if (edge) {
                         c.set(x, top, z, B.stair(p.cityWallStairs, x == -1 ? Direction.EAST : x == w ? Direction.WEST : z == -1 ? Direction.SOUTH : Direction.NORTH, true));
-                        if ((x + z) % 2 == 0) c.set(x, top + 1, z, p.cityWall);
+                        if ((x + z) % 2 == 0) {
+                            c.set(x, top + 1, z, v == 2 ? p.fence : p.cityWall);
+                        } else if (v == 1) {
+                            c.set(x, top + 1, z, B.s(Blocks.IRON_BARS));
+                        }
                     } else {
-                        c.set(x, top, z, p.cityWall);
+                        c.set(x, top, z, v == 2 ? p.planks : p.cityWall);
                     }
                 }
             }
             c.air(1, top, d - 2);
             c.set(1, top, d - 2, B.face(B.s(Blocks.LADDER), Direction.NORTH));
-            c.set(cx, top + 1, cz, B.lit(B.s(Blocks.CAMPFIRE), true));
-            c.set(cx, top, cz, p.cityWall);
+            if (v == 0) {
+                // Variant 0: timber corner posts supporting a pitched hipped watch-roof cap
+                for (int y = top + 1; y <= top + 2; y++) {
+                    c.set(0, y, 0, B.axis(p.post, Direction.Axis.Y));
+                    c.set(w - 1, y, 0, B.axis(p.post, Direction.Axis.Y));
+                    c.set(0, y, d - 1, B.axis(p.post, Direction.Axis.Y));
+                    c.set(w - 1, y, d - 1, B.axis(p.post, Direction.Axis.Y));
+                }
+                hipRoof(c, p, -1, -1, w, d, top + 3);
+            } else if (v == 1) {
+                // Variant 1: raised stone signal beacon brazier in an iron cage
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if (cx + dx == 1 && cz + dz == d - 2) continue;
+                        c.set(cx + dx, top + 1, cz + dz, B.slab(p.trimSlab, false));
+                    }
+                }
+                c.set(cx, top + 1, cz, p.cityWall);
+                c.set(cx, top + 2, cz, p.cityWall);
+                c.set(cx, top + 3, cz, B.lit(B.s(Blocks.CAMPFIRE), true));
+            } else if (v == 2) {
+                // Variant 2: timber belfry frame with suspended alarm bell and gable roof
+                for (int y = top + 1; y <= top + 2; y++) {
+                    c.set(0, y, cz, B.axis(p.post, Direction.Axis.Y));
+                    c.set(w - 1, y, cz, B.axis(p.post, Direction.Axis.Y));
+                }
+                for (int x = 0; x < w; x++) c.set(x, top + 3, cz, B.axis(p.beam, Direction.Axis.X));
+                c.set(cx, top + 2, cz, B.s(Blocks.BELL).setValue(net.minecraft.world.level.block.BellBlock.ATTACHMENT,
+                        net.minecraft.world.level.block.state.properties.BellAttachType.SINGLE_WALL)
+                        .setValue(net.minecraft.world.level.block.BellBlock.FACING, Direction.SOUTH));
+                gableRoof(c, p, -1, -1, w, d, top + 3, true, false, false);
+            } else {
+                // Variant 3: open garrison parapet with ballista mount and supply barrels
+                c.set(cx, top + 1, cz, p.fence);
+                c.set(cx, top + 2, cz, B.axis(p.beam, Direction.Axis.Z));
+                if (cz - 1 >= 0) c.set(cx, top + 2, cz - 1, B.stair(p.stairs, Direction.NORTH, true));
+                if ( cx - 1 >= 0) c.set(cx - 1, top + 2, cz - 1, B.face(p.trapdoor, Direction.SOUTH));
+                if (cx + 1 < w) c.set(cx + 1, top + 2, cz - 1, B.face(p.trapdoor, Direction.SOUTH));
+                if (w - 2 > 1) c.set(w - 2, top + 1, d - 2, B.face(B.s(Blocks.BARREL), Direction.UP));
+            }
         }
+        if (f.ruined) return List.of(new Room(1, 1, w - 2, d - 2, 1, lh));
         List<Room> rooms = new ArrayList<>();
         for (int k = 0; k < levels; k++) rooms.add(new Room(2, 1, w - 2, d - 3, k * lh + 1, (k + 1) * lh));
         return rooms;

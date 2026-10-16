@@ -815,7 +815,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         if (this.level() instanceof ServerLevel sl) {
             Component text = Component.translatable("shout.skycraft.dragon." + words);
             for (ServerPlayer p : sl.players()) {
-                if (p.distanceToSqr(this) < 64 * 64) p.displayClientMessage(text, true);
+                if (p.distanceToSqr(this) < 64 * 64) com.skycraft.core.Notifier.message(p, text);
             }
         }
     }

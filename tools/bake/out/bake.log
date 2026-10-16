@@ -1,25 +1,25 @@
 java.lang.UnsupportedOperationException: Reflective setAccessible(true) disabled
 java.lang.IllegalAccessException: class io.netty.util.internal.PlatformDependent0$7 (in module io.netty.common) cannot access class jdk.internal.misc.Unsafe (in module java.base) because module java.base does not export jdk.internal.misc to module io.netty.common
 	at jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:392) ~[?:?] {}
-[08:12:32] [Skycraft street plan loader/INFO] [co.sk.Skycraft/]: [bake] streetplan is stale (inputs changed); computing live
-[08:12:32] [Skycraft road plan loader/INFO] [co.sk.Skycraft/]: [bake] roadplan is stale (inputs changed); computing live
-[08:12:32] [Skycraft road plan loader/INFO] [co.sk.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
-[08:12:39] [Skycraft road plan loader/INFO] [co.sk.Skycraft/]: [bake] roadplan: 4901 links (8 failed, 21 merged into other roads), 5261 segments, 383702 vertices; 1524 km (highway 78, road 727, lane 103, trail 616); spans: 236 cut, 222 fill, 1280 bridge, 836 culvert, 170 ford, 398 switchback, 2343 stairs, 46 tunnel; 172 switchback stretches, 36 junction pins missed, 300 slivers dropped; 4914 sites; 7128 ms (sites 4185 ms, 8 threads)
-[08:12:39] [Skycraft scene plan loader/INFO] [co.sk.Skycraft/]: [bake] sceneplan is stale (inputs changed); computing live
-[08:12:39] [Skycraft scene plan loader/INFO] [co.sk.Skycraft/]: [bake] sceneplan: 3966 scenes, 8560 props, 436 km? land, 1524 km road (220 ms); ROAD_BEND=103 (2 refused) CROSSROADS=412 (7 refused) FORD=1 (0 refused) BRIDGE_END=20 (5 refused) FARM=306 (0 refused) CAMP_SITE=58 (0 refused) SHRINE_SITE=105 (1 refused) BATTLE_SITE=171 (1 refused) RUIN_EDGE=152 (1 refused) DUNGEON_MOUTH=958 (2 refused) LOREWEB_CLUE=746 (12 refused) SETTLEMENT_EDGE=934 (0 refused) 
-[08:12:47] [Skycraft street plan loader/INFO] [co.sk.Skycraft/]: [bake] streetplan: 884 settlements, 64300 specs (5419 props left out, 302 buildings turned to a free side, 281 back doors walled up), 59627 nodes, 57178 edges (37183 doorstep path edges), 12799 doors (50 unreachable, 0.39%), 1295 gate nodes + 1288 road joins, 62973 plots; 15556 ms (8 threads)
-[08:13:08] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] tasks: [bake:skycraft-bake, verify]
-[08:13:08] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] running bake:skycraft-bake
-[08:13:14] [Server thread/INFO] [co.sk.Skycraft/]: [bake] roadplan: 4901 links (8 failed, 21 merged into other roads), 5261 segments, 383702 vertices; 1524 km (highway 78, road 727, lane 103, trail 616); spans: 236 cut, 222 fill, 1280 bridge, 836 culvert, 170 ford, 398 switchback, 2343 stairs, 46 tunnel; 172 switchback stretches, 36 junction pins missed, 300 slivers dropped; 4914 sites; 5287 ms (sites 3185 ms, 8 threads)
-[08:13:19] [Server thread/INFO] [co.sk.Skycraft/]: [bake] streetplan: 884 settlements, 64300 specs (5419 props left out, 302 buildings turned to a free side, 281 back doors walled up), 59627 nodes, 57178 edges (37183 doorstep path edges), 12799 doors (50 unreachable, 0.39%), 1295 gate nodes + 1288 road joins, 62973 plots; 5179 ms (8 threads)
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [bake] sceneplan: 3966 scenes, 8560 props, 436 km? land, 1524 km road (169 ms); ROAD_BEND=103 (2 refused) CROSSROADS=412 (7 refused) FORD=1 (0 refused) BRIDGE_END=20 (5 refused) FARM=306 (0 refused) CAMP_SITE=58 (0 refused) SHRINE_SITE=105 (1 refused) BATTLE_SITE=171 (1 refused) RUIN_EDGE=152 (1 refused) DUNGEON_MOUTH=958 (2 refused) LOREWEB_CLUE=746 (12 refused) SETTLEMENT_EDGE=934 (0 refused) 
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [bake] baked landmass (2526 KB raw, sha 7e1f35cd4104, 437 ms) roadplan (4716 KB raw, sha 36c5b6584379, 5450 ms) streetplan (9061 KB raw, sha 396874165f58, 5577 ms) sceneplan (638 KB raw, sha a42324395b13, 188 ms) into F:\Projects\Personal\Skycraft\Skycraft\mod\run\skycraft-bake
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] finished bake:skycraft-bake
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] running verify
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [bake] roadplan is stale (inputs changed); computing live
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [bake] streetplan is stale (inputs changed); computing live
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [bake] sceneplan is stale (inputs changed); computing live
-[08:13:20] [Server thread/ERROR] [co.sk.Skycraft/]: [bake] STALE: [manifest is stale: inputs changed, landmass.bin missing or stale, roadplan.bin missing or stale, streetplan.bin missing or stale, sceneplan.bin missing or stale]
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] finished verify
-[08:13:20] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] all tasks done, stopping the server
+[07:36:29] [Skycraft road plan loader/INFO] [co.sk.Skycraft/]: [bake] roadplan is stale (inputs changed); computing live
+[07:36:29] [Skycraft street plan loader/INFO] [co.sk.Skycraft/]: [bake] streetplan is stale (inputs changed); computing live
+[07:36:29] [Skycraft road plan loader/INFO] [co.sk.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
+[07:36:53] [Skycraft road plan loader/INFO] [co.sk.Skycraft/]: [bake] roadplan: 8143 links (1 failed, 225 merged into other roads), 8576 segments, 484726 vertices; 2045 km (highway 239, road 554, lane 344, trail 909); spans: 611 cut, 382 fill, 1917 bridge, 1026 culvert, 300 ford, 901 switchback, 4182 stairs, 369 tunnel; 409 switchback stretches, 92 junction pins missed, 128 slivers dropped; 7640 sites; 24532 ms (sites 18577 ms, 8 threads)
+[07:36:54] [Skycraft scene plan loader/INFO] [co.sk.Skycraft/]: [bake] sceneplan is stale (inputs changed); computing live
+[07:36:54] [Skycraft scene plan loader/INFO] [co.sk.Skycraft/]: [bake] sceneplan: 5848 scenes, 12447 props, 430 km? land, 2045 km road (498 ms); ROAD_BEND=93 (12 refused) CROSSROADS=715 (24 refused) FORD=2 (0 refused) BRIDGE_END=25 (2 refused) FARM=724 (7 refused) CAMP_SITE=155 (0 refused) SHRINE_SITE=349 (1 refused) BATTLE_SITE=260 (2 refused) RUIN_EDGE=300 (3 refused) DUNGEON_MOUTH=1476 (15 refused) LOREWEB_CLUE=743 (15 refused) SETTLEMENT_EDGE=1006 (1 refused) 
+[07:37:07] [Skycraft street plan loader/INFO] [co.sk.Skycraft/]: [bake] streetplan: 1341 settlements, 78600 specs (2406 props left out, 315 buildings turned to a free side, 896 back doors walled up), 65534 nodes, 64189 edges (33002 doorstep path edges), 12154 doors (262 unreachable, 2.16%), 3351 gate nodes + 1412 road joins, 71581 plots; 37814 ms (8 threads)
+[07:37:28] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] tasks: [bake:skycraft-bake, verify]
+[07:37:28] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] running bake:skycraft-bake
+[07:37:53] [Server thread/INFO] [co.sk.Skycraft/]: [bake] roadplan: 8143 links (1 failed, 225 merged into other roads), 8576 segments, 484726 vertices; 2045 km (highway 239, road 554, lane 344, trail 909); spans: 611 cut, 382 fill, 1917 bridge, 1026 culvert, 300 ford, 901 switchback, 4182 stairs, 369 tunnel; 409 switchback stretches, 92 junction pins missed, 128 slivers dropped; 7640 sites; 24678 ms (sites 19549 ms, 8 threads)
+[07:38:03] [Server thread/INFO] [co.sk.Skycraft/]: [bake] streetplan: 1341 settlements, 78600 specs (2406 props left out, 315 buildings turned to a free side, 896 back doors walled up), 65534 nodes, 64189 edges (33002 doorstep path edges), 12154 doors (262 unreachable, 2.16%), 3351 gate nodes + 1412 road joins, 71581 plots; 9876 ms (8 threads)
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [bake] sceneplan: 5848 scenes, 12447 props, 430 km? land, 2045 km road (415 ms); ROAD_BEND=93 (12 refused) CROSSROADS=715 (24 refused) FORD=2 (0 refused) BRIDGE_END=25 (2 refused) FARM=724 (7 refused) CAMP_SITE=155 (0 refused) SHRINE_SITE=349 (1 refused) BATTLE_SITE=260 (2 refused) RUIN_EDGE=300 (3 refused) DUNGEON_MOUTH=1476 (15 refused) LOREWEB_CLUE=743 (15 refused) SETTLEMENT_EDGE=1006 (1 refused) 
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [bake] baked landmass (2580 KB raw, sha 89a5fc06d68a, 516 ms) roadplan (6270 KB raw, sha 0f90b9c818b4, 24902 ms) streetplan (10696 KB raw, sha 499b2d36fd65, 10316 ms) sceneplan (966 KB raw, sha e9f96e931ddf, 442 ms) into F:\Projects\Personal\Skycraft\Skycraft\mod\run\skycraft-bake
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] finished bake:skycraft-bake
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] running verify
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [bake] roadplan is stale (inputs changed); computing live
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [bake] streetplan is stale (inputs changed); computing live
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [bake] sceneplan is stale (inputs changed); computing live
+[07:38:04] [Server thread/ERROR] [co.sk.Skycraft/]: [bake] STALE: [manifest is stale: inputs changed, landmass.bin missing or stale, roadplan.bin missing or stale, streetplan.bin missing or stale, sceneplan.bin missing or stale]
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] finished verify
+[07:38:04] [Server thread/INFO] [co.sk.Skycraft/]: [autorun] all tasks done, stopping the server

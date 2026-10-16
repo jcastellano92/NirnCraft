@@ -196,7 +196,7 @@ public final class GuardWatch {
             for (int[] o : ring) {
                 int x = e.x + o[0], z = e.z + o[1];
                 if (!level.hasChunk(x >> 4, z >> 4)) continue;
-                out.add(new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z));
+                out.add(NpcPlacement.safeSurfaceAt(level, x, z));
             }
         }
         return out;

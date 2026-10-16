@@ -71,7 +71,7 @@ public final class Parties {
     }
 
     public static void broadcast(MinecraftServer server, Party party, Component message) {
-        for (ServerPlayer p : onlineMembers(server, party)) p.sendSystemMessage(message);
+        for (ServerPlayer p : onlineMembers(server, party)) com.skycraft.core.Notifier.message(p, message);
     }
 
     // ------------------------------------------------------------------ actions
@@ -79,11 +79,11 @@ public final class Parties {
     public static boolean create(ServerPlayer player) {
         PartyManager m = PartyManager.get(player.server);
         if (m.partyOf(player.getUUID()) != null) {
-            player.sendSystemMessage(err("already_in_party"));
+            com.skycraft.core.Notifier.message(player, err("already_in_party"));
             return false;
         }
         m.create(player.getUUID(), player.getGameProfile().getName());
-        player.sendSystemMessage(msg("created"));
+        com.skycraft.core.Notifier.message(player, msg("created"));
         Quests.onPartyChanged(player.server, player.getUUID());
         sync(player);
         return true;
@@ -93,32 +93,32 @@ public final class Parties {
         MinecraftServer server = from.server;
         PartyManager m = PartyManager.get(server);
         if (from == to) {
-            from.sendSystemMessage(err("self"));
+            com.skycraft.core.Notifier.message(from, err("self"));
             return false;
         }
         Party party = m.partyOf(from.getUUID());
         if (party == null) {
             party = m.create(from.getUUID(), from.getGameProfile().getName());
-            from.sendSystemMessage(msg("created"));
+            com.skycraft.core.Notifier.message(from, msg("created"));
             Quests.onPartyChanged(server, from.getUUID());
         } else if (!party.leader.equals(from.getUUID())) {
-            from.sendSystemMessage(err("not_leader"));
+            com.skycraft.core.Notifier.message(from, err("not_leader"));
             return false;
         }
         if (party.has(to.getUUID()) || m.partyOf(to.getUUID()) != null) {
-            from.sendSystemMessage(err("target_in_party", to.getDisplayName()));
+            com.skycraft.core.Notifier.message(from, err("target_in_party", to.getDisplayName()));
             return false;
         }
         if (party.members.size() >= QuestConfig.MAX_PARTY_SIZE.get()) {
-            from.sendSystemMessage(err("full"));
+            com.skycraft.core.Notifier.message(from, err("full"));
             return false;
         }
         List<Invite> list = INVITES.computeIfAbsent(to.getUUID(), k -> new ArrayList<>());
         final UUID partyId = party.id;
         list.removeIf(i -> i.partyId().equals(partyId));
         list.add(new Invite(party.id, from.getUUID(), from.getGameProfile().getName(), server.getTickCount() + INVITE_TICKS));
-        from.sendSystemMessage(msg("invited", to.getDisplayName()));
-        to.sendSystemMessage(msg("invite_received", from.getDisplayName()));
+        com.skycraft.core.Notifier.message(from, msg("invited", to.getDisplayName()));
+        com.skycraft.core.Notifier.message(to, msg("invite_received", from.getDisplayName()));
         sync(from);
         sync(to);
         return true;
@@ -141,7 +141,7 @@ public final class Parties {
         MinecraftServer server = player.server;
         PartyManager m = PartyManager.get(server);
         if (m.partyOf(player.getUUID()) != null) {
-            player.sendSystemMessage(err("already_in_party"));
+            com.skycraft.core.Notifier.message(player, err("already_in_party"));
             return false;
         }
         List<Invite> invites = invitesFor(server, player.getUUID());
@@ -150,16 +150,16 @@ public final class Parties {
             if (partyId == null || i.partyId().equals(partyId)) chosen = i;
         }
         if (chosen == null) {
-            player.sendSystemMessage(err("no_invite"));
+            com.skycraft.core.Notifier.message(player, err("no_invite"));
             return false;
         }
         Party party = m.byId(chosen.partyId());
         if (party == null) {
-            player.sendSystemMessage(err("no_invite"));
+            com.skycraft.core.Notifier.message(player, err("no_invite"));
             return false;
         }
         if (party.members.size() >= QuestConfig.MAX_PARTY_SIZE.get()) {
-            player.sendSystemMessage(err("full"));
+            com.skycraft.core.Notifier.message(player, err("full"));
             return false;
         }
         INVITES.remove(player.getUUID());
@@ -175,7 +175,7 @@ public final class Parties {
         MinecraftServer server = player.server;
         List<Invite> invites = invitesFor(server, player.getUUID());
         if (invites.isEmpty()) {
-            player.sendSystemMessage(err("no_invite"));
+            com.skycraft.core.Notifier.message(player, err("no_invite"));
             return false;
         }
         Iterator<Invite> it = invites.iterator();
@@ -185,10 +185,10 @@ public final class Parties {
             if (partyId == null ? i == last : i.partyId().equals(partyId)) {
                 it.remove();
                 ServerPlayer inviter = server.getPlayerList().getPlayer(i.inviter());
-                if (inviter != null) inviter.sendSystemMessage(err("declined", player.getDisplayName()));
+                if (inviter != null) com.skycraft.core.Notifier.message(inviter, err("declined", player.getDisplayName()));
             }
         }
-        player.sendSystemMessage(msg("you_declined"));
+        com.skycraft.core.Notifier.message(player, msg("you_declined"));
         sync(player);
         return true;
     }
@@ -198,11 +198,11 @@ public final class Parties {
         PartyManager m = PartyManager.get(server);
         Party party = m.partyOf(player.getUUID());
         if (party == null) {
-            player.sendSystemMessage(err("not_in_party"));
+            com.skycraft.core.Notifier.message(player, err("not_in_party"));
             return false;
         }
         removeFrom(server, party, player.getUUID(), player.getGameProfile().getName(), false);
-        player.sendSystemMessage(msg("you_left"));
+        com.skycraft.core.Notifier.message(player, msg("you_left"));
         return true;
     }
 
@@ -210,21 +210,21 @@ public final class Parties {
         MinecraftServer server = leader.server;
         Party party = PartyManager.get(server).partyOf(leader.getUUID());
         if (party == null) {
-            leader.sendSystemMessage(err("not_in_party"));
+            com.skycraft.core.Notifier.message(leader, err("not_in_party"));
             return false;
         }
         if (!party.leader.equals(leader.getUUID())) {
-            leader.sendSystemMessage(err("not_leader"));
+            com.skycraft.core.Notifier.message(leader, err("not_leader"));
             return false;
         }
         if (!party.has(target) || target.equals(leader.getUUID())) {
-            leader.sendSystemMessage(err("not_member"));
+            com.skycraft.core.Notifier.message(leader, err("not_member"));
             return false;
         }
         String name = party.nameOf(target);
         removeFrom(server, party, target, name, true);
         ServerPlayer kicked = server.getPlayerList().getPlayer(target);
-        if (kicked != null) kicked.sendSystemMessage(err("you_were_kicked"));
+        if (kicked != null) com.skycraft.core.Notifier.message(kicked, err("you_were_kicked"));
         return true;
     }
 
@@ -233,11 +233,11 @@ public final class Parties {
         PartyManager m = PartyManager.get(server);
         Party party = m.partyOf(leader.getUUID());
         if (party == null || !party.leader.equals(leader.getUUID())) {
-            leader.sendSystemMessage(err("not_leader"));
+            com.skycraft.core.Notifier.message(leader, err("not_leader"));
             return false;
         }
         if (!party.has(target)) {
-            leader.sendSystemMessage(err("not_member"));
+            com.skycraft.core.Notifier.message(leader, err("not_member"));
             return false;
         }
         party.leader = target;
@@ -269,7 +269,7 @@ public final class Parties {
     public static void chat(ServerPlayer player, String text) {
         Party party = partyOf(player);
         if (party == null) {
-            player.sendSystemMessage(err("not_in_party"));
+            com.skycraft.core.Notifier.message(player, err("not_in_party"));
             return;
         }
         Component line = Component.translatable("party.skycraft.chat", player.getDisplayName(), text).withStyle(ChatFormatting.AQUA);
@@ -281,7 +281,7 @@ public final class Parties {
         Party party = partyOf(player);
         if (party != null) {
             for (ServerPlayer other : onlineMembers(player.server, party)) {
-                if (other != player) other.sendSystemMessage(msg("member_online", player.getDisplayName()));
+                if (other != player) com.skycraft.core.Notifier.message(other, msg("member_online", player.getDisplayName()));
             }
             PROMPTS.put(player.getUUID(), player.server.getTickCount() + LOGIN_PROMPT_DELAY);
         }

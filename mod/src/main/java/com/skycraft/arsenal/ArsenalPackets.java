@@ -25,6 +25,7 @@ public final class ArsenalPackets {
     public static void register() {
         SkyNetwork.register(KillCam.class, NetworkDirection.PLAY_TO_CLIENT, KillCam::encode, KillCam::decode, KillCam::handle);
         SkyNetwork.register(BladeSwing.class, NetworkDirection.PLAY_TO_SERVER, BladeSwing::encode, BladeSwing::decode, BladeSwing::handle);
+        SkyNetwork.register(CollectArrow.class, NetworkDirection.PLAY_TO_SERVER, CollectArrow::encode, CollectArrow::decode, CollectArrow::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -102,6 +103,30 @@ public final class ArsenalPackets {
         static void handle(BladeSwing m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) ArtifactEvents.bloodskalSwing(player);
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Collect a stuck or floating arrow (or pull an arrow from a creature's body) via [F] or right-click. */
+    public record CollectArrow(int entityId) {
+        static void encode(CollectArrow m, FriendlyByteBuf buf) {
+            buf.writeVarInt(m.entityId);
+        }
+
+        static CollectArrow decode(FriendlyByteBuf buf) {
+            return new CollectArrow(buf.readVarInt());
+        }
+
+        static void handle(CollectArrow m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) {
+                net.minecraft.world.entity.Entity target = player.level().getEntity(m.entityId);
+                if (target instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+                    ArsenalEvents.tryPickupArrow(player, arrow);
+                } else if (target instanceof net.minecraft.world.entity.LivingEntity living) {
+                    ArsenalEvents.tryPullArrowFromBody(player, living);
+                }
+            }
             ctx.get().setPacketHandled(true);
         }
     }

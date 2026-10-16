@@ -97,35 +97,29 @@ public final class AmbientParticles {
         boolean weather = overworld && ClientWeather.active() && AtmosphereConfig.WEATHER_PARTICLES.get();
         WeatherProfile profile = ClientWeather.profile();
         float windStrength = weather ? ClientWeather.wind() : 0.2f;
-        float wx = ClientWeather.windX() * windStrength * 0.18f;
-        float wz = ClientWeather.windZ() * windStrength * 0.18f;
+        float clouds = weather ? ClientWeather.clouds() : (level.getRainLevel(1f) > 0.1f ? 0.85f : 0.25f);
+        float wx = ClientWeather.windX() * windStrength * 0.22f;
+        float wz = ClientWeather.windZ() * windStrength * 0.22f;
 
-        // ---- regional precipitation vanilla can't draw
-        if (weather && !underground) {
-            float snow = ClientWeather.snow();
-            if (snow > 0.02f) precipitation(level, rnd, cam, AtmosParticle.Kind.SNOW, snow * 20f * scale, budget, wx * 1.6f, wz * 1.6f);
-            float ash = ClientWeather.ash();
-            if (ash > 0.02f && VisualConfig.ASH.get()) precipitation(level, rnd, cam, AtmosParticle.Kind.ASH, ash * 12f * scale, budget, wx * 1.4f, wz * 1.4f);
+        // ---- regional precipitation vanilla can't draw (gated by cloud cover so it NEVER precipitates in bright sun)
+        if (weather && !underground && clouds >= 0.56f) {
+            float cloudGate = Mth.clamp((clouds - 0.56f) / 0.22f, 0f, 1f);
+            float snow = ClientWeather.snow() * cloudGate;
+            if (snow > 0.02f) precipitation(level, rnd, cam, AtmosParticle.Kind.SNOW, snow * 20f * scale, budget, wx * 1.8f, wz * 1.8f);
+            float ash = ClientWeather.ash() * cloudGate;
+            if (ash > 0.03f && VisualConfig.ASH.get()) precipitation(level, rnd, cam, AtmosParticle.Kind.ASH, ash * 12f * scale, budget, wx * 1.5f, wz * 1.5f);
             float sand = ClientWeather.sand();
-            if (sand > 0.02f && VisualConfig.SAND.get()) blownSand(level, rnd, cam, sand * 16f * scale, budget, wx * 2.2f, wz * 2.2f);
+            if (sand > 0.03f && VisualConfig.SAND.get()) blownSand(level, rnd, cam, sand * 16f * scale, budget, wx * 2.4f, wz * 2.4f);
         }
 
-        // ---- the climate's light ambient particles, even in clear weather
-        if (overworld && !underground) {
-            switch (profile.ambient) {
-                case ASH -> {
-                    if (VisualConfig.ASH.get()) precipitation(level, rnd, cam, AtmosParticle.Kind.ASH, 0.6f * scale, budget, wx, wz);
-                }
-                case SAND -> {
-                    if (VisualConfig.SAND.get() && windStrength > 0.3f) blownSand(level, rnd, cam, windStrength * 2f * scale, budget, wx * 2.2f, wz * 2.2f);
-                }
-                default -> {}
-            }
+        // ---- low ground-skimming sand/snow only during strong wind + active weather
+        if (overworld && !underground && profile.ambient == WeatherProfile.Ambient.SAND && VisualConfig.SAND.get() && windStrength > 0.52f && clouds > 0.45f) {
+            blownSand(level, rnd, cam, (windStrength - 0.45f) * 3f * scale, budget, wx * 2.4f, wz * 2.4f);
         }
-        if (overworld && !underground && snowyGround && VisualConfig.DRIFTING_SNOW.get() && windStrength > 0.25f) {
-            driftingSnow(level, rnd, cam, windStrength * 3f * scale, budget, wx * 2.5f, wz * 2.5f);
+        if (overworld && !underground && snowyGround && VisualConfig.DRIFTING_SNOW.get() && windStrength > 0.52f && (ClientWeather.snow() > 0.05f || clouds > 0.62f)) {
+            driftingSnow(level, rnd, cam, (windStrength - 0.45f) * 4f * scale, budget, wx * 2.6f, wz * 2.6f);
         }
-        if (VisualConfig.FALLING_LEAVES.get() && !underground) fallingLeaves(mc, level, rnd, cam, scale, budget, wx, wz);
+        if (VisualConfig.FALLING_LEAVES.get() && !underground) fallingLeaves(mc, level, rnd, cam, scale, budget, wx, wz, windStrength);
         if (VisualConfig.FIREFLIES.get() && overworld && warmForest && !underground) fireflies(level, rnd, cam, scale, budget);
         if (VisualConfig.MARSH_WISPS.get() && overworld && !underground && (swampHere || profile.ambient == WeatherProfile.Ambient.MARSH)) {
             marshWisps(level, rnd, cam, scale, budget, wx, wz);
@@ -227,9 +221,10 @@ public final class AmbientParticles {
 
     // ------------------------------------------------------------------ nature
 
-    /** Probes a few columns near the camera for leaves with air below and lets a leaf go now and then. */
-    private static void fallingLeaves(Minecraft mc, ClientLevel level, RandomSource rnd, Vec3 cam, float scale, int budget, float wx, float wz) {
-        int tries = scale >= 1.0f ? 3 : 2;
+    /** Probes a few columns near the camera for leaves with air below and lets a leaf go now and then, more often in wind. */
+    private static void fallingLeaves(Minecraft mc, ClientLevel level, RandomSource rnd, Vec3 cam, float scale, int budget, float wx, float wz, float windStrength) {
+        int tries = scale >= 1.0f ? (windStrength > 0.55f ? 5 : 3) : 2;
+        float dropChance = 0.14f + 0.28f * windStrength;
         int cx = Mth.floor(cam.x), cy = Mth.floor(cam.y), cz = Mth.floor(cam.z);
         for (int t = 0; t < tries && room(budget); t++) {
             int x = cx + rnd.nextInt(25) - 12;
@@ -238,10 +233,10 @@ public final class AmbientParticles {
                 BlockState s = level.getBlockState(POS.set(x, y, z));
                 if (!s.is(BlockTags.LEAVES)) continue;
                 if (!level.getBlockState(POS.set(x, y - 1, z)).isAir()) break;
-                if (rnd.nextFloat() > 0.18f) break;
+                if (rnd.nextFloat() > dropChance) break;
                 int color = mc.getBlockColors().getColor(s, level, POS.set(x, y, z), 0);
                 if (color == -1) color = s.getMapColor(level, POS).col;
-                AtmosParticle p = spawn(level, AtmosParticle.Kind.LEAF, x + rnd.nextDouble(), y - 0.05, z + rnd.nextDouble(), 0, -0.03, 0);
+                AtmosParticle p = spawn(level, AtmosParticle.Kind.LEAF, x + rnd.nextDouble(), y - 0.05, z + rnd.nextDouble(), wx * 0.5, -0.03, wz * 0.5);
                 if (p != null) p.wind(wx, wz).color(shade(color, 0.85f + rnd.nextFloat() * 0.25f));
                 break;
             }

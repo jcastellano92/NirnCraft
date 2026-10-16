@@ -3,6 +3,7 @@ package com.skycraft.survival.fishing;
 import com.skycraft.core.Skill;
 import com.skycraft.inventory.Inv;
 import com.skycraft.network.SkyNetwork;
+import com.skycraft.perk.Perks;
 import com.skycraft.skills.Progression;
 import com.skycraft.survival.SurvivalConfig;
 import com.skycraft.survival.SurvivalPackets;
@@ -15,13 +16,18 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.animal.AbstractFish;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -40,18 +46,7 @@ import java.util.List;
 
 /**
  * The bobber of a {@link SkyFishingRodItem} ({@code skycraft:fishing_hook}). It flies and floats like the vanilla
- * hook (same renderer), but the fishing is Skyrim's:
- *
- * <ol>
- *     <li>Wait: a fish takes {@code 6-20 s} to come (faster with a better rod, bait, rain, Fishing skill, at a fishing
- *     spot; slower in fished-out water, see {@link FishStock}). It may nibble once or twice first; reeling in then
- *     scares it away.</li>
- *     <li>Bite: the bobber is pulled under and the HUD shows the reel bar: a marker sweeps across it and you must reel
- *     in (use the rod again) while it is inside the catch zone. The zone is wider with Fishing skill and better rods,
- *     the marker faster for rarer fish. After two sweeps the fish gets away.</li>
- *     <li>Catch: the {@link FishSpecies} that lives in this water ({@link Fishing#pick}) flies out to you. The Forge
- *     {@link ItemFishedEvent} is posted, so the Fishing skill's XP and perks (skills/LifeSkills) apply.</li>
- * </ol>
+ * hook (same renderer), with physical fish approaching the bobber and a Stardew-style catch bar minigame.
  */
 public class SkyFishingHook extends FishingHook {
     private static final EntityDataAccessor<Boolean> BITING = SynchedEntityData.defineId(SkyFishingHook.class, EntityDataSerializers.BOOLEAN);
@@ -75,9 +70,15 @@ public class SkyFishingHook extends FishingHook {
     private int outOfWaterTicks;
     private int biteMisses;
     private FishSpecies species;
+    private Mob approachingFish;
+    private boolean spawnedDecoy;
 
     public SkyFishingHook(EntityType<? extends SkyFishingHook> type, Level level) {
         super(type, level);
+    }
+
+    public boolean isBiting() {
+        return this.entityData.get(BITING);
     }
 
     public SkyFishingHook(Player player, Level level, SkyFishingRodItem.Tier tier, int lure, int luck) {
@@ -207,11 +208,12 @@ public class SkyFishingHook extends FishingHook {
         if (!(this.getPlayerOwner() instanceof ServerPlayer player)) return;
         if (timer < 0) startWaiting(level, player, pos, true);
         timer--;
+        tickApproachingFish(level, pos);
         switch (phase) {
             case WAIT -> {
                 // the fish's wake approaching the bobber
-                if (timer < 40 && timer > 0 && this.random.nextFloat() < 0.4f) {
-                    double d = timer * 0.1;
+                if (timer < 55 && timer > 0 && this.random.nextFloat() < 0.45f) {
+                    double d = timer * 0.08;
                     double x = this.getX() + Mth.sin(approachAngle) * d;
                     double z = this.getZ() + Mth.cos(approachAngle) * d;
                     double y = pos.getY() + 1.0;
@@ -245,6 +247,104 @@ public class SkyFishingHook extends FishingHook {
         }
     }
 
+    /**
+     * Recruits a nearby wild fish entity (or spawns a temporary visual decoy fish in the water) and steers it
+     * to circle, nibble, and latch onto the bobber so the angler sees a real fish approach.
+     */
+    private void tickApproachingFish(ServerLevel level, BlockPos pos) {
+        if (approachingFish != null && (!approachingFish.isAlive() || approachingFish.isRemoved()
+                || approachingFish.distanceToSqr(this) > 36.0 * 36.0)) {
+            releaseApproachingFish(false);
+        }
+        if (approachingFish == null && (phase != Phase.WAIT || timer <= 85)) {
+            List<WaterAnimal> nearby = level.getEntitiesOfClass(WaterAnimal.class, this.getBoundingBox().inflate(14.0, 6.0, 14.0),
+                    e -> e instanceof AbstractFish && e.isAlive() && e.isInWater()
+                            && !e.getPersistentData().getBoolean("skycraft_hook_target"));
+            if (!nearby.isEmpty()) {
+                approachingFish = nearby.get(0);
+                approachingFish.getPersistentData().putBoolean("skycraft_hook_target", true);
+                spawnedDecoy = false;
+            } else if (timer <= 70 || phase != Phase.WAIT) {
+                double spawnDist = 3.5 + this.random.nextDouble() * 2.0;
+                double sx = this.getX() + Mth.sin(approachAngle) * spawnDist;
+                double sz = this.getZ() + Mth.cos(approachAngle) * spawnDist;
+                double sy = this.getY() - 0.35;
+                BlockPos spawnPos = BlockPos.containing(sx, sy, sz);
+                if (!level.getFluidState(spawnPos).is(FluidTags.WATER)) {
+                    sx = this.getX() + Mth.sin(approachAngle) * 1.2;
+                    sz = this.getZ() + Mth.cos(approachAngle) * 1.2;
+                    sy = this.getY() - 0.25;
+                }
+                Mob decoy = (this.random.nextBoolean() ? EntityType.SALMON : EntityType.COD).create(level);
+                if (decoy != null) {
+                    decoy.moveTo(sx, sy, sz, this.random.nextFloat() * 360f, 0f);
+                    decoy.setInvulnerable(true);
+                    decoy.setPersistenceRequired();
+                    decoy.getPersistentData().putBoolean("skycraft_hook_decoy", true);
+                    decoy.getPersistentData().putBoolean("skycraft_hook_target", true);
+                    if (level.addFreshEntity(decoy)) {
+                        approachingFish = decoy;
+                        spawnedDecoy = true;
+                    }
+                }
+            }
+        }
+        if (approachingFish == null) return;
+
+        Vec3 hookPos = new Vec3(this.getX(), this.getY() - 0.2, this.getZ());
+        Vec3 targetPos;
+        double speed;
+        if (phase == Phase.WAIT) {
+            double radius = Math.max(0.45, Math.min(4.2, timer * 0.055));
+            float orbit = approachAngle + timer * 0.045f;
+            targetPos = hookPos.add(Mth.sin(orbit) * radius, -0.1, Mth.cos(orbit) * radius);
+            speed = 0.09;
+        } else if (phase == Phase.NIBBLE) {
+            double dart = timer > 5 ? 0.15 : 0.75;
+            targetPos = hookPos.add(Mth.sin(approachAngle) * dart, -0.05, Mth.cos(approachAngle) * dart);
+            speed = 0.16;
+        } else {
+            float thrash = this.tickCount * 0.65f;
+            targetPos = hookPos.add(Mth.sin(thrash) * 0.22, -0.05, Mth.cos(thrash) * 0.22);
+            speed = 0.18;
+        }
+
+        Vec3 toTarget = targetPos.subtract(approachingFish.position());
+        double dist = toTarget.length();
+        if (dist > 0.02) {
+            Vec3 step = toTarget.scale(Math.min(speed, dist * 0.35) / dist);
+            approachingFish.setDeltaMovement(approachingFish.getDeltaMovement().scale(0.4).add(step));
+        }
+        Vec3 toHook = hookPos.subtract(approachingFish.position());
+        if (toHook.horizontalDistanceSqr() > 1.0E-4) {
+            float yaw = (float) (Mth.atan2(toHook.z, toHook.x) * Mth.RAD_TO_DEG) - 90f;
+            approachingFish.setYRot(yaw);
+            approachingFish.yBodyRot = yaw;
+            approachingFish.yHeadRot = yaw;
+        }
+    }
+
+    private void releaseApproachingFish(boolean caught) {
+        if (approachingFish == null) return;
+        approachingFish.getPersistentData().remove("skycraft_hook_target");
+        if (spawnedDecoy || caught) {
+            if (!approachingFish.isRemoved()) approachingFish.discard();
+        } else if (approachingFish.isAlive()) {
+            Vec3 away = approachingFish.position().subtract(this.position()).normalize().scale(0.35);
+            approachingFish.setDeltaMovement(away.x, -0.05, away.z);
+        }
+        approachingFish = null;
+        spawnedDecoy = false;
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (!this.level().isClientSide) {
+            releaseApproachingFish(false);
+        }
+        super.remove(reason);
+    }
+
     private void startWaiting(ServerLevel level, ServerPlayer player, BlockPos pos, boolean first) {
         phase = Phase.WAIT;
         this.entityData.set(BITING, false);
@@ -272,11 +372,13 @@ public class SkyFishingHook extends FishingHook {
         species = Fishing.pick(waters, luck, this.random);
         phase = Phase.BITE;
         int skill = Fishing.skill(player);
-        int width = Mth.clamp(Math.round((130 + skill * 1.2f) * tier.zone) - species.rarity() * 25, 70, 420);
-        zoneStart = 80 + this.random.nextInt(Math.max(1, 840 - width));
-        zoneEnd = zoneStart + width;
-        period = Mth.clamp(46 - species.rarity() * 8 - (species.maxCm() >= 120 ? 4 : 0), 26, 50);
-        window = period * 3 + 30;
+        int steadyRank = Perks.rank(player, "fishing.steady_reel");
+        float steadyMul = 1.0f + 0.20f * steadyRank;
+        int barSize = Mth.clamp(Math.round((240 + skill * 1.4f) * tier.zone * steadyMul) - species.rarity() * 18, 180, 480);
+        zoneStart = steadyRank;
+        zoneEnd = barSize;
+        period = species.rarity() * 100 + Mth.clamp(species.maxCm(), 10, 200);
+        window = 400;
         timer = window;
         biteStart = level.getGameTime();
         biteMisses = 0;
@@ -287,11 +389,32 @@ public class SkyFishingHook extends FishingHook {
         level.sendParticles(ParticleTypes.FISHING, this.getX(), y, this.getZ(), 6, 0.25, 0, 0.25, 0.2);
         boolean minigame = SurvivalConfig.FISHING_MINIGAME.get();
         SkyNetwork.sendToPlayer(player, new SurvivalPackets.Bite((byte) 1, (short) (minigame ? zoneStart : 0), (short) (minigame ? zoneEnd : 1000),
-                (short) period, (short) window, (byte) 0, ""));
+                (short) period, (short) window, (byte) 0, "skycraft:" + species.id()));
+    }
+
+    /** Completes the Stardew-style catch bar minigame reported by the client. */
+    public void completeMinigame(ServerPlayer player, boolean caught) {
+        if (this.level().isClientSide || phase != Phase.BITE || species == null) return;
+        InteractionHand hand = player.getMainHandItem().canPerformAction(ToolActions.FISHING_ROD_CAST)
+                ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+        ItemStack rod = player.getItemInHand(hand);
+        if (caught) {
+            int damage = land(player, rod);
+            if (this.onGround()) damage = Math.max(damage, 2);
+            if (!rod.isEmpty()) rod.hurtAndBreak(damage, player, p -> p.broadcastBreakEvent(hand));
+            this.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 1.0f);
+            this.discard();
+        } else {
+            escape(player, (byte) 0);
+            if (!rod.isEmpty()) rod.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+            this.discard();
+        }
     }
 
     /** The fish got away: {@code result} 0 out of the water, 2 too early or off the zone, 3 too late. */
     private void escape(Player player, byte result) {
+        releaseApproachingFish(false);
         if (player instanceof ServerPlayer sp && (phase == Phase.BITE || result == 2)) {
             SkyNetwork.sendToPlayer(sp, new SurvivalPackets.Bite((byte) 0, (short) 0, (short) 0, (short) 0, (short) 0, result, ""));
         }
@@ -330,44 +453,23 @@ public class SkyFishingHook extends FishingHook {
             this.level().broadcastEntityEvent(this, (byte) 31);
             damage = hooked instanceof ItemEntity ? 3 : 5;
         } else if (phase == Phase.BITE && species != null && player instanceof ServerPlayer sp) {
-            if (inZone(sp)) {
+            if (!SurvivalConfig.FISHING_MINIGAME.get()) {
                 damage = land(sp, rod);
                 if (this.onGround()) damage = Math.max(damage, 2);
                 this.discard();
                 return damage;
-            } else {
-                if (++biteMisses < 2 && timer > 25) {
-                    // Missed click: penalty to remaining time, but allow another attempt
-                    timer = Math.max(15, timer - 20);
-                    this.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.25f, 1.4f);
-                    return 0;
-                } else {
-                    escape(sp, (byte) 2);
-                    if (this.onGround()) damage = 2;
-                    this.discard();
-                    return damage;
-                }
             }
+            return 0;
         } else if (phase == Phase.NIBBLE) {
             escape(player, (byte) 2);
         }
+        releaseApproachingFish(false);
         if (this.onGround()) damage = 2;
         this.discard();
         return damage;
     }
 
-    /** Where the marker was when the player clicked (their ping taken off), within a little slack. */
-    private boolean inZone(ServerPlayer player) {
-        if (!SurvivalConfig.FISHING_MINIGAME.get()) return true;
-        int lag = Mth.clamp(player.latency / 50, 0, 10);
-        long elapsed = this.level().getGameTime() - biteStart - lag;
-        float speed = 2000f / period;
-        float slack = speed * 1.5f;
-        float pos = markerAt(elapsed, period);
-        return pos >= zoneStart - slack && pos <= zoneEnd + slack;
-    }
-
-    /** Marker position 0..1000 after {@code ticks}: it sweeps right then back left once per {@code period}. */
+    /** Marker position 0..1000 after {@code ticks}: kept for compatibility. */
     public static float markerAt(float ticks, int period) {
         float phase = (ticks % period + period) % period / period;
         float tri = phase < 0.5f ? phase * 2f : 2f - phase * 2f;
@@ -375,6 +477,7 @@ public class SkyFishingHook extends FishingHook {
     }
 
     private int land(ServerPlayer player, ItemStack rod) {
+        releaseApproachingFish(true);
         ServerLevel level = player.serverLevel();
         ItemStack fish = Fishing.catchOf(species, this.random, false);
         List<ItemStack> drops = new ArrayList<>();

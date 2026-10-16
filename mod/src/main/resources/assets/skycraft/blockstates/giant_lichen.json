@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/giant_lichen"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/giant_lichen_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/giant_lichen"
+      },
+      {
+        "model": "skycraft:block/giant_lichen",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/giant_lichen",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/giant_lichen",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/giant_lichen_harvested"
+      },
+      {
+        "model": "skycraft:block/giant_lichen_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/giant_lichen_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/giant_lichen_harvested",
+        "y": 270
+      }
+    ]
   }
 }

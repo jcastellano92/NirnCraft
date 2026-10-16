@@ -392,17 +392,6 @@ public final class RestManager {
             player.connection.teleport(player.getX(), y, player.getZ(), Mth.wrapDegrees(-lyingYaw), 35f);
             s.anchor = new Vec3(player.getX(), y, player.getZ());
             s.stand = s.anchor;
-        } else {
-            Marker seat = new Marker(EntityType.MARKER, level);
-            // the rider sits 0.35 below the marker; the hips end up at about ground level
-            seat.setPos(player.getX(), player.getY() - 0.25, player.getZ());
-            seat.addTag(SEAT_TAG);
-            level.addFreshEntity(seat);
-            if (!player.startRiding(seat, true)) {
-                seat.discard();
-                return false;
-            }
-            s.seat = seat.getUUID();
         }
         SESSIONS.put(player.getUUID(), s);
         SurvivalMode.setRestState(player.getUUID(), restLevel(mode));
@@ -828,7 +817,7 @@ public final class RestManager {
             if (!com.skycraft.combat.RespawnPoints.isProvisional(player, bed)
                     && !com.skycraft.crime.Ownership.isOwnedByOther(player, player.level(), bed)) {
                 com.skycraft.combat.RespawnPoints.setOwned(player, player.level().dimension(), bed);
-                if (!same) player.displayClientMessage(Component.translatable("block.minecraft.set_spawn"), true);
+                if (!same) Notifier.message(player, Component.translatable("block.minecraft.set_spawn"));
             }
         }
         int ticks = WorldConfig.WELL_RESTED_TICKS.get();
@@ -890,7 +879,7 @@ public final class RestManager {
                     disturbed = true; // knocked or pushed away
                     why = Component.translatable("world.skycraft.rest.interrupted");
                 } else if (s.mode == RestLogic.WAIT) {
-                    if (s.seat == null || !p.isPassenger()) why = Component.empty(); // stood up (sneak) or dismounted
+                    if ((s.seat != null && !p.isPassenger()) || (settled && p.isShiftKeyDown())) why = Component.empty();
                 } else if (!p.isSleeping() || p.isShiftKeyDown() || p.isPassenger()) {
                     why = Component.empty(); // left the bed
                 }

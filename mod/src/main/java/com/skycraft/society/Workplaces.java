@@ -165,10 +165,15 @@ public final class Workplaces {
         if (Marriage.isSpouse(npc)) return npc.getHome();
         BlockPos cached = npc.getWorkplace();
         if (cached != null) return cached;
+        if (npc.getPersistentData().contains(Housing.WORK_KEY)) {
+            BlockPos assigned = BlockPos.of(npc.getPersistentData().getLong(Housing.WORK_KEY));
+            npc.setWorkplace(assigned);
+            return assigned;
+        }
         Kind kind = kindFor(npc.role());
         if (kind == null) return null;
         BlockPos home = npc.getHome() != null ? npc.getHome() : npc.blockPosition();
-        BlockPos found = kind == Kind.INN ? innFor(npc) : find(level, home, kind);
+        BlockPos found = kind == Kind.INN ? innFor(npc) : findForNpc(level, npc, home, kind);
         // nothing better: work around the home (marked so we don't search again every routine step)
         npc.setWorkplace(found != null ? found : home);
         return npc.getWorkplace();
@@ -195,6 +200,23 @@ public final class Workplaces {
         if (inn == null) inn = home;
         npc.setInn(inn);
         return inn;
+    }
+
+    @Nullable
+    private static BlockPos findForNpc(ServerLevel level, NpcEntity npc, BlockPos near, Kind kind) {
+        java.util.List<BlockPos> candidates = anchors(level, near, kind, SEARCH * 2);
+        if (!candidates.isEmpty()) {
+            for (BlockPos cand : candidates) {
+                boolean claimed = !level.getEntitiesOfClass(NpcEntity.class,
+                        new net.minecraft.world.phys.AABB(cand).inflate(48, 16, 48),
+                        other -> other != npc && other.isAlive()
+                                && ((other.getWorkplace() != null && other.getWorkplace().distSqr(cand) <= 4.0)
+                                || other.blockPosition().distSqr(cand) <= 2.25)).isEmpty();
+                if (!claimed) return cand;
+            }
+            return candidates.get(0);
+        }
+        return find(level, near, kind);
     }
 
     @Nullable

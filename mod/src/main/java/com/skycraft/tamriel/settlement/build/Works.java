@@ -103,6 +103,9 @@ public final class Works {
                 c.wset(x, wy + 1, z, p.planks);
                 return;
             }
+            if (s.floor != Spec.UNSET && g < s.floor - 1 && g >= s.floor - 12) {
+                g = s.floor;
+            }
             BlockState top = c.wget(x, g, z);
             if (top.is(Blocks.WATER)) return;
             // main streets are paved, the rest are beaten paths with the odd patch of gravel or stone
@@ -241,23 +244,85 @@ public final class Works {
     // ------------------------------------------------------------------ market
 
     public static void stall(Canvas c, Palette p, Spec s) {
-        if (!c.recording()) c.clearPlants(-1, 1, -1, 3, 5, 3);
-        for (int x = 0; x < 3; x++) for (int z = 0; z < 3; z++) {
-            c.set(x, 0, z, p.plaza);
-            c.foundation(x, -1, z, p.foundation, 4);
+        int w = Math.max(4, s.w), d = Math.max(3, s.d);
+        if (!c.recording()) c.clearPlants(-1, 1, -1, w, 5, d);
+        for (int x = 0; x < w; x++) {
+            for (int z = 0; z < d; z++) {
+                boolean edge = x == 0 || z == 0 || x == w - 1 || z == d - 1;
+                c.set(x, 0, z, edge ? p.plaza2 : p.plaza);
+                c.foundation(x, -1, z, p.foundation, 4);
+            }
         }
-        int[][] posts = {{0, 0}, {2, 0}, {0, 2}, {2, 2}};
-        for (int[] q : posts) for (int y = 1; y <= 3; y++) c.set(q[0], y, q[1], p.fence);
-        BlockState[] cloth = {p.accent, B.s(Blocks.RED_WOOL), B.s(Blocks.YELLOW_WOOL), B.s(Blocks.GREEN_WOOL), B.s(Blocks.WHITE_WOOL)};
-        BlockState a = cloth[c.roll(0, 0, 0, 5, cloth.length)];
-        for (int x = -1; x <= 3; x++) for (int z = 0; z < 3; z++) c.set(x, 4, z, (x + z) % 2 == 0 ? a : B.s(Blocks.WHITE_WOOL));
-        // counter on the front with goods on it
-        Props.barrel(c, 0, 1, 0, "store");
-        c.set(1, 1, 0, p.planks);
-        c.set(2, 1, 0, B.s(Blocks.HAY_BLOCK));
-        BlockState[] goods = {Props.cheese(), B.s(Blocks.MELON), B.s(Blocks.PUMPKIN), B.s(Blocks.FLOWER_POT), B.s(Blocks.DECORATED_POT)};
-        c.set(1, 2, 0, goods[c.roll(1, 2, 0, 9, goods.length)]);
-        c.anchor(AnchorType.MERCHANT, 1, 1, 1);
+        // 4 sturdy corner posts rising from ground (y=1..3) directly into the awning corners (y=4)
+        int[][] posts = {{0, 0}, {w - 1, 0}, {0, d - 1}, {w - 1, d - 1}};
+        for (int[] q : posts) {
+            for (int y = 1; y <= 3; y++) c.set(q[0], y, q[1], p.fence);
+        }
+
+        int kind = Math.floorMod(s.variant + c.roll(0, 0, 0, 5, 6), 6);
+        BlockState clothA = switch (kind) {
+            case 0 -> B.s(Blocks.RED_WOOL);
+            case 1 -> B.s(Blocks.YELLOW_WOOL);
+            case 2 -> B.s(Blocks.ORANGE_WOOL);
+            case 3 -> B.s(Blocks.GREEN_WOOL);
+            case 4 -> B.s(Blocks.BLUE_WOOL);
+            default -> p.accent;
+        };
+        BlockState clothB = B.s(Blocks.WHITE_WOOL);
+
+        // Striped canopy supported directly by the 4 corner posts (no unsupported overhangs)
+        for (int x = 0; x < w; x++) {
+            for (int z = 0; z < d; z++) {
+                c.set(x, 4, z, (x % 2 == 0) ? clothA : clothB);
+            }
+        }
+        int midX = w / 2, midZ = d / 2;
+        c.set(midX, 3, midZ, B.s(Blocks.LANTERN).setValue(BlockStateProperties.HANGING, true));
+
+        // Front counter (z = 0, x = 1 .. w - 2) with upside-down stairs and a pass-through flap
+        for (int x = 1; x < w - 1; x++) {
+            if (x == w - 2 && w >= 4) {
+                c.set(x, 1, 0, B.with(B.face(p.trapdoor, Direction.WEST), BlockStateProperties.OPEN, true));
+            } else {
+                c.set(x, 1, 0, B.stair(p.stairs, Direction.SOUTH, true));
+            }
+        }
+        // Rear stock barrel & display shelf (z = d - 1)
+        Props.barrel(c, 1, 1, d - 1, "store");
+        if (w - 2 > 1) {
+            c.set(w - 2, 1, d - 1, B.slab(p.slab, true));
+        }
+
+        // Trade-specific wares on the front counter and rear shelf
+        switch (kind) {
+            case 0 -> { // Greengrocer / Produce
+                c.set(1, 2, 0, B.s(Blocks.MELON));
+                if (w - 2 > 1) c.set(w - 2, 2, d - 1, B.s(Blocks.PUMPKIN));
+                c.set(0, 1, 1, B.s(Blocks.HAY_BLOCK));
+            }
+            case 1 -> { // Bakery & Provisions
+                c.set(1, 2, 0, Props.cheese());
+                if (w - 2 > 1) c.set(w - 2, 2, d - 1, B.s(Blocks.CAKE));
+                Props.candles(c, 1, 2, d - 1, 2);
+            }
+            case 2 -> { // Blacksmith & Tools
+                c.set(1, 2, 0, B.s(Blocks.ANVIL));
+                if (w - 2 > 1) c.set(w - 2, 2, d - 1, B.face(Props.grindstone(), Direction.NORTH));
+            }
+            case 3 -> { // Apothecary & Herbs
+                c.set(1, 2, 0, B.s(Blocks.BREWING_STAND));
+                if (w - 2 > 1) Props.pot(c, w - 2, 2, d - 1, 17);
+            }
+            case 4 -> { // Textiles & Tailoring
+                c.set(1, 2, 0, B.s(Blocks.WHITE_CARPET));
+                if (w - 2 > 1) c.set(w - 2, 2, d - 1, B.face(B.s(Blocks.LOOM), Direction.NORTH));
+            }
+            default -> { // Curiosities & Pottery
+                c.set(1, 2, 0, B.s(Blocks.DECORATED_POT));
+                if (w - 2 > 1) c.set(w - 2, 2, d - 1, B.s(Blocks.AMETHYST_CLUSTER));
+            }
+        }
+        c.anchor(AnchorType.MERCHANT, midX, 1, midZ);
     }
 
     // ------------------------------------------------------------------ farming
@@ -494,7 +559,7 @@ public final class Works {
         int open = Math.max(3, w - 6);
         int ox0 = (w - open) / 2, ox1 = ox0 + open - 1;
         int archH = Math.min(h - 4, 6);
-        if (!c.recording()) c.clear(-1, 1, -1, w, h + 3, d);
+        if (!c.recording()) c.clear(0, 1, -1, w - 1, h + 3, d);
         boolean palisade = s.has(Spec.PALISADE);
         BlockState wallB = palisade ? B.axis(p.cityWall, Direction.Axis.Y) : p.cityWall;
         for (int x = 0; x < w; x++) {
@@ -547,7 +612,6 @@ public final class Works {
         for (int y = 1; y < h; y++) c.air(1, y, d - 1 - 2);
         c.anchor(AnchorType.GUARD, ox0 - 1, 1, -2);
         c.anchor(AnchorType.GUARD, ox1 + 1, 1, -2);
-        c.anchor(AnchorType.GUARD, (ox0 + ox1) / 2, h + 1, d / 2);
         c.anchor(AnchorType.GATE, (ox0 + ox1) / 2, 1, d / 2);
     }
 

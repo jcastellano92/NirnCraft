@@ -27,7 +27,14 @@ public final class B {
     private B() {}
 
     public static BlockState s(Block b) {
-        return b.defaultBlockState();
+        BlockState st = b.defaultBlockState();
+        if (b == Blocks.CHISELED_BOOKSHELF) {
+            for (int slot : new int[]{0, 1, 2, 4, 5}) {
+                var prop = net.minecraft.world.level.block.ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot);
+                if (st.hasProperty(prop)) st = st.setValue(prop, true);
+            }
+        }
+        return st;
     }
 
     /** A block by registry id, or {@code fallback} when it isn't registered. */
@@ -36,7 +43,8 @@ public final class B {
         if (cached != null) return cached;
         ResourceLocation rl = ResourceLocation.tryParse(id);
         Block b = rl != null && ForgeRegistries.BLOCKS.containsKey(rl) ? ForgeRegistries.BLOCKS.getValue(rl) : null;
-        BlockState st = (b == null || b == Blocks.AIR) ? fallback.defaultBlockState() : b.defaultBlockState();
+        Block target = (b == null || b == Blocks.AIR) ? fallback : b;
+        BlockState st = s(target);
         BY_ID.put(id, st);
         return st;
     }

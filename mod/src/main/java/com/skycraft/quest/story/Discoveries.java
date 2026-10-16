@@ -111,8 +111,8 @@ public final class Discoveries {
                 trigger(p, def);
             } else if (h <= HINT) {
                 if (HINTED.computeIfAbsent(p.getUUID(), k -> new HashSet<>()).add(def.id)) {
-                    p.displayClientMessage(Component.translatableWithFallback("story.skycraft.find.hint", "Something here catches your eye.")
-                            .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), true);
+                    com.skycraft.core.Notifier.message(p, Component.translatableWithFallback("story.skycraft.find.hint", "Something here catches your eye.")
+                            .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 }
             } else if (h > BUILD - 4) {
                 Set<String> hinted = HINTED.get(p.getUUID());

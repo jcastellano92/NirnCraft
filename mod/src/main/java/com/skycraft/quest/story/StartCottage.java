@@ -454,6 +454,19 @@ public final class StartCottage {
             CACHE.put(level.getSeed(), new Optional2(site));
         }
         build(level, site);
+        try {
+            for (long k : CottageTerrain.pathChunks(level, site)) {
+                level.getChunk(ChunkPos.getX(k), ChunkPos.getZ(k));
+            }
+            CottageTerrain. PathReport pr = CottageTerrain.buildPath(level, site);
+            d.pathBuilt = pr.built();
+            d.pathCells = pr.cells();
+            d.pathBreaks = pr.discontinuities();
+            d.pathGaps = pr.airGaps();
+            d.pathJoins = pr.joinsRoad();
+        } catch (RuntimeException ex) {
+            com.skycraft.Skycraft.LOGGER.warn("Initial cottage path build deferred to tickPrep", ex);
+        }
         d.floorY = floor;
         d.built = true;
         d.setDirty();

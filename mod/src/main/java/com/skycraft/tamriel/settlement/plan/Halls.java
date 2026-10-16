@@ -155,6 +155,7 @@ public final class Halls {
             jail.flags |= Spec.SIGN;
             Spec ref = keep(plan, p.id());
             boolean ok = ref != null && around(plan, jail, ref);
+            if (!ok) ok = alongStreet(plan, jail);
             if (!ok) ok = ring(plan, jail, 18, plan.radius - 6);
             if (!ok) outside(plan, jail);
         }
@@ -163,7 +164,7 @@ public final class Halls {
             hall.name = h.faction();
             hall.flags |= Spec.UPPER | Spec.SIGN;
             hall.margin = 2;
-            boolean ok = !h.outside() && ring(plan, hall, 16, plan.radius - 6);
+            boolean ok = !h.outside() && (alongStreet(plan, hall) || ring(plan, hall, 16, plan.radius - 6));
             if (!ok) outside(plan, hall);
         }
     }
@@ -219,6 +220,48 @@ public final class Halls {
         }
         plan.relaxed = false;
         s.minFloor = Spec.UNSET;
+        return false;
+    }
+
+    /** Places {@code s} on a free lot along an existing street, facing the road. */
+    static boolean alongStreet(Plan plan, Spec s) {
+        List<Spec> streets = new ArrayList<>();
+        for (Spec o : plan.specs) {
+            if (o.kind == Archetype.STREET) streets.add(o);
+        }
+        if (streets.isEmpty()) return false;
+        streets.sort((a, b) -> Boolean.compare(b.has(Spec.MAJOR), a.has(Spec.MAJOR)));
+        int setback = s.d / 2 + Math.max(1, s.margin) + 2;
+        for (int pass = 0; pass < 2; pass++) {
+            plan.relaxed = pass == 1;
+            for (Spec st : streets) {
+                double dx = st.x2 - st.x, dz = st.z2 - st.z;
+                double len = Math.hypot(dx, dz);
+                if (len < s.w + 4) continue;
+                double ux = dx / len, uz = dz / len;
+                double nx = -uz, nz = ux;
+                int dist = st.w / 2 + setback;
+                int steps = Math.max(1, (int) ((len - s.w) / 6));
+                for (int k = 0; k <= steps; k++) {
+                    double t = s.w / 2.0 + (len - s.w) * (k / (double) Math.max(1, steps));
+                    for (int side : new int[]{1, -1}) {
+                        int wx = (int) Math.round(st.x + ux * t + nx * side * dist);
+                        int wz = (int) Math.round(st.z + uz * t + nz * side * dist);
+                        if (Math.hypot(wx - plan.cx, wz - plan.cz) > plan.radius - 4) continue;
+                        Direction face = Math.abs(nx) >= Math.abs(nz)
+                                ? (-nx * side > 0 ? Direction.EAST : Direction.WEST)
+                                : (-nz * side > 0 ? Direction.SOUTH : Direction.NORTH);
+                        Spec c = Spec.at(s.kind, wx, wz, face).size(s.w, s.d, s.h);
+                        copy(s, c);
+                        if (plan.place(c, 2) != null) {
+                            plan.relaxed = false;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        plan.relaxed = false;
         return false;
     }
 

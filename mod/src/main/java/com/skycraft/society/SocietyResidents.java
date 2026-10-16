@@ -505,7 +505,7 @@ public final class SocietyResidents {
                  "dowager_noble", "retainer" -> NpcRole.STEWARD;
             case "court_wizard", "ash_wise_woman", "sap_speaker", "psijic_custodian" -> NpcRole.MAGE;
             case "housecarl", "gulakhan" -> NpcRole.HOUSECARL;
-            case "captain_of_guard", "watch_captain", "watch_sergeant", "captain" -> NpcRole.HOUSECARL;
+            case "captain_of_guard", "watch_captain", "watch_sergeant", "captain" -> NpcRole.IMPERIAL_SOLDIER;
             case "guard", "ordinators_watch", "ordinator", "buoyant_armiger", "imperial_soldier",
                  "wall_sentry", "night_watchman", "watchman", "jailer", "gate_porter",
                  "retired_legionary", "morag_tong_factor" -> NpcRole.IMPERIAL_SOLDIER;

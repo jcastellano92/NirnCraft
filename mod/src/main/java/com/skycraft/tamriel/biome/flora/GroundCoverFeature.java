@@ -79,9 +79,13 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
             if ((x >> 4) != box.center.x || (z >> 4) != box.center.z) continue;
             // not on a road, street, plot or pad (the paver would only have to clear it again)
             if (!com.skycraft.world.PlacementMask.clear(level, x, z, 0)) continue;
-            int y = k == 0 ? o.getY() : level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            int y = findTrueGroundY(level, x, z);
+            if (y <= level.getMinBuildHeight() + 1) continue;
             p.set(x, y, z);
             if (!level.getBlockState(p).isAir()) continue;
+            BlockPos belowPos = p.below();
+            BlockState belowState = level.getBlockState(belowPos);
+            if (!isValidGroundSubstrate(level, belowPos, belowState)) continue;
             if (cfg.nearWater() && !nearWater(box, x, y - 1, z)) continue;
             if (!state.canSurvive(level, p)) continue;
             if (state.getBlock() instanceof DoublePlantBlock && state.hasProperty(DoublePlantBlock.HALF)) {
@@ -100,15 +104,67 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
         return placed > 0;
     }
 
+    /**
+     * Walks downward from MOTION_BLOCKING_NO_LEAVES past any logs, leaves, bushes, snow layers, vines, fences, slabs,
+     * stairs, or air until it reaches actual ground, returning the air Y immediately above true ground.
+     */
+    private static int findTrueGroundY(WorldGenLevel level, int x, int z) {
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        int min = level.getMinBuildHeight() + 1;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int y = top; y > min; y--) {
+            cursor.set(x, y - 1, z);
+            BlockState below = level.getBlockState(cursor);
+            if (below.isAir() || isCanopyOrFoliageOrRoof(below)) {
+                continue;
+            }
+            cursor.set(x, y, z);
+            if (level.getBlockState(cursor).isAir()) {
+                return y;
+            }
+            return -1;
+        }
+        return -1;
+    }
+
+    private static boolean isCanopyOrFoliageOrRoof(BlockState s) {
+        if (s.is(net.minecraft.tags.BlockTags.LOGS) || s.is(net.minecraft.tags.BlockTags.LEAVES)
+                || s.is(net.minecraft.tags.BlockTags.FLOWERS) || s.is(net.minecraft.tags.BlockTags.SAPLINGS)
+                || s.is(net.minecraft.tags.BlockTags.FENCES) || s.is(net.minecraft.tags.BlockTags.WALLS)
+                || s.is(net.minecraft.world.level.block.Blocks.SNOW)
+                || s.is(net.minecraft.world.level.block.Blocks.MOSS_CARPET)) {
+            return true;
+        }
+        net.minecraft.world.level.block.Block b = s.getBlock();
+        return b instanceof net.minecraft.world.level.block.LeavesBlock
+                || b instanceof net.minecraft.world.level.block.BushBlock
+                || b instanceof net.minecraft.world.level.block.SnowLayerBlock
+                || b instanceof net.minecraft.world.level.block.VineBlock
+                || b instanceof net.minecraft.world.level.block.SlabBlock
+                || b instanceof net.minecraft.world.level.block.StairBlock
+                || b instanceof net.minecraft.world.level.block.FenceBlock
+                || b instanceof net.minecraft.world.level.block.WallBlock;
+    }
+
+    private static boolean isValidGroundSubstrate(WorldGenLevel level, BlockPos belowPos, BlockState below) {
+        if (below.isAir() || !below.getFluidState().isEmpty() || isCanopyOrFoliageOrRoof(below)) {
+            return false;
+        }
+        return below.isFaceSturdy(level, belowPos, net.minecraft.core.Direction.UP);
+    }
+
     private static void placeRegionalAlchemyFlora(WorldGenLevel level, GenBox box, int ox, int oz,
                                                   boolean nearWaterCfg, RandomSource random, BlockPos.MutableBlockPos p) {
         int x = ox + random.nextInt(5) - 2;
         int z = oz + random.nextInt(5) - 2;
         if ((x >> 4) != box.center.x || (z >> 4) != box.center.z) return;
         if (!com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return;
-        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        int y = findTrueGroundY(level, x, z);
+        if (y <= level.getMinBuildHeight() + 1) return;
         p.set(x, y, z);
         if (!level.getBlockState(p).isAir()) return;
+        BlockPos belowPos = p.below();
+        if (!isValidGroundSubstrate(level, belowPos, level.getBlockState(belowPos))) return;
 
         boolean byWater = nearWaterCfg || nearWater(box, x, y - 1, z);
         String floraId = chooseRegionalFloraId(x, y, z, byWater, random);

@@ -74,12 +74,43 @@ public final class AftermathPainters {
         GROUND.remove();
     }
 
+    /** True if the column at (x, gy, z) lies inside a roofed building or on a built floor/bed/door. */
+    private static boolean indoor(Canvas c, int x, int gy, int z) {
+        if (c.recording()) return false;
+        BlockState floor = c.get(x, gy, z);
+        if (floor.is(net.minecraft.tags.BlockTags.PLANKS) || floor.getBlock() instanceof net.minecraft.world.level.block.BedBlock
+                || floor.getBlock() instanceof net.minecraft.world.level.block.DoorBlock
+                || floor.getBlock() instanceof net.minecraft.world.level.block.StairBlock
+                || floor.getBlock() instanceof net.minecraft.world.level.block.SlabBlock
+                || floor.hasBlockEntity()) {
+            return true;
+        }
+        BlockState above = c.get(x, gy + 1, z);
+        if (above.getBlock() instanceof net.minecraft.world.level.block.BedBlock
+                || above.getBlock() instanceof net.minecraft.world.level.block.DoorBlock
+                || above.hasBlockEntity()) {
+            return true;
+        }
+        for (int dy = 2; dy <= 12; dy++) {
+            BlockState r = c.get(x, gy + dy, z);
+            if (!r.isAir() && !r.is(net.minecraft.tags.BlockTags.LEAVES) && !r.is(net.minecraft.tags.BlockTags.LOGS)
+                    && r.getFluidState().isEmpty() && !r.canBeReplaced()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void put(Canvas c, int x, int dy, int z, BlockState s) {
-        c.set(x, g(c, x, z) + dy, z, s);
+        int gy = g(c, x, z);
+        if (indoor(c, x, gy, z)) return;
+        c.set(x, gy + dy, z, s);
     }
 
     private static void putOpen(Canvas c, int x, int dy, int z, BlockState s) {
-        c.setIfOpen(x, g(c, x, z) + dy, z, s);
+        int gy = g(c, x, z);
+        if (indoor(c, x, gy, z)) return;
+        c.setIfOpen(x, gy + dy, z, s);
     }
 
     private static BlockState b(Block b) {
@@ -172,6 +203,7 @@ public final class AftermathPainters {
             for (int z = 0; z < d; z++) {
                 if (!c.touches(x, z, x, z)) continue;
                 int gy = g(c, x, z);
+                if (indoor(c, x, gy, z)) continue;
                 int r = c.roll(x, 0, z, 211, 100);
                 if (r < dirt) c.set(x, gy, z, b(Blocks.COARSE_DIRT));
                 else if (r < dirt + soot) putOpen(c, x, 1, z, soot());
@@ -525,39 +557,84 @@ public final class AftermathPainters {
 
     // ------------------------------------------------------------------ the living town
 
-    /** A salvaged handcart selling what was saved: awning, barrels, an anvil, the merchant behind it. */
+    /** A salvaged handcart selling what was saved: level foundation, top-slab cart bed, 4 corner posts, striped awning, upright wheels, and salvaged goods. */
     static void cartStall(Canvas c, Spec s) {
         int w = s.w, d = s.d;
-        clear(c, s, 5);
+        clear(c, s, 6);
         trample(c, w, d, 10, 20);
-        int x0 = 1, x1 = w - 2, z0 = 1, z1 = Math.min(d - 3, 4);
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) put(c, x, 1, z, b(Blocks.SPRUCE_SLAB));
-        }
-        for (int x = x0; x <= x1; x += 2) {
-            put(c, x, 2, z0, b(Blocks.SPRUCE_FENCE));
-            put(c, x, 2, z1, b(Blocks.SPRUCE_FENCE));
-        }
-        // wheels (one broken), the shaft, the awning
-        put(c, x0 - 1 >= 0 ? x0 - 1 : 0, 1, z0 + 1, b(Blocks.SPRUCE_TRAPDOOR));
-        put(c, x1 + 1 < w ? x1 + 1 : x1, 1, z0 + 1, c.chance(0, 0, 0, 281, 2) ? b(Blocks.SPRUCE_TRAPDOOR) : debris());
-        for (int x = x0; x <= x1; x++) {
-            for (int z = z0; z <= z1; z++) {
-                if (c.chance(x, 5, z, 283, 6)) continue;
-                put(c, x, 4, z, c.chance(x, 6, z, 285, 3) ? b(Blocks.ORANGE_WOOL) : b(Blocks.WHITE_WOOL));
+        int x0 = 1, x1 = Math.max(x0 + 2, w - 2), z0 = 1, z1 = Math.min(d - 3, 3);
+        int gy = g(c, w / 2, (z0 + z1) / 2);
+
+        // Level cobble/gravel pad under the cart and merchant standing area so the cart never stair-steps or floats
+        for (int x = Math.max(0, x0 - 1); x <= Math.min(w - 1, x1 + 1); x++) {
+            for (int z = Math.max(0, z0 - 1); z <= Math.min(d - 1, z1 + 1); z++) {
+                int colG = g(c, x, z);
+                for (int y = Math.min(colG, gy - 2); y <= gy; y++) {
+                    c.set(x, y, z, y == gy ? b(Blocks.COBBLESTONE) : b(Blocks.STONE));
+                }
+                for (int y = gy + 1; y <= colG + 5; y++) c.set(x, y, z, b(Blocks.AIR));
             }
         }
-        for (int x : new int[]{x0, x1}) {
-            for (int y = 2; y <= 3; y++) put(c, x, y, z0, b(Blocks.SPRUCE_FENCE));
+
+        // Cart bed at gy + 1 using TOP slabs so posts and goods at gy + 2 sit completely flush with zero air gap
+        BlockState topSlab = B.slab(b(Blocks.SPRUCE_SLAB), true);
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                c.set(x, gy + 1, z, topSlab);
+            }
         }
-        // wares: an anvil, barrels, a crate of salvaged tools
-        put(c, x0 + 1, 2, z0 + 1, b(Blocks.ANVIL));
-        put(c, x1 - 1, 2, z0 + 1, B.face(b(Blocks.BARREL), Direction.UP));
-        put(c, x1, 1, z1 + 1 < d ? z1 + 1 : z1, B.face(b(Blocks.BARREL), Direction.UP));
-        put(c, x0, 1, z1 + 1 < d ? z1 + 1 : z1, b(Blocks.BARREL));
-        // the merchant stands behind the cart
-        c.anchor(AnchorType.MERCHANT, w / 2, g(c, w / 2, z1 + 1) + 1, Math.min(d - 1, z1 + 1), "helgen_cart");
-        settle(c, w, d, 5);
+        // Pull-shafts extending from the front of the cart
+        if (z0 - 1 >= 0) {
+            c.set(x0, gy + 1, z0 - 1, B.face(b(Blocks.SPRUCE_FENCE_GATE), Direction.SOUTH));
+            c.set(x1, gy + 1, z0 - 1, B.face(b(Blocks.SPRUCE_FENCE_GATE), Direction.SOUTH));
+        }
+
+        // Upright open trapdoor wheels on left and right sides of the cart bed
+        BlockState leftWheel = B.with(B.face(b(Blocks.SPRUCE_TRAPDOOR), Direction.WEST), net.minecraft.world.level.block.TrapDoorBlock.OPEN, true);
+        BlockState rightWheel = B.with(B.face(b(Blocks.SPRUCE_TRAPDOOR), Direction.EAST), net.minecraft.world.level.block.TrapDoorBlock.OPEN, true);
+        if (x0 - 1 >= 0) {
+            c.set(x0 - 1, gy + 1, z0, leftWheel);
+            c.set(x0 - 1, gy + 1, z1, leftWheel);
+        }
+        if (x1 + 1 < w) {
+            c.set(x1 + 1, gy + 1, z0, rightWheel);
+            c.set(x1 + 1, gy + 1, z1, rightWheel);
+        }
+
+        // All 4 corner fence posts rising from the cart bed (gy + 2 .. gy + 3) up to the canopy (gy + 4)
+        int[][] corners = {{x0, z0}, {x1, z0}, {x0, z1}, {x1, z1}};
+        for (int[] cr : corners) {
+            c.set(cr[0], gy + 2, cr[1], b(Blocks.SPRUCE_FENCE));
+            c.set(cr[0], gy + 3, cr[1], b(Blocks.SPRUCE_FENCE));
+        }
+
+        // Intact striped canopy at gy + 4 with spruce slab front/back trim and hanging lantern
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                BlockState cloth = (x % 2 == 0) ? b(Blocks.ORANGE_WOOL) : b(Blocks.WHITE_WOOL);
+                c.set(x, gy + 4, z, cloth);
+            }
+        }
+        int midX = (x0 + x1) / 2, midZ = (z0 + z1) / 2;
+        c.set(midX, gy + 3, midZ, b(Blocks.LANTERN).setValue(LanternBlock.HANGING, true));
+
+        // Salvaged wares sitting flush on the cart bed (gy + 2)
+        c.set(x0 + 1, gy + 2, z0, b(Blocks.ANVIL));
+        if (x1 - 1 > x0 + 1) {
+            c.set(x1 - 1, gy + 2, z0, Props.cheese());
+        }
+        c.set(x1 - 1, gy + 2, z1, B.face(b(Blocks.BARREL), Direction.UP));
+        if (x0 + 1 < x1 - 1) {
+            c.set(x0 + 1, gy + 2, z1, B.face(b(Blocks.CHEST), Direction.NORTH));
+        }
+        // Extra stock barrels on the ground beside the rear corners
+        int backZ = Math.min(d - 1, z1 + 1);
+        c.set(x0, gy + 1, backZ, B.face(b(Blocks.BARREL), Direction.UP));
+        c.set(x1, gy + 1, backZ, B.face(b(Blocks.BARREL), Direction.UP));
+
+        // The merchant stands on the level pad behind the cart
+        c.anchor(AnchorType.MERCHANT, w / 2, gy + 1, backZ, "helgen_cart");
+        settle(c, w, d, 6);
     }
 
     /** A dragon-fire crater: a bowl of scorched stone with a smouldering centre, rubble thrown out, soot. */

@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/ash_creep_cluster"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/ash_creep_cluster_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/ash_creep_cluster"
+      },
+      {
+        "model": "skycraft:block/ash_creep_cluster",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/ash_creep_cluster",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/ash_creep_cluster",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/ash_creep_cluster_harvested"
+      },
+      {
+        "model": "skycraft:block/ash_creep_cluster_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/ash_creep_cluster_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/ash_creep_cluster_harvested",
+        "y": 270
+      }
+    ]
   }
 }

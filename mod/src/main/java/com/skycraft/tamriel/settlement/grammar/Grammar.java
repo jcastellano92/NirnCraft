@@ -4,6 +4,7 @@ import com.skycraft.tamriel.settlement.AnchorType;
 import com.skycraft.tamriel.settlement.SettlementPiece;
 import com.skycraft.tamriel.settlement.build.B;
 import com.skycraft.tamriel.settlement.build.Canvas;
+import com.skycraft.tamriel.settlement.build.Props;
 import com.skycraft.tamriel.settlement.build.Shells;
 import com.skycraft.tamriel.settlement.build.Shells.Room;
 import com.skycraft.tamriel.settlement.grammar.Blueprint.Annex;
@@ -65,9 +66,11 @@ public final class Grammar {
         Blueprint b = Blueprint.of(s);
         Result res = b.body == Body.RECT ? rect(c, b) : exotic(c, b);
         if (res.ground.isEmpty()) return;
-        Programs.furnish(c, b, res);
+        if (!s.has(Spec.RUINED)) {
+            Programs.furnish(c, b, res);
+        }
         dress(c, b, res);
-        if (s.has(Spec.FOR_SALE)) {
+        if (s.has(Spec.FOR_SALE) && !s.has(Spec.RUINED)) {
             c.anchor(AnchorType.HOUSE_DOOR, res.doorX, 1, res.doorZ);
             c.anchor(AnchorType.HOUSE_MIN, -1, 0, -1);
             c.anchor(AnchorType.HOUSE_MAX, s.w, b.height(), s.d);
@@ -631,6 +634,8 @@ public final class Grammar {
         f.thatch = b.roof == Roof.THATCH || b.wealth == Wealth.POOR;
         f.horns = false;
         f.chimney = false;
+        f.ruined = b.spec.has(Spec.RUINED);
+        f.variant = b.spec.variant;
         Palette p = b.pal;
         if (b.body == Body.TOWER && b.roof == Roof.SPIRE) {
             p = p.copy();
@@ -665,23 +670,24 @@ public final class Grammar {
         Spec s = b.spec;
         int dz = res.doorZ - 1;
         if (b.body == Body.TREE) return;
-        boolean signed = s.has(Spec.SIGN) || b.use.sign;
+        if (b.awning && b.body == Body.RECT) {
+            for (int x = res.doorX - 1; x <= res.doorX + 1; x++) {
+                c.setIfOpen(x, 3, dz, B.stair(p.roof, Direction.SOUTH, false));
+            }
+        }
+        boolean signed = b.use.mainSign() && (s.has(Spec.SIGN) || b.use.sign);
         if (signed) {
             Component kindTitle = Component.translatable("settlement.skycraft.kind."
                     + (s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED && !s.name.isEmpty() ? s.name : b.use.id()));
             Component title = s.name.isEmpty() || s.has(Spec.FOR_SALE) || s.kind == com.skycraft.tamriel.settlement.plan.Archetype.RESERVED
                     ? kindTitle
                     : Component.translatable("settlement.skycraft.name." + s.name);
-            // primary hanging sign on a bracket beside the door, sticking out from the facade
-            int sx = res.doorX + 1;
-            if (sx > b.bx1 - 1) sx = res.doorX - 1;
-            if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) c.sign(sx, 3, dz, hanging(p.sign), Direction.EAST, Component.empty(), title);
-            // for shops and inns, hang a companion trade sign on the opposite side of the door
-            if ((b.use.trade || b.use == Use.INN) && res.doorX - 1 >= b.bx0 + 1 && sx != res.doorX - 1) {
-                int sx2 = res.doorX - 1;
-                if (!c.recording() && Canvas.open(c.get(sx2, 3, dz))) {
-                    c.sign(sx2, 3, dz, hanging(p.sign), Direction.WEST, Component.empty(), kindTitle);
-                }
+            int offset = (b.awning && b.body == Body.RECT) ? 2 : 1;
+            int sx = res.doorX + offset;
+            if (sx > b.bx1 - 1) sx = res.doorX - offset;
+            if (sx < b.bx0 + 1) sx = Math.min(b.bx1 - 1, res.doorX + 1);
+            if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) {
+                Props.shopSign(c, p, b.use.id(), sx, 3, dz, Direction.EAST, title, kindTitle);
             }
         }
         if (b.banner) {
@@ -703,13 +709,6 @@ public final class Grammar {
             BlockState torch = B.face(B.s(b.pal.light.is(Blocks.SOUL_LANTERN) ? Blocks.SOUL_WALL_TORCH : Blocks.WALL_TORCH), Direction.NORTH);
             for (int x : new int[]{res.doorX - 1, res.doorX + 1}) {
                 if (!c.recording() && Canvas.open(c.get(x, 2, dz)) && !Canvas.open(c.get(x, 2, dz + 1))) c.set(x, 2, dz, torch);
-            }
-        }
-        if (b.awning && b.body == Body.RECT) {
-            BlockState cloth = (b.use.trade || b.use == Use.INN) ? Materials.wool(b.color) : null;
-            for (int x = res.doorX - 1; x <= res.doorX + 1; x++) {
-                if (cloth != null) c.setIfOpen(x, 3, dz, cloth);
-                else c.setIfOpen(x, 3, dz, B.stair(p.roof, Direction.SOUTH, false));
             }
         }
         if (!c.recording() && (b.use.trade || b.use == Use.INN) && b.body == Body.RECT && b.foundation != Foundation.STILTS) {

@@ -53,7 +53,7 @@ public class SabreCatEntity extends FaunaAnimal {
                 .add(Attributes.ATTACK_DAMAGE, 6.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.2)
-                .add(Attributes.FOLLOW_RANGE, 24.0);
+                .add(Attributes.FOLLOW_RANGE, 28.0);
     }
 
     @Override
@@ -72,12 +72,13 @@ public class SabreCatEntity extends FaunaAnimal {
         this.goalSelector.addGoal(1, new PounceGoal());
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.35, true));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 10f));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 12f));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::canAttackPlayers));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Animal.class, 40, true, false,
-                e -> e instanceof DeerEntity || e instanceof Sheep || e instanceof Goat || e instanceof Rabbit));
+        this.targetSelector.addGoal(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(this));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Animal.class, 40, true, false,
+                e -> e instanceof DeerEntity || e instanceof ElkEntity || e instanceof Sheep || e instanceof Goat || e instanceof Rabbit));
     }
 
     @Override

@@ -102,7 +102,7 @@ final class BestiarySpecs {
                 .voice("wolf", 1.0f)
                 .step(() -> SoundEvents.WOLF_STEP);
         s.category = MobCategory.MONSTER;
-        s.aggroRange = 18;
+        s.aggroRange = 22;
         s.fleeBelow = 0.2f;
         s.variantPower = new float[]{1f, 1.5f};
         s.frostMult = 1f;
@@ -532,7 +532,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(18, 60).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .prey(BestiarySpecs::bigGame)
                 .voice("senche_tiger", 1.0f);
-        s.aggroRange = 10;
+        s.aggroRange = 18;
         s.category = MobCategory.MONSTER;
         return s;
     }
@@ -632,7 +632,7 @@ final class BestiarySpecs {
                 .attack(Attacks.roar(24, 80).anim(AnimSlot.SPECIAL).chance(0.15f))
                 .resist(1.5f, 0f, 1f, 1f)
                 .voice("frost_giant", 1.0f);
-        s.aggroRange = 9;
+        s.aggroRange = 16;
         s.kbResist = 1.0;
         s.stepHeight = 1.5f;
         s.tracking(12);

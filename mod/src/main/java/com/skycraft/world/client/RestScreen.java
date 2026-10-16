@@ -2,58 +2,112 @@ package com.skycraft.world.client;
 
 import com.skycraft.client.SkyKeys;
 import com.skycraft.world.RestLogic;
-import com.skycraft.world.RestManager;
 import com.skycraft.world.SkyrimCalendar;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import org.lwjgl.glfw.GLFW;
 
 /**
- * Legacy prompt (no longer opened by the wait key, which just waits; kept for a future options screen). The choice puts
- * the player in the pose; the hours are then picked in the non-blocking panel of {@link RestClient} (so the camera
- * stays free), and, with other players online, joining a rest that somebody started uses the same two buttons.
+ * Skyrim's centered "Wait" / "Sleep" modal dialog: pick 1-24 hours on the slider (or with arrow keys / scroll wheel),
+ * view the current Tamrielic calendar date and time, and watch the hours count down live as time passes.
  */
 public class RestScreen extends Screen {
-    /** Reach for a bed (matches the server's check for the key). */
-    private static final double REACH = 3.5;
+    private static int lastWaitHours = 1;
+    private static int lastSleepHours = 8;
 
-    private final int current;
-    private boolean bedNear;
+    private boolean sleep;
+    private int hours;
+    private boolean closedByServer;
+    private HoursSlider slider;
+    private Button confirmBtn;
 
-    /** @param current the mode the player already rests in ({@link RestLogic#NONE} when standing) */
-    public RestScreen(int current) {
-        super(Component.translatable("screen.skycraft.rest"));
-        this.current = current;
+    public RestScreen(boolean sleep) {
+        super(Component.translatable(sleep ? "screen.skycraft.sleep" : "screen.skycraft.wait"));
+        this.sleep = sleep;
+        this.hours = sleep ? lastSleepHours : lastWaitHours;
+    }
+
+    public RestScreen(int mode) {
+        this(mode == RestLogic.SLEEP);
     }
 
     @Override
     protected void init() {
-        var mc = minecraft;
-        bedNear = mc != null && mc.level != null && mc.player != null && RestManager.findBed(mc.level, mc.player, REACH) != null;
         int cx = width / 2;
         int cy = height / 2;
-        Button sleep = Button.builder(Component.translatable("world.skycraft.rest.do_sleep"), b -> choose(RestLogic.SLEEP))
-                .bounds(cx - 102, cy + 2, 100, 20).build();
-        sleep.active = bedNear && current != RestLogic.SLEEP;
-        addRenderableWidget(sleep);
-        Button wait = Button.builder(Component.translatable("world.skycraft.rest.do_wait"), b -> choose(RestLogic.WAIT))
-                .bounds(cx + 2, cy + 2, 100, 20).build();
-        wait.active = current != RestLogic.WAIT;
-        addRenderableWidget(wait);
-        if (current != RestLogic.NONE) {
-            addRenderableWidget(Button.builder(Component.translatable("world.skycraft.rest.stand_up"), b -> {
-                RestClient.sendCancel();
-                onClose();
-            }).bounds(cx - 102, cy + 26, 100, 20).build());
-        }
+        slider = addRenderableWidget(new HoursSlider(cx - 100, cy + 4, 200, 20));
+        confirmBtn = addRenderableWidget(Button.builder(
+                Component.translatable(sleep ? "world.skycraft.rest.do_sleep" : "world.skycraft.rest.do_wait"),
+                b -> confirm()).bounds(cx - 102, cy + 34, 100, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), b -> onClose())
-                .bounds(cx + 2, cy + 26, 100, 20).build());
+                .bounds(cx + 2, cy + 34, 100, 20).build());
+        syncWidgets();
     }
 
-    private void choose(int mode) {
-        RestClient.sendEnter(mode);
-        onClose();
+    void onServerState() {
+        boolean nowSleep = RestClient.mode() == RestLogic.SLEEP;
+        if (nowSleep != this.sleep) {
+            this.sleep = nowSleep;
+            if (confirmBtn != null) {
+                confirmBtn.setMessage(Component.translatable(sleep ? "world.skycraft.rest.do_sleep" : "world.skycraft.rest.do_wait"));
+            }
+        }
+        syncWidgets();
+    }
+
+    void closeFromServer() {
+        this.closedByServer = true;
+        if (minecraft != null && minecraft.screen == this) {
+            minecraft.setScreen(null);
+        }
+    }
+
+    private void syncWidgets() {
+        int phase = RestClient.phase();
+        boolean passing = phase == 2;
+        if (confirmBtn != null) {
+            confirmBtn.active = !passing && RestClient.canStart();
+        }
+        if (slider != null) {
+            slider.active = !passing && !RestClient.isSkipDisabled();
+            if (passing) {
+                int total = Math.max(1, RestClient.hours());
+                int prog = Mth.clamp(RestClient.progress(), 0, 1000);
+                double remExact = total * (1.0 - prog / 1000.0);
+                int remHours = Math.max(1, Mth.ceil((float) remExact));
+                slider.setCountdownValue(remExact / 24.0, remHours);
+            } else {
+                slider.syncFromHours();
+            }
+        }
+    }
+
+    private void setHours(int newHours) {
+        this.hours = Mth.clamp(newHours, 1, 24);
+        if (sleep) lastSleepHours = this.hours;
+        else lastWaitHours = this.hours;
+        if (slider != null) {
+            slider.syncFromHours();
+        }
+    }
+
+    private void confirm() {
+        if (!RestClient.canStart()) return;
+        if (sleep) lastSleepHours = hours;
+        else lastWaitHours = hours;
+        RestClient.start(hours);
+    }
+
+    @Override
+    public void onClose() {
+        if (!closedByServer && RestClient.phase() != 0) {
+            RestClient.sendCancel();
+        }
+        super.onClose();
     }
 
     @Override
@@ -63,6 +117,28 @@ public class RestScreen extends Screen {
 
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
+        if (RestClient.phase() == 1) {
+            if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+                confirm();
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_LEFT) {
+                setHours(hours - 1);
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_RIGHT) {
+                setHours(hours + 1);
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_UP && minecraft != null && minecraft.level != null) {
+                setHours(RestLogic.hoursUntil(minecraft.level.getDayTime(), 6));
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_DOWN && minecraft != null && minecraft.level != null) {
+                setHours(RestLogic.hoursUntil(minecraft.level.getDayTime(), 18));
+                return true;
+            }
+        }
         if (SkyKeys.WAIT.matches(key, scan)) {
             onClose();
             return true;
@@ -71,20 +147,104 @@ public class RestScreen extends Screen {
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (RestClient.phase() == 1 && delta != 0) {
+            setHours(hours + (delta > 0 ? 1 : -1));
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // no dimming background: the world stays visible behind the small prompt
+        syncWidgets();
+        if (RestClient.phase() != 2) {
+            renderBackground(g);
+        }
         int cx = width / 2;
         int cy = height / 2;
-        g.fillGradient(cx - 112, cy - 46, cx + 112, cy + 52, 0xD0100C08, 0xD0201810);
-        g.fill(cx - 112, cy - 46, cx + 112, cy - 45, 0xFF8A7F66);
-        g.fill(cx - 112, cy + 51, cx + 112, cy + 52, 0xFF8A7F66);
-        g.drawCenteredString(font, title, cx, cy - 40, 0xFFF5EBC8);
+
+        // Skyrim-styled dark stone and bronze-framed modal panel
+        int x0 = cx - 134, y0 = cy - 72, x1 = cx + 134, y1 = cy + 66;
+        g.fillGradient(x0, y0, x1, y1, 0xDF100C08, 0xDF1E1710);
+        // Outer & inner borders
+        g.fill(x0, y0, x1, y0 + 1, 0xFF8A7F66);
+        g.fill(x0, y1 - 1, x1, y1, 0xFF8A7F66);
+        g.fill(x0, y0, x0 + 1, y1, 0xFF8A7F66);
+        g.fill(x1 - 1, y0, x1, y1, 0xFF8A7F66);
+        g.fill(x0 + 3, y0 + 3, x1 - 3, y0 + 4, 0x558A7F66);
+        g.fill(x0 + 3, y1 - 4, x1 - 3, y1 - 3, 0x558A7F66);
+        // Header divider rule with center diamond accent
+        g.fill(cx - 96, cy - 44, cx + 96, cy - 43, 0x808A7F66);
+        g.fill(cx - 2, cy - 45, cx + 2, cy - 42, 0xFFC8A850);
+
+        Component header = Component.translatable(sleep ? "screen.skycraft.sleep" : "screen.skycraft.wait");
+        g.pose().pushPose();
+        g.pose().translate(cx, cy - 62, 0);
+        g.pose().scale(1.6f, 1.6f, 1f);
+        g.drawCenteredString(font, header, 0, 0, 0xFFF5EBC8);
+        g.pose().popPose();
+
         long dayTime = minecraft != null && minecraft.level != null ? minecraft.level.getDayTime() : 0;
-        g.drawCenteredString(font, SkyrimCalendar.date(dayTime), cx, cy - 28, 0xFFD0C8B0);
-        g.drawCenteredString(font, SkyrimCalendar.time(dayTime), cx, cy - 17, 0xFFE8C060);
-        Component note = bedNear ? Component.translatable("world.skycraft.rest.bed_near")
-                : Component.translatable("world.skycraft.rest.no_bed_near");
-        g.drawCenteredString(font, note, cx, cy - 5, bedNear ? 0xFFA8C888 : 0xFFA89F86);
+        g.drawCenteredString(font, SkyrimCalendar.date(dayTime), cx, cy - 38, 0xFFD0C8B0);
+        g.drawCenteredString(font, SkyrimCalendar.time(dayTime), cx, cy - 26, 0xFFE8C060);
+
+        Component subLine;
+        int subColor = 0xFFA89F86;
+        if (RestClient.phase() == 2) {
+            int total = Math.max(1, RestClient.hours());
+            int passed = Math.min(total, (int) (total * (long) RestClient.progress() / 1000L));
+            subLine = Component.translatable("world.skycraft.rest.passing", passed, total);
+            subColor = 0xFFF5EBC8;
+        } else if (RestClient.isSkipDisabled()) {
+            subLine = Component.translatable("world.skycraft.rest.skip_off");
+        } else if (!RestClient.canStart() && RestClient.required() > 1) {
+            if (!RestClient.isInitiator() && RestClient.resting() >= RestClient.required()) {
+                subLine = Component.translatable("world.skycraft.rest.chooses", RestClient.initiator());
+            } else {
+                subLine = Component.translatable("world.skycraft.rest.waiting_others", RestClient.resting(), RestClient.required());
+            }
+        } else {
+            subLine = Component.translatable("world.skycraft.rest.until", SkyrimCalendar.time(dayTime + hours * 1000L));
+        }
+        g.drawCenteredString(font, subLine, cx, cy - 12, subColor);
+
+        if (sleep && RestClient.phase() == 1) {
+            g.drawCenteredString(font, Component.translatable("world.skycraft.rest.vanilla_hint"), cx, cy + 72, 0xFF8A7F66);
+        }
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private Component sliderLabel(int h) {
+        return Component.translatable(h == 1 ? "world.skycraft.rest.hour" : "world.skycraft.rest.hours", h);
+    }
+
+    private class HoursSlider extends AbstractSliderButton {
+        HoursSlider(int x, int y, int w, int h) {
+            super(x, y, w, h, Component.empty(), (hours - 1) / 23.0);
+            updateMessage();
+        }
+
+        void syncFromHours() {
+            this.value = Mth.clamp((hours - 1) / 23.0, 0.0, 1.0);
+            updateMessage();
+        }
+
+        void setCountdownValue(double normValue, int remainingHours) {
+            this.value = Mth.clamp(normValue, 0.0, 1.0);
+            setMessage(sliderLabel(remainingHours));
+        }
+
+        @Override
+        protected void updateMessage() {
+            setMessage(sliderLabel(hours));
+        }
+
+        @Override
+        protected void applyValue() {
+            hours = Mth.clamp(1 + (int) Math.round(value * 23), 1, 24);
+            if (sleep) lastSleepHours = hours;
+            else lastWaitHours = hours;
+        }
     }
 }

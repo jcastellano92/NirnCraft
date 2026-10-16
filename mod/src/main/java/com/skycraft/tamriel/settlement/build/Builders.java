@@ -50,7 +50,7 @@ public final class Builders {
                 return;
             }
         }
-        if (s.grammar() && !s.has(Spec.RUINED)) {
+        if (s.grammar()) {
             com.skycraft.tamriel.settlement.grammar.Grammar.build(c, s);
             return;
         }
@@ -119,7 +119,7 @@ public final class Builders {
 
     /** Height a building needs above its floor: storeys, the steepest roof over its span, chimney and finials. */
     public static int height(Spec s) {
-        if (s.grammar() && !s.has(Spec.RUINED)) return com.skycraft.tamriel.settlement.grammar.Blueprint.of(s).height();
+        if (s.grammar()) return com.skycraft.tamriel.settlement.grammar.Blueprint.of(s).height();
         if (!s.kind.building) return s.h;
         int storeys = s.kind == Archetype.TOWER ? Math.max(2, (s.h - 4) / 5) : s.has(Spec.UPPER) ? 2 : 1;
         int walls = s.kind == Archetype.TOWER ? storeys * 5 : storeys * (wallHeight(s.kind) + 1);
@@ -142,6 +142,7 @@ public final class Builders {
         f.horns = p.horns && (kind == Archetype.LONGHOUSE || kind == Archetype.PALACE || kind == Archetype.INN || s.has(Spec.SEAT));
         f.openLeft = kind == Archetype.SMITHY ? 4 : 0;
         f.ruined = s.has(Spec.RUINED);
+        f.variant = s.variant;
         f.chimney = rectangular(f.shell) && f.shell != Shell.FLAT && f.shell != Shell.DOME
                 && kind != Archetype.TEMPLE && kind != Archetype.PALACE && kind != Archetype.LONGHOUSE && kind != Archetype.TOWER;
         List<Room> rooms = Shells.build(c, p, f);
@@ -190,13 +191,21 @@ public final class Builders {
             default -> {
             }
         }
-        if (s.has(Spec.SIGN) || kind == Archetype.INN || kind == Archetype.SMITHY || kind == Archetype.STORE || kind == Archetype.ALCHEMIST) {
+        boolean mainBuildingSign = kind == Archetype.INN || kind == Archetype.SMITHY || kind == Archetype.STORE
+                || kind == Archetype.ALCHEMIST || kind == Archetype.TEMPLE || kind == Archetype.HALL_OF_DEAD
+                || kind == Archetype.PALACE || kind == Archetype.LONGHOUSE || kind == Archetype.BARRACKS
+                || kind == Archetype.MILL || kind == Archetype.STABLES;
+        if (mainBuildingSign) {
+            String kindId = kind.name().toLowerCase(java.util.Locale.ROOT);
+            Component kindTitle = Component.translatable("settlement.skycraft.kind." + kindId);
             Component title = s.name.isEmpty() || s.has(Spec.FOR_SALE)
-                    ? Component.translatable("settlement.skycraft.kind." + kind.name().toLowerCase(java.util.Locale.ROOT))
+                    ? kindTitle
                     : Component.translatable("settlement.skycraft.name." + s.name);
             int sx = Math.min(s.w - 1, doorX + 1);
             if (f.stilts) c.set(sx, 3, -1, B.s(Blocks.AIR));
-            c.sign(sx, 3, -1, com.skycraft.tamriel.settlement.grammar.Grammar.hanging(p.sign), Direction.EAST, Component.empty(), title);
+            if (!c.recording()) {
+                Props.shopSign(c, p, kindId, sx, 3, -1, Direction.EAST, title, kindTitle);
+            }
         }
     }
 

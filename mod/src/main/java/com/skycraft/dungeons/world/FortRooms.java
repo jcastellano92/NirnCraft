@@ -133,6 +133,14 @@ public final class FortRooms {
             if (room.nearDoor(x, z, 1) || room.onLane(x, z)) continue;
             p.set(x, room.floor, z, gear[i++ % gear.length]);
         }
+        if (!room.nearDoor(room.minX + 1, room.cz, 1) && !room.onLane(room.minX + 1, room.cz)) {
+            Deco.furniture(p, room.minX + 1, room.floor, room.cz, Direction.EAST,
+                    com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.WEAPON_RACK);
+        }
+        if (!room.nearDoor(room.maxX - 1, room.cz, 1) && !room.onLane(room.maxX - 1, room.cz)) {
+            Deco.furniture(p, room.maxX - 1, room.floor, room.cz, Direction.WEST,
+                    com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.CLUTTER_ARMOR_STAND);
+        }
         for (int x = room.minX + 2; x < room.maxX - 1; x += 3) {
             int z = room.maxZ - 1;
             if (room.nearDoor(x, z, 1) || room.onLane(x, z)) continue;
@@ -164,10 +172,16 @@ public final class FortRooms {
         for (int a = -half + 2; a <= half - 2; a++) {
             int x = alongX ? room.cx + a : room.cx - off, z = alongX ? room.cz - off : room.cz + a;
             if (room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
-            p.set(x, room.floor, z, Blocks.DARK_OAK_FENCE.defaultBlockState());
-            p.set(x, room.floor + 1, z, Deco.slab(Blocks.SPRUCE_SLAB, false));
+            Deco.furniture(p, x, room.floor, z, side,
+                    com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.BANQUET_TABLE);
+            Deco.furniture(p, x, room.floor + 1, z, side,
+                    (a & 1) == 0 ? com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.CLUTTER_TANKARD
+                            : com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.CLUTTER_PLATTER);
             int bx = x + side.getStepX(), bz = z + side.getStepZ();
-            if (room.interior(bx, bz)) p.set(bx, room.floor, bz, Deco.stair(Blocks.SPRUCE_STAIRS, side, false));
+            if (room.interior(bx, bz)) {
+                Deco.furniture(p, bx, room.floor, bz, side,
+                        com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.BENCH);
+            }
         }
         BarrowRooms.urns(p, room, 1);
     }
@@ -259,7 +273,8 @@ public final class FortRooms {
         int halfF = room.half(f);
         // throne
         int tx = room.localX(f, halfF - 1, 0), tz = room.localZ(f, halfF - 1, 0);
-        p.set(tx, room.floor, tz, Deco.stair(Blocks.DARK_OAK_STAIRS, back, false));
+        Deco.furniture(p, tx, room.floor, tz, back,
+                com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.THRONE);
         for (int s : new int[]{-1, 1}) {
             p.set(room.localX(f, halfF - 1, s), room.floor, room.localZ(f, halfF - 1, s), Deco.pillar(Blocks.STRIPPED_SPRUCE_LOG, Direction.Axis.Y));
             p.set(room.localX(f, halfF - 1, s), room.floor + 1, room.localZ(f, halfF - 1, s), Deco.lantern(false, false));

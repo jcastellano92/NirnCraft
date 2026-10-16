@@ -33,16 +33,16 @@ public enum Use {
     STABLES(11, 13, 11, 13, 1, 1, 4, false, true, true),
     BARN(9, 11, 13, 15, 1, 1, 5, false, false, false),
     MILL(9, 11, 9, 11, 2, 2, 4, false, true, true),
-    SAWMILL(11, 13, 9, 11, 1, 1, 5, false, true, true),
+    SAWMILL(11, 13, 9, 11, 1, 1, 5, false, false, true),
     SMELTER(9, 11, 9, 11, 1, 1, 5, false, false, true),
-    WAREHOUSE(11, 13, 13, 15, 1, 1, 6, false, true, false),
+    WAREHOUSE(11, 13, 13, 15, 1, 1, 6, false, false, false),
     FISHERY(9, 11, 9, 11, 1, 1, 4, false, true, true),
     TEMPLE(11, 15, 17, 21, 1, 1, 7, true, true, false),
     HALL_OF_DEAD(9, 11, 11, 13, 1, 1, 6, true, true, false),
-    GUARDHOUSE(7, 9, 9, 11, 1, 2, 4, false, false, false),
-    BARRACKS(9, 11, 15, 17, 1, 2, 4, true, false, false),
+    GUARDHOUSE(7, 9, 9, 11, 1, 2, 4, false, true, false),
+    BARRACKS(9, 11, 15, 17, 1, 2, 4, true, true, false),
     KEEP(21, 27, 23, 31, 2, 3, 6, true, true, false),
-    LONGHOUSE(15, 19, 21, 25, 1, 2, 5, true, false, false),
+    LONGHOUSE(15, 19, 21, 25, 1, 2, 5, true, true, false),
     GUILD_HALL(11, 13, 13, 15, 2, 2, 5, true, true, false),
     /** A camp worker's shack (outlying sites). */
     SHACK(7, 9, 7, 9, 1, 1, 3, false, false, false),
@@ -88,6 +88,12 @@ public enum Use {
     /** A home (households sleep and keep their things here). */
     public boolean home() {
         return this == HOVEL || this == COTTAGE || this == HOUSE || this == TOWNHOUSE || this == MANOR || this == FARMHOUSE;
+    }
+
+    /** True if this is a main shop, inn, temple, guild, keep, or guard building that hangs a 3D trade sign. */
+    public boolean mainSign() {
+        return !home() && this != SHACK && this != BARN && this != SAWMILL
+                && this != SMELTER && this != WAREHOUSE && this != FENCE_DEN && this != WATCHTOWER;
     }
 
     /** Footprint (odd width x odd depth) for a wealth tier: richer tiers lean to the top of the range. */

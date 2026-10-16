@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/scrib_jelly"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/scrib_jelly_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/scrib_jelly"
+      },
+      {
+        "model": "skycraft:block/scrib_jelly",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/scrib_jelly",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/scrib_jelly",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/scrib_jelly_harvested"
+      },
+      {
+        "model": "skycraft:block/scrib_jelly_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/scrib_jelly_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/scrib_jelly_harvested",
+        "y": 270
+      }
+    ]
   }
 }

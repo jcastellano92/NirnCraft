@@ -83,6 +83,7 @@ public final class SlowTime {
             }
             for (Projectile proj : level.getEntitiesOfClass(Projectile.class, owner.getBoundingBox().inflate(RADIUS),
                     pr -> pr.getOwner() != owner && pr.isAlive())) {
+                if (proj instanceof net.minecraft.world.entity.projectile.AbstractArrow a && com.skycraft.arsenal.entity.SkyArrow.isArrowInGround(a)) continue;
                 inside.add(proj);
                 CompoundTag pd = proj.getPersistentData();
                 if (!pd.contains(PROJ_KEY)) {

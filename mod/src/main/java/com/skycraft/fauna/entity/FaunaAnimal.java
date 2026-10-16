@@ -93,10 +93,17 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
         return super.finalizeSpawn(level, difficulty, reason, data, tag);
     }
 
-    /** Predators and territorial beasts leave players alone on Peaceful (and in creative/spectator). */
+    /** Predators and territorial beasts leave players alone on Peaceful, in creative/spectator, and in starter/town calm zones unless provoked. */
     protected boolean canAttackPlayers(LivingEntity target) {
-        return this.level().getDifficulty() != Difficulty.PEACEFUL
-                && !(target instanceof Player p && (p.isCreative() || p.isSpectator()));
+        if (this.level().getDifficulty() == Difficulty.PEACEFUL) return false;
+        if (target instanceof Player p) {
+            if (p.isCreative() || p.isSpectator()) return false;
+            if (this.getLastHurtByMob() != p && (com.skycraft.creatures.spawn.SpawnPacing.inStarterSafeCorridor(this.level(), p.getX(), p.getZ())
+                    || com.skycraft.creatures.spawn.SpawnPacing.calm(this.level(), p.blockPosition()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

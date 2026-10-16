@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 /** Network messages of the crime module (registered in this fixed order by {@link CrimeModule#registerPackets()}). */
 public final class CrimePackets {
     private static final Map<UUID, Long> LAST_QUERY = new HashMap<>();
+    private static final Map<UUID, BlockPos> LAST_QUERY_POS = new HashMap<>();
 
     private CrimePackets() {}
 
@@ -41,6 +42,7 @@ public final class CrimePackets {
 
     static void forget(UUID player) {
         LAST_QUERY.remove(player);
+        LAST_QUERY_POS.remove(player);
     }
 
     // ------------------------------------------------------------------ pickpocket
@@ -202,39 +204,49 @@ public final class CrimePackets {
         private static void answer(ServerPlayer player, BlockPos pos) {
             long now = player.level().getGameTime();
             Long last = LAST_QUERY.get(player.getUUID());
-            if (last != null && now - last < 5) return;
+            BlockPos prevPos = LAST_QUERY_POS.get(player.getUUID());
+            if (last != null && now - last < 5 && pos.equals(prevPos)) return;
             LAST_QUERY.put(player.getUUID(), now);
+            LAST_QUERY_POS.put(player.getUUID(), pos.immutable());
             if (player.distanceToSqr(Vec3.atCenterOf(pos)) > 100 || !player.level().isLoaded(pos)) return;
             var level = player.serverLevel();
             var queried = level.getBlockState(pos).getBlock();
             if (queried instanceof net.minecraft.world.level.block.DoorBlock || queried instanceof net.minecraft.world.level.block.TrapDoorBlock) {
-                // Doors have no block entity, so they used to get no answer at all: the client then predicted the door
-                // opening and the server snapped it shut again. Answer with the real lock decision (inn rooms, owned
-                // doors, picked locks included) so the client can refuse the click before the door moves.
                 boolean blocked = Locks.blocks(player, level, pos);
-                // looking at a door never decides anything: only a blocked door has a tier to report
                 int tier = blocked ? Math.max(0, Locks.lockLevel(level, Locks.normalizePos(level, pos))) : Locks.NOT_LOCKED;
-                SkyNetwork.sendToPlayer(player, new ContainerInfo(pos, false, tier, !blocked));
+                Component doorLabel = com.skycraft.tamriel.settlement.SettlementDoors.describeDoor(level, pos);
+                SkyNetwork.sendToPlayer(player, new ContainerInfo(pos, false, tier, !blocked, doorLabel != null ? doorLabel : Component.empty()));
                 return;
             }
             if (level.getBlockEntity(pos) == null) return;
             boolean owned = !player.isCreative() && Theft.isOwned(level, pos);
             int lock = Locks.lockLevel(level, pos);
             boolean unlocked = lock == Locks.NOT_LOCKED || Locks.isUnlocked(player, level, pos) || player.isCreative();
-            SkyNetwork.sendToPlayer(player, new ContainerInfo(pos, owned, lock, unlocked));
+            SkyNetwork.sendToPlayer(player, new ContainerInfo(pos, owned, lock, unlocked, Component.empty()));
         }
     }
 
-    public record ContainerInfo(BlockPos pos, boolean owned, int lock, boolean unlocked) {
+    public record ContainerInfo(BlockPos pos, boolean owned, int lock, boolean unlocked, Component label) {
+        public ContainerInfo(BlockPos pos, boolean owned, int lock, boolean unlocked) {
+            this(pos, owned, lock, unlocked, Component.empty());
+        }
+
         static void encode(ContainerInfo m, FriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeBoolean(m.owned);
             buf.writeVarInt(m.lock + 1);
             buf.writeBoolean(m.unlocked);
+            buf.writeComponent(m.label != null ? m.label : Component.empty());
         }
 
         static ContainerInfo decode(FriendlyByteBuf buf) {
-            return new ContainerInfo(buf.readBlockPos(), buf.readBoolean(), buf.readVarInt() - 1, buf.readBoolean());
+            return new ContainerInfo(
+                    buf.readBlockPos(),
+                    buf.readBoolean(),
+                    buf.readVarInt() - 1,
+                    buf.readBoolean(),
+                    buf.readComponent()
+            );
         }
 
         static void handle(ContainerInfo m, Supplier<NetworkEvent.Context> ctx) {

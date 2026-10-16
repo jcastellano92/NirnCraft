@@ -43,27 +43,50 @@ public final class Stealth {
         return mob.getLastHurtByMob() == player && mob.tickCount - mob.getLastHurtByMobTimestamp() < PROVOKED_TICKS;
     }
 
-    /** Distance at which a mob with line of sight notices a sneaking player (shorter in the dark and with skill). */
-    private static double noticeRange(Player player, PlayerData data) {
+    /** Consecutive 10-tick checks a chasing mob has had no line of sight to its target. */
+    private static final java.util.Map<java.util.UUID, Integer> UNSEEN_STREAK = new java.util.HashMap<>();
+
+    /** Distance at which a mob notices a sneaking player (factors in eyesight, light, armor noise, and Sneak skill). */
+    private static double noticeRange(Mob mob, Player player, PlayerData data) {
         int light = player.level().getMaxLocalRawBrightness(player.blockPosition());
-        return Math.max(3.0, 16.0 - data.getSkill(Skill.SNEAK) * 0.12 - (light < 8 ? 6.0 : 0.0));
+        double follow = mob.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE);
+        double eyeBonus = Math.max(0.0, (follow - 16.0) * 0.35);
+        int heavy = ArmorClass.countHeavy(player);
+        double noiseBonus = (heavy > 0 && !Perks.has(data, "sneak.muffled_movement")) ? heavy * 1.2 : 0.0;
+        return Math.max(4.5, 18.0 + eyeBonus + noiseBonus - data.getSkill(Skill.SNEAK) * 0.11 - (light < 8 ? 5.0 : 0.0));
     }
 
-    /** Whether a mob may start targeting a sneaking player. */
+    /** Whether a mob may start targeting a sneaking player (by sight or close-range sound). */
     private static boolean canNotice(Mob mob, Player player, PlayerData data) {
         if (provoked(mob, player)) return true;
-        if (!mob.hasLineOfSight(player)) return false;
-        return mob.distanceTo(player) <= noticeRange(player, data);
+        double dist = mob.distanceTo(player);
+        int heavy = ArmorClass.countHeavy(player);
+        double hearDist = Perks.has(data, "sneak.silence") ? 2.0 : (3.5 + (heavy > 0 && !Perks.has(data, "sneak.muffled_movement") ? heavy * 1.0 : 0.0));
+        if (!mob.hasLineOfSight(player)) {
+            return dist <= hearDist;
+        }
+        return dist <= noticeRange(mob, player, data);
     }
 
-    /** Whether a mob already chasing a sneaking player keeps track of them (more forgiving than noticing). */
+    /** Whether a mob already chasing a sneaking player keeps track of them (requires sustained concealment to break chase). */
     private static boolean keepsTrack(Mob mob, Player player, PlayerData data) {
-        if (provoked(mob, player)) return true;
+        if (provoked(mob, player)) {
+            UNSEEN_STREAK.remove(mob.getUUID());
+            return true;
+        }
         boolean los = mob.hasLineOfSight(player);
         double dist = mob.distanceTo(player);
-        if (!los) return dist <= 5.0;
+        if (!los) {
+            if (dist <= 9.0) return true; // close enough to hear footsteps/breathing
+            int streak = UNSEEN_STREAK.getOrDefault(mob.getUUID(), 0) + 1;
+            if (UNSEEN_STREAK.size() > 512) UNSEEN_STREAK.clear();
+            UNSEEN_STREAK.put(mob.getUUID(), streak);
+            // Require at least ~4 seconds (4 checks) out of line-of-sight before losing track
+            return streak < 4;
+        }
+        UNSEEN_STREAK.remove(mob.getUUID());
         int light = player.level().getMaxLocalRawBrightness(player.blockPosition());
-        return light >= 7 || dist <= Math.max(4.0, 14.0 - data.getSkill(Skill.SNEAK) * 0.1);
+        return light >= 7 || dist <= Math.max(7.0, 18.0 - data.getSkill(Skill.SNEAK) * 0.1);
     }
 
     // ------------------------------------------------------------------ events

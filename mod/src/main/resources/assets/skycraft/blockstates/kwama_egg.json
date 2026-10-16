@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/kwama_egg"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/kwama_egg_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/kwama_egg"
+      },
+      {
+        "model": "skycraft:block/kwama_egg",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/kwama_egg",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/kwama_egg",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/kwama_egg_harvested"
+      },
+      {
+        "model": "skycraft:block/kwama_egg_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/kwama_egg_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/kwama_egg_harvested",
+        "y": 270
+      }
+    ]
   }
 }

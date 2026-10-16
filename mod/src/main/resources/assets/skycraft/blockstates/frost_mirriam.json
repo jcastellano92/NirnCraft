@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/frost_mirriam"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/frost_mirriam_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/frost_mirriam"
+      },
+      {
+        "model": "skycraft:block/frost_mirriam",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/frost_mirriam",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/frost_mirriam",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/frost_mirriam_harvested"
+      },
+      {
+        "model": "skycraft:block/frost_mirriam_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/frost_mirriam_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/frost_mirriam_harvested",
+        "y": 270
+      }
+    ]
   }
 }

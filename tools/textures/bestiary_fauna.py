@@ -660,26 +660,26 @@ def mudcrab():
 
         def decor(ctx, v=v):
             t = ctx.tag
-            if t in ("thorax", "plate", "plate_top", "head"):
+            if t in ("thorax", "plate", "plate_top", "plate_peak", "rim_r", "rim_l", "rim_front", "rim_back", "head"):
                 # radial grooves on the carapace and a pale rim
                 tw, td = ctx.size("top")
-                if t == "thorax":
+                if t in ("thorax", "plate"):
                     # the H-shaped groove of a crab's carapace, and a speckled rim
                     for y in range(1, td - 1):
-                        ctx.tint("top", tw // 2 - 3, y, 0.7)
-                        ctx.tint("top", tw // 2 + 2, y, 0.7)
+                        ctx.tint("top", tw // 2 - 3, y, 0.75)
+                        ctx.tint("top", tw // 2 + 2, y, 0.75)
                     for x in range(tw // 2 - 3, tw // 2 + 3):
-                        ctx.tint("top", x, td // 2, 0.7)
-                scatter_spots(ctx, ["top"], v["plate"][1], 0.08, seed_off=2)
+                        ctx.tint("top", x, td // 2, 0.75)
+                scatter_spots(ctx, ["top", "front", "back", "right", "left"], v["plate"][2], 0.12, seed_off=2)
                 for f in ("right", "left", "front", "back"):
                     fw, fh = ctx.size(f)
                     if fh > 2:
                         ctx.hline(f, fh - 1, v["plate"][0])
                 if v["moss"] > 0:
                     patches(ctx, ["top"], 0.75, add=(10, 38, 0), scale=2.5, thresh=v["moss"], seed_off=3)
-                    patches(ctx, ["right", "left", "front"], 0.8, add=(10, 30, 0), scale=2.0, thresh=v["moss"] + 0.1, seed_off=4)
+                    patches(ctx, ["right", "left", "front", "back"], 0.8, add=(10, 30, 0), scale=2.0, thresh=v["moss"] + 0.1, seed_off=4)
                 if v["barn"] > 0:
-                    scatter_spots(ctx, ["top", "right", "left"], (200, 196, 180), v["barn"], seed_off=7)
+                    scatter_spots(ctx, ["top", "right", "left", "front"], (200, 196, 180), v["barn"], seed_off=7)
                     scatter_spots(ctx, ["top"], (150, 146, 132), v["barn"] * 0.6, seed_off=9)
             if t == "head":
                 fw, fh = ctx.size("front")
@@ -698,16 +698,21 @@ def mudcrab():
                         fw, fh = ctx.size(f)
                         for y in range(fh):
                             ctx.put(f, 0, y, (26, 20, 12))
-            elif t in ("pincer", "crusher", "crusher_finger"):
-                # claws darken toward the (outer, -x) tips, with a pale inner cutting edge
+            elif t in ("pincer", "crusher", "crusher_finger", "cutter"):
+                # claws darken toward the pincer tips, with warm calcareous tubercles on the inner cutting edge
                 for f in ("top", "bottom", "front", "back"):
                     fw, fh = ctx.size(f)
                     for y in range(fh):
                         for x in range(min(2, fw)):
-                            ctx.tint(f, x, y, 0.55 if x == 0 else 0.75)
-                ctx.fill("right", lerp(v["plate"][1], (0, 0, 0), 0.2))
+                            ctx.tint(f, x, y, 0.72 if x == 0 else 0.86)
+                rw, rh = ctx.size("right")
+                for y in range(rh):
+                    for x in range(rw):
+                        if y == rh - 1 or x in (0, rw - 1):
+                            ctx.tint("right", x, y, 0.78)
+                scatter_spots(ctx, ["top", "right", "front"], v["plate"][3], 0.14, seed_off=5)
                 if v["barn"] > 0:
-                    scatter_spots(ctx, ["top", "right"], (196, 192, 176), v["barn"], seed_off=11)
+                    scatter_spots(ctx, ["top", "right", "front"], (196, 192, 176), v["barn"], seed_off=11)
             elif t == "eye":
                 ctx.fill("top", (70, 66, 60))
             elif t == "spike":

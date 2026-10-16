@@ -47,12 +47,36 @@ public final class Sanity {
                         if (b instanceof DoorBlock) {
                             if (s.getValue(DoorBlock.HALF) != DoubleBlockHalf.LOWER) {
                                 // an upper half without its lower half
-                                if (!level.getBlockState(p.below()).is(b)) level.setBlock(p, air, 2);
+                                if (!level.getBlockState(p.below()).is(b)) level.setBlock(p, air, 2 | 16);
                                 continue;
                             }
                             if (!doorInWall(level, chunkBox, p, s)) {
-                                level.setBlock(p, air, 2);
-                                level.setBlock(p.above(), air, 2);
+                                level.setBlock(p, air, 2 | 16);
+                                level.setBlock(p.above(), air, 2 | 16);
+                            }
+                        } else if (b instanceof net.minecraft.world.level.block.BedBlock) {
+                            Direction facing = s.getValue(net.minecraft.world.level.block.BedBlock.FACING);
+                            net.minecraft.world.level.block.state.properties.BedPart part = s.getValue(net.minecraft.world.level.block.BedBlock.PART);
+                            Direction toPartner = part == net.minecraft.world.level.block.state.properties.BedPart.FOOT ? facing : facing.getOpposite();
+                            BlockPos partnerPos = p.relative(toPartner);
+                            boolean ok = supported(level, chunkBox, p.below()) && supported(level, chunkBox, partnerPos.below());
+                            if (ok && readable(chunkBox, partnerPos)) {
+                                BlockState ps = level.getBlockState(partnerPos);
+                                net.minecraft.world.level.block.state.properties.BedPart expected =
+                                        part == net.minecraft.world.level.block.state.properties.BedPart.FOOT
+                                                ? net.minecraft.world.level.block.state.properties.BedPart.HEAD
+                                                : net.minecraft.world.level.block.state.properties.BedPart.FOOT;
+                                if (!(ps.getBlock() instanceof net.minecraft.world.level.block.BedBlock)
+                                        || ps.getValue(net.minecraft.world.level.block.BedBlock.PART) != expected
+                                        || ps.getValue(net.minecraft.world.level.block.BedBlock.FACING) != facing) {
+                                    ok = false;
+                                }
+                            }
+                            if (!ok) {
+                                level.setBlock(p, air, 2 | 16);
+                                if (readable(chunkBox, partnerPos) && level.getBlockState(partnerPos).getBlock() instanceof net.minecraft.world.level.block.BedBlock) {
+                                    level.setBlock(partnerPos, air, 2 | 16);
+                                }
                             }
                         } else if (b instanceof TrapDoorBlock) {
                             if (!anyNeighbour(level, chunkBox, p)) level.setBlock(p, air, 2);
@@ -189,15 +213,13 @@ public final class Sanity {
         return false;
     }
 
-    /** Opens upwards (nothing solid, no ladder or container over it) and has a free side to be reached from. */
+    /** Opens upwards (nothing solid, no ladder over it) and has a free side to be reached from. */
     private static boolean reachable(WorldGenLevel level, BoundingBox chunkBox, BlockPos p, BlockState s) {
         BlockPos up = p.above();
-        if (inside(chunkBox, up)) {
+        if (inside(chunkBox, up) && s.getBlock() instanceof ChestBlock) {
             BlockState u = level.getBlockState(up);
             if (!u.isAir()) {
                 if (u.isSolidRender(level, up) || u.getBlock() instanceof LadderBlock) return false;
-                // a stacked container or a pot, candle, carpet or lantern on top: the top one goes
-                level.removeBlock(up, false);
             }
         }
         for (Direction d : Direction.Plane.HORIZONTAL) {

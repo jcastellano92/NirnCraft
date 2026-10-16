@@ -538,8 +538,13 @@ public final class Summons {
         if (!pd.contains(KIND)) pd.putString(KIND, "familiar");
     }
 
-    /** Animal Allegiance: an animal fights for {@code owner} until {@code until}. */
+    /** Animal Allegiance / Command Animal: an animal fights for {@code owner} until {@code until}. */
     public static void makeAlly(Mob mob, ServerPlayer owner, long until) {
+        long liveNow = com.skycraft.world.RestManager.liveTime(owner.level());
+        long gameNow = owner.level().getGameTime();
+        if (until < liveNow && until > gameNow) {
+            until = liveNow + (until - gameNow);
+        }
         mob.addTag(ALLY_TAG);
         CompoundTag pd = mob.getPersistentData();
         pd.putUUID(OWNER, owner.getUUID());
@@ -622,8 +627,8 @@ public final class Summons {
         }
 
         // Stay close to the owner.
+        double dist = mob.distanceToSqr(owner);
         if (summon) {
-            double dist = mob.distanceToSqr(owner);
             if (dist > 32 * 32) {
                 Vec3 behind = owner.position().subtract(owner.getViewVector(1f).multiply(2, 0, 2));
                 mob.teleportTo(behind.x, owner.getY(), behind.z);
@@ -632,6 +637,8 @@ public final class Summons {
                 mob.getNavigation().moveTo(owner, 1.2);
             }
             ambient(level, mob);
+        } else if (mob.getTarget() == null && dist > 6 * 6 && dist < 36 * 36) {
+            mob.getNavigation().moveTo(owner, 1.15);
         }
     }
 

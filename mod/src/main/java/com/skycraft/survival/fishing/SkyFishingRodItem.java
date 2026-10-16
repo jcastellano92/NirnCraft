@@ -55,6 +55,10 @@ public class SkyFishingRodItem extends FishingRodItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (player.fishing != null) {
+            if (player.fishing instanceof SkyFishingHook skyHook && skyHook.isBiting()
+                    && com.skycraft.survival.SurvivalConfig.FISHING_MINIGAME.get()) {
+                return InteractionResultHolder.pass(stack);
+            }
             if (!level.isClientSide) {
                 int damage = player.fishing.retrieve(stack);
                 stack.hurtAndBreak(damage, player, p -> p.broadcastBreakEvent(hand));

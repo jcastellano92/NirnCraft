@@ -135,12 +135,31 @@ public final class RockSweep {
         for (int i = 0; i < doomed.size(); i++) {
             BlockPos pos = BlockPos.of(doomed.getLong(i));
             if (level.setBlock(pos, air, FLAGS)) n++;
-            // grass, flowers and snow that sat on it would hang in the air
-            BlockPos up = pos.above();
-            BlockState u = level.getBlockState(up);
-            if (u.getBlock() instanceof net.minecraft.world.level.block.BushBlock || u.is(Blocks.SNOW)) level.setBlock(up, air, FLAGS);
+            // grass, flowers, double plants, vines and snow that sat on it would hang in the air
+            for (int dy = 1; dy <= 2; dy++) {
+                BlockPos up = pos.above(dy);
+                BlockState u = level.getBlockState(up);
+                if (isFloatingCover(u)) {
+                    level.setBlock(up, air, FLAGS);
+                }
+            }
         }
         return n;
+    }
+
+    private static boolean isFloatingCover(BlockState s) {
+        if (s.isAir()) return false;
+        Block b = s.getBlock();
+        return b instanceof net.minecraft.world.level.block.BushBlock
+                || b instanceof com.skycraft.crafting.arcane.block.IngredientPlantBlock
+                || b instanceof net.minecraft.world.level.block.DoublePlantBlock
+                || b instanceof net.minecraft.world.level.block.TallGrassBlock
+                || b instanceof net.minecraft.world.level.block.VineBlock
+                || b instanceof net.minecraft.world.level.block.SnowLayerBlock
+                || s.is(BlockTags.FLOWERS)
+                || s.is(BlockTags.SAPLINGS)
+                || s.is(Blocks.MOSS_CARPET)
+                || s.is(Blocks.SNOW);
     }
 
     /** Terrain-like material: stone and its relatives, soil, sand, gravel, ores, loose cobble and the slabs/walls of rock. */

@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/falmer_ear"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/falmer_ear_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/falmer_ear"
+      },
+      {
+        "model": "skycraft:block/falmer_ear",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/falmer_ear",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/falmer_ear",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/falmer_ear_harvested"
+      },
+      {
+        "model": "skycraft:block/falmer_ear_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/falmer_ear_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/falmer_ear_harvested",
+        "y": 270
+      }
+    ]
   }
 }

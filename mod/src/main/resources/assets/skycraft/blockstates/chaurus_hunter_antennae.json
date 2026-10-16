@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/chaurus_hunter_antennae"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/chaurus_hunter_antennae_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae"
+      },
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae_harvested"
+      },
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/chaurus_hunter_antennae_harvested",
+        "y": 270
+      }
+    ]
   }
 }

@@ -37,6 +37,7 @@ import net.minecraftforge.client.event.InputEvent;
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientEvents {
     private static boolean wasBlocking;
+    private static boolean unsheathedOnUse;
     private static int climbResend;
     private static boolean isWallClinging;
     private static net.minecraft.core.Direction wallFacing;
@@ -72,6 +73,13 @@ public final class ClientEvents {
         while (SkyKeys.SHEATHE.consumeClick()) {
             boolean nowSheathed = !com.skycraft.combat.Sheathe.isSheathed(mc.player);
             com.skycraft.combat.Sheathe.setSheathed(mc.player, nowSheathed);
+            if (nowSheathed) {
+                mc.player.stopUsingItem();
+                if (wasBlocking) {
+                    wasBlocking = false;
+                    SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.BLOCK_STOP, 0));
+                }
+            }
             SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
         }
 
@@ -222,12 +230,16 @@ public final class ClientEvents {
 
         // Weapon & unarmed blocking: dual-wielding has no block.
         // Block with RMB (keyUse) when offhand has shield/weapon or when two-handed/unarmed.
+        if (!mc.options.keyUse.isDown()) {
+            unsheathedOnUse = false;
+        }
         ItemStack main = mc.player.getMainHandItem();
         ItemStack off = mc.player.getOffhandItem();
         boolean dual = !main.isEmpty() && !off.isEmpty()
                 && WeaponClass.of(main).skill == Skill.ONE_HANDED
                 && WeaponClass.of(off).skill == Skill.ONE_HANDED;
-        boolean rmbBlock = mc.options.keyUse.isDown() && mc.screen == null && !dual
+        boolean rmbBlock = !com.skycraft.combat.Sheathe.isSheathed(mc.player) && !unsheathedOnUse
+                && mc.options.keyUse.isDown() && mc.screen == null && !dual
                 && (mc.hitResult == null || mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS)
                 && (off.getItem() instanceof net.minecraft.world.item.ShieldItem || off.isEmpty() || WeaponClass.of(main).twoHanded());
         boolean blocking = rmbBlock;
@@ -294,21 +306,76 @@ public final class ClientEvents {
     /** Alternating punches when unarmed and not sheathed (discrete clicks only, never while mining a block). */
     @SubscribeEvent
     public static void onAttackInput(InputEvent.InteractionKeyMappingTriggered event) {
-        if (!event.isAttack()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null) return;
-        // Block breaking (including Forge's per-tick continueAttack trigger) is left entirely to vanilla.
-        if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) return;
-        if (com.skycraft.combat.Sheathe.isSheathed(mc.player)) {
-            // Unsheathe immediately without playing the punch animation
-            event.setCanceled(true);
-            com.skycraft.combat.Sheathe.setSheathed(mc.player, false);
-            SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
-            return;
-        }
-
         ItemStack mainItem = mc.player.getMainHandItem();
         ItemStack offItem = mc.player.getOffhandItem();
+        WeaponClass mainWc = WeaponClass.of(mainItem);
+
+        if (com.skycraft.combat.Sheathe.isSheathed(mc.player)) {
+            if (event.isAttack()) {
+                boolean holdingCombatItem = mainItem.getItem() instanceof BowItem
+                        || mainItem.getItem() instanceof net.minecraft.world.item.CrossbowItem
+                        || mainItem.getItem() instanceof com.skycraft.arsenal.item.StaffItem
+                        || (mainWc != WeaponClass.OTHER && mainWc != WeaponClass.UNARMED && !(mainItem.getItem() instanceof net.minecraft.world.item.DiggerItem));
+                boolean hasRightSpell = mainItem.isEmpty() && !com.skycraft.magic.MagicData.selectedSpell(mc.player).isEmpty();
+                boolean hittingBlockWithTool = mc.hitResult != null
+                        && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
+                        && !holdingCombatItem && !hasRightSpell;
+                if (!hittingBlockWithTool) {
+                    event.setSwingHand(false);
+                    event.setCanceled(true);
+                    com.skycraft.magic.client.MagicClientEvents.consumeClickForUnsheathe();
+                    com.skycraft.combat.Sheathe.setSheathed(mc.player, false);
+                    SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
+                    return;
+                }
+            } else if (event.isUseItem()) {
+                boolean holdingUseCombat = mainItem.getItem() instanceof BowItem
+                        || mainItem.getItem() instanceof net.minecraft.world.item.CrossbowItem
+                        || mainItem.getItem() instanceof com.skycraft.arsenal.item.StaffItem
+                        || mainItem.getItem() instanceof net.minecraft.world.item.ShieldItem
+                        || offItem.getItem() instanceof net.minecraft.world.item.ShieldItem
+                        || (mainWc != WeaponClass.OTHER && mainWc != WeaponClass.UNARMED)
+                        || !com.skycraft.magic.MagicData.leftEffective(mc.player).isEmpty();
+                boolean interactableTarget = false;
+                if (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult ehr) {
+                    net.minecraft.world.entity.Entity hitEnt = ehr.getEntity();
+                    interactableTarget = hitEnt instanceof com.skycraft.arsenal.entity.SkyArrow
+                            || hitEnt instanceof com.skycraft.creatures.entity.CorpseEntity
+                            || hitEnt instanceof net.minecraft.world.entity.npc.Npc
+                            || hitEnt instanceof net.minecraft.world.entity.animal.horse.AbstractHorse
+                            || hitEnt instanceof net.minecraft.world.entity.vehicle.Boat
+                            || hitEnt instanceof net.minecraft.world.entity.vehicle.AbstractMinecart;
+                } else if (mc.hitResult instanceof net.minecraft.world.phys.BlockHitResult bhr
+                        && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && mc.level != null) {
+                    var state = mc.level.getBlockState(bhr.getBlockPos());
+                    interactableTarget = state.getMenuProvider(mc.level, bhr.getBlockPos()) != null
+                            || state.hasBlockEntity()
+                            || state.getBlock() instanceof net.minecraft.world.level.block.DoorBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.TrapDoorBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.FenceGateBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.ButtonBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.LeverBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.BedBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.CraftingTableBlock
+                            || state.getBlock() instanceof net.minecraft.world.level.block.AnvilBlock;
+                }
+                if (holdingUseCombat && !interactableTarget) {
+                    event.setSwingHand(false);
+                    event.setCanceled(true);
+                    unsheathedOnUse = true;
+                    com.skycraft.magic.client.MagicClientEvents.consumeClickForUnsheathe();
+                    com.skycraft.combat.Sheathe.setSheathed(mc.player, false);
+                    SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
+                    return;
+                }
+            }
+        }
+
+        if (!event.isAttack()) return;
+        // Block breaking (including Forge's per-tick continueAttack trigger) is left entirely to vanilla.
+        if (mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) return;
         if (mainItem.isEmpty() && offItem.getItem() instanceof net.minecraft.world.item.ShieldItem) {
             // Single shield equipped: shield bash instead of unarmed punch!
             event.setCanceled(true);

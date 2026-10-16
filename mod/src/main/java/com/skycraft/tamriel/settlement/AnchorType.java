@@ -113,7 +113,9 @@ public enum AnchorType {
     /** The evidence chest: gives a prisoner back what the jail took from them (never in a cell). */
     JAIL_PERSONAL,
     /** The confiscated goods: the shared, locked store of stolen goods taken from prisoners (never in a cell). */
-    JAIL_CONFISCATED;
+    JAIL_CONFISCATED,
+    /** Lower half of a building's main entrance door, tagged with the building's owner id. */
+    BUILDING_DOOR;
 
     public static final AnchorType[] VALUES = values();
 

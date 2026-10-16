@@ -71,12 +71,15 @@
     {
       "kind": "camp",
       "at": [
-        48,
-        23
+        34,
+        20
       ],
       "size": [
         13,
         13
+      ],
+      "flags": [
+        "no_beard"
       ],
       "variant": 11,
       "name": "riverwood_south_loggers_camp"
@@ -97,12 +100,15 @@
     {
       "kind": "camp",
       "at": [
-        50,
+        34,
         6
       ],
       "size": [
         13,
         13
+      ],
+      "flags": [
+        "no_beard"
       ],
       "variant": 2,
       "name": "riverwood_north_fellers_camp"
@@ -358,8 +364,8 @@
     "riverwood_alvors_house": "Alvor's House",
     "riverwood_delphines_room": "Delphine's Rooms",
     "riverwood_gerdurs_house": "Gerdur's House",
-    "riverwood_ylvas_house": "Ylva's House",
-    "riverwood_thyras_house": "Thyra's House",
+    "riverwood_ylvas_house": "Sven and Hilde's House",
+    "riverwood_thyras_house": "Faendal's House",
     "riverwood_timber_store": "Timber Store"
   }
 }

@@ -40,7 +40,7 @@ public final class SeasConfig {
                         "fish; the rare sea serpent of the open ocean and the sea leviathan of the Maormer waters.")
                 .define("seaLife", true);
         SEA_LIFE_BUDGET = b.comment("Sea creatures this spawner keeps around one player at most.")
-                .defineInRange("budget", 10, 0, 64);
+                .defineInRange("budget", 24, 0, 96);
         SERPENT_CHANCE = b.comment("Chance per attempt over the deep open ocean that a sea serpent rises.")
                 .defineInRange("serpentChance", 0.02, 0.0, 1.0);
         HAWKS = b.comment("Hawks circle over Skyrim's tundra, crags and coasts (huntable: feathers, beaks, eggs).")

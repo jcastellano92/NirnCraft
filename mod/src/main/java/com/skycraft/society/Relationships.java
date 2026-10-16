@@ -159,31 +159,42 @@ public final class Relationships {
     // ------------------------------------------------------------------ gifts
 
     static void addOptions(ServerPlayer player, NpcEntity npc, List<DialogueOption> out) {
-        if (!npc.role().civilian || npc.isPrisoner()) return;
+        if (!npc.role().civilian || npc.isPrisoner() || npc.isChild()) return;
+        Rank currentRank = rank(npc, player);
         ItemStack held = player.getMainHandItem();
-        if (!held.isEmpty() && !npc.isChild() && !Marriage.isAmulet(held)) {
+        if (!held.isEmpty() && !Marriage.isAmulet(held)
+                && (likes(npc, held) || currentRank.ordinal() >= Rank.ACQUAINTANCE.ordinal())) {
             out.add(new DialogueOption("society.gift", Component.translatable("dialogue.skycraft.society.gift", held.getHoverName()), 480,
                     Relationships::gift));
         }
-        if (npc.role().townsfolk() && !npc.isChild()) {
+        if (npc.role().townsfolk()) {
             CompoundTag favor = npc.social().getCompound("favor");
             String key = player.getStringUUID();
             if (favor.contains("item") && key.equals(favor.getString("for"))) {
                 Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(favor.getString("item")));
                 int count = favor.getInt("count");
                 if (count(player, item) >= count) {
-                    out.add(new DialogueOption("society.favor_done", Component.translatable("dialogue.skycraft.society.favor_done",
-                            count, new ItemStack(item).getHoverName()), 470, Relationships::completeFavor));
+                    Component label = com.skycraft.quest.QuestDialogue.questLabel(
+                            Component.translatable("dialogue.skycraft.society.favor_done", count, new ItemStack(item).getHoverName()));
+                    out.add(new DialogueOption("society.favor_done", label, 105, Relationships::completeFavor));
                 }
-            } else if (npc.level().getGameTime() >= npc.social().getLong("favor_next")) {
-                out.add(new DialogueOption("society.favor", Component.translatable("dialogue.skycraft.society.favor"), 475, Relationships::offerFavor));
+            } else if (npc.level().getGameTime() >= npc.social().getLong("favor_next")
+                    && com.skycraft.economy.Merchants.profession(npc) == null
+                    && com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty()
+                    && com.skycraft.quest.QuestDialogue.canOfferQuest(player, npc)
+                    && ((npc.getUUID().getLeastSignificantBits() ^ (npc.level().getDayTime() / DAY)) & 7L) == 0L) {
+                out.add(new DialogueOption("society.favor",
+                        com.skycraft.quest.QuestDialogue.questLabel(Component.translatable("dialogue.skycraft.society.favor")),
+                        475, Relationships::offerFavor));
             }
-            out.add(new DialogueOption("society.how", Component.translatable("dialogue.skycraft.society.how"), 590, (p, n) -> {
-                if (!(n instanceof NpcEntity e)) return;
-                Rank r = rank(e, p);
-                Dialogue.open(p, n, Component.translatable("society.skycraft.say.how." + r.name().toLowerCase(Locale.ROOT) + "."
-                        + p.getRandom().nextInt(2), p.getDisplayName()));
-            }));
+            if (currentRank.ordinal() >= Rank.FRIEND.ordinal()) {
+                out.add(new DialogueOption("society.how", Component.translatable("dialogue.skycraft.society.how"), 590, (p, n) -> {
+                    if (!(n instanceof NpcEntity e)) return;
+                    Rank r = rank(e, p);
+                    Dialogue.open(p, n, Component.translatable("society.skycraft.say.how." + r.name().toLowerCase(Locale.ROOT) + "."
+                            + p.getRandom().nextInt(2), p.getDisplayName()));
+                }));
+            }
         }
     }
 

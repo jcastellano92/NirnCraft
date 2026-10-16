@@ -452,7 +452,7 @@ public final class WildScenes {
 
         if (count > 0 && nearPlayer != null) {
             if (s.wonder) {
-                nearPlayer.displayClientMessage(Component.translatable("scene.skycraft.wonder." + s.id), false);
+                com.skycraft.core.Notifier.message(nearPlayer, Component.translatable("scene.skycraft.wonder." + s.id));
                 level.playSound(null, nearPlayer.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME,
                         SoundSource.AMBIENT, 0.8f, 1.0f);
             }

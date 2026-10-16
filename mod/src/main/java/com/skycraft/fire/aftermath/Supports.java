@@ -33,6 +33,10 @@ public final class Supports {
                 || b instanceof net.minecraft.world.level.block.WallBlock) {
             return true;
         }
+        if (b instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock) {
+            return s.getValue(com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock.SHAPE)
+                    != com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.ShapeCat.WALL;
+        }
         if (s.isAir()) return false;
         String path = BuiltInRegistries.BLOCK.getKey(b).getPath();
         return path.equals("ash_layer") || path.equals("bedroll");
@@ -43,6 +47,10 @@ public final class Supports {
         if (below.isAir() || Canvas.open(below) || !below.getFluidState().isEmpty()) return false;
         if (below.getBlock() instanceof BigFireBlock) return true;
         if (below.getBlock() instanceof GroundDecalBlock) return false;
+        if (below.getBlock() instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock
+                || below.getBlock() instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock) {
+            return true;
+        }
         return !below.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
     }
 

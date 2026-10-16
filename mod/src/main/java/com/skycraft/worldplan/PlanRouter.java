@@ -31,7 +31,7 @@ final class PlanRouter {
     private static final double OVER_CAP_K = 6.0;
     private static final double CLIFF_COST = 400.0;
     private static final double TURN_COST = 3.0;
-    private static final double ROAD_DISCOUNT = 0.35;
+    private static final double ROAD_DISCOUNT = 0.25;
     private static final double HEURISTIC_WEIGHT = 1.15;
     private static final double DIRECT_LIMIT = 384;
     private static final int WAYPOINT_STEP = 8;
@@ -48,7 +48,10 @@ final class PlanRouter {
 
     /** One routing job. {@code avoid}: settlement interiors as (x, z, radius) triples. */
     record Job(double ax, double az, double bx, double bz, byte kind, int maxBridge, int[] avoid, LongOpenHashSet roadCells,
-               int budget) {
+               int budget, int siteA, int siteB) {
+        Job(double ax, double az, double bx, double bz, byte kind, int maxBridge, int[] avoid, LongOpenHashSet roadCells, int budget) {
+            this(ax, az, bx, bz, kind, maxBridge, avoid, roadCells, budget, -1, -1);
+        }
     }
 
     private PlanRouter() {}
@@ -96,10 +99,15 @@ final class PlanRouter {
                 if (col.lakeDepthIn > half) c.blocked = true;
                 if (!c.lake && !c.sea && c.width > job.maxBridge() + 8) c.blocked = true;
             }
-            int[] avoid = job.avoid();
-            for (int i = 0; i + 2 < avoid.length; i += 3) {
-                long dx = x - avoid[i], dz = z - avoid[i + 1];
-                if (dx * dx + dz * dz < (long) avoid[i + 2] * avoid[i + 2]) c.penalty = 40f;
+            // Exempt cells within 20 blocks of the chosen gate endpoints from settlement/pin avoidance penalties
+            double dA = Math.hypot(x - job.ax(), z - job.az());
+            double dB = Math.hypot(x - job.bx(), z - job.bz());
+            if (dA > 20.0 && dB > 20.0) {
+                int[] avoid = job.avoid();
+                for (int i = 0; i + 2 < avoid.length; i += 3) {
+                    long dx = x - avoid[i], dz = z - avoid[i + 1];
+                    if (dx * dx + dz * dz < (long) avoid[i + 2] * avoid[i + 2]) c.penalty = 40f;
+                }
             }
             cache.put(k, c);
             return c;
@@ -113,6 +121,22 @@ final class PlanRouter {
     /** The 8-block grid cell key of a block position (for {@link Job#roadCells}). */
     static long cellKey(double x, double z) {
         return key(Math.floorDiv((int) Math.floor(x), CELL), Math.floorDiv((int) Math.floor(z), CELL));
+    }
+
+    private static boolean onRoad(double[] p, @Nullable LongOpenHashSet roadCells) {
+        return roadCells != null && !roadCells.isEmpty() && roadCells.contains(cellKey(p[0], p[1]));
+    }
+
+    private static boolean hasRoadCell(@Nullable LongOpenHashSet roadCells, int cx, int cz, boolean fineGrid) {
+        if (roadCells == null || roadCells.isEmpty()) return false;
+        if (fineGrid) return roadCells.contains(key(cx, cz));
+        int baseX = cx << 2, baseZ = cz << 2;
+        for (int dx = 0; dx < 4; dx++) {
+            for (int dz = 0; dz < 4; dz++) {
+                if (roadCells.contains(key(baseX + dx, baseZ + dz))) return true;
+            }
+        }
+        return false;
     }
 
     private static final class Node {
@@ -165,7 +189,64 @@ final class PlanRouter {
         if (poly == null) return null;
         poly = straighten(poly, fine);
         poly = simplify(poly, fine, SIMPLIFY);
-        return chaikin(chaikin(poly));
+        poly = withGateApproaches(poly, terrain, fine, job);
+        List<double[]> smoothed = chaikin(chaikin(poly, job.roadCells()), job.roadCells());
+        smoothed.set(0, new double[]{job.ax(), job.az()});
+        smoothed.set(smoothed.size() - 1, new double[]{job.bx(), job.bz()});
+        return smoothed;
+    }
+
+    /**
+     * Pins exact gate coordinates (ax, az) and (bx, bz) and inserts an outward gate-normal approach point 12 blocks
+     * straight outside each gate before Chaikin smoothing so roads meet settlement gates dead-center and perpendicular.
+     */
+    private static List<double[]> withGateApproaches(List<double[]> poly, PlanTerrain terrain, Grid fine, Job job) {
+        if (poly.size() < 2) return poly;
+        List<double[]> out = new ArrayList<>(poly);
+        out.set(0, new double[]{job.ax(), job.az()});
+        out.set(out.size() - 1, new double[]{job.bx(), job.bz()});
+        double[] na = gateNormal(terrain, job.siteA(), job.ax(), job.az());
+        if (na != null) {
+            double px = job.ax() + na[0] * 12.0, pz = job.az() + na[1] * 12.0;
+            Cell c = fine.cell(Math.floorDiv((int) Math.floor(px), CELL), Math.floorDiv((int) Math.floor(pz), CELL));
+            if (Float.isNaN(c.water) && !c.blocked) {
+                while (out.size() > 2 && Math.hypot(out.get(1)[0] - job.ax(), out.get(1)[1] - job.az()) < 16.0) {
+                    out.remove(1);
+                }
+                out.add(1, new double[]{px, pz});
+            }
+        }
+        double[] nb = gateNormal(terrain, job.siteB(), job.bx(), job.bz());
+        if (nb != null) {
+            double px = job.bx() + nb[0] * 12.0, pz = job.bz() + nb[1] * 12.0;
+            Cell c = fine.cell(Math.floorDiv((int) Math.floor(px), CELL), Math.floorDiv((int) Math.floor(pz), CELL));
+            if (Float.isNaN(c.water) && !c.blocked) {
+                while (out.size() > 2 && Math.hypot(out.get(out.size() - 2)[0] - job.bx(), out.get(out.size() - 2)[1] - job.bz()) < 16.0) {
+                    out.remove(out.size() - 2);
+                }
+                out.add(out.size() - 1, new double[]{px, pz});
+            }
+        }
+        return out;
+    }
+
+    @Nullable
+    private static double[] gateNormal(PlanTerrain terrain, int site, double gx, double gz) {
+        int s = site;
+        if (s < 0 || s >= terrain.siteX.length) {
+            for (int i = 0; i < terrain.siteX.length; i++) {
+                double d = Math.hypot(gx - terrain.siteX[i], gz - terrain.siteZ[i]);
+                if (d >= 8.0 && d <= terrain.siteRadius[i] + 16.0) {
+                    s = i;
+                    break;
+                }
+            }
+        }
+        if (s < 0 || s >= terrain.siteX.length) return null;
+        double dx = gx - terrain.siteX[s], dz = gz - terrain.siteZ[s];
+        double d = Math.hypot(dx, dz);
+        if (d < 8.0) return null;
+        return new double[]{dx / d, dz / d};
     }
 
     /**
@@ -178,6 +259,10 @@ final class PlanRouter {
         if (n < 3) return path;
         boolean[] keep = new boolean[n];
         keep[0] = keep[n - 1] = true;
+        LongOpenHashSet roadCells = grid.job.roadCells();
+        for (int i = 1; i < n - 1; i++) {
+            if (onRoad(path.get(i), roadCells)) keep[i] = true;
+        }
         java.util.ArrayDeque<int[]> stack = new java.util.ArrayDeque<>();
         stack.push(new int[]{0, n - 1});
         while (!stack.isEmpty()) {
@@ -189,6 +274,7 @@ final class PlanRouter {
             int far = -1;
             double worst = -1;
             boolean wetBefore = false;
+            boolean hasPinnedRoad = false;
             for (int i = a + 1; i < b; i++) {
                 double[] p = path.get(i);
                 double d = len < 1e-9 ? Math.hypot(p[0] - pa[0], p[1] - pa[1]) : Math.abs((p[0] - pa[0]) * dz - (p[1] - pa[1]) * dx) / len;
@@ -196,10 +282,11 @@ final class PlanRouter {
                     worst = d;
                     far = i;
                 }
+                if (keep[i]) hasPinnedRoad = true;
                 Cell c = grid.cell(Math.floorDiv((int) Math.floor(p[0]), grid.cell), Math.floorDiv((int) Math.floor(p[1]), grid.cell));
                 wetBefore |= !Float.isNaN(c.water);
             }
-            if (worst > tol || !clearShortcut(pa, pb, grid, wetBefore)) {
+            if (worst > tol || hasPinnedRoad && worst > 0.5 || !clearShortcut(pa, pb, grid, wetBefore)) {
                 keep[far] = true;
                 stack.push(new int[]{a, far});
                 stack.push(new int[]{far, b});
@@ -294,7 +381,7 @@ final class PlanRouter {
                     }
                 } else {
                     cost *= 1.0 - 0.4 * c.road;
-                    if (fineGrid && job.roadCells().contains(k)) cost *= ROAD_DISCOUNT;
+                    if (hasRoadCell(job.roadCells(), nx, nz, fineGrid)) cost *= ROAD_DISCOUNT;
                 }
                 cost += len * c.penalty;
                 if (cur.dir >= 0 && cur.dir != d) {
@@ -340,12 +427,20 @@ final class PlanRouter {
     private static List<double[]> straighten(List<double[]> path, Grid grid) {
         int n = path.size();
         if (n < 3) return path;
+        LongOpenHashSet roadCells = grid.job.roadCells();
         List<double[]> out = new ArrayList<>();
         out.add(path.get(0));
         int i = 0;
         while (i < n - 1) {
             int next = i + 1;
-            for (int j = Math.min(n - 1, i + STRAIGHTEN_LOOK); j > i + 1; j--) {
+            int maxLook = Math.min(n - 1, i + STRAIGHTEN_LOOK);
+            for (int k = i + 1; k < maxLook; k++) {
+                if (onRoad(path.get(k), roadCells)) {
+                    maxLook = k;
+                    break;
+                }
+            }
+            for (int j = maxLook; j > i + 1; j--) {
                 if (clearLine(path.get(i), path.get(j), grid)) {
                     next = j;
                     break;
@@ -376,13 +471,27 @@ final class PlanRouter {
     }
 
     static List<double[]> chaikin(List<double[]> p) {
+        return chaikin(p, null);
+    }
+
+    static List<double[]> chaikin(List<double[]> p, @Nullable LongOpenHashSet roadCells) {
         if (p.size() < 3) return p;
         List<double[]> out = new ArrayList<>(p.size() * 2);
         out.add(p.get(0));
         for (int i = 0; i < p.size() - 1; i++) {
             double[] a = p.get(i), b = p.get(i + 1);
-            out.add(new double[]{a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25});
-            out.add(new double[]{a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75});
+            boolean aOn = onRoad(a, roadCells), bOn = onRoad(b, roadCells);
+            if (aOn && bOn) {
+                if (i > 0) out.add(a);
+            } else if (aOn) {
+                if (i > 0) out.add(a);
+                out.add(new double[]{a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75});
+            } else if (bOn) {
+                out.add(new double[]{a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25});
+            } else {
+                out.add(new double[]{a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25});
+                out.add(new double[]{a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75});
+            }
         }
         out.add(p.get(p.size() - 1));
         return out;

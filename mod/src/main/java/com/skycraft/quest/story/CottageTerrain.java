@@ -53,7 +53,11 @@ final class CottageTerrain {
     static boolean isPlant(BlockState s) {
         if (s.isAir() || !s.getFluidState().isEmpty()) return false;
         return s.getBlock() instanceof BushBlock || s.getBlock() instanceof SnowLayerBlock
-                || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS) || s.is(Blocks.MOSS_CARPET)
+                || s.getBlock() instanceof com.skycraft.crafting.arcane.block.IngredientPlantBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.DoublePlantBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.TallGrassBlock
+                || s.getBlock() instanceof VineBlock
+                || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS) || s.is(Blocks.MOSS_CARPET) || s.is(Blocks.SNOW)
                 || s.canBeReplaced() && s.getCollisionShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
     }
 
@@ -108,14 +112,87 @@ final class CottageTerrain {
         if (level.getBlockState(p) != s) level.setBlock(p, s, SET);
     }
 
-    /** Removes trees and ground cover in the column strictly above {@code fromY} up to {@code toY}. */
-    static void clearVegetation(ServerLevel level, int x, int z, int fromY, int toY) {
+    /** Removes any plant, double-plant or snow layer at (x, y+1, z) and (x, y+2, z) after a support block is cleared. */
+    static int stripAbovePlants(ServerLevel level, int x, int y, int z) {
+        int cleared = 0;
+        for (int dy = 1; dy <= 2; dy++) {
+            BlockPos up = new BlockPos(x, y + dy, z);
+            BlockState us = level.getBlockState(up);
+            if (!us.isAir() && (isPlant(us) || us.is(Blocks.SNOW))) {
+                level.setBlock(up, Blocks.AIR.defaultBlockState(), SET);
+                cleared++;
+            }
+        }
+        return cleared;
+    }
+
+    /** Removes an entire tree (trunk and connected crown) so no half-trees or floating leaf rings ever remain. */
+    static int fellTree(ServerLevel level, int cx, int cy, int cz) {
+        int removed = 0;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        for (int y = fromY + 1; y <= toY; y++) {
+        List<int[]> logs = new ArrayList<>();
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                int x = cx + dx, z = cz + dz;
+                if (!loaded(level, x, z)) continue;
+                int g = groundTop(level, x, z);
+                if (g == NO_GROUND) continue;
+                int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 2;
+                for (int y = g + 1; y <= top; y++) {
+                    p.set(x, y, z);
+                    BlockState s = level.getBlockState(p);
+                    if (s.is(BlockTags.LOGS)) {
+                        logs.add(new int[]{x, z, g, top});
+                        break;
+                    }
+                }
+            }
+        }
+        if (logs.isEmpty() && loaded(level, cx, cz)) {
+            int g = groundTop(level, cx, cz);
+            if (g != NO_GROUND) logs.add(new int[]{cx, cz, g, level.getHeight(Heightmap.Types.WORLD_SURFACE, cx, cz) + 2});
+        }
+        for (int[] tr : logs) {
+            int lx = tr[0], lz = tr[1];
+            for (int dx = -3; dx <= 3; dx++) {
+                for (int dz = -3; dz <= 3; dz++) {
+                    if (dx * dx + dz * dz > 11) continue;
+                    int x = lx + dx, z = lz + dz;
+                    if (!loaded(level, x, z)) continue;
+                    int g = groundTop(level, x, z);
+                    if (g == NO_GROUND) continue;
+                    int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 2;
+                    for (int y = g + 1; y <= top; y++) {
+                        p.set(x, y, z);
+                        BlockState s = level.getBlockState(p);
+                        if (!s.isAir() && isCanopy(s)) {
+                            level.setBlock(p, Blocks.AIR.defaultBlockState(), SET);
+                            removed++;
+                            removed += stripAbovePlants(level, x, y, z);
+                        }
+                    }
+                }
+            }
+        }
+        return removed;
+    }
+
+    /** Removes trees and ground cover in the column strictly above {@code fromY} up to the top of the canopy. */
+    static void clearVegetation(ServerLevel level, int x, int z, int fromY, int toY) {
+        if (!loaded(level, x, z)) return;
+        int top = Math.max(toY, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 2);
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        boolean hitTree = false;
+        for (int y = fromY + 1; y <= top; y++) {
             p.set(x, y, z);
             BlockState s = level.getBlockState(p);
-            if (!s.isAir() && (isCanopy(s) || isPlant(s))) level.setBlock(p, Blocks.AIR.defaultBlockState(), SET);
+            if (!s.isAir() && (isCanopy(s) || isPlant(s))) {
+                if (isCanopy(s)) hitTree = true;
+                level.setBlock(p, Blocks.AIR.defaultBlockState(), SET);
+                stripAbovePlants(level, x, y, z);
+            }
         }
+        if (hitTree) fellTree(level, x, fromY + 1, z);
     }
 
     /** The surface block to put on top of a column that was graded: the natural top when it is soil-like, else grass. */
@@ -227,7 +304,7 @@ final class CottageTerrain {
     private static final int[][] NB = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
     /** The road-plan cell (x, z) nearest the start whose distance from a planned road centre line is within its band edge. */
-    private static int[] roadGoal(ServerLevel level, int sx, int sz, int reach) {
+    private static int[] roadGoal(ServerLevel level, StartCottage.Site site, int sx, int sz, int reach) {
         RoadPlan plan;
         try {
             plan = RoadPlan.get();
@@ -236,17 +313,24 @@ final class CottageTerrain {
         }
         if (plan == null || plan.segments() == 0) return null;
         RoadPlan.Hit hit = new RoadPlan.Hit();
+        double hx = site.helgenX() - sx, hz = site.helgenZ() - sz;
+        double hlen = Math.max(1.0, Math.hypot(hx, hz));
+        double ux = hx / hlen, uz = hz / hlen;
         double best = Double.MAX_VALUE;
         int[] out = null;
-        for (int dx = -reach; dx <= reach; dx += 3) {
-            for (int dz = -reach; dz <= reach; dz += 3) {
+        for (int dx = -reach; dx <= reach; dx += 2) {
+            for (int dz = -reach; dz <= reach; dz += 2) {
                 int x = sx + dx, z = sz + dz;
                 if (!plan.at(x + 0.5, z + 0.5, hit)) continue;
-                if (hit.distance > hit.halfWidth + 1.6f || hit.distance < hit.halfWidth + 0.4f) continue;
+                if (hit.distance > hit.halfWidth + 1.6f) continue;
                 if (hit.kind == RoadPlan.NORMAL ? false : hit.span == RoadPlan.BRIDGE || hit.span == RoadPlan.TUNNEL) continue;
-                double c = Math.sqrt((double) dx * dx + (double) dz * dz);
-                if (c < best) {
-                    best = c;
+                double dist = Math.hypot(dx, dz);
+                double along = dx * ux + dz * uz;
+                if (along < -12) continue;
+                double edgePenalty = Math.abs(hit.distance - (hit.halfWidth + 0.8f)) * 1.5;
+                double score = dist - along * 0.25 + edgePenalty;
+                if (score < best) {
+                    best = score;
                     out = new int[]{x, z};
                 }
             }
@@ -270,8 +354,13 @@ final class CottageTerrain {
     static java.util.Set<Long> pathChunks(ServerLevel level, StartCottage.Site s) {
         java.util.Set<Long> set = new java.util.HashSet<>();
         BlockPos st = s.at(1, -5, 0);
-        int[] goal = roadGoal(level, st.getX(), st.getZ(), 110);
-        int x0 = st.getX(), z0 = st.getZ(), x1 = goal == null ? x0 : goal[0], z1 = goal == null ? z0 : goal[1];
+        int[] goal = roadGoal(level, s, st.getX(), st.getZ(), 110);
+        if (goal == null) {
+            double ang = Math.atan2(s.helgenZ() - st.getZ(), s.helgenX() - st.getX());
+            double dist = Math.max(40.0, Math.hypot(s.helgenX() - st.getX(), s.helgenZ() - st.getZ()) - 56.0);
+            goal = new int[]{st.getX() + (int) Math.round(Math.cos(ang) * dist), st.getZ() + (int) Math.round(Math.sin(ang) * dist)};
+        }
+        int x0 = st.getX(), z0 = st.getZ(), x1 = goal[0], z1 = goal[1];
         int minX = Math.min(x0, x1) - 24, maxX = Math.max(x0, x1) + 24, minZ = Math.min(z0, z1) - 24, maxZ = Math.max(z0, z1) + 24;
         for (int cx = minX >> 4; cx <= maxX >> 4; cx++) {
             for (int cz = minZ >> 4; cz <= maxZ >> 4; cz++) set.add(net.minecraft.world.level.ChunkPos.asLong(cx, cz));
@@ -288,12 +377,13 @@ final class CottageTerrain {
     static PathReport buildPath(ServerLevel level, StartCottage.Site site) {
         BlockPos st = site.at(1, -5, 0);
         int sx = st.getX(), sz = st.getZ();
-        int[] goal = roadGoal(level, sx, sz, 110);
+        int[] goal = roadGoal(level, site, sx, sz, 110);
         boolean roadFound = goal != null;
         if (goal == null) {
-            // no planned road in reach (or no plan in this build): a trail of 50 blocks toward the town
+            // no planned road in reach (or no plan in this build): a trail toward Helgen's approach
             double ang = Math.atan2(site.helgenZ() - sz, site.helgenX() - sx);
-            goal = new int[]{sx + (int) Math.round(Math.cos(ang) * 50), sz + (int) Math.round(Math.sin(ang) * 50)};
+            double dist = Math.min(90.0, Math.max(50.0, Math.hypot(site.helgenX() - sx, site.helgenZ() - sz) - 56.0));
+            goal = new int[]{sx + (int) Math.round(Math.cos(ang) * dist), sz + (int) Math.round(Math.sin(ang) * dist)};
         }
         int gx = goal[0], gz = goal[1];
         int pad = 22;
@@ -346,9 +436,9 @@ final class CottageTerrain {
                 if (ni < 0 || nj < 0 || ni >= w || nj >= h || blocked[ni * h + nj]) continue;
                 int ng = ground[ni * h + nj];
                 int dh = Math.abs(ng - cg);
-                if (dh > 2) continue;
+                if (dh > 5) continue;
                 double step = (nb[0] != 0 && nb[1] != 0) ? 1.414 : 1.0;
-                double slope = dh == 0 ? 0 : dh == 1 ? 0.9 : 5.0;
+                double slope = dh == 0 ? 0 : dh == 1 ? 0.9 : dh == 2 ? 4.5 : 9.0 * dh;
                 // a little deterministic noise so the path meanders instead of running a ruler line
                 double wob = 0.35 * (hash(minX + ni, minZ + nj) & 255) / 255.0;
                 double c = cost[ci * h + cj] + step * (1 + wob) + slope;
@@ -605,17 +695,44 @@ final class CottageTerrain {
                 ceiling -= 1.5;
                 int from = (int) Math.floor(ceiling);
                 // up to the top of whatever stands in the column (a tree on a ledge may be far above the ground proper)
-                int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-                for (int y = from + 1; y <= top; y++) {
+                int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 2;
+                boolean hasBlockingCanopy = vlen < 24.0;
+                if (!hasBlockingCanopy) {
+                    for (int y = from + 1; y <= top; y++) {
+                        bp.set(x, y, z);
+                        if (isCanopy(level.getBlockState(bp))) {
+                            hasBlockingCanopy = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasBlockingCanopy) {
+                    for (int y = gTop + 1; y <= top; y++) {
+                        bp.set(x, y, z);
+                        BlockState s = level.getBlockState(bp);
+                        if (s.isAir()) continue;
+                        if (isCanopy(s)) {
+                            level.setBlock(bp, Blocks.AIR.defaultBlockState(), SET);
+                            removed++;
+                            removed += stripAbovePlants(level, x, y, z);
+                        }
+                    }
+                    removed += fellTree(level, x, gTop + 1, z);
+                }
+                // Also sweep any plant in the column above gTop + 1 whose support below is air or canopy
+                for (int y = gTop + 2; y <= top; y++) {
                     bp.set(x, y, z);
                     BlockState s = level.getBlockState(bp);
                     if (s.isAir()) continue;
-                    if (isCanopy(s)) {
-                        level.setBlock(bp, Blocks.AIR.defaultBlockState(), SET);
-                        removed++;
+                    if (isPlant(s) || s.is(Blocks.SNOW)) {
+                        BlockState below = level.getBlockState(bp.below());
+                        if (below.isAir() || isCanopy(below)) {
+                            level.setBlock(bp, Blocks.AIR.defaultBlockState(), SET);
+                            removed++;
+                            removed += stripAbovePlants(level, x, y, z);
+                        }
                     }
                 }
-                // a trunk topped below the line keeps its stub; ground cover is never touched here
             }
         }
         return removed;

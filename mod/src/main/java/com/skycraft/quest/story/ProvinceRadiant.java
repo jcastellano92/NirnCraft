@@ -49,15 +49,18 @@ public final class ProvinceRadiant {
 
     public static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out, boolean guard) {
         Region r = Regions.at(npc.level(), npc.blockPosition());
-        boolean talker = npc instanceof Villager || npc instanceof NpcEntity n && n.role().civilian;
-        if (!"skyrim".equals(r.province()) && !"sea".equals(r.province()) && !"dimension".equals(r.kind()) && (talker || guard)) {
-            out.add(new DialogueOption("story.province.work", Component.translatable("dialogue.skycraft.story.local_work", r.name()), 305,
+        boolean questGiver = guard || QuestDialogue.isInnkeeper(npc)
+                || (npc instanceof NpcEntity n && (n.role() == NpcRole.JARL || n.role() == NpcRole.STEWARD));
+        if (!"skyrim".equals(r.province()) && !"sea".equals(r.province()) && !"dimension".equals(r.kind()) && questGiver) {
+            out.add(new DialogueOption("story.province.work",
+                    QuestDialogue.questLabel(Component.translatable("dialogue.skycraft.story.local_work", r.name())), 305,
                     (pl, n) -> QuestDialogue.offer(pl, n, "province", () -> local(pl, n))));
         }
         boolean chartist = npc instanceof Villager v && v.getVillagerData().getProfession() == VillagerProfession.CARTOGRAPHER
                 || npc instanceof NpcEntity ne && (ne.role() == NpcRole.ADVENTURER || ne.role() == NpcRole.COURIER);
         if (chartist && SkyData.get(player).getLevel() >= 8) {
-            out.add(new DialogueOption("story.uncharted", Component.translatable("dialogue.skycraft.story.uncharted"), 306,
+            out.add(new DialogueOption("story.uncharted",
+                    QuestDialogue.questLabel(Component.translatable("dialogue.skycraft.story.uncharted")), 306,
                     (pl, n) -> QuestDialogue.offer(pl, n, "uncharted", () -> expedition(pl, n))));
         }
     }

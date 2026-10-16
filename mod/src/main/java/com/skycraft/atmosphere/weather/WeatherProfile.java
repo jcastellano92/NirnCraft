@@ -19,82 +19,83 @@ public final class WeatherProfile {
     private static final Map<String, WeatherProfile> BY_ID = new HashMap<>();
 
     public static final WeatherProfile SKYRIM_COLD = register("skyrim_cold", Ambient.SNOW, -10_000, true, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.SNOW, 4, WeatherKind.BLIZZARD, 2,
-            WeatherKind.FOG, 1);
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.SNOW, 3, WeatherKind.BLIZZARD, 1,
+            WeatherKind.FOG, 1, WeatherKind.GALE, 1);
     public static final WeatherProfile SKYRIM_TEMPERATE = register("skyrim_temperate", Ambient.NONE, 190, true, 4800, 14400,
-            WeatherKind.CLEAR, 5, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 2,
-            WeatherKind.RAIN, 3, WeatherKind.STORM, 1);
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 1);
     public static final WeatherProfile ASH = register("ash", Ambient.ASH, 10_000, false, 3600, 12000,
-            WeatherKind.CLEAR, 1, WeatherKind.CLOUDY, 1, WeatherKind.OVERCAST, 2, WeatherKind.ASHFALL, 4, WeatherKind.ASH_STORM, 2);
+            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 2, WeatherKind.ASHFALL, 3, WeatherKind.ASH_STORM, 1);
     public static final WeatherProfile VOLCANIC = ASH;
     public static final WeatherProfile DESERT = register("desert", Ambient.SAND, 10_000, false, 4800, 14400,
-            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 1, WeatherKind.DUST, 3, WeatherKind.SANDSTORM, 2);
+            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 2, WeatherKind.DUST, 2, WeatherKind.SANDSTORM, 1);
     public static final WeatherProfile ARID = DESERT;
     public static final WeatherProfile SWAMP = register("swamp", Ambient.MARSH, 10_000, false, 3600, 12000,
-            WeatherKind.CLEAR, 1, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 4, WeatherKind.DRIZZLE, 3,
+            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 3, WeatherKind.DRIZZLE, 3,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1);
     public static final WeatherProfile JUNGLE = register("jungle", Ambient.NONE, 10_000, false, 3600, 9600,
-            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 3, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 1, WeatherKind.RAIN, 4,
-            WeatherKind.STORM, 2);
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 4, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 2, WeatherKind.RAIN, 3,
+            WeatherKind.STORM, 1);
     public static final WeatherProfile MARITIME = register("maritime", Ambient.NONE, 240, false, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1);
     public static final WeatherProfile FROZEN = register("frozen", Ambient.SNOW, -10_000, true, 3600, 12000,
-            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 2, WeatherKind.SNOW, 3, WeatherKind.BLIZZARD, 4, WeatherKind.FOG, 1);
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.SNOW, 3, WeatherKind.BLIZZARD, 2, WeatherKind.FOG, 1,
+            WeatherKind.GALE, 1);
     public static final WeatherProfile TEMPERATE = register("temperate", Ambient.NONE, 220, false, 4800, 14400,
-            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 2,
-            WeatherKind.RAIN, 3, WeatherKind.STORM, 1);
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 1);
     public static final WeatherProfile ALPINE = register("alpine", Ambient.SNOW, 150, true, 3600, 12000,
-            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.SNOW, 3,
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.SNOW, 3,
             WeatherKind.BLIZZARD, 1, WeatherKind.RAIN, 1);
     public static final WeatherProfile SAVANNA = register("savanna", Ambient.NONE, 10_000, false, 4800, 14400,
-            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 3, WeatherKind.DUST, 1, WeatherKind.RAIN, 1, WeatherKind.STORM, 1);
+            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 4, WeatherKind.DUST, 1, WeatherKind.RAIN, 1, WeatherKind.STORM, 1);
     public static final WeatherProfile CRYSTAL = register("crystal", Ambient.NONE, 10_000, false, 4800, 14400,
-            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 3, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2);
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 4, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 1);
     public static final WeatherProfile MUSHROOM = register("mushroom", Ambient.MARSH, 10_000, false, 3600, 12000,
-            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 2, WeatherKind.FOG, 3, WeatherKind.DRIZZLE, 2, WeatherKind.RAIN, 1);
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.FOG, 3, WeatherKind.DRIZZLE, 2, WeatherKind.RAIN, 1);
     public static final WeatherProfile TROPICAL = register("tropical", Ambient.NONE, 10_000, false, 2400, 9600,
-            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 3, WeatherKind.DRIZZLE, 1, WeatherKind.RAIN, 2, WeatherKind.STORM, 2).mist(0.15f);
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 4, WeatherKind.DRIZZLE, 1, WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.15f);
     /** Other dimensions: no local weather at all. */
     public static final WeatherProfile NONE = register("none", Ambient.NONE, 10_000, false, 24000, 24000, WeatherKind.CLEAR, 1);
 
     // ---- tuned climates of particular regions (see REGIONS below; regions.json names the broad climate)
-    /** Whiterun's open tundra: mostly fair or overcast, the odd shower and summer storm, a breezy plain. */
+    /** Whiterun's open tundra: mostly fair or broken cumulus, the odd shower and summer storm, a breezy plain. */
     public static final WeatherProfile WHITERUN = register("whiterun", Ambient.NONE, 190, true, 4800, 16800,
-            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 1,
+            WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 6, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 1,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1, WeatherKind.GALE, 1).mist(0.15f);
-    /** Falkreath's pine forests: misty and wet. */
+    /** Falkreath's pine forests: misty and dappled with broken clouds, frequent gentle rain. */
     public static final WeatherProfile FALKREATH = register("falkreath", Ambient.NONE, 200, true, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 3, WeatherKind.DRIZZLE, 3,
-            WeatherKind.RAIN, 3, WeatherKind.STORM, 1).mist(0.45f);
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.35f);
     /** The Rift's golden autumn: bright days, lake mist in the mornings. */
     public static final WeatherProfile RIFT = register("the_rift", Ambient.NONE, 210, true, 4800, 14400,
-            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
-            WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.4f);
-    /** The Reach's crags: low cloud and endless drizzle. */
+            WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.35f);
+    /** The Reach's crags: low cloud and mountain drizzle. */
     public static final WeatherProfile REACH = register("the_reach", Ambient.NONE, 200, true, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 5,
-            WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.3f);
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 3,
+            WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.28f);
     /** Haafingar's cliffs over the Sea of Ghosts: sea fog, rain turning to snow, gales off the water. */
     public static final WeatherProfile HAAFINGAR = register("haafingar", Ambient.NONE, 140, true, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 3, WeatherKind.DRIZZLE, 2,
-            WeatherKind.RAIN, 2, WeatherKind.SNOW, 2, WeatherKind.STORM, 1, WeatherKind.GALE, 1).mist(0.35f);
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 2, WeatherKind.SNOW, 2, WeatherKind.STORM, 1, WeatherKind.GALE, 1).mist(0.30f);
     /** Hjaalmarch's marshes: fog most days, sleet and snow. */
     public static final WeatherProfile HJAALMARCH = register("hjaalmarch", Ambient.MARSH, 120, true, 3600, 12000,
-            WeatherKind.CLEAR, 1, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 6, WeatherKind.DRIZZLE, 3,
-            WeatherKind.RAIN, 1, WeatherKind.SNOW, 2).mist(0.7f);
+            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 3, WeatherKind.FOG, 4, WeatherKind.DRIZZLE, 2,
+            WeatherKind.RAIN, 1, WeatherKind.SNOW, 2).mist(0.55f);
     /** The Pale: snow and blizzards off the northern sea. */
     public static final WeatherProfile PALE = register("the_pale", Ambient.SNOW, -10_000, true, 3600, 12000,
-            WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 2, WeatherKind.SNOW, 5, WeatherKind.BLIZZARD, 4,
-            WeatherKind.FOG, 1, WeatherKind.GALE, 2).mist(0.1f);
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.SNOW, 4, WeatherKind.BLIZZARD, 2,
+            WeatherKind.FOG, 1, WeatherKind.GALE, 1).mist(0.1f);
     /** Winterhold: the harshest blizzards in Skyrim, clear frozen nights under the aurora. */
     public static final WeatherProfile WINTERHOLD = register("winterhold", Ambient.SNOW, -10_000, true, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 2, WeatherKind.SNOW, 4, WeatherKind.BLIZZARD, 5, WeatherKind.FOG, 1,
-            WeatherKind.GALE, 3).mist(0.1f);
+            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.SNOW, 4, WeatherKind.BLIZZARD, 3, WeatherKind.FOG, 1,
+            WeatherKind.GALE, 2).mist(0.1f);
     /** Eastmarch: snowy tundra over volcanic hot springs (steam fog), a dusting of ash blown from Morrowind. */
     public static final WeatherProfile EASTMARCH = register("eastmarch", Ambient.NONE, 150, true, 3600, 12000,
-            WeatherKind.CLEAR, 3, WeatherKind.CLOUDY, 3, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 4, WeatherKind.SNOW, 3,
-            WeatherKind.BLIZZARD, 1, WeatherKind.ASHFALL, 1).mist(0.55f);
+            WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 3, WeatherKind.SNOW, 2,
+            WeatherKind.BLIZZARD, 1, WeatherKind.ASHFALL, 1).mist(0.45f);
     /** Vvardenfell's ashlands: ashfall, ash storms and now and then the blight. */
     public static final WeatherProfile VVARDENFELL = register("vvardenfell", Ambient.ASH, 10_000, false, 3600, 12000,
             WeatherKind.CLEAR, 2, WeatherKind.CLOUDY, 2, WeatherKind.OVERCAST, 1, WeatherKind.ASHFALL, 5, WeatherKind.ASH_STORM, 3,

@@ -62,7 +62,7 @@ public final class SettlementCrowd {
     private static boolean isSettler(NpcEntity n) {
         var pd = n.getPersistentData();
         if (Followers.isFollower(n) || Marriage.isSpouse(n) || pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST)) return false;
-        return pd.contains(Housing.SLOT_KEY) || pd.getBoolean("skycraft_settler");
+        return pd.contains(Housing.SLOT_KEY) || pd.getBoolean("skycraft_settler") || com.skycraft.survival.inn.Innkeepers.isInnkeeper(n);
     }
 
     /** True if the settlement around {@code pos} already holds as many settlers as its plan has slots. */
@@ -93,14 +93,37 @@ public final class SettlementCrowd {
         if (people.isEmpty()) return 0;
         int removed = 0;
 
-        // one person per plan slot: the oldest keeps it
+        int tier = SettlementPopulation.tier(e);
+        boolean hasCourt = Housing.hasCourt(e.key, tier);
+        Housing.Plan housingPlan = SettlementPopulation.housing(e);
+
+        // one person per plan slot: the oldest keeps it; prune obsolete court roles in non-court towns
         Map<String, NpcEntity> slots = new HashMap<>();
+        boolean hasSlottedInnkeeper = false;
         for (NpcEntity n : people) {
+            if (!hasCourt && isSettler(n) && (n.role() == NpcRole.HOUSECARL || n.role() == NpcRole.JARL || n.role() == NpcRole.STEWARD)) {
+                n.getPersistentData().putBoolean("skycraft_steward", false);
+                if (remove(level, n)) removed++;
+                continue;
+            }
             String slot = n.getPersistentData().getString(Housing.SLOT_KEY);
             if (slot.isEmpty()) continue;
+            int hash = slot.indexOf('#');
+            if (hash >= 0) {
+                try {
+                    int idx = Integer.parseInt(slot.substring(hash + 1));
+                    if (housingPlan.at(idx) == null) {
+                        if (remove(level, n)) removed++;
+                        continue;
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
             NpcEntity held = slots.get(slot);
             if (held == null) {
                 slots.put(slot, n);
+                if (n.role() == NpcRole.INNKEEPER || com.skycraft.survival.inn.Innkeepers.isInnkeeper(n)) {
+                    hasSlottedInnkeeper = true;
+                }
             } else {
                 NpcEntity loser = held.tickCount >= n.tickCount ? n : held;
                 slots.put(slot, loser == n ? held : n);
@@ -108,12 +131,17 @@ public final class SettlementCrowd {
             }
         }
 
-        // unadopted settlers beyond the plan's headcount
-        int cap = SettlementPopulation.housing(e).bySlot.size();
+        // unadopted settlers beyond the plan's headcount (and any duplicate unslotted innkeeper)
+        int cap = housingPlan.bySlot.size();
         List<NpcEntity> adopted = new ArrayList<>();
         List<NpcEntity> loose = new ArrayList<>();
         for (NpcEntity n : people) {
             if (n.isRemoved() || !n.isAlive() || isVisitor(n) || !isSettler(n)) continue;
+            if (!n.getPersistentData().contains(Housing.SLOT_KEY) && hasSlottedInnkeeper
+                    && (n.role() == NpcRole.INNKEEPER || com.skycraft.survival.inn.Innkeepers.isInnkeeper(n))) {
+                if (remove(level, n)) removed++;
+                continue;
+            }
             (n.getPersistentData().contains(Housing.SLOT_KEY) ? adopted : loose).add(n);
         }
         int over = adopted.size() + loose.size() - Math.max(cap, 0);

@@ -120,6 +120,74 @@ public final class NoticeBoards {
             int targetCount,
             String personName
     ) {
+        public String posterName() {
+            String town = settlement.name().getString();
+            return switch (archetype) {
+                case "bandit_bounty" -> "Steward of " + town;
+                case "beast_hunt" -> "Master Huntsman of " + town;
+                case "lost_heirloom", "supply_order" -> (personName == null || personName.isBlank()) ? "Citizen of " + town : personName;
+                case "missing_person" -> "Kin of " + personName + " (" + town + ")";
+                default -> "Steward of " + town;
+            };
+        }
+
+        public String narrativeLetter() {
+            String town = settlement.name().getString();
+            String site = targetPlace.name().getString();
+            return switch (archetype) {
+                case "bandit_bounty" -> "To any sellsword or traveler of proven steel: the cutthroat known as "
+                        + personName + " has seized " + site + " and ambushed three wagons on the road from " + town
+                        + ". Inspect the wrecked caravan on the approach to " + site + ", track the raiders to their stronghold, and bring word of "
+                        + personName + "'s death back to the watch in " + town + ". A purse of " + rewardGold + " Septims awaits.";
+                case "beast_hunt" -> "Hear ye: a monstrous " + personName + " has been stalking the wilds around "
+                        + site + ", slaughtering livestock and driving trappers from the woods. Examine the fresh kills and tracks outside "
+                        + site + ", lure the beast from its lair, and bring its trophy back to " + town + " for " + rewardGold + " Septims.";
+                case "lost_heirloom" -> "While fleeing an ambush near " + site + ", my family's prized " + targetItemName
+                        + " was lost to the scavengers haunting those ruins. Search the ransacked camp outside " + site
+                        + ", wrest the " + targetItemName + " from the tomb-raider leader within, and return it to me in "
+                        + town + ". I will gladly pay " + rewardGold + " Septims.";
+                case "missing_person" -> "Please help us — " + personName + " set out from " + town + " toward " + site
+                        + " two nights ago and has not returned. Search where " + personName + " was last seen on the outskirts of "
+                        + site + ", break the captors holding the camp, and bring word of their safety back to " + town
+                        + ". We have " + rewardGold + " Septims saved.";
+                default -> "Notice to gatherers and mercenaries: my workshop in " + town + " is in urgent need of "
+                        + targetCount + " " + targetItemName + ". A shipment cache was abandoned near " + site
+                        + " when raiders struck the road. Locate the cache, drive off the scavengers, and deliver the supplies to "
+                        + personName + " in " + town + " for " + rewardGold + " Septims.";
+            };
+        }
+
+        public List<String> stagePreviews() {
+            String town = settlement.name().getString();
+            String site = targetPlace.name().getString();
+            return switch (archetype) {
+                case "bandit_bounty" -> List.of(
+                        "Inspect the ambushed caravan outside " + site,
+                        "Slay " + personName + " at " + site,
+                        "Report to the watch in " + town
+                );
+                case "beast_hunt" -> List.of(
+                        "Examine the fresh tracks & kills near " + site,
+                        "Hunt and slay the " + personName + " at " + site,
+                        "Present the beast's trophy in " + town
+                );
+                case "lost_heirloom" -> List.of(
+                        "Search the ransacked camp outside " + site,
+                        "Recover the " + targetItemName + " inside " + site,
+                        "Return the " + targetItemName + " to " + personName + " in " + town
+                );
+                case "missing_person" -> List.of(
+                        "Follow " + personName + "'s trail to " + site,
+                        "Defeat the captors holding the camp at " + site,
+                        "Bring word of " + personName + " back to " + town
+                );
+                default -> List.of(
+                        "Locate the abandoned supply cache near " + site,
+                        "Clear the scavengers guarding the " + targetItemName,
+                        "Deliver " + targetCount + " " + targetItemName + " to " + personName + " in " + town
+                );
+            };
+        }
     }
 
     private record SupplySpec(String item, String name, int count, String recipient) {}
@@ -478,66 +546,52 @@ public final class NoticeBoards {
 
     // ------------------------------------------------------------------ interaction & acceptance
 
-    /** Lists the board jobs for {@code settlement} to {@code player} in chat with clickable [Accept] buttons. */
+    /** Opens the custom Notice Board screen for {@code settlement} on {@code player}'s client. */
     public static int showBoard(ServerPlayer player, Place settlement) {
         List<Job> jobs = jobsFor(player.server, settlement, player);
-        player.sendSystemMessage(Component.translatable("quest.skycraft.board.header", settlement.name())
-                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-        if (jobs.isEmpty()) {
-            player.sendSystemMessage(Component.translatable("quest.skycraft.board.empty").withStyle(ChatFormatting.GRAY));
-            return 0;
-        }
+        CompoundTag payload = new CompoundTag();
+        payload.putString("settlementId", settlement.id());
+        payload.putString("settlementName", settlement.name().getString());
+        net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
         for (Job job : jobs) {
             boolean activeOrDone = Quests.find(player.server, player.getUUID(), job.id()) != null;
-            MutableComponent line = Component.literal(" [" + job.index() + "] ").withStyle(ChatFormatting.YELLOW)
-                    .append(job.title().copy().withStyle(ChatFormatting.WHITE))
-                    .append(Component.literal(" — ").withStyle(ChatFormatting.DARK_GRAY))
-                    .append(Component.literal(job.distance() + "m").withStyle(ChatFormatting.AQUA))
-                    .append(Component.literal(" (" + job.size().name() + ", " + job.rewardGold() + "g)").withStyle(ChatFormatting.GOLD));
-            if (activeOrDone) {
-                line.append(Component.literal(" "))
-                        .append(Component.translatable("quest.skycraft.board.taken").withStyle(ChatFormatting.DARK_GRAY));
-            } else {
-                MutableComponent btn = Component.literal(" [")
-                        .append(Component.translatable("quest.skycraft.board.accept_btn"))
-                        .append(Component.literal("]"))
-                        .withStyle(s -> s.withColor(ChatFormatting.GREEN)
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                        "/skycraft-board accept " + settlement.id() + " " + job.index()))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, job.description())));
-                line.append(btn);
+            CompoundTag jt = new CompoundTag();
+            jt.putInt("index", job.index());
+            jt.putString("id", job.id());
+            jt.putString("archetype", job.archetype());
+            jt.putString("title", job.title().getString());
+            jt.putString("targetPlace", job.targetPlace().name().getString());
+            jt.putString("size", job.size().name());
+            jt.putLong("gold", job.rewardGold());
+            jt.putInt("xp", job.rewardXp());
+            jt.putInt("rep", job.rewardRep());
+            jt.putString("poster", job.posterName());
+            jt.putString("letter", job.narrativeLetter());
+            jt.putBoolean("taken", activeOrDone);
+            net.minecraft.nbt.ListTag stages = new net.minecraft.nbt.ListTag();
+            for (String s : job.stagePreviews()) {
+                CompoundTag st = new CompoundTag();
+                st.putString("text", s);
+                stages.add(st);
             }
-            player.sendSystemMessage(line);
+            jt.put("stages", stages);
+            list.add(jt);
         }
+        payload.put("jobs", list);
+        com.skycraft.network.SkyNetwork.sendToPlayer(player, new QuestPackets.OpenNoticeBoard(payload));
         return jobs.size();
     }
 
-    /** Adds notice-board dialogue options when talking to an innkeeper or townsperson in a settlement. */
+    /**
+     * Notice-board contracts belong on the settlement Notice Board UI, not as meter-distance spam in random NPC
+     * dialogue menus. Kept as a safe no-op for external callers.
+     */
     public static void addDialogueOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
-        if (!QuestDialogue.isInnkeeper(npc) && !QuestDialogue.isTownsperson(npc)) return;
-        Optional<Place> placeOpt = nearestBoardSettlement(player.level(), npc.blockPosition(), 180);
-        if (placeOpt.isEmpty()) return;
-        Place settlement = placeOpt.get();
-        out.add(new DialogueOption("quest.board.check." + settlement.id(),
-                Component.translatable("dialogue.skycraft.quest.notice_board"), 48,
-                (pl, n) -> openBoardDialogue(pl, n, settlement)));
-        List<Job> jobs = jobsFor(player.server, settlement, player);
-        for (Job job : jobs) {
-            if (Quests.find(player.server, player.getUUID(), job.id()) != null) continue;
-            out.add(new DialogueOption("quest.board.take." + job.index(),
-                    Component.translatable("dialogue.skycraft.quest.board_entry", job.title(), job.distance(), job.rewardGold()),
-                    50 + job.index(),
-                    (pl, n) -> {
-                        if (accept(pl, settlement, job.index())) {
-                            Dialogue.open(pl, n, Component.translatable("quest.skycraft.board.accepted_reply", job.targetPlace().name(), job.rewardGold()));
-                        }
-                    }));
-        }
+        // Intentionally empty: players inspect and accept contracts via the Notice Board block & screen.
     }
 
     public static void openBoardDialogue(ServerPlayer player, LivingEntity speaker, Place settlement) {
         showBoard(player, settlement);
-        Dialogue.open(player, speaker, Component.translatable("quest.skycraft.board.innkeeper_intro", settlement.name()));
     }
 
     /** Accepts the job at {@code index} on {@code settlement}'s notice board for {@code player} (and their party). */
@@ -552,13 +606,13 @@ public final class NoticeBoards {
         if (resolved < 0 || resolved >= jobs.size()) {
             if (index >= 1 && index <= jobs.size()) resolved = index - 1;
             else {
-                player.sendSystemMessage(Component.translatable("quest.skycraft.board.invalid_index", jobs.size() - 1).withStyle(ChatFormatting.RED));
+                Notifier.message(player, Component.translatable("quest.skycraft.board.invalid_index", jobs.size() - 1).withStyle(ChatFormatting.RED));
                 return false;
             }
         }
         Job job = jobs.get(resolved);
         if (Quests.find(player.server, player.getUUID(), job.id()) != null) {
-            player.sendSystemMessage(Component.translatable("quest.skycraft.board.already_taken").withStyle(ChatFormatting.RED));
+            Notifier.message(player, Component.translatable("quest.skycraft.board.already_taken").withStyle(ChatFormatting.RED));
             return false;
         }
 
@@ -577,11 +631,22 @@ public final class NoticeBoards {
         return true;
     }
 
-    /** Builds the playable {@link Quest} for a notice board {@link Job}. */
+    /** Computes an approach/clue investigation site ~45 blocks outside {@code targetPos} toward {@code settlementPos}. */
+    private static BlockPos approachSpot(BlockPos settlementPos, BlockPos targetPos) {
+        double dx = settlementPos.getX() - targetPos.getX();
+        double dz = settlementPos.getZ() - targetPos.getZ();
+        double len = Math.max(1.0, Math.hypot(dx, dz));
+        int ox = (int) Math.round((dx / len) * 44.0);
+        int oz = (int) Math.round((dz / len) * 44.0);
+        return new BlockPos(targetPos.getX() + ox, targetPos.getY(), targetPos.getZ() + oz);
+    }
+
+    /** Builds the multi-stage Witcher-style playable {@link Quest} for a notice board {@link Job}. */
     public static Quest toQuest(Level level, Job job) {
-        Quest q = new Quest("board_" + job.archetype(), job.category(), job.title(), job.description());
+        Component richDesc = Component.literal(job.narrativeLetter());
+        Quest q = new Quest("board_" + job.archetype(), job.category(), job.title(), richDesc);
         q.id = job.id();
-        q.giverName = Component.translatable("quest.skycraft.board.giver", job.settlement().name());
+        q.giverName = Component.literal(job.posterName());
         q.giverPos = new BlockPos(job.settlement().x(), 72, job.settlement().z());
         q.giverDim = "minecraft:overworld";
         q.hold = !job.settlement().regionId().isEmpty()
@@ -597,9 +662,18 @@ public final class NoticeBoards {
         String targetLabel = job.targetPlace().name().getString();
         String settlementLabel = job.settlement().name().getString();
         int settleRadius = Math.max(48, job.settlement().radius());
+        BlockPos cluePos = approachSpot(q.giverPos, job.targetPos());
 
         switch (job.archetype()) {
             case "bandit_bounty" -> {
+                CompoundTag scouts = QuestSpawner.Spawn.of("minecraft:pillager", 1)
+                        .name(Component.literal(job.personName() + "'s Lookout"))
+                        .health(1.3f).damage(1.1f).build();
+                q.add(new Objective(Objective.Type.GO_TO,
+                        Component.literal("Inspect the ambushed caravan & tracks outside " + targetLabel))
+                        .at(cluePos, "minecraft:overworld", 22).guessY()
+                        .placement("surface").spawn(scouts).label("Ambush Site"));
+
                 CompoundTag chief = QuestSpawner.Spawn.of(job.targetEntity(), 1)
                         .name(Component.literal(job.personName()))
                         .health(3.0f).damage(1.6f).target().boss().build();
@@ -609,8 +683,21 @@ public final class NoticeBoards {
                         Component.translatable("quest.skycraft.board.bandit_bounty.obj", job.personName(), job.targetPlace().name()))
                         .at(job.targetPos(), "minecraft:overworld", 24).guessY()
                         .placement("structure").spawn(chief).spawn(guards).label(targetLabel));
+
+                q.add(new Objective(Objective.Type.TALK_TO,
+                        Component.literal("Report " + job.personName() + "'s death in " + settlementLabel))
+                        .at(q.giverPos, "minecraft:overworld", settleRadius).guessY()
+                        .filter("any")
+                        .topic(Component.literal("I have slain " + job.personName() + " at " + targetLabel + "."),
+                                Component.translatable("quest.skycraft.board.turnin_reply", job.rewardGold()))
+                        .label(settlementLabel));
             }
             case "beast_hunt" -> {
+                q.add(new Objective(Objective.Type.GO_TO,
+                        Component.literal("Examine the fresh kills & tracks near " + targetLabel))
+                        .at(cluePos, "minecraft:overworld", 22).guessY()
+                        .placement("surface").label("Beast Tracks"));
+
                 CompoundTag beast = QuestSpawner.Spawn.of(job.targetEntity(), 1)
                         .name(Component.literal(job.personName()))
                         .health(3.4f).damage(1.7f).target().boss().build();
@@ -629,6 +716,11 @@ public final class NoticeBoards {
                         .label(settlementLabel));
             }
             case "lost_heirloom" -> {
+                q.add(new Objective(Objective.Type.GO_TO,
+                        Component.literal("Search the ransacked campsite outside " + targetLabel))
+                        .at(cluePos, "minecraft:overworld", 20).guessY()
+                        .placement("surface").label("Ransacked Camp"));
+
                 CompoundTag guards = QuestSpawner.Spawn.of("minecraft:skeleton", 2)
                         .health(1.5f).damage(1.2f).build();
                 q.add(new Objective(Objective.Type.GO_TO,
@@ -647,6 +739,11 @@ public final class NoticeBoards {
                         .label(settlementLabel));
             }
             case "missing_person" -> {
+                q.add(new Objective(Objective.Type.GO_TO,
+                        Component.literal("Follow " + job.personName() + "'s trail toward " + targetLabel))
+                        .at(cluePos, "minecraft:overworld", 20).guessY()
+                        .placement("surface").label("Last Known Trail"));
+
                 CompoundTag captors = QuestSpawner.Spawn.of("minecraft:pillager", 2)
                         .health(1.4f).damage(1.2f).build();
                 q.add(new Objective(Objective.Type.GO_TO,
@@ -663,6 +760,11 @@ public final class NoticeBoards {
                         .label(settlementLabel));
             }
             default -> {
+                q.add(new Objective(Objective.Type.GO_TO,
+                        Component.literal("Locate the ambushed supply wagon outside " + targetLabel))
+                        .at(cluePos, "minecraft:overworld", 20).guessY()
+                        .placement("surface").label("Ambushed Wagon"));
+
                 q.add(new Objective(Objective.Type.GO_TO,
                         Component.translatable("quest.skycraft.board.supply_order.obj_gather", job.targetCount(), job.targetItemName(), job.targetPlace().name()))
                         .at(job.targetPos(), "minecraft:overworld", 18).guessY()

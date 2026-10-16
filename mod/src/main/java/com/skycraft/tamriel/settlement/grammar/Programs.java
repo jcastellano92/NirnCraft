@@ -8,6 +8,7 @@ import com.skycraft.tamriel.settlement.build.Canvas;
 import com.skycraft.tamriel.settlement.build.Interiors;
 import com.skycraft.tamriel.settlement.build.Props;
 import com.skycraft.tamriel.settlement.build.Shells.Room;
+import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind;
 import com.skycraft.tamriel.settlement.grammar.Blueprint.Annex;
 import com.skycraft.tamriel.settlement.kit.Palette;
 import com.skycraft.tamriel.settlement.plan.Spec;
@@ -153,7 +154,7 @@ public final class Programs {
             case WATCHTOWER -> {
                 Interiors.guardPost(c, p, r0);
                 Room top = res.upper.isEmpty() ? r0 : res.upper.get(res.upper.size() - 1);
-                c.anchor(AnchorType.GUARD, top.cx(), top.ceil() + 1, top.cz());
+                c.anchor(AnchorType.GUARD, top.cx(), top.y(), top.cz());
             }
         }
         if (b.annex == Annex.PEN) pen(c, b, res);
@@ -261,21 +262,20 @@ public final class Programs {
             placed++;
         }
         if (rich) {
-            c.set(r.x1(), y, r.z1(), B.s(Blocks.BOOKSHELF));
+            Props.bookshelf(c, r.x1(), y, r.z1(), Direction.NORTH, true);
             Props.pot(c, r.x1(), y + 1, r.z1(), 5);
-            c.set(r.x0(), y, r.z0(), B.face(B.s(Blocks.BARREL), Direction.UP));
-            Props.candles(c, r.x0(), y + 1, r.z0(), 3);
+            Props.wardrobe(c, p, r.x0(), y, r.z0(), Direction.SOUTH, bed == AnchorType.HOUSE_BED ? null : loot);
             if (r.w() >= 6 && r.d() >= 6) {
                 int dx = r.x0() + 1;
                 int dz = Math.max(r.z0() + 1, r.cz());
-                Props.table(c, p, dx, y, dz);
+                Props.desk(c, p, dx, y, dz, Direction.EAST);
                 Props.chair(c, p, dx + 1, y, dz, Direction.EAST);
-                Props.candles(c, dx, y + 1, dz, 2);
                 Props.tapestry(c, p, r.cx(), y + 2, r.z1() + 1);
-                Interiors.weaponRack(c, p, r.x0(), y, Math.min(r.z1() - 1, r.z0() + 2), Direction.EAST);
+                Props.wallClutter(c, p, r.cx(), y + 1, r.z1(), Direction.NORTH, FurnitureKind.WALL_TAPESTRY);
+                Props.weaponRack(c, p, r.x0(), y, Math.min(r.z1() - 1, r.z0() + 2), Direction.EAST);
             }
         } else {
-            Props.barrel(c, r.x1(), y, r.z0(), bed == AnchorType.HOUSE_BED ? null : "food");
+            Props.dresser(c, p, r.x1(), y, r.z0(), Direction.SOUTH, bed == AnchorType.HOUSE_BED ? null : "house");
         }
         Props.rug(c, rich ? p.carpet : p.carpet2, Math.max(r.x0(), r.cx() - 1), y, r.z0(), Math.min(r.x1(), r.cx() + 1), Math.max(r.z0(), r.z1() - 3));
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
@@ -286,11 +286,10 @@ public final class Programs {
         int y = r.y();
         c.set(r.x0(), y, r.z1(), Props.cookingPot());
         c.set(r.x0() + 1 <= r.x1() ? r.x0() + 1 : r.x0(), y, r.z1(), B.face(B.s(Blocks.SMOKER), Direction.NORTH));
-        Props.barrel(c, r.x1(), y, r.z1(), "food");
-        Props.barrel(c, r.x1(), y + 1, r.z1(), null);
+        Props.cabinet(c, p, r.x1(), y, r.z1(), Direction.NORTH, "food");
         Props.table(c, p, r.cx(), y, r.cz());
-        c.set(r.cx(), y + 1, r.cz(), Props.cheese());
-        if (r.w() >= 3) Props.chair(c, p, r.cx() - 1, y, r.cz(), Direction.WEST);
+        Props.clutter(c, p, r.cx(), y + 1, r.cz(), Direction.SOUTH, FurnitureKind.CLUTTER_PLATTER);
+        if (r.w() >= 3) Props.stool(c, p, r.cx() - 1, y, r.cz(), Direction.WEST);
         c.set(r.x1(), y, r.z0(), B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
     }
@@ -322,20 +321,21 @@ public final class Programs {
                 }
             }
         }
-        // Grand dining table with 6+ chairs
+        // Grand dining table with 6+ chairs and rich banquet clutter
         int tz0 = r.z0() + 2, tz1 = Math.max(tz0 + 2, r.z1() - 2);
         for (int z = tz0; z <= tz1; z++) {
-            Props.table(c, p, diningX, y, z);
+            Props.banquetTable(c, p, diningX, y, z, Direction.NORTH);
             Props.chair(c, p, diningX - 1, y, z, Direction.WEST);
             Props.chair(c, p, diningX + 1, y, z, Direction.EAST);
-            if (z % 2 == 0) Props.candles(c, diningX, y + 1, z, 3);
-            else c.set(diningX, y + 1, z, Props.cheese());
+            FurnitureKind ck = (z - tz0) % 3 == 0 ? FurnitureKind.CLUTTER_CANDELABRA
+                    : (z - tz0) % 3 == 1 ? FurnitureKind.CLUTTER_PLATTER : FurnitureKind.CLUTTER_GOBLETS;
+            Props.clutter(c, p, diningX, y + 1, z, Direction.NORTH, ck);
         }
         // Kitchen & pantry in the side bay
         c.set(kx0, y, r.z1(), Props.cookingPot());
         if (kx0 + 1 <= kx1) c.set(kx0 + 1, y, r.z1(), B.face(B.s(Blocks.SMOKER), Direction.NORTH));
         c.set(kx0, y, Math.max(r.z0() + 1, r.z1() - 2), B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
-        Props.barrel(c, kx0, y, Math.max(r.z0() + 1, r.z1() - 3), "food");
+        Props.cabinet(c, p, kx0, y, Math.max(r.z0() + 1, r.z1() - 3), kx0 == r.x0() ? Direction.EAST : Direction.WEST, "food");
         // Servant bed in the ground wing corner
         int sbx = kx0 == r.x0() ? r.x0() : r.x1();
         int sbz = r.z0() + 2;
@@ -348,12 +348,13 @@ public final class Programs {
         int txWall = kx0 == r.x0() ? r.x1() : r.x0();
         Direction tFace = txWall == r.x1() ? Direction.WEST : Direction.EAST;
         for (int z = r.z0() + 2; z <= r.z1() - 2; z += 2) {
-            c.set(txWall, y, z, B.s(Blocks.BOOKSHELF));
-            c.set(txWall, y + 1, z, B.s(Blocks.CHISELED_BOOKSHELF));
+            Props.bookshelf(c, txWall, y, z, tFace, false);
+            Props.bookshelf(c, txWall, y + 1, z, tFace, true);
         }
-        Interiors.weaponRack(c, p, txWall, y, r.cz(), tFace);
+        Props.weaponRack(c, p, txWall, y, r.cz(), tFace);
         Props.tapestry(c, p, diningX, y + 2, r.z1() + 1);
-        Props.chest(c, txWall, y, r.z1(), tFace, loot);
+        Props.wallClutter(c, p, diningX, y + 1, r.z1(), Direction.NORTH, FurnitureKind.WALL_TAPESTRY);
+        Props.cabinet(c, p, txWall, y, r.z1(), tFace, loot);
         Props.pot(c, txWall, y, r.z0() + 1, 9);
         Props.rug(c, p.carpet, Math.max(r.x0() + 1, diningX - 2), y, r.z0() + 1, Math.min(r.x1() - 1, diningX + 2), r.z1() - 1);
         for (int z = r.z0() + 2; z <= r.z1(); z += 4) Props.lantern(c, p, diningX, r.ceil() - 1, z, true);
@@ -371,14 +372,7 @@ public final class Programs {
         Interiors.partitionV(c, p, r, splitX, Math.min(r.z1() - 1, r.cz() + 1));
         if (r.d() >= 10) {
             int splitZ = r.cz();
-            for (int x = r.x0(); x < splitX; x++) {
-                boolean doorway = x == (r.x0() + splitX) / 2;
-                for (int yy = y; yy < r.ceil(); yy++) {
-                    if (doorway && yy <= y + 1) continue;
-                    c.set(x, yy, splitZ, p.wall);
-                }
-                if (doorway) c.entrance(x, y, splitZ, p.door, Direction.SOUTH);
-            }
+            Interiors.partitionH(c, p, r.x0(), splitX - 1, splitZ, y, r.ceil(), (r.x0() + splitX) / 2, true);
         }
         // Master bedroom & guest bedroom beds along back wall
         int placed = 0;
@@ -389,19 +383,23 @@ public final class Programs {
             if (c.bedCount() == before) continue;
             c.anchor(bed, x, y, r.z1() - 1);
             Props.chest(c, x, y, Math.max(r.z0() + 1, r.z1() - 3), Direction.NORTH, bed == AnchorType.HOUSE_BED ? null : loot);
+            if (x + 1 <= r.x1() && x + 1 != splitX) {
+                Props.nightstand(c, p, x + 1, y, r.z1(), Direction.NORTH);
+                Props.clutter(c, p, x + 1, y + 1, r.z1(), Direction.NORTH, FurnitureKind.CLUTTER_CANDELABRA);
+            }
             placed++;
         }
+        Props.wardrobe(c, p, r.x1(), y, r.z0(), Direction.SOUTH, bed == AnchorType.HOUSE_BED ? null : loot);
         // Noble library / study section in front-left
         for (int x = r.x0(); x < splitX; x++) {
-            c.set(x, y, r.z0(), B.s(Blocks.BOOKSHELF));
-            if (r.ceil() - y > 2) c.set(x, y + 1, r.z0(), B.s(Blocks.CHISELED_BOOKSHELF));
+            Props.bookshelf(c, x, y, r.z0(), Direction.SOUTH, false);
+            if (r.ceil() - y > 2) Props.bookshelf(c, x, y + 1, r.z0(), Direction.SOUTH, true);
         }
         int studyX = Math.max(r.x0() + 1, (r.x0() + splitX) / 2);
         int studyZ = Math.min(r.z1() - 2, r.z0() + 2);
-        Props.table(c, p, studyX, y, studyZ);
-        c.set(studyX, y + 1, studyZ, B.s(Blocks.LECTERN));
+        Props.desk(c, p, studyX, y, studyZ, Direction.SOUTH);
         if (studyZ + 1 < r.z1() - 1) Props.chair(c, p, studyX, y, studyZ + 1, Direction.SOUTH);
-        Interiors.weaponRack(c, p, r.x0(), y, Math.min(r.z1() - 2, r.z0() + 3), Direction.EAST);
+        Props.weaponRack(c, p, r.x0(), y, Math.min(r.z1() - 2, r.z0() + 3), Direction.EAST);
         Props.tapestry(c, p, r.cx(), y + 2, r.z1() + 1);
         Props.rug(c, p.carpet, r.x0() + 1, y, r.z0() + 1, Math.max(r.x0() + 1, splitX - 1), r.z1() - 2);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
@@ -410,14 +408,13 @@ public final class Programs {
     static void study(Canvas c, Palette p, Room r, String loot) {
         int y = r.y();
         for (int x = r.x0(); x <= r.x1(); x++) {
-            c.set(x, y, r.z1(), B.s(Blocks.BOOKSHELF));
-            if (r.ceil() - y > 2) c.set(x, y + 1, r.z1(), B.s(Blocks.BOOKSHELF));
+            Props.bookshelf(c, x, y, r.z1(), Direction.NORTH, (x & 1) == 0);
+            if (r.ceil() - y > 2) Props.bookshelf(c, x, y + 1, r.z1(), Direction.NORTH, true);
         }
-        Props.table(c, p, r.cx(), y, r.cz());
-        c.set(r.cx(), y + 1, r.cz(), B.s(Blocks.LECTERN));
+        Props.desk(c, p, r.cx(), y, r.cz(), Direction.SOUTH);
         Props.chair(c, p, r.cx(), y, r.cz() + 1 <= r.z1() - 1 ? r.cz() + 1 : r.cz(), Direction.SOUTH);
-        Props.chest(c, r.x0(), y, r.z0(), Direction.EAST, loot);
-        Props.candles(c, r.x1(), y, r.z0(), 4);
+        Props.cabinet(c, p, r.x0(), y, r.z0(), Direction.EAST, loot);
+        Props.clutter(c, p, r.x1(), y, r.z0(), Direction.WEST, FurnitureKind.CLUTTER_CANDELABRA);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
     }
 
@@ -470,21 +467,22 @@ public final class Programs {
 
     // ------------------------------------------------------------------ trades
 
-    /** A shop counter across the back third with an open passage at x1 and a seated keeper chair behind it. */
+    /** A shop counter across the back third with an open passage at x1 and a clear keeper standing spot behind it. */
     static int counter(Canvas c, Palette p, Room r, AnchorType who) {
         int y = r.y();
         int cz = Math.max(r.z0() + 2, r.z1() - 2);
         int cx1 = Math.max(r.x0() + 1, r.x1() - 1);
-        for (int x = r.x0() + 1; x <= cx1; x++) c.set(x, y, cz, p.planks);
+        for (int x = r.x0() + 1; x <= cx1; x++) Props.counter(c, p, x, y, cz, Direction.NORTH);
         if (r.x1() > cx1) {
             c.set(r.x1(), y, cz, B.with(B.face(p.trapdoor, Direction.WEST), BlockStateProperties.OPEN, true));
             for (int kz = Math.max(r.z0(), cz - 1); kz <= Math.min(r.z1(), cz + 1); kz++) {
                 c.keepClear(r.x1(), y, y + 1, kz);
             }
         }
-        c.set(r.x0() + 1, y + 1, cz, B.s(Blocks.CANDLE).setValue(CandleBlock.LIT, true));
+        Props.clutter(c, p, r.x0() + 1, y + 1, cz, Direction.NORTH, FurnitureKind.CLUTTER_SCALES);
+        if (cx1 > r.x0() + 1) Props.clutter(c, p, cx1, y + 1, cz, Direction.NORTH, FurnitureKind.CLUTTER_LEDGER);
         int seatZ = Math.min(r.z1(), cz + 1);
-        Props.chair(c, p, r.cx(), y, seatZ, Direction.SOUTH);
+        c.keepClear(r.cx(), y, y + 1, seatZ);
         c.anchor(who, r.cx(), y, seatZ);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
         return cz;
@@ -515,28 +513,29 @@ public final class Programs {
     static void books(Canvas c, Palette p, Room r, int doorX, AnchorType who) {
         int y = r.y();
         int cz = counter(c, p, r, who);
+        int seatZ = Math.min(r.z1(), cz + 1);
         for (int z = r.z0(); z < cz - 1; z++) {
             if (r.x0() == doorX && z == r.z0()) continue;
-            c.set(r.x0(), y, z, B.s(Blocks.BOOKSHELF));
-            c.set(r.x0(), y + 1, z, B.s(Blocks.BOOKSHELF));
+            Props.bookshelf(c, r.x0(), y, z, Direction.EAST, (z & 1) == 0);
+            Props.bookshelf(c, r.x0(), y + 1, z, Direction.EAST, true);
             if (r.x1() != doorX) {
-                c.set(r.x1(), y, z, B.s(Blocks.BOOKSHELF));
-                c.set(r.x1(), y + 1, z, B.s(Blocks.BOOKSHELF));
+                Props.bookshelf(c, r.x1(), y, z, Direction.WEST, (z & 1) != 0);
+                Props.bookshelf(c, r.x1(), y + 1, z, Direction.WEST, true);
             }
         }
         for (int x = r.x0(); x <= r.x1(); x++) {
-            c.set(x, y, r.z1(), B.s(Blocks.CHISELED_BOOKSHELF));
-            if (r.ceil() - y > 2) c.set(x, y + 1, r.z1(), B.s(Blocks.BOOKSHELF));
+            if (x == r.cx() && seatZ == r.z1()) continue;
+            Props.bookshelf(c, x, y, r.z1(), Direction.NORTH, true);
+            if (r.ceil() - y > 2) Props.bookshelf(c, x, y + 1, r.z1(), Direction.NORTH, false);
         }
-        c.set(r.cx(), y + 1, cz, B.s(Blocks.LECTERN));
+        Props.clutter(c, p, r.cx(), y + 1, cz, Direction.NORTH, FurnitureKind.CLUTTER_LEDGER);
         if (r.w() >= 7 && cz - r.z0() >= 4) {
             int rz = r.z0() + 2;
-            Props.table(c, p, r.cx(), y, rz);
+            Props.desk(c, p, r.cx(), y, rz, Direction.WEST);
             Props.chair(c, p, r.cx() - 1, y, rz, Direction.WEST);
-            Props.candles(c, r.cx(), y + 1, rz, 2);
         }
         Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "store");
-        Props.candles(c, r.x0() + 1, y + 1, cz, 3);
+        Props.clutter(c, p, r.x0() + 1, y + 1, cz, Direction.NORTH, FurnitureKind.CLUTTER_CANDELABRA);
     }
 
     static void tailor(Canvas c, Palette p, Room r, int doorX) {
@@ -550,10 +549,12 @@ public final class Programs {
             c.set(r.x0(), y, z, Materials.wool(cloth[c.roll(r.x0(), y, z, 43, cloth.length)]));
             c.set(r.x0(), y + 1, z, Materials.carpet(cloth[c.roll(r.x0(), y + 1, z, 44, cloth.length)]));
         }
-        // Dress forms & cutting table
+        // Dress forms, wardrobe & cutting table
         if (r.x1() != doorX && cz - r.z0() >= 3) {
-            c.set(r.x1(), y, r.z0() + 1, p.fence);
-            c.set(r.x1(), y + 1, r.z0() + 1, Materials.wool("purple"));
+            Props.armorStand(c, p, r.x1(), y, r.z0() + 1, Direction.WEST);
+        }
+        if (r.x0() != doorX && cz - r.z0() >= 3) {
+            Props.wardrobe(c, p, r.x0(), y, r.z0() + 1, Direction.EAST, "store");
         }
         c.set(r.x1(), y, r.z0(), Props.tanningRack());
         Props.chest(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), Direction.NORTH, "store");
@@ -582,11 +583,10 @@ public final class Programs {
         if (r.x1() - 1 > r.cx()) c.set(r.x1() - 1, y, r.z1(), B.s(Blocks.HAY_BLOCK));
         for (int z = r.z0(); z < cz - 1; z++) {
             if (r.x0() == doorX && z == r.z0()) continue;
-            c.set(r.x0(), y, z, p.fence);
-            c.set(r.x0(), y + 1, z, B.face(p.trapdoor, Direction.EAST));
+            Props.weaponRack(c, p, r.x0(), y, z, Direction.EAST);
         }
         if (r.x1() != doorX && cz - r.z0() >= 3) {
-            Interiors.weaponRack(c, p, r.x1(), y, r.z0() + 1, Direction.WEST);
+            Props.weaponRack(c, p, r.x1(), y, r.z0() + 1, Direction.WEST);
         }
         Props.barrel(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), "store");
         c.set(r.x1(), y, r.z0(), B.s(Blocks.WHITE_WOOL));
@@ -595,7 +595,11 @@ public final class Programs {
     static void tannery(Canvas c, Palette p, Room r, int doorX) {
         int y = r.y();
         int cz = counter(c, p, r, AnchorType.HUNTER);
-        for (int x = r.x0(); x <= r.x1(); x += 2) c.set(x, y, r.z1(), Props.tanningRack());
+        int seatZ = Math.min(r.z1(), cz + 1);
+        for (int x = r.x0(); x <= r.x1(); x += 2) {
+            if (x == r.cx() && seatZ == r.z1()) continue;
+            c.set(x, y, r.z1(), Props.tanningRack());
+        }
         c.set(r.x0(), y, r.z0() + 1, B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
         if (r.z0() + 2 < cz - 1) c.set(r.x0(), y, r.z0() + 2, Props.workbench());
         for (int z = r.z0(); z < cz - 1; z += 2) c.set(r.x1(), y, z, Materials.carpet(c.chance(r.x1(), y, z, 5, 2) ? "brown" : "white"));
@@ -632,19 +636,19 @@ public final class Programs {
             switch (i++ % 3) {
                 case 0 -> {
                     c.set(u.cx(), uy, u.cz(), B.face(Props.enchanter(), Direction.SOUTH));
-                    for (int x = u.x0(); x <= u.x1(); x++) c.set(x, uy, u.z1(), B.s(Blocks.BOOKSHELF));
-                    Props.candles(c, u.x0(), uy, u.z0(), 4);
+                    for (int x = u.x0(); x <= u.x1(); x++) Props.bookshelf(c, x, uy, u.z1(), Direction.NORTH, (x & 1) == 0);
+                    Props.clutter(c, p, u.x0(), uy, u.z0(), Direction.EAST, FurnitureKind.CLUTTER_CANDELABRA);
                 }
                 case 1 -> {
                     c.bed(u.x0(), uy, u.z1() - 1, p.bed, Direction.SOUTH);
                     c.anchor(AnchorType.BED, u.x0(), uy, u.z1() - 1);
-                    Props.chest(c, u.x1(), uy, u.z1(), Direction.WEST, "alchemist");
-                    c.set(u.x1(), uy, u.z0(), B.s(Blocks.LECTERN));
+                    Props.cabinet(c, p, u.x1(), uy, u.z1(), Direction.WEST, "alchemist");
+                    Props.desk(c, p, u.x1(), uy, u.z0(), Direction.SOUTH);
                 }
                 default -> {
                     c.set(u.cx(), uy, u.cz(), B.s(Blocks.RESPAWN_ANCHOR));
                     c.set(u.x0(), uy, u.z1(), B.s(Blocks.AMETHYST_CLUSTER));
-                    c.set(u.x1(), uy, u.z1(), B.s(Blocks.LECTERN));
+                    Props.desk(c, p, u.x1(), uy, u.z1(), Direction.NORTH);
                 }
             }
             Props.lantern(c, p, u.cx(), u.ceil() - 1, u.cz(), true);
@@ -799,13 +803,12 @@ public final class Programs {
 
     static void guardhouse(Canvas c, Palette p, Room r) {
         int y = r.y();
-        Props.table(c, p, r.cx(), y, r.cz());
-        Props.candles(c, r.cx(), y + 1, r.cz(), 2);
+        Props.desk(c, p, r.cx(), y, r.cz(), Direction.SOUTH);
         Props.chair(c, p, r.cx(), y, r.cz() + 1, Direction.SOUTH);
         for (int z = r.z0(); z <= r.z1(); z += 2) {
-            c.set(r.x0(), y, z, B.s(Blocks.GRINDSTONE));
-            c.set(r.x0(), y + 1, z, B.s(Blocks.CHAIN));
+            Props.weaponRack(c, p, r.x0(), y, z, Direction.EAST);
         }
+        Props.armorStand(c, p, r.x1(), y, r.z0() + 1 <= r.z1() ? r.z0() + 1 : r.z0(), Direction.WEST);
         Props.chest(c, r.x1(), y, r.z1(), Direction.WEST, "barracks");
         c.anchor(AnchorType.GUARD, r.cx(), y, r.cz() - 1);
         c.anchor(AnchorType.GUARD, r.cx() + 1, y, r.z1());
@@ -815,11 +818,15 @@ public final class Programs {
     static void guildHall(Canvas c, Palette p, Room r) {
         int y = r.y();
         for (int z = r.z0() + 2; z <= r.z1() - 2; z++) {
-            Props.table(c, p, r.cx(), y, z);
+            Props.banquetTable(c, p, r.cx(), y, z, Direction.NORTH);
             Props.chair(c, p, r.cx() - 1, y, z, Direction.WEST);
             Props.chair(c, p, r.cx() + 1, y, z, Direction.EAST);
-            if (z % 3 == 0) Props.candles(c, r.cx(), y + 1, z, 3);
+            FurnitureKind ck = (z - r.z0()) % 3 == 0 ? FurnitureKind.CLUTTER_CANDELABRA
+                    : (z - r.z0()) % 3 == 1 ? FurnitureKind.CLUTTER_TANKARD : FurnitureKind.CLUTTER_PLATTER;
+            Props.clutter(c, p, r.cx(), y + 1, z, Direction.NORTH, ck);
         }
+        Props.weaponRack(c, p, r.x0(), y, r.cz(), Direction.EAST);
+        Props.weaponRack(c, p, r.x1(), y, r.cz(), Direction.WEST);
         for (int x = r.x0(); x <= r.x1(); x += 2) Props.tapestry(c, p, x, y + 3, r.z1() + 1);
         Props.chest(c, r.x0(), y, r.z1(), Direction.EAST, "store");
         Props.chest(c, r.x1(), y, r.z1(), Direction.WEST, "store");

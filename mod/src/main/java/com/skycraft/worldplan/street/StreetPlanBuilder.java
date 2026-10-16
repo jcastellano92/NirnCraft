@@ -166,13 +166,13 @@ public final class StreetPlanBuilder {
         return plan;
     }
 
-    /** Road plan segment ends that lie on a settlement's pad, by place id: (segment << 32 | global vertex). */
+    /** Road plan segment ends that lie on a settlement's pad or terminate at a trunk junction within 16 blocks of a gate, by place id. */
     static Map<String, LongArrayList> roadEnds(RoadPlan rp) {
         Map<String, LongArrayList> out = new HashMap<>();
         for (int s = 0; s < rp.segments(); s++) {
             for (int end = 0; end < 2; end++) {
                 int join = end == 0 ? rp.segJoinA[s] : rp.segJoinB[s];
-                if (join != RoadPlan.JOIN_SITE) continue;
+                if (join != RoadPlan.JOIN_SITE && join < 0) continue;
                 int v = end == 0 ? rp.segStart[s] : rp.segEnd[s] - 1;
                 float x = rp.vx[v], z = rp.vz[v];
                 int best = -1;
@@ -184,7 +184,21 @@ public final class StreetPlanBuilder {
                         best = i;
                     }
                 }
-                if (best >= 0) out.computeIfAbsent(rp.siteId[best], k -> new LongArrayList()).add(((long) s << 32) | v);
+                if (best >= 0) {
+                    if (join != RoadPlan.JOIN_SITE) {
+                        Place p = Places.byId(rp.siteId[best]).orElse(null);
+                        if (p == null) continue;
+                        boolean nearGate = false;
+                        for (int[] g : SettlementAnchors.gates(p)) {
+                            if (Math.hypot(g[0] + 0.5 - x, g[1] + 0.5 - z) <= 16.0) {
+                                nearGate = true;
+                                break;
+                            }
+                        }
+                        if (!nearGate) continue;
+                    }
+                    out.computeIfAbsent(rp.siteId[best], k -> new LongArrayList()).add(((long) s << 32) | v);
+                }
             }
         }
         return out;

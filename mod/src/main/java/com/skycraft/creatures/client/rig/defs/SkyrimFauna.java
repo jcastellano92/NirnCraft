@@ -744,23 +744,23 @@ final class SkyrimFauna {
     /** Mudcrab: flat wide spiky-rimmed carapace, eye stalks, six legs, two pincers (the right one bigger). */
     static CreatureDef mudcrab() {
         Arachnid a = new Arachnid("mudcrab");
-        a.bodyW = 12;
+        a.bodyW = 14;
         a.bodyH = 4;
-        a.bodyL = 9;
-        a.headW = 6;
-        a.headH = 3;
-        a.headL = 2;
+        a.bodyL = 10;
+        a.headW = 8;
+        a.headH = 2;
+        a.headL = 0;
         a.fangLen = 0;
         a.abdomenW = 8;
         a.abdomenH = 2;
-        a.abdomenL = 3;
-        a.abdomenTilt = -25;
+        a.abdomenL = 0;
+        a.abdomenTilt = 0;
         a.legPairs = 3;
         a.legUpper = 5;
         a.legLower = 6;
         a.legW = 2;
-        a.legUp = 35;
-        a.legDown = 65;
+        a.legUp = 32;
+        a.legDown = 62;
         a.pincers = true;
         a.pincerLen = 4;
         a.shell = "shell";
@@ -769,29 +769,35 @@ final class SkyrimFauna {
         a.build();
         Rig rig = a.rig;
         Bone body = a.body;
-        // raised central plates and the spiky rim
-        body.box("plate", -5, -3, -4, 10, 1, 8).tag("plate");
-        body.box("plate", -3, -3.8f, -2.5f, 6, 1, 5).tag("plate_top");
-        body.box("under", -5.5f, 1.5f, -4, 11, 1, 8).tag("underside");
+        // broad rock-like domed carapace with sloped front/rear aprons and lateral overhangs
+        body.box("shell", -8, -1.5f, -4.5f, 1, 3, 9).tag("rim_r");
+        body.box("shell", 7, -1.5f, -4.5f, 1, 3, 9).tag("rim_l");
+        body.box("shell", -6, -1.5f, -5.8f, 12, 3, 1).tag("rim_front");
+        body.box("shell", -5.5f, -1.2f, 4.8f, 11, 3, 1).tag("rim_back");
+        body.box("plate", -6, -3.2f, -4.5f, 12, 2, 9).tag("plate");
+        body.box("plate", -4, -4.5f, -3f, 8, 2, 6).tag("plate_top");
+        body.box("plate", -2, -5.1f, -1.5f, 4, 1, 3).tag("plate_peak");
+        body.box("under", -6f, 1.5f, -4.5f, 12, 1, 9).tag("underside");
         for (int i = 0; i < 3; i++) {
-            float z = -3f + i * 2.8f;
-            body.box("spike", -7.2f, -1.2f, z - 0.5f, 2, 1, 1).tag("spike");
-            body.box("spike", 5.2f, -1.2f, z - 0.5f, 2, 1, 1).tag("spike");
+            float z = -3.2f + i * 3.0f;
+            body.box("spike", -8.8f, -1.0f, z - 0.5f, 1, 1, 2).tag("spike");
+            body.box("spike", 7.8f, -1.0f, z - 0.5f, 1, 1, 2).tag("spike");
         }
-        body.box("spike", -5.5f, -1.5f, -5.6f, 1, 1, 2).tag("spike");
-        body.box("spike", 4.5f, -1.5f, -5.6f, 1, 1, 2).tag("spike");
-        body.box("spike", -1.5f, -2.6f, -5.2f, 1, 1, 1).tag("spike");
-        body.box("spike", 0.5f, -2.6f, -5.2f, 1, 1, 1).tag("spike");
-        // eye stalks and mouthparts
-        a.head.pair("eyestalk", 1.6f, -1.2f, -1.2f, (b, side) -> {
-            b.rot(-12, 0, -14);
-            b.sbox("leg", -0.5f, -3, -0.5f, 1, 3, 1).tag("stalk");
-            b.sbox("eye", -0.5f, -4f, -0.5f, 1, 1, 1, 0.15f).tag("eye");
+        body.box("spike", -4.5f, -2.0f, -6.5f, 2, 1, 1).tag("spike");
+        body.box("spike", 2.5f, -2.0f, -6.5f, 2, 1, 1).tag("spike");
+        body.box("spike", -1.5f, -2.6f, -6.2f, 1, 1, 1).tag("spike");
+        body.box("spike", 0.5f, -2.6f, -6.2f, 1, 1, 1).tag("spike");
+        // low-set crab eye stalks and tucked mandibles under the front rim
+        a.head.pair("eyestalk", 2.2f, -1.0f, -0.6f, (b, side) -> {
+            b.rot(-18, 0, -16);
+            b.sbox("leg", -0.5f, -2.2f, -0.5f, 1, 2, 1).tag("stalk");
+            b.sbox("eye", -0.5f, -3.0f, -0.5f, 1, 1, 1, 0.15f).tag("eye");
         });
-        a.head.box("under", -1.5f, 0.5f, -2.6f, 3, 1, 1).tag("mouth");
-        // the right claw is a big crusher
+        a.head.box("under", -2.5f, 0.4f, -1.2f, 5, 1, 1).tag("mouth");
+        // heavy asymmetrical crab chelipeds (right crusher claw, left cutter claw)
         rig.bone("claw_lower_right").box("shell", -4.5f, -2.5f, -3f, 5, 5, 6, 0.1f).tag("crusher");
         rig.bone("pincer_right").box("shell", -3.5f, -1.5f, -2.5f, 4, 3, 3).tag("crusher_finger");
+        rig.bone("claw_lower_left").box("shell", -0.5f, -2.0f, -2.8f, 4, 4, 5, 0.05f).tag("cutter");
         CreatureDef def = a.def();
         def.anims.remove("special");
         def.anim("attack", crabPinch(true));

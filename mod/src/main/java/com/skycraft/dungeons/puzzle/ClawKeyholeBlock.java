@@ -60,17 +60,23 @@ public class ClawKeyholeBlock extends Block {
         Claw claw = Claw.byIndex(state.getValue(CLAW));
         ItemStack held = player.getMainHandItem();
         if (!(held.getItem() instanceof DragonClawItem item)) {
-            player.displayClientMessage(Component.translatable("message.skycraft.claw_door.locked", Component.translatable("item.skycraft." + claw.itemId())), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("message.skycraft.claw_door.locked", Component.translatable("item.skycraft." + claw.itemId())));
+            }
             return InteractionResult.CONSUME;
         }
         if (item.claw != claw) {
-            player.displayClientMessage(Component.translatable("message.skycraft.claw_door.wrong_claw"), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("message.skycraft.claw_door.wrong_claw"));
+            }
             level.playSound(null, pos, SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 0.8f, 0.7f);
             return InteractionResult.CONSUME;
         }
         Direction facing = state.getValue(FACING);
         if (!ringsMatch(level, pos, state)) {
-            player.displayClientMessage(Component.translatable("message.skycraft.claw_door.rings"), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("message.skycraft.claw_door.rings"));
+            }
             level.playSound(null, pos, SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 0.8f, 0.5f);
             return InteractionResult.CONSUME;
         }

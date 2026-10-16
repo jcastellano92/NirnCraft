@@ -105,21 +105,33 @@ public class CharacterStatusScreen extends Screen {
         y += 14;
 
         Collection<MobEffectInstance> effects = minecraft.player.getActiveEffects();
+        java.util.List<Component> hoveredEffectTip = null;
         if (effects.isEmpty()) {
             g.drawString(font, Component.translatable("screen.skycraft.no_active_effects"), rightX, y, DIM_COLOR, false);
         } else {
+            net.minecraft.client.resources.MobEffectTextureManager texMgr = minecraft.getMobEffectTextures();
             for (MobEffectInstance effect : effects) {
                 if (y > height - 40) break;
+                net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = texMgr.get(effect.getEffect());
+                g.blit(rightX, y - 1, 0, 10, 10, sprite);
                 Component effectTitle = effect.getEffect().getDisplayName();
                 int durationTicks = effect.getDuration();
-                String durStr = (durationTicks > 1200) ? (durationTicks / 1200) + "m" : (durationTicks / 20) + "s";
-                g.drawString(font, effectTitle.getString() + " (" + durStr + ")", rightX, y, TEXT_COLOR, false);
+                String durStr = effect.isInfiniteDuration() ? "\u221E"
+                        : (durationTicks > 1200) ? (durationTicks / 1200) + "m" : (durationTicks / 20) + "s";
+                g.drawString(font, effectTitle.getString() + " (" + durStr + ")", rightX + 13, y, TEXT_COLOR, false);
+                if (mouseX >= rightX && mouseX <= width - 10 && mouseY >= y - 1 && mouseY < y + 11) {
+                    hoveredEffectTip = tooltip(effect);
+                }
                 y += 12;
             }
         }
 
         // Bottom close hint
         g.drawCenteredString(font, Component.translatable("gui.back"), cx, height - 16, DIM_COLOR);
+
+        if (hoveredEffectTip != null && !hoveredEffectTip.isEmpty()) {
+            g.renderComponentTooltip(font, hoveredEffectTip, mouseX, mouseY);
+        }
 
         super.render(g, mouseX, mouseY, partialTick);
     }

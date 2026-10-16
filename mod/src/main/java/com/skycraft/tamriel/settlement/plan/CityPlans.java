@@ -364,6 +364,13 @@ public final class CityPlans {
             int lx = b.x() + i * b.stepX(), lz = b.z() + i * b.stepZ();
             Spec s = plan.at(b.kind(), lx, lz, b.face(), w, d);
             s.flags |= b.flags();
+            if (s.kind == Archetype.CAMP || s.kind == Archetype.SHRINE || s.kind == Archetype.LUMBER
+                    || s.kind == Archetype.YARD || s.kind == Archetype.PEN || s.kind == Archetype.FIELD
+                    || s.kind == Archetype.GARDEN || s.kind == Archetype.GRAVEYARD
+                    || (plan.place != null && Math.hypot(lx, lz) > plan.place.radius() - 4)
+                    || Math.hypot(lx, lz) > plan.radius - 4) {
+                s.flags |= Spec.NO_BEARD;
+            }
             s.variant = b.variant();
             if (b.h() > 0) s.h = b.h();
             if (b.margin() >= 0) s.margin = b.margin();
@@ -373,7 +380,10 @@ public final class CityPlans {
             }
             if (b.raise() != 0) s.minFloor = b.raise();
             if (!b.use().isEmpty()) grammarUse(plan, s, b.use(), b.wealth());
-            if (s.kind == Archetype.PALACE || s.kind == Archetype.LONGHOUSE
+            boolean allowSeat = com.skycraft.tamriel.settlement.grammar.Zoning.hasCourtSeat(plan.place, plan.place != null && (plan.place.type() == com.skycraft.tamriel.PlaceType.CAPITAL || plan.place.type() == com.skycraft.tamriel.PlaceType.CITY) ? 3 : 2);
+            if (!allowSeat) {
+                s.flags &= ~Spec.SEAT;
+            } else if (s.kind == Archetype.PALACE || s.kind == Archetype.LONGHOUSE
                     || s.use == com.skycraft.tamriel.settlement.grammar.Use.KEEP.ordinal()
                     || s.use == com.skycraft.tamriel.settlement.grammar.Use.LONGHOUSE.ordinal()) {
                 s.flags |= Spec.SEAT;
@@ -381,7 +391,8 @@ public final class CityPlans {
                     boolean cityKeep = s.kind == Archetype.PALACE || s.use == com.skycraft.tamriel.settlement.grammar.Use.KEEP.ordinal();
                     s.size(Math.max(s.w, cityKeep ? 19 : 15), Math.max(s.d, cityKeep ? 23 : 19));
                 }
-            } else if (s.kind == Archetype.HOUSE || s.kind == Archetype.MANOR || s.kind == Archetype.FARMHOUSE
+            }
+            if (s.kind == Archetype.HOUSE || s.kind == Archetype.MANOR || s.kind == Archetype.FARMHOUSE
                     || (s.grammar() && com.skycraft.tamriel.settlement.grammar.Use.byOrdinal(s.use).home())) {
                 if (s.w < 7) s.w = 7;
                 if (s.d < 9) s.d = 9;
@@ -448,6 +459,16 @@ public final class CityPlans {
         return Math.hypot(lx, lz) <= limit;
     }
 
+    private static boolean buildableGround(Plan plan, Spec s) {
+        if (s.kind == Archetype.DOCK || s.has(Spec.WATER)) return true;
+        int hx = Math.max(1, s.halfX() - s.margin), hz = Math.max(1, s.halfZ() - s.margin);
+        if (plan.terrain.anyWet(s.x, s.z, hx, hz)) return false;
+        if (s.kind.building && s.kind != Archetype.MINE && s.kind != Archetype.WALL && s.kind != Archetype.GATE) {
+            return plan.terrain.spread(s.x, s.z, hx, hz) <= 10;
+        }
+        return true;
+    }
+
     private static int[] findClearSpot(Plan plan, Spec probe, int lx, int lz, boolean checkLines) {
         int origX = probe.x, origZ = probe.z;
         int maxR = Math.max(64, plan.radius);
@@ -461,6 +482,7 @@ public final class CityPlans {
                     if (!insideRadius(plan, probe, nx, nz)) continue;
                     probe.x = plan.wx(nx, nz);
                     probe.z = plan.wz(nx, nz);
+                    if (!buildableGround(plan, probe)) continue;
                     boolean hit = checkLines ? anyCollision(plan, probe, gap) : anyNonLineCollision(plan, probe, gap);
                     if (!hit) {
                         probe.x = origX;
@@ -476,7 +498,7 @@ public final class CityPlans {
     }
 
     private static void placePin(Plan plan, Spec s, int lx, int lz) {
-        if (insideRadius(plan, s, lx, lz) && !anyCollision(plan, s, 0)) {
+        if (insideRadius(plan, s, lx, lz) && buildableGround(plan, s) && !anyCollision(plan, s, 0)) {
             plan.put(s);
             return;
         }

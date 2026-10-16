@@ -113,7 +113,7 @@ public final class GatePosts {
             }
             if (at == null) {
                 if (!level.hasChunk(g[0] >> 4, g[1] >> 4)) continue;
-                at = new BlockPos(g[0], level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, g[0], g[1]), g[1]);
+                at = NpcPlacement.safeSurfaceAt(level, g[0], g[1]);
             }
             out.add(new Gate(g[0] + "," + g[1], at));
         }
@@ -182,16 +182,19 @@ public final class GatePosts {
         }
     }
 
-    /** The cell nearest {@code want} (within two blocks, never the passage itself) a person can stand in. */
+    /** The cell nearest {@code want} (within three blocks, never the passage itself or a roof/furniture) a person can stand in. */
     static BlockPos standable(ServerLevel level, BlockPos want, BlockPos gate) {
-        for (int r = 0; r <= 3; r++) {
-            for (int dx = -r; dx <= r; dx++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
-                    for (int dy : new int[]{0, 1, -1, 2, -2}) {
+        for (int dy : new int[]{0, -1, 1, -2, 2}) {
+            for (int r = 0; r <= 3; r++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    for (int dz = -r; dz <= r; dz++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
                         BlockPos p = want.offset(dx, dy, dz);
                         if (p.getX() == gate.getX() && p.getZ() == gate.getZ()) continue;
                         if (!level.isLoaded(p)) continue;
+                        if (level.canSeeSky(p) && NpcPlacement.hasRoomBelow(level, p)) continue;
+                        if (NpcPlacement.isFireHazard(level, p) || NpcPlacement.isSlabHazard(level, p)
+                                || NpcPlacement.isFurnitureHazard(level, p)) continue;
                         BlockState feet = level.getBlockState(p), head = level.getBlockState(p.above()), floor = level.getBlockState(p.below());
                         if (!feet.getCollisionShape(level, p).isEmpty() || !head.getCollisionShape(level, p.above()).isEmpty()) continue;
                         if (!floor.isFaceSturdy(level, p.below(), net.minecraft.core.Direction.UP) || !level.getFluidState(p).isEmpty()) continue;

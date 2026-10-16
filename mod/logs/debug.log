@@ -1,34 +1,943 @@
-[15Oct2026 13:35:04.716] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded sceneplan (852 KB)
-[15Oct2026 13:35:04.732] [Test worker/INFO] [com.skycraft.Skycraft/]: [sceneplan] loaded the baked scene plan: 5213 scenes, 11046 props (430 ms)
-[15Oct2026 13:35:04.794] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded roadplan (6101 KB)
-[15Oct2026 13:35:05.031] [Test worker/INFO] [com.skycraft.Skycraft/]: [roadplan] loaded the baked road plan: 7174 links, 7984 segments, 478495 vertices, 50762 buckets (265 ms)
-[15Oct2026 13:35:05.232] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 7546 places of Tamriel
-[15Oct2026 13:35:05.686] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded the Tamriel map (880x672 cells) in 441 ms
-[15Oct2026 13:35:05.696] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded the Tamriel hydrology: 511 waterfalls, 540 river sites, 1356 springs
-[15Oct2026 13:35:05.729] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 83 regions of Nirn
-[15Oct2026 13:35:07.157] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded testbake (4 KB)
-[15Oct2026 13:35:07.161] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] stale_test is stale (inputs changed); computing live
-[15Oct2026 13:35:07.579] [Test worker/INFO] [com.skycraft.tamriel.world.WorldSheets/]: Loaded 11 world model sheet(s): 99 blocks, 3019 fields
-[15Oct2026 13:35:07.924] [Test worker/INFO] [com.skycraft.Skycraft/]: Skycraft roads: 1179 routing corridors (25942 cells)
-[15Oct2026 13:35:08.060] [Test worker/INFO] [com.skycraft.Skycraft/]: [roadplan] terrain index: 135864 road buckets, 2579777 edge entries, 4376 pad buckets (126 ms)
-[15Oct2026 13:35:08.359] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded streetplan (7972 KB)
-[15Oct2026 13:35:08.515] [Test worker/INFO] [com.skycraft.Skycraft/]: [streetplan] loaded the baked street plan: 1338 settlements, 63117 nodes, 59053 edges, 13503 doors, 52070 plots (176 ms)
-[15Oct2026 13:35:08.613] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 53 ms: 6 places, 15 segments, 35 scenes
-[15Oct2026 13:35:08.654] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 1) in 30 ms: 6 places, 13 segments, 24 scenes
-[15Oct2026 13:35:08.677] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (0, -3) in 18 ms: 6 places, 11 segments, 24 scenes
-[15Oct2026 13:35:08.701] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 21 ms: 6 places, 15 segments, 35 scenes
-[15Oct2026 13:35:08.718] [skycraft-tile-planner-2/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (5, 2) in 7 ms: 0 places, 0 segments, 0 scenes
-[15Oct2026 13:35:08.719] [skycraft-tile-planner-1/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (6, 2) in 7 ms: 0 places, 0 segments, 0 scenes
-[15Oct2026 13:35:08.726] [skycraft-tile-planner-2/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (7, 2) in 7 ms: 0 places, 0 segments, 0 scenes
-[15Oct2026 13:35:08.726] [skycraft-tile-planner-1/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (6, 1) in 7 ms: 0 places, 0 segments, 0 scenes
-[15Oct2026 13:35:08.737] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 16 ms: 6 places, 15 segments, 35 scenes
-[15Oct2026 13:35:08.742] [skycraft-tile-planner-2/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (6, 3) in 15 ms: 0 places, 0 segments, 0 scenes
-[15Oct2026 13:35:08.756] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 17 ms: 6 places, 15 segments, 35 scenes
-[15Oct2026 13:35:08.792] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 24 ms: 6 places, 16 segments, 33 scenes
-[15Oct2026 13:35:08.809] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (0, -3) in 14 ms: 6 places, 11 segments, 24 scenes
-[15Oct2026 13:35:08.830] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (-5, 1) in 12 ms: 6 places, 12 segments, 24 scenes
-[15Oct2026 13:35:08.847] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 1) in 16 ms: 6 places, 13 segments, 24 scenes
-[15Oct2026 13:35:08.858] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (5, 0) in 9 ms: 2 places, 3 segments, 8 scenes
-[15Oct2026 13:35:08.877] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 18 ms: 6 places, 15 segments, 35 scenes
-[15Oct2026 13:35:08.893] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 1) in 16 ms: 6 places, 13 segments, 24 scenes
-[15Oct2026 13:35:08.918] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 18 ms: 6 places, 15 segments, 35 scenes
+[16Oct2026 07:30:11.069] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded the Tamriel map (880x672 cells) in 494 ms
+[16Oct2026 07:30:11.102] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded the Tamriel hydrology: 511 waterfalls, 540 river sites, 1356 springs
+[16Oct2026 07:30:11.286] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 83 regions of Nirn
+[16Oct2026 07:30:11.374] [Test worker/DEBUG] [io.netty.util.internal.logging.InternalLoggerFactory/]: Using SLF4J as the default logging framework
+[16Oct2026 07:30:11.377] [Test worker/DEBUG] [io.netty.util.ResourceLeakDetector/]: -Dio.netty.leakDetection.level: simple
+[16Oct2026 07:30:11.377] [Test worker/DEBUG] [io.netty.util.ResourceLeakDetector/]: -Dio.netty.leakDetection.targetRecords: 4
+[16Oct2026 07:30:11.388] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: -Dio.netty.noUnsafe: false
+[16Oct2026 07:30:11.389] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: Java version: 17
+[16Oct2026 07:30:11.389] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: sun.misc.Unsafe.theUnsafe: available
+[16Oct2026 07:30:11.390] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: sun.misc.Unsafe.copyMemory: available
+[16Oct2026 07:30:11.390] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: sun.misc.Unsafe.storeFence: available
+[16Oct2026 07:30:11.391] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: java.nio.Buffer.address: available
+[16Oct2026 07:30:11.391] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: direct buffer constructor: unavailable
+java.lang.UnsupportedOperationException: Reflective setAccessible(true) disabled
+	at io.netty.util.internal.ReflectionUtil.trySetAccessible(ReflectionUtil.java:31) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.util.internal.PlatformDependent0$5.run(PlatformDependent0.java:288) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at java.security.AccessController.doPrivileged(AccessController.java:318) ~[?:?]
+	at io.netty.util.internal.PlatformDependent0.<clinit>(PlatformDependent0.java:282) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.util.internal.PlatformDependent.isAndroid(PlatformDependent.java:333) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.util.internal.PlatformDependent.<clinit>(PlatformDependent.java:88) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.buffer.UnpooledByteBufAllocator.<clinit>(UnpooledByteBufAllocator.java:37) ~[netty-buffer-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.buffer.Unpooled.<clinit>(Unpooled.java:75) ~[netty-buffer-4.1.82.Final.jar:4.1.82.Final]
+	at com.skycraft.atmosphere.AtmospherePlanTest.weatherFrontAdvectionFalloffAndPacketSync(AtmospherePlanTest.java:133) ~[test/:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:568) ~[?:?]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728) ~[junit-platform-commons-1.10.2.jar:1.10.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at java.util.ArrayList.forEach(ArrayList.java:1511) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at java.util.ArrayList.forEach(ArrayList.java:1511) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses(JUnitPlatformTestClassProcessor.java:119) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000(JUnitPlatformTestClassProcessor.java:94) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop(JUnitPlatformTestClassProcessor.java:89) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop(SuiteTestClassProcessor.java:62) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:568) ~[?:?]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36) ~[?:?]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24) ~[?:?]
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33) ~[?:?]
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94) ~[?:?]
+	at jdk.proxy1.$Proxy2.stop(Unknown Source) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run(TestWorker.java:193) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60) ~[?:?]
+	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56) ~[?:?]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:119) ~[?:?]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:66) ~[?:?]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69) ~[gradle-worker.jar:?]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74) ~[gradle-worker.jar:?]
+[16Oct2026 07:30:11.402] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: java.nio.Bits.unaligned: available, true
+[16Oct2026 07:30:11.403] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: jdk.internal.misc.Unsafe.allocateUninitializedArray(int): unavailable
+java.lang.IllegalAccessException: class io.netty.util.internal.PlatformDependent0$7 cannot access class jdk.internal.misc.Unsafe (in module java.base) because module java.base does not export jdk.internal.misc to unnamed module @1e1a0406
+	at jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:392) ~[?:?]
+	at java.lang.reflect.AccessibleObject.checkAccess(AccessibleObject.java:674) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:560) ~[?:?]
+	at io.netty.util.internal.PlatformDependent0$7.run(PlatformDependent0.java:410) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at java.security.AccessController.doPrivileged(AccessController.java:318) ~[?:?]
+	at io.netty.util.internal.PlatformDependent0.<clinit>(PlatformDependent0.java:401) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.util.internal.PlatformDependent.isAndroid(PlatformDependent.java:333) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.util.internal.PlatformDependent.<clinit>(PlatformDependent.java:88) ~[netty-common-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.buffer.UnpooledByteBufAllocator.<clinit>(UnpooledByteBufAllocator.java:37) ~[netty-buffer-4.1.82.Final.jar:4.1.82.Final]
+	at io.netty.buffer.Unpooled.<clinit>(Unpooled.java:75) ~[netty-buffer-4.1.82.Final.jar:4.1.82.Final]
+	at com.skycraft.atmosphere.AtmospherePlanTest.weatherFrontAdvectionFalloffAndPacketSync(AtmospherePlanTest.java:133) ~[test/:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:568) ~[?:?]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728) ~[junit-platform-commons-1.10.2.jar:1.10.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at java.util.ArrayList.forEach(ArrayList.java:1511) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at java.util.ArrayList.forEach(ArrayList.java:1511) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses(JUnitPlatformTestClassProcessor.java:119) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000(JUnitPlatformTestClassProcessor.java:94) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop(JUnitPlatformTestClassProcessor.java:89) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop(SuiteTestClassProcessor.java:62) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:568) ~[?:?]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36) ~[?:?]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24) ~[?:?]
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33) ~[?:?]
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94) ~[?:?]
+	at jdk.proxy1.$Proxy2.stop(Unknown Source) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run(TestWorker.java:193) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100) ~[?:?]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60) ~[?:?]
+	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56) ~[?:?]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:119) ~[?:?]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:66) ~[?:?]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69) ~[gradle-worker.jar:?]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74) ~[gradle-worker.jar:?]
+[16Oct2026 07:30:11.408] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: java.nio.DirectByteBuffer.<init>(long, int): unavailable
+[16Oct2026 07:30:11.408] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: sun.misc.Unsafe: available
+[16Oct2026 07:30:11.409] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: maxDirectMemory: 2147483648 bytes (maybe)
+[16Oct2026 07:30:11.409] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.tmpdir: C:\Users\Jeremy\AppData\Local\Temp (java.io.tmpdir)
+[16Oct2026 07:30:11.409] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.bitMode: 64 (sun.arch.data.model)
+[16Oct2026 07:30:11.410] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: Platform: Windows
+[16Oct2026 07:30:11.410] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.maxDirectMemory: -1 bytes
+[16Oct2026 07:30:11.410] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.uninitializedArrayAllocationThreshold: -1
+[16Oct2026 07:30:11.411] [Test worker/DEBUG] [io.netty.util.internal.CleanerJava9/]: java.nio.ByteBuffer.cleaner(): available
+[16Oct2026 07:30:11.411] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.noPreferDirect: false
+[16Oct2026 07:30:11.417] [Test worker/DEBUG] [io.netty.buffer.AbstractByteBuf/]: -Dio.netty.buffer.checkAccessible: true
+[16Oct2026 07:30:11.417] [Test worker/DEBUG] [io.netty.buffer.AbstractByteBuf/]: -Dio.netty.buffer.checkBounds: true
+[16Oct2026 07:30:11.418] [Test worker/DEBUG] [io.netty.util.ResourceLeakDetectorFactory/]: Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@5d5b5fa7
+[16Oct2026 07:30:11.424] [Test worker/DEBUG] [io.netty.util.internal.InternalThreadLocalMap/]: -Dio.netty.threadLocalMap.stringBuilder.initialSize: 1024
+[16Oct2026 07:30:11.424] [Test worker/DEBUG] [io.netty.util.internal.InternalThreadLocalMap/]: -Dio.netty.threadLocalMap.stringBuilder.maxSize: 4096
+[16Oct2026 07:30:11.426] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.numHeapArenas: 40
+[16Oct2026 07:30:11.426] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.numDirectArenas: 40
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.pageSize: 8192
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.maxOrder: 9
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.chunkSize: 4194304
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.smallCacheSize: 256
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.normalCacheSize: 64
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.maxCachedBufferCapacity: 32768
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.cacheTrimInterval: 8192
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.cacheTrimIntervalMillis: 0
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.useCacheForAllThreads: false
+[16Oct2026 07:30:11.427] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.maxCachedByteBuffersPerChunk: 1023
+[16Oct2026 07:30:11.437] [Test worker/DEBUG] [io.netty.buffer.ByteBufUtil/]: -Dio.netty.allocator.type: pooled
+[16Oct2026 07:30:11.437] [Test worker/DEBUG] [io.netty.buffer.ByteBufUtil/]: -Dio.netty.threadLocalDirectBufferSize: 0
+[16Oct2026 07:30:11.437] [Test worker/DEBUG] [io.netty.buffer.ByteBufUtil/]: -Dio.netty.maxThreadLocalCharBufferSize: 16384
+[16Oct2026 07:30:12.382] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] loaded testbake (4 KB)
+[16Oct2026 07:30:12.499] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] stale_test is stale (inputs changed); computing live
+[16Oct2026 07:30:12.920] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 7640 places of Tamriel
+[16Oct2026 07:30:14.840] [Test worker/INFO] [com.skycraft.tamriel.world.WorldSheets/]: Loaded 11 world model sheet(s): 99 blocks, 3019 fields
+[16Oct2026 07:30:23.669] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded 85 ports and 130 sea routes
+[16Oct2026 07:30:23.681] [Test worker/INFO] [com.skycraft.Skycraft/]: Loaded travel networks: 15 provinces, 1978 nodes, 4955 routes
+[16Oct2026 07:30:23.813] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] landmass is stale (inputs changed); computing live
+[16Oct2026 07:30:24.028] [Test worker/INFO] [com.skycraft.Skycraft/]: Skycraft roads: 39 landmasses on the Tamriel map (214 ms)
+[16Oct2026 07:30:24.238] [Test worker/INFO] [com.skycraft.Skycraft/]: Skycraft roads: 7 off-raster islands around 665 places (145982 cells, 208 ms)
+[16Oct2026 07:30:24.697] [Test worker/INFO] [com.skycraft.Skycraft/]: Travel selftest: 9/9 checks passed, 0 problems (Skyrim p50=226.3m, p90=357.8m, max=518.2m, 117 nodes, 151 routes)
+[16Oct2026 07:30:25.029] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] roadplan is stale (inputs changed); computing live
+[16Oct2026 07:30:43.934] [Test worker/INFO] [com.skycraft.Skycraft/]: Skycraft roads: road graph of 1315 settlements, 2056 links (18901 ms)
+[16Oct2026 07:30:44.247] [Skycraft road plan/INFO] [com.skycraft.Skycraft/]: Skycraft roads: 1179 routing corridors (25942 cells)
+[16Oct2026 07:30:50.223] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] roadplan: 8143 links (1 failed, 225 merged into other roads), 8576 segments, 484726 vertices; 2045 km (highway 239, road 554, lane 344, trail 909); spans: 611 cut, 382 fill, 1917 bridge, 1026 culvert, 300 ford, 901 switchback, 4182 stairs, 369 tunnel; 409 switchback stretches, 92 junction pins missed, 128 slivers dropped; 7640 sites; 25117 ms (sites 19188 ms, 8 threads)
+[16Oct2026 07:30:50.394] [Test worker/INFO] [com.skycraft.Skycraft/]: [roadplan] planned live: 8143 links, 8576 segments (25367 ms)
+[16Oct2026 07:30:50.598] [Test worker/INFO] [com.skycraft.Skycraft/]: [roadplan] terrain index: 149731 road buckets, 2617685 edge entries, 4911 pad buckets (127 ms)
+[16Oct2026 07:30:50.635] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] sceneplan is stale (inputs changed); computing live
+[16Oct2026 07:30:51.151] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] sceneplan: 5848 scenes, 12447 props, 430 km² land, 2045 km road (499 ms); ROAD_BEND=93 (12 refused) CROSSROADS=715 (24 refused) FORD=2 (0 refused) BRIDGE_END=25 (2 refused) FARM=724 (7 refused) CAMP_SITE=155 (0 refused) SHRINE_SITE=349 (1 refused) BATTLE_SITE=260 (2 refused) RUIN_EDGE=300 (3 refused) DUNGEON_MOUTH=1476 (15 refused) LOREWEB_CLUE=743 (15 refused) SETTLEMENT_EDGE=1006 (1 refused) 
+[16Oct2026 07:30:51.169] [Test worker/INFO] [com.skycraft.Skycraft/]: [sceneplan] planned live: 5848 scenes, 12447 props (533 ms)
+[16Oct2026 07:30:52.452] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] streetplan is stale (inputs changed); computing live
+[16Oct2026 07:30:53.925] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cheydinhal: no room for feature tree_row near (-28, -14)
+[16Oct2026 07:30:53.929] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cheydinhal: 10 of 11 features placed
+[16Oct2026 07:30:53.933] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan skingrad: no room for feature orchard near (1, 29)
+[16Oct2026 07:30:53.937] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan chorrol: no room for feature great_tree near (-12, 28)
+[16Oct2026 07:30:53.941] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan skingrad: no room for feature orchard near (20, 10)
+[16Oct2026 07:30:53.941] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan chorrol: 10 of 11 features placed
+[16Oct2026 07:30:53.944] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan skingrad: 10 of 12 features placed
+[16Oct2026 07:30:53.952] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan anvil: no room for feature pool near (-17, -11)
+[16Oct2026 07:30:53.953] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan anvil: 11 of 12 features placed
+[16Oct2026 07:30:53.969] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bravil: no room for feature market near (-8, 9)
+[16Oct2026 07:30:53.975] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bravil: no room for feature market near (44, 16)
+[16Oct2026 07:30:53.976] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bravil: 8 of 10 features placed
+[16Oct2026 07:30:54.057] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric kvatch: buildings 24%, developed 60% of r82, 10 features (authored), 300 specs, 175 ms
+[16Oct2026 07:30:54.057] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric skingrad: buildings 21%, developed 51% of r84, 10 features (authored), 278 specs, 160 ms
+[16Oct2026 07:30:54.060] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric bruma: buildings 28%, developed 57% of r82, 10 features (authored), 294 specs, 166 ms
+[16Oct2026 07:30:54.082] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric cheydinhal: buildings 25%, developed 66% of r84, 10 features (authored), 374 specs, 172 ms
+[16Oct2026 07:30:54.097] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric chorrol: buildings 26%, developed 63% of r84, 10 features (authored), 381 specs, 194 ms
+[16Oct2026 07:30:54.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan leyawiin: no room for feature pond near (-2, -28)
+[16Oct2026 07:30:54.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric anvil: buildings 25%, developed 64% of r84, 11 features (authored), 390 specs, 196 ms
+[16Oct2026 07:30:54.104] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan leyawiin: 11 of 12 features placed
+[16Oct2026 07:30:54.104] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric bravil: buildings 21%, developed 66% of r80, 8 features (authored), 360 specs, 207 ms
+[16Oct2026 07:30:54.200] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric leyawiin: buildings 24%, developed 66% of r84, 11 features (authored), 355 specs, 127 ms
+[16Oct2026 07:30:54.268] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan balmora: no room for feature market near (21, 24)
+[16Oct2026 07:30:54.272] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan balmora: no room for feature market near (-29, 13)
+[16Oct2026 07:30:54.272] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan balmora: 9 of 11 features placed
+[16Oct2026 07:30:54.291] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sadrith_mora: no room for feature great_tree near (7, -15)
+[16Oct2026 07:30:54.303] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sadrith_mora: no room for feature pond near (17, -5)
+[16Oct2026 07:30:54.304] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sadrith_mora: 10 of 12 features placed
+[16Oct2026 07:30:54.346] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ebonheart: no room for feature banners near (-6, -8)
+[16Oct2026 07:30:54.351] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ebonheart: 10 of 11 features placed
+[16Oct2026 07:30:54.365] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric balmora: buildings 31%, developed 65% of r82, 9 features (authored), 303 specs, 134 ms
+[16Oct2026 07:30:54.376] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric vivec: buildings 18%, developed 69% of r104, 12 features (authored), 440 specs, 193 ms
+[16Oct2026 07:30:54.445] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric aldruhn: buildings 27%, developed 63% of r82, 12 features (authored), 365 specs, 181 ms
+[16Oct2026 07:30:54.447] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric raven_rock: buildings 22%, developed 57% of r60, 6 features (authored), 251 specs, 119 ms
+[16Oct2026 07:30:54.465] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric necrom: buildings 28%, developed 58% of r82, 12 features (authored), 311 specs, 185 ms
+[16Oct2026 07:30:54.465] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ebonheart: buildings 22%, developed 60% of r76, 10 features (authored), 344 specs, 145 ms
+[16Oct2026 07:30:54.482] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric sadrith_mora: buildings 16%, developed 65% of r80, 10 features (authored), 434 specs, 234 ms
+[16Oct2026 07:30:54.644] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric gideon: buildings 27%, developed 64% of r81, 12 features (authored), 399 specs, 58 ms
+[16Oct2026 07:30:54.645] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric helstrom: buildings 27%, developed 65% of r81, 12 features (authored), 412 specs, 45 ms
+[16Oct2026 07:30:54.649] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rihad: no room for feature gatehouse near (0, 60)
+[16Oct2026 07:30:54.649] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sentinel: no room for feature pool near (15, 45)
+[16Oct2026 07:30:54.650] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rihad: 14 of 15 features placed
+[16Oct2026 07:30:54.654] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orsinium: no room for feature statue near (0, 38)
+[16Oct2026 07:30:54.654] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric stormhold: buildings 23%, developed 66% of r81, 12 features (authored), 421 specs, 85 ms
+[16Oct2026 07:30:54.660] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sentinel: no room for feature great_tree near (0, 67)
+[16Oct2026 07:30:54.669] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric murkmire: buildings 27%, developed 65% of r74, 6 features (authored), 336 specs, 60 ms
+[16Oct2026 07:30:54.671] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sentinel: no room for feature market near (29, 2)
+[16Oct2026 07:30:54.673] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orsinium: no room for feature market near (3, 19)
+[16Oct2026 07:30:54.673] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orsinium: no room for feature gatehouse near (0, 106)
+[16Oct2026 07:30:54.677] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sentinel: no room for feature market near (-22, 33)
+[16Oct2026 07:30:54.678] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orsinium: 19 of 22 features placed
+[16Oct2026 07:30:54.682] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan sentinel: 23 of 27 features placed
+[16Oct2026 07:30:54.702] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rimmen: no room for feature market near (8, -8)
+[16Oct2026 07:30:54.704] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rimmen: no room for feature market near (-31, 0)
+[16Oct2026 07:30:54.704] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wayrest: no room for feature great_tree near (21, -16)
+[16Oct2026 07:30:54.707] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rimmen: 10 of 12 features placed
+[16Oct2026 07:30:54.709] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan senchal: no room for feature market near (-4, 16)
+[16Oct2026 07:30:54.710] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wayrest: no room for feature great_tree near (-21, 26)
+[16Oct2026 07:30:54.711] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan senchal: no room for feature market near (2, -19)
+[16Oct2026 07:30:54.713] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan senchal: 10 of 12 features placed
+[16Oct2026 07:30:54.716] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wayrest: no room for feature basin near (73, -38)
+[16Oct2026 07:30:54.726] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wayrest: no room for feature market near (-57, -42)
+[16Oct2026 07:30:54.730] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wayrest: no room for feature tree_row near (55, -3)
+[16Oct2026 07:30:54.731] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wayrest: 18 of 23 features placed
+[16Oct2026 07:30:54.772] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric senchal: buildings 29%, developed 65% of r81, 10 features (authored), 390 specs, 69 ms
+[16Oct2026 07:30:54.775] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric riverhold: buildings 26%, developed 66% of r81, 12 features (authored), 392 specs, 75 ms
+[16Oct2026 07:30:54.775] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rimmen: buildings 25%, developed 64% of r81, 10 features (authored), 412 specs, 80 ms
+[16Oct2026 07:30:54.799] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan falinesti: no room for feature lamps near (-6, -25)
+[16Oct2026 07:30:54.801] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan falinesti: 11 of 12 features placed
+[16Oct2026 07:30:54.818] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rihad: buildings 15%, developed 53% of r104, 14 features (authored), 680 specs, 254 ms
+[16Oct2026 07:30:54.841] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan woodhearth: no room for feature lamps near (-1, -21)
+[16Oct2026 07:30:54.842] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan woodhearth: 11 of 12 features placed
+[16Oct2026 07:30:54.863] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric orsinium: buildings 13%, developed 43% of r112, 19 features (authored), 741 specs, 222 ms
+[16Oct2026 07:30:54.880] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric sentinel: buildings 20%, developed 63% of r100, 23 features (authored), 718 specs, 315 ms
+[16Oct2026 07:30:54.881] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric arenthia: buildings 21%, developed 70% of r74, 6 features (authored), 299 specs, 47 ms
+[16Oct2026 07:30:54.882] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric woodhearth: buildings 20%, developed 71% of r81, 11 features (authored), 319 specs, 53 ms
+[16Oct2026 07:30:54.894] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric falinesti: buildings 19%, developed 65% of r81, 11 features (authored), 392 specs, 140 ms
+[16Oct2026 07:30:54.901] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric firsthold: buildings 32%, developed 64% of r74, 6 features (authored), 287 specs, 55 ms
+[16Oct2026 07:30:54.903] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan college_of_winterhold: no room for feature great_tree near (36, 40)
+[16Oct2026 07:30:54.904] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan college_of_winterhold: 3 of 4 features placed
+[16Oct2026 07:30:54.904] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric college_of_winterhold: buildings 0%, developed 99% of r24, 3 features (authored), 32 specs, 1 ms
+[16Oct2026 07:30:54.931] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric riverwood: buildings 11%, developed 37% of r56, 7 features (authored), 133 specs, 24 ms
+[16Oct2026 07:30:54.935] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rorikstead: buildings 26%, developed 62% of r48, 7 features (authored), 138 specs, 25 ms
+[16Oct2026 07:30:54.937] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dragon_bridge: no room for feature great_tree near (32, -33)
+[16Oct2026 07:30:54.938] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dragon_bridge: 6 of 7 features placed
+[16Oct2026 07:30:54.959] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dragon_bridge: buildings 11%, developed 37% of r56, 6 features (authored), 126 specs, 26 ms
+[16Oct2026 07:30:54.962] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ivarstead: buildings 23%, developed 57% of r48, 7 features (authored), 139 specs, 40 ms
+[16Oct2026 07:30:54.964] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan helgen: no room for feature gatehouse near (0, 42)
+[16Oct2026 07:30:54.964] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan helgen: 6 of 7 features placed
+[16Oct2026 07:30:54.979] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric karthwasten: buildings 15%, developed 48% of r46, 6 features (authored), 95 specs, 32 ms
+[16Oct2026 07:30:54.987] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric wayrest: buildings 18%, developed 61% of r100, 18 features (authored), 717 specs, 318 ms
+[16Oct2026 07:30:54.991] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric soljunds_sinkhole: buildings 16%, developed 55% of r28, 3 features (authored), 44 specs, 10 ms
+[16Oct2026 07:30:54.992] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric shors_stone: buildings 20%, developed 55% of r40, 7 features (authored), 119 specs, 27 ms
+[16Oct2026 07:30:54.992] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric darkwater_crossing: buildings 9%, developed 37% of r38, 4 features (authored), 65 specs, 23 ms
+[16Oct2026 07:30:54.996] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric helgen: buildings 27%, developed 54% of r52, 6 features (authored), 180 specs, 54 ms
+[16Oct2026 07:30:54.999] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric kynesgrove: buildings 15%, developed 49% of r46, 8 features (authored), 117 specs, 38 ms
+[16Oct2026 07:30:55.000] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric old_hroldan: buildings 24%, developed 51% of r24, 3 features (authored), 28 specs, 6 ms
+[16Oct2026 07:30:55.006] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric nightgate_inn: buildings 35%, developed 55% of r20, 3 features (authored), 27 specs, 5 ms
+[16Oct2026 07:30:55.010] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric stonehills: buildings 26%, developed 53% of r34, 3 features (authored), 60 specs, 21 ms
+[16Oct2026 07:30:55.012] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric heartwood_mill: buildings 12%, developed 42% of r30, 2 features (authored), 47 specs, 11 ms
+[16Oct2026 07:30:55.015] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric angas_mill: buildings 29%, developed 56% of r26, 3 features (authored), 48 specs, 14 ms
+[16Oct2026 07:30:55.018] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric half_moon_mill: buildings 18%, developed 47% of r26, 3 features (authored), 31 specs, 11 ms
+[16Oct2026 07:30:55.018] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric mixwater_mill: buildings 19%, developed 41% of r26, 3 features (authored), 27 specs, 5 ms
+[16Oct2026 07:30:55.023] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric honningbrew_meadery: buildings 20%, developed 49% of r24, 3 features (authored), 22 specs, 8 ms
+[16Oct2026 07:30:55.023] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric solitude_sawmill: buildings 17%, developed 41% of r26, 3 features (authored), 27 specs, 10 ms
+[16Oct2026 07:30:55.028] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dushnikh_yal: buildings 12%, developed 57% of r32, 3 features (authored), 63 specs, 11 ms
+[16Oct2026 07:30:55.031] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric largashbur: buildings 15%, developed 55% of r32, 3 features (authored), 61 specs, 10 ms
+[16Oct2026 07:30:55.031] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric mor_khazgur: buildings 18%, developed 51% of r30, 3 features (authored), 56 specs, 9 ms
+[16Oct2026 07:30:55.036] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_mithryn: no room for feature great_tree near (-8, 14)
+[16Oct2026 07:30:55.037] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric narzulbur: buildings 19%, developed 48% of r30, 3 features (authored), 62 specs, 9 ms
+[16Oct2026 07:30:55.038] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_mithryn: no room for feature great_tree near (-11, 13)
+[16Oct2026 07:30:55.038] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric thalmor_embassy: buildings 31%, developed 54% of r26, 3 features (authored), 51 specs, 10 ms
+[16Oct2026 07:30:55.038] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_mithryn: 1 of 3 features placed
+[16Oct2026 07:30:55.047] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan weye: no room for feature well near (14, 9)
+[16Oct2026 07:30:55.048] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan weye: 3 of 4 features placed
+[16Oct2026 07:30:55.049] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tel_mithryn: buildings 21%, developed 54% of r32, 1 features (authored), 68 specs, 17 ms
+[16Oct2026 07:30:55.050] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric amol: buildings 31%, developed 56% of r28, 3 features (authored), 53 specs, 16 ms
+[16Oct2026 07:30:55.051] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric thirsk_mead_hall: buildings 13%, developed 57% of r22, 3 features (authored), 53 specs, 19 ms
+[16Oct2026 07:30:55.058] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric weye: buildings 18%, developed 62% of r24, 3 features (authored), 37 specs, 15 ms
+[16Oct2026 07:30:55.062] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric wawnet_inn: buildings 29%, developed 67% of r20, 3 features (authored), 33 specs, 18 ms
+[16Oct2026 07:30:55.063] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan blankenmarch: no room for feature tree_row near (3, -16)
+[16Oct2026 07:30:55.064] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan blankenmarch: no room for feature tree_row near (-16, -4)
+[16Oct2026 07:30:55.065] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan blankenmarch: 2 of 4 features placed
+[16Oct2026 07:30:55.065] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bleakers_way: no room for feature market near (-16, 0)
+[16Oct2026 07:30:55.065] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bleakers_way: 3 of 4 features placed
+[16Oct2026 07:30:55.074] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric skaal_village: buildings 23%, developed 57% of r36, 3 features (authored), 89 specs, 41 ms
+[16Oct2026 07:30:55.079] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric bleakers_way: buildings 18%, developed 59% of r24, 3 features (authored), 45 specs, 25 ms
+[16Oct2026 07:30:55.081] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric blankenmarch: buildings 43%, developed 76% of r24, 2 features (authored), 30 specs, 28 ms
+[16Oct2026 07:30:55.087] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric border_watch: buildings 18%, developed 51% of r34, 3 features (authored), 78 specs, 22 ms
+[16Oct2026 07:30:55.105] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brindle_home: no room for feature flowers near (-10, 2)
+[16Oct2026 07:30:55.105] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric aleswell: buildings 20%, developed 63% of r34, 4 features (authored), 85 specs, 57 ms
+[16Oct2026 07:30:55.108] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brindle_home: no room for feature orchard near (17, -6)
+[16Oct2026 07:30:55.108] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brindle_home: 2 of 4 features placed
+[16Oct2026 07:30:55.122] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric brindle_home: buildings 20%, developed 65% of r24, 2 features (authored), 49 specs, 22 ms
+[16Oct2026 07:30:55.142] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan pells_gate: no room for feature gatehouse near (4, -7)
+[16Oct2026 07:30:55.142] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan harluns_watch: no room for feature orchard near (-1, -14)
+[16Oct2026 07:30:55.142] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan harluns_watch: 3 of 4 features placed
+[16Oct2026 07:30:55.143] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan pells_gate: no room for feature garden near (-1, 6)
+[16Oct2026 07:30:55.143] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan pells_gate: 2 of 4 features placed
+[16Oct2026 07:30:55.145] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan waters_edge: no room for feature pond near (-1, -17)
+[16Oct2026 07:30:55.145] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan waters_edge: 3 of 4 features placed
+[16Oct2026 07:30:55.152] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric waters_edge: buildings 12%, developed 62% of r24, 3 features (authored), 39 specs, 12 ms
+[16Oct2026 07:30:55.154] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brina_cross_inn: no room for feature pond near (-10, -2)
+[16Oct2026 07:30:55.154] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brina_cross_inn: 3 of 4 features placed
+[16Oct2026 07:30:55.156] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric pells_gate: buildings 21%, developed 59% of r24, 2 features (authored), 43 specs, 17 ms
+[16Oct2026 07:30:55.158] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric harluns_watch: buildings 16%, developed 64% of r24, 3 features (authored), 55 specs, 22 ms
+[16Oct2026 07:30:55.162] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric brina_cross_inn: buildings 14%, developed 59% of r20, 3 features (authored), 35 specs, 15 ms
+[16Oct2026 07:30:55.162] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hackdirt: buildings 22%, developed 67% of r32, 4 features (authored), 82 specs, 35 ms
+[16Oct2026 07:30:55.171] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan gottshaw_inn: no room for feature well near (-2, -8)
+[16Oct2026 07:30:55.171] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan gottshaw_inn: 2 of 3 features placed
+[16Oct2026 07:30:55.174] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric cropsford: buildings 20%, developed 62% of r34, 4 features (authored), 79 specs, 48 ms
+[16Oct2026 07:30:55.179] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric gottshaw_inn: buildings 13%, developed 65% of r20, 2 features (authored), 31 specs, 14 ms
+[16Oct2026 07:30:55.195] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan lunar_fang_docks: no room for feature market near (16, 5)
+[16Oct2026 07:30:55.196] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vlastarus: no room for feature tree_row near (-14, 2)
+[16Oct2026 07:30:55.196] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vlastarus: 3 of 4 features placed
+[16Oct2026 07:30:55.196] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan lunar_fang_docks: no room for feature market near (-5, -5)
+[16Oct2026 07:30:55.198] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan lunar_fang_docks: no room for feature orchard near (-16, -4)
+[16Oct2026 07:30:55.198] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan lunar_fang_docks: 1 of 4 features placed
+[16Oct2026 07:30:55.208] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric lunar_fang_docks: buildings 16%, developed 66% of r24, 1 features (authored), 44 specs, 23 ms
+[16Oct2026 07:30:55.213] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric vlastarus: buildings 20%, developed 56% of r34, 3 features (authored), 72 specs, 31 ms
+[16Oct2026 07:30:55.214] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric shurgak_clan_estate: buildings 14%, developed 50% of r30, 4 features (authored), 59 specs, 25 ms
+[16Oct2026 07:30:55.214] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric knights_of_the_thorn_lodge: buildings 21%, developed 63% of r24, 3 features (authored), 39 specs, 16 ms
+[16Oct2026 07:30:55.230] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ember_hollow: no room for feature pool near (-2, 18)
+[16Oct2026 07:30:55.230] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ember_hollow: no room for feature pool near (15, -4)
+[16Oct2026 07:30:55.231] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ivy_shade: no room for feature orchard near (1, 4)
+[16Oct2026 07:30:55.231] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ember_hollow: 2 of 4 features placed
+[16Oct2026 07:30:55.233] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ivy_shade: no room for feature orchard near (-5, 13)
+[16Oct2026 07:30:55.233] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ivy_shade: 2 of 4 features placed
+[16Oct2026 07:30:55.235] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric fern_mouth: buildings 20%, developed 70% of r24, 3 features (authored), 51 specs, 13 ms
+[16Oct2026 07:30:55.238] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric cold_dale: buildings 17%, developed 67% of r24, 4 features (authored), 52 specs, 16 ms
+[16Oct2026 07:30:55.243] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ember_hollow: buildings 16%, developed 70% of r24, 2 features (authored), 50 specs, 24 ms
+[16Oct2026 07:30:55.249] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ivy_shade: buildings 18%, developed 61% of r24, 2 features (authored), 42 specs, 30 ms
+[16Oct2026 07:30:55.253] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wrenstone: no room for feature basin near (-5, 2)
+[16Oct2026 07:30:55.253] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned ivy_marsh: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 16, stalls 0, pens/gardens 0, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:55.253] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wrenstone: no room for feature banners near (-5, 0)
+[16Oct2026 07:30:55.254] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wrenstone: 1 of 3 features placed
+[16Oct2026 07:30:55.259] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan larkmarsh: no room for feature pond near (-5, -8)
+[16Oct2026 07:30:55.259] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan larkmarsh: 3 of 4 features placed
+[16Oct2026 07:30:55.263] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric wrenstone: buildings 44%, developed 77% of r24, 1 features (authored), 32 specs, 22 ms
+[16Oct2026 07:30:55.272] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric larkmarsh: buildings 18%, developed 66% of r24, 3 features (authored), 37 specs, 22 ms
+[16Oct2026 07:30:55.323] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan suran: no room for feature lamps near (16, 5)
+[16Oct2026 07:30:55.324] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan suran: 5 of 6 features placed
+[16Oct2026 07:30:55.342] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric suran: buildings 15%, developed 62% of r44, 5 features (authored), 109 specs, 49 ms
+[16Oct2026 07:30:55.344] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric gnisis: buildings 21%, developed 72% of r44, 5 features (authored), 113 specs, 60 ms
+[16Oct2026 07:30:55.344] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tear: buildings 24%, developed 68% of r72, 10 features (authored), 278 specs, 58 ms
+[16Oct2026 07:30:55.345] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric firewatch: buildings 27%, developed 60% of r72, 11 features (authored), 308 specs, 55 ms
+[16Oct2026 07:30:55.350] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan molag_mar: no room for feature lamps near (-7, -15)
+[16Oct2026 07:30:55.351] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan molag_mar: 5 of 6 features placed
+[16Oct2026 07:30:55.353] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric blacklight: buildings 26%, developed 61% of r72, 11 features (authored), 301 specs, 61 ms
+[16Oct2026 07:30:55.362] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan caldera: no room for feature banners near (-1, -4)
+[16Oct2026 07:30:55.363] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan caldera: 4 of 5 features placed
+[16Oct2026 07:30:55.371] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric molag_mar: buildings 20%, developed 61% of r44, 5 features (authored), 105 specs, 51 ms
+[16Oct2026 07:30:55.384] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan port_telvannis: no room for feature great_tree near (0, 6)
+[16Oct2026 07:30:55.385] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric caldera: buildings 20%, developed 64% of r38, 4 features (authored), 98 specs, 63 ms
+[16Oct2026 07:30:55.386] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan port_telvannis: no room for feature great_tree near (4, 3)
+[16Oct2026 07:30:55.388] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan port_telvannis: no room for feature pond near (20, -9)
+[16Oct2026 07:30:55.388] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan port_telvannis: 3 of 6 features placed
+[16Oct2026 07:30:55.410] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric gorne: buildings 19%, developed 70% of r44, 6 features (authored), 111 specs, 31 ms
+[16Oct2026 07:30:55.414] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric port_telvannis: buildings 8%, developed 62% of r44, 3 features (authored), 201 specs, 74 ms
+[16Oct2026 07:30:55.443] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric kragenmoor: buildings 18%, developed 62% of r44, 6 features (authored), 125 specs, 21 ms
+[16Oct2026 07:30:55.459] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric silgrad_tower: buildings 14%, developed 63% of r44, 6 features (authored), 116 specs, 57 ms
+[16Oct2026 07:30:55.461] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric khuul: buildings 20%, developed 60% of r32, 3 features (authored), 77 specs, 28 ms
+[16Oct2026 07:30:55.464] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric davons_watch: buildings 17%, developed 63% of r44, 6 features (authored), 113 specs, 42 ms
+[16Oct2026 07:30:55.477] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ald_velothi: buildings 12%, developed 63% of r22, 3 features (authored), 67 specs, 12 ms
+[16Oct2026 07:30:55.486] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric narsis: buildings 18%, developed 70% of r44, 7 features (authored), 113 specs, 54 ms
+[16Oct2026 07:30:55.488] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned massahanud_camp: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 9, stalls 0, pens/gardens 1, streets 3 (25 m), walls 0, gates 0
+[16Oct2026 07:30:55.502] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan gnaar_mok: no room for feature pond near (2, -11)
+[16Oct2026 07:30:55.502] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan gnaar_mok: 3 of 4 features placed
+[16Oct2026 07:30:55.510] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_branora: no room for feature great_tree near (-13, -19)
+[16Oct2026 07:30:55.513] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_branora: no room for feature great_tree near (9, 9)
+[16Oct2026 07:30:55.513] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_branora: 1 of 3 features placed
+[16Oct2026 07:30:55.515] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric gnaar_mok: buildings 11%, developed 55% of r32, 3 features (authored), 72 specs, 30 ms
+[16Oct2026 07:30:55.517] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric maar_gan: buildings 21%, developed 61% of r32, 3 features (authored), 96 specs, 35 ms
+[16Oct2026 07:30:55.529] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hla_oad: buildings 16%, developed 58% of r32, 3 features (authored), 73 specs, 45 ms
+[16Oct2026 07:30:55.537] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tel_branora: buildings 15%, developed 54% of r32, 1 features (authored), 83 specs, 48 ms
+[16Oct2026 07:30:55.550] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ahemmusa_camp: buildings 21%, developed 55% of r34, 3 features (authored), 90 specs, 20 ms
+[16Oct2026 07:30:55.554] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_mora: no room for feature great_tree near (-13, 1)
+[16Oct2026 07:30:55.556] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_mora: no room for feature great_tree near (14, -14)
+[16Oct2026 07:30:55.557] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_mora: 2 of 4 features placed
+[16Oct2026 07:30:55.558] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric seyda_neen: buildings 15%, developed 63% of r32, 3 features (authored), 81 specs, 42 ms
+[16Oct2026 07:30:55.563] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric pelagiad: buildings 16%, developed 55% of r34, 3 features (authored), 99 specs, 47 ms
+[16Oct2026 07:30:55.575] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vos: no room for feature market near (4, -10)
+[16Oct2026 07:30:55.575] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vos: 3 of 4 features placed
+[16Oct2026 07:30:55.576] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tel_mora: buildings 17%, developed 60% of r32, 2 features (authored), 94 specs, 32 ms
+[16Oct2026 07:30:55.582] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_vos: no room for feature great_tree near (-3, 7)
+[16Oct2026 07:30:55.584] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_vos: no room for feature great_tree near (21, -4)
+[16Oct2026 07:30:55.585] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_vos: 2 of 4 features placed
+[16Oct2026 07:30:55.588] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric vos: buildings 15%, developed 53% of r34, 3 features (authored), 76 specs, 33 ms
+[16Oct2026 07:30:55.591] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric zainab_camp: buildings 20%, developed 50% of r34, 3 features (authored), 88 specs, 12 ms
+[16Oct2026 07:30:55.601] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric urshilaku_camp: buildings 23%, developed 57% of r34, 3 features (authored), 90 specs, 10 ms
+[16Oct2026 07:30:55.602] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dagon_fel: no room for feature basin near (-11, 20)
+[16Oct2026 07:30:55.602] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dagon_fel: 3 of 4 features placed
+[16Oct2026 07:30:55.605] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tel_vos: buildings 4%, developed 63% of r32, 2 features (authored), 113 specs, 62 ms
+[16Oct2026 07:30:55.624] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dagon_fel: buildings 15%, developed 57% of r32, 3 features (authored), 83 specs, 39 ms
+[16Oct2026 07:30:55.624] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_aruhn: no room for feature great_tree near (-8, 5)
+[16Oct2026 07:30:55.626] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_aruhn: no room for feature market near (-4, 21)
+[16Oct2026 07:30:55.628] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_aruhn: no room for feature market near (17, 16)
+[16Oct2026 07:30:55.628] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_aruhn: 0 of 3 features placed
+[16Oct2026 07:30:55.638] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tel_aruhn: buildings 10%, developed 58% of r32, 0 features (authored), 61 specs, 31 ms
+[16Oct2026 07:30:55.641] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_fyr: no room for feature great_tree near (-17, 11)
+[16Oct2026 07:30:55.642] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tel_fyr: 2 of 3 features placed
+[16Oct2026 07:30:55.643] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric erabenimsun_camp: buildings 20%, developed 51% of r34, 4 features (authored), 98 specs, 21 ms
+[16Oct2026 07:30:55.654] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned senie: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 4, stalls 0, pens/gardens 1, streets 12 (46 m), walls 0, gates 0
+[16Oct2026 07:30:55.654] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tel_fyr: buildings 22%, developed 64% of r32, 2 features (authored), 94 specs, 16 ms
+[16Oct2026 07:30:55.658] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned mila_nipal: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 9, stalls 0, pens/gardens 1, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:55.671] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned aharasaplit_camp: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 4, stalls 0, pens/gardens 1, streets 12 (46 m), walls 0, gates 0
+[16Oct2026 07:30:55.675] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned yakaridan_camp: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 3, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:55.680] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned shashurari_camp: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 11, stalls 0, pens/gardens 0, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:55.682] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ghostgate: no room for feature banners near (-9, 2)
+[16Oct2026 07:30:55.682] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ghostgate: 3 of 4 features placed
+[16Oct2026 07:30:55.684] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned ileamdun: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 4, stalls 0, pens/gardens 1, streets 12 (46 m), walls 0, gates 0
+[16Oct2026 07:30:55.686] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ghostgate: buildings 39%, developed 68% of r20, 3 features (authored), 36 specs, 7 ms
+[16Oct2026 07:30:55.693] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned rahuabi: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 0, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:55.708] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned emaunar: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 9, stalls 0, pens/gardens 0, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:55.752] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric archon: buildings 23%, developed 66% of r81, 12 features (authored), 400 specs, 34 ms
+[16Oct2026 07:30:55.754] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric blackrose: buildings 24%, developed 65% of r81, 12 features (authored), 393 specs, 35 ms
+[16Oct2026 07:30:55.756] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tenmar_wall: buildings 23%, developed 70% of r49, 6 features (authored), 140 specs, 28 ms
+[16Oct2026 07:30:55.756] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric alten_corimont: buildings 21%, developed 68% of r49, 6 features (authored), 134 specs, 26 ms
+[16Oct2026 07:30:55.756] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric riverwalk: buildings 19%, developed 70% of r49, 6 features (authored), 137 specs, 33 ms
+[16Oct2026 07:30:55.758] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric arnesia: buildings 19%, developed 69% of r49, 6 features (authored), 132 specs, 40 ms
+[16Oct2026 07:30:55.765] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric soulrest: buildings 25%, developed 63% of r81, 12 features (authored), 406 specs, 47 ms
+[16Oct2026 07:30:55.786] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric thorn: buildings 25%, developed 62% of r81, 12 features (authored), 453 specs, 62 ms
+[16Oct2026 07:30:55.825] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenspring: no room for feature lamps near (-2, -30)
+[16Oct2026 07:30:55.825] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenspring: 5 of 6 features placed
+[16Oct2026 07:30:55.827] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric alten_meerhleel: buildings 22%, developed 70% of r49, 6 features (authored), 130 specs, 24 ms
+[16Oct2026 07:30:55.831] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rockgrove: buildings 17%, developed 68% of r49, 6 features (authored), 167 specs, 40 ms
+[16Oct2026 07:30:55.832] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric greenglade: buildings 21%, developed 70% of r49, 6 features (authored), 131 specs, 29 ms
+[16Oct2026 07:30:55.835] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rockpark: no room for feature pond near (6, -4)
+[16Oct2026 07:30:55.836] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rockpark: 5 of 6 features placed
+[16Oct2026 07:30:55.837] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric greenspring: buildings 20%, developed 69% of r49, 5 features (authored), 123 specs, 28 ms
+[16Oct2026 07:30:55.845] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric seaspring: buildings 21%, developed 71% of r49, 6 features (authored), 139 specs, 27 ms
+[16Oct2026 07:30:55.851] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric moonmarch: buildings 22%, developed 71% of r49, 6 features (authored), 137 specs, 33 ms
+[16Oct2026 07:30:55.852] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rockpark: buildings 21%, developed 73% of r49, 5 features (authored), 142 specs, 34 ms
+[16Oct2026 07:30:55.862] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric chasecreek: buildings 14%, developed 74% of r34, 3 features (authored), 65 specs, 16 ms
+[16Oct2026 07:30:55.883] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan forsaken_hamlet: no room for feature lamps near (0, -5)
+[16Oct2026 07:30:55.883] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan forsaken_hamlet: no room for feature lamps near (4, 0)
+[16Oct2026 07:30:55.883] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan forsaken_hamlet: 1 of 3 features placed
+[16Oct2026 07:30:55.887] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric forsaken_hamlet: buildings 47%, developed 92% of r22, 1 features (authored), 31 specs, 7 ms
+[16Oct2026 07:30:55.889] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rockguard: buildings 13%, developed 71% of r34, 3 features (authored), 56 specs, 14 ms
+[16Oct2026 07:30:55.889] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric mud_tree_village: buildings 12%, developed 70% of r34, 3 features (authored), 73 specs, 19 ms
+[16Oct2026 07:30:55.890] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric stillrise_village: buildings 17%, developed 73% of r34, 3 features (authored), 64 specs, 21 ms
+[16Oct2026 07:30:55.903] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hatching_pools: buildings 13%, developed 70% of r34, 3 features (authored), 64 specs, 26 ms
+[16Oct2026 07:30:55.905] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hissmir: buildings 14%, developed 73% of r34, 3 features (authored), 68 specs, 18 ms
+[16Oct2026 07:30:55.911] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hutan_tzel: buildings 15%, developed 70% of r34, 3 features (authored), 62 specs, 14 ms
+[16Oct2026 07:30:55.916] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric murkwater: buildings 17%, developed 73% of r34, 3 features (authored), 66 specs, 25 ms
+[16Oct2026 07:30:55.929] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric glenbridge: buildings 9%, developed 69% of r34, 3 features (authored), 62 specs, 27 ms
+[16Oct2026 07:30:55.954] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric chasepoint: buildings 15%, developed 69% of r34, 3 features (authored), 56 specs, 25 ms
+[16Oct2026 07:30:55.954] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bright_throat_village: no room for feature lamps near (-2, -19)
+[16Oct2026 07:30:55.955] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bright_throat_village: 3 of 4 features placed
+[16Oct2026 07:30:55.961] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric root_whisper_village: buildings 16%, developed 74% of r34, 4 features (authored), 87 specs, 28 ms
+[16Oct2026 07:30:55.963] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric bright_throat_village: buildings 24%, developed 75% of r34, 3 features (authored), 53 specs, 14 ms
+[16Oct2026 07:30:55.967] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dead_water_village: buildings 15%, developed 71% of r34, 3 features (authored), 64 specs, 25 ms
+[16Oct2026 07:30:55.981] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric riverbridge: buildings 11%, developed 73% of r34, 3 features (authored), 80 specs, 26 ms
+[16Oct2026 07:30:55.982] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rockpoint: buildings 16%, developed 74% of r34, 3 features (authored), 60 specs, 18 ms
+[16Oct2026 07:30:55.996] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric alten_markmont: buildings 16%, developed 71% of r34, 3 features (authored), 56 specs, 20 ms
+[16Oct2026 07:30:55.999] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric branchmont: buildings 16%, developed 75% of r34, 3 features (authored), 64 specs, 27 ms
+[16Oct2026 07:30:56.022] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rockspring: buildings 17%, developed 74% of r34, 3 features (authored), 61 specs, 8 ms
+[16Oct2026 07:30:56.034] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric longmont: buildings 15%, developed 69% of r34, 3 features (authored), 56 specs, 20 ms
+[16Oct2026 07:30:56.036] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned toll_town: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 9, stalls 0, pens/gardens 0, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:56.037] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric branchgrove: buildings 17%, developed 76% of r34, 3 features (authored), 79 specs, 27 ms
+[16Oct2026 07:30:56.043] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric noota_nara: buildings 15%, developed 69% of r34, 3 features (authored), 55 specs, 20 ms
+[16Oct2026 07:30:56.044] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned dead_marsh_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 10, stalls 0, pens/gardens 0, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.046] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan moss_claw_village: no room for feature lamps near (4, -13)
+[16Oct2026 07:30:56.046] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan moss_claw_village: no room for feature lamps near (-4, 3)
+[16Oct2026 07:30:56.046] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan moss_claw_village: 1 of 3 features placed
+[16Oct2026 07:30:56.051] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned warm_moon_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 10, stalls 0, pens/gardens 0, streets 9 (86 m), walls 0, gates 0
+[16Oct2026 07:30:56.054] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dark_root_village: buildings 37%, developed 94% of r22, 3 features (authored), 60 specs, 15 ms
+[16Oct2026 07:30:56.054] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned deep_heart_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 13, stalls 0, pens/gardens 1, streets 9 (89 m), walls 0, gates 0
+[16Oct2026 07:30:56.055] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric moss_claw_village: buildings 37%, developed 91% of r22, 1 features (authored), 29 specs, 15 ms
+[16Oct2026 07:30:56.060] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned silt_whisper_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 15, stalls 0, pens/gardens 0, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.065] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned dead_leaf_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 14, stalls 0, pens/gardens 1, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.069] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned silt_vine_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 10, stalls 0, pens/gardens 1, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:56.072] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned dead_whisper_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 1, streets 9 (86 m), walls 0, gates 0
+[16Oct2026 07:30:56.076] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned sweet_vine_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 11, stalls 0, pens/gardens 1, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.078] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned soft_stride_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 12, stalls 0, pens/gardens 1, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.080] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned warm_wallow_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 1, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:56.081] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned slow_eye_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 10, stalls 0, pens/gardens 1, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:56.082] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned dead_pool_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 9, stalls 0, pens/gardens 1, streets 3 (25 m), walls 0, gates 0
+[16Oct2026 07:30:56.083] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned red_shell_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 0, streets 3 (24 m), walls 0, gates 0
+[16Oct2026 07:30:56.083] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned red_song_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 0, streets 9 (90 m), walls 0, gates 0
+[16Oct2026 07:30:56.084] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned warm_tail_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 1, streets 3 (23 m), walls 0, gates 0
+[16Oct2026 07:30:56.084] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned bright_pool_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 1, streets 3 (21 m), walls 0, gates 0
+[16Oct2026 07:30:56.084] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned reed_egg_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 1, streets 3 (24 m), walls 0, gates 0
+[16Oct2026 07:30:56.092] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned gray_eye_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 11, stalls 0, pens/gardens 0, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:56.094] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned moss_stride_village: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 9, stalls 0, pens/gardens 0, streets 9 (86 m), walls 0, gates 0
+[16Oct2026 07:30:56.094] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dune: no room for feature market near (23, -17)
+[16Oct2026 07:30:56.096] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan corinthe: no room for feature market near (39, 2)
+[16Oct2026 07:30:56.096] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orcrest: no room for feature market near (1, 13)
+[16Oct2026 07:30:56.097] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dune: no room for feature market near (28, 8)
+[16Oct2026 07:30:56.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan dune: 10 of 12 features placed
+[16Oct2026 07:30:56.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan alabaster: no room for feature banners near (26, 0)
+[16Oct2026 07:30:56.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orcrest: no room for feature market near (-18, 4)
+[16Oct2026 07:30:56.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan alabaster: 11 of 12 features placed
+[16Oct2026 07:30:56.098] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan corinthe: 11 of 12 features placed
+[16Oct2026 07:30:56.099] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan orcrest: 10 of 12 features placed
+[16Oct2026 07:30:56.115] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan the_stitches: no room for feature market near (-36, 11)
+[16Oct2026 07:30:56.117] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan the_stitches: no room for feature market near (-19, 10)
+[16Oct2026 07:30:56.118] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan the_stitches: 4 of 6 features placed
+[16Oct2026 07:30:56.119] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan meir_lynmount: no room for feature market near (-2, 26)
+[16Oct2026 07:30:56.121] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan meir_lynmount: no room for feature market near (19, 21)
+[16Oct2026 07:30:56.122] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan meir_lynmount: 4 of 6 features placed
+[16Oct2026 07:30:56.126] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan seaplace: no room for feature market near (-7, 2)
+[16Oct2026 07:30:56.127] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dune: buildings 25%, developed 66% of r81, 10 features (authored), 383 specs, 37 ms
+[16Oct2026 07:30:56.129] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric corinthe: buildings 26%, developed 66% of r81, 11 features (authored), 397 specs, 39 ms
+[16Oct2026 07:30:56.131] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan seaplace: no room for feature market near (10, 0)
+[16Oct2026 07:30:56.131] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan seaplace: 4 of 6 features placed
+[16Oct2026 07:30:56.132] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan hakoshae: no room for feature market near (33, 20)
+[16Oct2026 07:30:56.132] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan hakoshae: 5 of 6 features placed
+[16Oct2026 07:30:56.134] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric the_stitches: buildings 23%, developed 69% of r49, 4 features (authored), 139 specs, 37 ms
+[16Oct2026 07:30:56.135] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric alabaster: buildings 25%, developed 67% of r81, 11 features (authored), 421 specs, 45 ms
+[16Oct2026 07:30:56.137] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric orcrest: buildings 24%, developed 64% of r81, 10 features (authored), 383 specs, 47 ms
+[16Oct2026 07:30:56.138] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric meir_lynmount: buildings 25%, developed 67% of r49, 4 features (authored), 144 specs, 39 ms
+[16Oct2026 07:30:56.149] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hakoshae: buildings 24%, developed 68% of r49, 5 features (authored), 164 specs, 42 ms
+[16Oct2026 07:30:56.157] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric seaplace: buildings 23%, developed 68% of r49, 4 features (authored), 129 specs, 60 ms
+[16Oct2026 07:30:56.189] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhall: no room for feature market near (-24, 13)
+[16Oct2026 07:30:56.191] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhall: no room for feature market near (24, 10)
+[16Oct2026 07:30:56.191] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhall: 4 of 6 features placed
+[16Oct2026 07:30:56.192] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ein_meirvale: no room for feature market near (6, 2)
+[16Oct2026 07:30:56.193] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brukreich_bridge: no room for feature market near (-1, 7)
+[16Oct2026 07:30:56.193] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan ein_meirvale: 5 of 6 features placed
+[16Oct2026 07:30:56.193] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan brukreich_bridge: 5 of 6 features placed
+[16Oct2026 07:30:56.204] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tenmar_forest: no room for feature market near (2, -4)
+[16Oct2026 07:30:56.205] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric greenhall: buildings 24%, developed 70% of r49, 4 features (authored), 127 specs, 34 ms
+[16Oct2026 07:30:56.206] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric ein_meirvale: buildings 22%, developed 68% of r49, 5 features (authored), 137 specs, 32 ms
+[16Oct2026 07:30:56.206] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan portneu_view: no room for feature market near (0, 12)
+[16Oct2026 07:30:56.208] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan darvulk_haven: no room for feature market near (-12, 23)
+[16Oct2026 07:30:56.208] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan portneu_view: no room for feature market near (-1, -14)
+[16Oct2026 07:30:56.209] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tenmar_forest: no room for feature market near (14, 8)
+[16Oct2026 07:30:56.209] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan portneu_view: 4 of 6 features placed
+[16Oct2026 07:30:56.209] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tenmar_forest: 4 of 6 features placed
+[16Oct2026 07:30:56.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan darvulk_haven: no room for feature market near (19, -5)
+[16Oct2026 07:30:56.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan darvulk_haven: 4 of 6 features placed
+[16Oct2026 07:30:56.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cori_darglade: no room for feature market near (-9, -9)
+[16Oct2026 07:30:56.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cori_darglade: 2 of 3 features placed
+[16Oct2026 07:30:56.219] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric brukreich_bridge: buildings 22%, developed 72% of r49, 5 features (authored), 163 specs, 51 ms
+[16Oct2026 07:30:56.219] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric cori_darglade: buildings 23%, developed 75% of r34, 2 features (authored), 51 specs, 23 ms
+[16Oct2026 07:30:56.223] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric darvulk_haven: buildings 25%, developed 70% of r49, 4 features (authored), 127 specs, 31 ms
+[16Oct2026 07:30:56.225] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric portneu_view: buildings 25%, developed 67% of r49, 4 features (authored), 124 specs, 46 ms
+[16Oct2026 07:30:56.232] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan verkarth_hills: no room for feature market near (0, 7)
+[16Oct2026 07:30:56.232] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan verkarth_hills: 2 of 3 features placed
+[16Oct2026 07:30:56.237] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tenmar_forest: buildings 23%, developed 67% of r49, 4 features (authored), 126 specs, 56 ms
+[16Oct2026 07:30:56.242] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan kings_walk: no room for feature market near (16, 12)
+[16Oct2026 07:30:56.242] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan kings_walk: 2 of 3 features placed
+[16Oct2026 07:30:56.242] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tardorn_wood: no room for feature market near (13, 6)
+[16Oct2026 07:30:56.242] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tardorn_wood: 2 of 3 features placed
+[16Oct2026 07:30:56.250] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric verkarth_hills: buildings 18%, developed 75% of r34, 2 features (authored), 72 specs, 30 ms
+[16Oct2026 07:30:56.252] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric kings_walk: buildings 24%, developed 76% of r34, 2 features (authored), 62 specs, 19 ms
+[16Oct2026 07:30:56.255] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tardorn_wood: buildings 17%, developed 73% of r34, 2 features (authored), 62 specs, 23 ms
+[16Oct2026 07:30:56.266] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan neumar_walk: no room for feature market near (-12, -15)
+[16Oct2026 07:30:56.266] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan neumar_walk: 2 of 3 features placed
+[16Oct2026 07:30:56.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan chasemoor: no room for feature market near (21, 2)
+[16Oct2026 07:30:56.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan chasemoor: 2 of 3 features placed
+[16Oct2026 07:30:56.276] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric neumar_walk: buildings 28%, developed 76% of r34, 2 features (authored), 51 specs, 21 ms
+[16Oct2026 07:30:56.280] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric chasemoor: buildings 18%, developed 72% of r34, 2 features (authored), 71 specs, 16 ms
+[16Oct2026 07:30:56.286] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan river_keep: no room for feature market near (5, 2)
+[16Oct2026 07:30:56.286] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan river_keep: 2 of 3 features placed
+[16Oct2026 07:30:56.287] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan darkarn_place: no room for feature market near (-3, -11)
+[16Oct2026 07:30:56.287] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan darkarn_place: 2 of 3 features placed
+[16Oct2026 07:30:56.295] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric river_keep: buildings 15%, developed 71% of r34, 2 features (authored), 67 specs, 21 ms
+[16Oct2026 07:30:56.298] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan valley_guard: no room for feature market near (23, 6)
+[16Oct2026 07:30:56.299] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan valley_guard: 3 of 4 features placed
+[16Oct2026 07:30:56.302] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric darkarn_place: buildings 22%, developed 71% of r34, 2 features (authored), 61 specs, 29 ms
+[16Oct2026 07:30:56.309] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan helkarn_land: no room for feature market near (19, -8)
+[16Oct2026 07:30:56.309] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan helkarn_land: 2 of 3 features placed
+[16Oct2026 07:30:56.309] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric valley_guard: buildings 29%, developed 75% of r34, 3 features (authored), 61 specs, 16 ms
+[16Oct2026 07:30:56.312] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan duncori_walk: no room for feature market near (0, 8)
+[16Oct2026 07:30:56.312] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan duncori_walk: no room for feature lamps near (-2, -21)
+[16Oct2026 07:30:56.312] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan duncori_walk: 1 of 3 features placed
+[16Oct2026 07:30:56.317] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric helkarn_land: buildings 23%, developed 72% of r34, 2 features (authored), 49 specs, 15 ms
+[16Oct2026 07:30:56.324] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric duncori_walk: buildings 18%, developed 73% of r34, 1 features (authored), 67 specs, 30 ms
+[16Oct2026 07:30:56.324] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan heimthor_mount: no room for feature market near (-14, 18)
+[16Oct2026 07:30:56.325] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan heimthor_mount: 2 of 3 features placed
+[16Oct2026 07:30:56.329] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan chasegrove: no room for feature market near (7, -8)
+[16Oct2026 07:30:56.330] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan chasegrove: 2 of 3 features placed
+[16Oct2026 07:30:56.338] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric heimthor_mount: buildings 25%, developed 77% of r34, 2 features (authored), 61 specs, 27 ms
+[16Oct2026 07:30:56.339] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric chasegrove: buildings 22%, developed 77% of r34, 2 features (authored), 80 specs, 23 ms
+[16Oct2026 07:30:56.355] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned haseae: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 0, streets 12 (46 m), walls 0, gates 0
+[16Oct2026 07:30:56.356] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan black_heights: no room for feature market near (-2, -4)
+[16Oct2026 07:30:56.357] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan black_heights: 3 of 4 features placed
+[16Oct2026 07:30:56.365] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan thaae_cove: no room for feature market near (-17, -11)
+[16Oct2026 07:30:56.365] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan thaae_cove: 2 of 3 features placed
+[16Oct2026 07:30:56.366] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned thae: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 3, stalls 0, pens/gardens 0, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:56.368] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric black_heights: buildings 21%, developed 73% of r34, 3 features (authored), 74 specs, 23 ms
+[16Oct2026 07:30:56.372] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned rinbaaar: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 16, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:56.373] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric thaae_cove: buildings 22%, developed 74% of r32, 2 features (authored), 63 specs, 15 ms
+[16Oct2026 07:30:56.379] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan nera_cove: no room for feature market near (4, 5)
+[16Oct2026 07:30:56.379] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan nera_cove: 2 of 3 features placed
+[16Oct2026 07:30:56.382] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan baathazir_docks: no room for feature market near (12, 18)
+[16Oct2026 07:30:56.382] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan baathazir_docks: 2 of 3 features placed
+[16Oct2026 07:30:56.382] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan nihai: no room for feature market near (0, 2)
+[16Oct2026 07:30:56.383] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan nihai: no room for feature lamps near (-2, -5)
+[16Oct2026 07:30:56.383] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan nihai: 1 of 3 features placed
+[16Oct2026 07:30:56.383] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned mamar: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 0, streets 4 (33 m), walls 0, gates 0
+[16Oct2026 07:30:56.387] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned nanial: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 15, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:56.388] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric nera_cove: buildings 24%, developed 75% of r32, 2 features (authored), 58 specs, 16 ms
+[16Oct2026 07:30:56.389] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric baathazir_docks: buildings 24%, developed 75% of r32, 2 features (authored), 51 specs, 14 ms
+[16Oct2026 07:30:56.390] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric nihai: buildings 68%, developed 91% of r22, 1 features (authored), 28 specs, 12 ms
+[16Oct2026 07:30:56.391] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned kajoae: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:56.418] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned thaal: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 14, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:56.418] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned jeqara: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 7, stalls 0, pens/gardens 0, streets 9 (86 m), walls 0, gates 0
+[16Oct2026 07:30:56.426] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned tehai: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 15, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:56.425] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tasha: no room for feature market near (12, -3)
+[16Oct2026 07:30:56.426] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tasha: 2 of 3 features placed
+[16Oct2026 07:30:56.431] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rawlkha: no room for feature lamps near (-15, -53)
+[16Oct2026 07:30:56.432] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rawlkha: no room for feature lamps near (-4, -27)
+[16Oct2026 07:30:56.432] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan rawlkha: 10 of 12 features placed
+[16Oct2026 07:30:56.432] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tasha: buildings 68%, developed 88% of r22, 2 features (authored), 32 specs, 18 ms
+[16Oct2026 07:30:56.441] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan eagle_vale: no room for feature great_tree near (28, -3)
+[16Oct2026 07:30:56.442] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan eagle_vale: 5 of 6 features placed
+[16Oct2026 07:30:56.445] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan velyn_harbor: no room for feature great_tree near (-20, 23)
+[16Oct2026 07:30:56.445] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan longvale: no room for feature great_tree near (24, 10)
+[16Oct2026 07:30:56.445] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan velyn_harbor: no room for feature lamps near (-12, -17)
+[16Oct2026 07:30:56.446] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan velyn_harbor: 4 of 6 features placed
+[16Oct2026 07:30:56.446] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan longvale: 5 of 6 features placed
+[16Oct2026 07:30:56.447] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan silvenar: no room for feature great_tree near (-9, 10)
+[16Oct2026 07:30:56.449] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan silvenar: no room for feature great_tree near (-10, 14)
+[16Oct2026 07:30:56.452] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan silvenar: 10 of 12 features placed
+[16Oct2026 07:30:56.454] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric eagle_vale: buildings 17%, developed 73% of r49, 5 features (authored), 141 specs, 26 ms
+[16Oct2026 07:30:56.457] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rawlkha: buildings 23%, developed 69% of r81, 10 features (authored), 331 specs, 29 ms
+[16Oct2026 07:30:56.457] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan emperors_run: no room for feature great_tree near (-11, -3)
+[16Oct2026 07:30:56.457] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan emperors_run: 5 of 6 features placed
+[16Oct2026 07:30:56.459] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan baandari_trading_post: no room for feature great_tree near (5, 23)
+[16Oct2026 07:30:56.459] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric velyn_harbor: buildings 14%, developed 72% of r49, 4 features (authored), 154 specs, 31 ms
+[16Oct2026 07:30:56.460] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan baandari_trading_post: 5 of 6 features placed
+[16Oct2026 07:30:56.460] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wasten_brukbrook: no room for feature great_tree near (15, -17)
+[16Oct2026 07:30:56.461] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wasten_brukbrook: 5 of 6 features placed
+[16Oct2026 07:30:56.462] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric longvale: buildings 17%, developed 74% of r49, 5 features (authored), 148 specs, 29 ms
+[16Oct2026 07:30:56.477] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric baandari_trading_post: buildings 13%, developed 73% of r49, 5 features (authored), 172 specs, 48 ms
+[16Oct2026 07:30:56.479] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric emperors_run: buildings 13%, developed 74% of r49, 5 features (authored), 159 specs, 47 ms
+[16Oct2026 07:30:56.480] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric wasten_brukbrook: buildings 17%, developed 74% of r49, 5 features (authored), 145 specs, 39 ms
+[16Oct2026 07:30:56.504] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric silvenar: buildings 21%, developed 66% of r81, 10 features (authored), 408 specs, 69 ms
+[16Oct2026 07:30:56.506] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan haven: no room for feature great_tree near (-6, -7)
+[16Oct2026 07:30:56.506] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan haven: 5 of 6 features placed
+[16Oct2026 07:30:56.509] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan southpoint: no room for feature great_tree near (7, -8)
+[16Oct2026 07:30:56.509] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan southpoint: no room for feature lamps near (-8, -18)
+[16Oct2026 07:30:56.510] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan southpoint: no room for feature lamps near (-10, -27)
+[16Oct2026 07:30:56.510] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan southpoint: 3 of 6 features placed
+[16Oct2026 07:30:56.513] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan redfur_trading_post: no room for feature great_tree near (7, 17)
+[16Oct2026 07:30:56.514] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan redfur_trading_post: no room for feature lamps near (-8, -20)
+[16Oct2026 07:30:56.514] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan redfur_trading_post: 4 of 6 features placed
+[16Oct2026 07:30:56.516] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cormount: no room for feature great_tree near (-17, -29)
+[16Oct2026 07:30:56.516] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cormount: no room for feature lamps near (0, -32)
+[16Oct2026 07:30:56.516] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan cormount: 4 of 6 features placed
+[16Oct2026 07:30:56.518] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric haven: buildings 16%, developed 72% of r49, 5 features (authored), 148 specs, 24 ms
+[16Oct2026 07:30:56.523] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan fullers_break: no room for feature garden near (6, 5)
+[16Oct2026 07:30:56.523] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan fullers_break: no room for feature lamps near (-7, -11)
+[16Oct2026 07:30:56.523] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan fullers_break: no room for feature lamps near (0, -2)
+[16Oct2026 07:30:56.523] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan fullers_break: 0 of 3 features placed
+[16Oct2026 07:30:56.526] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric southpoint: buildings 17%, developed 71% of r49, 3 features (authored), 124 specs, 30 ms
+[16Oct2026 07:30:56.528] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric fullers_break: buildings 56%, developed 100% of r22, 0 features (authored), 45 specs, 11 ms
+[16Oct2026 07:30:56.531] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric redfur_trading_post: buildings 19%, developed 75% of r49, 4 features (authored), 134 specs, 39 ms
+[16Oct2026 07:30:56.532] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan marbruk: no room for feature great_tree near (-15, -15)
+[16Oct2026 07:30:56.532] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan marbruk: 5 of 6 features placed
+[16Oct2026 07:30:56.533] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric cormount: buildings 15%, developed 71% of r49, 4 features (authored), 148 specs, 35 ms
+[16Oct2026 07:30:56.546] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan deepwoods: no room for feature lamps near (-2, 7)
+[16Oct2026 07:30:56.546] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan deepwoods: 2 of 3 features placed
+[16Oct2026 07:30:56.547] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenheart: no room for feature great_tree near (6, 4)
+[16Oct2026 07:30:56.548] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenheart: no room for feature lamps near (-6, -20)
+[16Oct2026 07:30:56.548] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenheart: no room for feature lamps near (-24, -25)
+[16Oct2026 07:30:56.548] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenheart: 3 of 6 features placed
+[16Oct2026 07:30:56.550] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric marbruk: buildings 19%, developed 75% of r49, 5 features (authored), 140 specs, 40 ms
+[16Oct2026 07:30:56.553] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric deepwoods: buildings 15%, developed 92% of r34, 2 features (authored), 58 specs, 21 ms
+[16Oct2026 07:30:56.561] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vulkwasten: no room for feature garden near (13, 22)
+[16Oct2026 07:30:56.561] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vulkwasten: 2 of 3 features placed
+[16Oct2026 07:30:56.569] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric greenheart: buildings 13%, developed 71% of r49, 3 features (authored), 151 specs, 55 ms
+[16Oct2026 07:30:56.570] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric vulkwasten: buildings 16%, developed 92% of r34, 2 features (authored), 46 specs, 17 ms
+[16Oct2026 07:30:56.578] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhill: no room for feature garden near (13, -3)
+[16Oct2026 07:30:56.579] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhill: no room for feature lamps near (13, -7)
+[16Oct2026 07:30:56.579] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhill: no room for feature lamps near (15, -1)
+[16Oct2026 07:30:56.579] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan greenhill: 0 of 3 features placed
+[16Oct2026 07:30:56.582] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric greenhill: buildings 56%, developed 100% of r22, 0 features (authored), 32 specs, 10 ms
+[16Oct2026 07:30:56.585] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vinedusk_village: no room for feature lamps near (7, -21)
+[16Oct2026 07:30:56.585] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan vinedusk_village: 2 of 3 features placed
+[16Oct2026 07:30:56.593] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan paalat: no room for feature lamps near (-7, 3)
+[16Oct2026 07:30:56.593] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan paalat: no room for feature lamps near (1, -12)
+[16Oct2026 07:30:56.593] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan paalat: 1 of 3 features placed
+[16Oct2026 07:30:56.597] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric vinedusk_village: buildings 17%, developed 92% of r34, 2 features (authored), 58 specs, 24 ms
+[16Oct2026 07:30:56.604] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric paalat: buildings 17%, developed 92% of r34, 1 features (authored), 34 specs, 22 ms
+[16Oct2026 07:30:56.608] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan karthdar: no room for feature garden near (-5, 11)
+[16Oct2026 07:30:56.608] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan karthdar: no room for feature lamps near (11, -1)
+[16Oct2026 07:30:56.608] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan karthdar: 1 of 3 features placed
+[16Oct2026 07:30:56.610] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan green_hall: no room for feature lamps near (-5, 0)
+[16Oct2026 07:30:56.610] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan green_hall: no room for feature lamps near (-16, -20)
+[16Oct2026 07:30:56.610] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan green_hall: 1 of 3 features placed
+[16Oct2026 07:30:56.614] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tarlain_heights: no room for feature lamps near (18, 4)
+[16Oct2026 07:30:56.614] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tarlain_heights: no room for feature lamps near (-4, 5)
+[16Oct2026 07:30:56.614] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tarlain_heights: 1 of 3 features placed
+[16Oct2026 07:30:56.616] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric karthdar: buildings 16%, developed 93% of r34, 1 features (authored), 51 specs, 18 ms
+[16Oct2026 07:30:56.623] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric green_hall: buildings 16%, developed 92% of r34, 1 features (authored), 47 specs, 23 ms
+[16Oct2026 07:30:56.625] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tarlain_heights: buildings 17%, developed 93% of r34, 1 features (authored), 45 specs, 31 ms
+[16Oct2026 07:30:56.677] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan longhaven: no room for feature garden near (-20, 10)
+[16Oct2026 07:30:56.677] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan longhaven: no room for feature lamps near (0, -19)
+[16Oct2026 07:30:56.677] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan longhaven: 1 of 3 features placed
+[16Oct2026 07:30:56.682] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan camp_gushnukbur: no room for feature garden near (7, 12)
+[16Oct2026 07:30:56.682] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan camp_gushnukbur: no room for feature lamps near (3, -8)
+[16Oct2026 07:30:56.682] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan camp_gushnukbur: 1 of 3 features placed
+[16Oct2026 07:30:56.683] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned ithion: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 7, stalls 0, pens/gardens 1, streets 9 (90 m), walls 0, gates 0
+[16Oct2026 07:30:56.687] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric longhaven: buildings 16%, developed 93% of r34, 1 features (authored), 62 specs, 26 ms
+[16Oct2026 07:30:56.688] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned nindell: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 0, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.688] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bramblebreach: no room for feature garden near (-3, 20)
+[16Oct2026 07:30:56.689] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bramblebreach: no room for feature lamps near (13, -9)
+[16Oct2026 07:30:56.689] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bramblebreach: no room for feature lamps near (20, 5)
+[16Oct2026 07:30:56.689] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan bramblebreach: 0 of 3 features placed
+[16Oct2026 07:30:56.690] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric camp_gushnukbur: buildings 26%, developed 97% of r30, 1 features (authored), 33 specs, 17 ms
+[16Oct2026 07:30:56.693] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned golaril: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 10, stalls 0, pens/gardens 1, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.694] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned neathil: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 6, stalls 0, pens/gardens 1, streets 9 (86 m), walls 0, gates 0
+[16Oct2026 07:30:56.695] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned gerathil: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 5, stalls 0, pens/gardens 1, streets 3 (22 m), walls 0, gates 0
+[16Oct2026 07:30:56.697] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric bramblebreach: buildings 17%, developed 93% of r34, 0 features (authored), 46 specs, 18 ms
+[16Oct2026 07:30:56.700] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned belelle: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 12, stalls 0, pens/gardens 1, streets 9 (90 m), walls 0, gates 0
+[16Oct2026 07:30:56.706] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned beldell: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 1, streets 9 (87 m), walls 0, gates 0
+[16Oct2026 07:30:56.714] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned ebon_ro: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 22, stalls 2, pens/gardens 0, streets 23 (281 m), walls 0, gates 0
+[16Oct2026 07:30:56.715] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned madell: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 12, stalls 0, pens/gardens 1, streets 9 (88 m), walls 0, gates 0
+[16Oct2026 07:30:56.720] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned faldell: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 11, stalls 0, pens/gardens 1, streets 9 (90 m), walls 0, gates 0
+[16Oct2026 07:30:56.782] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric vulkhel_guard: buildings 24%, developed 62% of r49, 6 features (authored), 137 specs, 34 ms
+[16Oct2026 07:30:56.786] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric greenwater_cove: buildings 30%, developed 68% of r49, 6 features (authored), 142 specs, 60 ms
+[16Oct2026 07:30:56.788] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric mathiisen: buildings 26%, developed 64% of r49, 6 features (authored), 136 specs, 60 ms
+[16Oct2026 07:30:56.789] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dusk: buildings 29%, developed 65% of r81, 12 features (authored), 392 specs, 66 ms
+[16Oct2026 07:30:56.792] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric shimmerene: buildings 31%, developed 67% of r49, 6 features (authored), 128 specs, 31 ms
+[16Oct2026 07:30:56.797] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric skywatch: buildings 27%, developed 62% of r81, 12 features (authored), 397 specs, 74 ms
+[16Oct2026 07:30:56.809] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric lillandril: buildings 28%, developed 61% of r81, 12 features (authored), 373 specs, 85 ms
+[16Oct2026 07:30:56.818] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric cloudrest: buildings 25%, developed 62% of r81, 12 features (authored), 424 specs, 94 ms
+[16Oct2026 07:30:56.858] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric sunhold: buildings 33%, developed 66% of r49, 6 features (authored), 120 specs, 33 ms
+[16Oct2026 07:30:56.866] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric rellenthil: buildings 30%, developed 66% of r49, 6 features (authored), 137 specs, 33 ms
+[16Oct2026 07:30:56.869] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric riverfield: buildings 31%, developed 71% of r49, 6 features (authored), 117 specs, 27 ms
+[16Oct2026 07:30:56.876] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric belport_run: buildings 27%, developed 65% of r49, 6 features (authored), 137 specs, 39 ms
+[16Oct2026 07:30:56.879] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric archen_grangrove: buildings 21%, developed 63% of r49, 6 features (authored), 171 specs, 42 ms
+[16Oct2026 07:30:56.888] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric west_guard: buildings 29%, developed 67% of r49, 6 features (authored), 143 specs, 27 ms
+[16Oct2026 07:30:56.906] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric dawnbreak: buildings 30%, developed 71% of r34, 3 features (authored), 61 specs, 12 ms
+[16Oct2026 07:30:56.911] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric phaer: buildings 23%, developed 68% of r34, 3 features (authored), 62 specs, 10 ms
+[16Oct2026 07:30:56.918] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric shattered_grove: buildings 17%, developed 70% of r34, 3 features (authored), 88 specs, 17 ms
+[16Oct2026 07:30:56.920] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan silsailen: no room for feature garden near (-2, 8)
+[16Oct2026 07:30:56.921] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan silsailen: no room for feature garden near (6, 8)
+[16Oct2026 07:30:56.921] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan silsailen: 1 of 3 features placed
+[16Oct2026 07:30:56.926] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric kings_haven: buildings 22%, developed 69% of r34, 3 features (authored), 66 specs, 13 ms
+[16Oct2026 07:30:56.928] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric sollicich_on_ker: buildings 19%, developed 65% of r34, 3 features (authored), 69 specs, 15 ms
+[16Oct2026 07:30:56.929] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric silsailen: buildings 64%, developed 87% of r22, 1 features (authored), 29 specs, 16 ms
+[16Oct2026 07:30:56.946] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric graddun_spring: buildings 24%, developed 67% of r34, 3 features (authored), 60 specs, 14 ms
+[16Oct2026 07:30:56.958] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric glenview: buildings 21%, developed 69% of r34, 3 features (authored), 75 specs, 28 ms
+[16Oct2026 07:30:56.981] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan artaeum_craftworks: no room for feature statue near (-11, 2)
+[16Oct2026 07:30:56.982] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan artaeum_craftworks: no room for feature statue near (7, 0)
+[16Oct2026 07:30:56.982] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan artaeum_craftworks: no room for feature garden near (13, -3)
+[16Oct2026 07:30:56.982] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan artaeum_craftworks: no room for feature garden near (0, 4)
+[16Oct2026 07:30:56.982] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan artaeum_craftworks: 0 of 4 features placed
+[16Oct2026 07:30:56.984] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned galiisen: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 7, stalls 0, pens/gardens 0, streets 4 (35 m), walls 0, gates 0
+[16Oct2026 07:30:56.985] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned lanethil: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 8, stalls 0, pens/gardens 1, streets 3 (25 m), walls 0, gates 0
+[16Oct2026 07:30:56.985] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan grand_psijic_villa: no room for feature garden near (18, 3)
+[16Oct2026 07:30:56.986] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan grand_psijic_villa: no room for feature garden near (0, 3)
+[16Oct2026 07:30:56.986] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan grand_psijic_villa: 2 of 4 features placed
+[16Oct2026 07:30:56.990] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric artaeum_craftworks: buildings 75%, developed 91% of r20, 0 features (authored), 29 specs, 17 ms
+[16Oct2026 07:30:57.007] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric grand_psijic_villa: buildings 39%, developed 82% of r27, 2 features (authored), 46 specs, 33 ms
+[16Oct2026 07:30:57.050] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned baira: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 3, stalls 0, pens/gardens 0, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.051] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned qaana: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 3, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.053] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned berud: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 3, stalls 0, pens/gardens 0, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.055] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned qaezir: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.057] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned zoahim: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 18, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.139] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned moiras_hope: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 19, stalls 0, pens/gardens 0, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.144] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned lowpoint: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 4, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.149] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned highwych: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 19, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.150] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned bramcroft: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 10, stalls 0, pens/gardens 1, streets 3 (30 m), walls 0, gates 0
+[16Oct2026 07:30:57.150] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned torwych: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 3, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.151] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned marcliff: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 6, stalls 0, pens/gardens 0, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.151] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned thorncombe: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 15, stalls 0, pens/gardens 1, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.151] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned wyngate: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 2, stalls 0, pens/gardens 1, streets 12 (43 m), walls 0, gates 0
+[16Oct2026 07:30:57.155] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned balmarsh: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 17, stalls 0, pens/gardens 0, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.160] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned yarhurst: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 4, stalls 0, pens/gardens 1, streets 12 (44 m), walls 0, gates 0
+[16Oct2026 07:30:57.165] [Skycraft street plan/DEBUG] [com.skycraft.Skycraft/]: Zoned balthorpe: buildings 0 (town 0), density 0% (built 0 / boundary 0 m2), coverage 0%, mean gap 0.0, variety 100%, 0 designs, props 16, stalls 0, pens/gardens 0, streets 2 (56 m), walls 0, gates 0
+[16Oct2026 07:30:57.195] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tang_mo_harbor_village: no room for feature basin near (21, 9)
+[16Oct2026 07:30:57.195] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan tang_mo_harbor_village: 3 of 4 features placed
+[16Oct2026 07:30:57.200] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric mistveil_village: buildings 20%, developed 85% of r34, 3 features (authored), 55 specs, 12 ms
+[16Oct2026 07:30:57.203] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric hundings_dojo: buildings 20%, developed 72% of r27, 4 features (authored), 52 specs, 13 ms
+[16Oct2026 07:30:57.203] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan kjolvik: no room for feature orchard near (15, 12)
+[16Oct2026 07:30:57.204] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan kjolvik: 3 of 4 features placed
+[16Oct2026 07:30:57.206] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tang_mo_harbor_village: buildings 21%, developed 73% of r32, 3 features (authored), 80 specs, 19 ms
+[16Oct2026 07:30:57.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan black_lacquer_pagoda: no room for feature lamps near (4, 2)
+[16Oct2026 07:30:57.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan black_lacquer_pagoda: no room for feature lamps near (7, -7)
+[16Oct2026 07:30:57.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan black_lacquer_pagoda: 2 of 4 features placed
+[16Oct2026 07:30:57.210] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wolf_jarls_howe: no room for feature shrine near (2, 4)
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wolf_jarls_howe: no room for feature shrine near (9, 0)
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wolf_jarls_howe: no room for feature lamps near (0, -3)
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wolf_jarls_howe: no room for feature lamps near (12, 0)
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan wolf_jarls_howe: 0 of 4 features placed
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan pyandonean_fleet_anchorage: no room for feature pool near (17, 0)
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan pyandonean_fleet_anchorage: no room for feature lamps near (-13, -33)
+[16Oct2026 07:30:57.211] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan pyandonean_fleet_anchorage: 4 of 6 features placed
+[16Oct2026 07:30:57.212] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan adasooms_gate: no room for feature lamps near (4, -2)
+[16Oct2026 07:30:57.212] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan adasooms_gate: no room for feature lamps near (0, 4)
+[16Oct2026 07:30:57.212] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan adasooms_gate: 2 of 4 features placed
+[16Oct2026 07:30:57.212] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric tiger_plains_village: buildings 16%, developed 71% of r34, 4 features (authored), 82 specs, 26 ms
+[16Oct2026 07:30:57.215] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric wolf_jarls_howe: buildings 100%, developed 99% of r18, 0 features (authored), 24 specs, 9 ms
+[16Oct2026 07:30:57.219] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric black_lacquer_pagoda: buildings 64%, developed 94% of r20, 2 features (authored), 27 specs, 17 ms
+[16Oct2026 07:30:57.220] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric kjolvik: buildings 18%, developed 76% of r34, 3 features (authored), 72 specs, 34 ms
+[16Oct2026 07:30:57.224] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric adasooms_gate: buildings 85%, developed 96% of r18, 2 features (authored), 27 specs, 23 ms
+[16Oct2026 07:30:57.228] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric pyandonean_fleet_anchorage: buildings 19%, developed 78% of r49, 4 features (authored), 109 specs, 40 ms
+[16Oct2026 07:30:57.238] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan coral_choked_palace: no room for feature statue near (-9, -5)
+[16Oct2026 07:30:57.239] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan coral_choked_palace: no room for feature statue near (13, 1)
+[16Oct2026 07:30:57.239] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan coral_choked_palace: 2 of 4 features placed
+[16Oct2026 07:30:57.240] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan coral_tower_of_thras: no room for feature lamps near (-1, -9)
+[16Oct2026 07:30:57.240] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan coral_tower_of_thras: 3 of 4 features placed
+[16Oct2026 07:30:57.245] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric coral_choked_palace: buildings 84%, developed 93% of r18, 2 features (authored), 30 specs, 11 ms
+[16Oct2026 07:30:57.247] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric coral_tower_of_thras: buildings 100%, developed 95% of r18, 3 features (authored), 34 specs, 12 ms
+[16Oct2026 07:30:57.262] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_sleeping_sand_cat: no room for feature market near (1, -11)
+[16Oct2026 07:30:57.263] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_sleeping_sand_cat: no room for feature lamps near (-1, 8)
+[16Oct2026 07:30:57.263] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_sleeping_sand_cat: no room for feature lamps near (-2, -3)
+[16Oct2026 07:30:57.263] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_sleeping_sand_cat: 0 of 3 features placed
+[16Oct2026 07:30:57.263] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_green_bough: no room for feature garden near (-11, 4)
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_green_bough: no room for feature lamps near (-4, -3)
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_green_bough: no room for feature lamps near (-1, -1)
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_hollow_oak: no room for feature garden near (1, -2)
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_green_bough: 0 of 3 features placed
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_hollow_oak: no room for feature lamps near (0, 6)
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_hollow_oak: no room for feature lamps near (-13, -2)
+[16Oct2026 07:30:57.264] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_hollow_oak: 0 of 3 features placed
+[16Oct2026 07:30:57.265] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric roadside_sleeping_sand_cat: buildings 100%, developed 95% of r20, 0 features (authored), 30 specs, 4 ms
+[16Oct2026 07:30:57.266] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric roadside_green_bough: buildings 66%, developed 100% of r20, 0 features (authored), 43 specs, 6 ms
+[16Oct2026 07:30:57.268] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric roadside_hollow_oak: buildings 66%, developed 100% of r20, 0 features (authored), 46 specs, 8 ms
+[16Oct2026 07:30:57.268] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_huntsmans_rest: no room for feature garden near (0, -2)
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_huntsmans_rest: no room for feature lamps near (-5, 2)
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_huntsmans_rest: no room for feature lamps near (1, 1)
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_huntsmans_rest: 0 of 3 features placed
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_wandering_root: no room for feature garden near (-4, -2)
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_wandering_root: no room for feature lamps near (-5, -4)
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_wandering_root: no room for feature lamps near (7, -3)
+[16Oct2026 07:30:57.269] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: City plan roadside_wandering_root: 0 of 3 features placed
+[16Oct2026 07:30:57.271] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric roadside_wandering_root: buildings 66%, developed 100% of r20, 0 features (authored), 41 specs, 5 ms
+[16Oct2026 07:30:57.274] [Skycraft street plan/INFO] [com.skycraft.Skycraft/]: fabric roadside_huntsmans_rest: buildings 66%, developed 100% of r20, 0 features (authored), 51 specs, 13 ms
+[16Oct2026 07:30:57.278] [Test worker/INFO] [com.skycraft.Skycraft/]: [bake] streetplan: 0 settlements, 0 specs (0 props left out, 0 buildings turned to a free side, 0 back doors walled up), 0 nodes, 0 edges (0 doorstep path edges), 0 doors (0 unreachable, 0.00%), 0 gate nodes + 0 road joins, 0 plots; 4825 ms (8 threads)
+[16Oct2026 07:30:57.279] [Test worker/INFO] [com.skycraft.Skycraft/]: [streetplan] planned live: 0 settlements, 0 doors (4828 ms)
+[16Oct2026 07:30:57.382] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 87 ms: 6 places, 15 segments, 35 scenes
+[16Oct2026 07:30:57.417] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 1) in 29 ms: 6 places, 13 segments, 24 scenes
+[16Oct2026 07:30:57.440] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (0, -3) in 19 ms: 6 places, 15 segments, 32 scenes
+[16Oct2026 07:30:57.463] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 19 ms: 6 places, 15 segments, 35 scenes
+[16Oct2026 07:30:57.478] [skycraft-tile-planner-1/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (6, 2) in 9 ms: 0 places, 0 segments, 0 scenes
+[16Oct2026 07:30:57.478] [skycraft-tile-planner-2/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (5, 2) in 9 ms: 0 places, 0 segments, 0 scenes
+[16Oct2026 07:30:57.486] [skycraft-tile-planner-2/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (6, 1) in 7 ms: 0 places, 0 segments, 0 scenes
+[16Oct2026 07:30:57.486] [skycraft-tile-planner-1/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (7, 2) in 7 ms: 0 places, 0 segments, 0 scenes
+[16Oct2026 07:30:57.498] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 18 ms: 6 places, 15 segments, 35 scenes
+[16Oct2026 07:30:57.503] [skycraft-tile-planner-2/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (6, 3) in 17 ms: 0 places, 0 segments, 0 scenes
+[16Oct2026 07:30:57.520] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 18 ms: 6 places, 15 segments, 35 scenes
+[16Oct2026 07:30:57.542] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 17 ms: 6 places, 16 segments, 33 scenes
+[16Oct2026 07:30:57.564] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (0, -3) in 15 ms: 6 places, 15 segments, 32 scenes
+[16Oct2026 07:30:57.583] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (-5, 1) in 15 ms: 6 places, 16 segments, 30 scenes
+[16Oct2026 07:30:57.601] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 1) in 16 ms: 6 places, 13 segments, 24 scenes
+[16Oct2026 07:30:57.612] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (5, 0) in 9 ms: 2 places, 3 segments, 8 scenes
+[16Oct2026 07:30:57.631] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 19 ms: 6 places, 15 segments, 35 scenes
+[16Oct2026 07:30:57.647] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 1) in 16 ms: 6 places, 13 segments, 24 scenes
+[16Oct2026 07:30:57.670] [Test worker/DEBUG] [com.skycraft.Skycraft/]: [tileplan] planned tile (4, 0) in 18 ms: 6 places, 15 segments, 35 scenes

@@ -28,11 +28,11 @@ public final class Styles {
 
     /** The style sheet of a culture and kit style. Never null (an empty sheet when the file is missing). */
     public static Style of(Culture c, int style) {
-        Palette kit = Kits.palette(c, style < 0 ? style : style & Kits.KIT_MASK);
+        String kitName = Kits.kitName(c, style < 0 ? style : style & Kits.KIT_MASK);
         int overlay = style < 0 ? 0 : style >>> Kits.OVERLAY_SHIFT;
-        String key = overlay == 0 ? c.id() + "/" + kit.name : c.id() + "/" + kit.name + "#" + overlay;
+        String key = overlay == 0 ? c.id() + "/" + kitName : c.id() + "/" + kitName + "#" + overlay;
         return CACHE.computeIfAbsent(key, k -> {
-            Style s = load(c, kit.name);
+            Style s = load(c, kitName);
             JsonObject sheet = overlay == 0 ? null : Overlays.sheet(overlay);
             if (sheet != null && (sheet.has("style") || sheet.has("tint"))) {
                 try {

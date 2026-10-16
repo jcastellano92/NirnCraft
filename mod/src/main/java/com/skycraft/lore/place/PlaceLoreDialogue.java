@@ -33,8 +33,8 @@ import java.util.List;
  * Rumours, legends and songs come from the region's lore, falling back to its province's ({@link PlaceLore#region}).
  */
 public final class PlaceLoreDialogue {
-    /** How far townsfolk know of trouble. */
-    private static final int TROUBLE_RANGE = 2400;
+    /** How far local innkeepers/stewards offer trouble quests, and how far townsfolk know local rumours. */
+    private static final int TROUBLE_RANGE = 900;
 
     private PlaceLoreDialogue() {}
 
@@ -49,6 +49,13 @@ public final class PlaceLoreDialogue {
                 && QuestNpcs.idOf(npc).isEmpty();
     }
 
+    private static boolean canOfferTroubleQuest(ServerPlayer player, LivingEntity e) {
+        if (!(e instanceof NpcEntity npc)) return false;
+        NpcRole role = npc.role();
+        if (role != NpcRole.INNKEEPER && role != NpcRole.STEWARD) return false;
+        return com.skycraft.quest.QuestDialogue.canOfferQuest(player, npc);
+    }
+
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (!isTownsfolk(player, npc)) return;
         Region region = Regions.at(npc.level(), npc.blockPosition());
@@ -61,17 +68,24 @@ public final class PlaceLoreDialogue {
         }
     }
 
-    /** The nearest place with a mini-quest the player can start now. */
-    private static Place troublePlace(ServerPlayer player, LivingEntity npc) {
+    /** The nearest place in the same region with a mini-quest or rumour. */
+    private static Place troublePlace(ServerPlayer player, LivingEntity npc, boolean requireAvailableQuest) {
         int x = npc.getBlockX(), z = npc.getBlockZ();
+        Region here = Regions.at(npc.level(), npc.blockPosition());
         List<Place> near = new ArrayList<>(Places.overlapping(x - TROUBLE_RANGE, z - TROUBLE_RANGE, x + TROUBLE_RANGE, z + TROUBLE_RANGE));
         near.sort(Comparator.comparingLong(p -> p.distSqr(x, z)));
         for (Place p : near) {
             if (p.distSqr(x, z) > (long) TROUBLE_RANGE * TROUBLE_RANGE) break;
+            if (here != null && !p.regionId().isEmpty() && !here.id().equals(p.regionId())) continue;
             PlaceLore.Content c = PlaceLore.contentFor(p.id()).orElse(null);
-            if (c == null || c.quest().isEmpty()) continue;
-            StoryData.QuestDef def = StoryData.quest(c.quest());
-            if (def == null || !"manual".equals(def.start) || !Story.available(player, def)) continue;
+            if (c == null) continue;
+            if (requireAvailableQuest) {
+                if (c.quest().isEmpty()) continue;
+                StoryData.QuestDef def = StoryData.quest(c.quest());
+                if (def == null || !"manual".equals(def.start) || !Story.available(player, def)) continue;
+            } else if (c.rumour() == null || c.rumour().text().isEmpty()) {
+                continue;
+            }
             return p;
         }
         return null;
@@ -79,20 +93,24 @@ public final class PlaceLoreDialogue {
 
     private static void trouble(ServerPlayer player, LivingEntity npc) {
         RandomSource r = player.getRandom();
-        Place place = troublePlace(player, npc);
-        if (place != null) {
-            PlaceLore.Content c = PlaceLore.contentFor(place.id()).orElseThrow();
-            StoryData.QuestDef def = StoryData.quest(c.quest());
-            if (!Quests.canTakeMore(player)) {
-                Dialogue.open(player, npc, Component.translatable("place_lore.skycraft.say.busy", c.rumour().c()));
-                return;
+        // Only innkeepers and stewards actually offer a local quest (with Accept/Decline); ordinary townsfolk share rumours
+        if (canOfferTroubleQuest(player, npc)) {
+            Place questPlace = troublePlace(player, npc, true);
+            if (questPlace != null) {
+                PlaceLore.Content c = PlaceLore.contentFor(questPlace.id()).orElseThrow();
+                StoryData.QuestDef def = StoryData.quest(c.quest());
+                if (def != null) {
+                    com.skycraft.quest.QuestDialogue.offerStory(player, npc, def, () -> Discovery.revealPlace(player, questPlace));
+                    return;
+                }
             }
-            if (def != null && PlaceLoreEvents.startQuest(player, def.id, true)) {
-                Discovery.revealPlace(player, place);
-                Component pitch = def.pitch.isEmpty() ? c.rumour().c() : def.pitch.c();
-                Dialogue.open(player, npc, pitch);
-                return;
-            }
+        }
+        Place rumourPlace = troublePlace(player, npc, false);
+        if (rumourPlace != null && r.nextBoolean()) {
+            PlaceLore.Content c = PlaceLore.contentFor(rumourPlace.id()).orElseThrow();
+            Discovery.revealPlace(player, rumourPlace);
+            Dialogue.open(player, npc, c.rumour().c());
+            return;
         }
         Region region = Regions.at(npc.level(), npc.blockPosition());
         Component rumour = PlaceLore.regionalRumour(region.id(), r);

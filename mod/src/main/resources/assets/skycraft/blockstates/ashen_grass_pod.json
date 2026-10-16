@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/ashen_grass_pod"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/ashen_grass_pod_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/ashen_grass_pod"
+      },
+      {
+        "model": "skycraft:block/ashen_grass_pod",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/ashen_grass_pod",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/ashen_grass_pod",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/ashen_grass_pod_harvested"
+      },
+      {
+        "model": "skycraft:block/ashen_grass_pod_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/ashen_grass_pod_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/ashen_grass_pod_harvested",
+        "y": 270
+      }
+    ]
   }
 }

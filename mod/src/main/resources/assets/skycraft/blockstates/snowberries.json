@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/snowberries"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/snowberries_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/snowberries"
+      },
+      {
+        "model": "skycraft:block/snowberries",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/snowberries",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/snowberries",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/snowberries_harvested"
+      },
+      {
+        "model": "skycraft:block/snowberries_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/snowberries_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/snowberries_harvested",
+        "y": 270
+      }
+    ]
   }
 }

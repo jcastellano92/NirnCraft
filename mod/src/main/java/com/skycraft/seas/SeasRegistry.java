@@ -93,7 +93,7 @@ public final class SeasRegistry {
 
     private static RegistryObject<EntityType<SchoolFishEntity>> fish(String id, float w, float h) {
         return ENTITIES.register(id, () -> EntityType.Builder.<SchoolFishEntity>of(SchoolFishEntity::new, MobCategory.WATER_AMBIENT)
-                .sized(w, h).clientTrackingRange(4).build(Skycraft.MODID + ":" + id));
+                .sized(w, h).clientTrackingRange(6).build(Skycraft.MODID + ":" + id));
     }
 
     static void init(IEventBus modBus) {

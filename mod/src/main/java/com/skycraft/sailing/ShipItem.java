@@ -38,7 +38,9 @@ public class ShipItem extends Item {
         if (hit.getType() != HitResult.Type.BLOCK) return InteractionResultHolder.pass(stack);
         BlockPos pos = hit.getBlockPos();
         if (!level.getFluidState(pos).is(FluidTags.WATER)) {
-            if (!level.isClientSide) player.displayClientMessage(Component.translatable("sailing.skycraft.launch_water"), true);
+            if (player instanceof ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("sailing.skycraft.launch_water"));
+            }
             return InteractionResultHolder.fail(stack);
         }
         if (level.isClientSide) return InteractionResultHolder.success(stack);
@@ -51,7 +53,9 @@ public class ShipItem extends Item {
         Vec3 at = hit.getLocation();
         ship.moveTo(at.x, surface - type.draft, at.z, player.getYRot(), 0f);
         if (!level.noCollision(ship, ship.getBoundingBox().deflate(0.05)) || !roomFor(level, ship)) {
-            player.displayClientMessage(Component.translatable("sailing.skycraft.launch_room"), true);
+            if (player instanceof ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("sailing.skycraft.launch_room"));
+            }
             return InteractionResultHolder.fail(stack);
         }
         ship.initNew(player);
@@ -62,7 +66,7 @@ public class ShipItem extends Item {
         if (!player.getAbilities().instabuild) stack.shrink(1);
         player.awardStat(Stats.ITEM_USED.get(this));
         if (player instanceof ServerPlayer sp) {
-            sp.displayClientMessage(Component.translatable("sailing.skycraft.launched", ship.getDisplayName()), true);
+            com.skycraft.core.Notifier.message(sp, Component.translatable("sailing.skycraft.launched", ship.getDisplayName()));
         }
         return InteractionResultHolder.consume(stack);
     }

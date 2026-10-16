@@ -51,12 +51,31 @@ public final class SocietyClientEvents {
      */
     @SubscribeEvent
     public static void onClientChatReceived(net.minecraftforge.client.event.ClientChatReceivedEvent event) {
-        if (!event.isSystem() || ClientSociety.BARKS.isEmpty()) return;
-        if (event instanceof net.minecraftforge.client.event.ClientChatReceivedEvent.System sys && sys.isOverlay()) return;
+        if (!event.isSystem()) return;
         net.minecraft.network.chat.Component message = event.getMessage();
         if (message == null) return;
+        if (event instanceof net.minecraftforge.client.event.ClientChatReceivedEvent.System sys && sys.isOverlay()) {
+            com.skycraft.client.hud.HudNotifications.add(new com.skycraft.network.CorePackets.Notify(
+                    com.skycraft.network.NotifyKind.MESSAGE, message, net.minecraft.network.chat.Component.empty(), 0, 0f));
+            event.setCanceled(true);
+            return;
+        }
+        if (message.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
+            String key = tc.getKey();
+            if (key.startsWith("place_lore.skycraft.") || key.startsWith("chat.type.advancement.")
+                    || key.startsWith("block.minecraft.bed.") || key.equals("block.minecraft.set_spawn")
+                    || key.startsWith("lootr.")) {
+                event.setCanceled(true);
+                return;
+            }
+        }
         String raw = message.getString().trim();
         if (raw.isEmpty()) return;
+        if (raw.startsWith("[Distant Horizons]") || raw.contains("Distant Horizons") || raw.startsWith("[Lootr]")) {
+            event.setCanceled(true);
+            return;
+        }
+        if (ClientSociety.BARKS.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         for (var entry : ClientSociety.BARKS.entrySet()) {
             String barkText = entry.getValue().text().getString().trim();

@@ -353,22 +353,34 @@ public final class RoadPlanBuilder {
         static int[] pins(Place p) {
             com.skycraft.tamriel.settlement.plan.CityPlan cp = com.skycraft.tamriel.settlement.plan.CityPlans.of(p);
             if (cp == null) return null;
+            List<int[]> gates = PlanLinks.gates(p);
             IntArrayList out = new IntArrayList();
             for (com.skycraft.tamriel.settlement.plan.CityPlan.Building b : cp.buildings) {
                 for (int k = 0; k < Math.max(1, b.count()); k++) {
                     int[] w = com.skycraft.tamriel.settlement.plan.Cities.world(p, b.x() + k * b.stepX(), b.z() + k * b.stepZ());
+                    int r = Math.max(b.w(), b.d()) / 2 + Math.max(0, b.margin()) + 3;
+                    if (nearGate(w[0], w[1], r, gates)) continue;
                     out.add(w[0]);
                     out.add(w[1]);
-                    out.add(Math.max(b.w(), b.d()) / 2 + Math.max(0, b.margin()) + 3);
+                    out.add(r);
                 }
             }
             for (com.skycraft.tamriel.settlement.plan.CityPlan.Landmark l : cp.landmarks) {
                 int[] w = com.skycraft.tamriel.settlement.plan.Cities.world(p, l.x(), l.z());
+                int r = Math.max(l.w(), l.d()) / 2 + Math.max(0, l.margin()) + 3;
+                if (nearGate(w[0], w[1], r, gates)) continue;
                 out.add(w[0]);
                 out.add(w[1]);
-                out.add(Math.max(l.w(), l.d()) / 2 + Math.max(0, l.margin()) + 3);
+                out.add(r);
             }
             return out.isEmpty() ? null : out.toIntArray();
+        }
+
+        private static boolean nearGate(int x, int z, int r, List<int[]> gates) {
+            for (int[] g : gates) {
+                if (Math.hypot(x - g[0], z - g[1]) < r + 12) return true;
+            }
+            return false;
         }
 
         /** Walled settlement interiors near a link: (x, z, r) triples, as the live planner avoids them. */
@@ -383,9 +395,8 @@ public final class RoadPlanBuilder {
                 int core = nodeCore[i];
                 boolean own = Math.hypot(ax - p.x(), az - p.z()) <= Math.max(p.radius(), core) + 60
                         || Math.hypot(bx - p.x(), bz - p.z()) <= Math.max(p.radius(), core) + 60;
-                // P5: a road ending at this settlement keeps out of its walls, fields and outskirts until it turns in at
-                // the gate (the ring of gates plus a margin; the gate itself is inside, so the last stretch runs in radially)
-                int r = own ? (core > 0 ? core + 14 + OWN_MARGIN : 0) : city ? p.radius() : core;
+                // Keep endpoint settlement avoidance strictly inside its gates so the road can reach the gate directly
+                int r = own ? (core > 0 ? Math.min(core - 2, p.radius() - 8) : 0) : city ? p.radius() : core;
                 if (own && nodePins[i] != null) out.addElements(out.size(), nodePins[i]);
                 if (r < 16) continue;
                 out.add(p.x());
@@ -395,13 +406,14 @@ public final class RoadPlanBuilder {
             return out.toIntArray();
         }
 
-        /** Routes a class of links in parallel, then accepts them one by one in order. */
+        /** Routes a class of links in parallel, then accepts them one by one in order (updating cells incrementally for trunk roads). */
         void wave(List<Task> tasks, boolean retryWider) {
             LongOpenHashSet cells = new LongOpenHashSet();
             for (Seg s : segs) {
                 if (s.spur) continue;
                 for (int i = 0; i < s.x.length; i++) cells.add(PlanRouter.cellKey(s.x[i], s.z[i]));
             }
+            int segStartIdx = segs.size();
             List<List<double[]>> routes = routeAll(tasks, cells, false);
             if (retryWider) {
                 List<Task> again = new ArrayList<>();
@@ -427,20 +439,52 @@ public final class RoadPlanBuilder {
             for (int i = 0; i < tasks.size(); i++) {
                 Task t = tasks.get(i);
                 List<double[]> r = routes.get(i);
+                if (t.kind() <= PlanLinks.ROAD && segs.size() > segStartIdx && overlapsRecentSegs(t, segStartIdx)) {
+                    PlanRouter.Job job = new PlanRouter.Job(t.ax(), t.az(), t.bx(), t.bz(), t.kind(), t.maxBridge(),
+                            avoid(t.ax(), t.az(), t.bx(), t.bz()), cells, BUDGET, t.siteA(), t.siteB());
+                    try {
+                        List<double[]> rerouted = PlanRouter.route(terrain, job);
+                        if (rerouted != null) r = rerouted;
+                    } catch (RuntimeException ignored) {
+                    }
+                }
                 if (r == null) {
                     linkStatus.set(t.link(), RoadPlan.LINK_FAILED);
                     failed++;
                     continue;
                 }
+                int beforeSegs = segs.size();
                 accept(t, r);
+                if (!t.spur()) {
+                    for (int si = beforeSegs; si < segs.size(); si++) {
+                        Seg s = segs.get(si);
+                        for (int k = 0; k < s.x.length; k++) cells.add(PlanRouter.cellKey(s.x[k], s.z[k]));
+                    }
+                }
             }
         }
 
+        private boolean overlapsRecentSegs(Task t, int fromSeg) {
+            double minX = Math.min(t.ax(), t.bx()) - 180, maxX = Math.max(t.ax(), t.bx()) + 180;
+            double minZ = Math.min(t.az(), t.bz()) - 180, maxZ = Math.max(t.az(), t.bz()) + 180;
+            for (int si = fromSeg; si < segs.size(); si++) {
+                Seg s = segs.get(si);
+                if (s.spur || s.x.length == 0) continue;
+                double sx0 = s.x[0], sz0 = s.z[0], sx1 = s.x[s.x.length - 1], sz1 = s.z[s.z.length - 1];
+                if (sx0 >= minX && sx0 <= maxX && sz0 >= minZ && sz0 <= maxZ
+                        || sx1 >= minX && sx1 <= maxX && sz1 >= minZ && sz1 <= maxZ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         List<List<double[]>> routeAll(List<Task> tasks, LongOpenHashSet cells, boolean unused) {
+            LongOpenHashSet snapshot = new LongOpenHashSet(cells);
             List<Future<List<double[]>>> futures = new ArrayList<>();
             for (Task t : tasks) {
                 PlanRouter.Job job = new PlanRouter.Job(t.ax(), t.az(), t.bx(), t.bz(), t.kind(), t.maxBridge(),
-                        avoid(t.ax(), t.az(), t.bx(), t.bz()), cells, BUDGET);
+                        avoid(t.ax(), t.az(), t.bx(), t.bz()), snapshot, BUDGET, t.siteA(), t.siteB());
                 futures.add(pool.submit(() -> {
                     try {
                         return PlanRouter.route(terrain, job);
@@ -560,17 +604,27 @@ public final class RoadPlanBuilder {
             List<double[]> pts = PlanRouter.resample(route, SPACING);
             int n = pts.size();
             float hw = halfWidth(task.kind());
-            // which vertices run along a road already planned
-            boolean[] shared = new boolean[n];
+            // which vertices run along a road already planned (widen merge snap distance to hw + o.hw + 14.0)
+            boolean[] rawShared = new boolean[n];
             double[][] proj = new double[n][];
             for (int i = 0; i < n; i++) {
                 double[] p = pts.get(i);
-                double[] e = nearestEdge(p[0], p[1], hw + 2.5 + 1.5);
+                double[] e = nearestEdge(p[0], p[1], hw + 2.5 + 14.0);
                 if (e == null) continue;
                 Seg o = segs.get((int) e[0]);
-                if (e[3] < hw + o.hw + 1.5) {
-                    shared[i] = true;
+                if (e[3] < hw + o.hw + 14.0) {
+                    rawShared[i] = true;
                     proj[i] = e;
+                }
+            }
+            boolean[] shared = new boolean[n];
+            for (int i = 0; i < n; i++) {
+                if (!rawShared[i]) continue;
+                boolean prev = i > 0 && rawShared[i - 1];
+                boolean next = i + 1 < n && rawShared[i + 1];
+                if (prev || next || (task.spur() && (i == 0 || i == n - 1))) {
+                    shared[i] = true;
+                    pts.set(i, new double[]{proj[i][4], proj[i][5]});
                 }
             }
             int pieces = 0;

@@ -98,7 +98,9 @@ public final class MainQuest {
         data.module("quest").putString("title", "dragonborn");
         data.markDirty();
         Notifier.title(player, Component.translatable("quest.skycraft.main.victory_title"), Component.translatable("quest.skycraft.main.victory_sub"));
-        player.server.getPlayerList().broadcastSystemMessage(
-                Component.translatable("quest.skycraft.main.victory_broadcast", player.getDisplayName()), false);
+        Component victoryMsg = Component.translatable("quest.skycraft.main.victory_broadcast", player.getDisplayName());
+        for (ServerPlayer sp : player.server.getPlayerList().getPlayers()) {
+            if (sp != player) Notifier.message(sp, victoryMsg);
+        }
     }
 }

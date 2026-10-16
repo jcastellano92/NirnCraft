@@ -110,15 +110,22 @@ public final class FactionDialogue {
         return null;
     }
 
+    private static boolean hasActiveFactionQuest(ServerPlayer p, Faction f) {
+        for (com.skycraft.quest.Quests.Ref ref : com.skycraft.quest.Quests.active(p.server, p.getUUID())) {
+            if (f.id.equals(ref.quest().faction)) return true;
+        }
+        return false;
+    }
+
     static void join(ServerPlayer p, LivingEntity npc, Faction f) {
         if (Factions.isMember(SkyData.get(p), f) || !admissible(p, npc, f)) return;
+        if (hasActiveFactionQuest(p, f)) {
+            Dialogue.open(p, npc, tr("quest.skycraft.reply.finish_first", f.displayName()));
+            return;
+        }
         StoryData.QuestDef def = joinQuest(p, f);
         if (def != null) {
-            if (Story.start(p, def)) {
-                Dialogue.open(p, npc, def.pitch.isEmpty() ? def.desc.c() : def.pitch.c());
-                return;
-            }
-            Dialogue.open(p, npc, tr("quest.skycraft.reply.too_busy"));
+            QuestDialogue.offerStory(p, npc, def, null);
             return;
         }
         if (Factions.join(p, f)) Dialogue.open(p, npc, tr("faction.skycraft.reply.welcome", f.displayName()));
@@ -150,11 +157,38 @@ public final class FactionDialogue {
 
     /** The next chapter of the faction's story, else a radiant contract from the hall. */
     static void work(ServerPlayer p, LivingEntity npc, Faction f) {
+        if (hasActiveFactionQuest(p, f)) {
+            Dialogue.open(p, npc, tr("quest.skycraft.reply.finish_first", f.displayName()));
+            return;
+        }
         for (StoryData.QuestDef def : StoryData.quests()) {
             // chapters offered in conversation (auto ones begin on their own when their time comes)
             if (!f.id.equals(def.faction) || def.rewards.join || def.repeatable || "auto".equals(def.start)) continue;
-            if (Story.available(p, def) && Story.start(p, def)) {
-                Dialogue.open(p, npc, def.pitch.isEmpty() ? def.desc.c() : def.pitch.c());
+            if (Story.available(p, def)) {
+                QuestDialogue.offerStory(p, npc, def, null);
+                return;
+            }
+        }
+        if (f == Faction.COLLEGE) {
+            CompoundTag qmod = SkyData.get(p).module("quest");
+            if (!qmod.getBoolean("college_destruction_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+                QuestDialogue.offer(p, npc, "college_dest", () -> com.skycraft.quest.CollegeQuests.destructionOffer(p, npc));
+                return;
+            }
+            if (!qmod.getBoolean("college_restoration_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+                QuestDialogue.offer(p, npc, "college_rest", () -> com.skycraft.quest.CollegeQuests.restorationOffer(p, npc));
+                return;
+            }
+            if (!qmod.getBoolean("college_alteration_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+                QuestDialogue.offer(p, npc, "college_alt", () -> com.skycraft.quest.CollegeQuests.alterationOffer(p, npc));
+                return;
+            }
+            if (!qmod.getBoolean("college_conjuration_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+                QuestDialogue.offer(p, npc, "college_conj", () -> com.skycraft.quest.CollegeQuests.conjurationOffer(p, npc));
+                return;
+            }
+            if (!qmod.getBoolean("college_illusion_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+                QuestDialogue.offer(p, npc, "college_ill", () -> com.skycraft.quest.CollegeQuests.illusionOffer(p, npc));
                 return;
             }
         }

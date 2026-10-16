@@ -84,7 +84,7 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
         if (this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
             Component words = Component.translatable("shout.skycraft.dragon.force");
             for (net.minecraft.server.level.ServerPlayer p : sl.players()) {
-                if (p.distanceToSqr(this) < 24 * 24) p.displayClientMessage(words, true);
+                if (p.distanceToSqr(this) < 24 * 24) com.skycraft.core.Notifier.message(p, words);
             }
         }
         FUS.tick(this, target, FUS.windup);

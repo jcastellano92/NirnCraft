@@ -83,6 +83,15 @@ public final class CombatHandler {
                 && WeaponClass.of(player.getOffhandItem()).skill == Skill.ONE_HANDED;
     }
 
+    /** Updates server-side weapon/shield blocking state for a player (e.g., when sheathing). */
+    public static void setBlocking(ServerPlayer player, boolean blocking) {
+        if (player == null) return;
+        ActionHandler.handle(player, blocking ? com.skycraft.network.CorePackets.Action.BLOCK_START : com.skycraft.network.CorePackets.Action.BLOCK_STOP, 0);
+        if (!blocking && player.isUsingItem()) {
+            player.stopUsingItem();
+        }
+    }
+
     /**
      * Deals damage caused by a combat side effect (two-handed sweep, shield bash, reflected blows, fire cloak...).
      * It never re-runs swing logic (stamina, power attacks, skill XP) and never chains into another side effect.
@@ -343,9 +352,6 @@ public final class CombatHandler {
         if (Perks.has(data, "archery.bullseye") && rnd.nextFloat() < 0.15f && !target.getType().is(BOSSES)) {
             target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60));
         }
-        if (Perks.has(data, "archery.hunters_discipline") && arrow.pickup == AbstractArrow.Pickup.ALLOWED && rnd.nextBoolean()) {
-            ActionHandler.addToBags(player, new ItemStack(Items.ARROW));
-        }
         mult *= huntingMultiplier(data, target);
         mult *= sneakMultiplier(player, data, target, WeaponClass.BOW);
         float result = amount * mult;
@@ -464,11 +470,27 @@ public final class CombatHandler {
 
     @SubscribeEvent
     public static void onAttackEntity(net.minecraftforge.event.entity.player.AttackEntityEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && Sheathe.isSheathed(player)) {
+            event.setCanceled(true);
+            Sheathe.setSheathed(player, false);
+            return;
+        }
         if (event.getEntity() instanceof ServerPlayer player && player.getMainHandItem().isEmpty()) {
             net.minecraft.world.InteractionHand hand = (player.tickCount % 2 == 0)
                     ? net.minecraft.world.InteractionHand.MAIN_HAND
                     : net.minecraft.world.InteractionHand.OFF_HAND;
             player.swing(hand, true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onUseStart(LivingEntityUseItemEvent.Start event) {
+        if (!(event.getEntity() instanceof Player player) || !Sheathe.isSheathed(player)) return;
+        var item = event.getItem().getItem();
+        if (item instanceof BowItem || item instanceof net.minecraft.world.item.CrossbowItem
+                || item instanceof ShieldItem || item instanceof com.skycraft.arsenal.item.StaffItem) {
+            event.setCanceled(true);
+            Sheathe.setSheathed(player, false);
         }
     }
 

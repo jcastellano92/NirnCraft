@@ -50,14 +50,18 @@ public final class ArcaneRegistry {
 
     // ---------------------------------------------------------------- wild alchemy plants
     public static final RegistryObject<Block> NIGHTSHADE = registerFloraBlock("nightshade",
-            () -> new IngredientPlantBlock(MobEffects.POISON, 10, false, BlockBehaviour.Properties.copy(Blocks.POPPY)));
+            () -> new IngredientPlantBlock(MobEffects.POISON, 10, false, BlockBehaviour.Properties.copy(Blocks.POPPY)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)));
     public static final RegistryObject<Block> DEATHBELL = registerFloraBlock("deathbell",
-            () -> new IngredientPlantBlock(MobEffects.WITHER, 6, false, BlockBehaviour.Properties.copy(Blocks.POPPY)));
+            () -> new IngredientPlantBlock(MobEffects.WITHER, 6, false, BlockBehaviour.Properties.copy(Blocks.POPPY)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)));
     public static final RegistryObject<Block> NIRNROOT = registerFloraBlock("nirnroot",
             () -> new IngredientPlantBlock(MobEffects.INVISIBILITY, 8, true, BlockBehaviour.Properties.copy(Blocks.POPPY)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)
                     .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : 6)));
     public static final RegistryObject<Block> FROST_MIRRIAM = registerFloraBlock("frost_mirriam",
-            () -> new IngredientPlantBlock(MobEffects.FIRE_RESISTANCE, 8, false, BlockBehaviour.Properties.copy(Blocks.POPPY)));
+            () -> new IngredientPlantBlock(MobEffects.FIRE_RESISTANCE, 8, false, BlockBehaviour.Properties.copy(Blocks.POPPY)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)));
 
     public static final RegistryObject<Item> ARCANE_ENCHANTER_ITEM = ITEMS.register("arcane_enchanter",
             () -> new BlockItem(ARCANE_ENCHANTER.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
@@ -163,6 +167,7 @@ public final class ArcaneRegistry {
                 effect, 6, glowing, ceiling,
                 () -> lookupItem(id),
                 BlockBehaviour.Properties.copy(Blocks.POPPY).sound(sound)
+                        .offsetType(BlockBehaviour.OffsetType.XZ)
                         .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : light)));
     }
 
@@ -176,6 +181,7 @@ public final class ArcaneRegistry {
                 effect, 7, glowing, ceiling,
                 () -> lookupItem(dropItemId),
                 BlockBehaviour.Properties.copy(Blocks.POPPY).sound(sound)
+                        .offsetType(BlockBehaviour.OffsetType.XZ)
                         .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : light)));
     }
 

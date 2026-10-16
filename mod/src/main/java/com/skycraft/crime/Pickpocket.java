@@ -77,6 +77,30 @@ public final class Pickpocket {
         if (p instanceof ServerPlayer player) open(player, npc);
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.isCanceled() || event.getHand() != InteractionHand.MAIN_HAND) return;
+        Player p = event.getEntity();
+        if (!p.isShiftKeyDown() || p.isSpectator()) return;
+        var level = event.getLevel();
+        var pos = event.getPos();
+        if (!level.getBlockState(pos).is(net.minecraft.tags.BlockTags.BEDS)) return;
+        var area = new net.minecraft.world.phys.AABB(pos).inflate(2.5, 1.5, 2.5);
+        LivingEntity sleeper = null;
+        double bestDist = Double.MAX_VALUE;
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, area, l -> l.isSleeping() && canPickpocket(l))) {
+            double d = e.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+            if (d < bestDist) {
+                bestDist = d;
+                sleeper = e;
+            }
+        }
+        if (sleeper == null || p.distanceToSqr(sleeper) > REACH_SQR) return;
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        if (p instanceof ServerPlayer player) open(player, sleeper);
+    }
+
     // ------------------------------------------------------------------ pockets
 
     private static List<ItemStack> pockets(ServerPlayer player, LivingEntity npc) {
@@ -143,7 +167,7 @@ public final class Pickpocket {
         // Light Fingers: +20% per rank
         c *= 1 + 0.2 * Perks.rank(player, "pickpocket.light_fingers");
         if (behind(player, npc)) c += 25;
-        if (npc.isSleeping()) c += Perks.has(player, "pickpocket.night_thief") ? 25 : 10;
+        if (npc.isSleeping()) c += Perks.has(player, "pickpocket.night_thief") ? 35 : 20;
         if (gold && Perks.has(player, "pickpocket.cutpurse")) c *= 1.5;
         if (stack.is(CrimeItems.LOCKPICK.get()) && Perks.has(player, "pickpocket.keymaster")) c = Math.max(c, 90);
         // every theft from the same person today makes them warier; Extra Pockets lets you take more
@@ -225,8 +249,36 @@ public final class Pickpocket {
             Notifier.send(player, NotifyKind.CRIME, Component.translatable("crime.skycraft.pickpocket.caught"), Component.empty());
             Notifier.message(player, Component.translatable("crime.skycraft.pickpocket.caught_line", npc.getDisplayName()));
             npc.playSound(SoundEvents.VILLAGER_NO, 1f, 1f);
-            if (npc.isSleeping()) npc.stopSleeping();
+            boolean wasSleeping = npc.isSleeping();
+            if (wasSleeping) npc.stopSleeping();
             if (npc instanceof Mob mob) mob.getLookControl().setLookAt(player, 30f, 30f);
+            long itemVal = isGold(stack) ? Currency.valueOf(stack) : Theft.unitValue(stack) * stack.getCount();
+            if (npc instanceof com.skycraft.society.entity.NpcEntity societyNpc) {
+                int disp = com.skycraft.society.Relationships.disposition(societyNpc, player);
+                com.skycraft.society.NpcRole role = societyNpc.role();
+                boolean aggressive = role.combatant || (societyNpc.canFight()
+                        && role != com.skycraft.society.NpcRole.JARL
+                        && role != com.skycraft.society.NpcRole.STEWARD
+                        && role != com.skycraft.society.NpcRole.SCHOLAR
+                        && role != com.skycraft.society.NpcRole.PRIEST
+                        && (disp < 0 || itemVal >= 50
+                        || role == com.skycraft.society.NpcRole.BLACKSMITH
+                        || role == com.skycraft.society.NpcRole.MINER
+                        || role == com.skycraft.society.NpcRole.LUMBERJACK));
+                if (aggressive) {
+                    societyNpc.setTarget(player);
+                    com.skycraft.society.Barks.say(societyNpc, Component.literal(wasSleeping
+                            ? "Cutpurse! You dare rob me in my sleep?! You'll pay with your blood!"
+                            : "Keep your hands out of my pockets, cutpurse!"));
+                } else {
+                    societyNpc.setFearedPlayer(player.getUUID());
+                    com.skycraft.society.Barks.say(societyNpc, Component.literal(wasSleeping
+                            ? "Thief! Somebody help! Guards!"
+                            : "Help! Thief! Guards, seize them!"));
+                }
+            } else if (Crimes.isGuard(npc) && npc instanceof Mob guardMob) {
+                guardMob.setTarget(player);
+            }
             // the victim always notices
             Crimes.report(player, npc.blockPosition(), Bounty.PICKPOCKET, true, null);
         }

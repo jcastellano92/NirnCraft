@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/powdered_mammoth_tusk"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/powdered_mammoth_tusk_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk"
+      },
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk_harvested"
+      },
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/powdered_mammoth_tusk_harvested",
+        "y": 270
+      }
+    ]
   }
 }

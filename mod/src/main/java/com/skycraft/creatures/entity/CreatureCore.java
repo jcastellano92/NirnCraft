@@ -80,15 +80,15 @@ public final class CreatureCore {
     public static void registerGoals(PathfinderMob mob, CreatureSpec spec, GoalSelector goalSelector, GoalSelector targetSelector) {
         Goals goals = new Goals(goalSelector, targetSelector);
         if (spec.move != CreatureSpec.Move.SWIM) goals.goal(0, new FloatGoal(mob));
-        if (spec.temper == CreatureSpec.Temper.PASSIVE) {
+        if (spec.temper == CreatureSpec.Temper.PASSIVE && spec.move != CreatureSpec.Move.FLY && spec.move != CreatureSpec.Move.HOVER) {
             goals.goal(1, new PanicGoal(mob, 1.6));
             goals.goal(2, new AvoidEntityGoal<>(mob, Player.class, 12f, 1.3, 1.6,
                     e -> !(e instanceof Player p && (p.isCreative() || p.isSpectator())) && !e.isCrouching()));
         }
-        if (spec.fleeBelow > 0) goals.goal(1, new FleeWhenHurtGoal(mob, spec.fleeBelow, 1.5));
+        if (spec.fleeBelow > 0 && spec.move != CreatureSpec.Move.FLY) goals.goal(1, new FleeWhenHurtGoal(mob, spec.fleeBelow, 1.5));
         if (!spec.attacks.isEmpty()) goals.goal(3, new CreatureAttackGoal(mob, spec));
         switch (spec.move) {
-            case FLY -> goals.goal(5, new HoverWanderGoal(mob, 1.0, 4, 14, 16));
+            case FLY -> goals.goal(5, new HoverWanderGoal(mob, 1.0, 12, 28, 22));
             case HOVER -> goals.goal(5, new HoverWanderGoal(mob, 0.8, 1, 4, 10));
             case SWIM -> goals.goal(5, new RandomSwimmingGoal(mob, 1.0, 20));
             default -> goals.goal(5, new WaterAvoidingRandomStrollGoal(mob, 0.8));
@@ -100,12 +100,21 @@ public final class CreatureCore {
             goals.target(1, new LoyalHurtByTargetGoal(mob).setAlertOthers());
             if (spec.temper == CreatureSpec.Temper.HOSTILE || spec.temper == CreatureSpec.Temper.TERRITORIAL) {
                 float range = spec.aggroRange;
+                float keepRange = Math.max(range * 1.8f, 28f);
                 goals.target(2, new NearestAttackableTargetGoal<>(mob, Player.class, 10, true, false,
-                        e -> !Summons.isCompanion(mob) && mob.level().getDifficulty() != Difficulty.PEACEFUL
-                                && e.distanceToSqr(mob) <= range * range));
+                        e -> {
+                            if (Summons.isCompanion(mob) || mob.level().getDifficulty() == Difficulty.PEACEFUL) return false;
+                            if (mob.getTarget() == e || mob.getLastHurtByMob() == e) {
+                                return e.distanceToSqr(mob) <= (double) keepRange * keepRange;
+                            }
+                            float effRange = (e instanceof Player p && p.isSprinting()) ? range * 1.25f
+                                    : (e instanceof Player p && p.isCrouching()) ? range * 0.65f : range;
+                            return e.distanceToSqr(mob) <= (double) effRange * effRange;
+                        }));
             }
+            goals.target(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(mob));
             if (spec.prey != null) {
-                goals.target(3, new NearestAttackableTargetGoal<>(mob, LivingEntity.class, 40, true, false,
+                goals.target(4, new NearestAttackableTargetGoal<>(mob, LivingEntity.class, 40, true, false,
                         e -> !Summons.isCompanion(mob) && spec.prey.test(e)));
             }
         }

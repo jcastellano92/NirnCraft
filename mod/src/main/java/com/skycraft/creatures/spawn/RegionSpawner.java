@@ -156,10 +156,16 @@ public final class RegionSpawner {
         BiomeFamily family = BiomeFamily.of(biome, spot);
         Region region = Regions.at(level, spot);
         int regionLevel = Leveling.regionLevel(level, spot);
+        int playerLevel = Math.max(1, com.skycraft.core.SkyData.get(player).getLevel());
         // the start area ramps up gently: weak enemies close to where new characters arrive
         double fromStart = SpawnPacing.distFromStart(level, spot.getX(), spot.getZ());
-        if (fromStart < 900) regionLevel = Math.min(regionLevel, 2 + (int) (fromStart / 90));
+        if (fromStart < 900) regionLevel = Math.min(regionLevel, 1 + (int) (fromStart / 140));
         boolean nearStart = SpawnPacing.nearStart(level, spot.getX(), spot.getZ());
+        if (hostileKind) {
+            int maxAllowedLevel = playerLevel + (nearStart ? 1 : roadSpot ? 2 : 4);
+            regionLevel = Math.min(regionLevel, maxAllowedLevel);
+        }
+        boolean lowLevelProtected = nearStart || (hostileKind && playerLevel <= 3);
         boolean night = level.isNight();
         long dayTime = level.getDayTime() % 24000L;
         SpawnTables.Weather weather = toSpawnWeather(spotWeather, level.isRaining(), level.isThundering());
@@ -186,7 +192,7 @@ public final class RegionSpawner {
                 if (!w.nearPlaces().isEmpty() && !nearPlace(w, spot)) continue;
                 if (w.townMin() > 0 && townNear.computeIfAbsent(w.townMin(), r -> SpawnPacing.settlementWithin(level, spot, r))) continue;
                 if (w.townMax() > 0 && !townNear.computeIfAbsent(w.townMax(), r -> SpawnPacing.settlementWithin(level, spot, r))) continue;
-                if (nearStart && hasBanned(g)) continue; // no bosses or bandits near the start
+                if (lowLevelProtected && hasBanned(g)) continue; // no bosses, trolls, sabre cats, bears or bandits near the start / at level 1-3
                 candidates.add(g);
                 total += g.weight();
             }
@@ -362,6 +368,11 @@ public final class RegionSpawner {
         if (!(e instanceof Mob mob)) {
             if (e != null) e.discard();
             return false;
+        }
+        if (place == SpawnTables.Placement.WATER
+                && (mob instanceof net.minecraft.world.entity.animal.WaterAnimal || mob.canBreatheUnderwater())
+                && level.getFluidState(at).isEmpty() && level.getFluidState(at.below()).is(FluidTags.WATER)) {
+            at = at.below();
         }
         mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
         if (!level.noCollision(mob) || level.containsAnyLiquid(mob.getBoundingBox()) && place != SpawnTables.Placement.WATER) return false;

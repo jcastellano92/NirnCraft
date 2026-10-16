@@ -90,7 +90,7 @@ public final class Settlers {
         data.populated.add(s.key);
         data.setDirty();
         RandomSource r = level.getRandom();
-        BlockPos center = Encounters.groundAt(level, s.x, s.z);
+        BlockPos center = NpcPlacement.outdoorGroundAt(level, s.x, s.z, s.y);
         if (center == null) center = new BlockPos(s.x, s.y, s.z);
         // Skycraft-built settlements populate their own buildings from SettlementAnchors (Jarl, smith, inn...)
         if (com.skycraft.tamriel.settlement.SettlementAnchors.near(level, center, 48).isPresent()) return;
@@ -234,16 +234,26 @@ public final class Settlers {
     public static NpcEntity spawnResident(ServerLevel level, BlockPos center, NpcRole role, @Nullable BlockPos bed, int radius) {
         RandomSource r = level.getRandom();
         BlockPos anchor = bed != null ? bed : center;
+        boolean bedIndoors = bed != null && !level.canSeeSky(bed) && !level.canSeeSky(bed.above());
         BlockPos pos = null;
         for (int i = 0; i < 12 && pos == null; i++) {
             int spread = bed != null ? 3 : 16;
             int x = anchor.getX() + r.nextInt(spread * 2 + 1) - spread;
             int z = anchor.getZ() + r.nextInt(spread * 2 + 1) - spread;
-            BlockPos p = bed != null ? new BlockPos(x, bed.getY(), z) : Encounters.groundAt(level, x, z);
-            if (p != null && Math.abs(p.getY() - anchor.getY()) <= 6 && level.getBlockState(p).isAir()
+            BlockPos p = bed != null ? new BlockPos(x, bed.getY(), z) : NpcPlacement.outdoorGroundAt(level, x, z, anchor.getY());
+            if (p != null && Math.abs(p.getY() - anchor.getY()) <= 4
+                    && !(bedIndoors && (level.canSeeSky(p) || level.canSeeSky(p.above())))
+                    && !(level.canSeeSky(p) && NpcPlacement.hasRoomBelow(level, p))
+                    && !NpcPlacement.isFireHazard(level, p)
+                    && !NpcPlacement.isSlabHazard(level, p)
+                    && !NpcPlacement.isFurnitureHazard(level, p)
+                    && level.getBlockState(p).isAir()
                     && level.getBlockState(p.above()).isAir() && level.getBlockState(p.below()).isSolid()) pos = p;
         }
-        if (pos == null) pos = bed != null ? bed.above() : center;
+        if (pos == null) {
+            pos = NpcPlacement.outdoorGroundAt(level, anchor.getX(), anchor.getZ(), anchor.getY());
+            if (pos == null) pos = NpcPlacement.safeSurfaceAt(level, anchor.getX(), anchor.getZ());
+        }
         NpcEntity npc = Npcs.create(level, pos, role);
         if (npc == null) return null;
         npc.setPersistenceRequired();

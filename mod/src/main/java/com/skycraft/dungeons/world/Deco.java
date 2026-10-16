@@ -174,4 +174,26 @@ public final class Deco {
         else id = "ebony";
         return Painter.block("skycraft:" + (deep ? "deepslate_" : "") + id + "_ore", fallback);
     }
+
+    /** Places a custom 3D Skyrim furniture or clutter block matching the dungeon kit's culture. */
+    public static void furniture(Painter p, int x, int y, int z, Direction facing,
+                                 com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind) {
+        if (!p.ok(x, y, z)) return;
+        com.skycraft.tamriel.settlement.Culture c = switch (p.kit) {
+            case IMPERIAL, AYLEID -> com.skycraft.tamriel.settlement.Culture.IMPERIAL;
+            case BRETON_KEEP_RUIN -> com.skycraft.tamriel.settlement.Culture.BRETON;
+            case REDGUARD -> com.skycraft.tamriel.settlement.Culture.REDGUARD;
+            case VELOTHI, DAEDRIC -> com.skycraft.tamriel.settlement.Culture.DUNMER;
+            case ALTMER, MAORMER -> com.skycraft.tamriel.settlement.Culture.ALTMER;
+            case BOSMER -> com.skycraft.tamriel.settlement.Culture.BOSMER;
+            case KHAJIIT -> com.skycraft.tamriel.settlement.Culture.KHAJIIT;
+            case XANMEER, SLOAD -> com.skycraft.tamriel.settlement.Culture.ARGONIAN;
+            default -> com.skycraft.tamriel.settlement.Culture.NORD;
+        };
+        BlockState state = com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.stateFor(kind, facing);
+        p.set(x, y, z, state);
+        if (p.blockEntity(x, y, z) instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlockEntity be) {
+            be.configure(kind, c.name(), p.roll(x, y, z, 901, 4));
+        }
+    }
 }

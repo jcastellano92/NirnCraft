@@ -61,6 +61,7 @@ public final class ArsenalEvents {
     private static final String RECORDED = "skycraft_recorded";
     private static final String PREPARED = "skycraft_arsenal_prepared";
     private static final String BOUND_ARROW = "skycraft_bound_arrow";
+    public static final String COLLECTIBLE = "skycraft_collectible";
     private static final java.util.UUID AFFIX_WEAPON_UUID = java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d40");
     private static final java.util.UUID[] AFFIX_ARMOR_UUIDS = {
             java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d41"),
@@ -113,6 +114,12 @@ public final class ArsenalEvents {
         CompoundTag pd = arrow.getPersistentData();
         if (pd.getBoolean(PREPARED)) return;
         pd.putBoolean(PREPARED, true);
+
+        if (!(arrow instanceof SkyArrow) && arrow.pickup == AbstractArrow.Pickup.ALLOWED) {
+            pd.putBoolean(COLLECTIBLE, true);
+            arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY; // disable survival walk-over auto-pickup
+        }
+
         if (!(arrow.getOwner() instanceof LivingEntity owner)) return;
 
         ItemStack rangedWeapon = owner.getUseItem();
@@ -123,6 +130,15 @@ public final class ArsenalEvents {
         }
 
         if (arrow.shotFromCrossbow()) {
+            if (arrow instanceof SkyArrow sky) {
+                sky.setFromCrossbow(true);
+            }
+            // Crossbows launch bolts at higher initial speed (4.2F vs vanilla 3.15F) with flatter near-range trajectory
+            Vec3 v = arrow.getDeltaMovement();
+            if (v.lengthSqr() > 1.0e-4) {
+                arrow.setDeltaMovement(v.normalize().scale(4.2));
+                arrow.hurtMarked = true;
+            }
             SkyCrossbowItem crossbow = owner.getMainHandItem().getItem() instanceof SkyCrossbowItem c ? c
                     : owner.getOffhandItem().getItem() instanceof SkyCrossbowItem c2 ? c2 : null;
             if (crossbow != null) {
@@ -144,6 +160,24 @@ public final class ArsenalEvents {
         }
     }
 
+    /** Break chance on block impact for vanilla non-SkyArrow projectiles. */
+    @SubscribeEvent
+    public static void onProjectileImpact(net.minecraftforge.event.entity.ProjectileImpactEvent event) {
+        if (event.getProjectile().level().isClientSide()) return;
+        if (!(event.getProjectile() instanceof AbstractArrow arrow) || arrow instanceof SkyArrow) return;
+        if (event.getRayTraceResult().getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+            float breakChance = SkyArrow.breakChanceFor(null, arrow.getOwner());
+            if (arrow.level().getRandom().nextFloat() < breakChance) {
+                if (arrow.level() instanceof ServerLevel sl) {
+                    sl.playSound(null, arrow.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.5f, 1.2f);
+                    sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, ammoOf(arrow)),
+                            arrow.getX(), arrow.getY(), arrow.getZ(), 6, 0.1, 0.1, 0.1, 0.05);
+                }
+                arrow.discard();
+            }
+        }
+    }
+
     /** The item an arrow entity would be picked up as. */
     public static ItemStack ammoOf(AbstractArrow arrow) {
         if (arrow instanceof SkyArrow sky) return sky.pickupStack();
@@ -154,6 +188,116 @@ public final class ArsenalEvents {
         }
         if (arrow instanceof SpectralArrow) return new ItemStack(Items.SPECTRAL_ARROW);
         return new ItemStack(Items.ARROW);
+    }
+
+    // ------------------------------------------------------------------ interactive arrow pickup
+
+    public static boolean isCollectibleArrow(Player player, AbstractArrow arrow) {
+        if (arrow == null || !arrow.isAlive() || (!SkyArrow.isArrowInGround(arrow) && !arrow.isInWater())) return false;
+        CompoundTag pd = arrow.getPersistentData();
+        if (pd.getBoolean(BOUND_ARROW)) return false;
+        return arrow.pickup == AbstractArrow.Pickup.ALLOWED
+                || pd.getBoolean(COLLECTIBLE)
+                || (player.getAbilities().instabuild && arrow.pickup == AbstractArrow.Pickup.CREATIVE_ONLY);
+    }
+
+    public static boolean tryPickupArrow(Player player, AbstractArrow arrow) {
+        if (!isCollectibleArrow(player, arrow) || player.distanceToSqr(arrow) > 25.0) return false;
+        if (!player.level().isClientSide) {
+            CompoundTag pd = arrow.getPersistentData();
+            boolean giveItem = arrow.pickup == AbstractArrow.Pickup.ALLOWED || pd.getBoolean(COLLECTIBLE);
+            if (giveItem) {
+                ItemStack stack = ammoOf(arrow);
+                if (!stack.isEmpty()) {
+                    com.skycraft.vitals.ActionHandler.addToBags(player, stack);
+                }
+            }
+            player.take(arrow, 1);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS,
+                    0.4f, 1.1f + player.getRandom().nextFloat() * 0.3f);
+            if (arrow instanceof SkyArrow sky) {
+                sky.clearDynamicLight();
+            }
+            arrow.discard();
+        }
+        return true;
+    }
+
+    public static boolean tryPullArrowFromBody(Player player, LivingEntity target) {
+        if (target == null || !target.isAlive() || target instanceof Player || player.distanceToSqr(target) > 20.0) return false;
+        if (player.level().isClientSide) return false;
+        CompoundTag pd = target.getPersistentData();
+        ListTag list = pd.getList(BODY_ARROWS, Tag.TAG_COMPOUND);
+        if (list.isEmpty()) return false;
+        int lastIdx = list.size() - 1;
+        CompoundTag itemTag = list.getCompound(lastIdx);
+        list.remove(lastIdx);
+        pd.put(BODY_ARROWS, list);
+        ItemStack stack = ItemStack.of(itemTag);
+        if (!stack.isEmpty()) {
+            com.skycraft.vitals.ActionHandler.addToBags(player, stack);
+            if (target.getArrowCount() > 0) {
+                target.setArrowCount(target.getArrowCount() - 1);
+            }
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS,
+                    0.4f, 1.0f + player.getRandom().nextFloat() * 0.3f);
+            return true;
+        }
+        return false;
+    }
+
+    @SubscribeEvent
+    public static void onEntityInteractSpecific(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific event) {
+        if (event.getTarget() instanceof AbstractArrow arrow && tryPickupArrow(event.getEntity(), arrow)) {
+            event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+            event.setCanceled(true);
+        } else if (event.getTarget() instanceof LivingEntity living
+                && !(living instanceof net.minecraft.world.entity.npc.Npc)
+                && !(living instanceof net.minecraft.world.entity.animal.horse.AbstractHorse)) {
+            if (!event.getLevel().isClientSide && tryPullArrowFromBody(event.getEntity(), living)) {
+                event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityInteract(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
+        if (event.getTarget() instanceof AbstractArrow arrow && tryPickupArrow(event.getEntity(), arrow)) {
+            event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+            event.setCanceled(true);
+        } else if (event.getTarget() instanceof LivingEntity living
+                && !(living instanceof net.minecraft.world.entity.npc.Npc)
+                && !(living instanceof net.minecraft.world.entity.animal.horse.AbstractHorse)) {
+            if (!event.getLevel().isClientSide && tryPullArrowFromBody(event.getEntity(), living)) {
+                event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        Player player = event.getEntity();
+        Vec3 hitLoc = event.getHitVec() != null ? event.getHitVec().getLocation() : Vec3.atCenterOf(event.getPos());
+        var arrows = event.getLevel().getEntitiesOfClass(AbstractArrow.class,
+                new net.minecraft.world.phys.AABB(hitLoc, hitLoc).inflate(1.1),
+                a -> isCollectibleArrow(player, a));
+        if (!arrows.isEmpty()) {
+            AbstractArrow closest = arrows.get(0);
+            double bestDist = closest.position().distanceToSqr(hitLoc);
+            for (int i = 1; i < arrows.size(); i++) {
+                double d = arrows.get(i).position().distanceToSqr(hitLoc);
+                if (d < bestDist) {
+                    bestDist = d;
+                    closest = arrows.get(i);
+                }
+            }
+            if (tryPickupArrow(player, closest)) {
+                event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+                event.setCanceled(true);
+            }
+        }
     }
 
     // ------------------------------------------------------------------ arrows hitting
@@ -171,7 +315,11 @@ public final class ArsenalEvents {
             ArrowKind kind = sky.kind();
             if (kind != null) {
                 switch (kind.element) {
-                    case FIRE -> amount += victim.fireImmune() ? 0 : 1.5f;
+                    case FIRE -> {
+                        if (!sky.isExtinguished() && !sky.isInWater()) {
+                            amount += victim.fireImmune() ? 0 : 1.5f;
+                        }
+                    }
                     case FROST -> amount += 1.5f;
                     case SHOCK -> {
                         amount += 2.5f;
@@ -210,7 +358,7 @@ public final class ArsenalEvents {
         event.setAmount(amount);
     }
 
-    /** Arrows that wounded a mob stay in its body (contract 27: the corpse adds them to its loot). */
+    /** Arrows that wounded a mob stay in its body (contract 27: the corpse adds them to its loot) if they don't break on impact. */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void recordArrow(LivingHurtEvent event) {
         LivingEntity victim = event.getEntity();
@@ -219,12 +367,21 @@ public final class ArsenalEvents {
         CompoundTag apd = arrow.getPersistentData();
         if (apd.getBoolean(RECORDED) || apd.getBoolean(BOUND_ARROW)) return;
         Entity owner = arrow.getOwner();
-        boolean fromPlayer = owner instanceof Player && arrow.pickup == AbstractArrow.Pickup.ALLOWED;
+        boolean fromPlayer = owner instanceof Player && (arrow.pickup == AbstractArrow.Pickup.ALLOWED || apd.getBoolean(COLLECTIBLE));
         boolean fromMob = owner instanceof Mob && !(owner instanceof Player);
         if (!fromPlayer && !fromMob) return;
         ItemStack stack = ammoOf(arrow);
         if (stack.isEmpty() || (arrow instanceof SkyArrow sky && sky.element() == ArrowKind.Element.EXPLOSIVE)) return;
         apd.putBoolean(RECORDED, true);
+        if (fromPlayer) {
+            arrow.pickup = AbstractArrow.Pickup.DISALLOWED; // piercing arrows can't be collected twice
+            apd.remove(COLLECTIBLE);
+        }
+        ArrowKind kind = arrow instanceof SkyArrow sky ? sky.kind() : null;
+        float breakChance = SkyArrow.breakChanceFor(kind, owner);
+        if (victim.getRandom().nextFloat() < breakChance) {
+            return; // arrow broke on impact
+        }
         CompoundTag pd = victim.getPersistentData();
         ListTag list = pd.getList(BODY_ARROWS, Tag.TAG_COMPOUND);
         if (list.size() >= MAX_ARROWS) return;
@@ -232,7 +389,6 @@ public final class ArsenalEvents {
         one.setCount(1);
         list.add(one.save(new CompoundTag()));
         pd.put(BODY_ARROWS, list);
-        if (fromPlayer) arrow.pickup = AbstractArrow.Pickup.DISALLOWED; // piercing arrows can't be collected twice
     }
 
     private static boolean humanoid(LivingEntity e) {

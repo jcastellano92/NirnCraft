@@ -3102,7 +3102,7 @@ def biome_json(b, where, order):
         "axolotls": [], "underground_water_creature": vanilla(b["underground"]),
         "water_creature": vanilla(b["water_creature"]), "water_ambient": vanilla(b["water_ambient"]), "misc": []}
     out["spawn_costs"] = {}
-    out["carvers"] = {"air": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]}
+    out["carvers"] = {}
     out["features"] = feats
     return out
 

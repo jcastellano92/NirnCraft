@@ -100,23 +100,48 @@ public final class SiteBuilder {
 
     // ------------------------------------------------------------------ terrain
 
-    /** Height of the solid natural ground at world column (x, z): skips trees, plants and snow. */
+    /** Height of the solid natural ground at world column (x, z): skips trees, plants, snow, and placed props. */
     public int groundAt(int x, int z) {
-        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
+        int top = Math.max(
+                level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z),
+                level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
+        ) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, top, z);
         int floor = level.getMinBuildHeight() + 4;
         while (p.getY() > floor) {
             BlockState s = level.getBlockState(p);
-            if (!s.isAir() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES) && !s.canBeReplaced()
-                    && !s.is(Blocks.SNOW) && s.getFluidState().isEmpty() && !s.is(BlockTags.FLOWERS)
-                    && !s.is(Blocks.BAMBOO) && !s.is(Blocks.MUSHROOM_STEM) && !s.is(Blocks.BROWN_MUSHROOM_BLOCK)
-                    && !s.is(Blocks.RED_MUSHROOM_BLOCK) && !s.is(Blocks.CACTUS) && !s.is(Blocks.VINE)) {
+            if (!s.getFluidState().isEmpty()) return p.getY(); // water: the caller checks with waterAt
+            if (!s.isAir() && !s.canBeReplaced() && !isNonTerrainPropOrPlant(s)) {
                 return p.getY();
             }
-            if (!s.getFluidState().isEmpty()) return p.getY(); // water: the caller checks with waterAt
             p.move(Direction.DOWN);
         }
         return floor;
+    }
+
+    private static boolean isNonTerrainPropOrPlant(BlockState s) {
+        if (s.is(BlockTags.LOGS) || s.is(BlockTags.LEAVES) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS)
+                || s.is(BlockTags.CROPS) || s.is(BlockTags.FENCES) || s.is(BlockTags.FENCE_GATES)
+                || s.is(BlockTags.WALLS) || s.is(BlockTags.SIGNS) || s.is(BlockTags.BANNERS)
+                || s.is(BlockTags.WOOL_CARPETS) || s.is(BlockTags.CANDLES) || s.is(BlockTags.CAMPFIRES)
+                || s.is(BlockTags.SLABS) || s.is(BlockTags.STAIRS) || s.is(BlockTags.TRAPDOORS)
+                || s.is(BlockTags.DOORS) || s.is(BlockTags.BEDS)) {
+            return true;
+        }
+        Block b = s.getBlock();
+        return b == Blocks.SNOW || b == Blocks.BAMBOO || b == Blocks.MUSHROOM_STEM
+                || b == Blocks.BROWN_MUSHROOM_BLOCK || b == Blocks.RED_MUSHROOM_BLOCK
+                || b == Blocks.CACTUS || b == Blocks.VINE || b == Blocks.COBWEB
+                || b == Blocks.SUGAR_CANE || b == Blocks.SWEET_BERRY_BUSH
+                || b == Blocks.BONE_BLOCK || b == Blocks.HAY_BLOCK
+                || b instanceof net.minecraft.world.level.block.BushBlock
+                || b instanceof SkullBlock || b instanceof BannerBlock
+                || b instanceof ChestBlock || b instanceof BarrelBlock
+                || b instanceof CampfireBlock || b instanceof net.minecraft.world.level.block.LanternBlock
+                || b instanceof net.minecraft.world.level.block.TorchBlock
+                || b instanceof net.minecraft.world.level.block.AbstractCauldronBlock
+                || b instanceof net.minecraft.world.level.block.AnvilBlock
+                || b instanceof net.minecraft.world.level.block.AmethystClusterBlock;
     }
 
     /** Local ground height (absolute y of the top solid block) under (dx, dz). */
@@ -386,6 +411,9 @@ public final class SiteBuilder {
         t.putBoolean("Fixed", true);
         t.putBoolean("Invisible", true);
         t.putBoolean("Silent", true);
+        net.minecraft.nbt.ListTag tags = new net.minecraft.nbt.ListTag();
+        tags.add(net.minecraft.nbt.StringTag.valueOf("skycraft_clutter"));
+        t.put("Tags", tags);
         frame.load(t);
         level.addFreshEntity(frame);
     }

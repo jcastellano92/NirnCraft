@@ -50,7 +50,9 @@ import java.util.Locale;
  */
 public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractContainerMenu> {
     private static final int ROW_HEIGHT = 18;
+    private static final int HEADER_HEIGHT = 14;
     private static final int PANEL_PADDING = 8;
+    private static final int SORT_NAME = 0, SORT_WEIGHT = 1, SORT_VALUE = 2, SORT_VW = 3;
 
     private final boolean isOwned;
     /** The menu of a mount's saddlebags (com.skycraft.mounts): slots 0 and 1 are its saddle and barding, cargo is weight-limited. */
@@ -66,7 +68,10 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     private int selectedIndex = 0;
     private int scrollOffset = 0;
     private int hoveredIndex = -1;
-    /** Mouse position while the V/W (gold per weight) text is hovered, else null: its tooltip is drawn last. */
+    private int sortMode = SORT_NAME;
+    private boolean sortDescending = false;
+    private int hoverSort = -1;
+    /** Mouse position while the V/W column header is hovered, else null: its tooltip is drawn last. */
     private int[] vwTooltipAt;
 
     /**
@@ -205,7 +210,30 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             list.add(new ContainerEntry(e.getValue(), rep, totalCount, totalWeight, value, packIndex.getOrDefault(e.getKey(), -1),
                     overflowIndex.getOrDefault(e.getKey(), -1)));
         }
+        list.sort(entryComparator());
         return list;
+    }
+
+    private java.util.Comparator<ContainerEntry> entryComparator() {
+        java.util.Comparator<ContainerEntry> c = switch (sortMode) {
+            case SORT_WEIGHT -> java.util.Comparator.comparingDouble(ContainerEntry::totalWeight);
+            case SORT_VALUE -> java.util.Comparator.comparingInt(ContainerEntry::value);
+            case SORT_VW -> java.util.Comparator.comparingDouble(e -> ValueDensity.of(e.stack()));
+            default -> java.util.Comparator.comparing(e -> e.stack().getHoverName().getString(), String.CASE_INSENSITIVE_ORDER);
+        };
+        if (sortDescending) c = c.reversed();
+        return java.util.Comparator.<ContainerEntry, Boolean>comparing(e -> !(isBag && viewMode == 0 && e.isGearSlot()))
+                .thenComparing(c)
+                .thenComparing(e -> e.stack().getHoverName().getString(), String.CASE_INSENSITIVE_ORDER);
+    }
+
+    private void setSort(int mode) {
+        if (sortMode == mode) {
+            sortDescending = !sortDescending;
+        } else {
+            sortMode = mode;
+            sortDescending = mode != SORT_NAME;
+        }
     }
 
     @Override
@@ -268,11 +296,12 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             selectedIndex = Math.max(0, entries.size() - 1);
         }
 
-        // Left column: Items list
+        // Left column: Column headers + Items list
         int listX = px + 10;
-        int listY = py + 26;
+        int headerRowY = py + 26;
+        int listY = py + 26 + HEADER_HEIGHT;
         int listW = pw / 2 + 10;
-        int listH = ph - 56;
+        int listH = ph - 56 - HEADER_HEIGHT;
         int maxVisible = listH / ROW_HEIGHT;
 
         if (scrollOffset > Math.max(0, entries.size() - maxVisible)) {
@@ -280,9 +309,15 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         hoveredIndex = -1;
-        // right-aligned columns, measured from what they show: weight | value | V/W (gold per weight, the last to go
-        // when the name would be left with too little room)
-        int wtW = 0, valW = 0, vwW = font.width("9.9k");
+        hoverSort = -1;
+        vwTooltipAt = null;
+        String nameHead = SkyUi.caps(Component.translatable("inventory.skycraft.column.name"));
+        String wtHead = SkyUi.caps(Component.translatable("inventory.skycraft.column.weight"));
+        String valHead = SkyUi.caps(Component.translatable("inventory.skycraft.column.value"));
+        String vwHead = SkyUi.caps(Component.translatable("inventory.skycraft.column.vw"));
+        int wtW = font.width(wtHead);
+        int valW = font.width(valHead);
+        int vwW = Math.max(font.width(vwHead), font.width("9.9k"));
         for (int i = 0, n = Math.min(entries.size(), 400); i < n; i++) {
             ContainerEntry en = entries.get(i);
             wtW = Math.max(wtW, font.width(ItemWeights.format(en.totalWeight())));
@@ -290,12 +325,33 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             vwW = Math.max(vwW, font.width(ValueDensity.format(ValueDensity.of(en.stack()))));
         }
         int colRight = listX + listW - 6;
-        boolean showVw = colRight - vwW - 8 - valW - 8 - wtW - 8 - (listX + 22) >= 60;
+        boolean showVw = colRight - vwW - 8 - valW - 8 - wtW - 8 - (listX + 22) >= 50;
         int vwRight = colRight;
         int valRight = showVw ? vwRight - vwW - 8 : colRight;
         int wtRight = valRight - valW - 8;
         int nameRoom = wtRight - wtW - 8 - (listX + 22);
-        boolean vwHover = false;
+
+        // Column headers (click to sort; V/W tooltip ONLY on the V/W column header)
+        int cols = showVw ? 4 : 3;
+        String[] hs = {nameHead, wtHead, valHead, vwHead};
+        int[] hx = {
+                listX + 22,
+                wtRight - font.width(wtHead),
+                valRight - font.width(valHead),
+                vwRight - font.width(vwHead)
+        };
+        for (int i = 0; i < cols; i++) {
+            int x1 = i == 0 ? listX + 2 : hx[i] - 6;
+            int x2 = i == 0 ? wtRight - wtW - 6 : hx[i] + font.width(hs[i]) + 2;
+            boolean hov = SkyUi.inside(mouseX, mouseY, x1, headerRowY - 2, x2, headerRowY + 10);
+            if (hov) hoverSort = i;
+            if (hov && i == SORT_VW) vwTooltipAt = new int[]{mouseX, mouseY};
+            boolean active = sortMode == i;
+            g.drawString(font, hs[i], hx[i], headerRowY, active ? SkyUi.LINE : hov ? SkyUi.TEXT : SkyUi.HEADER, false);
+            if (active) SkyUi.triangle(g, hx[i] - 5, headerRowY + 2, !sortDescending, SkyUi.LINE);
+        }
+        SkyUi.hline(g, listX, listX + listW, headerRowY + 11, 0x80);
+
         if (entries.isEmpty()) {
             Component emptyText = Component.translatable("inventory.skycraft.empty_container");
             g.drawString(font, emptyText, listX + 8, listY + 12, SkyUi.DIM, false);
@@ -341,12 +397,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
                     float ratio = ValueDensity.of(entry.stack());
                     String vwStr = ValueDensity.format(ratio);
                     g.drawString(font, vwStr, vwRight - font.width(vwStr), rowY + 5, ratio < 0f ? SkyUi.DIM : 0xFF98B888, false);
-                    if (isHovered && mouseX >= vwRight - vwW - 4) vwHover = true;
                 }
             }
         }
-        if (vwHover) vwTooltipAt = new int[]{mouseX, mouseY};
-        else vwTooltipAt = null;
 
         // Vertical separator
         int sepX = px + listW + 15;
@@ -413,14 +466,11 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             g.drawString(font, String.valueOf(sel.value()), detX + 50, infoY, SkyUi.GOLD, false);
             infoY += 11;
 
-            // gold per weight: higher is worth carrying (hover for the explanation)
+            // gold per weight: higher is worth carrying
             float ratio = ValueDensity.of(selStack);
             String vwLabel = SkyUi.caps(Component.translatable("inventory.skycraft.column.vw"));
             g.drawString(font, vwLabel, detX, infoY, SkyUi.HEADER, false);
             g.drawString(font, ValueDensity.format(ratio), detX + 50, infoY, ratio < 0f ? SkyUi.DIM : 0xFFB8E0A0, false);
-            if (SkyUi.inside(mouseX, mouseY, detX, infoY - 1, detX + 50 + font.width(ValueDensity.format(ratio)), infoY + 9)) {
-                vwTooltipAt = new int[]{mouseX, mouseY};
-            }
         }
 
         // what you carry against what you can carry (the container tab is the one you take from)
@@ -568,6 +618,10 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         }
         if (button == 0 && sheetUp()) return true; // never vanilla slot clicking: the slots are not drawn but still sit under the panel
         if (button == 0) {
+            if (hoverSort >= 0) {
+                setSort(hoverSort);
+                return true;
+            }
             if (hoveredIndex >= 0) {
                 selectedIndex = hoveredIndex;
                 takeOrStoreSelected();
@@ -602,7 +656,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             scrollOffset = Math.max(0, scrollOffset - 1);
             return true;
         } else if (delta < 0) {
-            int maxVisible = (imageHeight - 56) / ROW_HEIGHT;
+            int maxVisible = (imageHeight - 56 - HEADER_HEIGHT) / ROW_HEIGHT;
             int maxOffset = Math.max(0, getCurrentEntries().size() - maxVisible);
             scrollOffset = Math.min(maxOffset, scrollOffset + 1);
             return true;
@@ -674,7 +728,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
                 List<ContainerEntry> entries = getCurrentEntries();
                 if (selectedIndex < entries.size() - 1) {
                     selectedIndex++;
-                    int maxVisible = (imageHeight - 56) / ROW_HEIGHT;
+                    int maxVisible = (imageHeight - 56 - HEADER_HEIGHT) / ROW_HEIGHT;
                     if (selectedIndex >= scrollOffset + maxVisible) scrollOffset = selectedIndex - maxVisible + 1;
                 }
                 return true;

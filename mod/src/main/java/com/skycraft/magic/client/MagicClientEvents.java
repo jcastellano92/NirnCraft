@@ -50,10 +50,21 @@ public final class MagicClientEvents {
     private static boolean rightDown;
     private static boolean leftDown;
     private static boolean useWasDown;
+    private static boolean attackWasDown;
+    private static boolean castWasDown;
+    private static boolean castUnsheathed;
     /** Ticks the shout key has been held, or -1. Read by the HUD for the charge indicator. */
     public static int shoutHeld = -1;
 
     private MagicClientEvents() {}
+
+    /** Called when an attack or use click was consumed to unsheathe hands, so the same click does not also start casting. */
+    public static void consumeClickForUnsheathe() {
+        castUnsheathed = true;
+        attackWasDown = true;
+        useWasDown = true;
+        castWasDown = true;
+    }
 
     public static int wordsFor(int ticks) {
         return ticks >= WORD3_TICKS ? 3 : ticks >= WORD2_TICKS ? 2 : 1;
@@ -80,14 +91,15 @@ public final class MagicClientEvents {
 
     /** The right hand casts only when it holds no item (one hand system, see {@link com.skycraft.magic.Hands}). */
     private static boolean canStartRightCast(Minecraft mc, LocalPlayer player) {
-        if (player.isSpectator() || player.isUsingItem()) return false;
+        if (player.isSpectator() || player.isUsingItem() || com.skycraft.combat.Sheathe.isSheathed(player)) return false;
         if (com.skycraft.curse.Curses.transformed(player)) return false;
         if (!player.getMainHandItem().isEmpty()) return false;
         return !MagicData.selectedSpell(player).isEmpty();
     }
 
     private static boolean canStartLeftCast(Minecraft mc, LocalPlayer player) {
-        if (player.isSpectator() || player.isUsingItem() || !player.getOffhandItem().isEmpty()) return false;
+        if (player.isSpectator() || player.isUsingItem() || !player.getOffhandItem().isEmpty()
+                || com.skycraft.combat.Sheathe.isSheathed(player)) return false;
         if (com.skycraft.curse.Curses.transformed(player)) return false;
         if (!castFriendly(player.getMainHandItem())) return false;
         if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) return false;
@@ -104,6 +116,9 @@ public final class MagicClientEvents {
             rightDown = false;
             leftDown = false;
             useWasDown = false;
+            attackWasDown = false;
+            castWasDown = false;
+            castUnsheathed = false;
             shoutHeld = -1;
             return;
         }
@@ -114,10 +129,34 @@ public final class MagicClientEvents {
 
         // Right hand: LMB (attack key when hand is free) or CAST key.
         while (SkyKeys.CAST.consumeClick()) {
-            // state is read through isDown(); drain the click queue
+            if (mc.screen == null && com.skycraft.combat.Sheathe.isSheathed(player)) {
+                com.skycraft.combat.Sheathe.setSheathed(player, false);
+                SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.Action(com.skycraft.network.CorePackets.Action.SHEATHE_TOGGLE, 0));
+                consumeClickForUnsheathe();
+            }
         }
-        boolean attackDown = mc.options.keyAttack.isDown() && mc.screen == null && canStartRightCast(mc, player);
-        boolean right = (SkyKeys.CAST.isDown() || attackDown) && mc.screen == null;
+        boolean castKeyDown = SkyKeys.CAST.isDown() && mc.screen == null;
+        boolean atkKeyDown = mc.options.keyAttack.isDown() && mc.screen == null;
+        boolean useDown = mc.options.keyUse.isDown() && mc.screen == null;
+        if (!castKeyDown && !atkKeyDown && !useDown) {
+            castUnsheathed = false;
+        }
+        if (com.skycraft.combat.Sheathe.isSheathed(player)) {
+            if (rightDown) {
+                rightDown = false;
+                SkyNetwork.sendToServer(new MagicPackets.Cast(SpellCasting.RIGHT, false));
+            }
+            if (leftDown) {
+                leftDown = false;
+                SkyNetwork.sendToServer(new MagicPackets.Cast(SpellCasting.LEFT, false));
+            }
+        }
+        boolean canRight = canStartRightCast(mc, player);
+        boolean right = rightDown
+                ? ((castKeyDown || atkKeyDown) && canRight)
+                : (!castUnsheathed && canRight && ((castKeyDown && !castWasDown) || (atkKeyDown && !attackWasDown)));
+        castWasDown = castKeyDown;
+        attackWasDown = atkKeyDown;
         if (right != rightDown) {
             rightDown = right;
             SkyNetwork.sendToServer(new MagicPackets.Cast(SpellCasting.RIGHT, right));
@@ -125,8 +164,8 @@ public final class MagicClientEvents {
         }
 
         // Left hand: RMB (use key), started on a fresh press while nothing is targeted, held until released.
-        boolean useDown = mc.options.keyUse.isDown() && mc.screen == null;
-        boolean left = leftDown ? useDown : useDown && !useWasDown && canStartLeftCast(mc, player);
+        boolean left = leftDown ? (useDown && !com.skycraft.combat.Sheathe.isSheathed(player))
+                : (!castUnsheathed && useDown && !useWasDown && canStartLeftCast(mc, player));
         useWasDown = useDown;
         if (left != leftDown) {
             leftDown = left;
@@ -236,6 +275,16 @@ public final class MagicClientEvents {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.screen != null) return;
+        if (com.skycraft.combat.Sheathe.isSheathed(player)
+                && player.getMainHandItem().isEmpty()
+                && !MagicData.selectedSpell(player).isEmpty()) {
+            event.setCanceled(true);
+            event.setSwingHand(false);
+            consumeClickForUnsheathe();
+            com.skycraft.combat.Sheathe.setSheathed(player, false);
+            com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.Action(com.skycraft.network.CorePackets.Action.SHEATHE_TOGGLE, 0));
+            return;
+        }
         if (canStartRightCast(mc, player)) {
             event.setCanceled(true);
             event.setSwingHand(false);

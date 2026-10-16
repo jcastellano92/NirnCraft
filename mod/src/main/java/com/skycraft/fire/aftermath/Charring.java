@@ -52,41 +52,38 @@ public final class Charring {
         Block b = s.getBlock();
         int h = hash(x, y, z, seed, 1);
         boolean above = ly >= 1;
-        // wood
+        // wood: char structural timber and planks in place so ground-floor and upper walls never dissolve into air
         if (s.is(BlockTags.LOGS)) {
-            if (severity >= 3 && above && ly > 3 && h < 14) return AIR;
             if (severity == 1 && h >= 55) return s;
             BlockState out = FireBlocks.CHARRED_LOG.get().defaultBlockState();
             if (s.hasProperty(RotatedPillarBlock.AXIS)) out = out.setValue(RotatedPillarBlock.AXIS, s.getValue(RotatedPillarBlock.AXIS));
             return out;
         }
         if (s.is(BlockTags.PLANKS)) {
-            if (severity >= 2 && above && h >= 90 - (severity - 2) * 8) return AIR;
             if (severity == 1 && h >= 45) return s;
             return FireBlocks.CHARRED_PLANKS.get().defaultBlockState();
         }
         if (s.is(BlockTags.WOODEN_STAIRS)) {
-            if (severity >= 3 && above && h >= 88) return AIR;
+            if (severity >= 3 && above && ly > 5 && h >= 92) return AIR;
             if (severity == 1 && h >= 45) return s;
             return copy(s, FireBlocks.CHARRED_PLANKS_STAIRS.get().defaultBlockState(), StairBlock.FACING, StairBlock.HALF, StairBlock.SHAPE,
                     BlockStateProperties.WATERLOGGED);
         }
         if (s.is(BlockTags.WOODEN_SLABS)) {
-            if (severity >= 3 && above && h >= 85) return AIR;
+            if (severity >= 3 && above && ly > 5 && h >= 90) return AIR;
             if (severity == 1 && h >= 45) return s;
             return copy(s, FireBlocks.CHARRED_PLANKS_SLAB.get().defaultBlockState(), SlabBlock.TYPE, BlockStateProperties.WATERLOGGED);
         }
         if (s.is(BlockTags.WOODEN_FENCES) || s.is(BlockTags.FENCE_GATES)) {
             int fh = hash(x, 0, z, seed, 3);
-            return (severity >= 2 && above && fh < 55) ? AIR : s;
+            return (severity >= 3 && above && ly > 4 && fh < 30) ? AIR : s;
         }
         if (s.is(BlockTags.WOODEN_DOORS) || s.is(BlockTags.WOODEN_TRAPDOORS) || s.is(BlockTags.WOODEN_BUTTONS) || s.is(BlockTags.WOODEN_PRESSURE_PLATES)) {
-            // both halves of a door roll the same
             int dh = hash(x, 0, z, seed, 2);
-            return (above && dh < (severity >= 2 ? 70 : 35)) ? AIR : s;
+            return (above && ly > 4 && dh < (severity >= 2 ? 40 : 20)) ? AIR : s;
         }
         // cloth and glass
-        if (s.is(BlockTags.WOOL) || s.is(BlockTags.WOOL_CARPETS) || s.is(BlockTags.BEDS) || s.is(BlockTags.BANNERS) || s.is(BlockTags.CANDLES)) {
+        if (s.is(BlockTags.WOOL) || s.is(BlockTags.WOOL_CARPETS) || s.is(BlockTags.BANNERS) || s.is(BlockTags.CANDLES)) {
             return (above && h < (severity >= 2 ? 90 : 55)) ? AIR : s;
         }
         // glass blocks and panes (iron bars stay)
@@ -173,6 +170,16 @@ public final class Charring {
                 int r = c.roll(x, 0, z, 91, 100);
                 int gy = ground(c, x, z);
                 if (!c.touches(x, z, x, z)) continue;
+                BlockState fl = c.get(x, gy, z);
+                if (fl.is(net.minecraft.tags.BlockTags.PLANKS) || fl.getBlock() instanceof net.minecraft.world.level.block.BedBlock) continue;
+                boolean roofed = false;
+                for (int dy = 2; dy <= 10 && !roofed; dy++) {
+                    BlockState ab = c.get(x, gy + dy, z);
+                    if (!ab.isAir() && !ab.is(net.minecraft.tags.BlockTags.LEAVES) && !ab.is(net.minecraft.tags.BlockTags.LOGS) && !ab.canBeReplaced()) {
+                        roofed = true;
+                    }
+                }
+                if (roofed) continue;
                 if (r < 22) c.setIfOpen(x, gy + 1, z, FireBlocks.SOOT_STAIN.get().defaultBlockState());
                 else if (r < 30) c.setIfOpen(x, gy + 1, z, FireBlocks.TIMBER_DEBRIS.get().defaultBlockState());
                 else if (r < 36) c.setIfOpen(x, gy + 1, z, B.id("skycraft:ash_layer", Blocks.SNOW));
@@ -213,25 +220,25 @@ public final class Charring {
         }
     }
 
-    /** One quarter of the building has fallen in: walls and roof gone above a ragged line, a few posts left standing. */
+    /** One quarter of the roof has fallen in: upper roof rafters breached above wall height, walls left standing. */
     private static void collapse(Canvas c, Spec s, int w, int d, int hh) {
         int k = Math.floorMod(s.x * 31 + s.z * 17, 4);
-        int rw = Math.max(3, Math.round(w * 0.55f)), rd = Math.max(3, Math.round(d * 0.5f));
-        int x0 = (k & 1) == 0 ? -1 : w - rw, x1 = (k & 1) == 0 ? rw : w;
-        int z0 = (k & 2) == 0 ? -1 : d - rd, z1 = (k & 2) == 0 ? rd : d;
+        int rw = Math.max(3, Math.round(w * 0.45f)), rd = Math.max(3, Math.round(d * 0.45f));
+        int x0 = (k & 1) == 0 ? 1 : w - rw - 1, x1 = (k & 1) == 0 ? rw : w - 2;
+        int z0 = (k & 2) == 0 ? 1 : d - rd - 1, z1 = (k & 2) == 0 ? rd : d - 2;
         BlockState beam = FireBlocks.CHARRED_BEAM.get().defaultBlockState();
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 if (!c.touches(x, z, x, z)) continue;
-                int jag = c.roll(x, 0, z, 81, 4);                  // ragged edge of the break
-                int keep = 2 + jag;
+                int jag = c.roll(x, 0, z, 81, 3);
+                int keep = Math.max(5, hh - 3 + (jag & 1));
                 boolean post = (x % 4 == 0) && (z % 4 == 0);
                 for (int y = keep; y <= hh + 6; y++) c.air(x, y, z);
                 if (post) {
-                    for (int y = 1; y <= keep + 2; y++) c.set(x, y, z, B.axis(beam, Direction.Axis.Y));
+                    for (int y = 1; y <= keep; y++) c.set(x, y, z, B.axis(beam, Direction.Axis.Y));
                 }
                 int edgeDist = Math.min(Math.min(x - x0, x1 - x), Math.min(z - z0, z1 - z));
-                if (edgeDist >= 0 && x >= 0 && x < w && z >= 0 && z < d && c.chance(x, 1, z, 83, 3)) {
+                if (edgeDist >= 0 && x > 0 && x < w - 1 && z > 0 && z < d - 1 && c.chance(x, 1, z, 83, 3)) {
                     c.set(x, 1, z, c.chance(x, 1, z, 85, 2) ? FireBlocks.SPLINTERED_WRECKAGE.get().defaultBlockState()
                             : B.s(Blocks.COBBLESTONE_SLAB));
                 }

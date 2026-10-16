@@ -263,14 +263,23 @@ final class Civic {
     }
 
     static void banner(Canvas c, Palette p, Spec s) {
-        int h = 7;
+        int h = 6;
         int g = Outdoors.ground(c, 0, 0);
-        for (int y = 1; y <= h; y++) c.set(0, g + y, 0, y == 1 ? p.wallLow : p.fence);
-        BlockState cloth = p.accent;
-        for (int y = h - 3; y <= h - 1; y++) for (int x = 1; x <= 2; x++) c.set(x, g + y, 0, cloth);
+        c.foundation(0, g, 0, p.foundation, 8);
+        int y = g;
+        while (y > g - 6 && !Canvas.solidGround(c.get(0, y, 0))) {
+            c.set(0, y--, 0, p.fence);
+        }
+        c.set(0, g + 1, 0, p.wallLow);
+        for (int py = 2; py <= h; py++) c.set(0, g + py, 0, p.fence);
         c.set(1, g + h, 0, p.fence);
-        c.set(2, g + h, 0, p.fence);
-        c.set(0, g + h + 1, 0, B.s(Blocks.GOLD_BLOCK));
+        String color = Materials.colorOf(p.accent, "red");
+        BlockState southBanner = B.face(Materials.banner(color), Direction.SOUTH);
+        BlockState northBanner = B.face(Materials.banner(color), Direction.NORTH);
+        c.set(1, g + h, 1, southBanner);
+        c.set(1, g + h, -1, northBanner);
+        c.set(0, g + h - 1, 1, southBanner);
+        c.set(0, g + h + 1, 0, B.s(Blocks.LIGHTNING_ROD));
     }
 
     // ------------------------------------------------------------------ trees

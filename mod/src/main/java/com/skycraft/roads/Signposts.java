@@ -395,12 +395,12 @@ public final class Signposts {
             header.append(Component.literal(" — ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(Component.translatable(r.roadName()).withStyle(ChatFormatting.YELLOW));
         }
-        player.sendSystemMessage(header);
+        com.skycraft.core.Notifier.message(player, header);
 
         if (r.nextSettlement() != null) {
             Place p = r.nextSettlement();
             NoticeBoards.markPlaceKnown(player, p);
-            player.sendSystemMessage(Component.translatable("signpost.skycraft.readout.settlement",
+            com.skycraft.core.Notifier.message(player, Component.translatable("signpost.skycraft.readout.settlement",
                     arrowFor(r.settlementDir()), r.settlementDir(), p.name(), r.settlementDist(), r.travelMinutes(r.settlementDist()))
                     .withStyle(ChatFormatting.AQUA));
         }
@@ -410,14 +410,14 @@ public final class Signposts {
             String key = NoticeBoards.isRoadsideInn(p)
                     ? "signpost.skycraft.readout.inn"
                     : "signpost.skycraft.readout.town";
-            player.sendSystemMessage(Component.translatable(key,
+            com.skycraft.core.Notifier.message(player, Component.translatable(key,
                     arrowFor(r.innDir()), r.innDir(), p.name(), r.innDist(), r.travelMinutes(r.innDist()))
                     .withStyle(ChatFormatting.GREEN));
         }
         if (r.nearbyLandmark() != null) {
             Place p = r.nearbyLandmark();
             NoticeBoards.markPlaceKnown(player, p);
-            player.sendSystemMessage(Component.translatable("signpost.skycraft.readout.landmark",
+            com.skycraft.core.Notifier.message(player, Component.translatable("signpost.skycraft.readout.landmark",
                     arrowFor(r.landmarkDir()), r.landmarkDir(), p.name(), r.landmarkDist())
                     .withStyle(ChatFormatting.GRAY));
         }

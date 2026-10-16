@@ -224,19 +224,44 @@ public final class Canvas {
         m.set(x, y, z);
         BlockState old = level.getBlockState(m);
         if (old.is(BlockTags.FEATURES_CANNOT_REPLACE)) return;
+        if (!s.isAir() && (old.getBlock() instanceof BedBlock || old.getBlock() instanceof DoorBlock)
+                && !(s.getBlock() instanceof BedBlock) && !(s.getBlock() instanceof DoorBlock)) {
+            return;
+        }
+        if (s.isAir() && old.getBlock() instanceof BedBlock) {
+            Direction f = old.getValue(BedBlock.FACING);
+            Direction toOther = old.getValue(BedBlock.PART) == BedPart.FOOT ? f : f.getOpposite();
+            int ox = x + toOther.getStepX(), oz = z + toOther.getStepZ();
+            if (x >= x0 - 1 && x <= x1 + 1 && z >= z0 - 1 && z <= z1 + 1) {
+                BlockPos otherPos = new BlockPos(ox, y, oz);
+                BlockState otherState = level.getBlockState(otherPos);
+                if (otherState.getBlock() instanceof BedBlock) {
+                    level.setBlock(otherPos, Blocks.AIR.defaultBlockState(), 2 | 16);
+                }
+            }
+        }
         if (burn > 0 && !s.isAir()) s = com.skycraft.fire.aftermath.Charring.apply(s, x, y, z, y - oy, seed, burn);
-        level.setBlock(m, s, 2);
+        level.setBlock(m, s, 2 | 16);
     }
 
-    /** Topmost solid ground at (x, z): skips leaves, logs, plants, snow and fluids. Clamped to the chunk's column. */
+    /** Topmost solid ground at (x, z): skips leaves, logs, plants, snow, fluids and built prop blocks. */
     public int wground(int x, int z) {
-        if (level == null || x < x0 || x > x1 || z < z0 || z > z1) return oy;
+        if (level == null) return oy;
+        if (!level.hasChunk(x >> 4, z >> 4)) return com.skycraft.worldplan.street.StreetTerrain.land(x, z);
         int y = level.getHeight(worldgen() ? Heightmap.Types.OCEAN_FLOOR_WG : Heightmap.Types.OCEAN_FLOOR, x, z) - 1;
         int min = level.getMinBuildHeight();
         while (y > min) {
             BlockState s = level.getBlockState(m.set(x, y, z));
             if (s.isAir() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.canBeReplaced() || !s.getFluidState().isEmpty()
-                    || s.is(Blocks.SNOW) || s.is(BlockTags.FLOWERS)) {
+                    || s.is(Blocks.SNOW) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.FENCES) || s.is(BlockTags.FENCE_GATES)
+                    || s.is(BlockTags.WALLS) || s.is(BlockTags.BANNERS) || s.is(BlockTags.ALL_SIGNS)
+                    || s.is(BlockTags.SLABS) || s.is(BlockTags.STAIRS) || s.is(BlockTags.TRAPDOORS)
+                    || s.is(BlockTags.WOOL) || s.is(Blocks.GOLD_BLOCK) || s.is(Blocks.LIGHTNING_ROD)
+                    || s.getBlock() instanceof net.minecraft.world.level.block.LanternBlock
+                    || s.getBlock() instanceof net.minecraft.world.level.block.ChainBlock
+                    || s.getBlock() instanceof net.minecraft.world.level.block.BarrelBlock
+                    || s.getBlock() instanceof net.minecraft.world.level.block.HayBlock
+                    || s.getBlock() instanceof net.minecraft.world.level.block.CampfireBlock) {
                 y--;
                 continue;
             }
@@ -252,7 +277,7 @@ public final class Canvas {
 
     /** Water surface at (x, z) if the column is covered by water, else {@link Integer#MIN_VALUE}. */
     public int wwater(int x, int z) {
-        if (level == null || x < x0 || x > x1 || z < z0 || z > z1) return Integer.MIN_VALUE;
+        if (level == null || !level.hasChunk(x >> 4, z >> 4)) return Integer.MIN_VALUE;
         int top = level.getHeight(worldgen() ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.WORLD_SURFACE, x, z) - 1;
         return level.getBlockState(m.set(x, top, z)).getFluidState().isEmpty() ? Integer.MIN_VALUE : top;
     }
@@ -266,7 +291,7 @@ public final class Canvas {
     public void set(int lx, int ly, int lz, BlockState s) {
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (!okWorld(x, y, z)) return;
-        if (!reserved.isEmpty() && !s.isAir() && reserved.contains(BlockPos.asLong(x, y, z))) return;
+        if (!reserved.isEmpty() && !s.isAir() && !(s.getBlock() instanceof DoorBlock) && reserved.contains(BlockPos.asLong(x, y, z))) return;
         wset(x, y, z, rot(s));
     }
 
@@ -441,10 +466,15 @@ public final class Canvas {
         BlockState d = B.face(door, face).setValue(DoorBlock.HINGE, DoorHingeSide.LEFT);
         set(lx, ly, lz, d.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER));
         set(lx, ly + 1, lz, d.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
+        keepClear(lx, ly, ly + 1, lz);
+        keepClear(lx + face.getStepX(), ly, ly + 1, lz + face.getStepZ());
+        keepClear(lx - face.getStepX(), ly, ly + 1, lz - face.getStepZ());
     }
 
     /** World positions (lower door halves) of declared entrances -> the direction leading away from the building. */
     private static final java.util.Map<Long, Direction> ENTRANCES = new java.util.concurrent.ConcurrentHashMap<>();
+    /** World positions (both door halves) of declared entrances -> building owner id. */
+    private static final java.util.Map<Long, String> ENTRANCE_OWNERS = new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
      * An entrance: a door in an outer wall, opening towards local {@code face} (the interior lies that way). Declared so
@@ -454,9 +484,16 @@ public final class Canvas {
         door(lx, ly, lz, door, face);
         int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
         if (doorSink != null) doorSink.add(new int[]{x, y, z, dir(face.getOpposite()).get2DDataValue()});
-        if (level == null || !okWorld(x, y, z)) return;
+        if (owner != null && !owner.isEmpty()) {
+            anchor(AnchorType.BUILDING_DOOR, lx, ly, lz);
+        }
         if (ENTRANCES.size() > 100_000) ENTRANCES.clear();
         ENTRANCES.put(BlockPos.asLong(x, y, z), dir(face.getOpposite()));
+        if (owner != null && !owner.isEmpty()) {
+            if (ENTRANCE_OWNERS.size() > 100_000) ENTRANCE_OWNERS.clear();
+            ENTRANCE_OWNERS.put(BlockPos.asLong(x, y, z), owner);
+            ENTRANCE_OWNERS.put(BlockPos.asLong(x, y + 1, z), owner);
+        }
     }
 
     /** The outward direction of an entrance declared by {@link #entrance}, or null. */
@@ -465,16 +502,54 @@ public final class Canvas {
         return ENTRANCES.get(lowerHalf.asLong());
     }
 
+    /** The building owner id of an entrance declared by {@link #entrance}, or null. */
+    @Nullable
+    public static String entranceOwner(BlockPos pos) {
+        return ENTRANCE_OWNERS.get(pos.asLong());
+    }
+
     /** A bed whose foot is at (lx, ly, lz) and whose head lies towards local {@code toHead}. */
     public void bed(int lx, int ly, int lz, BlockState bed, Direction toHead) {
-        if (isReserved(lx, ly, lz) || isReserved(lx + toHead.getStepX(), ly, lz + toHead.getStepZ())) {
-            deadBeds.add(BlockPos.asLong(wx(lx, lz), oy + ly, wz(lx, lz)));
+        int hx = lx + toHead.getStepX(), hz = lz + toHead.getStepZ();
+        int fxW = wx(lx, lz), fzW = wz(lx, lz);
+        int hxW = wx(hx, hz), hzW = wz(hx, hz);
+        int yW = oy + ly;
+        if (isReserved(lx, ly, lz) || isReserved(hx, ly, hz)) {
+            deadBeds.add(BlockPos.asLong(fxW, yW, fzW));
+            deadBeds.add(BlockPos.asLong(hxW, yW, hzW));
             return;
         }
         beds[0]++;
         BlockState b = B.face(bed, toHead);
-        set(lx, ly, lz, b.setValue(BedBlock.PART, BedPart.FOOT));
-        set(lx + toHead.getStepX(), ly, lz + toHead.getStepZ(), b.setValue(BedBlock.PART, BedPart.HEAD));
+        BlockState footState = rot(b.setValue(BedBlock.PART, BedPart.FOOT));
+        BlockState headState = rot(b.setValue(BedBlock.PART, BedPart.HEAD));
+        if (level != null && yW >= y0 && yW <= y1 && (okWorld(fxW, yW, fzW) || okWorld(hxW, yW, hzW))) {
+            BlockPos fp = new BlockPos(fxW, yW, fzW);
+            BlockPos hp = new BlockPos(hxW, yW, hzW);
+            BlockState curF = level.getBlockState(fp);
+            BlockState curH = level.getBlockState(hp);
+            boolean fOk = open(curF) || curF.getBlock() instanceof BedBlock || curF.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock;
+            boolean hOk = open(curH) || curH.getBlock() instanceof BedBlock || curH.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock;
+            if (fOk && hOk) {
+                if (burn > 0) {
+                    footState = com.skycraft.fire.aftermath.Charring.apply(footState, fxW, yW, fzW, ly, seed, burn);
+                    headState = com.skycraft.fire.aftermath.Charring.apply(headState, hxW, yW, hzW, ly, seed, burn);
+                }
+                if (!footState.isAir() && !headState.isAir()) {
+                    // Ensure solid support under both halves of the bed
+                    for (BlockPos bp : new BlockPos[]{fp.below(), hp.below()}) {
+                        BlockState below = level.getBlockState(bp);
+                        if (below.isAir() || open(below)) {
+                            level.setBlock(bp, Blocks.SPRUCE_PLANKS.defaultBlockState(), 2 | 16);
+                        }
+                    }
+                    level.setBlock(fp, footState, 2 | 16);
+                    level.setBlock(hp, headState, 2 | 16);
+                }
+            }
+        }
+        keepClear(lx, ly, ly + 1, lz);
+        keepClear(hx, ly, ly + 1, hz);
     }
 
     /** A loot container; its owner is recorded as a {@link AnchorType#CONTAINER} anchor. */
@@ -494,6 +569,50 @@ public final class Canvas {
         m.set(x, y, z);
         if (level.getBlockEntity(m) instanceof RandomizableContainerBlockEntity c) {
             c.setLootTable(loot, hash(x, y, z, 31));
+        }
+    }
+
+    /** Places a custom 3D interior furniture or clutter block and configures its cultural style. */
+    public void furniture(
+            int lx, int ly, int lz,
+            com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind,
+            String cultureId, Direction localFacing
+    ) {
+        if (isReserved(lx, ly, lz)) return;
+        int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
+        if (!okWorld(x, y, z)) return;
+        BlockState cur = wget(x, y, z);
+        if (!open(cur) && !(cur.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock)) return;
+        BlockState state = com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.stateFor(kind, localFacing);
+        wset(x, y, z, rot(state));
+        m.set(x, y, z);
+        if (level.getBlockEntity(m) instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlockEntity fbe) {
+            fbe.configure(kind, cultureId, (int) (hash(x, y, z, 73) & 7));
+        }
+    }
+
+    /** Places a custom 3D interior storage container (wardrobe, dresser, cabinet) with cultural styling and optional loot. */
+    public void furnitureContainer(
+            int lx, int ly, int lz,
+            com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind,
+            String cultureId, Direction localFacing, @Nullable ResourceLocation loot
+    ) {
+        if (isReserved(lx, ly, lz)) return;
+        int n = containers[0]++;
+        if (n >= MAX_CONTAINERS) return;
+        if (n >= MAX_LOOT) loot = null;
+        anchor(AnchorType.CONTAINER, lx, ly, lz);
+        int x = wx(lx, lz), y = oy + ly, z = wz(lx, lz);
+        if (!okWorld(x, y, z)) return;
+        if (!supportContainer(x, y, z)) return;
+        BlockState state = com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.stateFor(kind, localFacing);
+        wset(x, y, z, rot(state));
+        m.set(x, y, z);
+        if (level.getBlockEntity(m) instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlockEntity fbe) {
+            fbe.configure(kind, cultureId, (int) (hash(x, y, z, 79) & 7));
+            if (loot != null) {
+                fbe.setLootTable(loot, hash(x, y, z, 31));
+            }
         }
     }
 
@@ -533,7 +652,10 @@ public final class Canvas {
         SignText text = new SignText();
         for (int i = 0; i < Math.min(4, lines.length); i++) text = text.setMessage(i, lines[i]);
         CompoundTag tag = sign.saveWithoutMetadata();
-        SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
+        SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> {
+            tag.put("front_text", t);
+            tag.put("back_text", t.copy());
+        });
         tag.putBoolean("is_waxed", true);
         sign.load(tag);
     }

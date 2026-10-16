@@ -46,12 +46,10 @@ public final class SideQuests {
     // 1. THE GOLDEN CLAW
     // ==================================================================
 
-    public static boolean startGoldenClaw(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer goldenClawOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
-        // the real Bleak Falls Barrow when the world has it within reach, else a barrow up a mountain nearby
         BlockPos dungeon = com.skycraft.tamriel.Places.byId("bleak_falls_barrow")
                 .filter(p -> level.dimension() == net.minecraft.world.level.Level.OVERWORLD && p.distSqr(at.getX(), at.getZ()) < 4000L * 4000L)
                 .map(p -> new BlockPos(p.x(), Locate.surfaceY(level, p.x(), p.z()), p.z())).orElse(null);
@@ -68,33 +66,34 @@ public final class SideQuests {
         q.giverDim = dim;
         q.hold = Holds.holdAt(level, at);
 
-        // Step 1: Ascend the mountain to Bleak Falls Barrow
         Objective o1 = new Objective(Objective.Type.GO_TO, tr("quest.skycraft.obj.golden_claw_1"))
                 .at(dungeon, dim, 32).guessY().label("Bleak Falls Barrow");
 
-        // Step 2: Slay Arvel the Swift and recover the Claw
         Objective o2 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.golden_claw_2"))
                 .at(dungeon, dim, 0).guessY().placement("structure").label("Arvel the Swift")
                 .spawn(Spawn.of("skycraft:bandit_chief", 1).name(lit("Arvel the Swift")).target().boss().health(1.8f).build())
                 .spawn(Spawn.of("skycraft:bandit", 3).build());
         o2.onComplete = "give:skycraft:ancient_tome";
 
-        // Step 3: Return to Lucan in Riverwood
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.golden_claw_3"))
                 .npc(giver.getUUID()).at(giver.blockPosition(), dim, 0)
                 .topic(tr("dialogue.skycraft.quest.golden_claw_return"), tr("quest.skycraft.reply.golden_claw_thanks"))
                 .label(giver.getDisplayName().getString());
 
         q.add(o1).add(o2).add(o3).reward(400);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.quest.pitch_golden_claw"));
+    }
+
+    public static boolean startGoldenClaw(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, goldenClawOffer(player, giver).quest());
     }
 
     // ==================================================================
     // 2. IN MY TIME OF NEED (Saadia vs Kematu)
     // ==================================================================
 
-    public static boolean startTimeOfNeed(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer timeOfNeedOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -108,15 +107,12 @@ public final class SideQuests {
         q.giverDim = dim;
         q.hold = Holds.holdAt(level, at);
 
-        // Step 1: Speak to the tavern maid Saadia
         Objective o1 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.time_of_need_1"))
                 .filter("villager").topic(tr("dialogue.skycraft.quest.saadia_ask"), tr("dialogue.skycraft.quest.saadia_reply"));
 
-        // Step 2: Confront Kematu at Swindler's Den
         Objective o2 = new Objective(Objective.Type.GO_TO, tr("quest.skycraft.obj.time_of_need_2"))
                 .at(den, dim, 24).guessY().label("Swindler's Den");
 
-        // Step 3: Slay Kematu and his Alik'r warriors
         Objective o3 = new Objective(Objective.Type.KILL_TARGET, tr("quest.skycraft.obj.time_of_need_3"))
                 .at(den, dim, 0).guessY().placement("surface").label("Kematu")
                 .spawn(Spawn.of("skycraft:bandit_chief", 1).name(lit("Kematu")).target().boss().health(2.0f).build())
@@ -127,15 +123,19 @@ public final class SideQuests {
         scimitar.enchant(Enchantments.SHARPNESS, 2);
 
         q.add(o1).add(o2).add(o3).reward(500, scimitar);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.quest.pitch_time_of_need"));
+    }
+
+    public static boolean startTimeOfNeed(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, timeOfNeedOffer(player, giver).quest());
     }
 
     // ==================================================================
     // 3. WAKING NIGHTMARE (Erandur / Vaermina)
     // ==================================================================
 
-    public static boolean startWakingNightmare(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer wakingNightmareOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -149,32 +149,33 @@ public final class SideQuests {
         q.giverDim = dim;
         q.hold = Holds.holdAt(level, at);
 
-        // Step 1: Reach the Corrupted Nightcaller Temple
         Objective o1 = new Objective(Objective.Type.GO_TO, tr("quest.skycraft.obj.waking_nightmare_1"))
                 .at(temple, dim, 32).guessY().label("Nightcaller Temple");
 
-        // Step 2: Purge the Tormented Phantoms
         Objective o2 = new Objective(Objective.Type.CLEAR_AREA, tr("quest.skycraft.obj.waking_nightmare_2"))
                 .at(temple, dim, 28).guessY().count(6)
                 .spawn(Spawn.of("skycraft:draugr", 4).name(lit("Tormented Phantom")).build())
                 .spawn(Spawn.of("minecraft:witch", 2).name(lit("Vaermina Priestess")).build())
                 .label("Temple Sanctum");
 
-        // Step 3: Complete the Banishment Ritual with Erandur
         Objective o3 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.waking_nightmare_3"))
                 .topic(tr("dialogue.skycraft.quest.waking_nightmare_ritual"), tr("dialogue.skycraft.quest.waking_nightmare_done"))
                 .filter("any");
 
         q.add(o1).add(o2).add(o3).reward(600);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.quest.pitch_waking_nightmare"));
+    }
+
+    public static boolean startWakingNightmare(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, wakingNightmareOffer(player, giver).quest());
     }
 
     // ==================================================================
     // 4. DEDICATED MISSION ARC: THE FORSWORN CONSPIRACY
     // ==================================================================
 
-    public static boolean startForswornConspiracy(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer forswornOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -188,21 +189,17 @@ public final class SideQuests {
         q.giverDim = dim;
         q.hold = "skyrim/the_reach";
 
-        // Part 1: Investigate the Market Murder and read Margret's Note
         Objective o1 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.forsworn_1"))
                 .filter("any").topic(tr("dialogue.skycraft.quest.forsworn_investigate"), tr("dialogue.skycraft.quest.forsworn_shrine"));
 
-        // Part 2: Slay Silver-Blood Thugs attempting to silence the truth
         Objective o2 = new Objective(Objective.Type.CLEAR_AREA, tr("quest.skycraft.obj.forsworn_2"))
                 .at(at.offset(16, 0, 16), dim, 24).count(3)
                 .spawn(Spawn.of("skycraft:bandit", 3).name(lit("Silver-Blood Thug")).build())
                 .label("Market Ambush");
 
-        // Part 3: Framed & Sent to Cidhna Mine: Infiltrate the deep mines
         Objective o3 = new Objective(Objective.Type.GO_TO, tr("quest.skycraft.obj.forsworn_3"))
                 .at(ruins, dim, 24).guessY().label("Cidhna Mine");
 
-        // Part 4: Confront Madanach, the King in Rags
         Objective o4 = new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.forsworn_4"))
                 .filter("any").topic(tr("dialogue.skycraft.quest.madanach_breakout"), tr("dialogue.skycraft.quest.madanach_reward"));
 
@@ -211,7 +208,12 @@ public final class SideQuests {
         armorReward.enchant(Enchantments.PROJECTILE_PROTECTION, 3);
 
         q.add(o1).add(o2).add(o3).add(o4).reward(1000, armorReward);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.quest.pitch_forsworn"));
+    }
+
+    public static boolean startForswornConspiracy(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, forswornOffer(player, giver).quest());
     }
 
     // ==================================================================
@@ -220,13 +222,13 @@ public final class SideQuests {
 
     public static void addSideQuestTopics(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         PlayerData data = SkyData.get(player);
-        if (data.getLevel() < 1) return;
+        if (data.getLevel() < 1 || !QuestDialogue.canOfferQuest(player, npc)) return;
+        String holdBase = Holds.base(Holds.holdAt(player.serverLevel(), npc.blockPosition()));
 
-        // The Golden Claw — offered strictly by the first merchant encountered in the world (like Lucan) during shop hours
+        // The Golden Claw — offered strictly by the designated Riverwood merchant during shop hours
         if (!hasSideQuest(player, "side_golden_claw")) {
             boolean isMerchant = com.skycraft.economy.Merchants.isMerchant(npc);
             boolean openHours = com.skycraft.economy.Shop.isOpen(player.level());
-            // Lucan Valerius lives in Riverwood: only a merchant standing in Riverwood can be the quest giver
             boolean inRiverwood = com.skycraft.tamriel.Places.byId("riverwood")
                     .map(p -> player.level().dimension() == net.minecraft.world.level.Level.OVERWORLD
                             && p.distSqr(npc.blockPosition().getX(), npc.blockPosition().getZ())
@@ -241,63 +243,45 @@ public final class SideQuests {
                 }
                 if (designated.equals(npc.getUUID())) {
                     out.add(new DialogueOption("quest.side.golden_claw",
-                            tr("dialogue.skycraft.quest.ask_golden_claw"), 320, (pl, n) -> {
-                        if (startGoldenClaw(pl, n)) {
-                            Dialogue.open(pl, n, tr("dialogue.skycraft.quest.pitch_golden_claw"));
-                        } else {
-                            Dialogue.open(pl, n, tr("quest.skycraft.reply.too_busy"));
-                        }
-                    }));
+                            QuestDialogue.questLabel(tr("dialogue.skycraft.quest.ask_golden_claw")), 320,
+                            (pl, n) -> QuestDialogue.offer(pl, n, "side_golden_claw", () -> goldenClawOffer(pl, n))));
+                    return;
                 }
             }
         }
 
-        // In My Time of Need — offered by guards or wandering traders (Redguard search)
-        if (!hasSideQuest(player, "side_time_of_need") && data.getLevel() >= 3) {
+        // In My Time of Need — offered in Whiterun Hold by caravan traders or soldiers
+        if (!hasSideQuest(player, "side_time_of_need") && data.getLevel() >= 3 && "whiterun".equals(holdBase)) {
             boolean isGuardOrTrader = com.skycraft.economy.Merchants.isCaravan(npc)
                     || (npc instanceof com.skycraft.society.entity.NpcEntity ne
                     && (ne.role() == com.skycraft.society.NpcRole.IMPERIAL_SOLDIER || ne.role() == com.skycraft.society.NpcRole.STORMCLOAK_SOLDIER));
             if (isGuardOrTrader) {
                 out.add(new DialogueOption("quest.side.time_of_need",
-                        tr("dialogue.skycraft.quest.ask_time_of_need"), 321, (pl, n) -> {
-                    if (startTimeOfNeed(pl, n)) {
-                        Dialogue.open(pl, n, tr("dialogue.skycraft.quest.pitch_time_of_need"));
-                    } else {
-                        Dialogue.open(pl, n, tr("quest.skycraft.reply.too_busy"));
-                    }
-                }));
+                        QuestDialogue.questLabel(tr("dialogue.skycraft.quest.ask_time_of_need")), 321,
+                        (pl, n) -> QuestDialogue.offer(pl, n, "side_time_of_need", () -> timeOfNeedOffer(pl, n))));
+                return;
             }
         }
 
-        // Waking Nightmare — offered by priests or innkeepers troubled by nightmares
-        if (!hasSideQuest(player, "side_waking_nightmare") && data.getLevel() >= 5) {
+        // Waking Nightmare — offered in The Pale (Dawnstar) by priests or innkeepers
+        if (!hasSideQuest(player, "side_waking_nightmare") && data.getLevel() >= 5 && "the_pale".equals(holdBase)) {
             boolean isPriestOrInn = (npc instanceof com.skycraft.society.entity.NpcEntity ne
                     && (ne.role() == com.skycraft.society.NpcRole.PRIEST || ne.role() == com.skycraft.society.NpcRole.INNKEEPER));
             if (isPriestOrInn) {
                 out.add(new DialogueOption("quest.side.waking_nightmare",
-                        tr("dialogue.skycraft.quest.ask_waking_nightmare"), 322, (pl, n) -> {
-                    if (startWakingNightmare(pl, n)) {
-                        Dialogue.open(pl, n, tr("dialogue.skycraft.quest.pitch_waking_nightmare"));
-                    } else {
-                        Dialogue.open(pl, n, tr("quest.skycraft.reply.too_busy"));
-                    }
-                }));
+                        QuestDialogue.questLabel(tr("dialogue.skycraft.quest.ask_waking_nightmare")), 322,
+                        (pl, n) -> QuestDialogue.offer(pl, n, "side_waking_nightmare", () -> wakingNightmareOffer(pl, n))));
+                return;
             }
         }
 
-        // The Forsworn Conspiracy Arc — offered in The Reach or by miners
-        if (!hasSideQuest(player, "arc_forsworn_conspiracy") && data.getLevel() >= 6) {
-            boolean inReachOrMiner = "the_reach".equals(Holds.base(Holds.holdAt(player.serverLevel(), player.blockPosition())))
-                    || (npc instanceof com.skycraft.society.entity.NpcEntity ne && ne.role() == com.skycraft.society.NpcRole.MINER);
-            if (inReachOrMiner) {
+        // The Forsworn Conspiracy Arc — offered in The Reach by guards, innkeepers, or miners
+        if (!hasSideQuest(player, "arc_forsworn_conspiracy") && data.getLevel() >= 6 && "the_reach".equals(holdBase)) {
+            boolean isMiner = npc instanceof com.skycraft.society.entity.NpcEntity ne && ne.role() == com.skycraft.society.NpcRole.MINER;
+            if (isMiner || QuestDialogue.isGuard(npc) || QuestDialogue.isInnkeeper(npc)) {
                 out.add(new DialogueOption("quest.arc.forsworn",
-                        tr("dialogue.skycraft.quest.ask_forsworn"), 323, (pl, n) -> {
-                    if (startForswornConspiracy(pl, n)) {
-                        Dialogue.open(pl, n, tr("dialogue.skycraft.quest.pitch_forsworn"));
-                    } else {
-                        Dialogue.open(pl, n, tr("quest.skycraft.reply.too_busy"));
-                    }
-                }));
+                        QuestDialogue.questLabel(tr("dialogue.skycraft.quest.ask_forsworn")), 323,
+                        (pl, n) -> QuestDialogue.offer(pl, n, "arc_forsworn_conspiracy", () -> forswornOffer(pl, n))));
             }
         }
     }

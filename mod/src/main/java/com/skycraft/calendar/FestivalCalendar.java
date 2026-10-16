@@ -433,9 +433,8 @@ public final class FestivalCalendar {
         Component header = Component.translatable("skycraft.calendar.festival.banner", f.titleComponent())
                 .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
         Component body = f.announceComponent().copy().withStyle(ChatFormatting.YELLOW);
-        player.displayClientMessage(header, false);
-        player.displayClientMessage(body, false);
-        player.displayClientMessage(header, true);
+        com.skycraft.core.Notifier.title(player, f.titleComponent(), body);
+        com.skycraft.core.Notifier.message(player, header);
         player.level().playSound(
                 null,
                 player.blockPosition(),
@@ -472,7 +471,8 @@ public final class FestivalCalendar {
 
         boolean started = Quests.start(player, q);
         if (started) {
-            player.sendSystemMessage(
+            com.skycraft.core.Notifier.message(
+                    player,
                     Component.translatable("skycraft.calendar.quest.started", f.titleComponent())
                             .withStyle(ChatFormatting.GOLD)
             );

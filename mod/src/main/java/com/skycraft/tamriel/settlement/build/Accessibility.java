@@ -166,7 +166,7 @@ public final class Accessibility {
         // the cells above this step
         for (int dy = 1; dy <= 2; dy++) {
             BlockPos u = p.above(dy);
-            if (box.isInside(u) && isProp(level, u, level.getBlockState(u), true)) level.setBlock(u, Blocks.AIR.defaultBlockState(), 2);
+            if (box.isInside(u) && isProp(level, u, level.getBlockState(u), true)) clearPropBlock(level, u);
         }
         if (!bottom && !top) return;
         STAIRS.incrementAndGet();
@@ -185,6 +185,19 @@ public final class Accessibility {
         if (!box.isInside(p)) return true;
         BlockState s = level.getBlockState(p);
         return s.getBlock() instanceof StairBlock && s.getValue(StairBlock.FACING) == f;
+    }
+
+    private static void clearPropBlock(WorldGenLevel level, BlockPos p) {
+        BlockState s = level.getBlockState(p);
+        level.setBlock(p, Blocks.AIR.defaultBlockState(), 2 | 16);
+        if (s.getBlock() instanceof BedBlock) {
+            Direction f = s.getValue(BedBlock.FACING);
+            Direction toOther = s.getValue(BedBlock.PART) == net.minecraft.world.level.block.state.properties.BedPart.FOOT ? f : f.getOpposite();
+            BlockPos other = p.relative(toOther);
+            if (level.getBlockState(other).getBlock() instanceof BedBlock) {
+                level.setBlock(other, Blocks.AIR.defaultBlockState(), 2 | 16);
+            }
+        }
     }
 
     /**
@@ -210,7 +223,7 @@ public final class Accessibility {
             }
             if (!fixable) continue;
             for (BlockPos q : new BlockPos[]{c, c.above()}) {
-                if (!clear(level, box, q)) level.setBlock(q, Blocks.AIR.defaultBlockState(), 2);
+                if (!clear(level, box, q)) clearPropBlock(level, q);
             }
             STAIRS_FIXED.incrementAndGet();
             return true;
@@ -270,7 +283,9 @@ public final class Accessibility {
                 || b instanceof net.minecraft.world.level.block.AnvilBlock || b instanceof net.minecraft.world.level.block.BrewingStandBlock
                 || b instanceof net.minecraft.world.level.block.DecoratedPotBlock || b instanceof net.minecraft.world.level.block.SkullBlock
                 || b instanceof net.minecraft.world.level.block.WallBannerBlock || b instanceof net.minecraft.world.level.block.StandingSignBlock
-                || b instanceof net.minecraft.world.level.block.StemBlock || b instanceof net.minecraft.world.level.block.SweetBerryBushBlock) {
+                || b instanceof net.minecraft.world.level.block.StemBlock || b instanceof net.minecraft.world.level.block.SweetBerryBushBlock
+                || b instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock
+                || b instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock) {
             return true;
         }
         if (s.is(BlockTags.LOGS) && !s.is(BlockTags.PLANKS)) {
@@ -294,7 +309,33 @@ public final class Accessibility {
     private static boolean remove(WorldGenLevel level, BlockPos p) {
         BlockState s = level.getBlockState(p);
         if (!isProp(level, p, s)) return false;
-        level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+        boolean pole = s.getBlock() instanceof FenceBlock || s.is(BlockTags.WALLS);
+        clearPropBlock(level, p);
+        if (pole) {
+            for (int dy = 1; dy <= 9; dy++) {
+                BlockPos up = p.above(dy);
+                BlockState us = level.getBlockState(up);
+                if (us.getBlock() instanceof FenceBlock || us.is(BlockTags.WALLS) || us.is(BlockTags.BANNERS)
+                        || us.is(BlockTags.ALL_SIGNS) || us.is(BlockTags.WOOL) || us.is(Blocks.GOLD_BLOCK)
+                        || us.is(Blocks.LIGHTNING_ROD) || us.getBlock() instanceof LanternBlock) {
+                    level.setBlock(up, Blocks.AIR.defaultBlockState(), 2);
+                    for (Direction dir : Direction.Plane.HORIZONTAL) {
+                        for (int step = 1; step <= 2; step++) {
+                            BlockPos arm = up.relative(dir, step);
+                            BlockState as = level.getBlockState(arm);
+                            if (as.getBlock() instanceof FenceBlock || as.is(BlockTags.BANNERS)
+                                    || as.is(BlockTags.ALL_SIGNS) || as.is(BlockTags.WOOL)) {
+                                level.setBlock(arm, Blocks.AIR.defaultBlockState(), 2);
+                            }
+                        }
+                    }
+                } else if (us.isAir()) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        }
         return true;
     }
 }

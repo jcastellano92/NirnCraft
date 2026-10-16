@@ -87,6 +87,8 @@ public final class PlanGround {
             mouth = false;
             padWeight = 0f;
             padHeight = Float.NaN;
+            plotWeight = 0f;
+            plotHeight = Float.NaN;
             n = 0;
         }
     }

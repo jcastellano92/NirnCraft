@@ -88,12 +88,32 @@ final class NpcGoals {
         }
     }
 
+    /** Whether the NPC is currently standing in or immediately beside a doorframe. */
+    static boolean isInDoorway(NpcEntity npc) {
+        var level = npc.level();
+        BlockPos pos = npc.blockPosition();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx != 0 && dz != 0) continue;
+                BlockPos p = pos.offset(dx, 0, dz);
+                if (level.getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.DoorBlock
+                        || level.getBlockState(p.above()).getBlock() instanceof net.minecraft.world.level.block.DoorBlock) {
+                    if (npc.distanceToSqr(p.getX() + 0.5, npc.getY(), p.getZ() + 0.5) < 2.25D) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /** A door-opener with a cooldown: an NPC wedged in a doorway can't strobe a shop door open and shut every tick. */
     static final class Door extends net.minecraft.world.entity.ai.goal.OpenDoorGoal {
         /** Game ticks before the same NPC may work a door again. Tuning knob. */
-        private static final int COOLDOWN = 8;
+        private static final int COOLDOWN = 40;
         private final NpcEntity npc;
         private long readyAt;
+        private int openTicks;
 
         Door(NpcEntity npc) {
             super(npc, true);
@@ -102,12 +122,35 @@ final class NpcGoals {
 
         @Override
         public boolean canUse() {
-            return npc.level().getGameTime() >= readyAt && super.canUse();
+            return !npc.isBusy() && !npc.getNavigation().isDone() && npc.level().getGameTime() >= readyAt && super.canUse();
+        }
+
+        @Override
+        public void start() {
+            openTicks = 0;
+            super.start();
+        }
+
+        @Override
+        public void tick() {
+            openTicks++;
+            super.tick();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            if (openTicks < 60 && doorPos != null
+                    && npc.distanceToSqr(doorPos.getX() + 0.5, npc.getY(), doorPos.getZ() + 0.5) < 1.69D) {
+                return true;
+            }
+            return super.canContinueToUse();
         }
 
         @Override
         public void stop() {
-            super.stop();
+            if (doorPos == null || npc.distanceToSqr(doorPos.getX() + 0.5, npc.getY(), doorPos.getZ() + 0.5) >= 1.21D) {
+                super.stop();
+            }
             readyAt = npc.level().getGameTime() + COOLDOWN;
         }
     }
@@ -406,8 +449,13 @@ final class NpcGoals {
 
         @Override
         public boolean canUse() {
-            if (npc.getTarget() != null || npc.isPassenger()) return false;
+            if (npc.isBusy() || npc.getTarget() != null || npc.isPassenger()) return false;
             return npc.getHuntTarget() != null || npc.getSeekTarget() != null || npc.getLeader() != null || npc.getDestination() != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse();
         }
 
         @Override
@@ -539,7 +587,7 @@ final class NpcGoals {
 
         @Override
         public boolean canUse() {
-            if (npc.getTarget() != null || npc.isBusy() || npc.isSleeping()) return false;
+            if (npc.getTarget() != null || npc.isBusy() || npc.isSleeping() || isInDoorway(npc)) return false;
             if (npc.role() == NpcRole.BARD && npc.takeSongRequest()) return true;
             if (--cooldown > 0) return false;
             cooldown = 100 + npc.getRandom().nextInt(100);
@@ -549,8 +597,13 @@ final class NpcGoals {
             if (settled) {
                 if (npc.activity != Schedule.Activity.WORK) return role == NpcRole.PRIEST && (patient = findPatient()) != null;
                 work = Workplaces.workplaceOf(npc);
-                if (work != null && Workplaces.kindFor(role) != null && npc.distanceToSqr(work.getX() + 0.5, npc.getY(), work.getZ() + 0.5) > 10 * 10) {
-                    return false;
+                if (work != null && Workplaces.kindFor(role) != null) {
+                    if (npc.distanceToSqr(work.getX() + 0.5, npc.getY(), work.getZ() + 0.5) > 5.0 * 5.0) {
+                        return false;
+                    }
+                    if (npc.level().isLoaded(work) && !npc.level().canSeeSky(work.above()) && npc.level().canSeeSky(npc.blockPosition().above())) {
+                        return false;
+                    }
                 }
             }
             return switch (role) {
@@ -568,7 +621,7 @@ final class NpcGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return ticks > 0 && npc.getTarget() == null && (npc.role() != NpcRole.PRIEST || patient != null && patient.isAlive());
+            return ticks > 0 && !npc.isBusy() && npc.getTarget() == null && (npc.role() != NpcRole.PRIEST || patient != null && patient.isAlive());
         }
 
         @Override
@@ -740,12 +793,13 @@ final class NpcGoals {
                 ticks = 0;
                 return;
             }
-            BlockPos seat = findSeat(level, spot);
+            BlockPos seat = findSeat(npc, level, spot);
             BlockPos post = seat != null ? seat : spot;
             if (!near(post, 1.75)) return;
             Player p = level.getNearestPlayer(npc, 6);
             if (p != null && npc.getRandom().nextInt(3) > 0) npc.getLookControl().setLookAt(p, 30f, 30f);
             else if (seat != null) faceSeat(npc, level, seat);
+            else faceStation(npc, level, post);
             if (ticks % 40 == 0) {
                 npc.swing(InteractionHand.MAIN_HAND);
                 level.playSound(null, npc.blockPosition(), npc.role() == NpcRole.BUTCHER ? SoundEvents.AXE_STRIP : SoundEvents.BOTTLE_FILL,
@@ -759,13 +813,14 @@ final class NpcGoals {
                 ticks = 0;
                 return;
             }
-            BlockPos seat = findSeat(level, spot);
+            BlockPos seat = findSeat(npc, level, spot);
             BlockPos post = seat != null ? seat : spot;
             if (!near(post, 1.75)) return;
             Player p = level.getNearestPlayer(npc, 7);
             if (p != null && !p.isSpectator()) npc.getLookControl().setLookAt(p, 30f, 30f);
             else {
                 if (seat != null) faceSeat(npc, level, seat);
+                else faceStation(npc, level, post);
                 if (ticks % 60 == 0) npc.swing(InteractionHand.OFF_HAND);
             }
         }
@@ -888,7 +943,7 @@ final class NpcGoals {
 
         @Override
         public boolean canUse() {
-            return com.skycraft.society.Followers.isFollower(npc) && !fighting(npc);
+            return !npc.isBusy() && com.skycraft.society.Followers.isFollower(npc) && !fighting(npc);
         }
 
         @Override
@@ -979,22 +1034,31 @@ final class NpcGoals {
 
     static boolean stationRole(NpcRole role) {
         return switch (role) {
-            case MERCHANT, APOTHECARY, INNKEEPER, JARL, STEWARD, MAGE, SCHOLAR, BUTCHER, TRAINER -> true;
+            case MERCHANT, APOTHECARY, INNKEEPER, JARL, STEWARD, MAGE, SCHOLAR, BUTCHER -> true;
             default -> false;
         };
     }
 
+    private static boolean isThroneBlock(BlockState state) {
+        var b = state.getBlock();
+        if (b instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock) {
+            var cat = state.getValue(com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock.SHAPE);
+            return cat == com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.ShapeCat.THRONE;
+        }
+        return false;
+    }
+
     @Nullable
-    static BlockPos findSeat(net.minecraft.world.level.Level level, BlockPos work) {
-        if (!level.isLoaded(work)) return null;
+    static BlockPos findSeat(NpcEntity npc, net.minecraft.world.level.Level level, BlockPos work) {
+        if (npc.role() != NpcRole.JARL || !level.isLoaded(work)) return null;
         for (int dy : new int[]{0, -1}) {
             BlockPos b = work.offset(0, dy, 0);
-            if (level.getBlockState(b).getBlock() instanceof net.minecraft.world.level.block.StairBlock) return b;
+            if (isThroneBlock(level.getBlockState(b))) return b;
         }
         for (int dy : new int[]{0, -1}) {
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 BlockPos b = work.offset(d.getStepX(), dy, d.getStepZ());
-                if (level.getBlockState(b).getBlock() instanceof net.minecraft.world.level.block.StairBlock) return b;
+                if (isThroneBlock(level.getBlockState(b))) return b;
             }
         }
         return null;
@@ -1005,7 +1069,37 @@ final class NpcGoals {
         if (s.hasProperty(net.minecraft.world.level.block.StairBlock.FACING)) {
             Direction out = s.getValue(net.minecraft.world.level.block.StairBlock.FACING).getOpposite();
             npc.getLookControl().setLookAt(seat.getX() + 0.5 + out.getStepX() * 3, npc.getEyeY(), seat.getZ() + 0.5 + out.getStepZ() * 3, 25f, 25f);
+        } else if (s.hasProperty(com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock.FACING)) {
+            Direction out = s.getValue(com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock.FACING);
+            npc.getLookControl().setLookAt(seat.getX() + 0.5 + out.getStepX() * 3, npc.getEyeY(), seat.getZ() + 0.5 + out.getStepZ() * 3, 25f, 25f);
         }
+    }
+
+    /** Faces the shopkeeper/innkeeper/steward across their counter, desk, or stall toward customers. */
+    static void faceStation(NpcEntity npc, net.minecraft.world.level.Level level, BlockPos work) {
+        BlockPos here = npc.blockPosition();
+        for (BlockPos base : new BlockPos[]{here, work}) {
+            if (base == null || !level.isLoaded(base)) continue;
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                BlockPos adj = base.relative(d);
+                if (NpcPlacement.isFurnitureOrStation(level, adj)) {
+                    npc.getLookControl().setLookAt(base.getX() + 0.5 + d.getStepX() * 3, npc.getEyeY(), base.getZ() + 0.5 + d.getStepZ() * 3, 25f, 25f);
+                    return;
+                }
+            }
+        }
+    }
+
+    private static boolean isSpotClaimedByOther(NpcEntity npc, BlockPos spot) {
+        var level = npc.level();
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(spot).inflate(0.75, 1.0, 0.75);
+        for (NpcEntity other : level.getEntitiesOfClass(NpcEntity.class, box, e -> e != npc && e.isAlive())) {
+            // Stationary occupant or older/lower-ID worker keeps the spot; the newcomer steps aside
+            if (other.getNavigation().isDone() || other.getId() < npc.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1103,18 +1197,26 @@ final class NpcGoals {
                 case SLEEP -> sleep(home);
                 case EAT, HOME -> {
                     BlockPos at = npc.getBed() != null ? npc.getBed() : home;
-                    go(at, 0.6D, 3);
-                    if (activity == Schedule.Activity.EAT && arrived(at, 4)) eat(level);
-                    else if (activity == Schedule.Activity.HOME && arrived(at, 6)) stroll(at, 4, 0.45D, 6);
+                    go(at, 0.6D, 2);
+                    if (activity == Schedule.Activity.EAT && arrived(at, 3)) eat(level);
+                    else if (activity == Schedule.Activity.HOME && arrived(at, 4)) stroll(at, 3, 0.45D, 6);
                 }
                 case WORK -> {
                     BlockPos work = Workplaces.workplaceOf(npc);
                     if (work == null) {
                         chores(home); // no workplace: household tasks indoors, never loitering in the street
                     } else if (stationRole(npc.role())) {
-                        BlockPos seat = findSeat(level, work);
+                        BlockPos seat = findSeat(npc, level, work);
                         BlockPos post = seat != null ? seat : work;
-                        if (!arrived(post, 1.75)) {
+                        if (seat == null && level.isLoaded(post) && NpcPlacement.isFurnitureHazard(level, post)) {
+                            BlockPos safePost = NpcPlacement.freeSpot(npc, post, 3);
+                            if (safePost != null) post = safePost;
+                        }
+                        if (isSpotClaimedByOther(npc, post)) {
+                            // Another seller/NPC is already occupying this exact counter spot: stand beside it or stroll the shop
+                            if (!arrived(work, 4.0)) go(work, 0.6D, 2.5);
+                            else stroll(work, 3, 0.4D, 6);
+                        } else if (!arrived(post, 1.75)) {
                             go(post, 0.65D, 1.25);
                         } else {
                             npc.getNavigation().stop();
@@ -1125,9 +1227,10 @@ final class NpcGoals {
                             Player p = level.getNearestPlayer(npc, 6);
                             if (p != null && !p.isSpectator()) npc.getLookControl().setLookAt(p, 30f, 30f);
                             else if (seat != null) faceSeat(npc, level, seat);
+                            else faceStation(npc, level, post);
                         }
-                    } else if (!arrived(work, 5)) {
-                        go(work, 0.65D, 3);
+                    } else if (!arrived(work, 3.5)) {
+                        go(work, 0.65D, 2);
                     } else {
                         // the Work goal takes over at the workplace; hang around it until it does
                         stroll(work, 3, 0.4D, 8);
@@ -1136,9 +1239,9 @@ final class NpcGoals {
                 case LUNCH, INN -> {
                     BlockPos inn = Workplaces.innFor(npc);
                     if (inn == null) inn = home;
-                    if (!arrived(inn, 7)) go(inn, 0.65D, 4);
+                    if (!arrived(inn, 4.5)) go(inn, 0.65D, 2.5);
                     else {
-                        stroll(inn, 5, 0.45D, 6);
+                        stroll(inn, 4, 0.45D, 6);
                         if (activity == Schedule.Activity.LUNCH && npc.getRandom().nextInt(4) == 0) eat(level);
                         com.skycraft.society.Chatter.tryStart(npc);
                     }
@@ -1182,9 +1285,30 @@ final class NpcGoals {
         private void watchdog(Schedule.Activity activity) {
             if (npc.tickCount % 10 != 0 || npc.isSleeping() || npc.isConversing()) return;
             var level = npc.level();
+            NpcPlacement.rescueFromFireOrSlab(npc);
             if (npc.tickCount % 20 == 0) NpcPlacement.rescueFromRoof(npc);
+            // If two stationary NPCs ever end up standing on the exact same spot, the higher-ID one steps aside
+            if (npc.getNavigation().isDone()) {
+                for (NpcEntity other : level.getEntitiesOfClass(NpcEntity.class, npc.getBoundingBox().inflate(0.25),
+                        e -> e != npc && e.isAlive() && !e.isSleeping() && e.getNavigation().isDone())) {
+                    if (npc.distanceToSqr(other) < 0.64 && npc.getId() > other.getId()) {
+                        BlockPos aside = NpcPlacement.freeSpot(npc, npc.blockPosition(), 2);
+                        if (aside != null && !aside.equals(npc.blockPosition())) {
+                            npc.getNavigation().moveTo(aside.getX() + 0.5, aside.getY(), aside.getZ() + 0.5, 0.55D);
+                        }
+                        break;
+                    }
+                }
+            }
             // stuck against a door, a wall or another body
             BlockPos t = target;
+            if (t != null && level.isLoaded(t) && (NpcPlacement.isFireHazard(level, t)
+                    || NpcPlacement.isSlabHazard(level, t)
+                    || NpcPlacement.isFurnitureHazard(level, t)
+                    || NpcPlacement.isRoof(npc, t))) {
+                target = null;
+                t = null;
+            }
             if (t != null && !arrived(t, 2.5) && level.isLoaded(t)) {
                 net.minecraft.world.phys.Vec3 p = npc.position();
                 if (lastPos != null && p.distanceToSqr(lastPos) < 0.04) stuck += 10;
@@ -1250,14 +1374,19 @@ final class NpcGoals {
         /** Household tasks: stay at (or in) the home, by the bed, instead of standing about in the street. */
         private void chores(BlockPos home) {
             BlockPos at = npc.getBed() != null ? npc.getBed() : home;
-            if (!arrived(at, 5)) go(at, 0.55D, 3);
+            if (!arrived(at, 3.5)) go(at, 0.55D, 2);
             else stroll(at, 3, 0.4D, 6);
         }
 
         // -------- movement
 
         private boolean arrived(BlockPos pos, double within) {
-            return npc.distanceToSqr(pos.getX() + 0.5, npc.getY(), pos.getZ() + 0.5) <= within * within
+            if (isInDoorway(npc)) return false;
+            var level = npc.level();
+            if (level.isLoaded(pos) && !level.canSeeSky(pos.above()) && level.canSeeSky(npc.blockPosition().above())) {
+                return false;
+            }
+            return npc.distanceToSqr(pos.getX() + 0.5, npc.getY(), npc.getZ() + 0.5) <= within * within
                     && Math.abs(npc.getY() - pos.getY()) < 4;
         }
 
@@ -1296,21 +1425,31 @@ final class NpcGoals {
             }
         }
 
-        /** Ambles to a random spot near {@code center} every few thinks. */
+        /** Ambles to a random safe floor spot near {@code center} every few thinks (never onto half-slabs, furniture, roofs, or fire pits). */
         private void stroll(BlockPos center, int radius, double speed, int every) {
             if (--strollTimer > 0) return;
             strollTimer = every + npc.getRandom().nextInt(every + 1);
             if (npc.isConversing()) return;
-            int x = center.getX() + npc.getRandom().nextInt(radius * 2 + 1) - radius;
-            int z = center.getZ() + npc.getRandom().nextInt(radius * 2 + 1) - radius;
-            BlockPos probe = new BlockPos(x, center.getY(), z);
-            if (!npc.level().isLoaded(probe)) return;
-            // stay on the floor the anchor is on (indoors) unless it's outside
-            int y = npc.level().canSeeSky(center) ? npc.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) : center.getY();
-            if (y > center.getY() + 3) return; // the cell is a rooftop: never a place to stroll to
-            target = new BlockPos(x, y, z);
-            this.speed = speed;
-            npc.getNavigation().moveTo(x + 0.5, y, z + 0.5, speed);
+            var level = npc.level();
+            boolean outside = level.canSeeSky(center);
+            for (int attempt = 0; attempt < 6; attempt++) {
+                int x = center.getX() + npc.getRandom().nextInt(radius * 2 + 1) - radius;
+                int z = center.getZ() + npc.getRandom().nextInt(radius * 2 + 1) - radius;
+                BlockPos probe = new BlockPos(x, center.getY(), z);
+                if (!level.isLoaded(probe)) return;
+                // stay on the floor the anchor is on (indoors) unless it's outside
+                int y = outside ? level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) : center.getY();
+                if (y > center.getY() + 3) continue; // the cell is a rooftop: never a place to stroll to
+                BlockPos cand = new BlockPos(x, y, z);
+                if (NpcPlacement.isFireHazard(level, cand) || NpcPlacement.isSlabHazard(level, cand)
+                        || NpcPlacement.isFurnitureHazard(level, cand) || NpcPlacement.isRoof(npc, cand)) continue;
+                if (!level.getBlockState(cand).getCollisionShape(level, cand).isEmpty()) continue;
+                if (!level.getBlockState(cand.below()).isFaceSturdy(level, cand.below(), Direction.UP)) continue;
+                target = cand;
+                this.speed = speed;
+                npc.getNavigation().moveTo(x + 0.5, y, z + 0.5, speed);
+                return;
+            }
         }
 
         private void lookAtCustomer() {
@@ -1416,6 +1555,8 @@ final class NpcGoals {
             for (Player p : level.getEntitiesOfClass(Player.class, npc.getBoundingBox().inflate(5))) {
                 if (!p.isSpectator() && !p.isCreative() && p.isAlive()) {
                     if (com.skycraft.crime.Jail.isJailArea(level, p.blockPosition())) continue;
+                    // While asleep, a sneaking or hidden player does not automatically wake the resident
+                    if (npc.isSleeping() && (p.isShiftKeyDown() || com.skycraft.combat.Stealth.hiddenFrom(npc, p))) continue;
                     // Player must also be indoors under roof
                     if (level.canSeeSky(p.blockPosition())) continue;
                     // Player must be within 4 blocks of the NPC's bed

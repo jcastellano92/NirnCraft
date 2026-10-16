@@ -1,7 +1,21 @@
 {
   "variants": {
-    "": {
-      "model": "skycraft:block/ash_grass"
-    }
+    "": [
+      {
+        "model": "skycraft:block/ash_grass"
+      },
+      {
+        "model": "skycraft:block/ash_grass",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/ash_grass",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/ash_grass",
+        "y": 270
+      }
+    ]
   }
 }

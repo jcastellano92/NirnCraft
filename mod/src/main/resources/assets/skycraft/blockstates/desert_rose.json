@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/desert_rose"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/desert_rose_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/desert_rose"
+      },
+      {
+        "model": "skycraft:block/desert_rose",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/desert_rose",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/desert_rose",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/desert_rose_harvested"
+      },
+      {
+        "model": "skycraft:block/desert_rose_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/desert_rose_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/desert_rose_harvested",
+        "y": 270
+      }
+    ]
   }
 }

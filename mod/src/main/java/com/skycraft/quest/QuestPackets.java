@@ -31,6 +31,8 @@ public final class QuestPackets {
         SkyNetwork.register(PartyTravelPrompt.class, NetworkDirection.PLAY_TO_CLIENT, PartyTravelPrompt::encode, PartyTravelPrompt::decode, PartyTravelPrompt::handle);
         SkyNetwork.register(PartyTravel.class, NetworkDirection.PLAY_TO_SERVER, PartyTravel::encode, PartyTravel::decode, PartyTravel::handle);
         SkyNetwork.register(NarrationCard.class, NetworkDirection.PLAY_TO_CLIENT, NarrationCard::encode, NarrationCard::decode, NarrationCard::handle);
+        SkyNetwork.register(OpenNoticeBoard.class, NetworkDirection.PLAY_TO_CLIENT, OpenNoticeBoard::encode, OpenNoticeBoard::decode, OpenNoticeBoard::handle);
+        SkyNetwork.register(AcceptBoardJob.class, NetworkDirection.PLAY_TO_SERVER, AcceptBoardJob::encode, AcceptBoardJob::decode, AcceptBoardJob::handle);
         com.skycraft.quest.story.IntroPackets.register();
     }
 
@@ -207,6 +209,44 @@ public final class QuestPackets {
                     default -> {
                     }
                 }
+            }
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Opens the interactive Notice Board parchment UI for a settlement (S2C). */
+    public record OpenNoticeBoard(CompoundTag tag) {
+        static void encode(OpenNoticeBoard m, FriendlyByteBuf buf) {
+            buf.writeNbt(m.tag);
+        }
+
+        static OpenNoticeBoard decode(FriendlyByteBuf buf) {
+            CompoundTag tag = buf.readNbt();
+            return new OpenNoticeBoard(tag == null ? new CompoundTag() : tag);
+        }
+
+        static void handle(OpenNoticeBoard m, Supplier<NetworkEvent.Context> ctx) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.NoticeBoardScreen.open(m.tag));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Accepts a pinned contract from the Notice Board screen (C2S). */
+    public record AcceptBoardJob(String settlementId, int jobIndex) {
+        static void encode(AcceptBoardJob m, FriendlyByteBuf buf) {
+            buf.writeUtf(m.settlementId, 64);
+            buf.writeVarInt(m.jobIndex);
+        }
+
+        static AcceptBoardJob decode(FriendlyByteBuf buf) {
+            return new AcceptBoardJob(buf.readUtf(64), buf.readVarInt());
+        }
+
+        static void handle(AcceptBoardJob m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) {
+                NoticeBoards.resolveSettlement(m.settlementId, player)
+                        .ifPresent(place -> NoticeBoards.accept(player, place, m.jobIndex));
             }
             ctx.get().setPacketHandled(true);
         }

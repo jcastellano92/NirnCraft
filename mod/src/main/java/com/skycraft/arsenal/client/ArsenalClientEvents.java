@@ -3,30 +3,108 @@ package com.skycraft.arsenal.client;
 import com.skycraft.Skycraft;
 import com.skycraft.arsenal.ArsenalPackets;
 import com.skycraft.arsenal.item.ArtifactItem;
+import com.skycraft.client.SkyKeys;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
 
-/** Forge-bus client hooks: Bloodskal Blade swings into thin air still release the energy blade. */
+/** Forge-bus client hooks: Bloodskal Blade swings into thin air and interactive arrow pickup via [F] or right-click. */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ArsenalClientEvents {
+    private static boolean interactWasDown = false;
+
     private ArsenalClientEvents() {}
 
     @SubscribeEvent
     public static void onClickInput(InputEvent.InteractionKeyMappingTriggered event) {
-        if (!event.isAttack()) return;
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || !ArtifactItem.is(player.getMainHandItem(), "bloodskal_blade")) return;
+        if (player == null || mc.screen != null) return;
+
+        if (event.isUseItem()) {
+            AbstractArrow targetArrow = findAimedArrow(player, 4.0);
+            if (targetArrow != null) {
+                event.setCanceled(true);
+                event.setSwingHand(true);
+                player.swing(InteractionHand.MAIN_HAND);
+                SkyNetwork.sendToServer(new ArsenalPackets.CollectArrow(targetArrow.getId()));
+                return;
+            }
+        }
+
+        if (!event.isAttack()) return;
+        if (!ArtifactItem.is(player.getMainHandItem(), "bloodskal_blade")) return;
         // creature hits are detected server-side (AttackEntityEvent); block hits start mining instead
         if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) return;
         if (player.getAttackStrengthScale(0.5f) < 0.95f) return;
         SkyNetwork.sendToServer(new ArsenalPackets.BladeSwing());
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        if (player == null || mc.screen != null) {
+            interactWasDown = false;
+            return;
+        }
+        boolean down = SkyKeys.INTERACT.isDown();
+        if (down && !interactWasDown) {
+            AbstractArrow targetArrow = findAimedArrow(player, 4.0);
+            if (targetArrow != null) {
+                player.swing(InteractionHand.MAIN_HAND);
+                SkyNetwork.sendToServer(new ArsenalPackets.CollectArrow(targetArrow.getId()));
+            } else if (mc.crosshairPickEntity instanceof net.minecraft.world.entity.LivingEntity living
+                    && living.getArrowCount() > 0) {
+                player.swing(InteractionHand.MAIN_HAND);
+                SkyNetwork.sendToServer(new ArsenalPackets.CollectArrow(living.getId()));
+            }
+        }
+        interactWasDown = down;
+    }
+
+    @Nullable
+    private static AbstractArrow findAimedArrow(LocalPlayer player, double range) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = player.getViewVector(1.0F);
+        Vec3 end = eye.add(look.scale(range));
+        AABB searchBox = player.getBoundingBox().expandTowards(look.scale(range)).inflate(0.75);
+        AbstractArrow best = null;
+        double bestDistSq = range * range;
+        for (AbstractArrow arrow : player.level().getEntitiesOfClass(AbstractArrow.class, searchBox,
+                a -> a.isAlive() && (com.skycraft.arsenal.entity.SkyArrow.isArrowInGround(a) || a.isInWater()))) {
+            AABB box = arrow.getBoundingBox().inflate(0.42);
+            if (box.contains(eye)) {
+                double d = eye.distanceToSqr(arrow.position());
+                if (d < bestDistSq) {
+                    bestDistSq = d;
+                    best = arrow;
+                }
+                continue;
+            }
+            var hit = box.clip(eye, end);
+            if (hit.isPresent()) {
+                double d = eye.distanceToSqr(hit.get());
+                if (d < bestDistSq) {
+                    bestDistSq = d;
+                    best = arrow;
+                }
+            }
+        }
+        return best;
     }
 
     @SubscribeEvent

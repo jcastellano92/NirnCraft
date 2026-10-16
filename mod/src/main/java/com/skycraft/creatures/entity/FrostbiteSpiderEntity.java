@@ -29,7 +29,14 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
                 .add(Attributes.MAX_HEALTH, 30.0)
                 .add(Attributes.ATTACK_DAMAGE, 4.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.30)
+                .add(Attributes.FOLLOW_RANGE, 24.0)
                 .add(Attributes.ARMOR, 2.0);
+    }
+
+    @Override
+    protected void registerGoals() {
+        super.registerGoals();
+        this.targetSelector.addGoal(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(this));
     }
 
     @Override

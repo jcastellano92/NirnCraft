@@ -324,8 +324,8 @@ final class DistantStorms {
                         thunderStrength = Math.max(thunderStrength, fi * ft);
                     }
                 }
-                // High convective towers & mesoscale rain bands also generate lightning
-                if (col.stormTower() > 0.62f && col.rainBand() > 0.38f) {
+                // High convective towers & mesoscale rain bands amplify active electrical storms (never plain snow/rain)
+                if (thunderStrength > 0.05f && col.stormTower() > 0.62f && col.rainBand() > 0.38f) {
                     thunderStrength = Math.max(thunderStrength, (col.stormTower() - 0.45f) * 1.2f);
                 }
 

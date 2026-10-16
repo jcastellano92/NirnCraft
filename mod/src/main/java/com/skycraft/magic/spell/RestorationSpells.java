@@ -66,7 +66,7 @@ public final class RestorationSpells {
         SpellSounds.impact(level, pos, Element.HOLY, 1.2f);
         int n = 0;
         boolean tooStrong = false;
-        for (LivingEntity e : Targeting.around(level, pos, spell.radius, e -> e.getMobType() == MobType.UNDEAD)) {
+        for (LivingEntity e : Targeting.around(level, pos, spell.radius, e -> e.getMobType() == MobType.UNDEAD && Targeting.canHarm(caster, e))) {
             if (!turnable(caster, spell, e)) {
                 tooStrong = true;
                 continue;
@@ -89,7 +89,7 @@ public final class RestorationSpells {
             MagicFx.sendNear(level, area.center, 64, MagicFx.RING, Element.HOLY, area.center.add(0, 0.1, 0), area.center, -1, (int) (area.radius * 10));
             if (owner == null) return;
             for (LivingEntity e : Targeting.around(level, area.center.add(0, 1, 0), area.radius + 1.5,
-                    e -> e.getMobType() == MobType.UNDEAD && turnable(owner, spell, e))) {
+                    e -> e.getMobType() == MobType.UNDEAD && Targeting.canHarm(owner, e) && turnable(owner, spell, e))) {
                 Illusion.applyFear(area.center, e, 80);
                 Vec3 out = e.position().subtract(area.center).multiply(1, 0, 1);
                 if (out.lengthSqr() > 1e-4) {

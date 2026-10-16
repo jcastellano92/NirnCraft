@@ -50,10 +50,17 @@ public final class InsectModels {
 
         @Override
         public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-            float flap = 0.35f + Mth.sin(ageInTicks * 1.3f) * 0.9f;
-            this.wingLeft.zRot = -flap;
-            this.wingRight.zRot = flap;
-            this.body.y = 22.0f + Mth.sin(ageInTicks * 1.3f) * 0.3f;
+            if (entity instanceof com.skycraft.fauna.entity.InsectEntity insect && insect.isPerched()) {
+                float fold = 1.18f + Mth.sin(ageInTicks * 0.12f) * 0.08f;
+                this.wingLeft.zRot = -fold;
+                this.wingRight.zRot = fold;
+                this.body.y = 22.4f;
+            } else {
+                float flap = 0.35f + Mth.sin(ageInTicks * 1.3f) * 0.9f;
+                this.wingLeft.zRot = -flap;
+                this.wingRight.zRot = flap;
+                this.body.y = 22.0f + Mth.sin(ageInTicks * 1.3f) * 0.3f;
+            }
         }
     }
 

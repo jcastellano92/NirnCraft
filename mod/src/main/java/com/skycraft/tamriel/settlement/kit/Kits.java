@@ -42,12 +42,26 @@ public final class Kits {
         return styles[Math.floorMod(style, styles.length)];
     }
 
+    private static String[] kitNames(Culture c) {
+        return switch (c) {
+            case NORD -> new String[]{"nord", "whiterun", "windhelm", "markarth", "riften", "solitude", "winterhold", "marsh", "forest", "stone"};
+            case IMPERIAL -> new String[]{"imperial", "imperial_city"};
+            case DUNMER -> new String[]{"hlaalu", "redoran", "telvanni", "velothi"};
+            default -> new String[]{c.id()};
+        };
+    }
+
+    /** The name of the kit palette for a culture and style index (Bootstrap-safe for Tier-0 plan tests). */
+    public static String kitName(Culture c, int style) {
+        String[] names = kitNames(c);
+        return names[Math.floorMod(style < 0 ? style : style & KIT_MASK, names.length)];
+    }
+
     /** The kit style index of the palette called {@code name} for a culture, or {@code fallback}. */
     public static int styleOf(Culture c, String name, int fallback) {
-        for (int i = 0; i < 16; i++) {
-            Palette p = kit(c, i);
-            if (p.name.equals(name)) return i;
-            if (i > 0 && p == kit(c, 0)) break;
+        String[] names = kitNames(c);
+        for (int i = 0; i < names.length; i++) {
+            if (names[i].equals(name)) return i;
         }
         return fallback;
     }

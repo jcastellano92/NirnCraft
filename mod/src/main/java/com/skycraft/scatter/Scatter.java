@@ -217,6 +217,11 @@ public final class Scatter {
             if (!k.provinces.isEmpty() && !k.provinces.contains(info.province())) return false;
             if (k.denyProvinces.contains(info.province())) return false;
             if (info.elevation() < k.minElev || info.elevation() > k.maxElev) return false;
+            if ("animal_den".equals(k.id)) {
+                // Monster/animal dens avoid populated settlements, traveled road corridors, and cluster sparsely
+                if (info.settleEdge() < 180 || info.roadHint() >= 0.22f || info.humanity() >= 0.25f) return false;
+                if (((cp.x * 31 + cp.z * 17) & 7) != 0) return false;
+            }
             return perKind.getOrDefault(k.id, 0) < rules.caps.perKind;
         }
 
@@ -294,11 +299,23 @@ public final class Scatter {
                     long need = p.radius() + 2L;
                     if (p.distSqr(x, z) < need * need) return fail("place footprint");
                 }
-                if (!com.skycraft.world.PlacementMask.clearOfPlans(level, x, z, 0)) return fail("placement mask");
+                if (!com.skycraft.world.PlacementMask.clearOfPlans(level, x, z, Math.max(1, k.radius / 2))) return fail("placement mask");
             } else {
-                if (!Places.overlapping(x - 3, z - 3, x + 3, z + 3).isEmpty()) return fail("place footprint");
+                int placePad = "animal_den".equals(k.id) ? 180 : Math.max(6, k.radius + 2);
+                for (com.skycraft.tamriel.Place p : Places.overlapping(x - placePad, z - placePad, x + placePad, z + placePad)) {
+                    long need = p.radius() + (p.type().isSettlement() ? placePad : Math.max(6, k.radius + 2));
+                    if (p.distSqr(x, z) < need * need) return fail("place footprint");
+                }
                 // natural scatter keeps off planned road corridors, street/plot/pad footprints and site pads
-                if (spacing && !com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return fail("placement mask");
+                int maskMargin = "animal_den".equals(k.id) ? 64 : Math.max(2, k.radius);
+                if (spacing && !com.skycraft.world.PlacementMask.clear(level, x, z, maskMargin)) return fail("placement mask");
+                if ("animal_den".equals(k.id)) {
+                    com.skycraft.worldplan.RoadPlan.Hit rh = new com.skycraft.worldplan.RoadPlan.Hit();
+                    if (com.skycraft.worldplan.RoadPlan.get().at(x + 0.5, z + 0.5, rh)
+                            && rh.distance <= rh.halfWidth + 72f) {
+                        return fail("near road");
+                    }
+                }
                 // ... and off the planned scenes, which may be built after it in a neighbouring chunk
                 if (com.skycraft.worldplan.scene.ScenePlan.get().covers(x, z, k.radius + 1)) return fail("scene");
             }
@@ -328,26 +345,25 @@ public final class Scatter {
             BlockState gs = level.getBlockState(col);
             boolean fluid = !gs.getFluidState().isEmpty() || !level.getFluidState(col.above()).isEmpty();
             if (fluid && !k.wet) return fail("fluid");
-            if (!k.wet) {
-                if (Terrain.isPath(gs)) return fail("path");
-                // never stand a prop on a road's coarse dirt or gravel next to a path
-                for (int[] o : new int[][]{{2, 0}, {-2, 0}, {0, 2}, {0, -2}}) {
-                    int h = b.groundAt(x + o[0], z + o[1]);
-                    if (Terrain.isPath(level.getBlockState(new BlockPos(x + o[0], h, z + o[1])))) return fail("near path");
-                }
+            if (Terrain.isPath(gs)) return fail("path");
+            // never stand a prop on a road's coarse dirt or gravel next to a path
+            for (int[] o : new int[][]{{2, 0}, {-2, 0}, {0, 2}, {0, -2}}) {
+                int h = b.groundAt(x + o[0], z + o[1]);
+                if (Terrain.isPath(level.getBlockState(new BlockPos(x + o[0], h, z + o[1])))) return fail("near path");
             }
             Ground ground = Terrain.ground(fluid ? level.getBlockState(col.below()) : gs);
             if (!k.ground.contains(ground)) return fail("ground " + ground);
-            if (!k.wet) {
-                int slope = 0;
-                for (int[] o : new int[][]{{2, 0}, {-2, 0}, {0, 2}, {0, -2}}) {
-                    slope = Math.max(slope, Math.abs(b.groundAt(x + o[0], z + o[1]) - g));
-                }
-                if (slope < k.minSlope || slope > k.maxSlope) return fail("slope " + slope);
-                if (!b.free(0, 0, 0)) return fail("blocked");
+            int slope = 0;
+            int probe = Math.max(2, Math.min(4, k.radius));
+            for (int[] o : new int[][]{{probe, 0}, {-probe, 0}, {0, probe}, {0, -probe}}) {
+                slope = Math.max(slope, Math.abs(b.groundAt(x + o[0], z + o[1]) - g));
             }
+            int maxSlope = k.wet ? k.maxSlope + 1 : k.maxSlope;
+            if (slope < k.minSlope || slope > maxSlope) return fail("slope " + slope);
+            if (!k.wet && !b.free(0, 0, 0)) return fail("blocked");
             b.y = g + 1;
-            Brush br = new Brush(b, RockSet.of(ground, gs));
+            RockSet rockSet = RockSet.of(ground, gs);
+            Brush br = new Brush(b, rockSet);
             boolean ok;
             try {
                 ok = k.builder != null ? Builders.build(k.builder, br, k) : Props.build(br, k);
@@ -356,6 +372,14 @@ public final class Scatter {
                 return fail("exception");
             }
             if (!ok) return fail("builder refused");
+            if (!k.wet && !"animal_den".equals(k.id)) {
+                try {
+                    int pad = Math.max(3, k.radius + 2);
+                    com.skycraft.landmarks.Grounding.fix(level, x - pad, z - pad, x + pad, z + pad,
+                            b::writable, rockSet.a().defaultBlockState());
+                } catch (RuntimeException ignored) {
+                }
+            }
             centres.add(new int[]{x, z, k.radius});
             count += Math.max(1, k.items);
             if (k.isolated) isolated++;

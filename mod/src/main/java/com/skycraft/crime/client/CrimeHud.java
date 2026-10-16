@@ -150,13 +150,54 @@ public final class CrimeHud {
 
             boolean isContainer = block instanceof net.minecraft.world.level.block.ChestBlock
                     || block instanceof net.minecraft.world.level.block.BarrelBlock
-                    || block instanceof net.minecraft.world.level.block.ShulkerBoxBlock;
+                    || block instanceof net.minecraft.world.level.block.ShulkerBoxBlock
+                    || block instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock;
 
             if (isContainer) {
                 boolean owned = (info != null && info.pos().equals(bpos) && info.owned()) || Ownership.isOwnedByOther(mc.player, mc.level, bpos);
                 String name = block.getName().getString();
+                if (mc.level.getBlockEntity(bpos) instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlockEntity fbe) {
+                    name = fbe.kind().displayName;
+                }
                 String action = owned ? "[F] Steal  " : "[F] Open  ";
                 drawSmall(g, font, Component.literal(action + name), cx, cy, 0.75f, owned ? (0xD0000000 | RED) : 0xD0E8E2D0);
+                return;
+            }
+
+            if (mc.level.getBlockEntity(bpos) instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlockEntity fbe) {
+                var kind = fbe.kind();
+                if (kind.isSeat()) {
+                    drawSmall(g, font, Component.literal("[F] Sit  " + kind.displayName), cx, cy, 0.75f, 0xD0E8E2D0);
+                    return;
+                }
+                if (kind.isTakeableClutter() && !fbe.isEmpty()) {
+                    boolean owned = Ownership.isOwnedByOther(mc.player, mc.level, bpos);
+                    String action = owned ? "[F] Steal  " : "[F] Take  ";
+                    drawSmall(g, font, Component.literal(action + kind.displayName), cx, cy, 0.75f, owned ? (0xD0000000 | RED) : 0xD0E8E2D0);
+                    return;
+                }
+                if (kind == com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.DESK && !fbe.isEmpty()) {
+                    drawSmall(g, font, Component.literal("[F] Search  Writing Desk"), cx, cy, 0.75f, 0xD0E8E2D0);
+                    return;
+                }
+            }
+
+            if (bstate.is(net.minecraft.world.level.block.Blocks.CHISELED_BOOKSHELF)) {
+                int occ = com.skycraft.lore.LoreEvents.findOccupiedSlot(bstate);
+                if (occ >= 0) {
+                    boolean owned = Ownership.isOwnedByOther(mc.player, mc.level, bpos);
+                    String action = owned ? "[F] Steal Book  " : "[F] Take Book  ";
+                    drawSmall(g, font, Component.literal(action + "Bookshelf"), cx, cy, 0.75f, owned ? (0xD0000000 | RED) : 0xD0E8E2D0);
+                } else {
+                    drawSmall(g, font, Component.literal("Bookshelf (Empty)"), cx, cy, 0.75f, 0x80AAAAAA);
+                }
+                return;
+            }
+
+            if (bstate.is(net.minecraft.world.level.block.Blocks.BOOKSHELF)) {
+                boolean owned = Ownership.isOwnedByOther(mc.player, mc.level, bpos);
+                String action = owned ? "[F] Steal Book  " : "[F] Take Book  ";
+                drawSmall(g, font, Component.literal(action + "Bookshelf"), cx, cy, 0.75f, owned ? (0xD0000000 | RED) : 0xD0E8E2D0);
                 return;
             }
 
@@ -166,9 +207,13 @@ public final class CrimeHud {
                 boolean owned = Ownership.isOwnedByOther(mc.player, mc.level, bpos);
                 long dayTime = mc.level.getDayTime() % 24000L;
                 boolean night = dayTime >= 13000L && dayTime <= 23000L;
-                boolean locked = (info != null && (info.pos().equals(bpos) || info.pos().equals(bpos.below())) && info.lock() != Locks.NOT_LOCKED && !info.unlocked())
+                boolean matchesInfo = info != null && (info.pos().equals(bpos) || info.pos().equals(bpos.below()) || info.pos().equals(bpos.above()));
+                boolean locked = (matchesInfo && info.lock() != Locks.NOT_LOCKED && !info.unlocked())
                         || (owned && night && (block instanceof net.minecraft.world.level.block.DoorBlock || block instanceof net.minecraft.world.level.block.TrapDoorBlock));
-                String est = getEstablishmentName(mc.level, bpos);
+                String serverLabel = (matchesInfo && info.label() != null && !info.label().getString().isBlank())
+                        ? info.label().getString()
+                        : null;
+                String est = serverLabel != null ? serverLabel : getEstablishmentName(mc.level, bpos);
                 String label = est != null ? est : "Door";
                 String t;
                 if (locked) {
@@ -180,6 +225,14 @@ public final class CrimeHud {
                 }
                 drawSmall(g, font, Component.literal(t), cx, cy, 0.75f, (owned || locked) ? (0xD0000000 | RED) : 0xD0E8E2D0);
                 return;
+            }
+
+            if (mc.level.getBlockEntity(bpos) instanceof net.minecraft.world.level.block.entity.SignBlockEntity signBe) {
+                Component signHud = com.skycraft.tamriel.settlement.client.ShopSignRenderer.describeSignForHud(signBe);
+                if (signHud != null) {
+                    drawSmall(g, font, signHud, cx, cy, 0.75f, 0xD0E8E2D0);
+                    return;
+                }
             }
 
             if (block.getDescriptionId().contains("shrine")) {
@@ -322,51 +375,34 @@ public final class CrimeHud {
         return estName;
     }
 
-    private static String findEstablishmentName(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+    private static String findEstablishmentName(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos rawPos) {
+        net.minecraft.core.BlockPos pos = com.skycraft.crime.Locks.normalizePos(level, rawPos);
         for (com.skycraft.economy.Houses.HouseDef h : com.skycraft.economy.Houses.HOUSES) {
             if (!h.homestead() && h.contains(pos)) {
                 return h.displayName().getString();
             }
         }
-        var npcs = level.getEntitiesOfClass(com.skycraft.society.entity.NpcEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(14));
-        for (var npc : npcs) {
-            var role = npc.role();
-            if (role == com.skycraft.society.NpcRole.INNKEEPER) {
-                return com.skycraft.survival.inn.Innkeepers.innName(npc).getString() + " (Inn)";
-            }
-            if (role == com.skycraft.society.NpcRole.PRIEST) return "Temple";
-            if (role == com.skycraft.society.NpcRole.BLACKSMITH) return "Blacksmith";
-            if (role == com.skycraft.society.NpcRole.APOTHECARY) return "Apothecary";
-            if (role == com.skycraft.society.NpcRole.MERCHANT || role == com.skycraft.society.NpcRole.BUTCHER
-                    || role == com.skycraft.society.NpcRole.SCHOLAR) return "Shop";
-        }
-        var villagers = level.getEntitiesOfClass(net.minecraft.world.entity.npc.Villager.class, new net.minecraft.world.phys.AABB(pos).inflate(14));
-        for (var v : villagers) {
-            var prof = v.getVillagerData().getProfession();
-            if (prof == net.minecraft.world.entity.npc.VillagerProfession.ARMORER || prof == net.minecraft.world.entity.npc.VillagerProfession.WEAPONSMITH || prof == net.minecraft.world.entity.npc.VillagerProfession.TOOLSMITH) {
-                return "Blacksmith";
-            }
-            if (prof == net.minecraft.world.entity.npc.VillagerProfession.CLERIC) return "Apothecary";
-            if (prof != net.minecraft.world.entity.npc.VillagerProfession.NONE && prof != net.minecraft.world.entity.npc.VillagerProfession.NITWIT) {
-                return "Shop";
-            }
-        }
         net.minecraft.core.BlockPos.MutableBlockPos m = new net.minecraft.core.BlockPos.MutableBlockPos();
-        for (int dx = -7; dx <= 7; dx++) {
-            for (int dy = -2; dy <= 4; dy++) {
-                for (int dz = -7; dz <= 7; dz++) {
+        String bestSignTitle = null;
+        double bestSignDist = Double.MAX_VALUE;
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dy = 0; dy <= 3; dy++) {
+                for (int dz = -3; dz <= 3; dz++) {
                     m.set(pos.getX() + dx, pos.getY() + dy, pos.getZ() + dz);
-                    var b = level.getBlockState(m).getBlock();
-                    if (b instanceof net.minecraft.world.level.block.AnvilBlock || b == net.minecraft.world.level.block.Blocks.GRINDSTONE || b == net.minecraft.world.level.block.Blocks.BLAST_FURNACE) {
-                        return "Blacksmith";
-                    }
-                    if (b == net.minecraft.world.level.block.Blocks.BREWING_STAND) {
-                        return "Apothecary";
+                    if (level.getBlockEntity(m) instanceof net.minecraft.world.level.block.entity.SignBlockEntity signBe) {
+                        var c = com.skycraft.tamriel.settlement.client.ShopSignRenderer.classify(signBe);
+                        if (c.title() != null && !c.title().isBlank()) {
+                            double d = dx * dx + dz * dz + dy * 0.5;
+                            if (d < bestSignDist) {
+                                bestSignDist = d;
+                                bestSignTitle = c.title();
+                            }
+                        }
                     }
                 }
             }
         }
-        return null;
+        return bestSignTitle;
     }
 
     public static net.minecraft.world.entity.item.ItemEntity getLookedAtItem(Minecraft mc, double maxDist) {

@@ -71,14 +71,16 @@ public final class Props {
                 br.written++;
             }
             case "skull" -> {
-                int dy = k.follow ? br.gy(e.p[0], e.p[2]) + e.p[1] : e.p[1];
+                int dy = (k.follow || e.p[1] == 0) ? br.gy(e.p[0], e.p[2]) + e.p[1] : e.p[1];
+                if (e.p[1] > 0 && b.free(e.p[0], dy - 1, e.p[2])) return;
                 if (b.free(e.p[0], dy, e.p[2])) {
                     b.skull(e.p[0], dy, e.p[2]);
                     br.written++;
                 }
             }
             case "banner" -> {
-                int dy = k.follow ? br.gy(e.p[0], e.p[2]) + e.p[1] : e.p[1];
+                int dy = (k.follow || e.p[1] == 0) ? br.gy(e.p[0], e.p[2]) + e.p[1] : e.p[1];
+                if (e.p[1] > 0 && b.free(e.p[0], dy - 1, e.p[2])) return;
                 if (b.free(e.p[0], dy, e.p[2])) {
                     b.banner(e.p[0], dy, e.p[2], color(b, e.color));
                     br.written++;
@@ -101,8 +103,20 @@ public final class Props {
             br.force(dx, dy, dz, s);
             return;
         }
-        if (br.set(dx, dy, dz, s) && dy == 0 && s.isSolidRender(br.b.level, br.b.at(dx, dy, dz))) {
-            br.support(dx, dy, dz, Blocks.DIRT.defaultBlockState());
+        // Soft surface coverings (carpets, cobwebs) at dy == 0 snap directly onto the local ground
+        if (dy == 0 && (s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock || s.is(Blocks.COBWEB))) {
+            br.top(dx, dz, 0, s);
+            return;
+        }
+        // Never place an upper block (dy > 0) floating over air when its supporting block below was skipped
+        if (dy > 0 && br.b.free(dx, dy - 1, dz)) {
+            return;
+        }
+        if (br.set(dx, dy, dz, s) && dy == 0) {
+            BlockState supportMat = s.isSolidRender(br.b.level, br.b.at(dx, dy, dz))
+                    ? Blocks.DIRT.defaultBlockState()
+                    : Blocks.COARSE_DIRT.defaultBlockState();
+            br.support(dx, dy, dz, supportMat);
         }
     }
 

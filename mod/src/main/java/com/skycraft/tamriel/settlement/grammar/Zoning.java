@@ -1421,14 +1421,14 @@ public final class Zoning {
             if (a[2] == 1) {
                 double len = Math.hypot(bx - ax, bz - az);
                 if (len < 8) continue;
-                ax += (bx - ax) / len * 6;
-                az += (bz - az) / len * 6;
+                ax += (bx - ax) / len * 4;
+                az += (bz - az) / len * 4;
             }
             if (b[2] == 1) {
                 double len = Math.hypot(bx - ax, bz - az);
                 if (len < 8) continue;
-                bx -= (bx - ax) / len * 6;
-                bz -= (bz - az) / len * 6;
+                bx -= (bx - ax) / len * 4;
+                bz -= (bz - az) / len * 4;
             }
             double mid = (a[0] + b[0] + (b[0] < a[0] ? 2 * Math.PI : 0)) / 2;
             int sector = Math.floorMod((int) Math.round(mid / (2 * Math.PI) * n), n);
@@ -1844,14 +1844,29 @@ public final class Zoning {
         x.noble = new int[]{0, -(int) (plan.radius * 0.6)};
         x.craft = new int[]{(int) (plan.radius * 0.5), (int) (plan.radius * 0.3)};
         x.poor = new int[]{-(int) (plan.radius * 0.5), (int) (plan.radius * 0.6)};
+        boolean courtSeat = hasCourtSeat(plan.place, x.tier);
+        boolean canonMinor = isCanonMinorSettlement(plan.place, cp, size);
+        boolean alreadySeated = false;
+        for (Spec s : plan.specs) {
+            if (!courtSeat) {
+                s.flags &= ~Spec.SEAT;
+            } else if (s.has(Spec.SEAT)) {
+                if (alreadySeated) s.flags &= ~Spec.SEAT;
+                else alreadySeated = true;
+            }
+        }
         for (Spec s : new ArrayList<>(plan.specs)) {
-            if (s.kind == Archetype.PALACE || s.kind == Archetype.LONGHOUSE
-                    || s.use == Use.KEEP.ordinal() || s.use == Use.LONGHOUSE.ordinal()) {
-                s.flags |= Spec.SEAT;
-            } else if (s.kind == Archetype.LANDMARK && s.name != null) {
-                String nm = s.name.toLowerCase(Locale.ROOT);
-                if (nm.contains("palace") || nm.contains("castle") || nm.contains("keep") || nm.contains("reach") || nm.contains("tower") || nm.contains("tree")) {
+            if (courtSeat && !alreadySeated) {
+                if (s.kind == Archetype.PALACE || s.kind == Archetype.LONGHOUSE
+                        || s.use == Use.KEEP.ordinal() || s.use == Use.LONGHOUSE.ordinal()) {
                     s.flags |= Spec.SEAT;
+                    alreadySeated = true;
+                } else if (s.kind == Archetype.LANDMARK && s.name != null) {
+                    String nm = s.name.toLowerCase(Locale.ROOT);
+                    if (nm.contains("palace") || nm.contains("castle") || nm.contains("keep") || nm.contains("reach") || nm.contains("tower") || nm.contains("tree")) {
+                        s.flags |= Spec.SEAT;
+                        alreadySeated = true;
+                    }
                 }
             }
             // a plan piece given a grammar use ("use": "sawmill") needs its seed and slope like a lot the fabric found
@@ -1868,7 +1883,10 @@ public final class Zoning {
             Use u = Use.of(s.kind, w);
             if (u == null) continue;
             s.use(u, w);
-            if (u == Use.KEEP || u == Use.LONGHOUSE) s.flags |= Spec.SEAT;
+            if (courtSeat && !alreadySeated && (u == Use.KEEP || u == Use.LONGHOUSE)) {
+                s.flags |= Spec.SEAT;
+                alreadySeated = true;
+            }
             if (u.home()) {
                 if (s.w < 7) s.w = 7;
                 if (s.d < 9) s.d = 9;
@@ -1876,7 +1894,7 @@ public final class Zoning {
             stamp(x, s);
             x.buildings.add(s);
         }
-        if (x.tier >= 2) {
+        if (courtSeat) {
             boolean hasSeat = false;
             for (Spec s : plan.specs) {
                 if (s.has(Spec.SEAT)) {
@@ -1892,25 +1910,51 @@ public final class Zoning {
         if (x.sk.squares.isEmpty()) {
             for (Spec s : plan.specs) if (s.kind == Archetype.PLAZA) x.sk.squares.add(new int[]{localX(plan, s.x, s.z), localZ(plan, s.x, s.z), s.w});
         }
-        if (x.sk.streets.size() < 2 && plan.radius >= 24) {
+        if (x.sk.streets.size() < 2 && plan.radius >= 24 && !canonMinor) {
             synthesizeStreets(x);
         }
         if (!x.sk.streets.isEmpty() && x.tier >= 1) {
-            reserved(x);
+            if (!canonMinor) reserved(x);
             lining(x);
         }
-        if (plan.place != null && !special(plan.place.variant()) && x.named) {
+        if (!canonMinor && plan.place != null && !special(plan.place.variant()) && x.named) {
             ensureTrades(x, com.skycraft.tamriel.settlement.plan.Cities.names(plan.place));
         }
-        fillGaps(x);
+        if (!canonMinor) {
+            fillGaps(x);
+        }
         if (x.tier >= 1) {
             adoptHarbor(x);
-            adoptOutskirts(x, cp);
+            if (!canonMinor) adoptOutskirts(x, cp);
         }
         // the homes of a hand-laid layout (and the ones the fill added) get a yard behind them like generated towns do
         if (x.tier >= 1) backyards(x);
         variety(plan);
         clearing(plan, 0, Math.min(plan.radius, 120));
+    }
+
+    /** True if this settlement should have a ruling seat (Jarl's keep/palace, count's castle, or Orc stronghold chief's longhouse). */
+    public static boolean hasCourtSeat(com.skycraft.tamriel.Place place, int tier) {
+        if (place != null) {
+            if (place.type() == com.skycraft.tamriel.PlaceType.CAPITAL || place.type() == com.skycraft.tamriel.PlaceType.CITY) return true;
+            if (place.radius() >= com.skycraft.society.GuardWatch.SEAT_RADIUS) return true;
+            return "stronghold".equals(place.variant());
+        }
+        return tier >= 3;
+    }
+
+    /**
+     * True for authored canon minor Skyrim/Solstheim towns and villages whose {@link CityPlan} already defines their
+     * exact canon buildings ({@code buildings} + {@code queue}) and should not be buried under random procedural houses,
+     * extra shops, or outskirts farms.
+     */
+    public static boolean isCanonMinorSettlement(com.skycraft.tamriel.Place place, com.skycraft.tamriel.settlement.plan.CityPlan cp, Layouts.Size size) {
+        if (place == null || cp == null) return false;
+        if (size == Layouts.Size.CITY || place.type() == com.skycraft.tamriel.PlaceType.CAPITAL || place.type() == com.skycraft.tamriel.PlaceType.CITY) return false;
+        if (place.radius() >= com.skycraft.society.GuardWatch.SEAT_RADIUS) return false;
+        String reg = place.regionId();
+        if (reg == null || !(reg.startsWith("skyrim/") || "morrowind/solstheim".equals(reg))) return false;
+        return !cp.buildings.isEmpty() || !cp.queue.isEmpty();
     }
 
     static void synthesizeStreets(Ctx x) {

@@ -102,26 +102,37 @@ public final class Fabric {
             set = String.join(",", done);
         }
         // ---- homes and trades along every street chain, main streets first
-        List<Plan.Chain> chains = new ArrayList<>(plan.chains);
-        chains.sort((a, b) -> Integer.compare(a.rank(), b.rank()));
-        for (Plan.Chain ch : chains) {
-            if (ch.tag().equals("bridge") || ch.tag().startsWith("bare")) continue;
-            walk(x, zoner, ch, 1);
-            walk(x, zoner, ch, -1);
+        boolean canonMinor = Zoning.isCanonMinorSettlement(p, cp, size);
+        if (!canonMinor) {
+            List<Plan.Chain> chains = new ArrayList<>(plan.chains);
+            chains.sort((a, b) -> Integer.compare(a.rank(), b.rank()));
+            for (Plan.Chain ch : chains) {
+                if (ch.tag().equals("bridge") || ch.tag().startsWith("bare")) continue;
+                walk(x, zoner, ch, 1);
+                walk(x, zoner, ch, -1);
+            }
+            // the straight authored streets too (cp.streets / rings that the queue fill did not cover)
+            for (Street st : new ArrayList<>(x.sk.streets)) {
+                if (st.len() < 10 || coveredByChain(plan, st)) continue;
+                frontageStreet(x, zoner, st, 1);
+                frontageStreet(x, zoner, st, -1);
+            }
+            Zoning.squareFrontage(x);
+            Zoning.infill(x);
+            boolean gap = !f.has("gap") || f.get("gap").getAsBoolean();
+            double target = f.has("target") ? f.get("target").getAsDouble() : f.has("density") ? f.get("density").getAsDouble() : Metrics.target(size) + 0.2;
+            if (gap) gaps(x, zoner, target, 3);
         }
-        // the straight authored streets too (cp.streets / rings that the queue fill did not cover)
-        for (Street st : new ArrayList<>(x.sk.streets)) {
-            if (st.len() < 10 || coveredByChain(plan, st)) continue;
-            frontageStreet(x, zoner, st, 1);
-            frontageStreet(x, zoner, st, -1);
-        }
-        Zoning.squareFrontage(x);
-        Zoning.infill(x);
-        boolean gap = !f.has("gap") || f.get("gap").getAsBoolean();
-        double target = f.has("target") ? f.get("target").getAsDouble() : f.has("density") ? f.get("density").getAsDouble() : Metrics.target(size) + 0.2;
-        if (gap) gaps(x, zoner, target, 3);
         Zoning.backyards(x);
-        if (!f.has("outskirts") || f.get("outskirts").getAsBoolean()) Zoning.outskirts(x, p != null ? p.variant() : "");
+        if (!canonMinor && (!f.has("outskirts") || f.get("outskirts").getAsBoolean())) {
+            Zoning.outskirts(x, p != null ? p.variant() : "");
+        }
+        if ("helgen".equals(cp.id)) {
+            for (int i = firstNew; i < plan.specs.size(); i++) {
+                Spec s = plan.specs.get(i);
+                if (s.kind.building) s.flag(Spec.BURNT);
+            }
+        }
         seatOnTerraces(plan, firstNew);
         double[] m = measure(plan, x.R);
         plan.fabricReport = String.format(Locale.ROOT, "fabric %s: buildings %.0f%%, developed %.0f%% of r%d, %d features (%s), %d specs, %d ms",

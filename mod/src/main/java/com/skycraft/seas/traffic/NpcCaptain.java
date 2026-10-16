@@ -151,7 +151,7 @@ public class NpcCaptain implements ShipEntity.Autopilot {
         ship.setTransient(false);
         Player p = level.getNearestPlayer(ship, 32);
         if (p instanceof ServerPlayer sp) {
-            sp.displayClientMessage(Component.translatable("seas.skycraft.prize", Component.translatable("seas.skycraft.ship." + kind.id)), true);
+            com.skycraft.core.Notifier.message(sp, Component.translatable("seas.skycraft.prize", Component.translatable("seas.skycraft.ship." + kind.id)));
         }
         Skycraft.LOGGER.debug("Seas: {} at {} taken as a prize", kind.id, ship.blockPosition());
     }
@@ -238,7 +238,7 @@ public class NpcCaptain implements ShipEntity.Autopilot {
         }
         if (best instanceof ServerPlayer sp && level.getGameTime() - lastHail > 1200) {
             lastHail = (int) level.getGameTime();
-            sp.displayClientMessage(Component.translatable("seas.skycraft.hail." + kind.id), false);
+            com.skycraft.core.Notifier.message(sp, Component.translatable("seas.skycraft.hail." + kind.id));
             level.playSound(null, ship.getX(), ship.getY() + 2, ship.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 3f, 1.3f);
         }
     }
@@ -287,7 +287,7 @@ public class NpcCaptain implements ShipEntity.Autopilot {
         level.playSound(null, ship.getX(), ship.getY() + 1, ship.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 2f, 0.7f);
         level.playSound(null, ship.getX(), ship.getY() + 1, ship.getZ(), SoundEvents.WOOD_HIT, SoundSource.NEUTRAL, 2f, 0.6f);
         Player p = quarry == null ? null : level.getPlayerByUUID(quarry);
-        if (p instanceof ServerPlayer sp) sp.displayClientMessage(Component.translatable("seas.skycraft.grappled"), true);
+        if (p instanceof ServerPlayer sp) com.skycraft.core.Notifier.message(sp, Component.translatable("seas.skycraft.grappled"));
     }
 
     /** Lashed alongside: the hull keeps station on the quarry's beam until the lines are cut by sailing hard away. */

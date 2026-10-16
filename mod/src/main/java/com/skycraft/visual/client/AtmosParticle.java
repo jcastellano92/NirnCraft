@@ -1,5 +1,10 @@
 package com.skycraft.visual.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -7,6 +12,9 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -18,6 +26,36 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class AtmosParticle extends TextureSheetParticle {
     public enum Kind { SNOW, ASH, EMBER, SAND, LEAF, FIREFLY, BREATH, WISP, MOTE }
+
+    /**
+     * Translucent particle sheet that tests against solid scene depth ({@code GL_LEQUAL}) so walls and roofs occlude
+     * particles, but does NOT write particle quad depths into {@code depthtex0} ({@code depthMask(false)}). Writing
+     * near-camera depth into the sky dome causes deferred screen-space ambient occlusion (SSAO) and TAA in shaders to
+     * paint dithered grey circular halos and trails behind falling particles.
+     */
+    private static final ParticleRenderType NO_DEPTH_WRITE_TRANSLUCENT = new ParticleRenderType() {
+        @Override
+        public void begin(BufferBuilder builder, TextureManager textureManager) {
+            RenderSystem.enableDepthTest();
+            RenderSystem.depthMask(false);
+            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+        }
+
+        @Override
+        public void end(Tesselator tesselator) {
+            tesselator.end();
+            RenderSystem.depthMask(true);
+        }
+
+        @Override
+        public String toString() {
+            return "SKYCRAFT_NO_DEPTH_WRITE_TRANSLUCENT";
+        }
+    };
 
     /** Particles of this class currently alive (reset when the level changes, see {@link AmbientParticles}). */
     static int live;
@@ -167,8 +205,8 @@ public final class AtmosParticle extends TextureSheetParticle {
         float t = age + phase * 10f;
         switch (kind) {
             case SNOW, ASH -> {
-                xd += (windX - xd) * 0.05 + Mth.sin(t * 0.13f) * 0.004;
-                zd += (windZ - zd) * 0.05 + Mth.cos(t * 0.11f) * 0.004;
+                xd += (windX - xd) * 0.14 + Mth.sin(t * 0.13f) * 0.004;
+                zd += (windZ - zd) * 0.14 + Mth.cos(t * 0.11f) * 0.004;
                 yd -= gravity;
                 yd *= 0.94;
                 roll += spin;
@@ -176,16 +214,16 @@ public final class AtmosParticle extends TextureSheetParticle {
                 if (onGround) lifetime = Math.min(lifetime, age + 8);
             }
             case SAND -> {
-                xd += (windX - xd) * 0.12;
-                zd += (windZ - zd) * 0.12;
+                xd += (windX - xd) * 0.18;
+                zd += (windZ - zd) * 0.18;
                 yd = yd * 0.9 - gravity + Mth.sin(t * 0.3f) * 0.006;
                 alpha = baseAlpha * fadeIn(life, 0.1f) * fadeOut(life, 0.7f);
             }
             case LEAF -> {
-                // falling leaves swing from side to side and slow down as they swing up
+                // falling leaves swing from side to side and drift with the wind
                 float swing = Mth.sin(t * 0.09f);
-                xd = windX * 0.6 + swing * 0.035;
-                zd = windZ * 0.6 + Mth.cos(t * 0.07f) * 0.02;
+                xd = windX * 0.95 + swing * 0.035;
+                zd = windZ * 0.95 + Mth.cos(t * 0.07f) * 0.02;
                 yd = -0.035 - 0.02 * Math.abs(swing);
                 roll = Mth.sin(t * 0.09f) * 0.8f + phase;
                 if (onGround) {
@@ -196,8 +234,8 @@ public final class AtmosParticle extends TextureSheetParticle {
                 alpha = baseAlpha * fadeOut(life, 0.85f);
             }
             case EMBER -> {
-                xd += (random.nextFloat() - 0.5f) * 0.01 + windX * 0.02;
-                zd += (random.nextFloat() - 0.5f) * 0.01 + windZ * 0.02;
+                xd += (random.nextFloat() - 0.5f) * 0.01 + windX * 0.085;
+                zd += (random.nextFloat() - 0.5f) * 0.01 + windZ * 0.085;
                 yd -= gravity;
                 yd *= 0.96;
                 xd *= 0.96;
@@ -221,8 +259,8 @@ public final class AtmosParticle extends TextureSheetParticle {
                 yd = yd * friction - gravity;
             }
             case WISP -> {
-                xd = xd * 0.98 + windX * 0.01 + Mth.sin(t * 0.01f) * 0.0015;
-                zd = zd * 0.98 + windZ * 0.01 + Mth.cos(t * 0.012f) * 0.0015;
+                xd = xd * 0.98 + windX * 0.02 + Mth.sin(t * 0.01f) * 0.0015;
+                zd = zd * 0.98 + windZ * 0.02 + Mth.cos(t * 0.012f) * 0.0015;
                 yd = Mth.sin(t * 0.02f) * 0.002;
                 roll += spin * 0.05f;
                 alpha = baseAlpha * fadeIn(life, 0.25f) * fadeOut(life, 0.65f);
@@ -256,7 +294,7 @@ public final class AtmosParticle extends TextureSheetParticle {
 
     @Override
     public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return NO_DEPTH_WRITE_TRANSLUCENT;
     }
 
     /** Provider for {@code /particle} and server-side spawns: default motion of the kind, no wind. */

@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/bleeding_crown"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/bleeding_crown_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/bleeding_crown"
+      },
+      {
+        "model": "skycraft:block/bleeding_crown",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/bleeding_crown",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/bleeding_crown",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/bleeding_crown_harvested"
+      },
+      {
+        "model": "skycraft:block/bleeding_crown_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/bleeding_crown_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/bleeding_crown_harvested",
+        "y": 270
+      }
+    ]
   }
 }

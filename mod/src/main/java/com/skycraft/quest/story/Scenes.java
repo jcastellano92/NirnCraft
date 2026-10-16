@@ -166,11 +166,10 @@ public final class Scenes {
                 p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(12, LINE_TICKS - 30, 18));
                 p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(Component.empty()));
                 p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(line));
-                p.sendSystemMessage(line);
             }
             case 4 -> {
-                p.sendSystemMessage(Component.translatable("quest.skycraft.intro.guard").withStyle(ChatFormatting.WHITE));
-                p.sendSystemMessage(Component.translatable("quest.skycraft.intro.pointer").withStyle(ChatFormatting.YELLOW));
+                com.skycraft.core.Notifier.message(p, Component.translatable("quest.skycraft.intro.guard").withStyle(ChatFormatting.WHITE));
+                com.skycraft.core.Notifier.message(p, Component.translatable("quest.skycraft.intro.pointer").withStyle(ChatFormatting.YELLOW));
                 p.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
             }
             case 5 -> flyby(p, introType);
@@ -264,7 +263,7 @@ public final class Scenes {
                 it.remove();
                 for (UUID id : p.audience()) {
                     ServerPlayer pl = server.getPlayerList().getPlayer(id);
-                    if (pl != null) pl.sendSystemMessage(p.line());
+                    if (pl != null) com.skycraft.core.Notifier.message(pl, p.line());
                 }
             }
         }

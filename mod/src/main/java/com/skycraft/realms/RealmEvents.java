@@ -132,14 +132,14 @@ public final class RealmEvents {
         boolean alduinDead = SovngardeFight.alduinDefeated(p.serverLevel());
         int line = Math.floorMod((int) (p.level().getGameTime() / 100), 3);
         if (p.isShiftKeyDown() || alduinDead) {
-            p.sendSystemMessage(Component.translatable(alduinDead ? "realm.skycraft.tsun.victory" : "realm.skycraft.tsun.return")
+            com.skycraft.core.Notifier.message(p, Component.translatable(alduinDead ? "realm.skycraft.tsun.victory" : "realm.skycraft.tsun.return")
                     .withStyle(net.minecraft.ChatFormatting.GOLD));
             p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1f, 0.6f);
             RealmTravel.schedule(p.server, 50, () -> {
                 if (p.isAlive() && Realm.of(p.level()) == Realm.SOVNGARDE) RealmTravel.returnHome(p);
             });
         } else {
-            p.sendSystemMessage(Component.translatable("realm.skycraft.tsun.greet." + line).withStyle(net.minecraft.ChatFormatting.GOLD));
+            com.skycraft.core.Notifier.message(p, Component.translatable("realm.skycraft.tsun.greet." + line).withStyle(net.minecraft.ChatFormatting.GOLD));
         }
     }
 

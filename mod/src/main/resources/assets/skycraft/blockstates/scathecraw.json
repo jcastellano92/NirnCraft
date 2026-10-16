@@ -1,7 +1,21 @@
 {
   "variants": {
-    "": {
-      "model": "skycraft:block/scathecraw"
-    }
+    "": [
+      {
+        "model": "skycraft:block/scathecraw"
+      },
+      {
+        "model": "skycraft:block/scathecraw",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/scathecraw",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/scathecraw",
+        "y": 270
+      }
+    ]
   }
 }

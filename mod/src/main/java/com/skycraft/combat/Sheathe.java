@@ -23,6 +23,13 @@ public final class Sheathe {
     /** Changes the state; the server sends it to the owner and every tracking player (appearance sync). */
     public static void setSheathed(Player player, boolean sheathed) {
         if (player == null) return;
+        if (sheathed) {
+            player.stopUsingItem();
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.magic.spell.SpellCasting.stop(sp);
+                CombatHandler.setBlocking(sp, false);
+            }
+        }
         PlayerData data = SkyData.get(player);
         if (data.module("combat").getBoolean("sheathed") == sheathed) return;
         data.module("combat").putBoolean("sheathed", sheathed);

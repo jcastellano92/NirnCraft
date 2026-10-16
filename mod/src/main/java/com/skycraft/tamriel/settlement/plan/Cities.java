@@ -248,7 +248,9 @@ public final class Cities {
             case "morthal" -> morthal(plan);
             case "dawnstar" -> dawnstar(plan);
             case "college_of_winterhold" -> college(plan);
-            case "helgen" -> helgen(plan);
+            case "helgen" -> {
+                if (CityPlans.of(p) == null) helgen(plan);
+            }
             case "dragon_bridge" -> {
                 CityPlan cp = CityPlans.of(p);
                 if (cp == null || (cp.nets.isEmpty() && cp.streets.isEmpty())) {

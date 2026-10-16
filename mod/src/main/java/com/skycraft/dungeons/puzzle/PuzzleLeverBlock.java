@@ -49,7 +49,9 @@ public class PuzzleLeverBlock extends LeverBlock {
         Direction inward = state.getValue(FACING);
         if (solved(level, pos, inward)) return super.use(state, level, pos, player, hand, hit);
         darts(level, pos, inward, player);
-        player.displayClientMessage(Component.translatable("message.skycraft.puzzle.wrong"), true);
+        if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+            com.skycraft.core.Notifier.message(sp, Component.translatable("message.skycraft.puzzle.wrong"));
+        }
         return InteractionResult.CONSUME;
     }
 

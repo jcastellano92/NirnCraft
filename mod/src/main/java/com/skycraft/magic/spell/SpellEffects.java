@@ -431,7 +431,7 @@ public final class SpellEffects {
                         if (e.getMaxHealth() <= threshold) Illusion.applyFear(area.center, e, 60);
                         e.setSecondsOnFire(2);
                     }
-                } else if (owner != null && (Targeting.isFriendly(owner, e) || e instanceof Player)) {
+                } else if (owner != null && Targeting.isHelpable(owner, e)) {
                     if (heal(owner, e, heal) > 0) MagicFx.send(e, MagicFx.HEAL, Element.HOLY, e.position(), e.position(), e.getId(), 0);
                 }
             }

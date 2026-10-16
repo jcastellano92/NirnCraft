@@ -413,19 +413,26 @@ def reeds(top):
     img = new()
     r = random.Random(131 + top)
     stems = [2, 5, 8, 11, 13]
+    if not top:
+        for x in range(2, 14):
+            put(img, x, 15, hexc("3E5624") if x % 2 == 0 else hexc("4E6A2E"))
+            if 3 <= x <= 12:
+                put(img, x, 14, hexc("4E6A2E"))
     for i, sx in enumerate(stems):
-        h = 16 if not top else r.randint(6, 14)
+        h = 16 if not top else r.randint(8, 14)
         for dy in range(h):
             y = 15 - dy
             x = sx + (1 if dy > 10 and i % 2 else 0)
             put(img, x, y, hexc("5E7A3A") if (dy + i) % 3 else hexc("4E6A2E"))
+            if dy < 10 and x + 1 < 15:
+                put(img, x + 1, y, hexc("3E5624"))
         if top and i % 2 == 0:  # cattail heads
             for dy in range(4):
                 put(img, sx, 15 - h + dy + 1, hexc("6A4426"))
                 put(img, sx + 1, 15 - h + dy + 1, hexc("7E5430"))
     if not top:
-        for x in (3, 9, 12):  # lower leaves
-            for dy in range(6):
+        for x in (3, 7, 9, 12):  # lower leaves
+            for dy in range(7):
                 put(img, x + (dy // 3), 15 - dy, hexc("6E8A44"))
     return img
 
@@ -433,27 +440,42 @@ def reeds(top):
 def scathecraw():
     img = new()
     r = random.Random(141)
-    for _ in range(9):
+    # Grounded basal root crown at y=14..15
+    for x in range(3, 13):
+        put(img, x, 15, hexc("542418") if x % 2 == 0 else hexc("6E3020"))
+        if 4 <= x <= 11:
+            put(img, x, 14, hexc("7A3A28"))
+    for _ in range(11):
         x = r.randint(2, 13)
-        h = r.randint(5, 12)
+        h = r.randint(6, 13)
         lean = r.choice([-1, 0, 1])
         for dy in range(h):
-            xx = x + (lean * dy) // 4
-            put(img, xx, 15 - dy, hexc("7A3A28") if dy < h - 2 else hexc("B8643A"))
-        put(img, x + (lean * h) // 4, 15 - h, hexc("D88A4A"))
+            xx = max(1, min(14, x + (lean * dy) // 4))
+            put(img, xx, 15 - dy, hexc("7A3A28") if dy < h - 3 else hexc("B8643A"))
+            if dy < 5 and xx + 1 < 15:
+                put(img, xx + 1, 15 - dy, hexc("5E2A1C"))
+        tx = max(1, min(14, x + (lean * h) // 4))
+        put(img, tx, 15 - h, hexc("D88A4A"))
+        if 15 - h + 1 < 16:
+            put(img, max(1, tx - 1), 15 - h + 1, hexc("F0AC64"))
     return img
 
 
 def ash_grass():
     img = new()
     r = random.Random(151)
-    for _ in range(12):
+    # Grounded basal clump at y=14..15
+    for x in range(2, 14):
+        put(img, x, 15, hexc("4E4E3A") if x % 2 == 0 else hexc("5E5E46"))
+        if 3 <= x <= 12:
+            put(img, x, 14, hexc("6A6A50"))
+    for _ in range(14):
         x = r.randint(1, 14)
-        h = r.randint(3, 9)
+        h = r.randint(4, 11)
         lean = r.choice([-1, 0, 0, 1])
         for dy in range(h):
-            xx = x + (lean * dy) // 3
-            put(img, xx, 15 - dy, mix(hexc("6A6A50"), hexc("A8A884"), dy / h + r.random() * 0.2))
+            xx = max(1, min(14, x + (lean * dy) // 3))
+            put(img, xx, 15 - dy, mix(hexc("6A6A50"), hexc("B8B894"), dy / h + r.random() * 0.2))
     return img
 
 
@@ -583,6 +605,57 @@ def cross(name, texture=None, tinted=False):
                  "render_type": "minecraft:cutout", "textures": {"cross": b(texture or name)}})
 
 
+def botanical_cross(name, texture=None):
+    tex = b(texture or name)
+    model(name, {
+        "ambientocclusion": False,
+        "render_type": "minecraft:cutout",
+        "textures": {"cross": tex, "particle": tex},
+        "elements": [
+            {
+                "from": [0.8, 0, 8],
+                "to": [15.2, 16, 8],
+                "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": 45, "rescale": True},
+                "shade": False,
+                "faces": {
+                    "north": {"uv": [0, 0, 16, 16], "texture": "#cross"},
+                    "south": {"uv": [0, 0, 16, 16], "texture": "#cross"},
+                },
+            },
+            {
+                "from": [8, 0, 0.8],
+                "to": [8, 16, 15.2],
+                "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": 45, "rescale": True},
+                "shade": False,
+                "faces": {
+                    "west": {"uv": [0, 0, 16, 16], "texture": "#cross"},
+                    "east": {"uv": [0, 0, 16, 16], "texture": "#cross"},
+                },
+            },
+            {
+                "from": [1.5, 0, 6.8],
+                "to": [14.5, 14, 6.8],
+                "rotation": {"origin": [8, 0, 6.8], "axis": "x", "angle": 22.5},
+                "shade": False,
+                "faces": {
+                    "north": {"uv": [0, 2, 16, 16], "texture": "#cross"},
+                    "south": {"uv": [0, 2, 16, 16], "texture": "#cross"},
+                },
+            },
+            {
+                "from": [9.2, 0, 1.5],
+                "to": [9.2, 14, 14.5],
+                "rotation": {"origin": [9.2, 0, 8], "axis": "z", "angle": 22.5},
+                "shade": False,
+                "faces": {
+                    "west": {"uv": [0, 2, 16, 16], "texture": "#cross"},
+                    "east": {"uv": [0, 2, 16, 16], "texture": "#cross"},
+                },
+            },
+        ],
+    })
+
+
 def write_assets():
     # simple cubes
     for name in ("volcanic_rock", "cracked_volcanic_rock", "magma_volcanic_rock", "coral_stone", "dune_sand",
@@ -637,8 +710,13 @@ def write_assets():
     self_drop("crystal_cluster")
     # plants
     for name in ("scathecraw", "ash_grass"):
-        cross(name)
-        blockstate(name, {"variants": {"": {"model": b(name)}}})
+        botanical_cross(name)
+        blockstate(name, {"variants": {"": [
+            {"model": b(name)},
+            {"model": b(name), "y": 90},
+            {"model": b(name), "y": 180},
+            {"model": b(name), "y": 270},
+        ]}})
         item_model(name, {"parent": "minecraft:item/generated", "textures": {"layer0": b(name)}})
     self_drop("scathecraw")
     self_drop("ash_grass", [SHEARS_OR_SILK])

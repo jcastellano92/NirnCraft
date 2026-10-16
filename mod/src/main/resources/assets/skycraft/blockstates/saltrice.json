@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/saltrice"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/saltrice_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/saltrice"
+      },
+      {
+        "model": "skycraft:block/saltrice",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/saltrice",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/saltrice",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/saltrice_harvested"
+      },
+      {
+        "model": "skycraft:block/saltrice_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/saltrice_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/saltrice_harvested",
+        "y": 270
+      }
+    ]
   }
 }

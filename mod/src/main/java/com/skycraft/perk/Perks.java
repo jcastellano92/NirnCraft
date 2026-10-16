@@ -321,6 +321,7 @@ public final class Perks {
         s = Skill.FISHING;
         p(s, "angler", 0f, 0f, FIVE);
         p(s, "patient_hands", -0.5f, 0.35f, lv(20), "angler");
+        p(s, "steady_reel", 0f, 0.45f, lv(25, 55), "angler");
         p(s, "treasure_fisher", 0.5f, 0.35f, lv(30, 60), "angler");
         p(s, "double_catch", -0.4f, 0.7f, lv(50), "patient_hands");
         p(s, "legendary_angler", 0.15f, 1f, lv(100), "double_catch", "treasure_fisher");

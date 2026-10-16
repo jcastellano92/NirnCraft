@@ -153,17 +153,53 @@ public final class WeatherFieldTexture extends AbstractTexture {
                 WeatherPhysics.ColumnState state = WeatherPhysics.evaluate(
                         sampleX, sampleZ, timeSec, regParams, regKind, wx, wz, fronts);
 
-                int band = aerosolBand(state.aerosolCode());
+                float cov = state.coverage();
+                float tower = state.stormTower();
+                float curtain = state.curtainDensity();
+                float aerosol = state.aerosolCode();
+
+                // Synchronize local cloud deck, storm base darkening, and precipitation curtains with ClientWeather
+                float liveSnow = ClientWeather.snow();
+                float liveRain = ClientWeather.rain();
+                float liveAsh = ClientWeather.ash();
+                float liveSand = ClientWeather.sand();
+                float liveClouds = ClientWeather.clouds();
+                float livePrecip = Math.max(Math.max(liveSnow, liveRain), Math.max(liveAsh, liveSand));
+                double dx = sampleX - cam.x;
+                double dz = sampleZ - cam.z;
+                float dist = (float) Math.sqrt(dx * dx + dz * dz);
+                float nearCam = Mth.clamp(1.0f - dist / 1800.0f, 0.0f, 1.0f);
+                if (nearCam > 0.0f) {
+                    if (livePrecip > 0.03f || liveClouds > 0.62f) {
+                        float minCov = Mth.clamp(Math.max(liveClouds, 0.78f + 0.18f * livePrecip), 0.65f, 0.98f);
+                        cov = Math.max(cov, Mth.lerp(nearCam, cov, minCov));
+                        float minTower = Math.max(0.38f * livePrecip, Math.max(0.0f, liveClouds - 0.55f) * 0.75f);
+                        tower = Math.max(tower, nearCam * minTower);
+                        curtain = Math.max(curtain, nearCam * 0.50f * livePrecip);
+                        if (liveAsh > 0.05f) {
+                            aerosol = WeatherPhysics.AEROSOL_ASH;
+                        } else if (liveSand > 0.05f) {
+                            aerosol = WeatherPhysics.AEROSOL_SAND;
+                        } else if (liveSnow > liveRain && aerosol < WeatherPhysics.AEROSOL_SNOW) {
+                            aerosol = WeatherPhysics.AEROSOL_SNOW;
+                        }
+                    } else if (regionalActive && liveClouds < 0.35f) {
+                        cov = Mth.lerp(nearCam * 0.65f, cov, Math.min(cov, liveClouds + 0.16f));
+                        curtain *= (1.0f - nearCam * 0.85f);
+                    }
+                }
+
+                int band = aerosolBand(aerosol);
                 int idx = row * SIZE + col;
                 if (teleported) {
-                    baseR[idx] = state.coverage();
-                    baseG[idx] = state.stormTower();
-                    baseB[idx] = state.curtainDensity();
+                    baseR[idx] = cov;
+                    baseG[idx] = tower;
+                    baseB[idx] = curtain;
                 } else {
                     // Temporal smoothing across sweeps so growing cumulus, storm towers, and rain bands evolve organically
-                    baseR[idx] = Mth.lerp(0.35f, baseR[idx], state.coverage());
-                    baseG[idx] = Mth.lerp(0.35f, baseG[idx], state.stormTower());
-                    baseB[idx] = Mth.lerp(0.40f, baseB[idx], state.curtainDensity());
+                    baseR[idx] = Mth.lerp(0.35f, baseR[idx], cov);
+                    baseG[idx] = Mth.lerp(0.35f, baseG[idx], tower);
+                    baseB[idx] = Mth.lerp(0.40f, baseB[idx], curtain);
                 }
                 baseBand[idx] = band;
 

@@ -81,7 +81,7 @@ public final class SailingPackets {
                     if (ship.getSail() != before) {
                         player.level().playSound(null, ship.getX(), ship.getY() + 4, ship.getZ(), SoundEvents.WOOL_PLACE, SoundSource.NEUTRAL, 1f, 0.7f);
                         player.level().playSound(null, ship.getX(), ship.getY() + 2, ship.getZ(), SoundEvents.LADDER_STEP, SoundSource.NEUTRAL, 0.8f, 0.6f);
-                        player.displayClientMessage(Component.translatable("sailing.skycraft.sail." + ship.getSail()), true);
+                        com.skycraft.core.Notifier.message(player, Component.translatable("sailing.skycraft.sail." + ship.getSail()));
                     }
                 }
             }

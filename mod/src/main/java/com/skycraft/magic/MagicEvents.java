@@ -212,6 +212,13 @@ public final class MagicEvents {
             event.setCanceled(true);
             return;
         }
+        // Telekinesis: intercept incoming arrows in mid-air while channeling Telekinesis.
+        if (victim instanceof ServerPlayer sp && source.getDirectEntity() instanceof AbstractArrow arrow
+                && SpellCasting.isCasting(sp, "telekinesis")
+                && com.skycraft.magic.spell.Mysticism.catchArrow(sp, arrow)) {
+            event.setCanceled(true);
+            return;
+        }
         // Summons never hurt their owner, the owner's other allies or party members.
         if (attacker != null) {
             UUID owner = Summons.ownerOf(attacker);

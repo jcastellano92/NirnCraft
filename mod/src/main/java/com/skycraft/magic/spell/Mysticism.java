@@ -63,7 +63,9 @@ public final class Mysticism {
 
     /** Telekinesis: item entity each player is holding. */
     private static final Map<UUID, Integer> HELD = new HashMap<>();
-    /** Telekinesis XP is granted once per item grabbed. */
+    /** Telekinesis: arrow entity each player has intercepted/grabbed. */
+    private static final Map<UUID, Integer> HELD_ARROWS = new HashMap<>();
+    /** Telekinesis XP is granted once per item/arrow grabbed. */
     private static final Map<UUID, UUID> LAST_GRAB = new HashMap<>();
     private static final List<ItemEntity> THROWN = new ArrayList<>();
 
@@ -83,9 +85,72 @@ public final class Mysticism {
 
     // ================================================================== Telekinesis
 
-    /** Telekinesis: hold to pull a distant item to you; let go to throw it. */
+    /** Intercepts an incoming or aimed arrow while channeling Telekinesis. */
+    public static boolean catchArrow(ServerPlayer p, net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+        if (p == null || arrow == null || !arrow.isAlive() || !SpellCasting.isCasting(p, "telekinesis")) return false;
+        Integer curArrowId = HELD_ARROWS.get(p.getUUID());
+        if (curArrowId != null && curArrowId != arrow.getId()
+                && p.serverLevel().getEntity(curArrowId) instanceof net.minecraft.world.entity.projectile.AbstractArrow existing
+                && existing.isAlive()) {
+            return false;
+        }
+        // Release any held item if we are catching an arrow
+        Integer itemId = HELD.remove(p.getUUID());
+        if (itemId != null && p.serverLevel().getEntity(itemId) instanceof ItemEntity ie && ie.isAlive()) {
+            ie.setNoGravity(false);
+        }
+        com.skycraft.arsenal.entity.SkyArrow.setArrowInGround(arrow, false);
+        arrow.setNoGravity(true);
+        arrow.setOwner(p);
+        arrow.setDeltaMovement(Vec3.ZERO);
+        arrow.hurtMarked = true;
+        arrow.fallDistance = 0;
+        HELD_ARROWS.put(p.getUUID(), arrow.getId());
+        SpellSounds.play(p, SpellSounds.Slot.CAST_ARCANE, 0.9f, 1.7f);
+        MagicFx.send(p, MagicFx.BEAM, Element.ARCANE, Targeting.handPos(p), arrow.position(), p.getId(), 1);
+        return true;
+    }
+
+    /** Telekinesis: hold to pull a distant item or intercept an incoming/grounded arrow; let go to launch it. */
     public static Spell.Result telekinesis(ServerPlayer p, Spell spell, int tick) {
         ServerLevel level = p.serverLevel();
+
+        // 1. Check if already holding or able to intercept an arrow
+        Integer heldArrowId = HELD_ARROWS.get(p.getUUID());
+        net.minecraft.world.entity.projectile.AbstractArrow arrow = heldArrowId == null ? null
+                : level.getEntity(heldArrowId) instanceof net.minecraft.world.entity.projectile.AbstractArrow a && a.isAlive() ? a : null;
+        if (arrow == null) {
+            HELD_ARROWS.remove(p.getUUID());
+            if (!HELD.containsKey(p.getUUID())) {
+                arrow = aimedOrIncomingArrow(p, reach(p, spell));
+                if (arrow != null) {
+                    catchArrow(p, arrow);
+                }
+            }
+        }
+        if (arrow != null) {
+            com.skycraft.arsenal.entity.SkyArrow.setArrowInGround(arrow, false);
+            arrow.setNoGravity(true);
+            arrow.setOwner(p);
+            arrow.fallDistance = 0;
+            Vec3 look = p.getViewVector(1f);
+            Vec3 hold = p.getEyePosition().add(look.scale(2.0)).add(0, -0.15, 0);
+            Vec3 to = hold.subtract(arrow.position());
+            arrow.setDeltaMovement(to.scale(0.45));
+            double horiz = Math.sqrt(look.x * look.x + look.z * look.z);
+            arrow.setYRot((float) (Math.atan2(look.x, look.z) * (180.0 / Math.PI)));
+            arrow.setXRot((float) (Math.atan2(look.y, horiz) * (180.0 / Math.PI)));
+            arrow.hurtMarked = true;
+            if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.ARCANE, Targeting.handPos(p), arrow.position(), p.getId(), 1);
+            if (tick % 20 == 0) SpellSounds.loop(p, spell);
+            if (!arrow.getUUID().equals(LAST_GRAB.get(p.getUUID()))) {
+                LAST_GRAB.put(p.getUUID(), arrow.getUUID());
+                return Spell.Result.EFFECT;
+            }
+            return Spell.Result.CAST;
+        }
+
+        // 2. Otherwise pull/hold a distant ItemEntity
         Integer heldId = HELD.get(p.getUUID());
         ItemEntity item = heldId == null ? null : level.getEntity(heldId) instanceof ItemEntity ie && ie.isAlive() ? ie : null;
         if (item == null) {
@@ -119,6 +184,52 @@ public final class Mysticism {
     }
 
     @Nullable
+    private static net.minecraft.world.entity.projectile.AbstractArrow aimedOrIncomingArrow(ServerPlayer p, double range) {
+        Vec3 eye = p.getEyePosition();
+        Vec3 look = p.getViewVector(1f);
+
+        // Priority 1: In-flight incoming arrows near the caster
+        net.minecraft.world.entity.projectile.AbstractArrow bestIncoming = null;
+        double bestIncDist = Double.MAX_VALUE;
+        for (net.minecraft.world.entity.projectile.AbstractArrow a : p.level().getEntitiesOfClass(
+                net.minecraft.world.entity.projectile.AbstractArrow.class, p.getBoundingBox().inflate(5.5),
+                a -> a.isAlive() && !com.skycraft.arsenal.entity.SkyArrow.isArrowInGround(a) && a.getOwner() != p)) {
+            Vec3 toPlayer = eye.subtract(a.position());
+            Vec3 vel = a.getDeltaMovement();
+            boolean headingTowardPlayer = vel.lengthSqr() > 0.01 && vel.normalize().dot(toPlayer.normalize()) > 0.25;
+            boolean inFrontOfCaster = look.dot(a.position().subtract(eye).normalize()) > 0.20;
+            if (headingTowardPlayer || inFrontOfCaster) {
+                double d = eye.distanceToSqr(a.position());
+                if (d < bestIncDist) {
+                    bestIncDist = d;
+                    bestIncoming = a;
+                }
+            }
+        }
+        if (bestIncoming != null) return bestIncoming;
+
+        // Priority 2: Grounded or water-floating collectible arrow along the look ray
+        Vec3 end = eye.add(look.scale(range));
+        BlockHitResult block = p.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
+        Vec3 limit = block.getType() == HitResult.Type.MISS ? end : block.getLocation().add(look.scale(0.5));
+        net.minecraft.world.entity.projectile.AbstractArrow bestAimed = null;
+        double bestAimDist = Double.MAX_VALUE;
+        for (net.minecraft.world.entity.projectile.AbstractArrow a : p.level().getEntitiesOfClass(
+                net.minecraft.world.entity.projectile.AbstractArrow.class, new AABB(eye, limit).inflate(1.2),
+                a -> com.skycraft.arsenal.ArsenalEvents.isCollectibleArrow(p, a))) {
+            Optional<Vec3> hit = a.getBoundingBox().inflate(0.55).clip(eye, limit);
+            if (hit.isPresent()) {
+                double d = eye.distanceToSqr(hit.get());
+                if (d < bestAimDist) {
+                    bestAimDist = d;
+                    bestAimed = a;
+                }
+            }
+        }
+        return bestAimed;
+    }
+
+    @Nullable
     private static ItemEntity aimedItem(ServerPlayer p, double range) {
         Vec3 eye = p.getEyePosition();
         Vec3 end = eye.add(p.getViewVector(1f).scale(range));
@@ -139,8 +250,25 @@ public final class Mysticism {
         return best;
     }
 
-    /** Lets go of a held item: thrown forward if it is still floating in front of the caster. */
-    private static void release(ServerPlayer p) {
+    /** Lets go of a held arrow or item: launched forward along the caster's aim if still floating nearby. */
+    public static void release(ServerPlayer p) {
+        Integer arrowId = HELD_ARROWS.remove(p.getUUID());
+        if (arrowId != null && p.serverLevel().getEntity(arrowId) instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow && arrow.isAlive()) {
+            com.skycraft.arsenal.entity.SkyArrow.setArrowInGround(arrow, false);
+            arrow.setNoGravity(false);
+            arrow.setOwner(p);
+            if (arrow.distanceToSqr(p) < 36) {
+                Vec3 look = p.getViewVector(1f);
+                arrow.shoot(look.x, look.y, look.z, 3.2F, 0.2F);
+                arrow.setCritArrow(true);
+                arrow.setBaseDamage(Math.max(arrow.getBaseDamage(), 2.5));
+                arrow.hurtMarked = true;
+                SpellSounds.play(p, SpellSounds.Slot.CAST_ARCANE, 0.9f, 1.1f);
+                p.level().playSound(null, p.blockPosition(), SoundEvents.ARROW_SHOOT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.2f);
+                Vitals.markInCombat(p);
+            }
+        }
+
         Integer id = HELD.remove(p.getUUID());
         if (id == null) return;
         if (!(p.serverLevel().getEntity(id) instanceof ItemEntity item) || !item.isAlive()) return;
@@ -329,7 +457,10 @@ public final class Mysticism {
                     n++;
                 } else {
                     n += strip(e);
-                    e.removeEffect(MagicRegistry.FLAME_CLOAK.get());
+                    if (e.removeEffect(MagicRegistry.FLAME_CLOAK.get())) n++;
+                    if (e.removeEffect(MagicRegistry.FROST_CLOAK.get())) n++;
+                    if (e.removeEffect(MagicRegistry.LIGHTNING_CLOAK.get())) n++;
+                    if (e.removeEffect(MagicRegistry.STENDARRS_AURA.get())) n++;
                 }
             }
         }
@@ -591,7 +722,9 @@ public final class Mysticism {
 
     /** Every tick for every player: telekinesis release, levitation upkeep, water walking. */
     public static void tick(ServerPlayer p) {
-        if (HELD.containsKey(p.getUUID()) && !SpellCasting.isCasting(p, "telekinesis")) release(p);
+        if ((HELD.containsKey(p.getUUID()) || HELD_ARROWS.containsKey(p.getUUID())) && !SpellCasting.isCasting(p, "telekinesis")) {
+            release(p);
+        }
         CompoundTag pd = p.getPersistentData();
         if (pd.getBoolean(LEVITATING)) {
             if (!p.hasEffect(MagicRegistry.LEVITATE.get()) || !p.isAlive()) {
@@ -642,6 +775,7 @@ public final class Mysticism {
 
     public static void clear() {
         HELD.clear();
+        HELD_ARROWS.clear();
         LAST_GRAB.clear();
         THROWN.clear();
     }

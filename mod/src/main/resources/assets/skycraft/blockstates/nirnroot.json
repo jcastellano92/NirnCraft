@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/nirnroot"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/nirnroot_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/nirnroot"
+      },
+      {
+        "model": "skycraft:block/nirnroot",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/nirnroot",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/nirnroot",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/nirnroot_harvested"
+      },
+      {
+        "model": "skycraft:block/nirnroot_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/nirnroot_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/nirnroot_harvested",
+        "y": 270
+      }
+    ]
   }
 }

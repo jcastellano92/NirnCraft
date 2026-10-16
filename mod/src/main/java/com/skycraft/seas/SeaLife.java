@@ -42,7 +42,7 @@ import java.util.List;
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SeaLife {
-    private static final int INTERVAL = 60;
+    private static final int INTERVAL = 40;
     private static final String TAG = "skycraft_sea_life";
 
     private SeaLife() {}
@@ -65,29 +65,29 @@ public final class SeaLife {
     // ------------------------------------------------------------------ the water
 
     private static void water(ServerLevel level, ServerPlayer player, List<Mob> mine, RandomSource r) {
-        for (int attempt = 0; attempt < 3; attempt++) {
-            double ang = r.nextDouble() * Math.PI * 2, dist = 24 + r.nextDouble() * 40;
+        for (int attempt = 0; attempt < 6; attempt++) {
+            double ang = r.nextDouble() * Math.PI * 2, dist = 16 + r.nextDouble() * 44;
             int x = Mth.floor(player.getX() + Math.cos(ang) * dist), z = Mth.floor(player.getZ() + Math.sin(ang) * dist);
             BlockPos col = new BlockPos(x, 62, z);
             if (!level.isLoaded(col) || !level.isPositionEntityTicking(col)) continue;
             int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             int floor = level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z);
             int depth = surface - floor;
-            if (depth < 3 || !level.getFluidState(new BlockPos(x, surface - 1, z)).is(FluidTags.WATER)) continue;
+            if (depth < 2 || !level.getFluidState(new BlockPos(x, surface - 1, z)).is(FluidTags.WATER)) continue;
             MapSample s = TamrielMap.sampleScratch(x, z);
             boolean sea = s.coastDistance < 4 && !s.inWater() && surface <= 64;
-            List<Pick> picks = sea ? seaPicks(level, x, z, s, depth) : freshPicks(level, depth, s);
+            List<Pick> picks = sea ? seaPicks(level, x, z, s, depth) : freshPicks(level, x, z, depth, s);
             Pick p = weighted(picks, r);
             if (p == null) return;
             long same = mine.stream().filter(m -> EntityType.getKey(m.getType()).toString().equals(p.id)).count();
-            if (same >= 4 && p.max <= 2 || same >= 10) return;
+            if (same >= 5 && p.max <= 2 || same >= 14) continue;
             int count = p.min + r.nextInt(p.max - p.min + 1);
             for (int i = 0; i < count; i++) {
                 int px = x + (i == 0 ? 0 : r.nextInt(5) - 2), pz = z + (i == 0 ? 0 : r.nextInt(5) - 2);
                 int pf = level.getHeight(Heightmap.Types.OCEAN_FLOOR, px, pz), ps = level.getHeight(Heightmap.Types.WORLD_SURFACE, px, pz);
                 if (ps - pf < 2) continue;
-                int y = p.bed ? pf : pf + 1 + r.nextInt(Math.max(1, ps - pf - 2));
-                spawn(level, p.id, new BlockPos(px, y, pz));
+                int y = p.bed ? pf : pf + 1 + r.nextInt(Math.max(1, ps - pf - 1));
+                spawn(level, p.id, new BlockPos(px, Math.min(ps - 1, y), pz));
             }
             return;
         }
@@ -103,12 +103,22 @@ public final class SeaLife {
         if (id.equals("sea/inner_sea") || prov.equals("morrowind") || prov.equals("black_marsh")) out.add(new Pick("skycraft:dreugh", 3, 1, 2, false));
         if (warm) {
             out.add(new Pick("skycraft:sea_netch", 4, 1, 3, false));
-            out.add(new Pick("skycraft:abecean_longfin", 4, 4, 7, false));
-            out.add(new Pick("skycraft:sea_crab", 2, 1, 1, true));
+            out.add(new Pick("skycraft:abecean_longfin", 6, 4, 8, false));
+            out.add(new Pick("minecraft:tropical_fish", 5, 4, 8, false));
+            out.add(new Pick("minecraft:pufferfish", 2, 1, 3, false));
+            out.add(new Pick("minecraft:dolphin", 2, 1, 3, false));
+            out.add(new Pick("skycraft:sea_crab", 2, 1, 2, true));
         } else {
             out.add(new Pick("skycraft:slaughterfish", cold ? 4 : 2, 1, 3, false));
-            out.add(new Pick("skycraft:abecean_longfin", 2, 3, 6, false));
+            out.add(new Pick("skycraft:abecean_longfin", 4, 3, 7, false));
+            out.add(new Pick("minecraft:cod", 5, 4, 8, false));
+            if (cold) {
+                out.add(new Pick("minecraft:salmon", 4, 3, 6, false));
+            } else {
+                out.add(new Pick("minecraft:dolphin", 2, 1, 2, false));
+            }
         }
+        if (depth >= 5) out.add(new Pick("minecraft:squid", 3, 2, 4, false));
         if (depth >= 8) out.add(new Pick("skycraft:giant_slaughterfish", cold ? 2 : 1, 1, 1, false));
         if (cold) out.add(new Pick("skycraft:seal", 3, 1, 3, false));
         if (open && depth >= 12) out.add(new Pick("skycraft:whale", 2, 1, 2, false));
@@ -124,12 +134,16 @@ public final class SeaLife {
         return out;
     }
 
-    private static List<Pick> freshPicks(ServerLevel level, int depth, MapSample s) {
+    private static List<Pick> freshPicks(ServerLevel level, int x, int z, int depth, MapSample s) {
         List<Pick> out = new ArrayList<>();
-        out.add(new Pick("skycraft:river_betty", 5, 4, 8, false));
+        out.add(new Pick("skycraft:river_betty", 6, 4, 8, false));
+        out.add(new Pick("minecraft:salmon", RiverRun.running(level) ? 9 : 4, 3, 6, false));
+        out.add(new Pick("minecraft:cod", 3, 2, 5, false));
+        float temp = level.getBiome(new BlockPos(x, 62, z)).value().getBaseTemperature();
+        if (temp >= 0.8f) {
+            out.add(new Pick("minecraft:tropical_fish", 4, 3, 6, false));
+        }
         if (depth >= 3) out.add(new Pick("skycraft:slaughterfish", 1, 1, 2, false));
-        // salmon in the real rivers; the autumn run (RiverRun) swells their numbers and drives them upstream
-        if (s.riverHalfWidth >= 2f && depth >= 2) out.add(new Pick("minecraft:salmon", RiverRun.running(level) ? 9 : 2, 2, 5, false));
         return out;
     }
 
@@ -178,7 +192,7 @@ public final class SeaLife {
         if (!level.noCollision(mob)) return;
         mob.addTag(TAG);
         mob.addTag(SkyCreature.REGION_SPAWN_TAG);
-        mob.getPersistentData().putLong("skycraft_rs_seen", level.getGameTime());
+        mob.getPersistentData().putLong("skycraft_rs_seen", com.skycraft.world.RestManager.liveTime(level));
         net.minecraftforge.event.ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(at), MobSpawnType.NATURAL, null, null);
         if (mob.isSpawnCancelled()) return;
         level.addFreshEntity(mob);

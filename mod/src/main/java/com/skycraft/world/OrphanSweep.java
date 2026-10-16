@@ -121,6 +121,14 @@ public final class OrphanSweep {
         for (int i = 0; i < doomed.size(); i++) {
             BlockPos pos = BlockPos.of(doomed.getLong(i));
             if (level.setBlock(pos, air, FLAGS)) n++;
+            // Clear any flora, double plants, vines, or snow layers resting on top of the removed log/leaf
+            for (int dy = 1; dy <= 2; dy++) {
+                BlockPos up = pos.above(dy);
+                BlockState u = level.getBlockState(up);
+                if (isFloatingCover(u)) {
+                    level.setBlock(up, air, FLAGS);
+                }
+            }
             // vines clinging to a removed block
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 BlockPos v = pos.relative(d);
@@ -133,6 +141,21 @@ public final class OrphanSweep {
             }
         }
         return n;
+    }
+
+    private static boolean isFloatingCover(BlockState s) {
+        if (s.isAir()) return false;
+        net.minecraft.world.level.block.Block b = s.getBlock();
+        return b instanceof net.minecraft.world.level.block.BushBlock
+                || b instanceof com.skycraft.crafting.arcane.block.IngredientPlantBlock
+                || b instanceof net.minecraft.world.level.block.DoublePlantBlock
+                || b instanceof net.minecraft.world.level.block.TallGrassBlock
+                || b instanceof VineBlock
+                || b instanceof net.minecraft.world.level.block.SnowLayerBlock
+                || s.is(BlockTags.FLOWERS)
+                || s.is(BlockTags.SAPLINGS)
+                || s.is(Blocks.MOSS_CARPET)
+                || s.is(Blocks.SNOW);
     }
 
     /** Ground a trunk may stand on: any solid block that is not itself vegetation. */

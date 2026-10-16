@@ -31,5 +31,6 @@ public final class SettlementStructures {
         STRUCTURE_TYPES.register(modBus);
         PIECE_TYPES.register(modBus);
         PLACEMENTS.register(modBus);
+        com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.init(modBus);
     }
 }

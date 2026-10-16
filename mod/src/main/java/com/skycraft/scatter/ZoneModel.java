@@ -136,7 +136,7 @@ public final class ZoneModel {
                 ruinEdge = Math.min(ruinEdge, (int) Math.sqrt((double) m.distSqr(x, z)) - k.radius);
             }
         }
-        // road corridor strength around the chunk (the planner prefers these corridors, so roads follow them)
+        // road corridor strength around the chunk (consult both the map corridor channel and the baked RoadPlan)
         float road = s.road;
         MapSample p = new MapSample();
         for (int i = 0; i < 6; i++) {
@@ -144,9 +144,18 @@ public final class ZoneModel {
             TamrielMap.sample(x + (int) Math.round(Math.cos(a) * 12), z + (int) Math.round(Math.sin(a) * 12), p);
             if (p.road > road) road = p.road;
         }
+        com.skycraft.worldplan.RoadPlan.Hit roadHit = new com.skycraft.worldplan.RoadPlan.Hit();
+        if (com.skycraft.worldplan.RoadPlan.get().at(x + 0.5, z + 0.5, roadHit)) {
+            float margin = roadHit.distance - roadHit.halfWidth;
+            if (margin <= 20f) {
+                road = 1.0f;
+            } else if (margin <= 68f) {
+                road = Math.max(road, 1.0f - (margin - 20f) / 48f);
+            }
+        }
         int water = waterDistance(s);
 
-        float humanity = Math.max(best, 0.35f * road);
+        float humanity = Math.max(best, 0.5f * road);
         float remote = Math.min(1f, Math.max(0f, (settleEdge - 120) / (float) (REMOTE_FULL - 120)));
         boolean mountains = s.crag > 0.3f || s.ridge > 0.35f || s.elevation > 150f;
 
@@ -160,7 +169,7 @@ public final class ZoneModel {
         else if (settleEdge > DEEP && road < 0.2f && dungeonEdge > 300) zone = ScatterZone.DEEP_WILD;
         else zone = ScatterZone.WILD;
         // the roadside and the shore are never "empty" country
-        if (zone == ScatterZone.ROADSIDE) humanity = Math.max(humanity, 0.35f);
+        if (zone == ScatterZone.ROADSIDE) humanity = Math.max(humanity, 0.45f);
         return new Info(zone, humanity, remote, settleEdge, settleType, settleId, road, water, dungeonEdge, ruinEdge, province,
                 archetype, region.id(), s.elevation, mountains);
     }

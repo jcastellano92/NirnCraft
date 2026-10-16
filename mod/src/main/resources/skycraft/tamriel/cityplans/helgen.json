@@ -1,6 +1,6 @@
 {
   "id": "helgen",
-  "base": "java",
+  "base": "none",
   "sil": "burnt-keep-rebuilt-wall",
   "names": {
     "inn": "helgen_charred_tankard",
@@ -391,8 +391,8 @@
     {
       "kind": "yard",
       "at": [
-        6,
-        51
+        12,
+        47
       ],
       "size": [
         5,
@@ -404,7 +404,7 @@
     {
       "kind": "yard",
       "at": [
-        3,
+        10,
         40
       ],
       "size": [
@@ -629,8 +629,8 @@
     {
       "kind": "reserved",
       "at": [
-        -3,
-        51
+        -11,
+        47
       ],
       "size": [
         7,
@@ -808,7 +808,10 @@
         9
       ],
       "name": "helgen_masons_forge",
-      "on": "row"
+      "on": "row",
+      "flags": [
+        "burnt"
+      ]
     },
     {
       "kind": "house",

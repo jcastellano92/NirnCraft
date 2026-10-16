@@ -50,7 +50,14 @@ public final class Outdoors {
     /** The y (relative to the canvas floor) of the solid ground under local (x, z), or 0 when recording / outside. */
     static int ground(Canvas c, int x, int z) {
         if (c.recording()) return 0;
-        return c.wground(c.wx(x, z), c.wz(x, z)) - c.oy;
+        int wx = c.wx(x, z), wz = c.wz(x, z);
+        int g = c.wground(wx, wz);
+        if (c.wwater(wx, wz) <= g && g < c.oy - 1 && g >= c.oy - 12) {
+            for (int y = g + 1; y < c.oy; y++) c.wset(wx, y, wz, Blocks.DIRT.defaultBlockState());
+            c.wset(wx, c.oy, wz, Blocks.GRASS_BLOCK.defaultBlockState());
+            return 0;
+        }
+        return g - c.oy;
     }
 
     /** Sets a block {@code dy} above the real ground of its column. */
@@ -298,16 +305,23 @@ public final class Outdoors {
     }
 
     static void cart(Canvas c, Palette p, int w, int d) {
-        int g = Math.max(ground(c, 0, 0), ground(c, Math.max(0, w - 1), 0));
         int len = Math.max(2, w - 1);
-        for (int x = 0; x < len; x++) c.set(x, g + 1, 0, B.slab(p.slab, true));
-        c.set(0, g + 1, 1, B.face(p.trapdoor, Direction.NORTH));
-        c.set(len - 1, g + 1, 1, B.face(p.trapdoor, Direction.NORTH));
-        c.set(0, g + 1, -1, B.face(p.trapdoor, Direction.SOUTH));
-        c.set(len - 1, g + 1, -1, B.face(p.trapdoor, Direction.SOUTH));
+        int g = Math.max(ground(c, 0, 0), ground(c, len - 1, 0));
+        for (int x = 0; x < len; x++) {
+            c.foundation(x, g, 0, p.foundation, 4);
+            c.set(x, g + 1, 0, B.slab(p.slab, true));
+        }
+        int[][] wheels = {{0, 1}, {len - 1, 1}, {0, -1}, {len - 1, -1}};
+        for (int[] wh : wheels) {
+            int wg = ground(c, wh[0], wh[1]);
+            for (int y = wg; y <= g; y++) c.set(wh[0], y, wh[1], p.foundation);
+            c.set(wh[0], g + 1, wh[1], B.with(B.face(p.trapdoor, wh[1] > 0 ? Direction.SOUTH : Direction.NORTH), BlockStateProperties.OPEN, true));
+        }
         BlockState[] goods = {B.s(Blocks.HAY_BLOCK), B.face(B.s(Blocks.BARREL), Direction.UP), B.s(Blocks.PUMPKIN), B.s(Blocks.MELON), Props.cheese()};
         for (int x = 0; x < len; x++) if (c.chance(x, 2, 0, 25, 2)) c.set(x, g + 2, 0, goods[c.roll(x, 2, 0, 27, goods.length)]);
-        c.set(len, g + 1, 0, p.fence);
+        int sg = ground(c, len, 0);
+        for (int y = sg; y <= g; y++) c.set(len, y, 0, p.foundation);
+        c.set(len, g + 1, 0, B.face(p.gate, Direction.EAST));
     }
 
     static void fountain(Canvas c, Palette p, int w, int d) {

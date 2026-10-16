@@ -175,7 +175,16 @@ public final class Plan {
             if (s.kind != Archetype.DOCK && !s.has(Spec.WATER)) {
                 int hx = Math.max(1, s.halfX() - s.margin), hz = Math.max(1, s.halfZ() - s.margin);
                 if (terrain.anyWet(s.x, s.z, hx, hz)) return false;
-                if (!relaxed && terrain.spread(s.x, s.z, hx, hz) > maxSlope(s.kind)) return false;
+                int limit = relaxed ? Math.max(maxSlope(s.kind), 11) : maxSlope(s.kind);
+                if (terrain.spread(s.x, s.z, hx, hz) > limit) return false;
+                if (s.kind.building && s.kind != Archetype.MINE && s.kind != Archetype.WALL && s.kind != Archetype.GATE) {
+                    int front = (s.facing.getAxis() == Direction.Axis.Z ? hz : hx) + 2;
+                    int fx = s.x + s.facing.getStepX() * front, fz = s.z + s.facing.getStepZ() * front;
+                    if (terrain.wet(fx, fz)) return false;
+                    int doorLand = terrain.land(fx, fz);
+                    int med = terrain.median(s.x, s.z, hx, hz);
+                    if (Math.abs(med - doorLand) > (relaxed ? 4 : 3)) return false;
+                }
             }
             if (keepOut != null && !s.has(Spec.GROUND) && keptOut(s)) return false;
         }
@@ -231,7 +240,7 @@ public final class Plan {
      */
     public void wallRing(int r, int sides, int h, double[] gates, int flags, boolean towers) {
         double step = 2 * Math.PI / sides;
-        int gateHalf = 6;
+        int gateHalf = 4;
         for (int i = 0; i < sides; i++) {
             double a0 = i * step + step / 2, a1 = a0 + step;
             double lx0 = Math.sin(a0) * r, lz0 = Math.cos(a0) * r;
@@ -275,13 +284,15 @@ public final class Plan {
                 Spec t = at(Archetype.TOWER, (int) Math.round(lx1), (int) Math.round(lz1), outward(a1).getOpposite()).size(7, 7);
                 t.h = h + 14;
                 t.margin = 2;
+                t.variant = i & 3;
                 boolean nearGate = false;
                 for (double g : gates) if (angleDist(a1, g) < Math.toRadians(8)) nearGate = true;
                 if (!nearGate) add(t);
             }
         }
+        double gr = r * Math.cos(step / 2.0);
         for (double g : gates) {
-            int lx = (int) Math.round(Math.sin(g) * r), lz = (int) Math.round(Math.cos(g) * r);
+            int lx = (int) Math.round(Math.sin(g) * gr), lz = (int) Math.round(Math.cos(g) * gr);
             Direction out = outward(g);
             Spec gate = at(Archetype.GATE, lx, lz, out).size(11, 7);
             gate.h = h + 6;
@@ -330,7 +341,14 @@ public final class Plan {
                 if (best != Spec.UNSET) s.minFloor = best;
             }
         }
+        int radLim = (place != null ? place.radius() : radius) - 4;
         for (Spec s : specs) {
+            if (!s.isLine() && (s.kind == Archetype.CAMP || s.kind == Archetype.SHRINE || s.kind == Archetype.LUMBER
+                    || s.kind == Archetype.YARD || s.kind == Archetype.PEN || s.kind == Archetype.FIELD
+                    || s.kind == Archetype.GARDEN || s.kind == Archetype.GRAVEYARD
+                    || Math.hypot(s.x - cx, s.z - cz) > radLim)) {
+                s.flags |= Spec.NO_BEARD;
+            }
             if (s.has(Spec.FIXED) && s.floor != Spec.UNSET) continue;
             if (s.isLine()) {
                 int mx = (s.x + s.x2) / 2, mz = (s.z + s.z2) / 2;
@@ -368,7 +386,7 @@ public final class Plan {
                 continue;
             }
             int hx = Math.max(1, s.halfX() - s.margin), hz = Math.max(1, s.halfZ() - s.margin);
-            int f = terrain.median(s.x, s.z, hx, hz);
+            int f = s.kind == Archetype.CAMP ? terrain.land(s.x, s.z) : terrain.median(s.x, s.z, hx, hz);
             if (s.kind == Archetype.DOCK) {
                 int w = terrain.water(s.x2 == 0 && s.z2 == 0 ? s.x : s.x, s.z);
                 if (w == Terrain.NO_WATER || w <= terrain.land(s.x, s.z)) {
@@ -379,8 +397,19 @@ public final class Plan {
             } else if (s.has(Spec.WATER)) {
                 int w = terrain.water(s.x, s.z);
                 f = w != Terrain.NO_WATER && w > f ? w + 2 : f + 2;
-            } else if (pal.stilts && s.kind.building && s.culture == culture.ordinal()) {
-                f += 2;
+            } else {
+                if (s.kind.building && s.kind != Archetype.MINE && s.kind != Archetype.WALL && s.kind != Archetype.GATE
+                        && s.minFloor == Spec.UNSET && !s.has(Spec.SEAT)) {
+                    int front = (s.facing.getAxis() == Direction.Axis.Z ? hz : hx) + 2;
+                    int fx = s.x + s.facing.getStepX() * front, fz = s.z + s.facing.getStepZ() * front;
+                    if (!terrain.wet(fx, fz)) {
+                        int doorLand = terrain.land(fx, fz);
+                        f = Math.max(doorLand, Math.min(doorLand + 2, f));
+                    }
+                }
+                if (pal.stilts && s.kind.building && s.culture == culture.ordinal()) {
+                    f += 2;
+                }
             }
             if (s.minFloor != Spec.UNSET) f = Math.max(f, base + s.minFloor);
             s.floor = f;

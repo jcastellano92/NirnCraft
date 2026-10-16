@@ -146,6 +146,7 @@
   "class": "highway",
   "route": [
    "helgen",
+   "pale_pass",
    "bruma"
   ],
   "why": [
@@ -422,7 +423,7 @@
    "falkreath.L3.lake_ilinalta"
   ],
   "route": [
-   "riverwood",
+   "helgen",
    "lakeview",
    "half_moon_mill",
    "falkreath",
@@ -543,8 +544,8 @@
   ],
   "route": [
    "falkreath",
-   "pale_pass",
-   "bruma"
+   "helgen",
+   "pale_pass"
   ],
   "class": "highway"
  },

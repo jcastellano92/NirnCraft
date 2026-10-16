@@ -124,8 +124,13 @@ public final class Ambush {
         st.attackAt = st.start + TIMER_TICKS;
         ACTIVE.put(player.getUUID(), st);
         Barks.say(leader, Component.translatable("society.skycraft.ambush.demand", st.demand));
-        player.sendSystemMessage(prompt(st.demand));
+        com.skycraft.dialogue.Dialogue.open(player, leader, Component.translatable("society.skycraft.ambush.demand", st.demand));
         return true;
+    }
+
+    public static int demandFor(ServerPlayer player) {
+        State st = ACTIVE.get(player.getUUID());
+        return st != null ? st.demand : 25;
     }
 
     private static MutableComponent option(String id, Component label, ChatFormatting color) {
@@ -152,14 +157,14 @@ public final class Ambush {
     public static void choose(ServerPlayer player, String choice) {
         State st = ACTIVE.get(player.getUUID());
         if (st == null) {
-            player.sendSystemMessage(Component.translatable("society.skycraft.ambush.none"));
+            com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.ambush.none"));
             return;
         }
         ServerLevel level = player.serverLevel();
         switch (choice) {
             case "pay" -> {
                 if (!Currency.take(player, st.demand)) {
-                    player.sendSystemMessage(Component.translatable("society.skycraft.ambush.poor", st.demand));
+                    com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.ambush.poor", st.demand));
                     return;
                 }
                 say(level, st, Component.translatable("society.skycraft.ambush.paid"));
@@ -176,10 +181,10 @@ public final class Ambush {
             }
             case "flee" -> {
                 st.attackAt = Math.min(st.attackAt, com.skycraft.world.RestManager.liveTime(level) + HEAD_START_TICKS);
-                player.sendSystemMessage(Component.translatable("society.skycraft.ambush.fled"));
+                com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.ambush.fled"));
             }
             case "fight" -> attack(level, player, st);
-            default -> player.sendSystemMessage(Component.translatable("society.skycraft.ambush.none"));
+            default -> com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.ambush.none"));
         }
     }
 
@@ -293,10 +298,6 @@ public final class Ambush {
                 if (!struck) say(level, st, Component.translatable("society.skycraft.ambush.attack"));
                 attack(level, player, st);
                 continue;
-            }
-            if (now % 20 == 0) {
-                long left = (st.attackAt - now + 19) / 20;
-                player.displayClientMessage(Component.translatable("society.skycraft.ambush.timer", left).withStyle(ChatFormatting.RED), true);
             }
         }
     }

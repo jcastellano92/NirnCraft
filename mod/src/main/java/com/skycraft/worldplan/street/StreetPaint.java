@@ -257,6 +257,10 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
                     set(x, y, z, gateFor(s).setValue(FenceGateBlock.FACING, along).setValue(FenceGateBlock.OPEN, true));
                     continue;
                 }
+                if ((b instanceof FenceBlock || s.is(BlockTags.WALLS) || s.is(BlockTags.BANNERS) || s.is(BlockTags.ALL_SIGNS))
+                        && h + 3 <= maxY && isTallPole(get(x, h + 3, z))) {
+                    continue;
+                }
                 // a full block of a building stays (the plan routed the path round every building); clutter, plants,
                 // low walls, slabs and stairs of yard props, tree trunks and natural ground (a cut) go
                 if (s.isSolidRender(level, pos.set(x, y, z)) && !natural(s) && !s.is(BlockTags.BASE_STONE_OVERWORLD)
@@ -281,6 +285,11 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
             }
             // a path block needs air above it (or it turns to dirt)
             if (get(x, h, z).is(Blocks.DIRT_PATH) && !get(x, h + 1, z).isAir()) set(x, h, z, Blocks.COARSE_DIRT.defaultBlockState());
+        }
+
+        static boolean isTallPole(BlockState s) {
+            return s.getBlock() instanceof FenceBlock || s.is(BlockTags.WALLS) || s.is(BlockTags.BANNERS)
+                    || s.is(BlockTags.ALL_SIGNS) || s.is(BlockTags.WOOL) || s.is(Blocks.GOLD_BLOCK);
         }
 
         static boolean solidTop(BlockState s) {

@@ -41,8 +41,8 @@ import java.util.List;
 public class DenBlockEntity extends BlockEntity {
     public static final String DEN_POS_TAG = "SkycraftDenPos";
     public static final String DEN_NOCTURNAL_TAG = "SkycraftNocturnalDen";
-    public static final int HOME_RADIUS = 24;
-    private static final double ACTIVATION_RANGE = 36.0;
+    public static final int HOME_RADIUS = 48;
+    private static final double ACTIVATION_RANGE = 32.0;
     private static final long RESPAWN_COOLDOWN_TICKS = 72000L; // 3 in-game days
 
     private boolean populated;
@@ -66,11 +66,19 @@ public class DenBlockEntity extends BlockEntity {
                 p -> p instanceof Player pl && !pl.isSpectator());
         if (nearest == null) return;
 
-        List<Mob> residents = serverLevel.getEntitiesOfClass(Mob.class, new AABB(pos).inflate(32.0),
+        List<Mob> residents = serverLevel.getEntitiesOfClass(Mob.class, new AABB(pos).inflate(56.0),
                 m -> m.isAlive() && m.getPersistentData().getLong(DEN_POS_TAG) == pos.asLong());
 
         if (!be.populated || (residents.isEmpty() && gameTime - be.lastSpawnTick >= RESPAWN_COOLDOWN_TICKS)) {
-            if (be.spawnResidents(serverLevel, pos)) {
+            // Never activate a den that ended up near a settlement calm zone or traveled road
+            if (com.skycraft.creatures.spawn.SpawnPacing.calm(serverLevel, pos)
+                    || com.skycraft.roads.RoadCells.isRoad(serverLevel, pos.getX(), pos.getZ(), 56)) {
+                be.populated = true;
+                be.lastSpawnTick = gameTime;
+                be.setChanged();
+                return;
+            }
+            if (be.spawnResidents(serverLevel, pos, nearest)) {
                 be.populated = true;
                 be.lastSpawnTick = gameTime;
                 be.setChanged();
@@ -78,13 +86,20 @@ public class DenBlockEntity extends BlockEntity {
             return;
         }
 
-        // Re-assert home tether (transient in vanilla Mob) and guide resting creatures back to the den hollow
+        // Release home restriction during active combat so predators never drop chase mid-fight;
+        // re-assert home tether and diurnal/nocturnal rest cycle when out of combat.
         boolean isDay = serverLevel.isDay();
         for (Mob mob : residents) {
+            if (mob.getTarget() != null && mob.getTarget().isAlive()) {
+                if (mob.hasRestriction()) {
+                    mob.clearRestriction();
+                }
+                continue;
+            }
             if (!mob.hasRestriction()) {
                 mob.restrictTo(pos, HOME_RADIUS);
             }
-            if (mob.getTarget() == null && (gameTime % 100L == (pos.asLong() & 19L))) {
+            if ((gameTime % 100L == (pos.asLong() & 19L))) {
                 boolean nocturnal = mob.getPersistentData().getBoolean(DEN_NOCTURNAL_TAG);
                 boolean shouldRest = nocturnal ? isDay : !isDay;
                 if (shouldRest && mob.blockPosition().distSqr(pos) > 36.0) {
@@ -94,9 +109,12 @@ public class DenBlockEntity extends BlockEntity {
         }
     }
 
-    private boolean spawnResidents(ServerLevel level, BlockPos pos) {
+    private boolean spawnResidents(ServerLevel level, BlockPos pos, Player nearest) {
         RandomSource random = level.getRandom();
-        DenChoice choice = chooseRegionalSpecies(pos.getX(), pos.getZ(), random);
+        int playerLevel = nearest != null ? Math.max(1, com.skycraft.core.SkyData.get(nearest).getLevel()) : 1;
+        boolean starterZone = com.skycraft.creatures.spawn.SpawnPacing.nearStart(level, pos.getX(), pos.getZ())
+                || com.skycraft.creatures.spawn.SpawnPacing.distFromStart(level, pos.getX(), pos.getZ()) < 480.0;
+        DenChoice choice = chooseRegionalSpecies(pos.getX(), pos.getZ(), playerLevel, starterZone, random);
         int count = choice.minCount + (choice.maxCount > choice.minCount ? random.nextInt(choice.maxCount - choice.minCount + 1) : 0);
         int spawned = 0;
 
@@ -121,16 +139,16 @@ public class DenBlockEntity extends BlockEntity {
     }
 
     private static BlockPos findSafeSpawnPos(ServerLevel level, BlockPos denPos, Mob mob, RandomSource random, int index) {
-        // First resident spawns right at the den hollow/mouth; packmates spawn just outside
+        // First resident spawns inside the excavated den chamber or entrance ramp; packmates spawn just outside
         int[][] offsets = {
-                {0, 1}, {0, 2}, {-1, 2}, {1, 2}, {0, 3}, {-2, 1}, {2, 1}, {-1, -1}, {1, -1}
+                {0, 0}, {0, 1}, {-1, 0}, {1, 0}, {0, 2}, {-1, 2}, {1, 2}, {0, 3}, {-2, 1}, {2, 1}
         };
         int start = Math.min(index, offsets.length - 1);
         for (int k = 0; k < offsets.length; k++) {
             int[] off = offsets[(start + k) % offsets.length];
             int x = denPos.getX() + off[0];
             int z = denPos.getZ() + off[1];
-            for (int dy = 0; dy <= 3; dy++) {
+            for (int dy = -2; dy <= 3; dy++) {
                 BlockPos candidate = new BlockPos(x, denPos.getY() + dy, z);
                 if (level.getBlockState(candidate).isAir() && level.getBlockState(candidate.above()).isAir()
                         && !level.getBlockState(candidate.below()).isAir()) {
@@ -147,7 +165,7 @@ public class DenBlockEntity extends BlockEntity {
 
     private record DenChoice(EntityType<? extends Mob> type, int minCount, int maxCount, boolean nocturnal, String label) {}
 
-    private static DenChoice chooseRegionalSpecies(int x, int z, RandomSource r) {
+    private static DenChoice chooseRegionalSpecies(int x, int z, int playerLevel, boolean starterZone, RandomSource r) {
         Region region = TamrielMap.region(x, z);
         String province = Cultures.province(region, x, z);
         String regId = region.id();
@@ -158,53 +176,72 @@ public class DenBlockEntity extends BlockEntity {
         boolean coast = s.coastDistance >= 0 && s.coastDistance <= 40;
         int roll = r.nextInt(100);
 
+        // Low-level / starter-corridor dens never spawn pairs of Trolls or Sabre Cats
+        if (starterZone || playerLevel <= 4) {
+            if (coast && roll < 30) {
+                return new DenChoice(FaunaEntities.MUDCRAB.get(), 1, 2, false, "mudcrab");
+            }
+            if (roll < 55) {
+                return new DenChoice(Bestiary.WOLF.get(), 1, 2, true, "wolf");
+            }
+            if (roll < 80) {
+                return new DenChoice(ModEntities.SKEEVER.get(), 2, 3, true, "skeever");
+            }
+            if (playerLevel >= 3 && roll < 92) {
+                return new DenChoice(FaunaEntities.BEAR.get(), 1, 1, false, "bear");
+            }
+            return new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 1, 2, true, "frostbite_spider");
+        }
+
+        int apexMax = playerLevel >= 12 ? 2 : 1;
+
         return switch (province) {
             case "morrowind" -> {
                 if (regId.contains("solstheim")) {
-                    yield roll < 40 ? new DenChoice(FaunaEntities.BEAR.get(), 1, 2, false, "bear")
+                    yield roll < 40 ? new DenChoice(FaunaEntities.BEAR.get(), 1, apexMax, false, "bear")
                             : roll < 75 ? new DenChoice(Bestiary.WOLF.get(), 2, 3, true, "wolf")
-                            : new DenChoice(ModEntities.TROLL.get(), 1, 2, false, "troll");
+                            : new DenChoice(ModEntities.TROLL.get(), 1, apexMax, false, "troll");
                 }
                 yield roll < 35 ? new DenChoice(Bestiary.NIX_HOUND.get(), 2, 3, true, "nix_hound")
-                        : roll < 65 ? new DenChoice(Bestiary.KAGOUTI.get(), 1, 2, false, "kagouti")
+                        : roll < 65 ? new DenChoice(Bestiary.KAGOUTI.get(), 1, apexMax, false, "kagouti")
                         : roll < 85 ? new DenChoice(Bestiary.ALIT.get(), 1, 2, false, "alit")
-                        : new DenChoice(Bestiary.CHAURUS.get(), 2, 3, true, "chaurus");
+                        : new DenChoice(Bestiary.CHAURUS.get(), 1, 2, true, "chaurus");
             }
             case "elsweyr", "hammerfell" -> {
-                yield roll < 35 ? new DenChoice(Bestiary.SENCHE_TIGER.get(), 1, 2, true, "senche_tiger")
-                        : roll < 65 ? new DenChoice(FaunaEntities.SABRE_CAT.get(), 1, 2, true, "sabre_cat")
-                        : roll < 85 ? new DenChoice(Bestiary.GIANT_SCORPION.get(), 2, 3, true, "giant_scorpion")
-                        : new DenChoice(Bestiary.SAND_SERPENT.get(), 1, 2, false, "sand_serpent");
+                yield roll < 35 ? new DenChoice(Bestiary.SENCHE_TIGER.get(), 1, apexMax, true, "senche_tiger")
+                        : roll < 65 ? new DenChoice(FaunaEntities.SABRE_CAT.get(), 1, apexMax, true, "sabre_cat")
+                        : roll < 85 ? new DenChoice(Bestiary.GIANT_SCORPION.get(), 1, 2, true, "giant_scorpion")
+                        : new DenChoice(Bestiary.SAND_SERPENT.get(), 1, apexMax, false, "sand_serpent");
             }
             case "black_marsh" -> {
                 yield roll < 35 ? new DenChoice(Bestiary.WAMASU.get(), 1, 1, false, "wamasu")
-                        : roll < 65 ? new DenChoice(ModEntities.TROLL.get(), 1, 2, false, "troll")
+                        : roll < 65 ? new DenChoice(ModEntities.TROLL.get(), 1, apexMax, false, "troll")
                         : roll < 85 ? new DenChoice(Bestiary.HACKWING.get(), 2, 3, false, "hackwing")
-                        : new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 2, 3, true, "giant_spider");
+                        : new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 1, 2, true, "giant_spider");
             }
             case "valenwood", "summerset" -> {
-                yield roll < 35 ? new DenChoice(ModEntities.SPRIGGAN.get(), 1, 2, false, "spriggan")
+                yield roll < 35 ? new DenChoice(ModEntities.SPRIGGAN.get(), 1, apexMax, false, "spriggan")
                         : roll < 60 ? new DenChoice(Bestiary.INDRIK.get(), 1, 2, false, "indrik")
-                        : roll < 85 ? new DenChoice(Bestiary.SENCHE_TIGER.get(), 1, 2, true, "senche_tiger")
-                        : new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 2, 3, true, "giant_spider");
+                        : roll < 85 ? new DenChoice(Bestiary.SENCHE_TIGER.get(), 1, apexMax, true, "senche_tiger")
+                        : new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 1, 2, true, "giant_spider");
             }
             case "high_rock", "cyrodiil" -> {
-                yield roll < 30 ? new DenChoice(FaunaEntities.BEAR.get(), 1, 2, false, "bear")
+                yield roll < 30 ? new DenChoice(FaunaEntities.BEAR.get(), 1, apexMax, false, "bear")
                         : roll < 55 ? new DenChoice(Bestiary.WOLF.get(), 2, 3, true, "wolf")
                         : roll < 72 ? new DenChoice(Bestiary.DURZOG.get(), 2, 3, true, "durzog")
-                        : roll < 86 ? new DenChoice(ModEntities.TROLL.get(), 1, 2, false, "troll")
-                        : new DenChoice(ModEntities.SPRIGGAN.get(), 1, 2, false, "spriggan");
+                        : roll < 86 ? new DenChoice(ModEntities.TROLL.get(), 1, apexMax, false, "troll")
+                        : new DenChoice(ModEntities.SPRIGGAN.get(), 1, 1, false, "spriggan");
             }
             default -> {
                 if (coast && cold && roll < 30) {
                     yield new DenChoice(FaunaEntities.HORKER.get(), 2, 3, false, "horker");
                 }
-                yield roll < 28 ? new DenChoice(FaunaEntities.BEAR.get(), 1, 2, false, "bear")
-                        : roll < 56 ? new DenChoice(Bestiary.WOLF.get(), 2, 3, true, "wolf")
-                        : roll < 74 ? new DenChoice(FaunaEntities.SABRE_CAT.get(), 1, 2, true, "sabre_cat")
-                        : roll < 88 ? new DenChoice(ModEntities.TROLL.get(), 1, 2, false, "troll")
-                        : roll < 95 ? new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 2, 3, true, "frostbite_spider")
-                        : new DenChoice(ModEntities.SPRIGGAN.get(), 1, 2, false, "spriggan");
+                yield roll < 30 ? new DenChoice(FaunaEntities.BEAR.get(), 1, apexMax, false, "bear")
+                        : roll < 60 ? new DenChoice(Bestiary.WOLF.get(), 2, 3, true, "wolf")
+                        : roll < 76 ? new DenChoice(FaunaEntities.SABRE_CAT.get(), 1, apexMax, true, "sabre_cat")
+                        : roll < 88 ? new DenChoice(ModEntities.TROLL.get(), 1, apexMax, false, "troll")
+                        : roll < 95 ? new DenChoice(ModEntities.FROSTBITE_SPIDER.get(), 1, 2, true, "frostbite_spider")
+                        : new DenChoice(ModEntities.SPRIGGAN.get(), 1, 1, false, "spriggan");
             }
         };
     }

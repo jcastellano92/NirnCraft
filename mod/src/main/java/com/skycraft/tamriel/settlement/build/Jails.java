@@ -78,7 +78,7 @@ public final class Jails {
         c.set(doorX + 1, 3, -1, p.light);
         if (!c.recording()) {
             Component name = jailTitle(s.name, settlement);
-            c.sign(doorX, 4, -1, p.sign, Direction.NORTH, Component.empty(), name);
+            Props.shopSign(c, p, "jail", doorX, 4, -1, Direction.EAST, name, Component.literal("Barracks & Jail"));
         }
         c.anchor(AnchorType.JAIL_EXIT, doorX, 1, -2);
         c.anchor(AnchorType.JAIL_MIN, 0, -4, 0);
@@ -126,10 +126,10 @@ public final class Jails {
                     Component.translatable("crime.skycraft.jail.sign.confiscated_2"), Component.translatable("crime.skycraft.jail.sign.use_confiscated", key));
         }
         // the guards' tables, a weapon rack and lamps
-        Props.table(c, p, 3, y, 5);
+        Props.desk(c, p, 3, y, 5, Direction.NORTH);
         Props.table(c, p, 4, y, 5);
-        Props.candles(c, 3, y + 1, 5, 2);
         Props.chair(c, p, 4, y, 4, Direction.SOUTH);
+        Props.weaponRack(c, p, 1, y, 4, Direction.EAST);
         Props.table(c, p, w - 4, y, 5);
         c.set(w - 5, y, 5, B.s(Blocks.SMITHING_TABLE));
         c.set(w - 4, y + 1, 5, B.s(Blocks.LANTERN));
@@ -266,7 +266,7 @@ public final class Jails {
         c.set(doorX - 1, 3, -1, p.light);
         c.set(doorX + 1, 3, -1, p.light);
         if (!c.recording()) {
-            c.sign(doorX, 4, -1, p.sign, Direction.NORTH, Component.empty(), jailTitle("jail", settlement));
+            Props.shopSign(c, p, "guardhouse", doorX, 4, -1, Direction.EAST, jailTitle("jail", settlement), Component.literal("Guardhouse"));
         }
         c.anchor(AnchorType.JAIL_EXIT, doorX, 1, -2);
         c.anchor(AnchorType.JAIL_MIN, 0, -4, 0);

@@ -403,7 +403,7 @@ public final class Theft {
                 ItemStack taken = stack.split(1);
                 retrieved = true;
                 com.skycraft.society.Barks.say(witness, net.minecraft.network.chat.Component.literal("Got it back! Now get out before I call the guards!"));
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("The " + witness.getName().getString() + " punched you and retrieved " + taken.getHoverName().getString() + "!").withStyle(net.minecraft.ChatFormatting.GOLD));
+                com.skycraft.core.Notifier.message(player, net.minecraft.network.chat.Component.literal("The " + witness.getName().getString() + " punched you and retrieved " + taken.getHoverName().getString() + "!").withStyle(net.minecraft.ChatFormatting.GOLD));
                 if (witness instanceof net.minecraft.world.entity.Mob mob) {
                     mob.setTarget(null);
                 }

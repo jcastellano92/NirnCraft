@@ -99,8 +99,7 @@ public final class FactionStaff {
         if (entry.isEmpty()) return null;
         for (Anchor a : entry.get().anchors(AnchorType.GUILD_LEADER)) {
             Faction f = factionOf(a);
-            // the head's anchor is their chair behind the desk: they stand on it
-            if (f != null && f.id.equals(faction)) return a.pos().above();
+            if (f != null && f.id.equals(faction)) return a.pos();
         }
         return null;
     }

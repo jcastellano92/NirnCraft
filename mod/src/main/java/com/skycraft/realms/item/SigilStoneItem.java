@@ -100,7 +100,9 @@ public class SigilStoneItem extends Item {
         Enchantment ench = enchantment(stone);
         ItemStack target = player.getOffhandItem();
         if (ench == null || target.isEmpty()) {
-            if (!level.isClientSide) player.displayClientMessage(Component.translatable("realm.skycraft.sigil.hint"), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.hint"));
+            }
             return InteractionResultHolder.fail(stone);
         }
         int lvl = level(stone);
@@ -108,8 +110,8 @@ public class SigilStoneItem extends Item {
         boolean compatible = ench.canEnchant(target) && EnchantmentHelper.isEnchantmentCompatible(
                 current.keySet().stream().filter(e -> e != ench).toList(), ench);
         if (!compatible || current.getOrDefault(ench, 0) >= lvl) {
-            if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("realm.skycraft.sigil.cannot", target.getHoverName()), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.cannot", target.getHoverName()));
             }
             return InteractionResultHolder.fail(stone);
         }
@@ -119,8 +121,10 @@ public class SigilStoneItem extends Item {
             if (!player.getAbilities().instabuild) stone.shrink(1);
             level.playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1f, 0.7f);
             level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6f, 0.8f);
-            player.displayClientMessage(Component.translatable("realm.skycraft.sigil.bound", ench.getFullname(lvl),
-                    target.getHoverName()), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.bound", ench.getFullname(lvl),
+                        target.getHoverName()));
+            }
         }
         return InteractionResultHolder.sidedSuccess(stone, level.isClientSide);
     }

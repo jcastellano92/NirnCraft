@@ -58,6 +58,7 @@ public final class Brush {
     /** A block resting {@code up} blocks above the ground of its own column. */
     public boolean top(int dx, int dz, int up, BlockState state) {
         int dy = gy(dx, dz) + up;
+        if (up > 0 && b.free(dx, dy - 1, dz)) return false;
         return set(dx, dy, dz, state);
     }
 

@@ -77,65 +77,65 @@ final class RoadStyle {
                 cobbleWall = b(Blocks.COBBLESTONE_WALL), cobbleSlab = b(Blocks.COBBLESTONE_SLAB);
 
         Style nord = new Style(classes(
-                w(cobble, cobble, mossy, gravel, path, cobble, bricks, mossy),
-                w(gravel, path, path, coarse, cobble, gravel, path, mossy),
-                w(path, path, coarse, path, gravel),
-                w(path, coarse, path)),
-                w(cobble, mossy, andesite, bricks, cobble), true, bricks, brickWall, bricks, brickSlab);
+                w(bricks, cobble, mossyBricks, polishedAndesite, cobble, bricks, mossy, cracked),
+                w(cobble, cobble, mossy, bricks, andesite, gravel, cobble, path),
+                w(cobble, path, gravel, mossy, coarse),
+                w(path, coarse, gravel, cobble)),
+                w(bricks, mossyBricks, polishedAndesite, cobble, mossy), true, bricks, brickWall, bricks, brickSlab);
         Style imperial = new Style(classes(
-                w(bricks, bricks, cracked, mossyBricks, bricks, polishedAndesite, bricks, cracked),
-                w(cobble, bricks, gravel, cobble, cracked, path),
-                w(path, gravel, coarse, path),
-                w(path, coarse, path)),
-                w(polishedAndesite, andesite, polishedAndesite, bricks), true, bricks, brickWall, bricks, brickSlab);
+                w(bricks, bricks, polishedAndesite, cracked, mossyBricks, bricks, polishedAndesite, bricks),
+                w(bricks, cobble, polishedAndesite, cracked, mossyBricks, gravel, cobble),
+                w(cobble, gravel, path, bricks, coarse),
+                w(path, gravel, coarse, cobble)),
+                w(polishedAndesite, bricks, mossyBricks, andesite), true, bricks, brickWall, bricks, brickSlab);
         Style dunmer = new Style(classes(
-                w(deepTiles, tuff, deepTiles, basalt, deepBricks, tuff),
-                w(ash(), coarse, tuff, ash(), gravel, coarse),
-                w(ash(), coarse, ash(), gravel),
-                w(ash(), coarse, ash())),
-                w(basalt, tuff, deepBricks, volcanic()), true, deepTiles, deepWall, deepBricks, deepSlab);
+                w(deepTiles, deepBricks, basalt, deepTiles, tuff, blackstone),
+                w(deepBricks, tuff, basalt, ash(), deepTiles, gravel),
+                w(tuff, ash(), coarse, basalt, gravel),
+                w(ash(), coarse, tuff)),
+                w(deepTiles, basalt, blackstone, volcanic()), true, deepTiles, deepWall, deepBricks, deepSlab);
         Style argonian = new Style(classes(
-                w(packedMud, mudBricks, packedMud, rooted, mudBricks),
-                w(packedMud, rooted, coarse, packedMud, path),
-                w(rooted, coarse, packedMud, path),
+                w(mudBricks, packedMud, mudBricks, mossyBricks, packedMud, rooted),
+                w(packedMud, mudBricks, mossy, rooted, packedMud, path),
+                w(packedMud, rooted, coarse, path),
                 w(rooted, coarse, path)),
-                w(mudBricks, packedMud, mudBricks), false, mangrove, mangroveFence, mangroveLog, mangroveSlab);
+                w(mudBricks, mossyBricks, packedMud), false, mangrove, mangroveFence, mangroveLog, mangroveSlab);
         Style khajiit = new Style(classes(
-                w(smoothSand, cutSand, smoothSand, sandstone, cutSand),
-                w(smoothSand, sandstone, coarse, smoothSand, packedMud),
-                w(sandstone, coarse, smoothSand, path),
+                w(cutSand, smoothSand, cutSand, sandstone, smoothSand, redSand),
+                w(smoothSand, cutSand, sandstone, packedMud, smoothSand, path),
+                w(sandstone, smoothSand, coarse, path),
                 w(coarse, path, sandstone)),
-                w(cutSand, sandstone, cutRed), true, cutSand, sandWall, sandstone, sandSlab);
+                w(cutSand, cutRed, smoothSand), true, cutSand, sandWall, sandstone, sandSlab);
         Style bosmer = new Style(classes(
-                w(path, path, rooted, coarse, path, gravel),
-                w(path, coarse, rooted, path),
-                w(path, coarse, path),
+                w(path, mossy, rooted, path, gravel, coarse),
+                w(path, rooted, coarse, mossy, path),
+                w(path, coarse, rooted),
                 w(path, coarse, rooted)),
-                w(coarse, rooted, coarse), false, oak, oakFence, oakLog, oakSlab);
+                w(mossy, rooted, coarse), false, oak, oakFence, oakLog, oakSlab);
         Style altmer = new Style(classes(
-                w(calcite, diorite, quartz, calcite, smoothQuartz, diorite),
-                w(diorite, calcite, gravel, diorite, path),
-                w(path, gravel, calcite, path),
-                w(path, coarse, path)),
-                w(quartz, diorite, smoothQuartz), true, smoothQuartz, dioriteWall, quartz, quartzSlab);
+                w(quartz, smoothQuartz, calcite, diorite, quartz, smoothQuartz),
+                w(calcite, diorite, quartz, smoothQuartz, gravel),
+                w(diorite, calcite, path, gravel),
+                w(path, calcite, coarse)),
+                w(quartz, smoothQuartz, diorite), true, smoothQuartz, dioriteWall, quartz, quartzSlab);
         Style redguard = new Style(classes(
-                w(redSand, cutRed, smoothSand, redSand, cutSand),
-                w(redSand, smoothSand, coarse, sandstone, redSand),
-                w(sandstone, coarse, redSand, path),
+                w(cutRed, redSand, cutSand, cutRed, smoothSand),
+                w(redSand, cutRed, smoothSand, sandstone, redSand),
+                w(sandstone, redSand, coarse, path),
                 w(coarse, path, redSand)),
-                w(cutRed, cutSand, cutRed), true, cutRed, redWall, cutRed, redSlab);
+                w(cutRed, cutSand, redSand), true, cutRed, redWall, cutRed, redSlab);
         Style breton = new Style(classes(
-                w(cobble, mossy, bricks, cobble, mossyBricks, cobble, gravel),
-                w(cobble, gravel, path, mossy, path),
-                w(path, gravel, coarse, path),
-                w(path, coarse, path)),
-                w(cobble, mossy, andesite), true, cobble, cobbleWall, bricks, cobbleSlab);
+                w(bricks, cobble, mossyBricks, polishedAndesite, bricks, mossy, cracked),
+                w(cobble, bricks, mossy, andesite, gravel, cobble, path),
+                w(cobble, path, gravel, mossy),
+                w(path, coarse, gravel)),
+                w(bricks, mossyBricks, cobble, polishedAndesite), true, cobble, cobbleWall, bricks, cobbleSlab);
         Style orc = new Style(classes(
-                w(cobble, blackstone, gravel, cobble, andesite),
-                w(gravel, cobble, coarse, path),
-                w(path, gravel, coarse),
-                w(path, coarse)),
-                w(cobble, andesite), false, spruce, spruceFence, spruceLog, spruceSlab);
+                w(blackstone, cobble, deepBricks, andesite, cobble, basalt),
+                w(cobble, blackstone, andesite, gravel, coarse),
+                w(cobble, gravel, path, coarse),
+                w(path, coarse, gravel)),
+                w(blackstone, cobble, andesite), false, spruce, spruceFence, spruceLog, spruceSlab);
         for (Culture c : Culture.VALUES) {
             STYLES[c.ordinal()] = switch (c) {
                 case IMPERIAL, AKAVIRI -> imperial;

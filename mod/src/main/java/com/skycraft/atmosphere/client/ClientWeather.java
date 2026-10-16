@@ -347,26 +347,24 @@ public final class ClientWeather {
                 default -> {}
             }
 
-            // Volcanic geothermal ash drift in Vvardenfell / Stonefalls / Ashlands even between major storms
-            if (prof == WeatherProfile.VOLCANIC || mapHeat > 0.35f) {
-                target[P.ASH] += w * Math.max(0.08f, mapHeat * 0.22f);
-            }
-            // Desert amber dust drift in Alik'r / Anequina dune fields
-            if (prof == WeatherProfile.ARID || dunes > 0.25f) {
-                target[P.SAND] += w * Math.max(0.06f, dunes * 0.18f);
-            }
+            boolean isVolcanic = prof == WeatherProfile.VOLCANIC
+                    || prof == WeatherProfile.VVARDENFELL
+                    || prof == WeatherProfile.RED_MOUNTAIN;
 
             float coastalMist = coastDist < 280f ? Mth.clamp(1f - coastDist / 280f, 0f, 1f) * 0.16f : 0f;
             float orographic = mapElev > 150f ? Mth.clamp((mapElev - 150f) / 240f, 0f, 0.20f) : 0f;
             float marshMist = (prof == WeatherProfile.SWAMP || wetland > 0.3f) ? Math.max(0.12f, wetland * 0.28f) : 0f;
-            float heatHaze = (prof == WeatherProfile.ARID || dunes > 0.25f) ? 0.10f + 0.12f * dunes : 0f;
+            float heatHaze = (prof == WeatherProfile.ARID || dunes > 0.25f) ? 0.08f + 0.10f * dunes : 0f;
 
-            float sampleClouds = Mth.clamp(k.clouds * dryAtten + orographic * 0.6f + coastalMist * 0.4f, 0f, 1f);
-            float sampleFog = Mth.clamp(k.fog + coastalMist + orographic * 0.5f + marshMist + heatHaze, 0f, 1f);
+            float sampleClouds = Mth.clamp(k.clouds * dryAtten + orographic * 0.45f + coastalMist * 0.3f, 0f, 1f);
+            if (k.precip != WeatherKind.Precip.NONE && amount > 0.02f) {
+                sampleClouds = Math.max(sampleClouds, Mth.clamp(0.78f + 0.18f * amount, 0.78f, 0.98f));
+            }
+            float sampleFog = Mth.clamp(k.fog + coastalMist + orographic * 0.4f + marshMist + heatHaze, 0f, 1f);
             if (summersetPrismatic && k == WeatherKind.CLEAR) {
                 sampleFog *= 0.55f; // crisp high-altitude air over Summerset & Eton Nir
             }
-            float sampleWind = k.wind + (coastDist < 180f ? 0.08f : 0f);
+            float sampleWind = k.wind + (coastDist < 180f ? 0.06f : 0f);
             float sampleThunder = k.thunder;
             if (front != null && frontWeight > 0.01f) {
                 sampleClouds = Mth.lerp(frontWeight, sampleClouds, front.kind.clouds);
@@ -381,9 +379,9 @@ public final class ClientWeather {
             target[P.THUNDER] += w * sampleThunder;
             int fogColor = (front != null && frontWeight > 0.35f && front.kind.fogColor != 0) ? front.kind.fogColor : k.fogColor;
             if (fogColor == 0) {
-                if (prof == WeatherProfile.VOLCANIC || mapHeat > 0.4f) fogColor = 0x5E4A42;
-                else if (prof == WeatherProfile.ARID || dunes > 0.3f) fogColor = 0xC9A878;
-                else if (prof == WeatherProfile.SWAMP || wetland > 0.4f) fogColor = 0x74887A;
+                if (isVolcanic) fogColor = 0x5E4A42;
+                else if (prof == WeatherProfile.ARID || dunes > 0.4f) fogColor = 0xC9A878;
+                else if (prof == WeatherProfile.SWAMP || wetland > 0.45f) fogColor = 0x74887A;
             }
             if (fogColor != 0) {
                 float tw = w * Math.max(0.18f, Math.max(sampleClouds, sampleFog));
@@ -493,12 +491,12 @@ public final class ClientWeather {
                 float mieR = Mth.lerp(warmPhase, 0.48f - 0.10f * lat, 0.94f);
                 float mieG = Mth.lerp(warmPhase, 0.46f + 0.06f * lat, 0.58f);
                 float mieB = Mth.lerp(warmPhase, 0.74f + 0.12f * lat, 0.44f);
-                if (profile == WeatherProfile.VOLCANIC || localHeat > 0.35f || cur[P.ASH] > 0.05f) {
+                if (profile == WeatherProfile.VOLCANIC || profile == WeatherProfile.VVARDENFELL || profile == WeatherProfile.RED_MOUNTAIN || cur[P.ASH] > 0.05f) {
                     // Vvardenfell / Stonefalls volcanic ash-ember twilight
                     mieR = 0.78f;
                     mieG = 0.35f;
                     mieB = 0.26f;
-                } else if (profile == WeatherProfile.ARID || localDunes > 0.25f || cur[P.SAND] > 0.05f) {
+                } else if (profile == WeatherProfile.ARID || localDunes > 0.35f || cur[P.SAND] > 0.05f) {
                     // Alik'r / Anequina warm amber desert horizon scattering
                     mieR = 0.96f;
                     mieG = 0.72f;

@@ -53,8 +53,9 @@ public final class MagicHud {
             int ry = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_RIGHT_SPELL, 10, height);
             drawSpell(g, font, player, data, right, width - 12, ry, true, MagicClientEvents.isCasting(SpellCasting.RIGHT), dual);
         }
-        // empty hands are shown too, so "what do I have equipped" is never a guess
-        if (left == null && right == null && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()) {
+        // empty hands are shown when drawn, so "what do I have equipped" is clear in combat stance
+        if (left == null && right == null && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()
+                && !com.skycraft.combat.Sheathe.isSheathed(player)) {
             int uy = HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height);
             g.drawString(font, Component.translatable("magic.skycraft.hud_unarmed", MagicClientEvents.HANDS_CYCLE.getTranslatedKeyMessage()),
                     12, uy, 0xFFB8B2A0, true);

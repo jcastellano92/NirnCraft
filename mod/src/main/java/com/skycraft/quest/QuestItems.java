@@ -179,8 +179,13 @@ public final class QuestItems {
         public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
             ItemStack stack = player.getItemInHand(hand);
             if (!level.isClientSide) {
-                player.sendSystemMessage(Component.translatable("item.skycraft.black_hand_letter.read")
-                        .withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+                Component text = Component.translatable("item.skycraft.black_hand_letter.read")
+                        .withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC);
+                if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                    com.skycraft.core.Notifier.message(sp, text);
+                } else {
+                    player.displayClientMessage(text, true);
+                }
             }
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
         }

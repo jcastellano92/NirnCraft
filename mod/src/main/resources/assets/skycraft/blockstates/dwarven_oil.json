@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/dwarven_oil"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/dwarven_oil_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/dwarven_oil"
+      },
+      {
+        "model": "skycraft:block/dwarven_oil",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/dwarven_oil",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/dwarven_oil",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/dwarven_oil_harvested"
+      },
+      {
+        "model": "skycraft:block/dwarven_oil_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/dwarven_oil_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/dwarven_oil_harvested",
+        "y": 270
+      }
+    ]
   }
 }

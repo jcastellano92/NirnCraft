@@ -43,7 +43,7 @@ public class BearEntity extends FaunaAnimal {
                 .add(Attributes.ATTACK_DAMAGE, 7.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.27)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.4)
-                .add(Attributes.FOLLOW_RANGE, 16.0);
+                .add(Attributes.FOLLOW_RANGE, 28.0);
     }
 
     @Override
@@ -67,11 +67,22 @@ public class BearEntity extends FaunaAnimal {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.3, true));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 10f));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 12f));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> canAttackPlayers(p) && this.distanceToSqr(p) < (p.isDiscrete() ? 16.0 : 64.0)));
+                p -> {
+                    if (!canAttackPlayers(p)) return false;
+                    // Once engaged or provoked, maintain pursuit up to full follow range (28 blocks)
+                    if (this.getTarget() == p || this.getLastHurtByMob() == p) {
+                        return this.distanceToSqr(p) <= 784.0;
+                    }
+                    double acquireRange = p.isDiscrete() ? 9.0 : (p.isSprinting() ? 20.0 : 16.0);
+                    return this.distanceToSqr(p) <= acquireRange * acquireRange;
+                }));
+        this.targetSelector.addGoal(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(this));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.animal.Animal.class, 60, true, false,
+                e -> e instanceof DeerEntity || e instanceof ElkEntity));
     }
 
     @Override

@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/pearl"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/pearl_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/pearl"
+      },
+      {
+        "model": "skycraft:block/pearl",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/pearl",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/pearl",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/pearl_harvested"
+      },
+      {
+        "model": "skycraft:block/pearl_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/pearl_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/pearl_harvested",
+        "y": 270
+      }
+    ]
   }
 }

@@ -217,7 +217,7 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             if (span == RoadPlan.CULVERT && d <= hw + 1.0f && culvertColumn(x, z, d, hw, sy, c, kind, roll)) return;
             if (tunnel && tunnelColumn(x, z, d, hw, sy, c, kind, roll)) return;
             if (!onRoad) {
-                verge(x, z, kind, roll);
+                verge(x, z, d, hw, sy, span, c, kind, roll);
                 // a lantern post just beside the stairs at every 8th row (a landing)
                 if (span == RoadPlan.STAIRS && d <= hw + 1.0f && ((int) Math.floor(hit.along)) % 8 == 0) {
                     BlockState post = kind >= 2 ? RoadStyle.wood(c).fence().defaultBlockState() : wallFor(stoneOf(c).block);
@@ -232,8 +232,15 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             if (span == RoadPlan.FORD) {
                 surf = roll < 55 ? Blocks.GRAVEL.defaultBlockState() : roll < 85 ? Blocks.COBBLESTONE.defaultBlockState()
                         : Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-            } else if (kind == 0 && d > hw - 0.9f) {
+            } else if (kind <= 1 && d > hw - 0.85f) {
+                // Dressed edge curbstones along both highways and regional roads
                 surf = RoadStyle.edge(c, roll);
+            } else if (kind == 0 && d < 0.7f && roll % 3 != 0) {
+                // Crowned flagstone/masonry spine down the centre of highways
+                surf = RoadStyle.deck(c);
+            } else if (kind <= 1 && Math.abs(d - hw * 0.52f) < 0.42f && roll % 4 == 0) {
+                // Subtle wheel-rut wear track along cart lanes
+                surf = RoadStyle.surface(c, (byte) Math.min(3, kind + 1), roll);
             } else {
                 surf = RoadStyle.surface(c, kind, roll);
             }
@@ -260,18 +267,73 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
 
         // ---------------------------------------------------------------- verge, blending
 
-        /** Beside the bed: nothing tall within the band's clear margin, and a worn edge on grass. */
-        void verge(int x, int z, byte kind, int roll) {
+        /** Beside the bed: nothing tall within the band's clear margin, worn shoulder, cut-bank retaining walls, and roadside details. */
+        void verge(int x, int z, float d, float hw, int sy, byte span, Culture c, byte kind, int roll) {
             int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            for (int y = Math.min(maxY, top + HEADROOM); y >= top; y--) {
+            for (int y = top; y <= Math.min(maxY, top + 28); y++) {
                 BlockState s = get(x, y, z);
                 if (s.isAir()) continue;
-                if (s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || clearable(s)) set(x, y, z, Blocks.AIR.defaultBlockState());
-                else break;
+                if (s.is(BlockTags.LOGS)) {
+                    set(x, y, z, Blocks.AIR.defaultBlockState());
+                    clearTreeCanopy(x, y, z);
+                } else if (s.is(BlockTags.LEAVES) || clearable(s)) {
+                    set(x, y, z, Blocks.AIR.defaultBlockState());
+                }
             }
-            if (kind <= 1 && roll % 100 < 38) {
-                BlockState g = get(x, top - 1, z);
-                if (g.is(Blocks.GRASS_BLOCK) || g.is(Blocks.DIRT) || g.is(Blocks.PODZOL)) set(x, top - 1, z, Blocks.COARSE_DIRT.defaultBlockState());
+            int groundY = top - 1;
+            if (kind <= 1) {
+                BlockState g = get(x, groundY, z);
+                if (g.is(Blocks.GRASS_BLOCK) || g.is(Blocks.DIRT) || g.is(Blocks.PODZOL)) {
+                    if (d <= hw + 0.65f && roll % 100 < 55) {
+                        set(x, groundY, z, RoadStyle.edge(c, roll));
+                    } else if (roll % 100 < 42) {
+                        set(x, groundY, z, Blocks.COARSE_DIRT.defaultBlockState());
+                    }
+                }
+                // Cut-bank stone retaining wall where a road cut slices into a steep hillside
+                if (d > hw + 0.35f && d <= hw + 1.25f && groundY - sy >= 2 && groundY - sy <= 5) {
+                    Stone st = stoneOf(c);
+                    for (int y = sy + 1; y <= groundY; y++) {
+                        set(x, y, z, (y + roll) % 4 == 0 ? st.mossy : st.block);
+                    }
+                    return;
+                }
+            }
+            // Periodic cultural roadside furniture (lantern posts & milestones/cairns) on the outer verge
+            if (kind <= 1 && span == RoadPlan.NORMAL && d > hw + 0.45f && d <= hw + 1.15f
+                    && Math.abs(groundY - sy) <= 1 && get(x, groundY, z).getFluidState().isEmpty()
+                    && isSupport(get(x, groundY, z))) {
+                int arcCell = (int) Math.floor(hit.along);
+                float arcFrac = hit.along - arcCell;
+                // Deterministic single-column anchor along the outer verge
+                if (arcFrac < 0.32f && ((x * 31 + z * 17) & 1) == 0) {
+                    Stone st = stoneOf(c);
+                    RoadStyle.Wood wood = RoadStyle.wood(c);
+                    int lanternPeriod = kind == 0 ? 36 : 48;
+                    if (arcCell > 8 && arcCell % lanternPeriod == 0 && (kind == 0 || curb(x, z))) {
+                        BlockState baseWall = wallFor(st.block);
+                        BlockState fence = wood.fence().defaultBlockState();
+                        set(x, groundY, z, st.block);
+                        set(x, groundY + 1, z, baseWall);
+                        set(x, groundY + 2, z, fence);
+                        set(x, groundY + 3, z, fence);
+                        set(x, groundY + 4, z, st.slab);
+                        // Hang a lantern toward the road if that neighbour is inside the same chunk
+                        int lx = x - Math.round(hit.dirZ), lz = z + Math.round(hit.dirX);
+                        if ((lx >> 4) == (x >> 4) && (lz >> 4) == (z >> 4) && get(lx, groundY + 3, lz).isAir()) {
+                            set(lx, groundY + 4, lz, wood.trapdoor().defaultBlockState());
+                            set(lx, groundY + 3, lz, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
+                        } else {
+                            set(x, groundY + 4, z, Blocks.LANTERN.defaultBlockState());
+                        }
+                    } else if (arcCell > 12 && arcCell % 72 == 24) {
+                        // Cultural roadside milestone / cairn
+                        set(x, groundY, z, st.mossy);
+                        set(x, groundY + 1, z, st.block);
+                        set(x, groundY + 2, z, wallFor(st.block));
+                        set(x, groundY + 3, z, st.slab);
+                    }
+                }
             }
         }
 
@@ -532,12 +594,41 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             }
         }
 
-        /** Clears everything from {@code y + 1} up for {@link #HEADROOM} blocks (water stays: a ford is awash). */
+        /** Clears everything from {@code y + 1} up for {@link #HEADROOM} blocks, and any tree logs/leaves above that. */
         void clearAbove(int x, int z, int y, boolean keepFluid) {
             for (int yy = y + 1; yy <= y + HEADROOM && yy <= maxY; yy++) {
                 BlockState s = get(x, yy, z);
                 if (s.isAir() || !s.getFluidState().isEmpty()) continue;
+                boolean isLog = s.is(BlockTags.LOGS);
                 set(x, yy, z, Blocks.AIR.defaultBlockState());
+                if (isLog) clearTreeCanopy(x, yy, z);
+            }
+            for (int yy = y + HEADROOM + 1; yy <= y + 28 && yy <= maxY; yy++) {
+                BlockState s = get(x, yy, z);
+                if (s.isAir() || !s.getFluidState().isEmpty()) continue;
+                if (s.is(BlockTags.LOGS)) {
+                    set(x, yy, z, Blocks.AIR.defaultBlockState());
+                    clearTreeCanopy(x, yy, z);
+                } else if (s.is(BlockTags.LEAVES) || clearable(s)) {
+                    set(x, yy, z, Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+
+        /** Removes the connected crown of a felled roadside tree so no half-trees hang over the road. */
+        void clearTreeCanopy(int cx, int cy, int cz) {
+            for (int dx = -3; dx <= 3; dx++) {
+                for (int dz = -3; dz <= 3; dz++) {
+                    if (dx * dx + dz * dz > 10) continue;
+                    int x = cx + dx, z = cz + dz;
+                    if (!level.hasChunk(x >> 4, z >> 4)) continue;
+                    for (int y = Math.max(minY, cy - 2); y <= Math.min(maxY, cy + 18); y++) {
+                        BlockState s = get(x, y, z);
+                        if (s.is(BlockTags.LEAVES) || (dx * dx + dz * dz <= 2 && s.is(BlockTags.LOGS)) || s.is(Blocks.SNOW)) {
+                            set(x, y, z, Blocks.AIR.defaultBlockState());
+                        }
+                    }
+                }
             }
         }
 

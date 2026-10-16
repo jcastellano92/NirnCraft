@@ -45,7 +45,9 @@ public final class QuestDialogue {
     private static final Map<UUID, Conversation> CONV = new HashMap<>();
     private static Boolean guardsRegistered;
 
-    private record Conversation(UUID npc, @Nullable RadiantQuests.Offer offer, String dailyKey, boolean bountyMenu, long expires) {
+    private record Conversation(UUID npc, @Nullable RadiantQuests.Offer offer,
+                                @Nullable BiConsumer<ServerPlayer, LivingEntity> customAccept,
+                                String dailyKey, boolean bountyMenu, long expires) {
     }
 
     private QuestDialogue() {}
@@ -67,8 +69,19 @@ public final class QuestDialogue {
         return Component.translatable(key, args);
     }
 
+    public static Component questLabel(Component label) {
+        if (label == null) return Component.empty();
+        String s = label.getString();
+        if (s.startsWith("\u25C6 ") || s.startsWith("\u2022 ")) return label;
+        return Component.literal("\u25C6 ").withStyle(net.minecraft.ChatFormatting.GOLD).append(label);
+    }
+
     private static DialogueOption opt(String id, String labelKey, int order, BiConsumer<ServerPlayer, LivingEntity> action, Object... args) {
-        return new DialogueOption(id, tr(labelKey, args), order, action);
+        Component label = tr(labelKey, args);
+        if (!"quest.decline".equals(id) && !"quest.rumors".equals(id)) {
+            label = questLabel(label);
+        }
+        return new DialogueOption(id, label, order, action);
     }
 
     // ------------------------------------------------------------------ NPC kinds
@@ -123,6 +136,27 @@ public final class QuestDialogue {
         return true;
     }
 
+    /**
+     * True if this NPC has not already offered/given a quest today and the player does not already have an active
+     * quest from or targeting this specific NPC. Prevents one NPC from acting as an endless quest dispenser.
+     */
+    public static boolean canOfferQuest(ServerPlayer player, LivingEntity npc) {
+        if (usedToday(npc, "any_quest")) return false;
+        for (Quests.Ref ref : Quests.active(player.server, player.getUUID())) {
+            Quest q = ref.quest();
+            if (npc.getUUID().equals(q.giver)) return false;
+            Objective o = q.current();
+            if (o != null && (o.type == Objective.Type.TALK_TO || o.type == Objective.Type.FETCH)) {
+                if (o.npc != null && o.npc.equals(npc.getUUID())) return false;
+                if (o.data.contains(com.skycraft.quest.story.Story.NPC)
+                        && com.skycraft.quest.story.QuestNpcs.matches(npc, o.data.getString(com.skycraft.quest.story.Story.NPC))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     // ------------------------------------------------------------------ provider
 
     static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
@@ -136,53 +170,91 @@ public final class QuestDialogue {
             if (o == null || (o.type != Objective.Type.TALK_TO && o.type != Objective.Type.FETCH)) continue;
             if (!matchesNpc(o, npc) || o.data.contains(com.skycraft.quest.story.Story.CHOICES)) continue; // choices: StoryDialogue
             String questId = q.id;
-            out.add(new DialogueOption("quest.turnin." + questId, o.topic, 100, (pl, n) -> turnIn(pl, n, questId)));
+            Component topic = o.topic != null ? o.topic : tr(o.type == Objective.Type.FETCH ? "dialogue.skycraft.quest.deliver" : "dialogue.skycraft.quest.turn_in", q.title);
+            out.add(new DialogueOption("quest.turnin." + questId, questLabel(topic), 100, (pl, n) -> turnIn(pl, n, questId)));
         }
         // 2. an open offer from this NPC
         Conversation c = CONV.get(player.getUUID());
         if (c != null && c.npc().equals(npc.getUUID()) && player.level().getGameTime() < c.expires()) {
-            if (c.offer() != null) {
+            if (c.offer() != null || c.customAccept() != null) {
                 out.add(opt("quest.accept", "dialogue.skycraft.quest.accept", 150, QuestDialogue::accept));
                 out.add(opt("quest.decline", "dialogue.skycraft.quest.decline", 151, QuestDialogue::decline));
                 return;
             }
             if (c.bountyMenu()) addBountyOptions(player, out);
         }
-        // 3. topics by kind of NPC
+        // 3. topics by kind of NPC (each NPC offers at most one quest and never while already holding a quest for the player)
         PlayerData data = SkyData.get(player);
         boolean guard = isGuard(npc);
-        if (isTownsperson(npc)) {
-            out.add(opt("quest.help", "dialogue.skycraft.quest.help", 300,
-                    (pl, n) -> ask(pl, n, "help", () -> RadiantQuests.villager(pl, n))));
-            if (isProfession(npc, VillagerProfession.WEAPONSMITH)) companionsTopics(player, data, out);
-            if (isProfession(npc, VillagerProfession.LIBRARIAN)) {
-                collegeTopics(player, data, out);
-                bardsTopics(player, data, out);
+        boolean canOffer = canOfferQuest(player, npc);
+        if (isTownsperson(npc) && canOffer
+                && com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty()
+                && com.skycraft.quest.faction.FactionStaff.factionOf(npc) == null) {
+            VillagerProfession prof = com.skycraft.economy.Merchants.profession(npc);
+            boolean hasFavor = prof != null && prof != VillagerProfession.NONE
+                    && !usedToday(npc, "help")
+                    && !Quests.hasActiveKind(server, player.getUUID(), "villager_")
+                    && ((npc.getUUID().getLeastSignificantBits() ^ day(npc)) & 7L) == 0L;
+            if (hasFavor) {
+                out.add(opt("quest.help", "dialogue.skycraft.quest.help", 300,
+                        (pl, n) -> ask(pl, n, "help", () -> RadiantQuests.villager(pl, n))));
             }
         }
-        if (guard) {
+        if (guard && canOffer && !Quests.hasActiveKind(server, player.getUUID(), "bounty_")) {
             out.add(opt("quest.bounty", "dialogue.skycraft.quest.bounties", 310,
                     (pl, n) -> ask(pl, n, "bounty", () -> RadiantQuests.bounty(pl, n))));
-            out.add(opt("quest.hunt", "dialogue.skycraft.quest.hunts", 311,
-                    (pl, n) -> ask(pl, n, "hunt", () -> RadiantQuests.hunt(pl, n))));
-            out.add(opt("quest.challenge", "dialogue.skycraft.quest.challenges", 312,
-                    (pl, n) -> ask(pl, n, "challenge", () -> RadiantQuests.challenge(pl, n))));
-            companionsTopics(player, data, out);
-            civilWarTopics(player, data, out);
         }
         if (com.skycraft.economy.Merchants.isCaravan(npc)) {
             thievesTopics(player, data, out);
             darkBrotherhoodTopics(player, data, out);
         }
         SideQuests.addSideQuestTopics(player, npc, out);
-        NoticeBoards.addDialogueOptions(player, npc, out);
+        // Notice-board contracts belong on the settlement Notice Board screen, never in random NPC dialogue menus.
         com.skycraft.quest.story.StoryDialogue.addOptions(player, npc, out);
-        com.skycraft.quest.story.ProvinceRadiant.addOptions(player, npc, out, guard);
+        if (canOffer) {
+            com.skycraft.quest.story.ProvinceRadiant.addOptions(player, npc, out, guard);
+        }
     }
 
-    /** Offers a generated quest from another module (province radiants), with the usual accept/decline flow. */
+    /** Offers a generated quest from another module (province radiants, side quests), with the usual accept/decline flow. */
     public static void offer(ServerPlayer player, LivingEntity npc, String dailyKey, Supplier<RadiantQuests.Offer> generator) {
         ask(player, npc, dailyKey, generator);
+    }
+
+    /**
+     * Pitches a data-driven {@link com.skycraft.quest.story.StoryData.QuestDef} with an explicit Accept / Decline
+     * confirmation step instead of auto-starting on topic click.
+     */
+    public static void offerStory(ServerPlayer player, LivingEntity npc, com.skycraft.quest.story.StoryData.QuestDef def,
+                                  @Nullable Runnable onAccepted) {
+        if (!com.skycraft.quest.story.Story.available(player, def)) {
+            Dialogue.open(player, npc, tr("quest.skycraft.reply.no_work"));
+            return;
+        }
+        if (!def.isMain() && !Quests.canTakeMore(player)) {
+            Dialogue.open(player, npc, tr("quest.skycraft.reply.too_busy"));
+            return;
+        }
+        long now = player.level().getGameTime();
+        Component pitch = def.pitch.isEmpty() ? def.desc.c() : def.pitch.c();
+        CONV.put(player.getUUID(), new Conversation(npc.getUUID(), null, (pl, n) -> {
+            if (!com.skycraft.quest.story.Story.available(pl, def)) {
+                Dialogue.open(pl, n, tr("quest.skycraft.reply.no_work"));
+                return;
+            }
+            if (!def.isMain() && !Quests.canTakeMore(pl)) {
+                Dialogue.open(pl, n, tr("quest.skycraft.reply.too_busy"));
+                return;
+            }
+            if (com.skycraft.quest.story.Story.start(pl, def)) {
+                markToday(n, "any_quest");
+                if (onAccepted != null) onAccepted.run();
+                Dialogue.open(pl, n, tr("quest.skycraft.reply.accepted"));
+            } else {
+                Dialogue.open(pl, n, tr("quest.skycraft.reply.too_busy"));
+            }
+        }, "story_" + def.id, false, now + OFFER_TICKS));
+        Dialogue.open(player, npc, pitch);
     }
 
     // ------------------------------------------------------------------ offers
@@ -212,7 +284,7 @@ public final class QuestDialogue {
             Dialogue.open(player, npc, c.offer().pitch());
             return;
         }
-        if (!dailyKey.isEmpty() && usedToday(npc, dailyKey)) {
+        if ((!dailyKey.isEmpty() && usedToday(npc, dailyKey)) || usedToday(npc, "any_quest")) {
             Dialogue.open(player, npc, tr("quest.skycraft.reply.no_work"));
             return;
         }
@@ -228,23 +300,34 @@ public final class QuestDialogue {
             offer = null;
         }
         if (!dailyKey.isEmpty()) markToday(npc, dailyKey);
+        markToday(npc, "any_quest");
         if (offer == null) {
             Dialogue.open(player, npc, tr("quest.skycraft.reply.nothing"));
             return;
         }
-        CONV.put(player.getUUID(), new Conversation(npc.getUUID(), offer, dailyKey, false, now + OFFER_TICKS));
+        CONV.put(player.getUUID(), new Conversation(npc.getUUID(), offer, null, dailyKey, false, now + OFFER_TICKS));
         Dialogue.open(player, npc, offer.pitch());
     }
 
     private static void accept(ServerPlayer player, LivingEntity npc) {
         Conversation c = CONV.remove(player.getUUID());
-        if (c == null || c.offer() == null || !c.npc().equals(npc.getUUID())) return;
-        if (Quests.start(player, c.offer().quest())) Dialogue.open(player, npc, tr("quest.skycraft.reply.accepted"));
-        else Dialogue.open(player, npc, tr("quest.skycraft.reply.too_busy"));
+        if (c == null || !c.npc().equals(npc.getUUID())) return;
+        if (c.customAccept() != null) {
+            c.customAccept().accept(player, npc);
+            return;
+        }
+        if (c.offer() == null) return;
+        if (Quests.start(player, c.offer().quest())) {
+            markToday(npc, "any_quest");
+            Dialogue.open(player, npc, tr("quest.skycraft.reply.accepted"));
+        } else {
+            Dialogue.open(player, npc, tr("quest.skycraft.reply.too_busy"));
+        }
     }
 
     private static void decline(ServerPlayer player, LivingEntity npc) {
         CONV.remove(player.getUUID());
+        markToday(npc, "any_quest");
         Dialogue.open(player, npc, tr("quest.skycraft.reply.declined"));
     }
 
@@ -412,7 +495,7 @@ public final class QuestDialogue {
                 Dialogue.open(pl, n, tr("quest.skycraft.reply.no_bounty"));
                 return;
             }
-            CONV.put(pl.getUUID(), new Conversation(n.getUUID(), null, "", true, pl.level().getGameTime() + OFFER_TICKS));
+            CONV.put(pl.getUUID(), new Conversation(n.getUUID(), null, null, "", true, pl.level().getGameTime() + OFFER_TICKS));
             Dialogue.open(pl, n, tr("quest.skycraft.reply.bounty_menu"));
         }));
     }

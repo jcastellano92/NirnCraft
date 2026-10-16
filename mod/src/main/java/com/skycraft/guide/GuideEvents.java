@@ -89,7 +89,6 @@ public final class GuideEvents {
     /** Triggers the MS19 arrival moment for {@code region}: narrator card, rumour hook, capital map pin, and client banner sync. */
     public static void triggerArrival(ServerPlayer player, PlayerData data, Region region) {
         CompoundTag mod = data.module(MODULE);
-        if (!mod.contains("arrived_regions", Tag.TAG_LIST)) mod.put("arrived_regions", new ListTag());
         ListTag arrived = mod.getList("arrived_regions", Tag.TAG_STRING);
         boolean already = false;
         for (int i = 0; i < arrived.size(); i++) {
@@ -99,6 +98,7 @@ public final class GuideEvents {
             }
         }
         if (!already) arrived.add(StringTag.valueOf(region.id()));
+        mod.put("arrived_regions", arrived);
 
         String key = shortKey(region.id());
         String arriveKey = "skycraft.guide.arrive." + key;
@@ -110,7 +110,6 @@ public final class GuideEvents {
         mod.putInt("last_arrival_seq", mod.getInt("last_arrival_seq") + 1);
 
         // Queue rumour entry in the player's guide data
-        if (!mod.contains("rumours", Tag.TAG_LIST)) mod.put("rumours", new ListTag());
         ListTag rumours = mod.getList("rumours", Tag.TAG_STRING);
         boolean hasRumour = false;
         for (int i = 0; i < rumours.size(); i++) {
@@ -120,6 +119,7 @@ public final class GuideEvents {
             }
         }
         if (!hasRumour) rumours.add(StringTag.valueOf(rumourKey));
+        mod.put("rumours", rumours);
 
         // Mark the region's capital / marquee settlement as known on the player's world map
         if (region.capital() != null && !region.capital().isEmpty()) {
@@ -129,12 +129,7 @@ public final class GuideEvents {
 
         data.markDirty();
 
-        // 1-sentence evocative Narrator Card (MS19)
+        // 1-sentence evocative Narrator Card (MS19); the rumour subtitle is shown on the arrival banner by GuideClient
         SkyNetwork.sendToPlayer(player, new QuestPackets.NarrationCard(Component.translatable(arriveKey), 140));
-
-        // Passing traveler / courier rumour hook pointing toward the region's marquee questline
-        player.sendSystemMessage(Component.translatable("skycraft.guide.rumour.prefix", region.name())
-                .withStyle(ChatFormatting.GOLD)
-                .append(Component.translatable(rumourKey).withStyle(ChatFormatting.YELLOW)));
     }
 }

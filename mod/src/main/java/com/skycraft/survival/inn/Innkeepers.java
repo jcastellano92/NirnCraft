@@ -113,6 +113,7 @@ public final class Innkeepers {
         inn.lastCheck = now;
         BlockPos center = new BlockPos(s.x, Math.max(level.getMinBuildHeight(), s.y), s.z);
         if (!level.isPositionEntityTicking(center)) return;
+        if (com.skycraft.tamriel.settlement.SettlementAnchors.near(level, center, 48).isPresent()) return;
         List<LivingEntity> found = level.getEntitiesOfClass(LivingEntity.class, new AABB(center).inflate(96, 64, 96),
                 e -> e.isAlive() && isInnkeeper(e));
         if (!found.isEmpty()) {
@@ -162,13 +163,16 @@ public final class Innkeepers {
             int r = 2 + attempt / 4;
             int x = anchor.getX() + random.nextInt(2 * r + 1) - r;
             int z = anchor.getZ() + random.nextInt(2 * r + 1) - r;
-            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            BlockPos pos = new BlockPos(x, y, z);
+            BlockPos pos = com.skycraft.society.NpcPlacement.safeSurfaceAt(level, x, z);
             BlockState ground = level.getBlockState(pos.below());
             if (!ground.isFaceSturdy(level, pos.below(), Direction.UP) || !ground.getFluidState().isEmpty()) continue;
             if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) continue;
             if (!level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty()) continue;
             if (!level.getFluidState(pos).isEmpty()) continue;
+            if (com.skycraft.society.NpcPlacement.hasRoomBelow(level, pos)
+                    || com.skycraft.society.NpcPlacement.isFireHazard(level, pos)
+                    || com.skycraft.society.NpcPlacement.isSlabHazard(level, pos)
+                    || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, pos)) continue;
             return pos;
         }
         return null;

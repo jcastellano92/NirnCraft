@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -144,6 +145,10 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         super(type, level);
         this.xpReward = 5;
         this.setCanPickUpLoot(false);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.DAMAGE_FIRE, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.DANGER_FIRE, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.LAVA, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.DAMAGE_OTHER, -1.0F);
         if (this.getNavigation() instanceof GroundPathNavigation nav) nav.setCanOpenDoors(true);
     }
 
@@ -614,6 +619,13 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         // like Skyrim's children: nothing but /kill and the void can hurt them
         if (isChild() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
         Entity attacker = source.getEntity();
+        if (attacker == null && (source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)
+                || source.is(net.minecraft.world.damagesource.DamageTypes.HOT_FLOOR))
+                && (!role().villain || !this.level().canSeeSky(this.blockPosition()))) {
+            this.clearFire();
+            if (!this.level().isClientSide) com.skycraft.society.NpcPlacement.rescueFromFireOrSlab(this);
+            return false;
+        }
         if (attacker instanceof NpcEntity o && this.isAlliedTo(o)) return false;
         boolean hurt = super.hurt(source, amount);
         if (hurt && !this.level().isClientSide && attacker instanceof LivingEntity living && living != this
@@ -898,9 +910,13 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     // ------------------------------------------------------------------ crowds
 
-    /** People pass through each other (townsfolk, villagers): no NPC-vs-NPC shoving, so doorways and gates never jam. */
-    private static boolean passThrough(Entity other) {
-        return other instanceof NpcEntity || other instanceof net.minecraft.world.entity.npc.AbstractVillager;
+    /** Walking people pass through each other so doorways and gates never jam, but stationary people do not stack on the same spot. */
+    private boolean passThrough(Entity other) {
+        if (!(other instanceof NpcEntity || other instanceof net.minecraft.world.entity.npc.AbstractVillager)) return false;
+        if (this.isSleeping() || (other instanceof LivingEntity l && l.isSleeping())) return true;
+        if (!this.getNavigation().isDone()) return true;
+        if (other instanceof Mob m && !m.getNavigation().isDone()) return true;
+        return false;
     }
 
     @Override
@@ -915,10 +931,17 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         super.doPush(other);
     }
 
-    /** Roofs are not places to wander to: walk targets well above the person's anchors that stand open to the sky score nothing. */
+    /** Roofs, fire pits, half-slabs, and counters/furniture are not places to wander to. */
     @Override
     public float getWalkTargetValue(BlockPos pos, net.minecraft.world.level.LevelReader level) {
-        if (!this.level().isClientSide && home != null && com.skycraft.society.NpcPlacement.isRoof(this, pos)) return -1.0e9F;
+        if (!this.level().isClientSide) {
+            if (com.skycraft.society.NpcPlacement.isFireHazard(level, pos)
+                    || com.skycraft.society.NpcPlacement.isSlabHazard(level, pos)
+                    || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, pos)) {
+                return -1.0e9F;
+            }
+            if (com.skycraft.society.NpcPlacement.isRoof(this, pos)) return -1.0e9F;
+        }
         return super.getWalkTargetValue(pos, level);
     }
 
@@ -969,6 +992,12 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         }
         placeBySchedule();
         if (!initialized) initialize();
+        if (this.isOnFire() || (this.tickCount + this.getId()) % 10 == 0) {
+            com.skycraft.society.NpcPlacement.rescueFromFireOrSlab(this);
+        }
+        if ((this.tickCount + this.getId()) % 20 == 0) {
+            com.skycraft.society.NpcPlacement.rescueFromRoof(this);
+        }
         if (getLook() < 0 && this.tickCount % 20 == 1) Npcs.ensureLook(this); // older saves
         if (isConversing()) {
             this.getNavigation().stop();
@@ -984,7 +1013,16 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
                 setConversationPartner(-1);
             } else {
                 this.getNavigation().stop();
+                this.zza = 0.0F;
+                this.xxa = 0.0F;
+                this.setSpeed(0.0F);
                 this.getLookControl().setLookAt(partner, 30.0F, 30.0F);
+                double dx = partner.getX() - this.getX();
+                double dz = partner.getZ() - this.getZ();
+                float targetYaw = (float) (Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0F;
+                this.setYRot(Mth.approachDegrees(this.getYRot(), targetYaw, 25.0F));
+                this.yBodyRot = Mth.approachDegrees(this.yBodyRot, targetYaw, 25.0F);
+                this.setYHeadRot(Mth.approachDegrees(this.getYHeadRot(), targetYaw, 30.0F));
             }
         }
         if (this.tickCount % 20 != 0) return;

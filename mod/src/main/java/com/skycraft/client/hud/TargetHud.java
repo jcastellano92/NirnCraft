@@ -81,10 +81,12 @@ public final class TargetHud {
     @SubscribeEvent
     public static void onAttack(AttackEntityEvent event) {
         if (event.getEntity().level().isClientSide && event.getEntity() == Minecraft.getInstance().player
-                && event.getTarget() instanceof LivingEntity le && worthShowing(le)) {
+                && event.getTarget() instanceof LivingEntity le && !(le instanceof ArmorStand)) {
             lastAttacked = le;
             lastAttackedTime = Util.getMillis();
-            select(le);
+            if (worthShowing(le)) {
+                select(le);
+            }
         }
     }
 
@@ -145,7 +147,7 @@ public final class TargetHud {
             double score = dot * 4.0 - (dist / 24.0);
             if (e == aimed) score += 5.0;
             if (recentAttack) score += 4.0;
-            if (e instanceof Mob mob && mob.getTarget() == player) score += 2.0;
+            if (e instanceof Mob mob && (mob.getTarget() == player || mob.isAggressive())) score += 2.5;
             if (isBoss(e)) score += 1.5;
             if (e == target) score += 1.5; // Hysteresis bonus prevents jitter between nearby foes
 
@@ -188,8 +190,12 @@ public final class TargetHud {
         if (e instanceof ArmorStand || (e instanceof Player && !e.isAlive())) return false;
         if (e.isInvisible()) return false;
         if (e instanceof Enemy || isBoss(e)) return true;
-        if (e instanceof Mob mob && mob.getTarget() == Minecraft.getInstance().player) return true;
-        if (e == lastAttacked && (Util.getMillis() - lastAttackedTime < 4000)) return true;
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (e instanceof Mob mob && (mob.getTarget() == player || mob.isAggressive())) return true;
+        if (player != null && (e.getLastHurtByMob() == player || player.getLastHurtByMob() == e)) return true;
+        if (e == lastAttacked && (Util.getMillis() - lastAttackedTime < 6000)) return true;
+        if (e instanceof com.skycraft.fauna.entity.FaunaAnimal && e.getHealth() < e.getMaxHealth()) return true;
+        if (e instanceof com.skycraft.fauna.entity.FaunaAnimal && Minecraft.getInstance().crosshairPickEntity == e) return true;
         return e == target;
     }
 

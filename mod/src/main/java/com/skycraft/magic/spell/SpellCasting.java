@@ -109,6 +109,10 @@ public final class SpellCasting {
     public static void start(ServerPlayer p, int hand) {
         if (hand != LEFT && hand != RIGHT) return;
         if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) return;
+        if (com.skycraft.combat.Sheathe.isSheathed(p)) {
+            com.skycraft.combat.Sheathe.setSheathed(p, false);
+            return;
+        }
         Active[] hands = hands(p);
         if (hands[hand] != null) return;
         // one hand system (magic.Hands): a hand that holds an item or a bound weapon holds no spell, and a two-handed
@@ -163,11 +167,13 @@ public final class SpellCasting {
     public static void stop(ServerPlayer p) {
         ACTIVE.remove(p.getUUID());
         WARD.remove(p.getUUID());
+        com.skycraft.magic.spell.Mysticism.release(p);
     }
 
     private static void end(ServerPlayer p, Active[] hands, int hand) {
         hands[hand] = null;
         if (!isCastingWard(p)) WARD.remove(p.getUUID());
+        if (!isCasting(p, "telekinesis")) com.skycraft.magic.spell.Mysticism.release(p);
     }
 
     /** The ward spells: held to absorb spell damage from the front. */
@@ -264,6 +270,7 @@ public final class SpellCasting {
         }
         if (result == Spell.Result.FAILED) {
             end(p, hands, a.hand);
+            if (dual) end(p, hands, 1 - a.hand);
             return;
         }
         if (result == Spell.Result.EFFECT) a.hadEffect = true;

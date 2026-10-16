@@ -349,50 +349,122 @@ public final class Builders {
     }
 
     static boolean animalDen(Brush br, Kind k) {
-        Block shell = br.rock.a() == Blocks.STONE || br.rock.a() == Blocks.BLACKSTONE ? Blocks.COARSE_DIRT : br.rock.a();
+        // Refuse if any column of the burrow footprint is wet or slopes too steeply
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dz = -4; dz <= 4; dz++) {
+                if (dx * dx + dz * dz > 18) continue;
+                if (br.b.waterAt(dx, dz)) return false;
+            }
+        }
+        Block earth = br.rock.a() == Blocks.SANDSTONE ? Blocks.SANDSTONE
+                : br.rock.a() == Blocks.RED_SANDSTONE ? Blocks.RED_SANDSTONE
+                : Blocks.COARSE_DIRT;
+        Block mossyRock = br.rock.c();
+        Block log = br.b.pal.log();
         boolean any = false;
-        for (int dx = -3; dx <= 3; dx++) {
-            for (int dz = -3; dz <= 3; dz++) {
-                double d2 = dx * dx + dz * dz;
-                if (d2 > 11) continue;
-                int h = (int) Math.round(2.4 * Math.sqrt(Math.max(0, 1 - d2 / 11.0)));
-                if (br.b.waterAt(dx, dz)) continue;
-                for (int y = 0; y < Math.max(h, 1); y++) {
-                    Block blk = br.r.nextInt(4) == 0 ? br.rock.pick(br.r) : shell;
-                    any |= br.top(dx, dz, y, blk);
+
+        // 1. Build a grounded hillside/burrow mound over the rear & flanks (dz in [-4..2], dx in [-4..4])
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dz = -4; dz <= 2; dz++) {
+                double norm = (dx * dx) / 16.0 + ((dz + 1.0) * (dz + 1.0)) / 14.0;
+                if (norm > 1.0) continue;
+                int h = (int) Math.round(3.2 * Math.sqrt(Math.max(0.0, 1.0 - norm)));
+                if (h < 1) continue;
+                int colGy = br.gy(dx, dz);
+                // Ensure solid foundation from base level down to natural ground
+                for (int y = Math.min(colGy, -3); y < 0; y++) {
+                    br.force(dx, y, dz, br.rock.pick(br.r).defaultBlockState());
+                }
+                for (int y = 0; y < h; y++) {
+                    boolean topLayer = (y == h - 1);
+                    Block blk = topLayer
+                            ? (br.r.nextInt(3) == 0 ? Blocks.MOSS_BLOCK : earth)
+                            : (br.r.nextInt(3) == 0 ? earth : br.rock.pick(br.r));
+                    br.force(dx, colGy + y, dz, blk.defaultBlockState());
+                    any = true;
                 }
             }
         }
         if (!any) return false;
-        // the hollow and its mouth (towards local +z)
-        for (int dx = -1; dx <= 0; dx++)
-            for (int dz = -1; dz <= 0; dz++)
-                for (int y = 0; y <= 1; y++) br.force(dx, br.gy(dx, dz) + y, dz, br.air());
-        for (int dz = 1; dz <= 3; dz++) br.force(0, br.gy(0, dz), dz, br.air());
-        br.force(0, br.gy(0, 2) + 1, 2, br.air());
 
-        // Anchor the living DenBlockEntity in the floor of the hollow so regional residents spawn and tether here
-        br.force(0, br.gy(0, 0) - 1, 0, BiomeBlocks.CREATURE_DEN.get().defaultBlockState());
-
-        // Fallen timber / root overhang framing the den mouth
-        Block log = br.b.pal.log();
-        br.top(-1, 2, 1, pillar(log, Direction.Axis.X));
-        br.top(1, 2, 1, pillar(log, Direction.Axis.X));
-
-        // Nesting mat, gnawed bones, skulls, cave fungi, and a predator's victim cache
-        br.top(-1, -1, 0, Blocks.BROWN_CARPET);
-        br.b.lying(0, br.gy(0, 0), 0, new ItemStack(Items.BONE));
-        if (br.r.nextBoolean()) br.b.lying(-1, br.gy(-1, 0), 0, new ItemStack(Items.BONE));
-        br.top(0, 4, 0, Blocks.BONE_BLOCK);
-        int skullY = br.gy(1, 3);
-        if (br.b.free(1, skullY, 3)) br.b.skull(1, skullY, 3);
-        if (br.r.nextInt(3) == 0) br.top(-1, 1, 1, Blocks.COBWEB);
-        br.top(2, -1, 0, ArcaneRegistry.floraBlock(br.r.nextBoolean() ? "imp_stool" : "namiras_rot"));
-        if (br.r.nextInt(2) == 0) {
-            int chestY = br.gy(-1, 0);
-            if (br.b.free(-1, chestY, 0)) {
-                br.b.chest(-1, chestY, 0, Direction.SOUTH, ExploreLoot.table("cache"));
+        // 2. Excavate a sloped entrance trench (+z = 4 down to +z = 1) descending 2 blocks underground
+        for (int dz = 4; dz >= 1; dz--) {
+            int depth = switch (dz) {
+                case 4 -> 0;
+                case 3 -> -1;
+                default -> -2;
+            };
+            int halfW = dz >= 3 ? 1 : 1;
+            for (int dx = -halfW; dx <= halfW; dx++) {
+                br.force(dx, depth - 1, dz, (br.r.nextInt(3) == 0 ? br.rock.b() : earth).defaultBlockState());
+                for (int y = depth; y <= depth + 3; y++) {
+                    br.force(dx, y, dz, br.air());
+                }
             }
+            if (dz == 3 || dz == 2) {
+                br.force(0, depth, dz, br.rock.slab().defaultBlockState());
+            }
+            // Flanking retaining boulders along the trench walls
+            for (int side : new int[]{-2, 2}) {
+                int bankY = br.gy(side, dz);
+                br.force(side, bankY - 1, dz, br.rock.a().defaultBlockState());
+                br.force(side, bankY, dz, (br.r.nextBoolean() ? mossyRock : br.rock.b()).defaultBlockState());
+            }
+        }
+
+        // 3. Excavate the subterranean den chamber (dz in [-3..0], dx in [-2..2], floor at y = -2, ceiling at y = +1)
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -3; dz <= 0; dz++) {
+                if (Math.abs(dx) == 2 && dz == -3) continue; // rounded back corners
+                // Solid stone/packed-earth floor at y = -3
+                Block floorBlk = (dx == 0 && dz == -1)
+                        ? BiomeBlocks.CREATURE_DEN.get()
+                        : (br.r.nextInt(3) == 0 ? Blocks.ROOTED_DIRT : br.rock.a());
+                br.force(dx, -3, dz, floorBlk.defaultBlockState());
+                // Carve 3-block-high underground interior (y = -2, -1, 0)
+                for (int y = -2; y <= 0; y++) {
+                    br.force(dx, y, dz, br.air());
+                }
+                // Ensure sturdy vaulted stone/earth roof above the chamber (y = 1, 2)
+                br.force(dx, 1, dz, br.rock.pick(br.r).defaultBlockState());
+                if (Math.abs(dx) <= 1 && dz >= -2) {
+                    br.force(dx, 2, dz, earth.defaultBlockState());
+                }
+            }
+        }
+
+        // 4. Grounded stone & gnarled root/timber archway framing the mouth at dz = 1
+        for (int side : new int[]{-2, 2}) {
+            br.force(side, -2, 1, br.rock.a().defaultBlockState());
+            br.force(side, -1, 1, mossyRock.defaultBlockState());
+            br.force(side, 0, 1, pillar(log, Direction.Axis.Y));
+            br.support(side, -2, 1, br.rock.a().defaultBlockState());
+        }
+        for (int dx = -1; dx <= 1; dx++) {
+            br.force(dx, 1, 1, pillar(log, Direction.Axis.X));
+            br.force(dx, 2, 1, (dx == 0 ? mossyRock : earth).defaultBlockState());
+        }
+
+        // 5. Subterranean micro-elements inside the chamber (all placed directly on the y = -2 floor)
+        // Bedding nest in the back alcove
+        br.force(-1, -2, -2, Blocks.MOSS_CARPET.defaultBlockState());
+        br.force(0, -2, -2, Blocks.BROWN_CARPET.defaultBlockState());
+        // Gnawed ribcage / bone pile and skull inside and at the threshold
+        br.force(1, -2, -1, pillar(Blocks.BONE_BLOCK, Direction.Axis.Z));
+        br.b.lying(0, -2, 0, new ItemStack(Items.BONE));
+        if (br.r.nextBoolean()) {
+            br.b.lying(-1, -2, -1, new ItemStack(Items.BONE));
+        }
+        br.b.skull(1, -2, 0);
+        // Cave fungi & cobwebbing tucked under the ceiling corners
+        Block caveFungus = ArcaneRegistry.floraBlock(br.r.nextBoolean() ? "imp_stool" : "namiras_rot");
+        br.force(-2, -2, -1, caveFungus.defaultBlockState());
+        if (br.r.nextInt(2) == 0) {
+            br.force(2, 0, -1, Blocks.COBWEB.defaultBlockState());
+        }
+        // Half-buried victim cache in the back corner of the den
+        if (br.r.nextInt(2) == 0) {
+            br.b.chest(1, -2, -2, Direction.SOUTH, ExploreLoot.table("cache"));
         }
         return true;
     }
@@ -452,25 +524,41 @@ public final class Builders {
     }
 
     static boolean boatWreck(Brush br, Kind k) {
-        Block planks = br.b.pal.planks();
-        boolean any = false;
-        for (int x = -3; x <= 3; x++) {
-            int half = Math.abs(x) == 3 ? 0 : 1;
-            for (int z = -half; z <= half; z++) {
-                if (br.r.nextInt(6) == 0) continue;
-                any |= br.set(x, -1, z, planks);
-            }
-            if (half == 1) {
-                if (br.r.nextInt(4) > 0) br.set(x, 0, -1, br.b.pal.slab());
-                if (br.r.nextInt(3) > 0) br.set(x, 0, 1, br.b.pal.slab());
+        boolean hasWater = false, hasDry = false;
+        for (int dx = -4; dx <= 4; dx += 2) {
+            for (int dz = -3; dz <= 3; dz += 2) {
+                if (br.b.waterAt(dx, dz)) hasWater = true;
+                else hasDry = true;
             }
         }
-        br.set(-3, 0, 0, br.b.stair(br.b.pal.stairs(), Direction.EAST));
-        br.set(3, 0, 0, br.b.stair(br.b.pal.stairs(), Direction.WEST));
-        for (int y = 0; y < 2 + br.r.nextInt(2); y++) br.set(0, y, 0, br.b.pal.fence());
-        br.set(1, 1, 0, Blocks.WHITE_CARPET);
-        if (br.r.nextInt(2) == 0) br.b.barrel(-1, 0, 0, ExploreLoot.table("shipwreck"));
-        br.top(5, 1, 0, br.b.pal.slab());
+        // Must sit right on the water's edge / shallows, never stranded on dry inland grass
+        if (!hasWater || !hasDry) return false;
+
+        Block planks = br.b.pal.planks();
+        BlockState bottomSlab = br.b.pal.slab().defaultBlockState().setValue(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM);
+        BlockState topSlab = br.b.pal.slab().defaultBlockState().setValue(BlockStateProperties.SLAB_TYPE, SlabType.TOP);
+        boolean any = false;
+        // Raised skiff hull: keel along z=0, gunwales along z=-1..1, pointed bow/stern stairs
+        for (int x = -2; x <= 2; x++) {
+            any |= br.set(x, 0, 0, bottomSlab);
+            for (int z : new int[]{-1, 1}) {
+                if (x == 2 && z == 1 && br.r.nextInt(3) == 0) continue; // stove-in gunwale gap
+                Direction gunwaleDir = z < 0 ? Direction.NORTH : Direction.SOUTH;
+                any |= br.set(x, 0, z, br.b.stair(br.b.pal.stairs(), gunwaleDir));
+            }
+        }
+        // Bow and stern prows
+        any |= br.set(-3, 0, 0, br.b.stair(br.b.pal.stairs(), Direction.WEST));
+        any |= br.set(3, 0, 0, br.b.stair(br.b.pal.stairs(), Direction.EAST));
+        br.set(-4, 0, 0, topSlab);
+        br.set(4, 0, 0, topSlab);
+        // Thwart bench & snapped mast with tattered sail cloth attached to the mast (never floating in mid-air)
+        br.set(1, 0, 0, planks);
+        int mastH = 2 + br.r.nextInt(2);
+        for (int y = 1; y <= mastH; y++) br.set(0, y, 0, br.b.pal.fence());
+        br.set(0, mastH, 1, Blocks.WHITE_WOOL);
+        if (mastH >= 3) br.set(0, mastH - 1, 1, Blocks.WHITE_WOOL);
+        br.b.barrel(-1, 0, 0, ExploreLoot.table("shipwreck"));
         return any;
     }
 

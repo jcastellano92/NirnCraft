@@ -247,13 +247,13 @@ public class GuardEntity extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return route.length > 0 && post == null && getTarget() == null && !isSummoned()
+            return route.length > 0 && post == null && getTarget() == null && !isSummoned() && !isConversing()
                     && level().getGameTime() >= patrolIdleUntil;
         }
 
         @Override
         public boolean canContinueToUse() {
-            return route.length > 0 && getTarget() == null && !isSummoned() && !getNavigation().isDone();
+            return route.length > 0 && getTarget() == null && !isSummoned() && !isConversing() && !getNavigation().isDone();
         }
 
         @Override
@@ -280,7 +280,7 @@ public class GuardEntity extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return post != null && getTarget() == null && !isSummoned()
+            return post != null && getTarget() == null && !isSummoned() && !isConversing()
                     && distanceToSqr(post.getX() + 0.5, post.getY(), post.getZ() + 0.5) > 1.5 * 1.5;
         }
 
@@ -293,6 +293,41 @@ public class GuardEntity extends PathfinderMob {
         public void start() {
             getNavigation().moveTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, 0.75D);
         }
+    }
+
+    private int conversingPlayerId = -1;
+    private long conversingUntil = 0L;
+
+    public void engageConversation(@Nullable Player player, int ticks) {
+        if (player == null) {
+            this.conversingPlayerId = -1;
+            this.conversingUntil = 0L;
+            return;
+        }
+        this.conversingPlayerId = player.getId();
+        this.conversingUntil = this.level().getGameTime() + ticks;
+        this.getNavigation().stop();
+        this.getLookControl().setLookAt(player, 30.0F, 30.0F);
+    }
+
+    @Nullable
+    private Player activeConversationPartner() {
+        if (this.getTarget() != null || this.conversingPlayerId < 0) return null;
+        if (this.level().getGameTime() >= this.conversingUntil) {
+            this.conversingPlayerId = -1;
+            return null;
+        }
+        Entity e = this.level().getEntity(this.conversingPlayerId);
+        if (!(e instanceof Player p) || !p.isAlive() || this.distanceToSqr(p) > 64.0
+                || !com.skycraft.dialogue.Dialogue.isTalking(p.getUUID())) {
+            this.conversingPlayerId = -1;
+            return null;
+        }
+        return p;
+    }
+
+    public boolean isConversing() {
+        return activeConversationPartner() != null;
     }
 
     @Override
@@ -323,13 +358,62 @@ public class GuardEntity extends PathfinderMob {
     // ------------------------------------------------------------------ behaviour
 
     @Override
+    public float getWalkTargetValue(BlockPos pos, net.minecraft.world.level.LevelReader level) {
+        if (!this.level().isClientSide) {
+            if (com.skycraft.society.NpcPlacement.isFireHazard(level, pos)
+                    || com.skycraft.society.NpcPlacement.isSlabHazard(level, pos)
+                    || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, pos)) {
+                return -1.0e9F;
+            }
+            if (this.level().canSeeSky(pos) && com.skycraft.society.NpcPlacement.hasRoomBelow(this.level(), pos)) {
+                return -1.0e9F;
+            }
+        }
+        return super.getWalkTargetValue(pos, level);
+    }
+
+    @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
         if (!initialized) initialize(this.level());
+        if ((this.tickCount + this.getId()) % 20 == 0 && this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            BlockPos here = this.blockPosition();
+            boolean onRoof = this.onGround() && sl.canSeeSky(here) && com.skycraft.society.NpcPlacement.hasRoomBelow(sl, here);
+            boolean onHazard = this.isOnFire() || com.skycraft.society.NpcPlacement.isDirectFire(sl, here)
+                    || com.skycraft.society.NpcPlacement.isFurnitureHazard(sl, here);
+            if (onRoof || onHazard) {
+                this.clearFire();
+                BlockPos safe = com.skycraft.society.NpcPlacement.safeSurfaceAt(sl, here.getX(), here.getZ());
+                if (!safe.equals(here) && !com.skycraft.society.NpcPlacement.hasRoomBelow(sl, safe)) {
+                    if (post != null && sl.isLoaded(post) && com.skycraft.society.NpcPlacement.hasRoomBelow(sl, post)) {
+                        setPost(safe, postYaw);
+                    } else if (home != null && sl.isLoaded(home) && com.skycraft.society.NpcPlacement.hasRoomBelow(sl, home)) {
+                        setHome(safe);
+                    }
+                    this.getNavigation().stop();
+                    this.moveTo(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5, this.getYRot(), 0.0F);
+                }
+            }
+        }
         LivingEntity target = this.getTarget();
         if (target != null && (!target.isAlive() || target instanceof Player p && (p.isCreative() || p.isSpectator()))) {
             this.setTarget(null);
             target = null;
+        }
+        Player partner = activeConversationPartner();
+        if (target == null && partner != null) {
+            this.getNavigation().stop();
+            this.zza = 0.0F;
+            this.xxa = 0.0F;
+            this.setSpeed(0.0F);
+            this.getLookControl().setLookAt(partner, 30.0F, 30.0F);
+            double dx = partner.getX() - this.getX();
+            double dz = partner.getZ() - this.getZ();
+            float targetYaw = (float) (net.minecraft.util.Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0F;
+            this.setYRot(net.minecraft.util.Mth.approachDegrees(this.getYRot(), targetYaw, 25.0F));
+            this.yBodyRot = net.minecraft.util.Mth.approachDegrees(this.yBodyRot, targetYaw, 25.0F);
+            this.setYHeadRot(net.minecraft.util.Mth.approachDegrees(this.getYHeadRot(), targetYaw, 30.0F));
+            return;
         }
         if (target == null && post != null && this.tickCount % 10 == 0
                 && this.distanceToSqr(post.getX() + 0.5, post.getY(), post.getZ() + 0.5) <= 2.25) {

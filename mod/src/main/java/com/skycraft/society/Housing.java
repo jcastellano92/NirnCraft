@@ -176,7 +176,7 @@ public final class Housing {
     public static Plan plan(String key, List<Anchor> anchors, int tier) {
         tier = Math.max(0, Math.min(2, tier));
         Plan plan = new Plan();
-        boolean capital = tier == 0;
+        boolean capital = hasCourt(key, tier);
         int n = anchors.size();
 
         // ---- classify buildings by what their anchors say they are
@@ -406,9 +406,16 @@ public final class Housing {
             }
         }
         if (keepIdx < 0) return;
-        Anchor keepAnchor = anchors.get(keepIdx);
         for (String courtJob : Courts.REQUIRED_JOBS) {
             if (present.contains(courtJob)) continue;
+            int workIdx = keepIdx;
+            for (int i = 0; i < anchors.size(); i++) {
+                if (jobId(anchors.get(i).type()).equals(courtJob)) {
+                    workIdx = i;
+                    break;
+                }
+            }
+            Anchor keepAnchor = anchors.get(workIdx);
             BedKind[] order = {BedKind.COURT, BedKind.HOME, BedKind.TEMPLE, BedKind.INN_STAFF, BedKind.GUILD, BedKind.BARRACKS};
             int bed = -1;
             BedKind chosenKind = BedKind.COURT;
@@ -421,7 +428,7 @@ public final class Housing {
             }
             if (bed >= 0) {
                 put(plan, new Resident(courtJob, Courts.roleForCourtJob(courtJob), anchors.get(bed).type(),
-                        bed, keepIdx, bed, chosenKind, -1));
+                        bed, workIdx, bed, chosenKind, -1));
                 present.add(courtJob);
             }
         }
@@ -431,18 +438,24 @@ public final class Housing {
     private static void assignTrainers(Plan plan, String key, int tier, List<Anchor> anchors, Map<BedKind, List<Integer>> pool, Set<Integer> used) {
         List<SocietyTrainers.Spec> specs = SocietyTrainers.trainersForSettlement(key, tier, null);
         if (specs.isEmpty()) return;
+        Set<Integer> claimedWork = new HashSet<>();
+        for (Resident r : plan.bySlot.values()) {
+            if (r.work() >= 0) claimedWork.add(r.work());
+        }
         int idx = 0;
         for (Resident r : new ArrayList<>(plan.bySlot.values())) {
             if (idx >= specs.size()) break;
             if (r.slotType() == AnchorType.GUILD_TRAINER || "guild_trainer".equals(r.job())) {
                 SocietyTrainers.Spec spec = specs.get(idx++);
-                int work = r.work() >= 0 ? r.work() : findWorkplaceIndex(anchors, spec.workplace());
+                int work = r.work() >= 0 ? r.work() : findWorkplaceIndex(anchors, spec.workplace(), claimedWork);
+                if (work >= 0) claimedWork.add(work);
                 put(plan, new Resident(spec.jobId(), NpcRole.TRAINER, r.slotType(), r.slot(), work, r.bed(), r.bedKind(), r.leisure()));
             }
         }
         while (idx < specs.size()) {
             SocietyTrainers.Spec spec = specs.get(idx++);
-            int workIdx = findWorkplaceIndex(anchors, spec.workplace());
+            int workIdx = findWorkplaceIndex(anchors, spec.workplace(), claimedWork);
+            if (workIdx >= 0) claimedWork.add(workIdx);
             Anchor ref = workIdx >= 0 ? anchors.get(workIdx) : anchors.get(0);
             BedKind[] order = {BedKind.GUILD, BedKind.HOME, BedKind.COURT, BedKind.TEMPLE, BedKind.INN_STAFF};
             int bed = -1;
@@ -468,13 +481,31 @@ public final class Housing {
         }
     }
 
-    private static int findWorkplaceIndex(List<Anchor> anchors, @Nullable String workplaceId) {
+    private static int findWorkplaceIndex(List<Anchor> anchors, @Nullable String workplaceId, Set<Integer> claimedWork) {
         if (workplaceId != null && !workplaceId.isEmpty()) {
+            for (int i = 0; i < anchors.size(); i++) {
+                AnchorType t = anchors.get(i).type();
+                if (!claimedWork.contains(i) && JOB_SET.contains(t)
+                        && (t.id().equalsIgnoreCase(workplaceId) || jobId(t).equalsIgnoreCase(workplaceId))) {
+                    return i;
+                }
+            }
             for (int i = 0; i < anchors.size(); i++) {
                 AnchorType t = anchors.get(i).type();
                 if (JOB_SET.contains(t) && (t.id().equalsIgnoreCase(workplaceId) || jobId(t).equalsIgnoreCase(workplaceId))) {
                     return i;
                 }
+            }
+        }
+        for (int i = 0; i < anchors.size(); i++) {
+            AnchorType t = anchors.get(i).type();
+            if (!claimedWork.contains(i) && JOB_SET.contains(t) && t != AnchorType.JAIL_PRISONER && t != AnchorType.GUARD) {
+                return i;
+            }
+        }
+        for (int i = 0; i < anchors.size(); i++) {
+            if (anchors.get(i).type() == AnchorType.MEETING || anchors.get(i).type() == AnchorType.INN) {
+                return i;
             }
         }
         for (int i = 0; i < anchors.size(); i++) {
@@ -526,9 +557,20 @@ public final class Housing {
         return "helgen".equals(key) ? GUARDS[Math.max(0, Math.min(2, tier))] : 0;
     }
 
+    /** True if the settlement has a ruling court (capitals, cities, major seats, or Orc strongholds). */
+    public static boolean hasCourt(String key, int tier) {
+        if (tier == 0) return true;
+        if (key == null || key.isBlank()) return false;
+        var place = com.skycraft.tamriel.Places.byId(key).orElse(null);
+        if (place == null) return false;
+        if (place.type() == com.skycraft.tamriel.PlaceType.CAPITAL || place.type() == com.skycraft.tamriel.PlaceType.CITY) return true;
+        if (place.radius() >= GuardWatch.SEAT_RADIUS) return true;
+        return "stronghold".equals(place.variant());
+    }
+
     static int cap(AnchorType t, int tier, boolean capital) {
         return switch (t) {
-            case JARL, HOUSECARL, STEWARD, WIZARD -> 1;
+            case JARL, HOUSECARL, STEWARD, WIZARD -> capital ? 1 : 0;
             case GUARD -> GUARDS[tier];
             case MERCHANT -> MERCHANTS[tier];
             case INN, PRIEST, SMITH, ALCHEMIST, FARMER, MILLER, MINER, LUMBERJACK -> 6;

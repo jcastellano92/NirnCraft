@@ -49,7 +49,7 @@ public record TamrielChannel(Channel channel) implements DensityFunction.SimpleF
         if ((channel == Channel.ROAD || channel == Channel.OVERHANG) && com.skycraft.worldplan.PlanGround.blending()) {
             // P2: the planned road beds and site pads also keep caves and overhangs off the surface
             double w = com.skycraft.worldplan.PlanGround.influence(ctx.blockX(), ctx.blockZ());
-            v = channel == Channel.ROAD ? Math.max(v, w) : v * (1 - 0.9 * w);
+            v = channel == Channel.ROAD ? Math.max(v, w) : v * (1 - w);
         }
         return v;
     }

@@ -34,11 +34,11 @@ public final class CrimeClientEvents {
         sinceQuery++;
         HitResult hit = mc.hitResult;
         if (!(hit instanceof BlockHitResult bhr) || hit.getType() != HitResult.Type.BLOCK) return;
-        BlockPos pos = bhr.getBlockPos();
+        BlockPos pos = com.skycraft.crime.Locks.normalizePos(mc.level, bhr.getBlockPos());
         var block = mc.level.getBlockState(pos).getBlock();
         BlockEntity be = mc.level.getBlockEntity(pos);
         if (!(be instanceof Container) && !(block instanceof net.minecraft.world.level.block.DoorBlock) && !(block instanceof net.minecraft.world.level.block.TrapDoorBlock)) return;
-        if (!pos.equals(lastQuery) || sinceQuery > 40) {
+        if (!pos.equals(lastQuery) || sinceQuery > 20) {
             lastQuery = pos.immutable();
             sinceQuery = 0;
             SkyNetwork.sendToServer(new CrimePackets.QueryContainer(lastQuery));
@@ -61,7 +61,10 @@ public final class CrimeClientEvents {
                 event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);
                 if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
                     mc.level.playLocalSound(cpos, net.minecraft.sounds.SoundEvents.CHEST_LOCKED, net.minecraft.sounds.SoundSource.BLOCKS, 0.5f, 1.3f, false);
-                    mc.player.displayClientMessage(Component.translatable("hud.skycraft.crime.locked_msg").withStyle(ChatFormatting.RED), true);
+                    com.skycraft.client.hud.HudNotifications.add(new com.skycraft.network.CorePackets.Notify(
+                            com.skycraft.network.NotifyKind.MESSAGE,
+                            Component.translatable("hud.skycraft.crime.locked_msg").withStyle(ChatFormatting.RED),
+                            Component.empty(), 0, 0f));
                 }
             }
         }

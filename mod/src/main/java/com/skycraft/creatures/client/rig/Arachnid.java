@@ -61,7 +61,9 @@ public final class Arachnid {
         body = rig.root().child("body", 0, -clearance, 0);
         body.box(shell, -bodyW / 2f, -bodyH / 2f, -bodyL / 2f, bodyW, bodyH, bodyL).tag("thorax");
         head = body.child("head", 0, 0, -bodyL / 2f);
-        head.box(shell, -headW / 2f, -headH / 2f, -headL, headW, headH, headL).tag("head");
+        if (headL > 0) {
+            head.box(shell, -headW / 2f, -headH / 2f, -headL, headW, headH, headL).tag("head");
+        }
         if (fangLen > 0) {
             head.pair("fang", headW / 4f, headH / 2f - 1, -headL, (b, side) -> {
                 b.rot(20, 0, 0);
@@ -69,7 +71,9 @@ public final class Arachnid {
             });
         }
         abdomen = body.child("abdomen", 0, -bodyH / 4f, bodyL / 2f).rot(-abdomenTilt, 0, 0);
-        abdomen.box(abdomenMat != null ? abdomenMat : shell, -abdomenW / 2f, -abdomenH / 2f, 0, abdomenW, abdomenH, abdomenL).tag("abdomen");
+        if (abdomenL > 0) {
+            abdomen.box(abdomenMat != null ? abdomenMat : shell, -abdomenW / 2f, -abdomenH / 2f, 0, abdomenW, abdomenH, abdomenL).tag("abdomen");
+        }
         // legs fan out from front to back along the thorax sides
         for (int i = 0; i < legPairs; i++) {
             float f = legPairs == 1 ? 0.5f : (float) i / (legPairs - 1);

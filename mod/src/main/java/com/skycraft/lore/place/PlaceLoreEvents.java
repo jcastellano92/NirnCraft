@@ -85,10 +85,8 @@ public final class PlaceLoreEvents {
         return Story.start(player, def);
     }
 
-    /** {@link Discovery} hook: the player discovered a named place. Shows its hook under the banner. */
+    /** {@link Discovery} hook: the player discovered a named place. */
     public static void onDiscovered(ServerPlayer player, Place place) {
-        Component hook = PlaceLore.hook(place.id());
-        if (hook != null) player.sendSystemMessage(hook.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         PlaceLorePlacer.onEnter(player, place);
     }
 

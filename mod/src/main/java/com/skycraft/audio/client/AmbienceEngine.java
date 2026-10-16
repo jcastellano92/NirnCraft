@@ -45,9 +45,19 @@ public final class AmbienceEngine {
      * Foliage and grass beds carry warm low-passed breeze and reed/leaf chorus modulation: their level is
      * balanced so they blend naturally with regional exploration music.
      */
-    private static final Map<String, Float> BED_CAP = Map.of(
-            "forest_day", 0.45f, "forest_night", 0.45f, "plains_day", 0.4f, "plains_night", 0.45f,
-            "wind_light", 0.4f, "savanna_day", 0.45f, "jungle_day", 0.45f, "marsh_day", 0.45f);
+    private static final Map<String, Float> BED_CAP = Map.ofEntries(
+            Map.entry("forest_day", 0.45f),
+            Map.entry("forest_night", 0.22f),
+            Map.entry("plains_day", 0.4f),
+            Map.entry("plains_night", 0.20f),
+            Map.entry("wind_light", 0.4f),
+            Map.entry("savanna_day", 0.45f),
+            Map.entry("jungle_day", 0.45f),
+            Map.entry("jungle_night", 0.28f),
+            Map.entry("marsh_day", 0.45f),
+            Map.entry("marsh_night", 0.26f),
+            Map.entry("swamp_night", 0.26f)
+    );
     /** Game ticks since the last positional call started, and calls started in the last few seconds. */
     private static int lastCallTick = -100;
     private static final int CALL_COOLDOWN_TICKS = 30;
@@ -56,6 +66,7 @@ public final class AmbienceEngine {
     private static final Map<String, Bed> PLAYING = new HashMap<>();
     private static final Map<String, Float> TARGET = new HashMap<>();
     private static int ticks;
+    private static float movementDuck = 1.0f;
     private static final Habitat HAB = new Habitat();
 
     private AmbienceEngine() {}
@@ -66,7 +77,7 @@ public final class AmbienceEngine {
     static final class Habitat {
         float forest, pine, plains, marsh, swamp, jungle, desert, savanna, ash, volcanic, snowy, glacier, mountain, mushroom,
                 crystal, hotSpring, coast, ocean, river;
-        float night, rain, thunder, altitude;
+        float night, rain, thunder, wind, snow, altitude;
         boolean surface, cave, nether, end, skyrim, morrowind, onWater;
         float caveDepth;
         Soundscapes.Cave caveKind = Soundscapes.Cave.NONE;
@@ -134,8 +145,11 @@ public final class AmbienceEngine {
         else if (time < 22500) night = 1f;
         else night = 1f - (time - 22500) / 1500f;
         h.night = night;
-        h.rain = level.getRainLevel(1f);
+        boolean cwActive = level.dimension() == Level.OVERWORLD && com.skycraft.atmosphere.client.ClientWeather.active();
+        h.snow = cwActive ? com.skycraft.atmosphere.client.ClientWeather.snow() : 0f;
+        h.rain = Math.max(level.getRainLevel(1f), h.snow);
         h.thunder = level.getThunderLevel(1f);
+        h.wind = cwActive ? com.skycraft.atmosphere.client.ClientWeather.wind() : Mth.clamp(0.18f + 0.45f * h.rain + 0.35f * h.thunder, 0f, 1f);
         h.altitude = Mth.clamp((float) (eye.y - 95.0) / 140f, 0f, 1f);
         h.caveKind = h.nether || h.end ? Soundscapes.Cave.NONE : Soundscapes.cave(id);
         h.cave = ListenerEnvironment.underground
@@ -200,33 +214,46 @@ public final class AmbienceEngine {
         }
         float day = 1f - h.night;
         float wet = 1f - 0.8f * h.rain;        // rain silences birds and insects
-        float open = 1f - h.forest * 0.6f - h.jungle * 0.5f;   // trees break the wind
-        float cold = h.snowy;
+        float open = 1f - h.forest * 0.45f - h.jungle * 0.4f;   // trees partially shelter the wind
+        float cold = Math.max(h.snowy, h.snow > 0.1f ? 0.8f : 0f);
         float warmSwamp = h.swamp;
+        float storm = Math.max(Math.max(h.rain, h.thunder), Math.max(0f, h.wind - 0.5f));
+        float nightInsectAtten = (1f - cold * 0.92f) * (1f - h.altitude * 0.75f) * (1f - h.mountain * 0.65f) * (1f - storm * 0.85f);
 
-        // Warm low-passed breeze & tonal biome beds (resynthesized without raw white-noise bursts)
+        // Warm low-passed breeze & tonal biome beds (night insect beds attenuated by altitude, cold, mountain & storm)
         TARGET.put("forest_day", h.forest * day * wet * (1f - cold * 0.6f) * 0.7f);
-        TARGET.put("forest_night", h.forest * h.night * wet * (1f - cold * 0.7f) * 0.65f);
+        TARGET.put("forest_night", h.forest * h.night * wet * nightInsectAtten * 0.20f);
         TARGET.put("plains_day", h.plains * day * wet * (1f - cold * 0.7f) * 0.6f);
-        TARGET.put("plains_night", h.plains * h.night * wet * (1f - cold * 0.8f) * 0.6f);
+        TARGET.put("plains_night", h.plains * h.night * wet * nightInsectAtten * 0.18f);
         TARGET.put("savanna_day", h.savanna * day * wet * 0.65f);
         TARGET.put("marsh_day", h.marsh * day * wet * 0.65f);
-        TARGET.put("marsh_night", h.marsh * h.night * wet * 0.7f);
-        TARGET.put("swamp_night", warmSwamp * h.night * wet * 0.7f);
+        TARGET.put("marsh_night", h.marsh * h.night * wet * (1f - cold * 0.85f) * (1f - h.altitude * 0.65f) * 0.24f);
+        TARGET.put("swamp_night", warmSwamp * h.night * wet * (1f - cold * 0.85f) * (1f - h.altitude * 0.65f) * 0.26f);
         TARGET.put("jungle_day", h.jungle * day * (1f - 0.5f * h.rain) * 0.7f);
-        TARGET.put("jungle_night", h.jungle * h.night * (1f - 0.5f * h.rain) * 0.7f);
-        TARGET.put("wind_light", Mth.clamp((0.25f + 0.25f * h.rain + 0.3f * h.plains + 0.2f * cold + 0.2f * h.glacier) * open
-                * (1f - h.altitude), 0f, 0.7f));
-        TARGET.put("wind_strong", Mth.clamp((h.altitude * 1.1f + h.mountain * 0.35f + h.glacier * 0.3f + h.thunder * 0.4f) * open, 0f, 1f));
-        TARGET.put("blizzard", Mth.clamp(cold * h.rain * 1.1f, 0f, 1f));
-        TARGET.put("desert_wind", h.desert * (0.6f + 0.4f * h.rain) * 0.8f);
-        TARGET.put("ash_storm", h.ash * (0.45f + 0.55f * h.rain));
+        TARGET.put("jungle_night", h.jungle * h.night * (1f - 0.5f * h.rain) * (1f - h.altitude * 0.5f) * 0.28f);
+
+        // Prevent double-stacking of forest_night and plains_night at biome borders
+        float fn = TARGET.getOrDefault("forest_night", 0f);
+        float pn = TARGET.getOrDefault("plains_night", 0f);
+        if (fn > 0f && pn > 0f && fn + pn > 0.22f) {
+            float scale = 0.22f / (fn + pn);
+            TARGET.put("forest_night", fn * scale);
+            TARGET.put("plains_night", pn * scale);
+        }
+
+        float windBreeze = Mth.clamp((0.20f + 0.55f * h.wind + 0.20f * h.plains + 0.15f * cold) * open * (1f - 0.5f * h.altitude), 0f, 0.75f);
+        float windGale = Mth.clamp((Math.max(0f, h.wind - 0.42f) * 1.45f + h.altitude * 0.85f + h.mountain * 0.30f + h.glacier * 0.25f + h.thunder * 0.35f) * open, 0f, 1f);
+        TARGET.put("wind_light", windBreeze);
+        TARGET.put("wind_strong", windGale);
+        TARGET.put("blizzard", Mth.clamp(cold * Math.max(h.rain, h.snow) * (0.65f + 0.65f * h.wind), 0f, 1f));
+        TARGET.put("desert_wind", h.desert * (0.45f + 0.55f * h.wind) * 0.85f);
+        TARGET.put("ash_storm", h.ash * (0.40f + 0.60f * Math.max(h.rain, h.wind)));
         TARGET.put("volcanic_rumble", h.volcanic * 0.7f);
         TARGET.put("hot_springs", h.hotSpring * 0.8f);
         TARGET.put("crystal_shimmer", h.crystal * 0.75f);
         TARGET.put("mushroom_grotto", h.mushroom * 0.4f);
         TARGET.put("ice_cave", h.glacier * 0.35f);
-        TARGET.put("coast_waves", h.coast * (h.onWater ? 0.5f : 1f) * 0.85f);
+        TARGET.put("coast_waves", h.coast * (h.onWater ? 0.5f : 1f) * (0.75f + 0.25f * h.wind));
         TARGET.put("open_ocean", h.ocean > 0.9f && h.onWater ? 0.8f : h.ocean * 0.3f * (h.onWater ? 1f : 0f));
         TARGET.put("river", Mth.clamp(h.river * 1.4f, 0f, 0.7f));
         SILENCED_BEDS.forEach(TARGET::remove);
@@ -242,6 +269,10 @@ public final class AmbienceEngine {
         if (!AudioConfig.AMBIENCE.get() && !PLAYING.isEmpty()) stopAll(mc);
         if (mc.isPaused()) return;
         ticks++;
+        boolean movingFast = mc.player.isSprinting() || mc.player.getDeltaMovement().horizontalDistanceSqr() > 0.022;
+        float targetDuck = movingFast ? 0.55f : 1.0f;
+        movementDuck += (targetDuck - movementDuck) * 0.08f;
+
         Camera camera = mc.gameRenderer.getMainCamera();
         Vec3 eye = camera.isInitialized() ? camera.getPosition() : mc.player.getEyePosition();
         if (ticks % 10 == 0) {
@@ -263,8 +294,18 @@ public final class AmbienceEngine {
         Map<String, Float> want = new HashMap<>();
         for (int i = 0; i < order.size() && want.size() < MAX_BEDS; i++) {
             float t = order.get(i).getValue();
-            if (t > 0.03f) want.put(order.get(i).getKey(), Math.min(BED_CAP.getOrDefault(order.get(i).getKey(), 1f),
+            if (t > 0.02f) want.put(order.get(i).getKey(), Math.min(BED_CAP.getOrDefault(order.get(i).getKey(), 1f),
                     Mth.clamp(t * outdoor * vol, 0f, 1f)));
+        }
+        // Ensure combined forest_night + plains_night never exceeds a single night bed (<= 0.22f)
+        if (want.containsKey("forest_night") && want.containsKey("plains_night")) {
+            float fn = want.get("forest_night");
+            float pn = want.get("plains_night");
+            if (fn + pn > 0.22f) {
+                float scale = 0.22f / (fn + pn);
+                want.put("forest_night", fn * scale);
+                want.put("plains_night", pn * scale);
+            }
         }
         for (Map.Entry<String, Bed> e : PLAYING.entrySet()) {
             e.getValue().target = want.getOrDefault(e.getKey(), 0f);
@@ -313,23 +354,24 @@ public final class AmbienceEngine {
             float out = 1f - ListenerEnvironment.muffle * 0.8f;
             if (out < 0.25f) return;
             float wetland = h.marsh + h.swamp;
+            float altAtten = (1f - h.altitude * 0.75f) * (1f - h.mountain * 0.65f);
             pool.add(new Call("bird_song", 6f * day * dry * (h.forest + 0.5f * h.plains + 0.3f * h.savanna) * (1f - h.snowy * 0.7f), 8, 28, 6, 0.7f));
             pool.add(new Call("crow", 1.2f * day * dry * (h.forest + h.plains), 16, 40, 8, 0.7f));
             pool.add(new Call("hawk", 1.2f * day * dry * (h.mountain + h.altitude + h.desert * 0.5f + h.savanna * 0.5f), 30, 70, 30, 0.8f));
-            pool.add(new Call("tree_creak", 1.5f * (h.forest + h.jungle * 0.5f) * (0.4f + h.rain + h.thunder), 6, 18, 4, 0.6f));
+            pool.add(new Call("tree_creak", 1.8f * (h.forest + h.jungle * 0.5f) * (0.3f + 0.8f * h.wind + 0.5f * h.rain + 0.5f * h.thunder), 6, 18, 4, 0.65f));
             pool.add(new Call("owl", 2f * h.night * dry * h.forest, 12, 32, 8, 0.7f));
             pool.add(new Call("wolf_howl", 0.6f * h.night * (h.forest + h.snowy + h.plains * 0.5f) * (h.skyrim ? 1f : 0.4f), 60, 120, 6, 1f));
             pool.add(new Call("frog", 6f * wetland * (0.4f + h.night), 5, 20, 0, 0.7f));
-            pool.add(new Call("cricket", 4f * h.night * dry * (h.forest + h.plains + 0.5f * wetland) * (1f - h.snowy), 4, 16, 0, 0.45f));
-            pool.add(new Call("insect", 3.5f * dry * (0.6f * day + 0.4f * h.night) * (h.marsh + h.swamp + 0.5f * h.jungle), 4, 14, 1, 0.4f));
-            pool.add(new Call("cicada", 3f * day * dry * (h.savanna + 0.7f * h.jungle + 0.3f * h.forest * (1f - h.snowy)), 6, 22, 5, 0.45f));
+            pool.add(new Call("cricket", 1.1f * h.night * dry * (h.forest + h.plains + 0.5f * wetland) * (1f - h.snowy * 0.95f) * altAtten, 10, 24, 0, 0.16f));
+            pool.add(new Call("insect", 0.9f * dry * (0.6f * day + 0.4f * h.night) * (h.marsh + h.swamp + 0.5f * h.jungle) * altAtten, 9, 22, 1, 0.14f));
+            pool.add(new Call("cicada", 1.8f * day * dry * (h.savanna + 0.7f * h.jungle + 0.3f * h.forest * (1f - h.snowy)) * altAtten, 10, 26, 5, 0.24f));
             pool.add(new Call("loon", 1f * (h.river + h.marsh * 0.6f) * (0.4f + h.night) * (1f - h.desert), 40, 90, 2, 0.8f));
             pool.add(new Call("jungle_bird", 5f * h.jungle * (0.3f + day) * dry, 10, 32, 8, 0.8f));
             pool.add(new Call("gull", 3f * (h.coast + h.ocean * 0.6f) * day * dry, 12, 36, 10, 0.8f));
             pool.add(new Call("wave_crash", 3f * h.coast, 10, 28, 0, 0.8f));
             pool.add(new Call("whale", h.ocean > 0.9f && h.onWater ? 0.4f : 0f, 50, 120, -10, 1f));
-            pool.add(new Call("sand_hiss", 2f * h.desert * (0.5f + h.rain), 4, 14, 0, 0.6f));
-            pool.add(new Call("wind_gust", 1.5f * (h.mountain + h.altitude + h.snowy * 0.5f + h.desert * 0.5f + h.ash * 0.5f) * (0.5f + h.rain), 6, 20, 4, 0.7f));
+            pool.add(new Call("sand_hiss", 2f * h.desert * (0.4f + 0.6f * h.wind), 4, 14, 0, 0.6f));
+            pool.add(new Call("wind_gust", 2.0f * (0.35f * Math.max(0f, h.wind - 0.32f) + h.mountain + h.altitude + h.snowy * 0.5f + h.desert * 0.5f + h.ash * 0.5f) * (0.4f + 0.8f * h.wind + 0.4f * h.rain), 6, 20, 4, 0.75f));
             pool.add(new Call("volcano", 0.7f * h.ash + 1.2f * h.volcanic, 80, 160, 0, 1f));
             pool.add(new Call("lava_bubble", 1.5f * h.volcanic + 2f * h.hotSpring, 6, 20, -1, 0.6f));
             pool.add(new Call("ice_creak", 1.2f * h.glacier, 20, 60, -2, 0.9f));
@@ -402,9 +444,16 @@ public final class AmbienceEngine {
 
     // ------------------------------------------------------------------ the looping bed
 
+    private static boolean isNightInsectBed(String name) {
+        return "forest_night".equals(name) || "plains_night".equals(name)
+                || "marsh_night".equals(name) || "swamp_night".equals(name)
+                || "jungle_night".equals(name);
+    }
+
     /** One looping ambience bed: non-positional, fades towards {@link #target}, stops itself after fading out. */
     public static final class Bed extends AbstractTickableSoundInstance {
         final String name;
+        final boolean nightInsects;
         float target;
         float level;
         boolean started;
@@ -413,6 +462,7 @@ public final class AmbienceEngine {
         Bed(String name, SoundEvent event) {
             super(event, SoundSource.AMBIENT, SoundInstance.createUnseededRandom());
             this.name = name;
+            this.nightInsects = isNightInsectBed(name);
             this.looping = true;
             this.delay = 0;
             this.relative = true;
@@ -432,7 +482,12 @@ public final class AmbienceEngine {
         public void tick() {
             // about four seconds for a full fade
             level += Mth.clamp(target - level, -0.012f, 0.012f);
-            volume = Math.max(0.0001f, level);
+            float effective = level;
+            if (nightInsects) {
+                float chorus = 0.45f + 0.55f * (0.5f + 0.5f * Mth.sin(ticks * 0.015f)) * (0.6f + 0.4f * Mth.sin(ticks * 0.004f + 1.3f));
+                effective *= chorus * movementDuck;
+            }
+            volume = Math.max(0.0001f, effective);
             if (target <= 0f && level <= 0.002f) {
                 if (++silentTicks > 40) stop();
             } else {

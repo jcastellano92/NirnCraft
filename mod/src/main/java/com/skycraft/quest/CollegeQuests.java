@@ -33,8 +33,7 @@ public final class CollegeQuests {
     }
 
     // ------------------------------------------------------------------ 1. Destruction
-    public static boolean startDestruction(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer destructionOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -63,12 +62,16 @@ public final class CollegeQuests {
         ItemStack tome = MagicRegistry.TOMES.containsKey("fireball")
                 ? new ItemStack(MagicRegistry.TOMES.get("fireball").get()) : ItemStack.EMPTY;
         q.add(o1).add(o2).add(o3).reward(500, tome);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.college.dest_start"));
+    }
+
+    public static boolean startDestruction(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, destructionOffer(player, giver).quest());
     }
 
     // ------------------------------------------------------------------ 2. Restoration
-    public static boolean startRestoration(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer restorationOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -98,12 +101,16 @@ public final class CollegeQuests {
         ItemStack tome = MagicRegistry.TOMES.containsKey("close_wounds")
                 ? new ItemStack(MagicRegistry.TOMES.get("close_wounds").get()) : ItemStack.EMPTY;
         q.add(o1).add(o2).add(o3).reward(500, tome);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.college.rest_start"));
+    }
+
+    public static boolean startRestoration(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, restorationOffer(player, giver).quest());
     }
 
     // ------------------------------------------------------------------ 3. Alteration
-    public static boolean startAlteration(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer alterationOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -132,12 +139,16 @@ public final class CollegeQuests {
         ItemStack tome = MagicRegistry.TOMES.containsKey("ironflesh")
                 ? new ItemStack(MagicRegistry.TOMES.get("ironflesh").get()) : ItemStack.EMPTY;
         q.add(o1).add(o2).add(o3).reward(500, tome);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.college.alt_start"));
+    }
+
+    public static boolean startAlteration(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, alterationOffer(player, giver).quest());
     }
 
     // ------------------------------------------------------------------ 4. Conjuration
-    public static boolean startConjuration(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer conjurationOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -166,12 +177,16 @@ public final class CollegeQuests {
         ItemStack tome = MagicRegistry.TOMES.containsKey("conjure_frost_atronach")
                 ? new ItemStack(MagicRegistry.TOMES.get("conjure_frost_atronach").get()) : ItemStack.EMPTY;
         q.add(o1).add(o2).add(o3).reward(500, tome);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.college.conj_start"));
+    }
+
+    public static boolean startConjuration(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, conjurationOffer(player, giver).quest());
     }
 
     // ------------------------------------------------------------------ 5. Illusion
-    public static boolean startIllusion(ServerPlayer player, LivingEntity giver) {
-        if (!Quests.canTakeMore(player)) return false;
+    public static RadiantQuests.Offer illusionOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
         String dim = level.dimension().location().toString();
         BlockPos at = player.blockPosition();
@@ -200,7 +215,12 @@ public final class CollegeQuests {
         ItemStack tome = MagicRegistry.TOMES.containsKey("invisibility")
                 ? new ItemStack(MagicRegistry.TOMES.get("invisibility").get()) : ItemStack.EMPTY;
         q.add(o1).add(o2).add(o3).reward(500, tome);
-        return Quests.start(player, q);
+        return new RadiantQuests.Offer(q, tr("dialogue.skycraft.college.ill_start"));
+    }
+
+    public static boolean startIllusion(ServerPlayer player, LivingEntity giver) {
+        if (!Quests.canTakeMore(player)) return false;
+        return Quests.start(player, illusionOffer(player, giver).quest());
     }
 }
 

@@ -140,6 +140,9 @@ public final class QuestNpcs {
         int x = spot.get().x() + def.dx;
         int z = spot.get().z() + def.dz;
         ServerLevel level = level(server, anchorDim(server, id));
+        if (level != null && level.hasChunk(x >> 4, z >> 4)) {
+            return com.skycraft.society.NpcPlacement.safeSurfaceAt(level, x, z);
+        }
         int y = level == null ? 64 : Locate.surfaceY(level, x, z);
         return new BlockPos(x, y, z);
     }
@@ -321,8 +324,10 @@ public final class QuestNpcs {
     /** Creates (but doesn't add) the NPC entity at the surface of {@code at}. */
     @Nullable
     private static LivingEntity create(ServerLevel level, StoryData.NpcDef def, BlockPos at) {
-        // an indoor spot with room to stand (a cell, a hall's desk) is used as is; outdoors, the ground under it
-        BlockPos pos = !level.canSeeSky(at) && standable(level, at) ? at : QuestSpawner.surface(level, at.getX(), at.getZ());
+        // an indoor spot with room to stand (a cell, a hall's desk) is used as is; outdoors, the safe ground near it
+        BlockPos pos = !level.canSeeSky(at) && standable(level, at)
+                ? at
+                : com.skycraft.society.NpcPlacement.safeSurfaceAt(level, at.getX(), at.getZ());
         LivingEntity entity = null;
         if (!def.entity.isEmpty()) {
             Optional<EntityType<?>> type = EntityType.byString(def.entity);
@@ -338,7 +343,7 @@ public final class QuestNpcs {
             NpcEntity npc = Npcs.create(level, pos, role);
             if (npc == null) return null;
             npc.setSkin(def.female ? 1 : 0);
-            npc.setHome(at, 10);
+            npc.setHome(pos, 10);
             entity = npc;
         }
         entity.setCustomName(def.name.c());

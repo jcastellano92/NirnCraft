@@ -36,7 +36,8 @@ public final class StoryDialogue {
                 if (!only.isEmpty() && !QuestNpcs.matches(npc, only)) continue;
                 String questId = q.id;
                 int choice = j;
-                out.add(new DialogueOption("story.choice." + questId + "." + j, Quest.readComponent(c.getString("label")), 90 + j,
+                out.add(new DialogueOption("story.choice." + questId + "." + j,
+                        QuestDialogue.questLabel(Quest.readComponent(c.getString("label"))), 90 + j,
                         (pl, n) -> choose(pl, n, questId, choice)));
             }
         }
@@ -44,15 +45,11 @@ public final class StoryDialogue {
         if (id.isEmpty()) return;
         for (StoryData.QuestDef def : StoryData.quests()) {
             if (!id.equals(def.offeredBy()) || !Story.available(player, def)) continue;
+            if (!def.isMain() && !QuestDialogue.canOfferQuest(player, npc)) continue;
             Component label = def.offer.isEmpty() ? Component.translatable("story.skycraft.default.offer", def.title.c()) : def.offer.c();
-            out.add(new DialogueOption("story.offer." + def.id, label, 95, (pl, n) -> {
-                if (!Story.available(pl, def)) return;
-                if (!def.isMain() && !Quests.canTakeMore(pl)) {
-                    Dialogue.open(pl, n, Component.translatable("quest.skycraft.reply.too_busy"));
-                    return;
-                }
-                if (Story.start(pl, def)) Dialogue.open(pl, n, def.pitch.isEmpty() ? def.desc.c() : def.pitch.c());
-            }));
+            out.add(new DialogueOption("story.offer." + def.id, QuestDialogue.questLabel(label), 95,
+                    (pl, n) -> QuestDialogue.offerStory(pl, n, def, null)));
+            break; // One quest offer at a time per named NPC
         }
         StoryData.NpcDef def = StoryData.npc(id);
         if (def != null && !def.greet.isEmpty()) {

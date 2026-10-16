@@ -344,6 +344,16 @@ final class Scenes {
     // ------------------------------------------------------------------ boat cast ashore
 
     static boolean boatWreck(Stage s) {
+        boolean nearWater = false;
+        for (int dx = -6; dx <= 6 && !nearWater; dx += 2) {
+            for (int dz = -6; dz <= 6; dz += 2) {
+                if (!s.dry(dx, dz)) {
+                    nearWater = true;
+                    break;
+                }
+            }
+        }
+        if (!nearWater) return false;
         int g = s.top(0, 0);
         int len = 7 + s.vary(1, 0, 2);
         for (int i = -len / 2; i <= len / 2; i++) {
@@ -357,7 +367,7 @@ final class Scenes {
         }
         for (int y = 1; y <= 4; y++) s.set(1, g + y, 0, s.wood.fence());
         s.set(1, g + 3, 1, Blocks.WHITE_WOOL);
-        s.set(1, g + 2, -1, Blocks.WHITE_CARPET);
+        s.set(1, g + 2, 1, Blocks.WHITE_WOOL);
         BlockPos b = s.barrel(-2, g + 1, 0, "explore/shipwreck");
         s.put(b, note(s, "traveller", "Ship's Log"));
         s.barrel(2, g + 1, 0, null);

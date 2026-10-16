@@ -20,6 +20,26 @@ public final class SurvivalPackets {
         SkyNetwork.register(Cook.class, NetworkDirection.PLAY_TO_SERVER, Cook::encode, Cook::decode, Cook::handle);
         SkyNetwork.register(Meters.class, NetworkDirection.PLAY_TO_CLIENT, Meters::encode, Meters::decode, Meters::handle);
         SkyNetwork.register(Bite.class, NetworkDirection.PLAY_TO_CLIENT, Bite::encode, Bite::decode, Bite::handle);
+        SkyNetwork.register(ReelResult.class, NetworkDirection.PLAY_TO_SERVER, ReelResult::encode, ReelResult::decode, ReelResult::handle);
+    }
+
+    /** C2S: client completed the Stardew-style fishing catch bar minigame (caught = 100% progress, false = 0% escaped). */
+    public record ReelResult(boolean caught) {
+        static void encode(ReelResult m, FriendlyByteBuf buf) {
+            buf.writeBoolean(m.caught);
+        }
+
+        static ReelResult decode(FriendlyByteBuf buf) {
+            return new ReelResult(buf.readBoolean());
+        }
+
+        static void handle(ReelResult m, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null && player.fishing instanceof com.skycraft.survival.fishing.SkyFishingHook hook) {
+                hook.completeMinigame(player, m.caught);
+            }
+            ctx.get().setPacketHandled(true);
+        }
     }
 
     /** C2S: cook {@code times} of a cooking pot recipe at the open cooking pot. */

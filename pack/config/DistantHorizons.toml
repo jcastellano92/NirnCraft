@@ -20,6 +20,14 @@ _version = 5
 		farFogMax = 1.0
 		farFogFalloff = "EXPONENTIAL_SQUARED"
 
+	[client.advanced.graphics.ssao]
+		# Complementary Reimagined handles AO; disabling DH SSAO prevents depth-buffer halo artifacts around sky particles.
+		enableSsao = false
+
+	[client.advanced.graphics.genericRendering]
+		# Complementary Reimagined renders Skycraft's 3D volumetric clouds; disable vanilla-style DH box clouds.
+		enableCloudRendering = false
+
 	[client.advanced.autoUpdater]
 		# The pack pins Distant Horizons; never download a different version at launch.
 		enableAutoUpdater = false

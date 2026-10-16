@@ -4,6 +4,7 @@ import com.skycraft.tamriel.settlement.AnchorType;
 import com.skycraft.tamriel.settlement.Culture;
 import com.skycraft.tamriel.settlement.build.Shells.Frame;
 import com.skycraft.tamriel.settlement.build.Shells.Room;
+import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind;
 import com.skycraft.tamriel.settlement.kit.Palette;
 import com.skycraft.tamriel.settlement.kit.Shell;
 import com.skycraft.tamriel.settlement.plan.Spec;
@@ -88,8 +89,8 @@ public final class GuildHalls {
         if (!c.recording()) {
             int sx = Math.min(s.w - 1, doorX + 1);
             if (f.stilts) c.set(sx, 3, -1, B.s(Blocks.AIR));
-            c.sign(sx, 3, -1, p.sign, Direction.NORTH, Component.empty(),
-                    Component.translatableWithFallback("settlement.skycraft.name." + faction, faction));
+            Component title = Component.translatableWithFallback("settlement.skycraft.name." + faction, faction);
+            Props.shopSign(c, p, "guild_hall", sx, 3, -1, Direction.EAST, title, Component.literal("Guild Hall"));
         }
     }
 
@@ -106,11 +107,12 @@ public final class GuildHalls {
         Props.rug(c, p.carpet, cx, y, r.z0(), cx, r.z1() - 3);
         int deskZ = r.z1() - 2;
         Props.table(c, p, cx - 1, y, deskZ);
-        Props.table(c, p, cx, y, deskZ);
+        Props.desk(c, p, cx, y, deskZ, Direction.SOUTH);
         Props.table(c, p, cx + 1, y, deskZ);
-        Props.candles(c, cx - 1, y + 1, deskZ, 2);
-        c.set(cx + 1, y + 1, deskZ, theme == Theme.ARCANE || theme == Theme.SACRED ? B.s(Blocks.LECTERN) : B.s(Blocks.CANDLE));
-        Props.chair(c, p, cx, y, r.z1() - 1, Direction.SOUTH);
+        Props.clutter(c, p, cx - 1, y + 1, deskZ, Direction.NORTH, FurnitureKind.CLUTTER_CANDELABRA);
+        Props.clutter(c, p, cx + 1, y + 1, deskZ, Direction.NORTH,
+                theme == Theme.ARCANE || theme == Theme.SACRED ? FurnitureKind.CLUTTER_LEDGER : FurnitureKind.CLUTTER_GOBLETS);
+        Props.throne(c, p, cx, y, r.z1() - 1, Direction.SOUTH);
         c.anchor(AnchorType.GUILD_LEADER, cx, y, r.z1() - 1);
         // the colours on the back wall
         int back = r.z1() + 1;
@@ -141,7 +143,9 @@ public final class GuildHalls {
             switch (theme) {
                 case MARTIAL -> {
                     // straw dummies, targets and a weapon rack
-                    if (even) {
+                    if (z == z0) {
+                        Props.weaponRack(c, p, x, y, z, Direction.EAST);
+                    } else if (even) {
                         c.set(x, y, z, B.s(Blocks.HAY_BLOCK));
                         c.set(x, y + 1, z, B.s(Blocks.CARVED_PUMPKIN));
                     } else {
@@ -150,19 +154,19 @@ public final class GuildHalls {
                     }
                 }
                 case ARCANE -> {
-                    c.set(x, y, z, even ? B.s(Blocks.BOOKSHELF) : B.s(Blocks.CHISELED_BOOKSHELF));
-                    c.set(x, y + 1, z, B.s(Blocks.BOOKSHELF));
+                    Props.bookshelf(c, x, y, z, Direction.EAST, !even);
+                    Props.bookshelf(c, x, y + 1, z, Direction.EAST, true);
                 }
                 case SHADOW -> {
-                    if (even) Props.barrel(c, x, y, z, null);
+                    if (even) Props.cabinet(c, p, x, y, z, Direction.EAST, "store");
                     else c.set(x, y, z, B.s(Blocks.COBWEB));
                 }
                 case SACRED -> {
-                    if (even) Props.candles(c, x, y, z, 3);
-                    else c.set(x, y, z, B.stair(p.stairs, Direction.EAST, false));
+                    if (even) Props.clutter(c, p, x, y, z, Direction.EAST, FurnitureKind.CLUTTER_CANDELABRA);
+                    else Props.bench(c, p, x, y, z, Direction.WEST);
                 }
                 case TRADE -> {
-                    if (even) Props.barrel(c, x, y, z, null);
+                    if (even) Props.cabinet(c, p, x, y, z, Direction.EAST, "store");
                     else c.set(x, y, z, B.s(Blocks.CRAFTING_TABLE));
                 }
                 case CAMP -> c.setIfOpen(x, y, z, p.carpet2);
@@ -190,7 +194,8 @@ public final class GuildHalls {
         int cxz = r.x1() - 2;
         int z0 = r.z0() + 1, z1 = Math.max(z0 + 2, r.z1() - 5);
         for (int z = z0; z <= z1; z++) {
-            c.set(cxz, y, z, z == z0 ? B.slab(p.slab, true) : p.planks);
+            if (z == z0) c.set(cxz, y, z, B.slab(p.slab, true));
+            else Props.counter(c, p, cxz, y, z, Direction.WEST);
         }
         int vz = (z0 + z1) / 2;
         c.anchor(AnchorType.GUILD_VENDOR, r.x1() - 1, y, vz);
@@ -200,10 +205,10 @@ public final class GuildHalls {
             default -> "store";
         };
         Props.chest(c, r.x1(), y, z0, Direction.WEST, loot);
-        Props.barrel(c, r.x1(), y, z1, loot);
+        Props.cabinet(c, p, r.x1(), y, z1, Direction.WEST, loot);
         if (theme == Theme.MARTIAL) c.set(r.x1(), y, vz, Props.workbench());
         else if (theme == Theme.ARCANE || theme == Theme.SACRED) c.set(r.x1(), y, vz, B.s(Blocks.BREWING_STAND));
-        Props.candles(c, cxz, y + 1, vz, 2);
+        Props.clutter(c, p, cxz, y + 1, vz, Direction.WEST, FurnitureKind.CLUTTER_SCALES);
     }
 
     /** The members' bunks upstairs. */
@@ -214,8 +219,9 @@ public final class GuildHalls {
             c.anchor(AnchorType.GUILD_BED, r.x1(), y, z);
             Props.chest(c, r.x1(), y, z + 1, Direction.WEST, "barracks");
         }
+        Props.wardrobe(c, p, r.x0(), y, r.z0() + 1, Direction.EAST, "barracks");
         Props.table(c, p, r.cx(), y, r.cz());
-        Props.candles(c, r.cx(), y + 1, r.cz(), 3);
+        Props.clutter(c, p, r.cx(), y + 1, r.cz(), Direction.SOUTH, FurnitureKind.CLUTTER_TANKARD);
         Props.chair(c, p, r.cx() - 1, y, r.cz(), Direction.WEST);
         Props.rug(c, colours.is(Blocks.WHITE_WOOL) ? p.carpet : p.carpet2, r.cx() - 1, y, r.z0() + 1, r.cx() + 1, r.z1() - 1);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz() + 2, true);

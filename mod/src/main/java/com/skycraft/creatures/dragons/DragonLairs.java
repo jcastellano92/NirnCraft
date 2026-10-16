@@ -83,7 +83,7 @@ public final class DragonLairs {
         risen.startRising();
         level.addFreshEntity(risen);
         level.playSound(null, at, com.skycraft.audio.AudioSounds.creature("dragon", "roar"), SoundSource.HOSTILE, 10f, 0.8f);
-        player.displayClientMessage(Component.translatable("message.skycraft.dragon.mound_rises"), true);
+        com.skycraft.core.Notifier.message(player, Component.translatable("message.skycraft.dragon.mound_rises"));
     }
 
     private static void checkWordWall(ServerLevel level, ServerPlayer player, DragonWorldData data, int x, int z) {

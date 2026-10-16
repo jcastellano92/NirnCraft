@@ -63,6 +63,7 @@ public final class ClientSurvival {
         flags = 0;
         hunger = fatigue = cold = warmth = trend = 0;
         lastHungerStage = lastFatigueStage = lastColdStage = -1;
+        FishingHud.reset();
     }
 
     // ------------------------------------------------------------------ fishing spots
@@ -72,7 +73,9 @@ public final class ClientSurvival {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
-        if (level == null || mc.player == null || mc.isPaused() || level.getGameTime() % 3 != 0) return;
+        if (level == null || mc.player == null || mc.isPaused()) return;
+        FishingHud.clientTick(mc);
+        if (level.getGameTime() % 3 != 0) return;
         RandomSource r = level.random;
         int px = mc.player.getBlockX(), pz = mc.player.getBlockZ();
         int cx = Math.floorDiv(px, FishingSpots.CELL), cz = Math.floorDiv(pz, FishingSpots.CELL);

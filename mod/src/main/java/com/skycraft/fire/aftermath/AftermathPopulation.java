@@ -222,13 +222,23 @@ public final class AftermathPopulation {
     public static BlockPos settle(ServerLevel level, BlockPos at) {
         if (!level.isLoaded(at)) return at;
         int[] order = {0, -1, 1, -2, 2, -3, 3, -4, 4, -6, 6};
-        for (int dy : order) {
-            BlockPos p = at.offset(0, dy, 0);
-            BlockPos below = p.below();
-            BlockState here = level.getBlockState(p), head = level.getBlockState(p.above());
-            if (level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP) && here.getCollisionShape(level, p).isEmpty()
-                    && head.getCollisionShape(level, p.above()).isEmpty() && level.getFluidState(p).isEmpty()) {
-                return p;
+        for (int r = 0; r <= 2; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+                    for (int dy : order) {
+                        BlockPos p = at.offset(dx, dy, dz);
+                        BlockPos below = p.below();
+                        BlockState here = level.getBlockState(p), head = level.getBlockState(p.above());
+                        if (level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
+                                && here.getCollisionShape(level, p).isEmpty()
+                                && head.getCollisionShape(level, p.above()).isEmpty()
+                                && level.getFluidState(p).isEmpty()
+                                && !com.skycraft.society.NpcPlacement.isFireHazard(level, p)) {
+                            return p;
+                        }
+                    }
+                }
             }
         }
         return at;

@@ -175,10 +175,12 @@ TERRAIN = {"type": "minecraft:range_choice", "input": "skycraft:tamriel/below_su
 FINAL = {"type": "minecraft:min",
          "argument1": {"type": "minecraft:squeeze", "argument": mul(0.64, {"type": "minecraft:interpolated", "argument": {
              "type": "minecraft:blend_density", "argument": fades(TERRAIN)}})},
-         # noodle caves are not interpolated (evaluated per block): keep them off road beds and pads (P2), where the
-         # road plan sets the ground exactly (the road channel includes the planned beds and site pads)
-         "argument2": {"type": "minecraft:max", "argument1": "minecraft:overworld/caves/noodle",
-                       "argument2": add(-100.0, mul(120.0, "skycraft:tamriel/road"))}}
+         # noodle caves are not interpolated (evaluated per block): keep them at least 7 blocks below the surface and
+         # off road beds, settlement pads and plots (P2/P5)
+         "argument2": {"type": "minecraft:range_choice", "input": "skycraft:tamriel/below_surface",
+                       "min_inclusive": -1000000.0, "max_exclusive": 0.25, "when_in_range": 1.0,
+                       "when_out_of_range": {"type": "minecraft:max", "argument1": "minecraft:overworld/caves/noodle",
+                                             "argument2": add(-100.0, mul(500.0, "skycraft:tamriel/road"))}}}
 
 SHIFTED = lambda n: {"type": "minecraft:shifted_noise", "noise": n, "shift_x": "minecraft:shift_x", "shift_y": 0.0,
                      "shift_z": "minecraft:shift_z", "xz_scale": 0.25, "y_scale": 0.0}
@@ -327,6 +329,25 @@ def main():
 
     write("skycraft/worldgen/configured_feature/map_water.json", {"type": "skycraft:map_water", "config": {}})
     write("skycraft/worldgen/placed_feature/map_water.json", {"feature": "skycraft:map_water", "placement": []})
+
+    # Disable vanilla post-surface WorldCarvers (even when a vanilla cave biome is sampled at y=0): all Tamriel caves
+    # come from the plan-aware 3-tier noise router above, which respects skycraft:tamriel/road on roads, pads and plots.
+    disabled_cave = {
+        "type": "minecraft:cave",
+        "config": {
+            "probability": 0.0,
+            "y": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 8}, "max_inclusive": {"absolute": 180}},
+            "yScale": 0.5,
+            "lava_level": {"above_bottom": 8},
+            "replaceable": "#minecraft:overworld_carver_replaceables",
+            "horizontal_radius_multiplier": 1.0,
+            "vertical_radius_multiplier": 1.0,
+            "floor_level": -0.7,
+        },
+    }
+    write("minecraft/worldgen/configured_carver/cave.json", disabled_cave)
+    write("minecraft/worldgen/configured_carver/cave_extra_underground.json", disabled_cave)
+    write("minecraft/worldgen/configured_carver/canyon.json", disabled_cave)
     print("wrote the skycraft:tamriel terrain JSON")
 
 

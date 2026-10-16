@@ -547,7 +547,7 @@ public final class SocietyTrainers {
         List<Skill> skills = skillsOf(entity);
         int priority = 12;
         for (Skill skill : skills) {
-            Component label = formatOptionLabel(player, entity, skill);
+            Component label = NpcDialogue.serviceLabel(formatOptionLabel(player, entity, skill));
             out.add(new DialogueOption("society.train." + skill.id(), label, priority++, (p, n) -> {
                 Result res = train(p, n, skill);
                 switch (res.status()) {

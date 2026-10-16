@@ -131,7 +131,7 @@ public final class SettlementPopulation {
                 AnchorType t = res.slotType();
                 if ("helgen".equals(e.key) && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()) {
                     // the dragon has been: only survivors and shaken soldiers, no shopkeepers, innkeeper, bard or court
-                    done = ruinedHelgen(level, at, t, i, a.owner());
+                    done = ruinedHelgen(level, at, t, i, a.owner(), list);
                     if (done) {
                         adopt(level, at, res, list, bed, e.key + "#" + i, regionId, null);
                         e.spawned.add(i);
@@ -220,7 +220,28 @@ public final class SettlementPopulation {
      * kept a shop, an inn or a court is a dazed survivor sitting among the rubble, and only some of the households are
      * still there. Returns true when the anchor is dealt with.
      */
-    private static boolean ruinedHelgen(ServerLevel level, BlockPos at, AnchorType t, int i, String owner) {
+    private static BlockPos ruinedSurvivorSpot(ServerLevel level, BlockPos at, List<Anchor> list, int slotIdx) {
+        BlockPos meeting = null;
+        for (Anchor a : list) {
+            if (a.type() == AnchorType.MEETING) {
+                meeting = a.pos();
+                break;
+            }
+        }
+        BlockPos base = meeting != null ? meeting : at;
+        double ang = (slotIdx * 2.399963229728653) % (Math.PI * 2);
+        int dist = 3 + (slotIdx % 6);
+        BlockPos candidate = base.offset((int) Math.round(Math.cos(ang) * dist), 0, (int) Math.round(Math.sin(ang) * dist));
+        if (level.isLoaded(candidate)) {
+            BlockPos outdoor = com.skycraft.society.NpcPlacement.outdoorGroundAt(level, candidate.getX(), candidate.getZ(), base.getY());
+            if (outdoor != null && !com.skycraft.society.NpcPlacement.isFireHazard(level, outdoor)) {
+                return outdoor;
+            }
+        }
+        return at;
+    }
+
+    private static boolean ruinedHelgen(ServerLevel level, BlockPos at, AnchorType t, int i, String owner, List<Anchor> list) {
         switch (t) {
             case GUARD -> {
                 return guard(level, at);
@@ -234,18 +255,18 @@ public final class SettlementPopulation {
                     return true;
                 }
                 if (i % 2 == 0) return true;
-                return npc(level, at, NpcRole.CITIZEN, Component.translatable("entity.skycraft.helgen_survivor"), 6) != null;
+                return npc(level, ruinedSurvivorSpot(level, at, list, i), NpcRole.CITIZEN, Component.translatable("entity.skycraft.helgen_survivor"), 10) != null;
             }
             case JARL, HOUSECARL, STEWARD, WIZARD, BARD, PRIEST, INN, SMITH, ALCHEMIST, FARMER, MILLER, LUMBERJACK, MINER, JEWELER,
                     BOOKSELLER, TAILOR, BUTCHER, FLETCHER, FENCE, FISHER, HUNTER, WORKER -> {
                 // roughly one in two of the old jobs left a survivor behind
                 if (i % 2 == 0) return true;
                 boolean wounded = i % 4 == 1;
-                return npc(level, at, wounded ? NpcRole.BEGGAR : NpcRole.CITIZEN,
-                        Component.translatable(wounded ? "entity.skycraft.helgen_wounded" : "entity.skycraft.helgen_survivor"), 6) != null;
+                return npc(level, ruinedSurvivorSpot(level, at, list, i), wounded ? NpcRole.BEGGAR : NpcRole.CITIZEN,
+                        Component.translatable(wounded ? "entity.skycraft.helgen_wounded" : "entity.skycraft.helgen_survivor"), 10) != null;
             }
             case BED -> {
-                return i % 3 != 0 || npc(level, at, NpcRole.CITIZEN, Component.translatable("entity.skycraft.helgen_survivor"), 8) != null;
+                return i % 3 != 0 || npc(level, ruinedSurvivorSpot(level, at, list, i), NpcRole.CITIZEN, Component.translatable("entity.skycraft.helgen_survivor"), 12) != null;
             }
             default -> {
                 return true;
@@ -285,11 +306,13 @@ public final class SettlementPopulation {
                               @Nullable com.skycraft.society.SocietyResidents.Entry authored) {
         BlockPos post = res.work() >= 0 && res.work() < list.size() ? standing(level, list.get(res.work()).pos()) : null;
         String settlementKey = slot.contains("#") ? slot.substring(0, slot.indexOf('#')) : slot;
-        for (LivingEntity l : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at).inflate(5),
+        boolean ruinedHelgen = slot.startsWith("helgen#") && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get();
+        BlockPos searchCenter = ruinedHelgen ? ruinedSurvivorSpot(level, at, list, res.slot()) : at;
+        for (LivingEntity l : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(searchCenter).inflate(8),
                 x -> x.isAlive() && x.tickCount <= 2 && !x.getPersistentData().contains(Housing.JOB_KEY)
                         && (x instanceof NpcEntity || x instanceof AbstractVillager || x instanceof GuardEntity))) {
             CompoundTag pd = l.getPersistentData();
-            String job = slot.startsWith("helgen#") && com.skycraft.quest.QuestConfig.RUINED_HELGEN.get()
+            String job = ruinedHelgen
                     && !pd.getBoolean(com.skycraft.fire.aftermath.HelgenFolk.CART) && !(l instanceof GuardEntity)
                     ? "survivor" : res.job();
             pd.putString(Housing.JOB_KEY, job);
@@ -320,6 +343,14 @@ public final class SettlementPopulation {
                 if (!why.isEmpty()) {
                     pd.putString(Housing.WHY_KEY, String.join(",", why));
                 }
+            }
+            if ("survivor".equals(job)) {
+                if (l instanceof NpcEntity n) {
+                    n.setWorkplace(null);
+                    n.setBed(null);
+                    n.setHome(l.blockPosition(), 12);
+                }
+                return;
             }
             if (post != null) pd.putLong(Housing.WORK_KEY, post.asLong());
             if (res.household()) { // free hours at the plaza the plan picked for them, or indoors when it is full
@@ -363,34 +394,44 @@ public final class SettlementPopulation {
     }
 
     /**
-     * The anchor itself when it is free standing room (1x2 clearance, floor underneath, not in a gate or doorway, nobody
-     * within {@link #SPAWN_GAP}); else the nearest such spot within three blocks; else null (try again later).
+     * The anchor itself when it is free standing room (1x2 clearance, floor underneath, not in a gate or doorway,
+     * not on a roof, slab, or furniture, nobody within {@link #SPAWN_GAP}); else the nearest such spot within three
+     * blocks; else null (try again later).
      */
     static BlockPos freeSpot(ServerLevel level, BlockPos at) {
-        RandomSource r = level.getRandom();
-        for (int i = 0; i < 14; i++) {
-            int dx = i == 0 ? 0 : r.nextInt(7) - 3;
-            int dz = i == 0 ? 0 : r.nextInt(7) - 3;
-            for (int dy : new int[]{0, 1, -1}) {
-                BlockPos p = at.offset(dx, dy, dz);
-                if (!level.isLoaded(p)) continue;
-                if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()
-                        || !level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
-                        || !level.getBlockState(p.below()).isFaceSturdy(level, p.below(), net.minecraft.core.Direction.UP)) continue;
-                if (doorway(level, p)) continue;
-                boolean crowded = !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
-                        new net.minecraft.world.phys.AABB(p).inflate(SPAWN_GAP),
-                        l -> l.isAlive() && (l instanceof NpcEntity || l instanceof net.minecraft.world.entity.npc.AbstractVillager
-                                || l instanceof GuardEntity)).isEmpty();
-                if (!crowded) return p;
+        boolean anchorIndoors = !level.canSeeSky(at) && !level.canSeeSky(at.above());
+        for (int dy : new int[]{0, -1, 1}) {
+            for (int r = 0; r <= 3; r++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    for (int dz = -r; dz <= r; dz++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+                        BlockPos p = at.offset(dx, dy, dz);
+                        if (!level.isLoaded(p)) continue;
+                        if (anchorIndoors && (level.canSeeSky(p) || level.canSeeSky(p.above()))) continue;
+                        if (level.canSeeSky(p) && com.skycraft.society.NpcPlacement.hasRoomBelow(level, p)) continue;
+                        if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()
+                                || !level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
+                                || !level.getBlockState(p.below()).isFaceSturdy(level, p.below(), net.minecraft.core.Direction.UP)
+                                || !level.getFluidState(p).isEmpty()) continue;
+                        if (doorway(level, p)
+                                || com.skycraft.society.NpcPlacement.isFireHazard(level, p)
+                                || com.skycraft.society.NpcPlacement.isSlabHazard(level, p)
+                                || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, p)) continue;
+                        boolean crowded = !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                                new net.minecraft.world.phys.AABB(p).inflate(SPAWN_GAP),
+                                l -> l.isAlive() && (l instanceof NpcEntity || l instanceof net.minecraft.world.entity.npc.AbstractVillager
+                                        || l instanceof GuardEntity)).isEmpty();
+                        if (!crowded) return p;
+                    }
+                }
             }
         }
         return null;
     }
 
-    /** The position to stand an NPC at: the anchor, or the block above it when the anchor is solid (bed, throne). */
+    /** The floor-level anchor position: freeSpot finds the nearest clear floor cell beside any bed or station. */
     static BlockPos standing(ServerLevel level, BlockPos p) {
-        return level.getBlockState(p).getCollisionShape(level, p).isEmpty() ? p : p.above();
+        return p;
     }
 
     static NpcEntity npc(ServerLevel level, BlockPos at, NpcRole role, Component name, int homeRadius) {

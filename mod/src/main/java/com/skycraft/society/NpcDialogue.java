@@ -71,7 +71,7 @@ public final class NpcDialogue {
         ItemStack held = event.getItemStack();
         if (held.is(Items.NAME_TAG) || held.is(Items.LEAD)) return;
         if (player instanceof ServerPlayer sp) {
-            if (npc.getTarget() == sp || npc.isHostileTo(sp)) {
+        if ((npc.getTarget() == sp || npc.isHostileTo(sp)) && !npc.getPersistentData().getBoolean(Ambush.TAG_AMBUSH)) {
                 event.setCancellationResult(InteractionResult.FAIL);
                 event.setCanceled(true);
                 return;
@@ -93,6 +93,10 @@ public final class NpcDialogue {
                     return;
                 }
             }
+            if (npc.isSleeping()) {
+                npc.stopSleeping();
+            }
+            npc.setConversationPartner(sp.getId());
             npc.getNavigation().stop();
             npc.getLookControl().setLookAt(sp, 30f, 30f);
             Dialogue.open(sp, npc, greeting(sp, npc));
@@ -102,6 +106,9 @@ public final class NpcDialogue {
     }
 
     static Component greeting(ServerPlayer player, NpcEntity npc) {
+        if (npc.getPersistentData().getBoolean(Ambush.TAG_AMBUSH)) {
+            return Component.translatable("society.skycraft.ambush.demand", Ambush.demandFor(player));
+        }
         if (npc.getPersistentData().getBoolean("skycraft_old_orc")) {
             return Component.literal("I am waiting for a good death. Old age is a shame for an Orc warrior. Send me to Malacath with honor!");
         }
@@ -179,6 +186,13 @@ public final class NpcDialogue {
         return Component.translatable("dialogue.skycraft.society." + key, args);
     }
 
+    public static Component serviceLabel(Component label) {
+        if (label == null) return Component.empty();
+        String s = label.getString();
+        if (s.startsWith("\u25C6 ") || s.startsWith("\u2022 ")) return label;
+        return Component.literal("\u2022 ").withStyle(net.minecraft.ChatFormatting.YELLOW).append(label);
+    }
+
     public static String resolveReactiveKey(@org.jetbrains.annotations.Nullable String regionOrHold, @org.jetbrains.annotations.Nullable String deed) {
         return ContextualDialogue.resolveReactiveKey(regionOrHold, deed);
     }
@@ -186,11 +200,26 @@ public final class NpcDialogue {
     // ------------------------------------------------------------------ topics
 
     static void addOptions(ServerPlayer player, LivingEntity entity, List<DialogueOption> out) {
+        if (entity.getPersistentData().getBoolean(Ambush.TAG_AMBUSH) && Ambush.active(player)) {
+            int demand = Ambush.demandFor(player);
+            out.add(new DialogueOption("ambush.pay", Component.translatable("society.skycraft.ambush.opt.pay", demand), 1,
+                    (p, e) -> Ambush.choose(p, "pay")));
+            out.add(new DialogueOption("ambush.persuade", Component.translatable("society.skycraft.ambush.opt.persuade"), 2,
+                    (p, e) -> Ambush.choose(p, "persuade")));
+            out.add(new DialogueOption("ambush.flee", Component.translatable("society.skycraft.ambush.opt.flee"), 3,
+                    (p, e) -> Ambush.choose(p, "flee")));
+            out.add(new DialogueOption("ambush.fight", Component.translatable("society.skycraft.ambush.opt.fight"), 4,
+                    (p, e) -> Ambush.choose(p, "fight")));
+            return;
+        }
         String hold = com.skycraft.core.Holds.holdAt(player.level(), player.blockPosition());
         if (com.skycraft.crime.Crimes.isGuard(entity) && com.skycraft.crime.Bounty.get(player, hold) > 0) return;
         if (!(entity instanceof NpcEntity npc)) {
+            if (entity instanceof com.skycraft.creatures.entity.GuardEntity guard) {
+                guard.engageConversation(player, 20 * 60);
+            }
             if (com.skycraft.crime.Crimes.isGuard(entity) && !ContextualDialogue.activeDeeds(player, hold).isEmpty()) {
-                out.add(new DialogueOption("society.react", opt("react"), 515, (p, n) -> {
+                out.add(new DialogueOption("society.day.react", opt("react"), 515, (p, n) -> {
                     Component react = ContextualDialogue.reactiveLine(p, n);
                     if (react != null) Dialogue.open(p, n, react);
                 }));
@@ -201,7 +230,7 @@ public final class NpcDialogue {
         if (npc.isHostileTo(player)) return;
         NpcRole role = npc.role();
         if (npc.isPrisoner()) {
-            out.add(new DialogueOption("society.free", opt("free"), 10, NpcDialogue::freePrisoner));
+            out.add(new DialogueOption("society.free", serviceLabel(opt("free")), 10, NpcDialogue::freePrisoner));
             return;
         }
 
@@ -260,7 +289,7 @@ public final class NpcDialogue {
         }
 
         if (npc.getPersistentData().getBoolean("skycraft_reveler")) {
-            out.add(new DialogueOption("society.reveler_drink", Component.literal("I'll share a drink with you! (Toast)"), 10, (p, n) -> {
+            out.add(new DialogueOption("society.reveler_drink", serviceLabel(Component.literal("I'll share a drink with you! (Toast)")), 10, (p, n) -> {
                 // one toast per reveler per player per in-game day
                 CompoundTag toasts = n.getPersistentData().getCompound("skycraft_toasts");
                 long day = p.level().getDayTime() / 24000L;
@@ -285,36 +314,33 @@ public final class NpcDialogue {
             return;
         }
 
+        // Children have simple, natural child dialogue (1-2 options)
+        if (npc.isChild() || role == NpcRole.CHILD) {
+            out.add(new DialogueOption("society.work.play", opt("play"), 10,
+                    (p, n) -> Dialogue.open(p, n, say("play." + p.getRandom().nextInt(4)))));
+            Marriage.addOptions(player, npc, out);
+            return;
+        }
+
         // Server-validated skill training (F-TRAINER / R3d-1.1)
         SocietyTrainers.addDialogueOptions(player, npc, out);
 
-        // "what do you do around here?" is a silly thing to ask a jarl, a steward, a mage or a court wizard
-        boolean obviousJob = role == NpcRole.JARL || role == NpcRole.STEWARD || role == NpcRole.HOUSECARL || role == NpcRole.MAGE
-                || npc.getPersistentData().getString(com.skycraft.economy.Merchants.PROFESSION_KEY).equals("skycraft:court_wizard")
-                || !com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty();
-        if (!obviousJob) out.add(new DialogueOption("society.job", opt("job"), 600,
-                (p, n) -> Dialogue.open(p, n, jobLine(n, role))));
-        // people on the road talk about the road (pilgrims of their shrine, soldiers of their orders, tinkers of their wares)
+        // People on the road talk about the road
         String travelKind = travelerKind(npc);
         if (travelKind != null) {
-            out.add(new DialogueOption("society.traveler", opt("traveler_news"), 15, (p, n) -> Dialogue.open(p, n,
+            out.add(new DialogueOption("society.news.traveler", opt("traveler_news"), 15, (p, n) -> Dialogue.open(p, n,
                     Component.translatable("society.skycraft.say.traveler." + travelKind + "." + p.getRandom().nextInt(3)))));
         }
+
         Relationships.addOptions(player, npc, out);
         Marriage.addOptions(player, npc, out);
-        if (role.civilian && !npc.isChild()) {
-            out.add(new DialogueOption("society.region", opt("region"), 530, NpcDialogue::aboutRegion));
-            ContextualDialogue.addContextualOptions(player, npc, out);
-            if (role != NpcRole.INNKEEPER && Relationships.rank(npc, player).ordinal() >= Relationships.Rank.STRANGER.ordinal()) {
-                out.add(new DialogueOption("society.news", opt("news"), 520, NpcDialogue::news));
-            }
-        }
 
+        boolean hasSpecificRoleTopic = true;
         switch (role) {
-            case BEGGAR -> out.add(new DialogueOption("society.coin", opt("coin"), 10, NpcDialogue::giveCoin));
+            case BEGGAR -> out.add(new DialogueOption("society.coin", serviceLabel(opt("coin")), 10, NpcDialogue::giveCoin));
             case BARD -> {
                 boolean atInn = isNearInn(npc);
-                out.add(new DialogueOption("society.song", opt("song"), 10, (p, n) -> {
+                out.add(new DialogueOption("society.song", serviceLabel(opt("song")), 10, (p, n) -> {
                     if (atInn) {
                         int song = p.getRandom().nextInt(Chatter.SONGS);
                         if (n instanceof NpcEntity b) {
@@ -327,33 +353,49 @@ public final class NpcDialogue {
                     }
                 }));
             }
-            // room, rumors and disease cures come from the survival module (it recognizes persistent "skycraft_role")
-            case PRIEST -> out.add(new DialogueOption("society.heal", opt("heal"), 10, NpcDialogue::heal));
-            case INNKEEPER -> out.add(new DialogueOption("society.drink", opt("drink", DRINK_PRICE), 97, NpcDialogue::buyDrink));
-            case IMPERIAL_SOLDIER, STORMCLOAK_SOLDIER -> out.add(new DialogueOption("society.war", opt("war"), 10,
+            case PRIEST -> out.add(new DialogueOption("society.heal", serviceLabel(opt("heal")), 10, NpcDialogue::heal));
+            case INNKEEPER -> out.add(new DialogueOption("society.drink", serviceLabel(opt("drink", DRINK_PRICE)), 97, NpcDialogue::buyDrink));
+            case IMPERIAL_SOLDIER, STORMCLOAK_SOLDIER -> out.add(new DialogueOption("society.work.war", opt("war"), 500,
                     (p, n) -> Dialogue.open(p, n, say("war." + role.id + "." + p.getRandom().nextInt(2)))));
-            case JARL -> out.add(new DialogueOption("society.standing", opt("standing"), 10, NpcDialogue::standing));
-            case STEWARD -> out.add(new DialogueOption("society.hold", opt("hold"), 10,
+            case JARL -> out.add(new DialogueOption("society.hold.standing", opt("standing"), 500, NpcDialogue::standing));
+            case STEWARD -> out.add(new DialogueOption("society.hold.steward", opt("hold"), 500,
                     (p, n) -> Dialogue.open(p, n, say("hold." + p.getRandom().nextInt(3)))));
-            case FARMER -> out.add(new DialogueOption("society.harvest", opt("harvest"), 10,
+            case FARMER -> out.add(new DialogueOption("society.work.harvest", opt("harvest"), 500,
                     (p, n) -> Dialogue.open(p, n, say("harvest." + p.getRandom().nextInt(3)))));
-            case BLACKSMITH -> out.add(new DialogueOption("society.smithing", opt("smithing"), 10,
+            case BLACKSMITH -> out.add(new DialogueOption("society.work.smithing", opt("smithing"), 500,
                     (p, n) -> Dialogue.open(p, n, say("smithing." + p.getRandom().nextInt(3)))));
-            case MERCHANT, APOTHECARY -> out.add(new DialogueOption("society.business", opt("business"), 10,
+            case MERCHANT, APOTHECARY -> out.add(new DialogueOption("society.work.business", opt("business"), 500,
                     (p, n) -> Dialogue.open(p, n, say("business." + p.getRandom().nextInt(3)))));
-            case CARAVAN_TRADER -> out.add(new DialogueOption("society.caravan", opt("caravan"), 10,
+            case CARAVAN_TRADER -> out.add(new DialogueOption("society.work.caravan", opt("caravan"), 500,
                     (p, n) -> Dialogue.open(p, n, say("caravan." + p.getRandom().nextInt(3)))));
-            case FISHER -> out.add(new DialogueOption("society.fishing", opt("fishing"), 10,
+            case FISHER -> out.add(new DialogueOption("society.work.fishing", opt("fishing"), 500,
                     (p, n) -> Dialogue.open(p, n, say("fishing." + p.getRandom().nextInt(2)))));
-            case SCHOLAR -> out.add(new DialogueOption("society.studies", opt("studies"), 10,
+            case SCHOLAR -> out.add(new DialogueOption("society.work.studies", opt("studies"), 500,
                     (p, n) -> Dialogue.open(p, n, say("studies." + p.getRandom().nextInt(3)))));
-            case TRAINER -> out.add(new DialogueOption("society.training_lore", opt("training_lore"), 25,
+            case TRAINER -> out.add(new DialogueOption("society.work.training_lore", opt("training_lore"), 500,
                     (p, n) -> Dialogue.open(p, n, say("training_lore." + p.getRandom().nextInt(3)))));
-            case CHILD -> out.add(new DialogueOption("society.play", opt("play"), 10,
-                    (p, n) -> Dialogue.open(p, n, say("play." + p.getRandom().nextInt(4)))));
-            case HUNTER -> out.add(new DialogueOption("society.game", opt("game"), 10,
+            case HUNTER -> out.add(new DialogueOption("society.work.game", opt("game"), 500,
                     (p, n) -> Dialogue.open(p, n, say("game." + p.getRandom().nextInt(2)))));
-            default -> {
+            default -> hasSpecificRoleTopic = false;
+        }
+
+        // Only add "What do you do around here?" when the NPC didn't already get a specific trade topic
+        boolean obviousJob = role == NpcRole.JARL || role == NpcRole.STEWARD || role == NpcRole.HOUSECARL || role == NpcRole.MAGE
+                || npc.getPersistentData().getString(com.skycraft.economy.Merchants.PROFESSION_KEY).equals("skycraft:court_wizard")
+                || !com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty();
+        if (!obviousJob && !hasSpecificRoleTopic && travelKind == null) {
+            out.add(new DialogueOption("society.job", opt("job"), 510,
+                    (p, n) -> Dialogue.open(p, n, jobLine(n, role))));
+        }
+
+        if (role.civilian) {
+            ContextualDialogue.addContextualOptions(player, npc, out);
+            int topicPick = Math.floorMod(npc.getUUID().hashCode(), 3);
+            if (topicPick == 0) {
+                out.add(new DialogueOption("society.region", opt("region"), 530, NpcDialogue::aboutRegion));
+            } else if (topicPick == 1 && role != NpcRole.INNKEEPER
+                    && Relationships.rank(npc, player).ordinal() >= Relationships.Rank.STRANGER.ordinal()) {
+                out.add(new DialogueOption("society.news", opt("news"), 520, NpcDialogue::news));
             }
         }
     }

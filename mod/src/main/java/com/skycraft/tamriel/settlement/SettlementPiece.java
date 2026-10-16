@@ -108,8 +108,10 @@ public class SettlementPiece extends StructurePiece {
         int ax = cornerX(s, o, -m, -m), az = cornerZ(s, o, -m, -m);
         int bx = cornerX(s, o, s.w - 1 + m, s.d - 1 + m), bz = cornerZ(s, o, s.w - 1 + m, s.d - 1 + m);
         int h = Math.max(2, Builders.height(s));
+        boolean noBeard = s.has(Spec.NO_BEARD) || s.kind == com.skycraft.tamriel.settlement.plan.Archetype.CAMP;
         int minY = s.kind == com.skycraft.tamriel.settlement.plan.Archetype.TERRACE ? s.floor - 16 : s.floor + 1;
-        return new BoundingBox(Math.min(ax, bx), minY, Math.min(az, bz), Math.max(ax, bx), s.floor + h, Math.max(az, bz));
+        int slack = noBeard ? 12 : 0;
+        return new BoundingBox(Math.min(ax, bx), minY, Math.min(az, bz), Math.max(ax, bx), s.floor + h + slack, Math.max(az, bz));
     }
 
     /** World position of the building's local origin (front-left corner) so that its footprint is centred on (x, z). */
@@ -153,10 +155,17 @@ public class SettlementPiece extends StructurePiece {
         return spec.has(Spec.FOR_SALE) ? base : base + "#" + index;
     }
 
-    /** The beardifier only shapes terrain around pieces that sit on it (not streets, docks or bridges). */
+    /** The beardifier only shapes terrain around pieces that sit on it (not streets, docks, bridges or outdoor camps/yards). */
     @Override
     public boolean isCloseToChunk(ChunkPos pos, int range) {
-        if (spec.has(Spec.NO_BEARD)) return false;
+        if (spec.has(Spec.NO_BEARD) || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.CAMP
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.SHRINE
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.LUMBER
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.YARD
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.PEN
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.FIELD
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.GARDEN
+                || spec.kind == com.skycraft.tamriel.settlement.plan.Archetype.GRAVEYARD) return false;
         return super.isCloseToChunk(pos, range);
     }
 
@@ -178,7 +187,8 @@ public class SettlementPiece extends StructurePiece {
                     chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, null);
             // boulders and loose stone whose ground the grading removed (they would hang in the air over the town)
             com.skycraft.world.RockSweep.sweep(level, clip.minX(), clip.minZ(), clip.maxX(), clip.maxZ(), 6,
-                    chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, 24, null, null);
+                    chunkBox.minX() - 14, chunkBox.minZ() - 14, chunkBox.maxX() + 14, chunkBox.maxZ() + 14, 24, null,
+                    spec.floor != Spec.UNSET ? pos -> pos.getY() <= spec.floor : null);
             {
                 // a yard, garden, fence line or stall painted after a building can fence its door in: sweep the neighbourhood too
                 BoundingBox wide = new BoundingBox(

@@ -34,14 +34,20 @@ public final class HudNotifications {
                 MESSAGES.add(new Entry(msg, now, 5000));
             }
             case MESSAGE -> {
+                String text = msg.title().getString();
+                MESSAGES.removeIf(e -> e.msg.title().getString().equals(text));
                 MESSAGES.add(new Entry(msg, now, 5000));
                 while (MESSAGES.size() > 5) MESSAGES.remove(0);
             }
             default -> {
-                // Merge consecutive increases of the same skill so grinding doesn't flood the queue.
+                // Merge consecutive increases of the same skill or duplicate banners so spamming doesn't flood the queue.
                 if (msg.kind() == NotifyKind.SKILL_UP) {
                     BANNERS.removeIf(e -> e.msg.kind() == NotifyKind.SKILL_UP && e.msg.value() == msg.value());
+                } else {
+                    String title = msg.title().getString();
+                    BANNERS.removeIf(e -> e.msg.kind() == msg.kind() && e.msg.title().getString().equals(title));
                 }
+                while (BANNERS.size() >= 4) BANNERS.pollFirst();
                 BANNERS.add(new Entry(msg, 0, durationOf(msg.kind())));
             }
         }

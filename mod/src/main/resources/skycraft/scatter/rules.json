@@ -23,10 +23,10 @@
       { "scale": "none", "density": 1.22, "kinds": {"bone_pile": 3, "boulder_field": 1.5, "fallen_log": 1} }
     ],
     "wild": [
-      { "scale": "wild", "density": 2.1, "kinds": {"boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.5, "mushroom_ring": 1.2, "bone_pile": 1.2, "animal_den": 1, "rock_arch": 0.35, "spire": 0.7, "ledge": 1.2, "crystal_outcrop": 0.5, "ore_outcrop": 0.9, "wildflowers": 3, "berry_patch": 1.5} }
+      { "scale": "wild", "density": 2.1, "kinds": {"boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.5, "mushroom_ring": 1.2, "bone_pile": 1.2, "animal_den": 0.12, "rock_arch": 0.35, "spire": 0.7, "ledge": 1.2, "crystal_outcrop": 0.5, "ore_outcrop": 0.9, "wildflowers": 3, "berry_patch": 1.5} }
     ],
     "deep_wild": [
-      { "scale": "remote", "density": 2.52, "kinds": {"boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.8, "mushroom_ring": 1.5, "bone_pile": 1.8, "animal_den": 1.6, "rock_arch": 0.7, "spire": 1.3, "ledge": 1.4, "crystal_outcrop": 0.9, "ore_outcrop": 1.2, "wildflowers": 2.5, "berry_patch": 1.2} }
+      { "scale": "remote", "density": 2.52, "kinds": {"boulder_field": 3, "fallen_log": 3, "hollow_stump": 1.8, "mushroom_ring": 1.5, "bone_pile": 1.8, "animal_den": 0.25, "rock_arch": 0.7, "spire": 1.3, "ledge": 1.4, "crystal_outcrop": 0.9, "ore_outcrop": 1.2, "wildflowers": 2.5, "berry_patch": 1.2} }
     ]
   },
   "scenes": {

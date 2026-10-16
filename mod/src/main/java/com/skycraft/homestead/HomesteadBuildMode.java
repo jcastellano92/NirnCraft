@@ -102,10 +102,7 @@ public final class HomesteadBuildMode {
         HomesteadClaim claim = HomesteadData.get(player.server).getClaim(player.getUUID());
         if (claim == null || !claim.isHorizontallyInside(player.level(), player.blockPosition())) {
             off(player, "message.skycraft.homestead.build_mode.left");
-            return;
         }
-        // a quiet reminder while it is on
-        player.displayClientMessage(Component.translatable("message.skycraft.homestead.build_mode.hud").withStyle(net.minecraft.ChatFormatting.GOLD), true);
     }
 
     @SubscribeEvent

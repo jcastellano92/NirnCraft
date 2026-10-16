@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/coda_flower"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/coda_flower_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/coda_flower"
+      },
+      {
+        "model": "skycraft:block/coda_flower",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/coda_flower",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/coda_flower",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/coda_flower_harvested"
+      },
+      {
+        "model": "skycraft:block/coda_flower_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/coda_flower_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/coda_flower_harvested",
+        "y": 270
+      }
+    ]
   }
 }

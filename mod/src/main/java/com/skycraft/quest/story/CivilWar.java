@@ -97,7 +97,9 @@ public final class CivilWar {
         s.setDirty();
         Component msg = Component.translatable("quest.skycraft.civil_war.taken",
                 Component.translatable("quest.skycraft.civil_war.side." + side), Holds.displayName(id)).withStyle(ChatFormatting.GOLD);
-        server.getPlayerList().broadcastSystemMessage(msg, false);
+        for (net.minecraft.server.level.ServerPlayer sp : server.getPlayerList().getPlayers()) {
+            com.skycraft.core.Notifier.message(sp, msg);
+        }
     }
 
     /** The region of the enemy's next fort for {@code side}, or null when the enemy holds nothing. */

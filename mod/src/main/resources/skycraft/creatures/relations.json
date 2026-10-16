@@ -10,8 +10,17 @@
     "vampire": ["skycraft:vampire"],
     "falmer": ["skycraft:falmer", "skycraft:chaurus", "skycraft:chaurus_hunter"],
     "automaton": ["skycraft:dwarven_spider", "skycraft:dwarven_sphere", "skycraft:dwarven_centurion"],
-    "predator": ["skycraft:wolf", "skycraft:bear", "skycraft:sabre_cat"],
-    "prey": ["skycraft:deer", "skycraft:elk", "minecraft:rabbit", "minecraft:goat", "minecraft:horse", "skycraft:mudcrab"],
+    "predator": [
+      "skycraft:wolf", "skycraft:bear", "skycraft:sabre_cat", "skycraft:senche_tiger",
+      "skycraft:kagouti", "skycraft:alit", "skycraft:nix_hound", "skycraft:durzog",
+      "skycraft:wamasu", "skycraft:swamp_leviathan", "skycraft:giant_scorpion",
+      "skycraft:sand_serpent", "skycraft:hackwing", "skycraft:realm_stalker"
+    ],
+    "prey": [
+      "skycraft:deer", "skycraft:elk", "minecraft:rabbit", "minecraft:goat",
+      "minecraft:sheep", "minecraft:horse", "skycraft:mudcrab", "skycraft:guar",
+      "skycraft:echatere", "skycraft:indrik", "skycraft:horker", "skycraft:realm_grazer"
+    ],
     "hunter": [],
     "legion": [],
     "stormcloak": [],

@@ -592,8 +592,8 @@ public class CorpseEntity extends Entity {
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
         if (locked) {
-            if (!this.level().isClientSide) {
-                player.displayClientMessage(Component.translatable("fire.skycraft.body.nothing"), true);
+            if (player instanceof ServerPlayer sp) {
+                com.skycraft.core.Notifier.message(sp, Component.translatable("fire.skycraft.body.nothing"));
             }
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }

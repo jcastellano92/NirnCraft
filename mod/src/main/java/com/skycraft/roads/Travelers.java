@@ -353,8 +353,8 @@ public final class Travelers {
         int target = road.clamp(idx + dir * 6); // ~12 blocks ahead
         int x = road.xs[target], z = road.zs[target];
         if (!level.isLoaded(new BlockPos(x, mob.getBlockY(), z))) return;
-        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        moveTo(mob, x + 0.5, y, z + 0.5, speed(mob));
+        BlockPos dest = com.skycraft.society.NpcPlacement.safeSurfaceAt(level, x, z);
+        moveTo(mob, dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, speed(mob));
     }
 
     /**
@@ -521,10 +521,14 @@ public final class Travelers {
     private static BlockPos groundAt(ServerLevel level, int x, int z) {
         if (!level.isLoaded(new BlockPos(x, level.getSeaLevel(), z))) return null;
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        BlockPos below = new BlockPos(x, y - 1, z);
+        BlockPos pos = new BlockPos(x, y, z);
+        BlockPos below = pos.below();
         BlockState s = level.getBlockState(below);
         if (!s.getFluidState().isEmpty() || s.is(BlockTags.LEAVES)) return null;
-        return new BlockPos(x, y, z);
+        if (com.skycraft.society.NpcPlacement.hasRoomBelow(level, pos)
+                || com.skycraft.society.NpcPlacement.isFireHazard(level, pos)
+                || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, pos)) return null;
+        return pos;
     }
 
     /** True if the player could plausibly see a mob standing at {@code pos}. */

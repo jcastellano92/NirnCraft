@@ -434,20 +434,21 @@ public final class ContextualDialogue {
     /** Adds a contextual local-life / current-events dialogue option for civilian townsfolk outside ruined Helgen. */
     public static void addContextualOptions(ServerPlayer player, NpcEntity npc, List<DialogueOption> out) {
         if (HelgenFolk.inHelgen(npc) || !npc.role().civilian || npc.isChild() || npc.isPrisoner()) return;
-        out.add(new DialogueOption("society.context",
-                Component.translatable("dialogue.skycraft.society.context"),
-                525,
-                (p, n) -> {
-                    if (n instanceof NpcEntity target) {
-                        Dialogue.open(p, target, buildContextualReflection(p, target));
-                    }
-                }));
         String secret = npc.getPersistentData().getString(SocietyResidents.SECRET_KEY);
         if (!secret.isBlank()) {
             out.add(new DialogueOption("society.secret",
                     Component.translatable("dialogue.skycraft.society.secret"),
                     520,
                     (p, n) -> Dialogue.open(p, n, Component.literal(secret))));
+        } else if (Math.floorMod(npc.getUUID().hashCode(), 3) == 2 || !npc.getPersistentData().getString(SocietyResidents.TALK_KEY).isBlank()) {
+            out.add(new DialogueOption("society.context",
+                    Component.translatable("dialogue.skycraft.society.context"),
+                    525,
+                    (p, n) -> {
+                        if (n instanceof NpcEntity target) {
+                            Dialogue.open(p, target, buildContextualReflection(p, target));
+                        }
+                    }));
         }
         Region region = Cultures.regionAt(npc.level(), npc.blockPosition());
         String hold = region != null ? region.shortId() : Holds.holdAt(npc.level(), npc.blockPosition());

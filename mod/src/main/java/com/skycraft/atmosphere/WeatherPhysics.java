@@ -436,15 +436,20 @@ public final class WeatherPhysics {
         float rainBand = clamp01(Math.max(frontBandMax, regionalBand) + orographicLift * precipTotal * 0.35f);
 
         // 3. Orographic precipitation enhancement on windward slopes & rainshadow suppression on leeward slopes
-        float drySuppression = (1f - 0.52f * leewardDry * (1f - 0.65f * frontEnvMax));
+        float drySuppression = (1f - 0.52f * leewardDry * (1f - 0.65f * frontEnvMax) * (1f - 0.70f * clamp01(precipTotal * 1.4f)));
         float coverage = clamp01((Math.max(cu * 0.78f, st) + marineLayer + wetlandMist + orographicCloud + 0.25f * rainBand) * drySuppression);
+        if (precipTotal > 0.08f) {
+            // Active rain, snow, blizzards, or storms always sustain a thick overcast/cumulonimbus canopy overhead
+            float overcastFloor = clamp01(0.76f + 0.22f * precipTotal);
+            coverage = Math.max(coverage, overcastFloor);
+        }
         if (profile == WeatherProfile.ARID || s.dunes > 0.30f) {
-            if (sand < 0.25f && frontEnvMax < 0.2f) {
+            if (sand < 0.25f && frontEnvMax < 0.2f && precipTotal < 0.1f) {
                 coverage *= (1f - 0.45f * Math.max(0.4f, s.dunes));
             }
         }
 
-        float stormTower = clamp01(Math.max(cb, orographicTower) + 0.35f * rainBand + 0.25f * dark + s.heat * 0.30f);
+        float stormTower = clamp01(Math.max(cb, orographicTower) + 0.35f * rainBand + 0.25f * dark + 0.22f * snow + s.heat * 0.30f);
 
         // 4. Sub-cloud precipitation curtain density: concentrated inside rain bands, storm cores, and windward mountain slopes
         float rawCurtain = 0f;

@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/deathbell"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/deathbell_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/deathbell"
+      },
+      {
+        "model": "skycraft:block/deathbell",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/deathbell",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/deathbell",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/deathbell_harvested"
+      },
+      {
+        "model": "skycraft:block/deathbell_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/deathbell_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/deathbell_harvested",
+        "y": 270
+      }
+    ]
   }
 }

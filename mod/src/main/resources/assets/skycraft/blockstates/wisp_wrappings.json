@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/wisp_wrappings"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/wisp_wrappings_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/wisp_wrappings"
+      },
+      {
+        "model": "skycraft:block/wisp_wrappings",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/wisp_wrappings",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/wisp_wrappings",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/wisp_wrappings_harvested"
+      },
+      {
+        "model": "skycraft:block/wisp_wrappings_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/wisp_wrappings_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/wisp_wrappings_harvested",
+        "y": 270
+      }
+    ]
   }
 }

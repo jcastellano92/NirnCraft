@@ -82,6 +82,19 @@ public class IngredientPlantBlock extends FlowerBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
+        if (state.isAir()
+                || state.is(Blocks.SNOW)
+                || state.is(BlockTags.LEAVES)
+                || state.is(BlockTags.LOGS)
+                || state.getBlock() instanceof net.minecraft.world.level.block.SnowLayerBlock
+                || state.getBlock() instanceof net.minecraft.world.level.block.LeavesBlock
+                || state.getBlock() instanceof net.minecraft.world.level.block.BushBlock
+                || state.getBlock() instanceof net.minecraft.world.level.block.SlabBlock
+                || state.getBlock() instanceof net.minecraft.world.level.block.StairBlock
+                || state.getBlock() instanceof net.minecraft.world.level.block.FenceBlock
+                || state.getBlock() instanceof net.minecraft.world.level.block.WallBlock) {
+            return false;
+        }
         return super.mayPlaceOn(state, level, pos)
                 || state.is(BlockTags.DIRT)
                 || state.is(BlockTags.SAND)
@@ -106,7 +119,6 @@ public class IngredientPlantBlock extends FlowerBlock {
                 || state.is(Blocks.SANDSTONE)
                 || state.is(Blocks.RED_SANDSTONE)
                 || state.is(BlockTags.TERRACOTTA)
-                || state.is(BlockTags.LOGS)
                 || state.is(BiomeBlocks.ASH_BLOCK.get())
                 || state.is(BiomeBlocks.VOLCANIC_ROCK.get())
                 || state.is(BiomeBlocks.CRACKED_VOLCANIC_ROCK.get())
@@ -122,14 +134,19 @@ public class IngredientPlantBlock extends FlowerBlock {
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos below = pos.below();
-        if (this.mayPlaceOn(level.getBlockState(below), level, below)) {
+        BlockState belowState = level.getBlockState(below);
+        if (this.mayPlaceOn(belowState, level, below)
+                && (belowState.isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
+                        || belowState.is(Blocks.FARMLAND)
+                        || belowState.is(Blocks.MUD)
+                        || belowState.is(Blocks.POWDER_SNOW))) {
             return true;
         }
         if (ceilingAllowed) {
             BlockPos above = pos.above();
             BlockState aboveState = level.getBlockState(above);
-            return aboveState.is(BlockTags.LOGS) || aboveState.is(BlockTags.LEAVES)
-                    || aboveState.is(BlockTags.BASE_STONE_OVERWORLD) || this.mayPlaceOn(aboveState, level, above);
+            return (aboveState.is(BlockTags.BASE_STONE_OVERWORLD) || aboveState.is(BlockTags.DIRT))
+                    && aboveState.isFaceSturdy(level, above, net.minecraft.core.Direction.DOWN);
         }
         return false;
     }

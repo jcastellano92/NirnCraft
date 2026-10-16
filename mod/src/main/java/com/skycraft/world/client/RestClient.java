@@ -80,21 +80,23 @@ public final class RestClient {
         cancelSent = false;
         if (phase == 0) {
             restoreCamera();
+            if (mc.screen instanceof RestScreen rs) {
+                rs.closeFromServer();
+            }
             return;
         }
         hint = null;
         if (mc.player == null) return;
         if (mc.screen instanceof InBedChatScreen) mc.setScreen(null);
-        if (!cameraTaken) {
-            savedCamera = mc.options.getCameraType();
-            mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-            cameraTaken = true;
-            mc.player.setXRot(mode == RestLogic.WAIT ? 20f : 35f);
-            mc.player.xRotO = mc.player.getXRot();
-        }
         if (!was) {
             prevMove = movementDown(mc);
-            if (mode == RestLogic.WAIT && !mc.player.isPassenger()) mc.player.setXRot(20f);
+        }
+        if (mode != RestLogic.JAIL) {
+            if (mc.screen instanceof RestScreen rs) {
+                rs.onServerState();
+            } else {
+                mc.setScreen(new RestScreen(mode == RestLogic.SLEEP));
+            }
         }
     }
 
@@ -118,11 +120,63 @@ public final class RestClient {
         restoreCamera();
     }
 
+    // ------------------------------------------------------------------ state accessors for RestScreen
+
+    public static int phase() {
+        return phase;
+    }
+
+    public static int mode() {
+        return mode;
+    }
+
+    public static int flags() {
+        return flags;
+    }
+
+    public static int hours() {
+        return hours;
+    }
+
+    public static int progress() {
+        return progress;
+    }
+
+    public static int resting() {
+        return resting;
+    }
+
+    public static int required() {
+        return required;
+    }
+
+    public static String initiator() {
+        return initiator;
+    }
+
+    public static boolean canStart() {
+        return phase == 1 && (flags & WorldPackets.RestState.F_CAN_START) != 0;
+    }
+
+    public static boolean isSkipDisabled() {
+        return (flags & WorldPackets.RestState.F_SKIP_OFF) != 0;
+    }
+
+    public static boolean isInitiator() {
+        return (flags & WorldPackets.RestState.F_INITIATOR) != 0;
+    }
+
+    public static void start(int chosenHours) {
+        if (!canStart()) return;
+        chosen = Mth.clamp(chosenHours, 1, 24);
+        SkyNetwork.sendToServer(new WorldPackets.Rest(WorldPackets.Rest.START, mode, chosen));
+    }
+
     // ------------------------------------------------------------------ keys
 
     /**
-     * The wait key waits (sits down); it never sleeps. Pressing it again stands up (and cancels a running skip).
-     * Sleeping is using a bed you may use (a rented room, your bedroll, an unowned bed): right-click it.
+     * The wait key opens the Skyrim Wait menu. Pressing it again cancels.
+     * Sleeping is triggered by right-clicking a bed you may use.
      */
     public static void onWaitKey(Minecraft mc) {
         if (mc.player == null || mc.screen != null) return;
@@ -143,13 +197,8 @@ public final class RestClient {
         SkyNetwork.sendToServer(new WorldPackets.Rest(WorldPackets.Rest.CANCEL, 0, 0));
     }
 
-    private static boolean canStart() {
-        return phase == 1 && (flags & WorldPackets.RestState.F_CAN_START) != 0;
-    }
-
     private static void start() {
-        if (!canStart()) return;
-        SkyNetwork.sendToServer(new WorldPackets.Rest(WorldPackets.Rest.START, mode, chosen));
+        start(chosen);
     }
 
     private static boolean movementDown(Minecraft mc) {
@@ -184,7 +233,7 @@ public final class RestClient {
         event.setCanceled(true);
     }
 
-    /** Escape while resting stands up instead of opening the pause menu (unless the window lost focus). */
+    /** Escape while resting without RestScreen open stands up instead of opening the pause menu. */
     @SubscribeEvent
     public static void onScreen(ScreenEvent.Opening event) {
         Minecraft mc = Minecraft.getInstance();
@@ -273,6 +322,7 @@ public final class RestClient {
             }
             return;
         }
+        if (mc.screen instanceof RestScreen) return;
         long dayTime = mc.level.getDayTime();
         boolean jail = mode == RestLogic.JAIL;
         if (phase == 2) {

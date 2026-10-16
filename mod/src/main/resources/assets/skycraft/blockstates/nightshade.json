@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/nightshade"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/nightshade_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/nightshade"
+      },
+      {
+        "model": "skycraft:block/nightshade",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/nightshade",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/nightshade",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/nightshade_harvested"
+      },
+      {
+        "model": "skycraft:block/nightshade_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/nightshade_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/nightshade_harvested",
+        "y": 270
+      }
+    ]
   }
 }

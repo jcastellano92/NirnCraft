@@ -1,10 +1,38 @@
 {
   "variants": {
-    "harvested=false": {
-      "model": "skycraft:block/rot_scale_fungus"
-    },
-    "harvested=true": {
-      "model": "skycraft:block/rot_scale_fungus_harvested"
-    }
+    "harvested=false": [
+      {
+        "model": "skycraft:block/rot_scale_fungus"
+      },
+      {
+        "model": "skycraft:block/rot_scale_fungus",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/rot_scale_fungus",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/rot_scale_fungus",
+        "y": 270
+      }
+    ],
+    "harvested=true": [
+      {
+        "model": "skycraft:block/rot_scale_fungus_harvested"
+      },
+      {
+        "model": "skycraft:block/rot_scale_fungus_harvested",
+        "y": 90
+      },
+      {
+        "model": "skycraft:block/rot_scale_fungus_harvested",
+        "y": 180
+      },
+      {
+        "model": "skycraft:block/rot_scale_fungus_harvested",
+        "y": 270
+      }
+    ]
   }
 }

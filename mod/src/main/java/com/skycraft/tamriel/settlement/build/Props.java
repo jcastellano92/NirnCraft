@@ -3,6 +3,7 @@ package com.skycraft.tamriel.settlement.build;
 import com.skycraft.Skycraft;
 import com.skycraft.tamriel.settlement.kit.Palette;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
@@ -71,16 +72,119 @@ public final class Props {
         return new ResourceLocation(Skycraft.MODID, "chests/village/" + name);
     }
 
-    // ------------------------------------------------------------------ furniture
-
-    /** A table top at (x, y, z). */
-    public static void table(Canvas c, Palette p, int x, int y, int z) {
-        c.set(x, y, z, B.slab(p.slab, true));
+    private static String palName(Palette p) {
+        return (p != null && p.name != null && !p.name.isEmpty()) ? p.name : "nord";
     }
 
-    /** A chair at (x, y, z) whose seat faces away from {@code back}. */
+    /** A custom 3D cultural table at (x, y, z). */
+    public static void table(Canvas c, Palette p, int x, int y, int z) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.TABLE, palName(p), Direction.SOUTH);
+    }
+
+    /** A custom 3D cultural banquet table segment at (x, y, z). */
+    public static void banquetTable(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.BANQUET_TABLE, palName(p), facing);
+    }
+
+    /** A custom 3D cultural nightstand at (x, y, z). */
+    public static void nightstand(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.NIGHTSTAND, palName(p), facing);
+    }
+
+    /** A custom 3D cultural shop/inn counter at (x, y, z). */
+    public static void counter(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.COUNTER, palName(p), facing);
+    }
+
+    /** A custom 3D cultural writing desk at (x, y, z) with slanted lectern, ledger, inkwell, and quill. */
+    public static void desk(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.DESK, palName(p), facing);
+    }
+
+    /** A custom 3D cultural chair at (x, y, z) whose seat faces away from {@code back}. */
     public static void chair(Canvas c, Palette p, int x, int y, int z, Direction back) {
-        c.set(x, y, z, B.stair(p.stairs, back, false));
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.CHAIR, palName(p), back.getOpposite());
+    }
+
+    /** A custom 3D cultural stool at (x, y, z). */
+    public static void stool(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.STOOL, palName(p), facing);
+    }
+
+    /** A custom 3D cultural bench at (x, y, z) facing {@code facing}. */
+    public static void bench(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.BENCH, palName(p), facing);
+    }
+
+    /** A custom 3D cultural throne at (x, y, z) facing {@code facing}. */
+    public static void throne(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.THRONE, palName(p), facing);
+    }
+
+    /** A custom 3D cultural wardrobe container at (x, y, z) facing {@code facing}. */
+    public static void wardrobe(Canvas c, Palette p, int x, int y, int z, Direction facing, String loot) {
+        c.furnitureContainer(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.WARDROBE,
+                palName(p), facing, loot == null ? null : loot(loot));
+    }
+
+    /** A custom 3D cultural dresser container at (x, y, z) facing {@code facing}. */
+    public static void dresser(Canvas c, Palette p, int x, int y, int z, Direction facing, String loot) {
+        c.furnitureContainer(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.DRESSER,
+                palName(p), facing, loot == null ? null : loot(loot));
+    }
+
+    /** A custom 3D cultural cabinet container at (x, y, z) facing {@code facing}. */
+    public static void cabinet(Canvas c, Palette p, int x, int y, int z, Direction facing, String loot) {
+        c.furnitureContainer(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.CABINET,
+                palName(p), facing, loot == null ? null : loot(loot));
+    }
+
+    /** A custom 3D cultural weapon rack with visible steel swords & shield at (x, y, z) facing {@code facing}. */
+    public static void weaponRack(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.WEAPON_RACK, palName(p), facing);
+    }
+
+    /** A custom 3D cultural armor stand at (x, y, z) facing {@code facing}. */
+    public static void armorStand(Canvas c, Palette p, int x, int y, int z, Direction facing) {
+        c.furniture(x, y, z, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind.CLUTTER_ARMOR_STAND, palName(p), facing);
+    }
+
+    /** A custom 3D tabletop clutter piece at (x, y, z) facing {@code facing}. */
+    public static void clutter(Canvas c, Palette p, int x, int y, int z,
+                               com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind, Direction facing) {
+        c.furniture(x, y, z, kind, palName(p), facing);
+    }
+
+    /** A custom 3D tabletop clutter piece at (x, y, z) facing {@code facing}. */
+    public static void clutter(Canvas c, Palette p, int x, int y, int z,
+                               Direction facing, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind) {
+        c.furniture(x, y, z, kind, palName(p), facing);
+    }
+
+    /** A custom 3D wall mount/clutter piece at (x, y, z) facing outward {@code facing}. */
+    public static void wallClutter(Canvas c, Palette p, int x, int y, int z,
+                                   com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind, Direction facing) {
+        c.furniture(x, y, z, kind, palName(p), facing);
+    }
+
+    /** A custom 3D wall mount/clutter piece at (x, y, z) facing outward {@code facing}. */
+    public static void wallClutter(Canvas c, Palette p, int x, int y, int z,
+                                   Direction facing, com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind) {
+        c.furniture(x, y, z, kind, palName(p), facing);
+    }
+
+    /** A chiseled bookshelf pre-populated with visible 3D leather-bound tomes facing {@code facing}. */
+    public static void bookshelf(Canvas c, int x, int y, int z, Direction facing) {
+        c.set(x, y, z, B.face(B.s(Blocks.CHISELED_BOOKSHELF), facing));
+    }
+
+    /** Places either a chiseled bookshelf with 3D visible books or a full bookshelf at (x, y, z) facing {@code facing}. */
+    public static void bookshelf(Canvas c, int x, int y, int z, Direction facing, boolean chiseled) {
+        if (chiseled) {
+            c.set(x, y, z, B.face(B.s(Blocks.CHISELED_BOOKSHELF), facing));
+        } else {
+            c.set(x, y, z, B.s(Blocks.BOOKSHELF));
+        }
     }
 
     public static void candles(Canvas c, int x, int y, int z, int count) {
@@ -139,6 +243,10 @@ public final class Props {
         c.set(x + side.getStepX(), y + 2, z + side.getStepZ(), B.stair(p.trim, intoRoom.getOpposite(), true));
         c.set(x - side.getStepX(), y + 2, z - side.getStepZ(), B.stair(p.trim, intoRoom.getOpposite(), true));
         c.set(x, y + 2, z, p.foundation);
+        c.keepClear(x, y, y + 2, z);
+        c.keepClear(x + side.getStepX(), y, y + 2, z + side.getStepZ());
+        c.keepClear(x - side.getStepX(), y, y + 2, z - side.getStepZ());
+        c.keepClear(x + intoRoom.getStepX(), y, y + 1, z + intoRoom.getStepZ());
     }
 
     /** Sunken Nordic fire pit with a cooking pot (the floor block is replaced by the fire). */
@@ -181,5 +289,45 @@ public final class Props {
     /** A rack of three pelts / carpets on the wall. */
     public static void pelts(Canvas c, Palette p, int x, int y, int z) {
         c.setIfOpen(x, y, z, p.carpet2);
+    }
+
+    /**
+     * 3D hanging shop sign: places a wall hanging sign block at {@code (x, y, z)} tagged with its
+     * trade archetype and regional palette so {@code ShopSignRenderer} renders a bespoke 3D bracket,
+     * regional plaque, and sculpted double-sided trade symbol.
+     */
+    public static void shopSign(Canvas c, Palette p, String useId, int x, int y, int z, Direction facing, Component title, Component subtitle) {
+        ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(p.sign.getBlock());
+        BlockState hanging = id == null ? B.s(Blocks.SPRUCE_WALL_HANGING_SIGN)
+                : B.id(id.toString().replace("_wall_sign", "_wall_hanging_sign"), Blocks.SPRUCE_WALL_HANGING_SIGN);
+        Component emblem = Component.literal(tradeEmblem(useId));
+        Component line2 = subtitle == null || subtitle.getString().equals(title.getString()) ? Component.empty() : subtitle;
+        String safeUse = useId == null || useId.isEmpty() ? "general" : useId;
+        String safePal = p == null || p.name == null || p.name.isEmpty() ? "nord" : p.name;
+        Component meta = Component.literal("skycraft:" + safeUse + ":" + safePal);
+        c.sign(x, y, z, hanging, facing, emblem, title, line2, meta);
+    }
+
+    private static String tradeEmblem(String useId) {
+        if (useId == null) return "\u2726";
+        return switch (useId) {
+            case "smithy" -> "\u2692 \u2694 \u2692";
+            case "apothecary", "alchemist" -> "\u2697 \u2740 \u2697";
+            case "inn", "mead_hall" -> "\uD83C\uDF7A \u2668 \uD83C\uDF7A";
+            case "general", "general_store", "store", "market_shop" -> "\u2696 \u2726 \u2696";
+            case "fletcher" -> "\uD83C\uDFF9 \u27B3 \uD83C\uDFF9";
+            case "mage", "enchanter", "bookseller", "mage_tower" -> "\u2721 \uD83D\uDCD6 \u2721";
+            case "jeweler", "jeweller" -> "\u25C6 \uD83D\uDC8E \u25C6";
+            case "bakery", "mill" -> "\u2740 \uD83E\uDD56 \u2740";
+            case "tailor", "tannery" -> "\u2702 \uD83E\uDDF5 \u2702";
+            case "butcher" -> "\uD83E\uDD69 \u2694 \uD83E\uDD69";
+            case "fishery" -> "\uD83D\uDC1F \u2726 \uD83D\uDC1F";
+            case "stables" -> "\u2658 \u2726 \u2658";
+            case "temple", "hall_of_dead" -> "\u2727 \u2600 \u2727";
+            case "keep", "palace", "longhouse", "hall" -> "\u265B \u2694 \u265B";
+            case "barracks", "guardhouse", "jail" -> "\u26E8 \u2694 \u26E8";
+            case "guild_hall", "guild" -> "\u2694 \u2726 \u2694";
+            default -> "\u2726";
+        };
     }
 }
