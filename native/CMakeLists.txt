@@ -124,7 +124,7 @@ add_custom_command(
   DEPENDS "${GEN}/aether_height.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
 add_custom_command(
   OUTPUT "${GEN}/aether_height_cpu.cpp"
-  COMMAND "${SLANGC}" "${HEIGHT_SRC}" -target cpp -entry heightMain -stage compute -entry divTestMain -stage compute -O3 -fp-mode precise
+  COMMAND "${SLANGC}" "${HEIGHT_SRC}" -target cpp -entry heightMain -stage compute -O3 -fp-mode precise
           -o "${GEN}/aether_height_cpu.cpp"
   DEPENDS "${HEIGHT_SRC}" COMMENT "slangc aether_height -> C++ (CPU reference)")
 target_sources(aether_core PRIVATE src/height_engine.cpp "${GEN}/aether_height_cpu.cpp" "${GEN}/aether_height_spv.h")

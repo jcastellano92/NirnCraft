@@ -95,15 +95,18 @@ final class AetherHeightGpu implements AutoCloseable {
         Field layersF = field(NoiseStack.class, "layers");
         Field perms = field(GradientNoise.class, "perms"), ox = field(GradientNoise.class, "offsetX"),
                 oy = field(GradientNoise.class, "offsetY"), oz = field(GradientNoise.class, "offsetZ");
+        // NoiseStack.Layer(noise, frequency, amplitude) is a protected record: its fields by reflection too
+        Class<?> layerC = Class.forName(NoiseStack.class.getName() + "$Layer");
+        Field lNoise = field(layerC, "noise"), lFreq = field(layerC, "frequency"), lAmp = field(layerC, "amplitude");
         int total = 0;
-        NoiseStack.Layer[][] all = new NoiseStack.Layer[4][];
+        Object[][] all = new Object[4][];
         for (int n = 0; n < 4; n++) {
             Noise noise = noises[n].noise();
             // NoiseStack.get and NoiseStack$Perlin.get are the same sum; any other subclass is not this kernel
             if (noise == null || (noise.getClass() != NoiseStack.class
                     && !noise.getClass().getName().equals(NoiseStack.class.getName() + "$Perlin"))) return null;
-            all[n] = (NoiseStack.Layer[]) layersF.get(noise);
-            for (NoiseStack.Layer l : all[n]) if (l.noise().getClass() != PerlinNoise.class) return null;
+            all[n] = (Object[]) layersF.get(noise);
+            for (Object l : all[n]) if (lNoise.get(l).getClass() != PerlinNoise.class) return null;
             total += all[n].length;
         }
         int lw = AetherNative.HEIGHT_LAYER_WORDS;
@@ -112,14 +115,15 @@ final class AetherHeightGpu implements AutoCloseable {
         for (int n = 0; n < 4; n++) {
             t[n * 2] = first;
             t[n * 2 + 1] = all[n].length;
-            for (NoiseStack.Layer l : all[n]) {
+            for (Object l : all[n]) {
                 int w = 8 + first * lw;
-                putDouble(t, w, l.frequency());
-                putDouble(t, w + 2, ox.getDouble(l.noise()));
-                putDouble(t, w + 4, oy.getDouble(l.noise()));
-                putDouble(t, w + 6, oz.getDouble(l.noise()));
-                t[w + 8] = Float.floatToRawIntBits(l.amplitude());
-                byte[] p = (byte[]) perms.get(l.noise());
+                Object perlin = lNoise.get(l);
+                putDouble(t, w, lFreq.getDouble(l));
+                putDouble(t, w + 2, ox.getDouble(perlin));
+                putDouble(t, w + 4, oy.getDouble(perlin));
+                putDouble(t, w + 6, oz.getDouble(perlin));
+                t[w + 8] = Float.floatToRawIntBits(lAmp.getFloat(l));
+                byte[] p = (byte[]) perms.get(perlin);
                 if (p.length != 256) return null;
                 for (int i = 0; i < 256; i++) t[w + 12 + (i >> 2)] |= (p[i] & 255) << ((i & 3) * 8);
                 first++;

@@ -1,11 +1,12 @@
-// Exact terrain height batches (aether_height_*): shaders/aether_height.slang on its own Vulkan compute device, or the
-// same kernel compiled to C++. Self-contained (no AetherContext): the tile server and the client's column workers
-// call it from their own threads.
+// Exact seeded-noise batches for the terrain height (aether_height_*): shaders/aether_height.slang on its own Vulkan
+// compute device, or the same kernel compiled to C++. Self-contained (no AetherContext): the client's column
+// workers and the tile server call it from their own threads; calls on one handle serialise.
 #include <vulkan/vulkan.h>
 
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -32,22 +33,48 @@ struct CpuBuf {
     T* data;
     size_t count;
 };
-// Must list the globals of aether_height.slang in declaration order.
+struct HeightParams {
+    int32_t x0, z0, step, width, count;
+};
+// Must list the globals of aether_height.slang in declaration order (a push-constant block is a pointer there).
 struct HeightGlobals {
-    CpuBuf<const int32_t> params;
+    const HeightParams* params;
     CpuBuf<const uint32_t> noiseTab;
-    CpuBuf<const uint32_t> columns;
-    CpuBuf<uint32_t> outBits;
+    CpuBuf<const uint32_t> slots;
+    CpuBuf<uint32_t> outVals;
     CpuBuf<uint32_t> outFlags;
-    CpuBuf<double> divTest;  // divTestMain only
 };
 
-constexpr uint32_t GROUP = 64;            // numthreads of heightMain
-constexpr uint32_t CHUNK = 16384;         // most columns per submission (buffer size)
-constexpr uint32_t COLUMN_BYTES = AETHER_HEIGHT_COLUMN_WORDS * 4;
+constexpr uint32_t GROUP = 64;     // numthreads of heightMain
+constexpr uint32_t SLOTS = AETHER_HEIGHT_SLOTS;
+constexpr uint32_t CHUNK = 65536;  // most columns per submission (buffer size)
 
 double msSince(std::chrono::steady_clock::time_point t0) {
     return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+}
+
+// The host's half of the exactness argument (aether_height.slang): layer frequencies and offsets zero or in
+// [2^-60, 2^60], amplitudes zero or in [2^-60, 2^60], permutations bytes; the header's layers inside the table.
+bool tableOk(const uint32_t* t, uint32_t words, std::string& err) {
+    auto inRange = [](double v) { return v == 0.0 || (std::fabs(v) >= 0x1p-60 && std::fabs(v) <= 0x1p60); };
+    uint32_t layers = 0;
+    for (uint32_t n = 0; n < 4; n++) {
+        uint64_t end = uint64_t(t[n * 2]) + t[n * 2 + 1];
+        layers = std::max<uint32_t>(layers, uint32_t(std::min<uint64_t>(end, 1u << 20)));
+        if (8ull + end * AETHER_HEIGHT_LAYER_WORDS > words) return err = "noise table: layers beyond the table", false;
+    }
+    for (uint32_t l = 0; l < layers; l++) {
+        const uint32_t* w = t + 8 + size_t(l) * AETHER_HEIGHT_LAYER_WORDS;
+        for (int i = 0; i < 4; i++) {
+            double d;
+            std::memcpy(&d, w + i * 2, 8);
+            if (!inRange(d) || (i > 0 && d < 0.0)) return err = "noise table: frequency/offset out of the proven range", false;
+        }
+        float a;
+        std::memcpy(&a, w + 8, 4);
+        if (!inRange(double(a))) return err = "noise table: amplitude out of the proven range", false;
+    }
+    return true;
 }
 
 class Engine {
@@ -55,7 +82,7 @@ public:
     virtual ~Engine() = default;
     virtual const char* device() const = 0;
     virtual bool setNoise(const uint32_t* t, uint32_t words, std::string& err) = 0;
-    virtual bool batch(const int32_t params[5], const uint32_t* cols, double* heights, uint32_t* flags,
+    virtual bool batch(const HeightParams& p, const uint32_t* slots, float* values, uint32_t* flags,
                        AetherHeightTimes& times, std::string& err) = 0;
 };
 
@@ -66,15 +93,16 @@ public:
         noise_.assign(t, t + words);
         return true;
     }
-    bool batch(const int32_t params[5], const uint32_t* cols, double* heights, uint32_t* flags, AetherHeightTimes& times,
+    bool batch(const HeightParams& p, const uint32_t* slots, float* values, uint32_t* flags, AetherHeightTimes& times,
                std::string&) override {
         auto t0 = std::chrono::steady_clock::now();
-        uint32_t count = uint32_t(params[4]);
-        std::vector<uint32_t> bits(size_t(count) * 2);
-        HeightGlobals g{{params, 5}, {noise_.data(), noise_.size()}, {cols, size_t(count) * AETHER_HEIGHT_COLUMN_WORDS},
-                        {bits.data(), bits.size()}, {flags, count}, {nullptr, 0}};
-        uint32_t groups = (count + GROUP - 1) / GROUP;
+        uint32_t count = uint32_t(p.count);
+        std::memset(flags, 0, size_t(count) * 4);
+        HeightGlobals g{&p, {noise_.data(), noise_.size()}, {slots, count},
+                        {reinterpret_cast<uint32_t*>(values), size_t(count) * SLOTS}, {flags, count}};
+        uint32_t groups = (count * SLOTS + GROUP - 1) / GROUP;
         std::atomic<uint32_t> next{0};
+        // threads of one column write the same flag word with the same value: harmless on x64
         auto worker = [&] {
             for (;;) {
                 uint32_t g0 = next.fetch_add(16);
@@ -88,7 +116,6 @@ public:
         for (unsigned i = 0; i + 1 < threads; i++) pool.emplace_back(worker);
         worker();
         for (auto& t : pool) t.join();
-        std::memcpy(heights, bits.data(), size_t(count) * 8);
         times.kernelMs = msSince(t0);
         return true;
     }
@@ -109,7 +136,7 @@ public:
     ~VulkanEngine() override {
         if (dev_) {
             vkDeviceWaitIdle(dev_);
-            for (Buf* b : {&params_, &noise_, &staging_, &columns_, &outDev_, &readback_}) release(*b);
+            for (Buf* b : {&noise_, &upload_, &slots_, &outDev_, &readback_}) release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
@@ -138,6 +165,7 @@ public:
         vkEnumeratePhysicalDevices(inst_, &n, devs.data());
         int best = -1, bestScore = -1;
         std::string why;
+        const char* want = std::getenv("AETHER_HEIGHT_DEVICE");  // <name part>: that device (parity on every GPU)
         for (uint32_t i = 0; i < n; i++) {
             std::string reason;
             if (!usable(devs[i], reason)) {
@@ -148,15 +176,13 @@ public:
             vkGetPhysicalDeviceProperties(devs[i], &p);
             int score = p.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? 3
                       : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ? 2 : 1;
-            // AETHER_HEIGHT_DEVICE=<name part>: pick that device (parity runs on every GPU of a machine)
-            const char* want = std::getenv("AETHER_HEIGHT_DEVICE");
             if (want && *want && std::strstr(p.deviceName, want)) score += 10;
             if (score > bestScore) {
                 bestScore = score;
                 best = int(i);
             }
         }
-        if (best < 0) return fail(err, "no Vulkan 1.2 device with the exact-height requirements: " + why);
+        if (best < 0) return fail(err, "no Vulkan 1.2 device with the exact-noise requirements: " + why);
         phys_ = devs[size_t(best)];
         VkPhysicalDeviceProperties p;
         vkGetPhysicalDeviceProperties(phys_, &p);
@@ -167,7 +193,7 @@ public:
         std::vector<VkQueueFamilyProperties> qf(qn);
         vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, qf.data());
         family_ = UINT32_MAX;
-        // prefer a compute-only family (async compute), so the batches never queue behind a game's graphics work
+        // prefer a compute-only family (async compute): the batches do not queue behind the game's graphics work
         for (int pass = 0; pass < 2 && family_ == UINT32_MAX; pass++)
             for (uint32_t i = 0; i < qn; i++)
                 if ((qf[i].queueFlags & VK_QUEUE_COMPUTE_BIT) && (pass == 1 || !(qf[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))) {
@@ -194,15 +220,18 @@ public:
         smci.codeSize = aether_height_spv_size;
         smci.pCode = reinterpret_cast<const uint32_t*>(aether_height_spv);
         if (vkCreateShaderModule(dev_, &smci, nullptr, &module_) != VK_SUCCESS) return fail(err, "shader module");
-        VkDescriptorSetLayoutBinding b[5];
-        for (uint32_t i = 0; i < 5; i++) b[i] = {i, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, VK_SHADER_STAGE_COMPUTE_BIT, nullptr};
+        VkDescriptorSetLayoutBinding b[4];
+        for (uint32_t i = 0; i < 4; i++) b[i] = {i, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, VK_SHADER_STAGE_COMPUTE_BIT, nullptr};
         VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        dl.bindingCount = 5;
+        dl.bindingCount = 4;
         dl.pBindings = b;
         if (vkCreateDescriptorSetLayout(dev_, &dl, nullptr, &setLayout_) != VK_SUCCESS) return fail(err, "set layout");
+        VkPushConstantRange pr{VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(HeightParams)};
         VkPipelineLayoutCreateInfo pl{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
         pl.setLayoutCount = 1;
         pl.pSetLayouts = &setLayout_;
+        pl.pushConstantRangeCount = 1;
+        pl.pPushConstantRanges = &pr;
         if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout_) != VK_SUCCESS) return fail(err, "pipeline layout");
         VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
         cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
@@ -211,7 +240,7 @@ public:
         cp.stage.pName = "main";
         cp.layout = layout_;
         if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe_) != VK_SUCCESS) return fail(err, "pipeline");
-        VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5};
+        VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = 1;
         dp.poolSizeCount = 1;
@@ -239,90 +268,90 @@ public:
             qp.queryCount = 4;
             if (vkCreateQueryPool(dev_, &qp, nullptr, &queries_) != VK_SUCCESS) timestamps_ = false;
         }
+        // device buffers for one full chunk; the upload buffer carries the noise table and the slot words
+        if (!ensure(slots_, size_t(CHUNK) * 4, false, err)) return false;
+        if (!ensure(outDev_, size_t(CHUNK) * (SLOTS + 1) * 4, false, err)) return false;
+        if (!ensure(readback_, size_t(CHUNK) * (SLOTS + 1) * 4, true, err, true)) return false;
         uint32_t empty[8] = {};
         return setNoise(empty, 8, err);
     }
 
     bool setNoise(const uint32_t* t, uint32_t words, std::string& err) override {
-        if (!ensure(noise_, size_t(words) * 4, true, err)) return false;
-        std::memcpy(noise_.map, t, size_t(words) * 4);
-        noiseWords_ = words;
-        dirty_ = true;
+        size_t bytes = size_t(words) * 4;
+        if (noise_.size < bytes) {
+            vkDeviceWaitIdle(dev_);
+            release(noise_);
+            if (!ensure(noise_, bytes, false, err)) return false;
+        }
+        if (!ensure(upload_, std::max(bytes, size_t(CHUNK) * 4), true, err)) return false;
+        std::memcpy(upload_.map, t, bytes);
+        begin();
+        VkBufferCopy c{0, 0, bytes};
+        vkCmdCopyBuffer(cmd_, upload_.buf, noise_.buf, 1, &c);
+        barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        if (!submitWait(err)) return false;
+        noiseBytes_ = bytes;
+        writeSet();
         return true;
     }
 
-    bool batch(const int32_t params[5], const uint32_t* cols, double* heights, uint32_t* flags, AetherHeightTimes& times,
+    bool batch(const HeightParams& p, const uint32_t* slots, float* values, uint32_t* flags, AetherHeightTimes& times,
                std::string& err) override {
-        uint32_t count = uint32_t(params[4]);
-        // every chunk shares the buffers: the chunk's columns at offset 0
-        if (!ensure(params_, 64, true, err)) return false;
-        if (!ensure(staging_, size_t(CHUNK) * COLUMN_BYTES, true, err)) return false;
-        if (!ensure(columns_, size_t(CHUNK) * COLUMN_BYTES, false, err)) return false;
-        if (!ensure(outDev_, size_t(CHUNK) * 12, false, err)) return false;
-        if (!ensure(readback_, size_t(CHUNK) * 12, true, err, true)) return false;
-        if (dirty_) writeSet();
-        int32_t width = params[3];
+        uint32_t count = uint32_t(p.count), width = uint32_t(p.width);
         for (uint32_t c0 = 0, n = 0; c0 < count; c0 += n) {
-            // whole rows, sized so one submission stays a few milliseconds on this device (slow FP64 parts get
-            // small chunks: no long dispatch, no watchdog risk)
-            uint32_t rows = std::max(1u, std::min(chunkCols_, CHUNK) / uint32_t(width));
-            n = std::min(rows * uint32_t(width), count - c0);
-            // chunk origin: column c0 of the batch (rows of `width` columns)
-            int32_t pc[5] = {params[0] + int32_t(c0 % uint32_t(width)) * params[2], params[1] + int32_t(c0 / uint32_t(width)) * params[2],
-                             params[2], width, int32_t(n)};
-
+            // whole rows, sized so one submission stays a few milliseconds on this device (a slow part gets small
+            // chunks: no long dispatch, no watchdog risk)
+            uint32_t rows = std::max(1u, chunkCols_ / width);
+            n = std::min(rows * width, count - c0);
+            HeightParams pc{p.x0 + int32_t(c0 % width) * p.step, p.z0 + int32_t(c0 / width) * p.step, p.step, p.width,
+                            int32_t(n)};
             auto u0 = std::chrono::steady_clock::now();
-            std::memcpy(params_.map, pc, sizeof(pc));
-            std::memcpy(staging_.map, cols + size_t(c0) * AETHER_HEIGHT_COLUMN_WORDS, size_t(n) * COLUMN_BYTES);
+            std::memcpy(upload_.map, slots + c0, size_t(n) * 4);
             times.uploadMs += msSince(u0);
-            vkResetCommandBuffer(cmd_, 0);
-            VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-            bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-            vkBeginCommandBuffer(cmd_, &bi);
+            begin();
             if (timestamps_) {
                 vkCmdResetQueryPool(cmd_, queries_, 0, 4);
                 vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
             }
-            VkBufferCopy in{0, 0, VkDeviceSize(n) * COLUMN_BYTES};
-            vkCmdCopyBuffer(cmd_, staging_.buf, columns_.buf, 1, &in);
-            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            VkBufferCopy in{0, 0, VkDeviceSize(n) * 4};
+            vkCmdCopyBuffer(cmd_, upload_.buf, slots_.buf, 1, &in);
+            vkCmdFillBuffer(cmd_, outDev_.buf, VkDeviceSize(CHUNK) * SLOTS * 4, VkDeviceSize(n) * 4, 0u);  // the flags
+            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queries_, 1);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipe_);
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
-            vkCmdDispatch(cmd_, (n + GROUP - 1) / GROUP, 1, 1);
+            vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pc), &pc);
+            vkCmdDispatch(cmd_, (n * SLOTS + GROUP - 1) / GROUP, 1, 1);
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                     VK_PIPELINE_STAGE_TRANSFER_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 2);
-            VkBufferCopy out[2] = {{0, 0, VkDeviceSize(n) * 8}, {VkDeviceSize(CHUNK) * 8, VkDeviceSize(CHUNK) * 8, VkDeviceSize(n) * 4}};
+            // values are slot-major over this chunk's n columns, then the flags
+            VkBufferCopy out[2] = {{0, 0, VkDeviceSize(n) * SLOTS * 4},
+                                   {VkDeviceSize(CHUNK) * SLOTS * 4, VkDeviceSize(CHUNK) * SLOTS * 4, VkDeviceSize(n) * 4}};
             vkCmdCopyBuffer(cmd_, outDev_.buf, readback_.buf, 2, out);
             barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_HOST_BIT);
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queries_, 3);
-            vkEndCommandBuffer(cmd_);
-            VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
-            si.commandBufferCount = 1;
-            si.pCommandBuffers = &cmd_;
-            vkResetFences(dev_, 1, &fence_);
-            if (vkQueueSubmit(queue_, 1, &si, fence_) != VK_SUCCESS) return fail(err, "vkQueueSubmit failed");
-            VkResult w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 10'000'000'000ull);
-            if (w != VK_SUCCESS) return fail(err, w == VK_TIMEOUT ? "height batch timed out" : "device lost");
+            if (!submitWait(err)) return false;
             if (timestamps_) {
                 uint64_t ts[4] = {};
                 if (vkGetQueryPoolResults(dev_, queries_, 0, 4, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS) {
                     double k = timestampPeriod_ * 1e-6;
-                    times.uploadMs += double(ts[1] - ts[0]) * k;
                     double kernel = double(ts[2] - ts[1]) * k;
+                    times.uploadMs += double(ts[1] - ts[0]) * k;
                     times.kernelMs += kernel;
                     times.readbackMs += double(ts[3] - ts[2]) * k;
-                    if (kernel > 8.0 && chunkCols_ > 256) chunkCols_ /= 2;
-                    else if (kernel < 2.0 && n == rows * uint32_t(width) && chunkCols_ < CHUNK) chunkCols_ *= 2;
+                    if (kernel > 8.0 && chunkCols_ > 1024) chunkCols_ /= 2;
+                    else if (kernel < 2.0 && n == rows * width && chunkCols_ < CHUNK) chunkCols_ *= 2;
                 }
             }
             auto r0 = std::chrono::steady_clock::now();
             const uint32_t* o = static_cast<const uint32_t*>(readback_.map);
-            std::memcpy(heights + c0, o, size_t(n) * 8);
-            std::memcpy(flags + c0, o + size_t(CHUNK) * 2, size_t(n) * 4);
+            for (uint32_t s = 0; s < SLOTS; s++)
+                std::memcpy(values + size_t(s) * count + c0, o + size_t(s) * n, size_t(n) * 4);
+            std::memcpy(flags + c0, o + size_t(CHUNK) * SLOTS, size_t(n) * 4);
             times.readbackMs += msSince(r0);
         }
         return true;
@@ -369,6 +398,7 @@ private:
         b = {};
     }
 
+    // host: host-visible (cached when asked: readback); else device-local. Allocated once (sizes are fixed).
     bool ensure(Buf& b, size_t size, bool host, std::string& err, bool cached = false) {
         size = std::max<size_t>(size, 64);
         if (b.buf && b.size >= size) return true;
@@ -392,19 +422,16 @@ private:
         vkBindBufferMemory(dev_, b.buf, b.mem, 0);
         if (host && vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map) != VK_SUCCESS) return fail(err, "vkMapMemory");
         b.size = size;
-        dirty_ = true;
         return true;
     }
 
     void writeSet() {
-        // the outputs: heights (2 words per column) then flags, one buffer, CHUNK columns
-        VkDescriptorBufferInfo bi[5] = {{params_.buf, 0, 64},
-                                        {noise_.buf, 0, std::max<VkDeviceSize>(VkDeviceSize(noiseWords_) * 4, 64)},
-                                        {columns_.buf, 0, VkDeviceSize(CHUNK) * COLUMN_BYTES},
-                                        {outDev_.buf, 0, VkDeviceSize(CHUNK) * 8},
-                                        {outDev_.buf, VkDeviceSize(CHUNK) * 8, VkDeviceSize(CHUNK) * 4}};
-        VkWriteDescriptorSet w[5];
-        for (uint32_t i = 0; i < 5; i++) {
+        VkDescriptorBufferInfo bi[4] = {{noise_.buf, 0, std::max<VkDeviceSize>(noiseBytes_, 64)},
+                                        {slots_.buf, 0, VkDeviceSize(CHUNK) * 4},
+                                        {outDev_.buf, 0, VkDeviceSize(CHUNK) * SLOTS * 4},
+                                        {outDev_.buf, VkDeviceSize(CHUNK) * SLOTS * 4, VkDeviceSize(CHUNK) * 4}};
+        VkWriteDescriptorSet w[4];
+        for (uint32_t i = 0; i < 4; i++) {
             w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
             w[i].dstSet = set_;
             w[i].dstBinding = i;
@@ -412,8 +439,26 @@ private:
             w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             w[i].pBufferInfo = &bi[i];
         }
-        vkUpdateDescriptorSets(dev_, 5, w, 0, nullptr);
-        dirty_ = false;
+        vkUpdateDescriptorSets(dev_, 4, w, 0, nullptr);
+    }
+
+    void begin() {
+        vkResetCommandBuffer(cmd_, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cmd_, &bi);
+    }
+
+    bool submitWait(std::string& err) {
+        vkEndCommandBuffer(cmd_);
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &cmd_;
+        vkResetFences(dev_, 1, &fence_);
+        if (vkQueueSubmit(queue_, 1, &si, fence_) != VK_SUCCESS) return fail(err, "vkQueueSubmit failed");
+        VkResult w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 10'000'000'000ull);
+        if (w != VK_SUCCESS) return fail(err, w == VK_TIMEOUT ? "height batch timed out" : "device lost");
+        return true;
     }
 
     void barrier(VkAccessFlags src, VkAccessFlags dst, VkPipelineStageFlags from, VkPipelineStageFlags to) {
@@ -441,10 +486,9 @@ private:
     VkCommandBuffer cmd_ = VK_NULL_HANDLE;
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
-    Buf params_, noise_, staging_, columns_, outDev_, readback_;
-    uint32_t noiseWords_ = 0;
-    uint32_t chunkCols_ = 2048;  // columns per submission, adapted to the device's speed
-    bool dirty_ = true;
+    Buf noise_, upload_, slots_, outDev_, readback_;
+    size_t noiseBytes_ = 0;
+    uint32_t chunkCols_ = 4096;  // columns per submission, adapted to the device's speed
 };
 
 }  // namespace
@@ -471,7 +515,7 @@ AETHER_API AetherStatus aether_height_create(AetherBackend backend, AetherHeight
         auto v = std::make_unique<VulkanEngine>();
         std::string err;
         if (!v->init(err)) {
-            std::fprintf(stderr, "[aether] exact height: %s\n", err.c_str());
+            std::fprintf(stderr, "[aether] exact noise: %s\n", err.c_str());
             return AETHER_ERR_UNSUPPORTED;
         }
         h->engine = std::move(v);
@@ -491,28 +535,24 @@ AETHER_API const char* aether_height_device(AetherHeight* h) { return h ? h->eng
 AETHER_API AetherStatus aether_height_set_noise(AetherHeight* h, const uint32_t* table, uint32_t words) {
     if (!h || !table || words < 8) return AETHER_ERR_ARG;
     std::lock_guard<std::mutex> l(h->mu);
-    // the header's layers must lie inside the table: the kernel does not bounds-check them
-    for (uint32_t n = 0; n < 4; n++) {
-        uint64_t end = 8ull + (uint64_t(table[n * 2]) + table[n * 2 + 1]) * AETHER_HEIGHT_LAYER_WORDS;
-        if (end > words) return h->fail(AETHER_ERR_ARG, "noise table: layers beyond the table");
-    }
     std::string err;
+    if (!tableOk(table, words, err)) return h->fail(AETHER_ERR_ARG, err);
     if (!h->engine->setNoise(table, words, err)) return h->fail(AETHER_ERR_GPU, err);
     return AETHER_OK;
 }
 
 AETHER_API AetherStatus aether_height_batch(AetherHeight* h, int32_t x0, int32_t z0, int32_t step, uint32_t width,
-                                            uint32_t count, const uint32_t* columns, double* heights, uint32_t* flags,
+                                            uint32_t count, const uint32_t* slots, float* values, uint32_t* flags,
                                             AetherHeightTimes* times) {
-    if (!h || !columns || !heights || !flags || width == 0 || count == 0 || count > (1u << 24) || step <= 0)
-        return h ? h->fail(AETHER_ERR_ARG, "bad batch arguments") : AETHER_ERR_ARG;
-    if (width > CHUNK) return h->fail(AETHER_ERR_ARG, "width above 16384");
+    if (!h) return AETHER_ERR_ARG;
+    if (!slots || !values || !flags || width == 0 || width > CHUNK || count == 0 || count > (1u << 24) || step <= 0)
+        return h->fail(AETHER_ERR_ARG, "bad batch arguments");
     std::lock_guard<std::mutex> l(h->mu);
     auto t0 = std::chrono::steady_clock::now();
     AetherHeightTimes t{};
-    int32_t params[5] = {x0, z0, step, int32_t(width), int32_t(count)};
+    HeightParams p{x0, z0, step, int32_t(width), int32_t(count)};
     std::string err;
-    if (!h->engine->batch(params, columns, heights, flags, t, err)) return h->fail(AETHER_ERR_GPU, err);
+    if (!h->engine->batch(p, slots, values, flags, t, err)) return h->fail(AETHER_ERR_GPU, err);
     t.totalMs = msSince(t0);
     if (times) *times = t;
     return AETHER_OK;
