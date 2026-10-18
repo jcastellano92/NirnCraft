@@ -57,7 +57,9 @@ real loaded world, visual review, then saved cameras. Generation changes invalid
 
 ## Next
 
-Execute the **Tamriel Total Parity & Living World Master Plan (`T1`–`T12`)** documented in [`docs/world/WORLD-PLAN.md`](world/WORLD-PLAN.md) Sections 8–10 and [`docs/prompts/README.md`](prompts/README.md), starting with **`T1` (`docs/prompts/T1-residents-and-voices.md`)** and **`T2` (`docs/prompts/T2-cityplans-and-peninsulas.md`)** after reviewing the plan with the owner.
+T1–T12 are done (WORLD-PLAN section 10). The next programme is the **concept-art-driven Visual Targets pipeline**:
+[`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (plan only; owner decisions in its section 10, then
+VT0 housekeeping, VT1 ingest and targets for Volume 01 Skyrim, VT2 the headless site exporter).
 
 ## The rules (non-negotiable)
 
