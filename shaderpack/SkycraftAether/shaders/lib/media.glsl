@@ -22,6 +22,10 @@
 const float MEDIA_RANGE = 128.0;
 const float HALO_AIR = 0.0012;  // the clear-air share of a lamp's halo, per block
 
+// what the last applyMedia call's outdoor air scattered towards the eye of the sun's light (luminance): the most the
+// light shafts (lib/shafts.glsl) may take back where that air lies in shadow
+float gMediaSun = 0.0;
+
 // the weather's aerosol band at a world column (categorical: nearest cell, never blended): 0 rain cloud, 1 snow,
 // 2 dust, 3 volcanic ash / blight
 int aerosolBand(vec2 worldXZ) {
@@ -73,14 +77,17 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
     float mu = dot(dir, sun);
     vec3 litOut = (skyAmbient(vec3(0, 1, 0), sun) * 1.4 + sunRadiance(sun) * (0.08 + 0.35 * pow(max(mu, 0.0), 6.0)))
                 * bandTint(band);
+    float sunLum = dot(sunRadiance(sun) * (0.08 + 0.35 * pow(max(mu, 0.0), 6.0)) * bandTint(band), vec3(0.2126, 0.7152, 0.0722));
 #ifdef WEATHER_SKY
     // the air under a storm cell is lit by a dimmer, greyer sky
     if (haveWeather()) {
         vec4 wc = weatherSample(weatherField, camPos.xz);
         float shade = clamp(smoothstep(0.62, 0.92, wc.r) * 0.45 + wc.g * 0.35 + wc.b * 0.45, 0.0, 0.85);
         litOut *= 1.0 - 0.45 * shade;
+        sunLum *= 1.0 - 0.45 * shade;
     }
 #endif
+    gMediaSun = 0.0;
     float T = 1.0;
     vec3 S = vec3(0.0);
     // adaptive quality: the march's steps (fewer in front of far pixels first; 0 leaves the closed form alone) and the
@@ -118,10 +125,12 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
             float alpha = 1.0 - exp(-ext * len);
             vec3 c = ext > 1e-7 ? (sOut * (litOut * exposure + storm) + room.a * room.rgb * vec3(0.012)) / ext : vec3(0.0);
             S += T * (c * alpha + storm * 0.25 * HALO_AIR * len);
+            gMediaSun += ext > 1e-7 ? T * alpha * sOut * exposure / ext * sunLum : 0.0;
             T *= 1.0 - alpha;
         }
         S = mix(S0, S, mediaFade);
         T = mix(T0, T, mediaFade);
+        gMediaSun *= mediaFade;
     }
 #endif
 #if HALO_STEPS > 0
@@ -176,6 +185,7 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
         float gate = outdoorExposure(camPos + dir * max(from, min(t, 48.0)), camPos);
         float tr = exp(-max(od, 0.0) * gate);
         S += T * litOut * (1.0 - tr);
+        gMediaSun += T * (1.0 - tr) * sunLum;
         T *= tr;
     }
     return col * T + S;

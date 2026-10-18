@@ -5,7 +5,9 @@
 //  * water: refraction with absorption by depth, screen-space reflections falling back to aether's far terrain and
 //    the sky, Fresnel, a sun glint, and foam lapping wherever the water is shallow (any shore, any pond)
 //  * glass and ice: refraction and tint; under water: absorption fog and caustics on the bed
-//  * light shafts: screen-space scattering towards the sun (or moon) through gaps in terrain, trees and aether's clouds
+//  * light shafts: the key light marched along the view ray through the air with real occlusion (lib/shafts.glsl:
+//    shadow map, aether's sun map), into colortex4's alpha for composite1.fsh; LOW (no SHAFT_MARCH): screen-space
+//    scattering towards the sun (or moon) through gaps in terrain, trees and aether's clouds
 #include "/lib/settings.glsl"
 #include "/lib/common.glsl"
 #include "/lib/atmosphere.glsl"
@@ -40,6 +42,10 @@ uniform float viewHeight;
 uniform int isEyeInWater;
 uniform ivec2 eyeBrightnessSmooth;
 uniform float wetness;
+
+#ifdef SHAFT_MARCH
+#include "/lib/shafts.glsl"
+#endif
 
 in vec2 texcoord;
 
@@ -165,9 +171,10 @@ float fallsSpray(vec2 uv, vec3 n, float dist) {
 }
 #endif
 
-// screen-space light shafts: march towards the light's screen position, collecting how much of the way is open sky
+// screen-space light shafts (without SHAFT_MARCH): march towards the light's screen position, collecting how much of
+// the way is open sky
 vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
-#if defined VOLUMETRIC_LIGHT && !defined SKYCRAFT_REALM
+#if defined VOLUMETRIC_LIGHT && !defined SHAFT_MARCH && !defined SKYCRAFT_REALM
     vec3 L = sun.y > -0.05 ? sun : -sun;
     vec3 lightView = mat3(gbufferModelView) * L;
     if (lightView.z > -0.05) return vec3(0.0);  // behind the camera
@@ -301,5 +308,10 @@ void main() {
         col = mix(vec3(1.2, 0.35, 0.05), col, exp(-min(dist0, 50.0) * 0.8));  // lava
     }
     col += lightShafts(texcoord, sun, dist0);
-    outColor = vec4(col, 1.0);
+    // the marched shafts (composite1.fsh smooths and adds them): none seen from under water
+    float shafts = 0.0;
+#if defined VOLUMETRIC_LIGHT && defined SHAFT_MARCH
+    if (isEyeInWater == 0) shafts = shaftsMarch(dir, dist0, sun, gl_FragCoord.xy, wetness, rainStrength);
+#endif
+    outColor = vec4(col, shafts);
 }

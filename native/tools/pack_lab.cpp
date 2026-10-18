@@ -16,6 +16,12 @@
 //   qp (smoke columns) qc (fallback clouds) qb (bloom) qd (detail falloff start) qf (far fraction)
 //   sweep=FILE: after the first image, one more per line of FILE ("out.png key=v key=v ...": the q keys above), the
 //   scene rendered once; gputime=N: GPU time of the pack's passes (GL timestamps, median of N runs) per image
+// profile=LOW|MEDIUM|HIGH|ULTRA|ADAPTIVE: shaders.properties' profile applied to settings.glsl; pack=DIR another copy
+// of the pack's shaders/ (a baseline); frames=N frametime=s: N frames (the eye adapting), seedexp=log2 the eye's
+// exposure before them, explog=1 prints it per frame
+// scene=cave [hole=1 torch=0] | window: synthetic rooms around the eye (a rock tunnel with a mouth 12 blocks ahead and
+//   a torch; a timber room with a window in its right wall) with a real shadow map of them, the roof cache, sky and
+//   block light; look=deg turns the eye inside the room (the room stays on heading yaw - look)
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #ifndef _CRT_SECURE_NO_WARNINGS
@@ -470,7 +476,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     const char* outPng = argv[1];
-    PACK = "../shaderpack/SkycraftAether/shaders";  // run from native/
+    PACK = sarg(argc, argv, "pack", "../shaderpack/SkycraftAether/shaders");  // run from native/ (pack=: another copy)
     std::string profileName = sarg(argc, argv, "profile", "");
     if (!profileName.empty() && !loadProfile(profileName)) {
         std::printf("pack_lab: no profile.%s in shaders.properties\n", profileName.c_str());
@@ -646,6 +652,9 @@ int main(int argc, char** argv) {
     struct Lamp { double p[3]; double c[3]; };
     std::vector<Lamp> lamps;
     double fwd[3] = {std::sin(yaw * PI / 180), 0, -std::cos(yaw * PI / 180)}, side[3] = {-fwd[2], 0, fwd[0]};
+    // a scene is built along the heading yaw - look= (look turns the eye inside it without turning the room)
+    double sYaw = (yaw - arg(argc, argv, "look", 0)) * PI / 180;
+    double sFwd[3] = {std::sin(sYaw), 0, -std::cos(sYaw)}, sSide[3] = {-sFwd[2], 0, sFwd[0]};
     auto ahead = [&](double along, double across, double up, double out[3]) {
         for (int k = 0; k < 3; k++) out[k] = (k == 0 ? x : k == 1 ? y : z) + fwd[k] * along + side[k] * across;
         out[1] = y + up;
@@ -672,7 +681,7 @@ int main(int argc, char** argv) {
             for (auto& t : torches) {
                 Lamp l;
                 for (int k = 0; k < 3; k++) {
-                    l.p[k] = (k == 0 ? x : k == 1 ? y : z) + fwd[k] * t[0] + side[k] * t[1];
+                    l.p[k] = (k == 0 ? x : k == 1 ? y : z) + sFwd[k] * t[0] + sSide[k] * t[1];
                     l.c[k] = t[3 + k];
                 }
                 l.p[1] = y + t[2];
@@ -680,8 +689,8 @@ int main(int argc, char** argv) {
             }
     }
     auto toLocal = [&](const double v[3], double out[3]) {  // a camera-relative world vector into the scene's frame
-        out[0] = v[0] * fwd[0] + v[2] * fwd[2];
-        out[1] = v[0] * side[0] + v[2] * side[2];
+        out[0] = v[0] * sFwd[0] + v[2] * sFwd[2];
+        out[1] = v[0] * sSide[0] + v[2] * sSide[2];
         out[2] = v[1];
     };
     // the nearest solid along a camera-relative ray: distance, world normal and albedo (false when none)
@@ -703,7 +712,7 @@ int main(int argc, char** argv) {
         if (t >= 1e29) return false;
         double nl[3] = {0, 0, 0};
         nl[std::abs(bestFace) - 1] = bestFace > 0 ? 1 : -1;
-        for (int k = 0; k < 3; k++) nWorld[k] = fwd[k] * nl[0] + side[k] * nl[1] + (k == 1 ? nl[2] : 0.0);
+        for (int k = 0; k < 3; k++) nWorld[k] = sFwd[k] * nl[0] + sSide[k] * nl[1] + (k == 1 ? nl[2] : 0.0);
         return true;
     };
     // Minecraft's sky light inside: 15 at an opening, one level less per block from it
@@ -981,7 +990,8 @@ int main(int argc, char** argv) {
     // colortex4..8 as Iris keeps them: two halves each (a pass writes one half, then the buffer flips), HDR and linear;
     // colortex8 is the pack's persistent exposure (R32F, clear = false)
     std::vector<float> zeroes(N * 4, 0.0f);
-    GLuint ct[9][2] = {};
+    GLuint ct[9][2] = {}, lowAlt[4];
+    for (int i = 0; i < 4; i++) lowAlt[i] = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, true);
     int cur[9] = {};
     for (int i = 4; i <= 8; i++)
         for (int k = 0; k < 2; k++)
@@ -1108,6 +1118,7 @@ int main(int argc, char** argv) {
         for (int t : pr.targets) {
             if (toScreen) targetTex[t] = outTex;
             else if (t >= 4 && t <= 8) targetTex[t] = ct[t][1 - cur[t]];
+            else if (t >= 0 && t < 4) targetTex[t] = lowAlt[t];  // an older pack's HDR through colortex0..3
             else { std::printf("pack_lab: a pass writes colortex%d (not modelled)\n", t); return false; }
         }
         for (int i = 4; i <= 8; i++) samplers["colortex" + std::to_string(i)] = ct[i][cur[i]];
@@ -1180,6 +1191,10 @@ int main(int argc, char** argv) {
         glEnd();
         if (!toScreen)
             for (int t : pr.targets) {
+                if (t < 4) {
+                    samplers["colortex" + std::to_string(t)] = lowAlt[t];
+                    continue;
+                }
                 cur[t] = 1 - cur[t];
                 if (t == 4) {  // colortex4 is sampled with mipmaps after composite only (see passes)
                     glBindTexture(GL_TEXTURE_2D, ct[4][cur[4]]);
@@ -1217,6 +1232,7 @@ int main(int argc, char** argv) {
     // clears colortex5..7 every frame, colortex4 and the exposure (colortex8) persist
     auto passes = [&]() {
         for (int i = 5; i <= 7; i++) for (int k = 0; k < 2; k++) clearTex(ct[i][k]);
+        for (int i = 0; i < 4; i++) samplers["colortex" + std::to_string(i)] = tex[i];
         bool good = run(pWater, false, false);
         good = good && run(pDeferred, true, false);  // deferred sees the opaque depth only
         deferredOut = ct[4][cur[4]];
@@ -1291,9 +1307,9 @@ int main(int argc, char** argv) {
         }
         for (auto& p : pts) {
             size_t i = size_t(p[1] * H) * W + size_t(p[0] * W), g = row(i);
-            std::printf("probe (%.2f,%.2f) albedo %.3f %.3f %.3f  deferred %.3f %.3f %.3f  composite %.3f %.3f %.3f  dist %.0f\n",
+            std::printf("probe (%.2f,%.2f) albedo %.3f %.3f %.3f  deferred %.3f %.3f %.3f  composite %.3f %.3f %.3f shafts %.4f  dist %.0f\n",
                         p[0], p[1], bedLin[i * 4], bedLin[i * 4 + 1], bedLin[i * 4 + 2], hd[g * 4], hd[g * 4 + 1], hd[g * 4 + 2],
-                        hc[g * 4], hc[g * 4 + 1], hc[g * 4 + 2], bedDepth[i]);
+                        hc[g * 4], hc[g * 4 + 1], hc[g * 4 + 2], hc[g * 4 + 3], bedDepth[i]);
         }
     }
     std::vector<uint8_t> px(N * 4), img(N * 4);

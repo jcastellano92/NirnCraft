@@ -78,3 +78,5 @@ profile.ADAPTIVE=Adaptive
 profile.ADAPTIVE.comment=The mod tunes every effect to this machine (ULTRA's ceilings, HIGH's maps). The fixed tiers are ceilings it scales down from.
 option.AUTO_EXPOSURE=Eye adaptation
 option.AUTO_EXPOSURE.comment=The exposure follows the scene like an eye: caves and nights open up, a cave mouth's daylight blows out, walking out squints for a second.
+option.SHAFT_MARCH=Real light shafts
+option.SHAFT_MARCH.comment=Shafts where the sun really reaches the air: through cave mouths, ceiling holes, windows, doors, trees and cloud gaps (shadow map and far-field sun map). Off: screen-space shafts only.

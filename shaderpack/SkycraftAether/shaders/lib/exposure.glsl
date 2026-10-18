@@ -15,7 +15,7 @@ const float EXPOSURE_FIXED = -0.3219;  // log2(0.8): the pack's exposure before 
 const float EXPOSURE_KEY = -0.79;      // log2 exposure at a scene log-average of 1.0 (pack_lab: noon land keeps the old x0.8)
 const float EXPOSURE_SLOPE = 0.72;     // how much of a luminance change the eye undoes (1 = all of it)
 const float EXPOSURE_MIN = -1.6;       // log2: the most the eye stops down (x0.33)
-const float EXPOSURE_MAX = 2.6;        // log2: the most it opens (x6.1)
+const float EXPOSURE_MAX = 2.3;        // log2: the most it opens (x4.9)
 const float ADAPT_BRIGHTER = 0.32;     // seconds (time constant) when the scene brightens: settles in ~1 s
 const float ADAPT_DARKER = 1.1;        // seconds when it darkens: ~3.5 s
 

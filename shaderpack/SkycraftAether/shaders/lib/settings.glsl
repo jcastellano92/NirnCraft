@@ -53,8 +53,9 @@
 //#define SMOKE_FIRE_VOLUMES      // fires' smoke as volumes too (the mod draws fire smoke as sprites: one or the other)
 #define LIGHTNING_LIGHT 1 // [0 1] storm channels light the ground, the rain and the clouds (outdoors only)
 //#define LIGHT_OCCLUSION        // the mod's point lights are shadowed by walls (needs -Dskycraft.localLightOcclusion)
-#define VOLUMETRIC_LIGHT        // light shafts through clouds, trees and windows
-#define VL_SAMPLES 32 // [8 12 16 24 32]
+#define VOLUMETRIC_LIGHT        // light shafts through clouds, trees, windows, doors, cave mouths and ceiling holes
+#define SHAFT_MARCH             // shafts from real occlusion (shadow map + aether's sun map); off: screen-space only
+#define VL_SAMPLES 20 // [6 8 12 16 20 24 32] shaft steps (the most; adaptive quality uses fewer when it must)
 #define STARS                   // stars and the galaxy, turning with the sky
 #define AURORA                  // northern lights in cold northern skies at night
 #define WEATHER_SKY             // the sky greys and the sky light dims under the mod's storm cells and overcast
