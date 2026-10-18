@@ -1,4 +1,6 @@
 // aether_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -528,6 +530,168 @@ static void testActors() {
     aether_destroy(ctx);
 }
 
+// Refinement fades: a tile replaced while resident dissolves from the old ground to the new one over the fade time,
+// per pixel (most pixels still show the old ground just after the swap, every pixel the new one once it is over).
+// Then LOD dither: a flat plane looks the same at every level, so depth must not change while the level map does.
+static void testTransitions() {
+    std::printf("refinement fades and LOD dither\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    CHECK(aether_set_transitions(ctx, -1.0f) == AETHER_ERR_ARG);
+    CHECK(aether_set_transitions(ctx, 0.4f) == AETHER_OK);
+    std::vector<float> low(256 * 256, 100.0f), high(256 * 256, 110.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    auto upload = [&](std::vector<float>& h, int lod) {
+        for (int tz = -2; tz <= 2; tz++)
+            for (int tx = -2; tx <= 2; tx++) {
+                AetherColumnTile t{lod, tx, tz, h.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                aether_upload_column_tile(ctx, &t);
+            }
+    };
+    auto sleepMs = [](int ms) {
+        auto end = std::chrono::steady_clock::now() + std::chrono::milliseconds(ms);
+        while (std::chrono::steady_clock::now() < end) {}
+    };
+    upload(low, 0);
+    double centre[3] = {10.5, 140.0, 10.5};
+    aether_update(ctx, centre, 0);
+    sleepMs(450);
+    aether_update(ctx, centre, 0);  // the first window's own fade-in is over (and dropped)
+    AetherFrame f{};
+    f.cameraPos[0] = 10.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 10.5;
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(64 * 64);
+    AetherFrameOutput o{nullptr, nullptr, depth.data()};
+    auto newShare = [&] {
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        size_t n = 0;
+        for (size_t i = 0; i < depth.size(); i++) {
+            float nx = (float(i % 64) + 0.5f) / 64 * 2 - 1, ny = 1 - (float(i / 64) + 0.5f) / 64 * 2;
+            float len = std::sqrt(0.01f * nx * nx + 1 + 0.01f * ny * ny);
+            n += std::abs(depth[i] / len - 30.0f) < 0.5f;  // the new ground is 30 below the camera, the old 40
+        }
+        return double(n) / double(depth.size());
+    };
+    double before = newShare();
+    upload(high, 0);
+    aether_update(ctx, centre, 0);
+    double start = newShare();
+    sleepMs(450);
+    aether_update(ctx, centre, 0);
+    double end = newShare();
+    std::printf("  new ground: %.0f%% before the swap, %.0f%% right after it, %.0f%% after the fade\n", 100 * before,
+                100 * start, 100 * end);
+    CHECK(before == 0.0);
+    CHECK(start < 0.5);
+    CHECK(end == 1.0);
+    aether_set_transitions(ctx, 0.0f);  // fades off: the swap is immediate
+    upload(low, 0);
+    aether_update(ctx, centre, 0);
+    CHECK(newShare() == 0.0);
+
+    for (int lod = 1; lod < 3; lod++) upload(low, lod);  // (y 100 is a face at LODs 0-2: 2^lod divides 164)
+    aether_update(ctx, centre, 0);
+    AetherFrame g = f;
+    g.width = 160;
+    g.height = 90;
+    cameraMatrix(90, -4, 70, 160.0 / 90.0, g.invViewProj);
+    g.maxDistance = 6000;
+    g.flags = AETHER_FRAME_DEBUG_LOD;
+    std::vector<float> d0(160 * 90), d1(160 * 90);
+    std::vector<uint32_t> c0(160 * 90), c1(160 * 90);
+    AetherFrameOutput o0{c0.data(), nullptr, d0.data()}, o1{c1.data(), nullptr, d1.data()};
+    CHECK(aether_render(ctx, &g, &o0) == AETHER_OK);
+    g.flags |= AETHER_FRAME_LOD_DITHER;
+    CHECK(aether_render(ctx, &g, &o1) == AETHER_OK);
+    size_t hits = 0, depthOff = 0, lodChanged = 0;
+    for (size_t i = 0; i < d0.size(); i++) {
+        if (d0[i] > 1e29f) continue;
+        hits++;
+        depthOff += std::abs(d0[i] - d1[i]) > 0.01f + 1e-4f * d0[i];
+        lodChanged += c0[i] != c1[i];
+    }
+    std::printf("  dither: %zu ground px, %zu change level, %zu change depth\n", hits, lodChanged, depthOff);
+    CHECK(hits > 1000);
+    CHECK(lodChanged > 0 && lodChanged < hits / 3);
+    CHECK(depthOff < hits / 200 + 2);
+    aether_destroy(ctx);
+}
+
+// A dragon's wings beat (its silhouette changes over the beat), fold on the ground, and an impostor marked half
+// transparent covers about half its pixels (the per-pixel dissolve of a tracking-boundary cross-fade).
+static void testActorMotion() {
+    std::printf("far actor motion and fades\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 160.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherActor a{};
+    a.pos[0] = 0.5;
+    a.pos[1] = 140.0;
+    a.pos[2] = -150.5;
+    a.height = 5.0f;
+    a.radius = 6.0f;
+    a.kind = 2;  // dragon, facing -Z (away from the camera)
+    a.tint = 0xFF283038u;
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 180.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 96;
+    f.height = 64;
+    cameraMatrix(0, -14.5, 24, 1.5, f.invViewProj);  // north, from above and behind: the wings' upper faces
+    f.maxDistance = 600;
+    f.planetRadius = 0;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ACTORS;
+    std::vector<uint32_t> normal(96 * 64);
+    AetherFrameOutput o{nullptr, normal.data(), nullptr, nullptr};
+    auto cover = [&](uint32_t flags, float t) {
+        a.flags = flags;
+        aether_set_actors(ctx, &a, 1);
+        f.timeSec = t;
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        size_t n = 0, top = 64, bottom = 0;
+        for (size_t i = 0; i < normal.size(); i++)
+            if (((normal[i] >> 16) & 255) == 4) {
+                n++;
+                top = std::min(top, i / 96);
+                bottom = std::max(bottom, i / 96);
+            }
+        return std::array<size_t, 3>{n, top, bottom};
+    };
+    auto up = cover(AETHER_GAIT_FLAP << 8, 0.3125f);    // beat phase 90 degrees: wings raised
+    auto down = cover(AETHER_GAIT_FLAP << 8, 0.9375f);  // 270 degrees: lowered
+    auto folded = cover(AETHER_GAIT_STILL << 8, 0.3125f);
+    auto full = cover(AETHER_GAIT_GLIDE << 8, 0.0f);
+    auto half = cover((AETHER_GAIT_GLIDE << 8) | 128u, 0.0f);
+    auto gone = cover((AETHER_GAIT_GLIDE << 8) | 255u, 0.0f);
+    std::printf("  dragon px: wings up %zu (rows %zu-%zu), down %zu (rows %zu-%zu), folded %zu; gliding %zu, half faded %zu, "
+                "gone %zu\n", up[0], up[1], up[2], down[0], down[1], down[2], folded[0], full[0], half[0], gone[0]);
+    CHECK(up[0] > 50 && down[0] > 50);
+    CHECK(up[1] < down[1]);       // raised wings reach higher on screen
+    CHECK(folded[0] < full[0]);   // folded wings cover less than spread ones
+    CHECK(half[0] > full[0] / 4 && half[0] < full[0] * 3 / 4);
+    CHECK(gone[0] == 0);
+    aether_destroy(ctx);
+}
+
 // Pixels the near field covers skip the far march entirely; the rest render exactly as without near depth.
 static void testNearDepth(const char* raster) {
     std::printf("near-depth skip\n");
@@ -903,6 +1067,8 @@ int main(int argc, char** argv) {
     testStructures();
     testSunMap();
     testActors();
+    testActorMotion();
+    testTransitions();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");

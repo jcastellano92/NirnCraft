@@ -25,11 +25,13 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000900;
+    public static final int ABI_VERSION = 0x000A00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
-            FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200;
+            FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000;
+    /** Far actor gaits (AetherActor.flags bits 8-9): dragons fold their wings, glide or beat them. */
+    public static final int GAIT_STILL = 0, GAIT_GLIDE = 1, GAIT_FLAP = 2;
     public static final int CLASS_TERRAIN = 0, CLASS_FOLIAGE = 1, CLASS_WATER = 2, CLASS_EMISSIVE = 3;
     public static final int TILE = 256;
 
@@ -40,7 +42,7 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap, setTransitions,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
 
     private AetherNative(Path library) {
@@ -84,6 +86,7 @@ public final class AetherNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         setSunMap = bind(l, lib, "aether_set_sun_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         setMaterials = bind(l, lib, "aether_set_materials", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setTransitions = bind(l, lib, "aether_set_transitions", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT));
         heightCreate = bind(l, lib, "aether_height_create", FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS));
         heightDestroy = bind(l, lib, "aether_height_destroy", FunctionDescriptor.ofVoid(ADDRESS));
         heightLastError = bind(l, lib, "aether_height_last_error", FunctionDescriptor.of(ADDRESS, ADDRESS));
@@ -490,8 +493,28 @@ public final class AetherNative {
             }
         }
 
+        /**
+         * (abi 0.10) Refinement fades: a region rebuilt over a resident one (exact tile over the stand-in, buildings
+         * arriving, a finer LOD entering the window) dissolves into the new content over this many seconds; 0 = at once.
+         */
+        public void setTransitions(float fadeSeconds) {
+            try {
+                check((int) setTransitions.invokeExact(ptr, fadeSeconds), "aether_set_transitions");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         /** Far actors: x, y, z, yaw, height, radius, kind, tint per actor. */
         public void setActors(double[] xyz, float[] yawHeightRadius, int[] kindTint, int count) {
+            setActors(xyz, yawHeightRadius, kindTint, null, count);
+        }
+
+        /**
+         * As setActors, plus per actor flags (abi 0.10, may be null): bits 0-7 transparency (0 opaque .. 255 gone, the
+         * per-pixel dissolve of a cross-fade with the real entity), bits 8-9 the gait (GAIT_*), bits 16-31 a phase seed.
+         */
+        public void setActors(double[] xyz, float[] yawHeightRadius, int[] kindTint, int[] flags, int count) {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment s = a.allocate(Math.max(1, count) * ACTOR_SIZE, 8);
                 for (int i = 0; i < count; i++) {
@@ -504,6 +527,7 @@ public final class AetherNative {
                     s.set(JAVA_FLOAT, o + 32, yawHeightRadius[3 * i + 2]);
                     s.set(JAVA_INT, o + 36, kindTint[2 * i]);
                     s.set(JAVA_INT, o + 40, kindTint[2 * i + 1]);
+                    s.set(JAVA_INT, o + 44, flags != null ? flags[i] : 0);
                 }
                 check((int) setActors.invokeExact(ptr, s, count), "aether_set_actors");
             } catch (Throwable t) {

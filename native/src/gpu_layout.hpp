@@ -34,7 +34,7 @@ struct alignas(16) FrameGpu {
     LodGpu lods[MAX_LODS];
     float prevViewProj[16];
     float prevCam[4];
-    uint32_t temporal[4];
+    uint32_t temporal[4];  // frame index, history valid, now (nowMs), fade duration ms
     // sun map (aether_set_sun_map): centre camera-relative + half extent; basis X, Y (perpendicular to the key
     // light) and the key light L; rows: first row, row count, size, flags (1 = enabled)
     float sunMapCentre[4];
@@ -47,10 +47,11 @@ struct alignas(16) FrameGpu {
 struct alignas(16) ActorGpu {
     float posYaw[4];  // camera-relative feet (curvature applied), yaw
     float shape[4];   // height, radius, kind, tint bits
+    float motion[4];  // phase seed, gait (0 still, 1 glide, 2 flap), opacity, 0
 };
 
 static_assert(sizeof(LodGpu) == 32);
-static_assert(sizeof(ActorGpu) == 32);
+static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 48);
 static_assert(sizeof(MaterialGpu) == 32);
 static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5);

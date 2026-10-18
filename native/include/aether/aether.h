@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000900
+#define AETHER_ABI_VERSION 0x000A00
 
 typedef struct AetherContext AetherContext;
 
@@ -115,6 +115,8 @@ typedef struct AetherFrame {
 #define AETHER_FRAME_DEBUG_WEATHER 0x200u
 #define AETHER_FRAME_DEBUG_ALBEDO 0x400u      /* surfaces output their albedo (offline G-buffers: the pack lab) */
 #define AETHER_FRAME_SEE_THROUGH_WATER 0x800u /* rays pass water (the bed under it, offline) */
+#define AETHER_FRAME_LOD_DITHER 0x1000u       /* (abi 0.10) dithered LOD transitions: each pixel's LOD segment grid
+                                                 starts at its own phase, so a level change is a stipple band, not a line */
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
@@ -148,7 +150,14 @@ typedef struct AetherActor {
     float height, radius;       /* blocks */
     uint32_t kind;              /* impostor atlas row; 0 = generic humanoid */
     uint32_t tint;              /* RGBA8 */
+    /* (abi 0.10, in what was padding; zero = the old behaviour) bits 0-7: transparency 0..255 (the impostor dissolves
+       per pixel: 0 opaque, 255 gone; a cross-fade with the real entity at the tracking boundary), bits 8-9: gait
+       (AETHER_GAIT_*), bits 16-31: animation phase seed (e.g. the entity id), so a flock does not beat in step */
+    uint32_t flags;
 } AetherActor;
+#define AETHER_GAIT_STILL 0u  /* on the ground: dragons fold their wings */
+#define AETHER_GAIT_GLIDE 1u
+#define AETHER_GAIT_FLAP 2u
 
 typedef struct AetherStats {
     uint32_t regions, regionsDirty;
@@ -292,6 +301,13 @@ AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first,
 AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, float halfExtent);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint32_t count);
+/*
+ * (abi 0.10) Refinement fades: a region rebuilt over a resident one (an exact tile replacing the raster stand-in,
+ * buildings or landmarks arriving on a tile, a finer LOD entering the window over the coarser one) dissolves from what
+ * was there to the new content per pixel over fadeSeconds (the old region stays packed meanwhile; a fade already running
+ * keeps its start, so a tile refined twice in a row dissolves once). 0 (default) swaps at once.
+ */
+AETHER_API AetherStatus aether_set_transitions(AetherContext* ctx, float fadeSeconds);
 /* 1 if tile (lod, tileX, tileZ) is resident (uploaded and not evicted), else 0. */
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */

@@ -313,10 +313,32 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     bool moved = !havePacked_;
     {
         std::lock_guard<std::mutex> lock(mu_);
+        uint32_t now = nowMs();
         for (auto& [k, r] : results) {
             if (!r) continue;
+            auto old = regions_.find(k);
+            if (fadeMs > 0 && !r->empty()) {
+                // dissolve from what was there (or, for a region new to the window, from the coarser LOD that
+                // covered it); a fade already running keeps its start and its old region, so a tile refined twice
+                // in quick succession (stand-in, exact, then its buildings) dissolves once
+                auto f = fading_.find(k);
+                if (f == fading_.end() || int32_t(now - f->second.startMs) >= int32_t(fadeMs)) {
+                    std::shared_ptr<const Region> prev = old != regions_.end() ? old->second : nullptr;
+                    if (prev && prev->empty()) prev = nullptr;
+                    fading_[k] = Fade{prev, now};
+                }
+            }
             regions_[k] = r;
             dirty_.erase(k);
+        }
+        for (auto it = fading_.begin(); it != fading_.end();) {
+            int dx = std::abs(it->first.x - centreRegion[it->first.lod][0]), dz = std::abs(it->first.z - centreRegion[it->first.lod][1]);
+            if (int32_t(now - it->second.startMs) >= int32_t(fadeMs) || dx > windowRadius + 1 || dz > windowRadius + 1) {
+                it = fading_.erase(it);
+                moved = true;  // repack without the old region
+            } else {
+                ++it;
+            }
         }
         // evict regions far outside the window (keep one ring of slack against thrashing), and the tiles and
         // sections behind them two rings out, so memory stays bounded however far the player travels
@@ -358,6 +380,32 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
     p.lodCount = lodCount;
     p.revision = packed()->revision + 1;
     std::unordered_map<const Region*, int32_t> slot;
+    // a region's DAG, materials and height mip appended to the scene; returns its slot
+    auto pack = [&](const Region* r, const Key3& k) {
+        auto s = slot.find(r);
+        if (s != slot.end()) return s->second;
+        int lod = k.lod;
+        RegionGpu g{};
+        g.origin[0] = k.x * (256 << lod);
+        g.origin[1] = WORLD_MIN_Y + k.y * (256 << lod);
+        g.origin[2] = k.z * (256 << lod);
+        g.origin[3] = lod;
+        g.bases[0] = uint32_t(p.nodes.size());
+        g.bases[1] = uint32_t(p.leaves.size());
+        g.bases[2] = r->dag.root;
+        g.bases[3] = uint32_t(p.heightMip.size());
+        p.heightMip.insert(p.heightMip.end(), r->dag.heightMip.begin(), r->dag.heightMip.end());
+        g.runs[0] = uint32_t(p.runEnd.size());
+        g.runs[1] = uint32_t(r->dag.runEnd.size());
+        p.nodes.insert(p.nodes.end(), r->dag.nodes.begin(), r->dag.nodes.end());
+        p.leaves.insert(p.leaves.end(), r->dag.leaves.begin(), r->dag.leaves.end());
+        p.runEnd.insert(p.runEnd.end(), r->dag.runEnd.begin(), r->dag.runEnd.end());
+        for (uint16_t m : r->dag.runMat) p.runMat.push_back(m);
+        int32_t v = int32_t(p.regions.size());
+        p.regions.push_back(g);
+        slot.emplace(r, v);
+        return v;
+    };
     int side = 2 * windowRadius + 1;
     for (int lod = 0; lod < lodCount; lod++) {
         int rows = regionRows(lod);
@@ -385,25 +433,15 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
                             if (s != slot.end()) {
                                 v = s->second;
                             } else {
-                                RegionGpu g{};
-                                g.origin[0] = k.x * (256 << lod);
-                                g.origin[1] = WORLD_MIN_Y + k.y * (256 << lod);
-                                g.origin[2] = k.z * (256 << lod);
-                                g.origin[3] = lod;
-                                g.bases[0] = uint32_t(p.nodes.size());
-                                g.bases[1] = uint32_t(p.leaves.size());
-                                g.bases[2] = r->dag.root;
-                                g.bases[3] = uint32_t(p.heightMip.size());
-                                p.heightMip.insert(p.heightMip.end(), r->dag.heightMip.begin(), r->dag.heightMip.end());
-                                g.runs[0] = uint32_t(p.runEnd.size());
-                                g.runs[1] = uint32_t(r->dag.runEnd.size());
-                                p.nodes.insert(p.nodes.end(), r->dag.nodes.begin(), r->dag.nodes.end());
-                                p.leaves.insert(p.leaves.end(), r->dag.leaves.begin(), r->dag.leaves.end());
-                                p.runEnd.insert(p.runEnd.end(), r->dag.runEnd.begin(), r->dag.runEnd.end());
-                                for (uint16_t m : r->dag.runMat) p.runMat.push_back(m);
-                                v = int32_t(p.regions.size());
-                                p.regions.push_back(g);
-                                slot.emplace(r, v);
+                                v = pack(r, k);
+                                auto f = fading_.find(k);
+                                if (f != fading_.end()) {
+                                    // the kernel dissolves from runs.z (old slot + 1, or ~0: nothing, look coarser)
+                                    // to this region between runs.w and runs.w + fadeMs
+                                    uint32_t oldSlot = f->second.old ? uint32_t(pack(f->second.old.get(), k)) + 1u : 0xFFFFFFFFu;
+                                    p.regions[size_t(v)].runs[2] = oldSlot;
+                                    p.regions[size_t(v)].runs[3] = f->second.startMs;
+                                }
                             }
                         }
                     }
@@ -427,6 +465,11 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
         lastCentre_[lod][1] = centreRegion[lod][1];
     }
     havePacked_ = true;
+}
+
+uint32_t nowMs() {
+    static const auto t0 = std::chrono::steady_clock::now();
+    return uint32_t(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t0).count());
 }
 
 uint64_t World::nodeBytes() const { return packed()->nodes.size() * 4; }

@@ -422,6 +422,8 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
         g.temporal[1] = 1;
     }
     g.temporal[0] = ctx->frameIndex;
+    g.temporal[2] = nowMs();  // World's clock: refinement fades (RegionGpu.runs.w) are stamped with it
+    g.temporal[3] = ctx->world.fadeMs;
     if (ctx->sunMapSize) {
         // the map stays put while the camera wanders (256-block steps), so most frames only refresh a band of rows
         // (the light moves slowly); a step or a new size redoes all of it
@@ -476,6 +478,10 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
         ag.shape[1] = a.radius;
         ag.shape[2] = float(a.kind);
         std::memcpy(&ag.shape[3], &a.tint, 4);
+        ag.motion[0] = float((a.flags >> 16) & 0xFFFFu) / 65536.0f;
+        ag.motion[1] = float((a.flags >> 8) & 3u);
+        ag.motion[2] = 1.0f - float(a.flags & 255u) / 255.0f;
+        if ((a.flags & 255u) == 255u) continue;  // fully dissolved: the real entity has taken over
         in.actors.push_back(ag);
         if (in.actors.size() >= 512) break;
     }
@@ -600,6 +606,12 @@ AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint
     if (!ctx->backend->readSunMap(m, err) || m.empty()) return ctx->fail(AETHER_ERR_STATE, err.empty() ? "no sun map yet" : err);
     if (count < m.size()) return ctx->fail(AETHER_ERR_ARG, "sun map buffer too small");
     std::memcpy(out, m.data(), m.size() * 4);
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_set_transitions(AetherContext* ctx, float fadeSeconds) {
+    if (!ctx || !(fadeSeconds >= 0.0f && fadeSeconds <= 10.0f)) return AETHER_ERR_ARG;
+    ctx->world.fadeMs = uint32_t(fadeSeconds * 1000.0f + 0.5f);
     return AETHER_OK;
 }
 

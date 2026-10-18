@@ -27,6 +27,8 @@ final class AetherFarActors {
     private AetherFarActors() {}
 
     static final double FAR = 4096;
+    /** Blocks inside the tracking range where actors are sent anyway (the cross-fade band). */
+    static final double OVERLAP = 32;
     static final int HUMANOID = 0, CREATURE = 1, DRAGON = 2, SHIP = 3;
     private static final Map<UUID, Integer> lastCount = new HashMap<>();
 
@@ -49,7 +51,9 @@ final class AetherFarActors {
                 Entity e = candidates.get(i);
                 if (e == p) continue;
                 double d = e.position().distanceTo(p.position());
-                double seen = Math.min(e.getType().clientTrackingRange() * 16.0, view) - 8;
+                // from a little inside the tracking range: the client fades the impostor out while it also has the
+                // real entity, so an actor crossing the boundary either way is never missing for a moment
+                double seen = Math.min(e.getType().clientTrackingRange() * 16.0, view) - OVERLAP;
                 if (d > seen && d < FAR) near.add(new double[] {d, i});
             }
             near.sort((a, b) -> Double.compare(a[0], b[0]));
@@ -58,7 +62,7 @@ final class AetherFarActors {
             if (n == 0 && (last == null || last == 0)) continue;  // nothing new to say
             double[] xyz = new double[n * 3];
             float[] vel = new float[n * 3], yhr = new float[n * 3];
-            int[] kt = new int[n * 2];
+            int[] kt = new int[n * 2], idf = new int[n * 2];
             for (int k = 0; k < n; k++) {
                 Entity e = candidates.get((int) near.get(k)[1]);
                 Vec3 v = e.getDeltaMovement();  // blocks per tick
@@ -75,8 +79,10 @@ final class AetherFarActors {
                 int kind = kind(e);
                 kt[k * 2] = kind;
                 kt[k * 2 + 1] = tint(e, kind);
+                idf[k * 2] = e.getId();
+                idf[k * 2 + 1] = e.onGround() ? AetherNet.FarActors.ON_GROUND : 0;
             }
-            SkyNetwork.sendToPlayer(p, new AetherNet.FarActors(n, xyz, vel, yhr, kt));
+            SkyNetwork.sendToPlayer(p, new AetherNet.FarActors(n, xyz, vel, yhr, kt, idf));
         }
         lastCount.keySet().removeIf(u -> server.getPlayerList().getPlayer(u) == null);
     }

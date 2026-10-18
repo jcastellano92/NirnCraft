@@ -6,6 +6,7 @@
 struct ActorGpu {
     float4 posYaw;  // camera-relative feet position (view-flat), yaw radians (0 = facing -Z)
     float4 shape;   // height, radius, kind, tint (RGBA8 bit pattern)
+    float4 motion;  // animation phase seed 0..1, gait (0 still / on the ground, 1 gliding, 2 flapping), opacity 0..1
 };
 
 static const int ACTOR_HUMANOID = 0;
@@ -75,7 +76,34 @@ void keepNearest(float t, float3 n, inout float best, inout float3 bestN) {
     }
 }
 
-ActorHit traceActors(float3 o, float3 dir, float tMax) {
+float3 rotZ(float3 v, float a) {
+    float c = cos(a), s = sin(a);
+    return float3(c * v.x - s * v.y, s * v.x + c * v.y, v.z);
+}
+
+// One dragon wing on side sgn (+1 right, -1 left, mirrored): an inner arm membrane hinged at the shoulder, raised by
+// a1 about the body's long axis, and an outer membrane hinged at its tip, raised a further a2 (lagging the beat, so
+// the tip whips). Boxes in each hinge's frame; returns the hit and its normal in the actor's frame.
+float rayWing(float3 ro, float3 rd, float sgn, float3 shoulder, float len1, float len2, float chord, float th, float a1,
+              float a2, out float3 n) {
+    float3 mo = float3(ro.x * sgn, ro.y, ro.z), md = float3(rd.x * sgn, rd.y, rd.z);
+    float3 o1 = rotZ(mo - shoulder, -a1), d1 = rotZ(md, -a1);
+    float3 n1, n2;
+    float t1 = rayBox(o1 - float3(len1 * 0.5, 0, chord * 0.1), d1, float3(len1 * 0.5, th, chord * 0.5), n1);
+    float3 o2 = rotZ(o1 - float3(len1, 0, 0), -a2), d2 = rotZ(d1, -a2);
+    // the outer membrane narrows and sweeps back towards the tail
+    float t2 = rayBox(o2 - float3(len2 * 0.5, 0, chord * 0.32), d2, float3(len2 * 0.5, th, chord * 0.36), n2);
+    float best = 1e30;
+    float3 bn = float3(0, 1, 0);
+    if (t1 > 0.0 && t1 < best) { best = t1; bn = rotZ(n1, a1); }
+    if (t2 > 0.0 && t2 < best) { best = t2; bn = rotZ(rotZ(n2, a2), a1); }
+    n = float3(bn.x * sgn, bn.y, bn.z);
+    return best < 1e29 ? best : -1.0;
+}
+
+// dither: this pixel's threshold for actors fading at the tracking boundary (motion.z < 1: the client has the real
+// entity, or just lost it, and the impostor dissolves)
+ActorHit traceActors(float3 o, float3 dir, float tMax, float dither) {
     ActorHit h;
     h.t = -1.0;
     h.n = float3(0, 1, 0);
@@ -84,12 +112,13 @@ ActorHit traceActors(float3 o, float3 dir, float tMax) {
     float best = tMax;
     for (int i = 0; i < min(count, 512); i++) {
         ActorGpu a = actors[i];
+        if (dither >= a.motion.z) continue;  // dissolved here (opacity 1 draws every pixel)
         float height = a.shape.x, radius = a.shape.y;
         int kind = int(a.shape.z);
         float3 feet = a.posYaw.xyz;
         // bounding sphere first
         float3 centre = feet + float3(0, height * 0.5, 0);
-        float bound = max(height, radius * 4.0);
+        float bound = max(height, radius * (kind == ACTOR_DRAGON ? 5.0 : 4.0));
         float3 oc = o - centre;
         float bb = dot(oc, dir), cc = dot(oc, oc) - bound * bound;
         if (bb * bb - cc < 0.0 || (bb > 0.0 && cc > 0.0)) continue;
@@ -114,9 +143,30 @@ ActorHit traceActors(float3 o, float3 dir, float tMax) {
                 keepNearest(rayCapsule(lo, ld, float3(lx, radius * 0.22, lz), float3(lx, height * 0.45, lz), radius * 0.22, nn), nn, t, ln);
             }
         } else if (kind == ACTOR_DRAGON) {
-            keepNearest(rayEllipsoid(lo - float3(0, height * 0.5, 0), ld, float3(radius * 0.6, height * 0.35, radius * 2.2), nn), nn, t, ln);
-            keepNearest(rayBox(lo - float3(radius * 1.9, height * 0.55, 0), ld, float3(radius * 1.6, height * 0.03, radius * 0.9), nn), nn, t, ln);
-            keepNearest(rayBox(lo - float3(-radius * 1.9, height * 0.55, 0), ld, float3(radius * 1.6, height * 0.03, radius * 0.9), nn), nn, t, ln);
+            // body, neck and head forward (-Z), tail back, and two hinged wings beating on the frame clock: about
+            // 0.8 Hz flapping, a slow sway gliding, folded along the flanks when still (on the ground)
+            float r = radius;
+            keepNearest(rayEllipsoid(lo - float3(0, height * 0.5, 0.1 * r), ld, float3(r * 0.55, height * 0.3, r * 1.8), nn), nn, t, ln);
+            keepNearest(rayCapsule(lo, ld, float3(0, height * 0.58, -1.4 * r), float3(0, height * 0.72, -2.5 * r), r * 0.2, nn), nn, t, ln);
+            keepNearest(rayEllipsoid(lo - float3(0, height * 0.74, -2.85 * r), ld, float3(r * 0.26, r * 0.2, r * 0.48), nn), nn, t, ln);
+            keepNearest(rayCapsule(lo, ld, float3(0, height * 0.48, 1.6 * r), float3(0, height * 0.4, 4.0 * r), r * 0.13, nn), nn, t, ln);
+            float gait = a.motion.y;
+            float ph = frame.sunDir.w * 5.0265482 + a.motion.x * 6.2831853;  // 0.8 Hz
+            float a1, a2;
+            if (gait > 1.5) {
+                a1 = 0.1 + 0.62 * sin(ph);
+                a2 = 0.05 + 0.45 * sin(ph - 0.9);
+            } else if (gait > 0.5) {
+                a1 = 0.1 + 0.05 * sin(ph * 0.35);
+                a2 = -0.04;
+            } else {
+                a1 = 0.55;
+                a2 = -2.5;
+            }
+            float3 shoulder = float3(r * 0.35, height * 0.62, -0.35 * r);
+            float th = max(height * 0.025, 0.08);
+            keepNearest(rayWing(lo, ld, 1.0, shoulder, r * 1.7, r * 1.9, r * 1.5, th, a1, a2, nn), nn, t, ln);
+            keepNearest(rayWing(lo, ld, -1.0, shoulder, r * 1.7, r * 1.9, r * 1.5, th, a1, a2, nn), nn, t, ln);
         } else {
             keepNearest(rayBox(lo - float3(0, height * 0.15, 0), ld, float3(radius * 0.35, height * 0.15, radius), nn), nn, t, ln);
             keepNearest(rayCapsule(lo, ld, float3(0, height * 0.3, 0), float3(0, height, 0), radius * 0.04, nn), nn, t, ln);

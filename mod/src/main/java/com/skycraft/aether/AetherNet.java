@@ -31,9 +31,13 @@ public final class AetherNet {
 
     /**
      * S->C, twice a second: actors beyond the client's tracking range (players, large creatures, dragons, ships), as
-     * aether impostors. Per actor: xyz (3 doubles), velocity in blocks/s (3), yaw/height/radius (3), kind/tint (2).
+     * aether impostors. Per actor: xyz (3 doubles), velocity in blocks/s (3), yaw/height/radius (3), kind/tint (2),
+     * entity id/flags (2: the id the client knows the entity by once it tracks it, so the impostor cross-fades into the
+     * real one instead of doubling it; flags bit 0 = on the ground).
      */
-    public record FarActors(int count, double[] xyz, float[] vel, float[] yawHeightRadius, int[] kindTint) {}
+    public record FarActors(int count, double[] xyz, float[] vel, float[] yawHeightRadius, int[] kindTint, int[] idFlags) {
+        public static final int ON_GROUND = 1;
+    }
 
     // client side handlers, set by AetherClient (so a dedicated server never loads client classes)
     static volatile Consumer<Hello> onHello = m -> {};
@@ -94,6 +98,8 @@ public final class AetherNet {
             for (int k = 0; k < 3; k++) b.writeFloat(m.yawHeightRadius[i * 3 + k]);
             b.writeInt(m.kindTint[i * 2]);
             b.writeInt(m.kindTint[i * 2 + 1]);
+            b.writeVarInt(m.idFlags[i * 2]);
+            b.writeByte(m.idFlags[i * 2 + 1]);
         }
     }
 
@@ -102,14 +108,16 @@ public final class AetherNet {
         if (n < 0 || n > MAX_ACTORS) throw new IllegalArgumentException("aether far actors: " + n);
         double[] xyz = new double[n * 3];
         float[] vel = new float[n * 3], yhr = new float[n * 3];
-        int[] kt = new int[n * 2];
+        int[] kt = new int[n * 2], idf = new int[n * 2];
         for (int i = 0; i < n; i++) {
             for (int k = 0; k < 3; k++) xyz[i * 3 + k] = b.readDouble();
             for (int k = 0; k < 3; k++) vel[i * 3 + k] = b.readFloat();
             for (int k = 0; k < 3; k++) yhr[i * 3 + k] = b.readFloat();
             kt[i * 2] = b.readInt();
             kt[i * 2 + 1] = b.readInt();
+            idf[i * 2] = b.readVarInt();
+            idf[i * 2 + 1] = b.readUnsignedByte();
         }
-        return new FarActors(n, xyz, vel, yhr, kt);
+        return new FarActors(n, xyz, vel, yhr, kt, idf);
     }
 }

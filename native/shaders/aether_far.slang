@@ -56,6 +56,7 @@ struct TraceResult {
     int axis;      // axis of the face crossed into the hit voxel
     int lod;
     uint steps;
+    float dither;  // 0..1, fixed per pixel: which side of a refinement fade it shows (old below the progress)
 };
 
 uint popcount64(uint64_t x) { return countbits(uint(x)) + countbits(uint(x >> 32)); }
@@ -240,6 +241,18 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
             }
             if (idx >= 0) {
                 RegionGpu r = regions[idx];
+                if (r.runs.z != 0u) {
+                    // a refinement fade (World::fading_): pixels whose dither is past the fade's progress still see
+                    // what the region replaced, or the coarser LOD when it is new to the window
+                    float prog = float(int(frame.temporal.z - r.runs.w)) / float(max(frame.temporal.w, 1u));
+                    if (res.dither >= prog) {
+                        if (r.runs.z == 0xFFFFFFFFu) {
+                            uncExit = uExit;
+                            return TRACE_UNCOVERED;
+                        }
+                        r = regions[r.runs.z - 1u];
+                    }
+                }
                 float3 ro = (p0 - regionOriginRel(r)) / s;
                 if (traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
                     res.lod = lod;
@@ -301,7 +314,11 @@ float3 worldAt(float3 o, float3 dir, float k, float t) {
 }
 
 // Trace the curved view ray from t0 to t1. Returns the hit distance along the view ray or -1.
-float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res) {
+// lodDither (0..1 per pixel, 0 = off): the segment grid of every LOD starts at a per-pixel phase. A ray changes LOD
+// only at a segment start (the first segment that leaves a level's window, or whose footprint wants a coarser level),
+// so with a fixed grid every pixel switches on the same jagged line; with the phase spread over one segment the switch
+// becomes a stochastic band a segment wide (dithered LOD transitions, no pop line).
+float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout TraceResult res) {
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
     float pixelAngle = frame.params.w * frame.params.z;
@@ -313,12 +330,18 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
     int pinned = -1;     // a finer LOD that had data while the wanted one did not (streaming), and for how long
     int pinLeft = 0;
     float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this segment
+    int phasedLod = -1;   // the level whose segment grid was last phase-shifted (lodDither)
+    float shrink = 0.0;   // fraction cut off the current segment (its grid's phase)
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
         int want = int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
-        float tn = min(t + 192.0 * s, t1);
+        if (lodDither > 0.0 && lod != phasedLod) {
+            phasedLod = lod;
+            shrink = 0.9 * frac(lodDither + 0.618034 * float(lod));
+        }
+        float tn = min(t + 192.0 * s * (1.0 - shrink), t1);
         float3 a = worldAt(o, dir, k, t);
         float3 b = worldAt(o, dir, k, tn);
         // rising above the world top: the parabola only climbs further from here
@@ -358,6 +381,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
         if (finer) { pinned = lod; pinLeft = 8; }
         else if (pinLeft > 0) pinLeft--;
         t = tn;
+        shrink = 0.0;
         finer = false;
         gapEnd = 1e30;
     }
@@ -367,7 +391,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
 // Straight ray (sun shadows): 1 if lit.
 float traceShadow(float3 p, float3 dir, int lod) {
     TraceResult res;
-    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
+    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5;
     int lodCount = int(frame.dims.w);
     float t = 0;
     float maxT = 2048.0;
@@ -496,7 +520,7 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
     float3 sky = reflectedSky(p, r, sun);
     if (r.y > 0.35) return sky;  // steep reflections only see sky
     TraceResult rr;
-    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
     int lodCount = int(frame.dims.w);
     int l = min(lod + 1, lodCount - 1);
     float s = float(1 << lod);
@@ -649,7 +673,7 @@ float2 sunTexel(uint i, uint j) {
     int lodCount = int(frame.dims.w);
     int l = clamp(int(floor(log2(max(2.0 * he / S, 1.0)))), 0, lodCount - 1);
     TraceResult rr;
-    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
     float t = 0;
     for (int seg = 0; seg < 128; seg++) {
         if (t >= maxT) break;
@@ -703,6 +727,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     float3 o = frame.camFrac.xyz;
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
+    // per-pixel dithers, fixed on screen (the pack has no temporal accumulation to resolve a moving pattern): one for
+    // refinement fades, a decorrelated one for the LOD segment phase, a third for far actors' fades
+    res.dither = pixelDither(id.xy, 0u);
+    float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, 1u), 1e-3) : 0.0;
     float3 sun = frame.sunDir.xyz;
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
@@ -729,13 +757,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             return;
         }
     }
-    float tHit = traceView(o, dir, frame.params.x, frame.params.y, res);
+    float tHit = traceView(o, dir, frame.params.x, frame.params.y, lodDither, res);
     ActorHit ah;
     ah.t = -1.0;
     ah.n = float3(0, 1, 0);
     ah.albedo = float3(1, 1, 1);
     if ((frame.dims.z & FRAME_ACTORS) != 0 && frame.weatherParams.w > 0.5)
-        ah = traceActors(o, dir, tHit >= 0.0 ? tHit : frame.params.y);
+        ah = traceActors(o, dir, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, 2u));
     bool actorFirst = ah.t >= 0.0;
 
     float3 color = float3(0, 0, 0);

@@ -13,6 +13,7 @@ static const uint FRAME_DEBUG_LOD = 0x100u;
 static const uint FRAME_DEBUG_ALBEDO = 0x400u;        // surfaces output their albedo (the pack lab's G-buffer)
 static const uint FRAME_SEE_THROUGH_WATER = 0x800u;  // rays pass water voxels (the bed under a lake, for the lab)
 static const uint FRAME_DEBUG_WEATHER = 0x200u;  // ground shows the sampled weather column (cov, tower, curtain)
+static const uint FRAME_LOD_DITHER = 0x1000u;  // dithered LOD transitions (per-pixel segment phase)
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -42,7 +43,7 @@ struct FrameGpu {
     LodGpu lods[MAX_LODS];
     float4 prevViewProj[4];  // last frame's camera-relative view-projection (columns), for cloud reprojection
     float4 prevCam;          // last frame's camera relative to this frame's camInt
-    uint4 temporal;          // frame index, history valid (0/1)
+    uint4 temporal;          // frame index, history valid (0/1), now (ms, World's clock), refinement fade ms
     float4 sunMapCentre;     // sun map centre, camera-relative; w = half extent (blocks)
     float4 sunMapX;          // sun map basis (perpendicular to the key light)
     float4 sunMapY;
@@ -146,6 +147,13 @@ float3 applyAerial(float3 c, float3 dir, float3 sun, float t, FrameGpu f) {
 }
 
 // Smooth value noise on a world-space grid (stable under camera motion and LOD changes).
+// A per-pixel threshold in [0, 1): interleaved gradient noise (Jimenez 2014), spread evenly over small
+// neighbourhoods so a dissolve at any progress reads as a fine even stipple; `salt` decorrelates several uses.
+float pixelDither(uint2 px, uint salt) {
+    float2 p = float2(px) + float2(float(salt) * 47.0, float(salt) * 17.0);
+    return frac(52.9829189 * frac(0.06711056 * p.x + 0.00583715 * p.y));
+}
+
 float hash21(int2 p) {
     uint h = uint(p.x) * 374761393u + uint(p.y) * 668265263u;
     h = (h ^ (h >> 13)) * 1274126177u;

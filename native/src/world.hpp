@@ -1,6 +1,7 @@
 // The far-field world: column tiles and chunk sections in, a clipmap of SVDAG regions out, packed for the kernels.
 #pragma once
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -77,6 +78,10 @@ public:
     int windowRadius = 2;  // regions either side of the camera's region, per LOD
     uint16_t stoneMat = 1;
     uint16_t waterMat = 6;
+    // refinement fades (aether_set_transitions): a region rebuilt over a resident one (an exact tile replacing the
+    // stand-in, buildings arriving) keeps the old one packed for fadeMs, and the kernel dissolves from old to new
+    // per pixel over that time. 0 = off (swap at once).
+    std::atomic<uint32_t> fadeMs{0};
 
     void putTile(std::unique_ptr<Tile> t);
     void putSection(int sx, int sy, int sz, const uint16_t* mats);
@@ -125,6 +130,15 @@ private:
     std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};
     bool havePacked_ = false;
+    // regions mid-fade: the one they replaced (null: there was nothing, the new one dissolves in) and when
+    struct Fade {
+        std::shared_ptr<const Region> old;
+        uint32_t startMs;
+    };
+    std::unordered_map<Key3, Fade, Key3Hash> fading_;
 };
+
+// Milliseconds on a steady clock (wraps after 49 days; compared as signed differences).
+uint32_t nowMs();
 
 }  // namespace aether
