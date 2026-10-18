@@ -1,0 +1,260 @@
+// aether_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
+#include <chrono>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <functional>
+#include <random>
+#include <string>
+#include <vector>
+
+#include "aether/aether.h"
+#include "camera.hpp"
+#include "svdag.hpp"
+
+using namespace aether;
+
+static int failures = 0;
+#define CHECK(c)                                                              \
+    do {                                                                      \
+        if (!(c)) {                                                           \
+            std::printf("  FAIL %s:%d: %s\n", __FILE__, __LINE__, #c);       \
+            failures++;                                                       \
+        }                                                                     \
+    } while (0)
+
+// A dense source with no classification shortcuts beyond what it can prove.
+struct DenseSource : VoxelSource {
+    std::function<uint16_t(int, int, int)> f;
+    bool smartClassify = false;
+    BoxClass classify(int x, int y, int z, int n, uint16_t& mat) override {
+        if (!smartClassify) return BoxClass::Mixed;
+        uint16_t first = f(x, y, z);
+        bool same = true;
+        for (int k = 0; k < n && same; k++)
+            for (int j = 0; j < n && same; j++)
+                for (int i = 0; i < n && same; i++) same = f(x + i, y + j, z + k) == first;
+        if (!same) return BoxClass::Mixed;
+        mat = first;
+        return first ? BoxClass::Uniform : BoxClass::Air;
+    }
+    void brick(int x, int y, int z, uint16_t out[64]) override {
+        for (int k = 0; k < 4; k++)
+            for (int j = 0; j < 4; j++)
+                for (int i = 0; i < 4; i++) out[i + 4 * j + 16 * k] = f(x + i, y + j, z + k);
+    }
+};
+
+static void testRoundTrip(const char* name, std::function<uint16_t(int, int, int)> f, bool smart) {
+    DenseSource s;
+    s.f = f;
+    s.smartClassify = smart;
+    auto t0 = std::chrono::steady_clock::now();
+    Svdag d = buildSvdag(s);
+    double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    uint64_t mismatches = 0, solid = 0;
+    for (int z = 0; z < REGION; z += 1)
+        for (int y = 0; y < REGION; y += 1)
+            for (int x = 0; x < REGION; x += 1) {
+                uint16_t want = f(x, y, z);
+                if (want) solid++;
+                if (d.at(x, y, z) != want) mismatches++;
+            }
+    std::printf("  %-22s build %7.1f ms, nodes %7zu words, leaves %6zu, runs %7zu, solid %9llu, mismatches %llu\n", name,
+                ms, d.nodes.size(), d.leaves.size(), d.runEnd.size(), (unsigned long long)solid,
+                (unsigned long long)mismatches);
+    CHECK(mismatches == 0);
+    CHECK(d.solidVoxels == solid);
+}
+
+static void testSvdag() {
+    std::printf("svdag round trips\n");
+    testRoundTrip("empty", [](int, int, int) { return uint16_t(0); }, true);
+    testRoundTrip("full", [](int, int, int) { return uint16_t(7); }, true);
+    testRoundTrip("sphere", [](int x, int y, int z) {
+        double dx = x - 127.5, dy = y - 100.5, dz = z - 140.5;
+        double r = std::sqrt(dx * dx + dy * dy + dz * dz);
+        return uint16_t(r < 90 ? (r < 60 ? 1 : 2 + (x / 37) % 3) : 0);
+    }, false);
+    testRoundTrip("terrain", [](int x, int y, int z) {
+        double h = 90 + 30 * std::sin(x * 0.05) * std::cos(z * 0.043) + 8 * std::sin(x * 0.31 + z * 0.17);
+        if (y < h - 4) return uint16_t(1);
+        if (y < h - 1) return uint16_t(3);
+        if (y < h) return uint16_t(2);
+        return uint16_t(y < 70 ? 6 : 0);
+    }, true);
+    std::mt19937 rng(12345);
+    std::vector<uint16_t> noise(size_t(REGION) * REGION * REGION);
+    for (auto& v : noise) v = (rng() % 100) < 7 ? uint16_t(1 + rng() % 5) : 0;
+    testRoundTrip("random 7%", [&](int x, int y, int z) { return noise[(size_t(z) * REGION + y) * REGION + x]; }, false);
+
+    // sharing: a full solid region is a handful of nodes whatever its material count
+    DenseSource s;
+    s.f = [](int, int, int) { return uint16_t(1); };
+    s.smartClassify = true;
+    Svdag d = buildSvdag(s);
+    CHECK(d.nodes.size() <= 6 * 17);
+    CHECK(d.leaves.size() == 1);
+    CHECK(d.runEnd.size() == 1);
+}
+
+static void testAbi() {
+    std::printf("c abi\n");
+    CHECK(aether_abi_version() == AETHER_ABI_VERSION);
+    std::printf("  %s\n", aether_build_info());
+    AetherContext* ctx = nullptr;
+    CHECK(aether_create(AETHER_BACKEND_CPU, &ctx) == AETHER_OK);
+    CHECK(aether_render(ctx, nullptr, nullptr) == AETHER_ERR_ARG);
+    // a flat synthetic tile at lod 0 around the origin, rendered looking down: every pixel must hit at the expected depth
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            CHECK(aether_upload_column_tile(ctx, &t) == AETHER_OK);
+        }
+    double centre[3] = {10.5, 140.0, 10.5};
+    CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
+    AetherFrame f{};
+    f.cameraPos[0] = 10.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 10.5;
+    // straight down: invViewProj maps ndc (x, y, 0.5) to direction (x * 0.1, -1, y * 0.1)
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(64 * 64);
+    std::vector<uint32_t> color(64 * 64);
+    AetherFrameOutput o{color.data(), nullptr, depth.data()};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    // surface 100 means voxels with centre < 100 are solid: the top face is y = 100, 40 blocks below the camera
+    double worst = 0;
+    for (int py = 0; py < 64; py++)
+        for (int px = 0; px < 64; px++) {
+            float nx = (px + 0.5f) / 64 * 2 - 1, ny = 1 - (py + 0.5f) / 64 * 2;
+            double len = std::sqrt(0.01 * nx * nx + 1 + 0.01 * ny * ny);
+            double expect = 40.0 * len;
+            worst = std::max(worst, std::abs(depth[size_t(py) * 64 + px] - expect));
+        }
+    std::printf("  flat plane: worst depth error %.4f blocks\n", worst);
+    CHECK(worst < 0.01);
+
+    // grazing rays: camera on integer coordinates, so whole pixel columns run inside region boundary planes
+    // (regression: these used to stall on the boundary and see through the ground)
+    for (double yaw : {0.0, 90.0, 180.0, 270.0}) {
+        AetherFrame g = f;
+        g.cameraPos[0] = 0.0;
+        g.cameraPos[1] = 140.0;
+        g.cameraPos[2] = 0.0;
+        g.width = 96;
+        g.height = 64;
+        cameraMatrix(yaw, -25, 60, 1.5, g.invViewProj);
+        std::vector<float> dg(96 * 64);
+        AetherFrameOutput og{nullptr, nullptr, dg.data()};
+        CHECK(aether_render(ctx, &g, &og) == AETHER_OK);
+        double worstG = 0;
+        for (int py = 0; py < 64; py++)
+            for (int px = 0; px < 96; px++) {
+                float nx = (px + 0.5f) / 96 * 2 - 1, ny = 1 - (py + 0.5f) / 64 * 2;
+                float p4[4];
+                for (int r = 0; r < 4; r++)
+                    p4[r] = g.invViewProj[r] * nx + g.invViewProj[4 + r] * ny + g.invViewProj[8 + r] * 0.5f + g.invViewProj[12 + r];
+                double dx = p4[0] / p4[3], dy = p4[1] / p4[3], dz = p4[2] / p4[3];
+                double l = std::sqrt(dx * dx + dy * dy + dz * dz);
+                if (dy / l > -0.2) continue;
+                double expect = 40.0 / (-dy / l);
+                worstG = std::max(worstG, std::abs(dg[size_t(py) * 96 + px] - expect));
+            }
+        std::printf("  grazing yaw %3.0f: worst depth error %.4f blocks\n", yaw, worstG);
+        CHECK(worstG < 0.02);
+    }
+    aether_destroy(ctx);
+}
+
+static bool parity(const char* raster) {
+    std::printf("cpu/vulkan parity (preview terrain)\n");
+    AetherContext* cpu = nullptr;
+    AetherContext* gpu = nullptr;
+    if (aether_create(AETHER_BACKEND_VULKAN, &gpu) != AETHER_OK) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return true;
+    }
+    aether_create(AETHER_BACKEND_CPU, &cpu);
+    if (aether_preview_load_raster(cpu, raster) != AETHER_OK || aether_preview_load_raster(gpu, raster) != AETHER_OK) {
+        std::printf("  SKIP: %s missing (run native/tools/export_raster.py)\n", raster);
+        aether_destroy(cpu);
+        aether_destroy(gpu);
+        return true;
+    }
+    double x = 0, z = 0;
+    double y = aether_preview_height(cpu, x, z) + 60;
+    double centre[3] = {x, y, z};
+    for (AetherContext* c : {cpu, gpu}) {
+        for (int lod = 0; lod < 7; lod++) {
+            int span = 256 << lod;
+            int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
+            aether_preview_generate(c, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+        }
+        aether_update(c, centre, 0);
+    }
+    const uint32_t W = 320, H = 180;
+    AetherFrame f{};
+    f.cameraPos[0] = x;
+    f.cameraPos[1] = y;
+    f.cameraPos[2] = z;
+    cameraMatrix(90, -5, 70, double(W) / H, f.invViewProj);  // looking east, slightly down
+    f.width = W;
+    f.height = H;
+    f.maxDistance = 40000;
+    f.planetRadius = 6371000;
+    f.sunDir[0] = 0.4f;
+    f.sunDir[1] = 0.6f;
+    f.sunDir[2] = -0.3f;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_SHADOWS | AETHER_FRAME_ATMOS;
+    std::vector<float> dc(W * H), dg(W * H);
+    std::vector<uint32_t> cc(W * H), cg(W * H);
+    AetherFrameOutput oc{cc.data(), nullptr, dc.data()}, og{cg.data(), nullptr, dg.data()};
+    CHECK(aether_render(cpu, &f, &oc) == AETHER_OK);
+    CHECK(aether_render(gpu, &f, &og) == AETHER_OK);
+    size_t hitMismatch = 0, depthBad = 0, colorBad = 0, hits = 0;
+    for (size_t i = 0; i < dc.size(); i++) {
+        bool hc = dc[i] < 1e29f, hg = dg[i] < 1e29f;
+        hits += hc;
+        if (hc != hg) {
+            hitMismatch++;
+            continue;
+        }
+        if (hc && std::abs(dc[i] - dg[i]) > 0.5f + 0.002f * dc[i]) depthBad++;
+        for (int ch = 0; ch < 3; ch++) {
+            int a = int((cc[i] >> (8 * ch)) & 255), b = int((cg[i] >> (8 * ch)) & 255);
+            if (std::abs(a - b) > 3) {
+                colorBad++;
+                break;
+            }
+        }
+    }
+    double n = double(dc.size());
+    std::printf("  %zu px, hits %.1f%%, hit/miss mismatch %.3f%%, depth outliers %.3f%%, colour outliers %.3f%%\n",
+                dc.size(), 100.0 * hits / n, 100.0 * hitMismatch / n, 100.0 * depthBad / n, 100.0 * colorBad / n);
+    // float order differs (FMA contraction, transcendental ulps); a silhouette pixel may flip, nothing more
+    CHECK(hits > dc.size() / 4);
+    CHECK(hitMismatch / n < 0.002);
+    CHECK(depthBad / n < 0.002);
+    CHECK(colorBad / n < 0.01);
+    aether_destroy(cpu);
+    aether_destroy(gpu);
+    return true;
+}
+
+int main(int argc, char** argv) {
+    testSvdag();
+    testAbi();
+    parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
+    return failures ? 1 : 0;
+}
