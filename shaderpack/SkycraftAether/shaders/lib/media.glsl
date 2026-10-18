@@ -17,6 +17,7 @@
 #include "/lib/air.glsl"
 #include "/lib/lightning.glsl"
 #include "/lib/fog.glsl"
+#include "/lib/quality.glsl"
 
 const float MEDIA_RANGE = 128.0;
 const float HALO_AIR = 0.0012;  // the clear-air share of a lamp's halo, per block
@@ -82,14 +83,25 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
 #endif
     float T = 1.0;
     vec3 S = vec3(0.0);
+    // adaptive quality: the march's steps (fewer in front of far pixels first; 0 leaves the closed form alone) and the
+    // halo steps (dither: the per-pixel count rounding, spatially stable)
+    float qDither = qualityDither(gl_FragCoord.xy);
+    int mediaSteps = 0;
+    float qm = qualityKnob(6, 0, QUALITY_FALLBACK), mediaFade = qualityFade(qm, 0.1);
 #if MEDIA_STEPS > 0
-    if (marched) {
+    mediaSteps = marched && qm > 0.0 ? qualityCount(MEDIA_STEPS, qm * qualityDistance(t), qDither, 1) : 0;
+    if (mediaSteps > 0) {
+        // fading in or out (the knob on its way between 0 and its first level): the march's share scales with it and
+        // the closed form below starts that much nearer, so the near air eases between the two
+        vec3 S0 = S;
+        float T0 = T;
         loadAir(camPos);
         vec4 dyn0 = haveWeather() ? weatherSample(weatherDyn, w0.xz) : dyn1;
         vec4 wf0 = haveWeather() ? weatherSample(weatherField, w0.xz) : wf1;
         float nearEnd = min(t, MEDIA_RANGE);
         for (int i = 0; i < MEDIA_STEPS; i++) {
-            float a = float(i) / float(MEDIA_STEPS), b = float(i + 1) / float(MEDIA_STEPS);
+            if (i >= mediaSteps) break;
+            float a = float(i) / float(mediaSteps), b = float(i + 1) / float(mediaSteps);
             float s0 = MEDIA_RANGE * a * a, s1 = min(nearEnd, MEDIA_RANGE * b * b);
             if (s1 <= s0) break;
             float len = s1 - s0;
@@ -108,17 +120,23 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
             S += T * (c * alpha + storm * 0.25 * HALO_AIR * len);
             T *= 1.0 - alpha;
         }
+        S = mix(S0, S, mediaFade);
+        T = mix(T0, T, mediaFade);
     }
 #endif
 #if HALO_STEPS > 0
     // halos: lamps and the mod's point lights live within ~30 blocks, in 4-block cells: a dedicated even march there
     // (the main one is too coarse that far out), scattering in the local fog, the dungeon air and a trace of clear air
-    if (marched && (haveAir() || gLights > 0)) {
+    float qh = qualityKnob(6, 1, QUALITY_FALLBACK);
+    int haloSteps = marched && qh > 0.0 ? qualityCount(HALO_STEPS, qh, qDither, 1) : 0;
+    vec3 haloS0 = S;
+    if (haloSteps > 0 && (haveAir() || gLights > 0)) {
         loadAir(camPos);
         float end = min(t, 30.0);
-        float stepLen = end / float(HALO_STEPS);
+        float stepLen = end / float(haloSteps);
         float Th = 1.0;
         for (int i = 0; i < HALO_STEPS; i++) {
+            if (i >= haloSteps) break;
             float dm = (float(i) + dither) * stepLen;
             vec3 p = dir * dm;
             vec3 w = p + camPos;
@@ -139,10 +157,11 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
 #endif
             Th *= exp(-sigma * stepLen);
         }
+        S = mix(haloS0, S, qualityFade(qh, 0.1));  // halos fade in and out with the knob
     }
 #endif
     // beyond the march (or all of it, unmarched): the closed-form ground layer, outdoors only
-    float from = marched && MEDIA_STEPS > 0 ? MEDIA_RANGE : 0.0;
+    float from = mediaSteps > 0 ? MEDIA_RANGE * mediaFade : 0.0;
     if (t > from && t < 1e29) {  // the bare sky keeps its own horizon haze
         float to = min(t, 3000.0);
         float base = max(63.0, dyn1.g * 1024.0);

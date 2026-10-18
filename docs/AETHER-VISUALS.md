@@ -1,7 +1,7 @@
 # Skycraft visuals: the full matrix (near field = the Skycraft Aether shader pack, far field = aether)
 
 Every effect is designed for both fields so it carries across the hand-off, and each has a cheaper fallback the
-quality controller (`AetherQuality`) or the pack profile can drop to. Status: **done**, **building**, *planned*.
+quality controller (adaptive quality v2, docs/ADAPTIVE-QUALITY.md) or the pack profile can drop to. Status: **done**, **building**, *planned*.
 
 Shared inputs, computed once and used by both fields:
 
@@ -46,5 +46,5 @@ Shared inputs, computed once and used by both fields:
 | LOD transitions | - | dithered blend across LOD boundaries | hard switch | *planned* |
 | Underground | lightmap, block light | off (near field covers it: near-zero cost) | - | **done** |
 | High altitude | - | 7 LODs to ~40 km, curvature; horizon fog | fewer LODs | **done** |
-| Hardware scaling | pack profiles LOW / MEDIUM / HIGH / ULTRA | AetherQuality: resolution, clouds, shadows | - | far **done**, pack *planned* |
+| Hardware scaling | adaptive quality v2: continuous knobs (taps, samples, steps, waves, far detail) in quality.png; profiles are ceilings | the same controller: resolution, LOD bias, clouds, shadows, fallback tiers | far field off | **done** (docs/ADAPTIVE-QUALITY.md) |
 | World load | - | the whole map at LOD 2-6 baked once per world on the server, shared with every player | - | *planned* |

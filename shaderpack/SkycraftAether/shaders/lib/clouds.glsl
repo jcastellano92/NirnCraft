@@ -10,6 +10,7 @@
 #include "/lib/atmosphere.glsl"
 #include "/lib/noise.glsl"
 #include "/lib/weather.glsl"
+#include "/lib/quality.glsl"
 
 // the deck's base and thickness in world blocks (the mod's condensation level where the weather is known)
 float fallbackCloudBase(vec2 worldXZ) {
@@ -49,7 +50,9 @@ vec4 fallbackClouds(vec3 dir, vec3 sun, vec3 camPos, float time, float rain) {
 #else
     const int OCT = 3;
 #endif
-    float dens = fallbackCloudDensity(p, time, wx, OCT);
+    // adaptive quality: the finest octaves go first (softer heaps), down to 2
+    int oct = 2 + int(floor(float(OCT - 2) * qualityKnob(7, 0, 1.0) + 0.5));
+    float dens = fallbackCloudDensity(p, time, wx, oct);
     if (dens <= 0.002) return vec4(0.0);
     // light through the deck: less sun where a denser part lies towards it, darker bellies under storms
     float shade = 1.0;

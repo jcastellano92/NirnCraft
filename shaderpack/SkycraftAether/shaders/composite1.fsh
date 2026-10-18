@@ -2,6 +2,7 @@
 // Bloom: the scene's mip chain (Iris builds it for colortex4) above a brightness knee, a few widths summed, so lava,
 // fire, lamps, magic and the sun glow; then into colortex0 for final.fsh.
 #include "/lib/settings.glsl"
+#include "/lib/quality.glsl"
 
 uniform sampler2D colortex4;
 
@@ -22,12 +23,15 @@ vec3 knee(vec3 c) {
 void main() {
     vec3 c = texture(colortex4, texcoord).rgb;
 #ifdef BLOOM
+    float strength = qualityKnob(8, 0, 1.0);  // adaptive quality: the minimal tier turns the glow off
+    if (strength > 0.0) {
     vec3 b = vec3(0.0);
     b += knee(textureLod(colortex4, texcoord, 2.0).rgb) * 0.35;
     b += knee(textureLod(colortex4, texcoord, 3.5).rgb) * 0.3;
     b += knee(textureLod(colortex4, texcoord, 5.0).rgb) * 0.25;
     b += knee(textureLod(colortex4, texcoord, 6.5).rgb) * 0.2;
-    c += b * 0.12;
+    c += b * 0.12 * strength;
+    }
 #endif
     outColor = vec4(c, 1.0);
 }

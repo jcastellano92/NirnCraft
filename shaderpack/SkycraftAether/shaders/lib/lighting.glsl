@@ -11,6 +11,7 @@
 #include "/lib/clouds.glsl"
 #include "/lib/air.glsl"
 #include "/lib/keylight.glsl"
+#include "/lib/quality.glsl"
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
@@ -36,17 +37,21 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
     vec4 sp = shadowProjection * (shadowModelView * vec4(p, 1.0));
     vec3 s = distortShadow(sp.xyz / sp.w) * 0.5 + 0.5;
     float texel = 1.0 / float(shadowMapResolution);
-    float radius = texel * SHADOW_SOFTNESS * (1.5 + dist * 0.02);
+    // adaptive quality: fewer taps far away first, and a tighter penumbra with fewer taps (less visible noise)
+    float qTaps = qualityKnob(1, 0, QUALITY_FALLBACK);
+    float radius = texel * SHADOW_SOFTNESS * mix(0.6, 1.0, qualityKnob(1, 1, 1.0)) * (1.5 + dist * 0.02);
+    int taps = qualityCount(SHADOW_TAPS, qTaps * qualityDistance(dist), qualityDither(px), 1);
     float rot = ign(px, 0.0) * 6.2831853;
     float lit = 0.0;
     for (int i = 0; i < SHADOW_TAPS; i++) {
+        if (i >= taps) break;
         // golden-angle spiral
-        float r = sqrt((float(i) + 0.5) / float(SHADOW_TAPS));
+        float r = sqrt((float(i) + 0.5) / float(taps));
         float a = float(i) * 2.39996 + rot;
         lit += texture(shadowtex0, vec3(s.xy + vec2(cos(a), sin(a)) * r * radius, s.z - 0.0004));
     }
     float fade = smoothstep(shadowDistance * 0.8, shadowDistance, dist);
-    return mix(lit / float(SHADOW_TAPS), 1.0, fade);
+    return mix(lit / float(taps), 1.0, fade);
 }
 #endif
 

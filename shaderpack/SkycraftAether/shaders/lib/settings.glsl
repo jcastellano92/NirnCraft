@@ -7,10 +7,16 @@
 #define AETHER_HANDOFF_BAND 24.0 // [8.0 16.0 24.0 32.0 48.0] blocks over which near hands over to far
 #define EXPOSURE 1.0 // [0.6 0.8 1.0 1.2 1.4 1.7 2.0]
 
+// adaptive quality (lib/quality.glsl, docs/ADAPTIVE-QUALITY.md): the mod measures this machine and scales the counts
+// below at runtime (they are ceilings). The ADAPTIVE profile (these defaults) carries ULTRA's ceilings and, without the
+// mod's controller, runs at QUALITY_FALLBACK of them (0.65: about HIGH); the fixed profiles run their own counts (1.0).
+#define ADAPTIVE_QUALITY        // follow the mod's quality controller (off: the fixed counts, QUALITY_FALLBACK of them)
+#define QUALITY_FALLBACK 0.65 // [0.65 1.0] share of the counts used without the controller
+
 // shadows
 #define SHADOWS                 // near-field sun shadows (aether shadows the far field itself)
 #define SHADOW_DISTORT 0.85 // [0.7 0.8 0.85 0.9]
-#define SHADOW_TAPS 12 // [4 8 12 20] soft-shadow samples
+#define SHADOW_TAPS 20 // [4 8 12 20] soft-shadow samples (the most; adaptive quality uses fewer when it must)
 #define SHADOW_SOFTNESS 1.0 // [0.5 1.0 1.5 2.0]
 
 // materials
@@ -18,7 +24,7 @@
 #define SPECULAR                // sun and sky highlights (GGX), widened with distance so far ones do not shimmer
 #define FOLIAGE_SSS             // sunlight through leaves and grass
 #define SSAO                    // screen-space ambient occlusion
-#define SSAO_SAMPLES 6 // [4 6 8 12]
+#define SSAO_SAMPLES 12 // [4 6 8 12]
 #define COLORED_LIGHT           // block light takes the colour of what emits it (the mod's emitter cache, ~26 blocks)
 #define BLOCKLIGHT_FLICKER 1 // [0 1 2] torch and fire light flickers (0 steady, 2 strong)
 #define SUN_HORIZON_TAPS 6 // [0 4 6] without aether's sun map: low sun blocked by distant mountains (terrain taps)
@@ -28,11 +34,11 @@
 #define WIND_STRENGTH 1.0 // [0.0 0.5 1.0 1.5 2.0]
 
 // water
-#define WATER_WAVES 2 // [0 1 2 3] 0 flat, 3 most octaves
+#define WATER_WAVES 3 // [0 1 2 3] 0 flat, 3 most octaves
 #define WATER_ALPHA 0.62 // [0.4 0.5 0.62 0.75 0.9]
 #define REFRACTION              // water, glass and ice bend what is behind them
 #define SSR                     // screen-space reflections (sky and aether's far field beyond the screen)
-#define SSR_STEPS 20 // [10 16 20 32]
+#define SSR_STEPS 32 // [10 16 20 32]
 #define SHORE_FOAM              // foam where the water is shallow, lapping with the waves
 #define CAUSTICS                // light patterns under water
 #define WATER_FLOW              // flowing water: waves ride the flow, rapids break white, falls stream white water
@@ -40,14 +46,14 @@
 
 // atmosphere
 #define FOG_LAYERS              // low valley fog, marsh mist and height fog by weather and time of day
-#define MEDIA_STEPS 10 // [0 4 6 10 14 16] the near air march: fog sealed out of houses and caves, dungeon air, halos
-#define HALO_STEPS 8 // [0 6 8 12 16] lamps, torches, fires and spells glow in the fog around them (0: off)
-#define PLUME_STEPS 10 // [0 6 10 16] smoke columns: the Red Mountain volcano (and fires with the option below)
+#define MEDIA_STEPS 16 // [0 4 6 10 14 16] the near air march: fog sealed out of houses and caves, dungeon air, halos
+#define HALO_STEPS 12 // [0 6 8 12 16] lamps, torches, fires and spells glow in the fog around them (0: off)
+#define PLUME_STEPS 16 // [0 6 10 16] smoke columns: the Red Mountain volcano (and fires with the option below)
 //#define SMOKE_FIRE_VOLUMES      // fires' smoke as volumes too (the mod draws fire smoke as sprites: one or the other)
 #define LIGHTNING_LIGHT 1 // [0 1] storm channels light the ground, the rain and the clouds (outdoors only)
 //#define LIGHT_OCCLUSION        // the mod's point lights are shadowed by walls (needs -Dskycraft.localLightOcclusion)
 #define VOLUMETRIC_LIGHT        // light shafts through clouds, trees and windows
-#define VL_SAMPLES 16 // [8 12 16 24 32]
+#define VL_SAMPLES 32 // [8 12 16 24 32]
 #define STARS                   // stars and the galaxy, turning with the sky
 #define AURORA                  // northern lights in cold northern skies at night
 #define WEATHER_SKY             // the sky greys and the sky light dims under the mod's storm cells and overcast
